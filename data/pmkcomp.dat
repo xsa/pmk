@@ -3,7 +3,7 @@
 
 # SLCFLAGS = shared libs compiler flags
 # SLLDFLAGS = shared libs linking flags
-# SLSUFFIX = shared lib suffix (needed ?)
+# SLSUFFIX = shared lib suffix (needed?)
 
 ADD_COMPILER {
 	ID = "tendra"
