@@ -67,23 +67,23 @@
 #define BIN_TEST_NAME	"test_bin"
 
 /* node tokens */
-#define PMK_TOK_DEFINE	1
-#define PMK_TOK_SETNGS	2
+#define PMK_TOK_SETNGS	1
+#define PMK_TOK_DEFINE	2
 #define PMK_TOK_SWITCH	3
 #define PMK_TOK_TARGET	4 /* will be obsolete by SETTINGS */
 #define PMK_TOK_ACCOMP	5 /* will be obsolete by SETTINGS */
 
 /* special setting tokens */
-#define PMK_TOK_SETVAR	17 /* set variable */
-#define PMK_TOK_SETPRM	18 /* set parameter */
+#define PMK_TOK_SETVAR	9 /* set variable */
+#define PMK_TOK_SETPRM	10 /* set parameter */
 
 /* item command tokens */
-#define PMK_TOK_CHKBIN	33
-#define PMK_TOK_CHKINC	34
-#define PMK_TOK_CHKLIB	35
-#define PMK_TOK_CHKCFG	36
-#define PMK_TOK_CHKPKG	37
-#define PMK_TOK_CHKTYP	38
+#define PMK_TOK_CHKBIN	17
+#define PMK_TOK_CHKINC	18
+#define PMK_TOK_CHKLIB	19
+#define PMK_TOK_CHKCFG	20
+#define PMK_TOK_CHKPKG	21
+#define PMK_TOK_CHKTYP	22
 
 /*
 #define KW_SETNGS_GLANG		"LANG"
@@ -98,6 +98,7 @@ typedef struct {
 } cmdkw;
 
 bool func_wrapper(prscell *, pmkdata *);
+bool process_node(prsnode *, pmkdata *);
 bool pmk_define(pmkcmd *, htable *, pmkdata *);
 bool pmk_target(pmkcmd *, htable *, pmkdata *);
 bool pmk_ac_compat(pmkcmd *, htable *, pmkdata *);

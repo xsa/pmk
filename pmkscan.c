@@ -107,11 +107,11 @@ bool parse_data(prsdata *pdata, scandata *sdata) {
 		while (pcell != NULL) {
 			switch(pcell->token) {
 				case PSC_TOK_INCL :
-					sdata->includes = pcell->ht;
+					sdata->includes = pcell->data;
 					break;
 			
 				case PSC_TOK_FUNC :
-					sdata->functions = pcell->ht;
+					sdata->functions = pcell->data;
 					break;
 
 				default :

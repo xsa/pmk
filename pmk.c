@@ -58,9 +58,6 @@ extern int	 nbkwpf;
 
 int		 cur_line = 0;
 
-/* keyword data */
-htable		*keyhash;
-
 
 /*
 	read configuration file
@@ -286,19 +283,7 @@ bool process_template(char *template, pmkdata *pgd) {
 */
 
 bool process_cmd(prsdata *pdata, pmkdata *pgd) {
-	prscell	*pcell;
-
-	/* init pcell with the first cell of pdata */
-	pcell = pdata->tree->first;
-
-	while (pcell != NULL) {
-		if (func_wrapper(pcell, pgd) == false)
-			return(false);
-
-		pcell = pcell->next;
-	}
-
-	return(true);
+	return(process_node(pdata->tree, pgd));
 }
 
 /*
@@ -585,10 +570,6 @@ int main(int argc, char *argv[]) {
 #endif
 	pmk_log("\n\n");
 
-
-	/* print number of hashed command */
-/*	pmk_log("Hashed %d pmk keywords.\n", keyhash->count);*/
-
 	pmk_log("Loaded %d predefinined variables.\n", nbpd);
 	pmk_log("Loaded %d overridden switches.\n", ovrsw);
 	pmk_log("Loaded %d overridden variables.\n", nbcd);
@@ -651,11 +632,6 @@ int main(int argc, char *argv[]) {
 
 	/* flush and close files */
 	pmk_log_close();
-
-	/* clear cmd hash */
-	if (keyhash != NULL) {
-		hash_destroy(keyhash);
-	}
 
 	/* clean global data */
 	clean(&gdata);

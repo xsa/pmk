@@ -1,3 +1,6 @@
+06 Sep 2003 mipsator
+ * more stuff to permit node command (i will explain later).
+
 05 Sep 2003 mipsator
  * improved parser engine again (first part).
  * new pmk language style (no longer need leading dot) but keep

@@ -127,24 +127,54 @@ void prsnode_destroy(prsnode *pnode) {
 */
 
 prscell *prscell_init(void) {
-	htable	*ht;
 	prscell	*pcell;
 
 	pcell = (prscell *) malloc(sizeof(prscell));
-	if (pcell != NULL) {
-		ht = hash_init_adv(MAX_CMD_OPT, (void (*)(void *))po_free,
-				(void *(*)(void *, void *, void *))po_append);
-		if (ht != NULL) {
-			pcell->ht = ht;
-			pcell->next = NULL;
-		} else {
-			/* cannot init htable */
-			free(pcell);
-			return(NULL);
-		}
-	}
 
 	return(pcell);
+}
+
+/*
+	initialize parsing cell structure
+
+	return : parsing cell structure
+*/
+
+bool prscell_init_data(prscell *pcell) {
+	bool	 rval = false;
+	htable	*pht;
+	prsnode	*pnode;
+
+	if (pcell != NULL) {
+		switch(pcell->type) {
+			case PRS_KW_NODE :
+				pnode = prsnode_init();
+				if (pnode != NULL) {
+					pcell->data = pnode;
+					pcell->next = NULL;
+					rval = true;
+				} else {
+					/* cannot init htable */
+					free(pcell);
+				}
+				break;
+			case PRS_KW_ITEM :
+				pht = hash_init_adv(MAX_CMD_OPT, (void (*)(void *))po_free,
+					(void *(*)(void *, void *, void *))po_append);
+				if (pht != NULL) {
+					pcell->data = pht;
+					pcell->next = NULL;
+					rval = true;
+				} else {
+					/* cannot init htable */
+					free(pcell);
+				}
+				break;
+			default :
+				break;
+		}
+	}
+	return(rval);
 }
 
 /*
@@ -153,9 +183,20 @@ prscell *prscell_init(void) {
 	pcell : structure to clean
 */
 
-void	prscell_destroy(prscell *pcell) {
-	hash_destroy(pcell->ht);
-	free(pcell);
+void prscell_destroy(prscell *pcell) {
+	if (pcell != NULL) {
+		switch(pcell->type) {
+			case PRS_KW_NODE :
+				/* XXX TODO */
+				break;
+			case PRS_KW_ITEM :
+				hash_destroy(pcell->data);
+				break;
+			default :
+				break;
+		}
+		free(pcell);
+	}
 }
 
 /*
@@ -254,6 +295,8 @@ char *parse_quoted(char *pstr, pmkobj *po, size_t size) {
 	return : new parsing cursor
 
 	NOTE: code is especially redundant as it will create pmk object later.
+
+	XXX need more comments
 */
 
 char *parse_list(char *pstr, pmkobj *po, size_t size) {
@@ -265,10 +308,6 @@ char *parse_list(char *pstr, pmkobj *po, size_t size) {
 	pda = da_init();
 
 	while ((*pstr != PMK_CHAR_LIST_END) && (*pstr != CHAR_EOS)) {
-		/*
-		pstr = skip_blank(pstr);
-		*/
-
 		switch (*pstr) {
 			case PMK_CHAR_QUOTE_START :
 				pstr++;
@@ -492,7 +531,7 @@ char *skip_blank(char *pstr) {
 bool parse_cell(char *line, prscell *pcell, htable *phkw) {
 	char	 name[CMD_LEN],
 #ifdef PRS_OBSOLETE
-		*pname, /* XXX temporary */
+		*pname, /* temporary to skip leading dot */
 #endif
 		*pstr;
 #ifdef PRS_OBSOLETE
@@ -528,6 +567,8 @@ bool parse_cell(char *line, prscell *pcell, htable *phkw) {
 	pkw = hash_get(phkw, name);
 	if (pkw != NULL) {
 		pcell->token = pkw->token;
+		pcell->type = pkw->type;
+		prscell_init_data(pcell); /* XXX check */
 #ifdef DEBUG_PRS
 		debugf("token = %d", pcell->token);
 #endif
@@ -657,7 +698,7 @@ bool parse_opt(char *line, prsopt *popt) {
 
 	popt->value = (pmkobj *) malloc(sizeof(pmkobj));
 	if (popt->value == NULL) {
-		strlcpy(parse_err, "memory allocation failed", sizeof(parse_err));
+		strlcpy(parse_err, "memory allocation failed.", sizeof(parse_err));
 		return(false);
 	}
 
@@ -685,16 +726,7 @@ bool parse_opt(char *line, prsopt *popt) {
 		strlcpy(parse_err, PRS_ERR_TRAILING, sizeof(parse_err));
 		return(false);
 	}
-/* XXX FIXME move it to global parse
-#ifdef DEBUG_PRS
-	debugf("recording '%s' key", key);
-#endif
-	/ key name and value are ok /
-	if (hash_add(ht, key, value) == HASH_ADD_FAIL) {
-		strlcpy(parse_err, PRS_ERR_HASH, sizeof(parse_err));
-		return(false);
-	}
-*/
+
 	return(true);
 }
 
@@ -736,14 +768,14 @@ bool parse_pmkfile(FILE *fp, prsdata *pdata, prskw kwtab[], size_t size) {
 				if (process == true) {
 					process = false;
 					
-					/* XXX FIXME linking PROBLEM HERE */
 					if (tnode->last != NULL) {
+						/* linking to last item of node */
 						tnode->last->next = pcell;
 					} else {
+						/* empty node, link as first */
 						tnode->first = pcell;
 					}
 					tnode->last = pcell;
-					/**/
 #ifdef DEBUG_PRS
 					debugf("end of command");
 #endif
@@ -767,14 +799,29 @@ bool parse_pmkfile(FILE *fp, prsdata *pdata, prskw kwtab[], size_t size) {
 						prscell_destroy(pcell);
 						return(false);
 					} else {
-						/* XXX  TODO */
 #ifdef DEBUG_PRS
 						debugf("recording '%s' key", opt.key);
 #endif
 						/* key name and value are ok */
-						if (hash_add(pcell->ht, opt.key, opt.value) == HASH_ADD_FAIL) {
-							strlcpy(parse_err, PRS_ERR_HASH, sizeof(parse_err));
-							return(false);
+						switch(pcell->type) {
+							case PRS_KW_NODE :
+								/* XXX  TODO
+									create new cell
+									set type to PRS_KW_UNKW
+									link it in node
+									NOTE : could set token instead of type
+								*/
+								break;
+							case PRS_KW_ITEM :
+								if (hash_add(pcell->data, opt.key, opt.value) == HASH_ADD_FAIL) {
+									strlcpy(parse_err, PRS_ERR_HASH, sizeof(parse_err));
+									return(false);
+								}
+								break;
+							default :
+								strlcpy(parse_err, "unknow type.", sizeof(parse_err));
+								return(false);
+								break;
 						}
 					}
 				} else {
@@ -792,6 +839,8 @@ bool parse_pmkfile(FILE *fp, prsdata *pdata, prskw kwtab[], size_t size) {
 #endif
 						return(false);
 					}
+
+/*					debugf("type = %d", pcell->type); / XXX */
 
 					process = true;
 				}
