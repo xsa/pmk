@@ -20,7 +20,6 @@ pmk :
 pmksetup :
 ! does clean temporary files on error
 - missing checks :
-	+ endian type (HW_ENDIAN = BIG_ENDIAN, LITTLE_ENDIAN)
 	- char unsigned (pmk ?)
 	- long double (pmk ?)
 	- better check for install ?
