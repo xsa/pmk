@@ -68,7 +68,7 @@ cfgrm:
 	@if ($(PREMAKE) -v >/dev/null 2>&1); then \
 		echo 'Configure using pmk.'; \
 		$(PREMAKE); \
-		@echo 'OK' > config; \
+		echo 'OK' > config; \
 	else \
 		echo 'Configure using pmkcfg.sh'; \
 		CC=$(CC) sh pmkcfg.sh; \
@@ -79,7 +79,7 @@ cfgum:
 	@if ($(PREMAKE) -v >/dev/null 2>&1); then \
 		echo 'Configure using pmk.'; \
 		$(PREMAKE) -e sw_usermode; \
-		@echo 'OK' > config; \
+		echo 'OK' > config; \
 	else \
 		echo 'Configure using pmkcfg.sh'; \
 		CC=$(CC) sh pmkcfg.sh -u; \
@@ -103,38 +103,38 @@ $(INST): config $(I_OBJS)
 	$(CC) -o $(INST) $(LDFLAGS) $(I_OBJS)
 
 install: all
-	$(INSTALL) -d -m 755 $(BINDIR)
-	$(INSTALL) -m 755 $(PREMAKE) $(BINDIR)/$(PREMAKE)
-	$(INSTALL) -m 755 $(SCAN) $(BINDIR)/$(SCAN)
-#	$(INSTALL) -m 755 $(INST) $(BINDIR)/$(INST)
-	$(INSTALL) -d -m 755 $(SBINDIR)
-	$(INSTALL) -m 755 $(SETUP) $(SBINDIR)/$(SETUP)
-	$(INSTALL) -d -m 755 $(DATADIR)
-	$(INSTALL) -m 644 samples/$(SAMPLE) $(DATADIR)
-	$(INSTALL) -m 644 samples/$(CONFIG) $(DATADIR)
-	$(INSTALL) -m 644 data/pmkscan.dat $(DATADIR)
-	$(INSTALL) -d -m 755 $(MANDIR)/man1
-	$(INSTALL) -m 444 man/$(PREMAKE).1 $(MANDIR)/man1/$(PREMAKE).1
-	$(INSTALL) -m 444 man/$(SCAN).1 $(MANDIR)/man1/$(SCAN).1
-	$(INSTALL) -m 444 man/$(INST).1 $(MANDIR)/man1/$(INST).1
-	$(INSTALL) -d -m 755 $(MANDIR)/man5
-	$(INSTALL) -m 444 man/$(PREMAKE).conf.5 $(MANDIR)/man5/$(PREMAKE).conf.5
-	$(INSTALL) -m 444 man/$(PREMAKE)file.5 $(MANDIR)/man5/$(PREMAKE)file.5
-	$(INSTALL) -d -m 755 $(MANDIR)/man8
-	$(INSTALL) -m 444 man/$(SETUP).8 $(MANDIR)/man8/$(SETUP).8
+	$(INSTALL) -d -m 755 $(DESTDIR)$(BINDIR)
+	$(INSTALL) -m 755 $(PREMAKE) $(DESTDIR)$(BINDIR)/$(PREMAKE)
+	$(INSTALL) -m 755 $(SCAN) $(DESTDIR)$(BINDIR)/$(SCAN)
+#	$(INSTALL) -m 755 $(INST) $(DESTDIR)$(BINDIR)/$(INST)
+	$(INSTALL) -d -m 755 $(DESTDIR)$(SBINDIR)
+	$(INSTALL) -m 755 $(SETUP) $(DESTDIR)$(SBINDIR)/$(SETUP)
+	$(INSTALL) -d -m 755 $(DESTDIR)$(DATADIR)
+	$(INSTALL) -m 644 samples/$(SAMPLE) $(DESTDIR)$(DATADIR)
+	$(INSTALL) -m 644 samples/$(CONFIG) $(DESTDIR)$(DATADIR)
+	$(INSTALL) -m 644 data/pmkscan.dat $(DESTDIR)$(DATADIR)
+	$(INSTALL) -d -m 755 $(DESTDIR)$(MANDIR)/man1
+	$(INSTALL) -m 444 man/$(PREMAKE).1 $(DESTDIR)$(MANDIR)/man1/$(PREMAKE).1
+	$(INSTALL) -m 444 man/$(SCAN).1 $(DESTDIR)$(MANDIR)/man1/$(SCAN).1
+	$(INSTALL) -m 444 man/$(INST).1 $(DESTDIR)$(MANDIR)/man1/$(INST).1
+	$(INSTALL) -d -m 755 $(DESTDIR)$(MANDIR)/man5
+	$(INSTALL) -m 444 man/$(PREMAKE).conf.5 $(DESTDIR)$(MANDIR)/man5/$(PREMAKE).conf.5
+	$(INSTALL) -m 444 man/$(PREMAKE)file.5 $(DESTDIR)$(MANDIR)/man5/$(PREMAKE)file.5
+	$(INSTALL) -d -m 755 $(DESTDIR)$(MANDIR)/man8
+	$(INSTALL) -m 444 man/$(SETUP).8 $(DESTDIR)$(MANDIR)/man8/$(SETUP).8
 
 deinstall:
-	rm -f $(BINDIR)/$(PREMAKE)
-	rm -f $(BINDIR)/$(SCAN)
-#	rm -f $(BINDIR)/$(INST)
-	rm -f $(SBINDIR)/$(SETUP)
-	rm -rf $(DATADIR)
-	rm -f $(BASE)/man/man1/$(PREMAKE).1
-	rm -f $(BASE)/man/man1/$(SCAN).1
-	rm -f $(BASE)/man/man1/$(INST).1
-	rm -f $(BASE)/man/man8/$(SETUP).8
-	rm -f $(BASE)/man/man5/$(PREMAKE)file.5
-	rm -f $(BASE)/man/man5/$(PREMAKE).conf.5
+	rm -f $(DESTDIR)$(BINDIR)/$(PREMAKE)
+	rm -f $(DESTDIR)$(BINDIR)/$(SCAN)
+#	rm -f $(DESTDIR)$(BINDIR)/$(INST)
+	rm -f $(DESTDIR)$(SBINDIR)/$(SETUP)
+	rm -rf $(DESTDIR)$(DATADIR)
+	rm -f $(DESTDIR)$(BASE)/man/man1/$(PREMAKE).1
+	rm -f $(DESTDIR)$(BASE)/man/man1/$(SCAN).1
+	rm -f $(DESTDIR)$(BASE)/man/man1/$(INST).1
+	rm -f $(DESTDIR)$(BASE)/man/man8/$(SETUP).8
+	rm -f $(DESTDIR)$(BASE)/man/man5/$(PREMAKE)file.5
+	rm -f $(DESTDIR)$(BASE)/man/man5/$(PREMAKE).conf.5
 
 $(PREMAKE)-clean:
 	rm -f $(P_OBJS) $(PREMAKE)
