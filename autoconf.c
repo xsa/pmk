@@ -89,12 +89,14 @@ bool ac_parse_config(pmkdata *pgd) {
 
 	fp_in = fopen(fsrc, "r");
 	if (fp_in == NULL) {
+		errorf("failed to open '%s'.", fsrc);
 		return(false);
 	}
 
 	/* open temporary file ? */
 	fp_out = tmp_open(PMK_TMP_AC_CONF, "w", ftmp, sizeof(ftmp));
 	if (fp_out == NULL) {
+		errorf("failed to open '%s'.", ftmp);
 		fclose(fp_in);
 		return(false);
 	}
