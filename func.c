@@ -117,7 +117,7 @@ bool pmk_check_include(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 	char	*incfile,
 		*incfunc,
 		incpath[MAXPATHLEN],
-		strbuf[512];
+		strbuf[512]; /* storage buffer */
 	FILE	*ifp;
 	bool	required = true;
 
@@ -193,13 +193,14 @@ bool pmk_check_lib(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 
 bool pmk_check_config(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 	FILE	*rpipe;
-	char	version[16],
+	char	version[MAX_VERS_LEN],
 		cfgpath[MAXPATHLEN],
 		cfgcmd[MAXPATHLEN],
 		*cfgtool,
 		*libvers,
 		*bpath;
-	bool	required = true;
+	bool	required = true,
+		rval = false;
 
 	pmk_log("* Checking with config tool [%s]\n", cmd->label);
 
@@ -210,9 +211,6 @@ bool pmk_check_config(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 		errorf("CFGTOOL not provided.");
 		return(false);
 	}
-
-	libvers = hash_get(ht, "VERSION");
-	/* XXX need test ? */
 
 	bpath = hash_get(gdata->htab, "BIN_PATH");
 	if (bpath == NULL) {
@@ -226,25 +224,43 @@ bool pmk_check_config(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 		pmk_log("no.\n");
 		if (required == true) {
 			return(false);
+		} else {
+			/* XXX DEF_XXX_CONFIG */
+			return(true);
 		}
 	} else {
 		pmk_log("yes.\n");
 	}
 	
-	snprintf(cfgcmd, sizeof(cfgcmd), "%s --version", cfgpath);
+	libvers = hash_get(ht, "VERSION");
+	if (libvers != NULL) {
+		snprintf(cfgcmd, sizeof(cfgcmd), "%s --version", cfgpath);
 
-	rpipe = popen(cfgcmd, "r");
-	if (rpipe == NULL) {
-		errorf("Cannot get version from '%s'.", cfgcmd);
-		return(false);
-	} else {
-		pmk_log("\tFound version >= %s : ", libvers);
-
-		get_line(rpipe, version, sizeof(version)); /* XXX check returned value ? */
-		/* XXX should check version */
-		pmk_log("XXX (%s).\n", version);
-
-		pclose(rpipe);
-		return(true);
+		rpipe = popen(cfgcmd, "r");
+		if (rpipe == NULL) {
+			errorf("Cannot get version from '%s'.", cfgcmd);
+			return(false);
+		} else {
+			pmk_log("\tFound version >= %s : ", libvers);
+	
+			get_line(rpipe, version, sizeof(version)); /* XXX check returned value ? */
+			if (check_version(libvers, version) == true) {
+				pmk_log("Yes (%s).\n", version);
+				rval = true;
+			} else {
+				pmk_log("No (%s).\n", version);
+				if (required == true) {
+					rval = false;
+				} else {
+					/* XXX DEV_ */
+					rval = true;
+				}
+			}
+	
+			pclose(rpipe);
+			return(true);
+		}
 	}
+
+	/* XXX HAVE_... */
 }

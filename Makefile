@@ -8,6 +8,9 @@ CFLAGS?=
 #CFLAGS+=	-Werror
 #CFLAGS+=	-ansi -pedantic
 
+#optimize building stuff (gcc only)
+#CFLAGS+=	-pipe
+
 # Debug stuff
 #CFLAGS+=	-DPMK_DEBUG
 #CFLAGS+=	-DPMKSETUP_DEBUG
