@@ -28,11 +28,13 @@ common:
 	-	add test target in tests/Makefile
 	-	update README and INSTALL
 xsa	+	improve deinstall target (ugly rm -rf)
+	-	new samples : prog c & c++, lib c & c++
 
 
 pmk:
 -----------------------------------------------------------------------
 mips	-	MODULE support in CHECK_PKG_CONFIG
+mips	-	config tool data init when needed
 	+	handle PKG_CONFIG_PATH (env)
 mips	-	linking flags for shared libraries
 	~.	compatibility with autoconf (progressing) :
@@ -41,7 +43,7 @@ mips	-	linking flags for shared libraries
 			- support for CPPFLAGS (misc linker options) ?
 			- VPATH ?
 	-.	cache ? (hash table with binary location, ...)
-	-.	more C++ support !
+	-.	more C++ support ! (CXXFLAGS in func)
 	-.	verify in CHECK_BINARY that program has executable right ?
 	-.	convert gdata.labl to pmk objects ?
 	-.	checks hash_add() in autoconf.c (void func => bool func)
