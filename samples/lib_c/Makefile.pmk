@@ -25,7 +25,7 @@ all: show $(LIB_STATIC) $(LIB_SHARED) $(NAME) run_$(NAME) clean
 
 .c.o:
 	@echo ""
-	@echo "-> Building objet file"
+	@echo "-> Building object file"
 	$(CC) $(CFLAGS) $(SLCFLAGS) -c $<
 
 show:
