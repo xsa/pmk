@@ -173,7 +173,7 @@ bool process_template(char *template, pmkdata *pgd) {
 
 	dfd = fopen(fpath, "w");
 	if (dfd == NULL) {
-		fclose(tfd);
+		fclose(tfd); /* close already opened tfd before leaving */
 		errorf("cannot open %s.", fpath);
 		return(false);
 	}
@@ -760,7 +760,7 @@ int main(int argc, char *argv[]) {
 		exit(1);
 	}
 
-	/* initialise global data has htable */
+	/* initialise global data hash table */
 	gdata.htab = hash_init(MAX_DATA_KEY);
 	if (gdata.htab == NULL) {
 		clean(&gdata);
@@ -785,7 +785,7 @@ int main(int argc, char *argv[]) {
 	} else {
 		/* configuration file not found */
 		clean(&gdata);
-		errorf("cannot open '%s', run pmksetup");
+		errorf("cannot open '%s', run pmksetup", PREMAKE_CONFIG_PATH);
 		exit(1);
 	}
 
