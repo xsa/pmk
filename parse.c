@@ -230,7 +230,8 @@ void prscell_destroy(prscell *pcell) {
 
 /*
 	init a prsopt structure
-	XXX
+	
+	return : prsopt structure
 */
 
 prsopt *prsopt_init(void) {
@@ -243,7 +244,8 @@ prsopt *prsopt_init(void) {
 
 /*
 	init a prsopt structure with given aguments
-	XXX
+	
+	return : prsopt structure
 */
 
 prsopt *prsopt_init_adv(char *key, char opchar, char *value) {
@@ -277,7 +279,8 @@ prsopt *prsopt_init_adv(char *key, char opchar, char *value) {
 
 /*
 	destroy a prsopt structure
-	XXX
+	
+	ppo : prsopt structure to free
 */
 
 void prsopt_destroy(prsopt *ppo) {
@@ -539,9 +542,10 @@ char *parse_quoted(char *pstr, pmkobj *po, size_t size) {
 	if (*pstr == PMK_CHAR_QUOTE_END) {
 		/* found end of quoted string */
 		*pbuf = CHAR_EOS;
-		/* XXX use strdup to gain memory ? */
 		po->type = PO_STRING;
-		po->data = buffer;
+		/* use strdup to gain memory (but lose some cpu ;) */
+		po->data = strdup(buffer);
+		free(buffer);
 		pstr++;
 		return(pstr);
 	} else {
@@ -1004,7 +1008,7 @@ bool parse_node(FILE *fp, prsdata *pdata, htable *phkw, prscell *pcell) {
 	pnode = pcell->data;
 
 	if (pnode->token == PRS_TOK_NULL) {
-		/* XXX BLAH BLAH */
+		/* XXX i'm unable to remember what i wanted to put as comment :) */
 		return(parse_line(fp, pdata, phkw, pnode));
 	} else {
 		while ((loop == true) && (prs_get_line(fp, buf, sizeof(buf)) == true)) {
@@ -1170,10 +1174,14 @@ bool parse_line(FILE *fp, prsdata *pdata, htable *phkw, prsnode *pnode) {
 
 				switch (pcell->type) {
 					case PRS_KW_NODE :
-						parse_node(fp, pdata, phkw, pcell); /* XXX */
+						/* process a nde */
+						if (parse_node(fp, pdata, phkw, pcell) == false)
+							return(false);
 						break;
 					case PRS_KW_CELL :
-						parse_command(fp, pdata, pcell); /* XXX */
+						/* process a command */
+						if (parse_command(fp, pdata, pcell) == false)
+							return(false);
 						break;
 				}
 		}
