@@ -69,9 +69,6 @@
 /* maximal number of key in label hash */
 #define MAX_LABEL_KEY		1024
 
-/* maximal size of error message */
-#define MAX_ERRMSG_LEN		256
-
 /* command option type */
 typedef struct {
 	char	name[OPT_NAME_LEN],
@@ -95,7 +92,7 @@ typedef struct {
 		 srcdir[MAXPATHLEN],
 		 pmkfile[MAXPATHLEN],
 		 ovrfile[MAXPATHLEN],
-		 errmsg[MAX_ERRMSG_LEN];
+		 errmsg[MAX_ERR_MSG_LEN];
 } pmkdata;
 
 
