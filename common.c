@@ -30,78 +30,32 @@
  *
  */
 
-/*
-#define PMKSETUP_DEBUG 1
-*/
+#define EMPTY_OPT_VALUE ""
 
 #include <sys/param.h>
-#include <err.h>
-#include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
+#include <string.h>
 
 #include "pmk.h"
 
 /*
-	usage
+	put env variable in an option
 */
 
-void usage(void) {
-	/* nothing yet */
-}
+bool env_to_opt(char *env_name, pmkcmdopt *opt) {
+	char	*env_val;
+	bool	rval;
 
-/*
-	main
-*/
-
-int main(int argc, char *argv[]) {
-	FILE	*cfd,
-		*tfd;
-	char	cf[MAXPATHLEN],
-		tf[MAXPATHLEN];
-	bool	exists=FALSE;
-
-	/* try to open configuration file if it exists */
-	snprintf(cf, sizeof(cf), "%s/%s", SYSCONFDIR, PREMAKE_CONFIG);
-	cfd = fopen(cf, "r");
-	if (cfd != NULL) {
-		exists=TRUE;
+	env_val = getenv(env_name);
+	if (env_val == NULL) {
+		/* env variable name not found */
+		strncpy(opt->value, EMPTY_OPT_VALUE, sizeof(EMPTY_OPT_VALUE));
+		rval = FALSE;
+	} else {
+		/* okay get it */
+		strncpy(opt->value, env_val, sizeof(env_val));
+		rval = TRUE;
+		
 	}
-
-	/* creating temporary file to build new configuration file */
-	snprintf(tf, sizeof(tf), "/tmp/pmk.XXXXXXXXXX");
-	if (mkstemp(tf) == NULL) {
-		/* name randomize failed */
-		err(1, "%s", tf);
-	}
-	tfd = fopen(tf, "w");
-	if (tfd == NULL) {
-		/* cannot open temporary file */
-		err(1, "%s", tf);
-	}
-
-	fprintf(tfd, "# PREMAKE");
-
-	printf("Hey you know what ? I'm doing nothing :)\n");
-
-
-	fclose(tfd);
-	if (exists == TRUE) {
-		/* configuration file was opened */
-		fclose(cfd);
-	}
-
-	/* finished playing with temporary file */
-	/* XXX code to overwrite old configuration file */
-
-#ifndef PMKSETUP_DEBUG
-	if (unlink(tf) == -1) {
-		/* canot remove temporary file */
-		err(1, "%s", tf);
-	}
-#else
-	printf("[DEBUG] %s has not been deleted !\n", tf);
-#endif
-
-	return(0);
+	return(rval);
 }
