@@ -588,7 +588,12 @@ char *parse_idtf(char *pstr, char *pbuf, size_t size) {
 }
 
 /*
-	blah
+	process string to substitute variables with their values
+
+	pstr : string to process
+	pht : hash table where variables are stored
+
+	return : new string or NULL
 */
 
 char *process_string(char *pstr, htable *pht) {
