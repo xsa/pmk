@@ -63,6 +63,11 @@ prsdata *prsdata_init(void) {
 	if (pdata != NULL) {
 		pdata->linenum = 0;
 		pdata->tree = prsnode_init();
+		if (pdata->tree == NULL) {
+			/* tree init failed, clean allocated structure */
+			prsdata_destroy(pdata);
+			pdata = NULL;
+		}
 	}
 
 	return(pdata);
@@ -96,7 +101,6 @@ prseng *prseng_init(void) {
 		peng->phtkw = NULL;
 		peng->linenum = 1;
 		peng->offset = 0;
-		peng->curnode = NULL;
 	}
 
 	return(peng);
@@ -1167,8 +1171,8 @@ bool parse_opt_new(prseng *peng, prsopt *popt, char *seplst) {
 			break;
 	}
 #endif
-
-	/*if (*pstr != CHAR_EOS) {                                        */
+	/* XXX permit trailing garbage such as comment ? */
+	/*if (*pstr != CHAR_CR) {                                        */
 	/*        strlcpy(parse_err, PRS_ERR_TRAILING, sizeof(parse_err));*/
 	/*        return(false);                                          */
 	/*}                                                               */
@@ -1244,8 +1248,6 @@ bool parse_opt_block(prsdata *pdata, prseng *peng, prscell *pcell, bool chk_deli
 	prsopt	 opt,
 		*nopt;
 
-	/*pstr = peng->prscur; |+ XXX should take beginning of buffer ? useless ? +|*/
-
 	pnode = pcell->data;
 
 	if ((pcell->type == PRS_KW_NODE) && (pnode->token == PRS_TOK_NULL)) {
@@ -1266,20 +1268,20 @@ bool parse_opt_block(prsdata *pdata, prseng *peng, prscell *pcell, bool chk_deli
 					peng->prscur++;
 
 					if (chk_delim == true) {
-						/* XXX should return(false) instead ?*/
+						/* delimiter found, exit from the loop */
 						loop = false;
 					} else {
-						/* XXX should not found that ? */
+						/* delimiter not expected */
 						return(false);
 					}
 					break;
 
 				case CHAR_EOS :
 					if (chk_delim == true) {
-						/* delimiter not found */
+						/* expected delimiter not found */
 						return(false);
 					} else {
-						/* main loop, no delimiter */
+						/* main loop, no delimiter was expected => ok */
 						return(true);
 					}
 					break;
@@ -1288,7 +1290,7 @@ bool parse_opt_block(prsdata *pdata, prseng *peng, prscell *pcell, bool chk_deli
 #ifdef DEBUG_PRS
 					debugf("parse_opt_block() : calling parse_opt_new()");
 #endif
-					/* XXX XXX parse_opt does not update frame pointer */
+					/* parse option */
 					if (parse_opt_new(peng, &opt, PRS_PMKFILE_SEP) == false) {
 						errorf("line %d : %s", pdata->linenum, parse_err);
 #ifdef DEBUG_PRS
@@ -1349,8 +1351,6 @@ bool parse_cmd_block(prsdata *pdata, prseng *peng, prsnode *pnode, bool chk_deli
 	bool	 loop = true;
 	prscell	*pcell;
 
-	/*pstr = peng->prscur; |+ XXX should take beginning of buffer ? useless ? +|*/
-
 	if (chk_delim == true) {
 #ifdef DEBUG_PRS
 		debugf("parse_cmd_block() : checking beginning of the block sequence.");
@@ -1401,10 +1401,10 @@ bool parse_cmd_block(prsdata *pdata, prseng *peng, prsnode *pnode, bool chk_deli
 				peng->prscur++;
 
 				if (chk_delim == true) {
-					/* XXX should return(false) instead ?*/
+					/* delimiter found, exit from the loop */
 					loop = false;
 				} else {
-					/* XXX should not found that ? */
+					/* delimiter not expected */
 					return(false);
 				}
 				break;
@@ -1414,18 +1414,19 @@ bool parse_cmd_block(prsdata *pdata, prseng *peng, prsnode *pnode, bool chk_deli
 				debugf("parse_cmd_block() : found end of string character.");
 #endif
 				if (chk_delim == true) {
-					/* delimiter not found */
+					/* expected delimiter not found */
 					return(false);
 				} else {
-					/* main loop, no delimiter */
+					/* main loop, no delimiter was expected => ok */
 					return(true);
 				}
 				break;
 
 			default :
-				if (chk_delim == true) {
-					/* return() XXX TODO not NULL */
-				}
+				/* XXX */
+				/*if (chk_delim == true) {                */
+				/*        |+ return() XXX TODO not NULL +|*/
+				/*}                                       */
 
 #ifdef DEBUG_PRS
 				debugf("parse_cmd_block() : parsing command header.");
@@ -1472,12 +1473,13 @@ bool parse_pmkfile(FILE *fp, prsdata *pdata, prskw kwtab[], size_t size) {
 		peng->fp = fp;
 		/* init hash table of command keywords */
 		peng->phtkw = keyword_hash(kwtab, size);
-		/*|+ set current node +|      */
-		/*peng->curnode = pdata->tree;*/
 	}
 
 	/* update buffer window */
-	prs_fill_buf(peng); /* XXX check */
+	if (prs_fill_buf(peng) == false) {
+		errorf("parsing buffer init failed.");
+		return(false);
+	}
 
 	/*if (parse_line(fp, pdata, phkw, tnode) != true) {*/
 	if (parse_cmd_block(pdata, peng, pdata->tree, false) != true) {

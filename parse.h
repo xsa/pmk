@@ -138,7 +138,6 @@ typedef struct {
 	htable	*phtkw;			/* command keywords */
 	int	 linenum;		/* current line */
 	long	 offset;		/* offset of the buffer window */
-	prsnode	*curnode;		/* current prsnode */
 } prseng;
 
 prsdata	*prsdata_init(void);
