@@ -10,7 +10,7 @@ pmk :
 	- support for LDFLAGS (misc linker options)
 	- support for CPPFLAGS (misc linker options)
 	- VPATH ?
-! cache ? (hash table with binary location, ...)
+- cache ? (hash table with binary location, ...)
 - more C++ support
 + CHECK_VARIABLE
 - verify in CHECK_BINARY that program has executable right ?
