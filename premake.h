@@ -136,11 +136,4 @@
 /* size for temporary buffers */
 #define TMP_BUF_LEN		512
 
-/* command tokens */
-#define	TOK_NULL	 0
-#define	TOK_DEFINE	 1
-#define TOK_CHK_BIN	 2
-#define TOK_CHK_INC	 3
-#define TOK_CHK_LIB	 4
-
 #endif /* _PREMAKE_H_ */

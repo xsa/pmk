@@ -1,3 +1,6 @@
+02 Jul 2003 mipsator
+ * added get_lang() as preliminary work on C++ support.
+
 # PMK 0.5 released
 
 30 Jun 2003 mipsator

@@ -44,6 +44,13 @@
 #include "common.h"
 
 
+#define NBLANG	2
+langdata	ldata[NBLANG] = {
+	{"C",	"CC",	"CPPFLAGS",	"CFLAGS"},
+	{"C++",	"CXX",	"CPPFLAGS",	"CXXFLAGS"}
+};
+
+
 /*
 	check boolean string
 
@@ -416,4 +423,30 @@ bool require_check(htable *pht) {
 	}
 
 	return(check_bool_str(req));
+}
+
+/*
+	XXX BLAH BLAH
+*/
+
+langdata *check_lang(htable *pht, pmkdata *pgd) {
+	char	*lang;
+	int	i;
+
+	/* check first if language has been provided locally */
+	lang = hash_get(pht, "LANG");
+	if (lang == NULL) {
+		/* XXX TODO should check global lang when available */
+
+		/* return C by default */
+		return(&ldata[0]);
+	}
+
+	for (i = 0 ; i < NBLANG ; i++) {
+		if (strncmp(ldata[i].name, lang, LANG_NAME_LEN) == 0) {
+			return(&ldata[i]);
+		}
+	}
+
+	return(NULL);
 }
