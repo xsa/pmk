@@ -94,6 +94,11 @@ test_pmk: pmk
 	@cat samples/Makefile.sample.pmk
 	@echo "----------------------------------------"
 	@echo ""
+	@echo "samples/subdir/Makefile.subdir.pmk"
+	@echo "----------------------------------------"
+	@cat samples/subdir/Makefile.subdir.pmk
+	@echo "----------------------------------------"
+	@echo ""
 	@echo "samples/config_sample.h.pmk"
 	@echo "----------------------------------------"
 	@cat samples/config_sample.h.pmk
@@ -113,6 +118,11 @@ test_pmk: pmk
 	@echo "samples/Makefile.sample"
 	@echo "----------------------------------------"
 	@cat samples/Makefile.sample
+	@echo "----------------------------------------"
+	@echo ""
+	@echo "samples/subdir/Makefile.subdir"
+	@echo "----------------------------------------"
+	@cat samples/subdir/Makefile.subdir
 	@echo "----------------------------------------"
 	@echo ""
 	@echo "samples/config_sample.h"
@@ -142,7 +152,9 @@ test_pmksetup: pmksetup
 test_clean:
 	@echo ""
 	@echo "=> Removing generated files"
-	rm -f samples/Makefile.sample samples/config_sample.h samples/ac_config.h pmk.log pmk.conf
+	rm -f pmk.log pmk.conf
+	rm -f samples/Makefile.sample samples/config_sample.h samples/ac_config.h
+	rm -f samples/subdir/Makefile.subdir
 	@echo ""
 	@echo "=> End of cleaning."
 	@echo ""

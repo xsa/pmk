@@ -148,10 +148,12 @@ bool ac_parse_config(htable *ht, char *fpath) {
 */
 
 void ac_process_dyn_var(htable *pht, pmkdata *pgd, char *template) {
-	char	*ac_dir,
-		*srcdir,
+	char	*srcdir,
 		*basedir,
-		buf[MAXPATHLEN];
+		buf[MAXPATHLEN],
+		ac_dir[MAXPATHLEN],
+		abs_bd[MAXPATHLEN],
+		abs_sd[MAXPATHLEN];
 
 	/* should process variables like following (if i believe autoconf manual) :
 		- srcdir : the relative path to the directory that contains the source code for that `Makefile'.
@@ -166,24 +168,28 @@ void ac_process_dyn_var(htable *pht, pmkdata *pgd, char *template) {
 		- abs_top_builddir : absolute path of top_builddir.
 	*/
 
-	ac_dir = strdup(dirname(template));
 	srcdir = pgd->srcdir;
 	basedir = pgd->basedir;
+
+	/* extract ac_dir from template
+		NOTE : ac_dir is relative */
+	relpath(srcdir, dirname(template), ac_dir);
 
 	/* init builddir */
 	hash_add(pht, "abs_top_builddir", basedir);
 
-	/* compute top_builddir */
-	relpath(ac_dir, basedir, buf);
-	hash_add(pht, "top_builddir", buf);
-
 	/* set abs_builddir */
-	hash_add(pht, "abs_builddir", ac_dir);
+	abspath(basedir, ac_dir, abs_bd);
+	hash_add(pht, "abs_builddir", abs_bd);
+
+	/* compute top_builddir */
+	relpath(abs_bd, basedir, buf);
+	hash_add(pht, "top_builddir", buf);
 
 	/* Mr GNU said : rigorously equal to ".". So i did :) */
 	hash_add(pht, "builddir", ".");
 
-	/* set srcdir */
+	/* set absolute srcdir */
 	hash_add(pht, "abs_top_srcdir", srcdir);
 
 	/* compute top_srcdir */
@@ -191,13 +197,12 @@ void ac_process_dyn_var(htable *pht, pmkdata *pgd, char *template) {
 	hash_add(pht, "top_srcdir", buf);
 
 	/* absolute path of template */
-	hash_add(pht, "abs_srcdir", ac_dir);
+	abspath(srcdir, ac_dir, abs_sd);
+	hash_add(pht, "abs_srcdir", abs_sd);
 
 	/* relative path to template */
-	relpath(basedir, ac_dir, buf);
+	relpath(abs_bd, abs_sd, buf);
 	hash_add(pht, "srcdir", buf);
-
-	free(ac_dir);
 }
 
 /*

@@ -9,7 +9,7 @@ VERSION=0.0.1b
 
 # set the target files that will be processed
 .TARGET
-LIST=Makefile.sample.pmk,config_sample.h.pmk
+LIST=Makefile.sample.pmk,config_sample.h.pmk,subdir/Makefile.subdir.pmk
 .END
 
 # set autoconf compatibility
