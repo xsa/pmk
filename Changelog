@@ -1,3 +1,6 @@
+11 Dec 2004 mipsator
+ * added detection of 'id' and 'sudo' in pmksetup, idea from Sean Chittenden.
+
 06 Dec 2004 mipsator
  * added detection of 'ls' and 'echo' in pmksetup.
 
