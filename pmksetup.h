@@ -45,7 +45,7 @@
 /* pmksetup specific version */
 #define PREMAKE_SUBVER_PMKSETUP	"7"
 
-#define PREMAKE_CONFIG_TMP	PREMAKE_TMP_DIR "/pmk.XXXXXXXX"
+#define PREMAKE_CONFIG_TMP	PREMAKE_TMP_DIR "/pmk.conf_XXXXXXXX"
 #define PREMAKE_CONFIG_MODE	S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH
 
 
@@ -53,6 +53,12 @@
 /* for lint */
 #define DATADIR	"/DATADIR_not_defined"
 #endif
+
+/* set default priviledged user */
+#ifndef PRIVSEP_USER
+#define PRIVSEP_USER	"nobody"
+#endif
+
 
 #define PMKCPU_DATA		DATADIR "/pmkcpu.dat"
 
