@@ -489,8 +489,7 @@ int check_echo(htable *pht) {
 	char	*echo_n, *echo_c, *echo_t;
 	size_t	s;
 
-	snprintf(echocmd, sizeof(echocmd),
-		"echo \"one\\c\"; echo -n two; echo three"); 
+	snprintf(echocmd, sizeof(echocmd), ECHO_CMD);
 
 	if ((echo_pipe = popen(echocmd, "r")) == NULL) {
 		errorf("unable to execute %s", echocmd);

@@ -54,6 +54,7 @@
 #define MAX_CONF_OPT		256	/* XXX temp maximum hash entries */
 #define PATH_STR_DELIMITER	':'	/* string delimiter of the $PATH variable */    
 
+#define ECHO_CMD	"echo \"one\\c\"; echo -n two; echo three"
 #define	ECHO_EMPTY	""
 #define	ECHO_N		"-n"
 #define	ECHO_C		"\\c"
