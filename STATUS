@@ -19,13 +19,13 @@ Debian		3.0		sparc		PMK.0.7.11	OK		Martin Reindl		gcc-3.3.2, gmake-3.80, linux-2
 FreeBSD		5.2.1		alpha		PMK 0.9.0	OK		Damien Couderc		gcc-3.3.3
 FreeBSD		5.2.1		i386		PMK 0.9.0	OK		Damien Couderc		gcc-3.3.3
 HP-UX		B.11.22		ia64		PMK 0.8.1	OK		Damien Couderc		HP ANSI C++/C B3910B A.05.36
-HP-UX		B.11.11		parisc		PMK 0.8.1-s7	OK		Martin Reindl		HP ANSI C A.11.11.04
+HP-UX		B.11.11		parisc		PMK 0.9.0	OK		Damien Couderc		???
 HP-UX		B.11.11		parisc		PMK 0.8.1-s7	OK		Martin Reindl		gcc-3.3.3
 IRIX		6.5		IP32		PMK 0.8.1-s7	OK		Xavier Santolaria	MIPSpro Compilers 7.30
 Mac OS X	10.3.5		ppc		PMK 0.8.1-s7	OK		Xavier Santolaria	gcc-3.3, gmake-3.79.1
-Mandrake	10.0		i686		PMK 0.8.1-s4	OK		Damien Couderc		gcc-3.3.2, gmake-3.80, linux-2.6.3
+Mandrake	10.0		i686		PMK 0.9.0	OK		Damien Couderc		gcc-3.3.2, gmake-3.80, linux-2.6.3
 NetBSD		2.0G		alpha		PMK 0.8.1-s7	OK		Martin Reindl		gcc-3.3.3
-NetBSD		1.6		i386		PMK 0.8.1-s4	OK		Damien Couderc		gcc-2.95.3
+NetBSD		1.6		i386		PMK 0.9.0	OK		Damien Couderc		gcc-2.95.3
 NetBSD		1.6.1		macppc		PMK 0.8.1	OK		Martin Reindl		gcc-2.95.3
 NetBSD		2.0		sgimips		PMK 0.8.1-s9	OK		Martin Reindl		gcc-3.3.3
 NetBSD		2.0G		sparc		PMK 0.8.1-s7	OK		Martin Reindl		gcc-3.3.3

@@ -37,9 +37,9 @@
 #include "cpu_arch_def.h"
 
 
-.text
-
 #ifdef ARCH_X86_32
+
+.text
 
 /*
  *	X86 32 bits code
@@ -116,6 +116,8 @@ x86_exec_cpuid:
 
 #ifdef ARCH_X86_64
 
+.text
+
 /*
  *	X86 64 bits code
  */
@@ -190,9 +192,9 @@ x86_exec_cpuid:
 #endif /* ARCH_X86_64 */
 
 
-.data
-
 #if defined(ARCH_X86_32) || defined(ARCH_X86_64)
+
+.data
 
 	.globl x86_cpu_reg_eax
 x86_cpu_reg_eax:
