@@ -2,6 +2,8 @@
  * rewritten parse_opt().
  * updated sample files to work with the new parser.
  * added parser_test.c into test directory.
+ * added parse_word(), parse_quoted(), parse_list() and skip_blank().
+ * rewritten parse_opt() again to be more compact, simple and efficient.
 
 01 Aug 2003 mipsator
  * added test_pmkscan target plus some cosmetics in Makefile.
