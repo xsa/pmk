@@ -1097,7 +1097,7 @@ bool pmk_set_parameter(pmkcmd *cmd, prsopt *popt, pmkdata *gdata) {
 
 	/* global language */
 	if (strncmp(popt->key, "LANG", sizeof(popt->key)) == 0) {
-		pmk_log("\tSetting global language.\n");
+		pmk_log("\tSetting global language :\n");
 
 		/* set global language */
 		pstr = po_get_str(popt->value);
