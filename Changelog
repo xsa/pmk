@@ -1,3 +1,6 @@
+01 Oct 2003 mipsator
+ * added premk-cvs@lists.sourceforge.net to get commit messages.
+
 30 Sep 2003 mipsator
  * changed USERMODE by PMK_USERMODE to avoid conflicts.
  * fixed hash_str_append() in hash.
