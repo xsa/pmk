@@ -38,7 +38,7 @@
 	INCLUDE="libgen.h"
 }
 
-# checking strlcat in string.h
+# checking isblank in ctype.h
 .CHECK_INCLUDE(function_isblank) {
 	REQUIRED=FALSE
 	INCLUDE="ctype.h"
