@@ -279,7 +279,7 @@ bool pmk_check_include(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 		errorf("cannot get compiler path.");
 		return(false);
 	} else {
-		pmk_log("\tUse %s language with %s compiler\n.", pld->name, pld->comp);
+		pmk_log("\tUse %s language with %s compiler.\n", pld->name, pld->comp);
 	}
 
 	/* fill test file */
