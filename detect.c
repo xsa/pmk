@@ -103,6 +103,7 @@ int cid_to_idx(unsigned int id) {
 bool detect_compiler(char *cpath, char *blog, comp_data *cdata) {
 	FILE		*tfp,
 			*rpipe;
+	bool		 failed = false;
 	char		 cfgcmd[MAXPATHLEN],
 			 ftmp[MAXPATHLEN],
 			 pipebuf[TMP_BUF_LEN];
@@ -125,13 +126,19 @@ bool detect_compiler(char *cpath, char *blog, comp_data *cdata) {
 
 	/* get result */
 	r = system(cfgcmd);
+
+	/* test file no longer needed */
+	if (unlink(ftmp) == -1) {
+		/* cannot remove temporary file */
+		errorf("cannot remove %s : %s.", ftmp, strerror(errno)); 
+	}
+
 	if (r == 0) {
 		rpipe = popen(CC_TEST_BIN, "r");
 		if (rpipe != NULL) {
 			if (get_line(rpipe, pipebuf, sizeof(pipebuf)) == false) {
 				errorf("cannot get compiler id.");
-				pclose(rpipe);
-				return(EXIT_FAILURE);
+				failed = true;
 			} else {
 				/* get compiler id */
 				cid = (unsigned int) strtoul(pipebuf, NULL, 8);
@@ -144,10 +151,9 @@ bool detect_compiler(char *cpath, char *blog, comp_data *cdata) {
 				}
 			}
 
-			if (get_line(rpipe, pipebuf, sizeof(pipebuf)) == false) {
+			if (failed == false && get_line(rpipe, pipebuf, sizeof(pipebuf)) == false) {
 				errorf("cannot get compiler version.");
-				pclose(rpipe);
-				return(EXIT_FAILURE);
+				failed = true;
 			} else {
 					strlcpy(cdata->version, pipebuf,
 						sizeof(cdata->descr)); /* XXX check */
@@ -155,19 +161,20 @@ bool detect_compiler(char *cpath, char *blog, comp_data *cdata) {
 
 			pclose(rpipe);
 
-			/* delete binary */
-			if (unlink(CC_TEST_BIN) == -1) {
-				errorf("cannot remove %s : %s.", 
-					ftmp, strerror(errno));
-			}
 		} else {
+			errorf("failed to get output from test binary.");
 		}
-	} else {
-	}
 
-	if (unlink(ftmp) == -1) {
-		/* cannot remove temporary file */
-		errorf("cannot remove %s : %s.", ftmp, strerror(errno)); 
+		/* delete binary */
+		if (unlink(CC_TEST_BIN) == -1) {
+			errorf("cannot remove %s : %s.", 
+				CC_TEST_BIN, strerror(errno));
+		}
+
+		if (failed == true)
+			return(EXIT_FAILURE);
+	} else {
+		errorf("failed to build test binary.");
 	}
 
 	return(true);
