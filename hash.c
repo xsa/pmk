@@ -74,7 +74,7 @@ int hash_compute(char *key, int table_size) {
 	c = *key;
 	while (c != '\0') {
 		/* sum all characters with modulo */
-		hash = (hash + (c)) % table_size;
+		hash = (hash + (int) c) % table_size;
 		c = *key;
 		key++;
 		len++;
