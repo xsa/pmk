@@ -1,3 +1,8 @@
+28 May 2003 mipsator
+ * misc changes in Makefile.
+ * changed samples/ac_config.h into samples/ac_config.h.sample .
+ * ac_config.h.sample is more complete.
+
 27 May 2003 mipsator
  * record_val() is now functional.
  * use record_val() for almost all tests.

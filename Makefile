@@ -98,6 +98,12 @@ test_pmk: pmk
 	@cat samples/config_sample.h.pmk
 	@echo "----------------------------------------"
 	@echo ""
+	@echo "samples/ac_config.h"
+	@echo "----------------------------------------"
+	@cp samples/ac_config.h.sample samples/ac_config.h
+	@cat samples/ac_config.h
+	@echo "----------------------------------------"
+	@echo ""
 	@echo "-> Running pmk"
 	./pmk -f samples/pmkfile.sample
 	@echo ""
@@ -113,19 +119,31 @@ test_pmk: pmk
 	@cat samples/config_sample.h
 	@echo "----------------------------------------"
 	@echo ""
-	@echo "-> Removing generated files"
-	rm -f samples/Makefile.sample samples/config_sample.h pmk.log pmk.conf
+	@echo "samples/ac_config.h"
+	@echo "----------------------------------------"
+	@cat samples/ac_config.h
+	@echo "----------------------------------------"
 	@echo ""
 	@echo "=> End of test"
 	@echo ""
 
 test_pmksetup: pmksetup
+	@echo ""
+	@echo "=> Testing pmksetup"
 	@echo "Generating local pmk.conf."
 	@echo "(need USER_TEST enabled)"
 	@echo ""
 	./pmksetup -V
 	@echo ""
-	@echo "Done."
+	@echo "=> End of test"
 	@echo ""
 
-test_all: test_pmksetup test_pmk
+test_clean:
+	@echo ""
+	@echo "=> Removing generated files"
+	rm -f samples/Makefile.sample samples/config_sample.h samples/ac_config.h pmk.log pmk.conf
+	@echo ""
+	@echo "=> End of cleaning."
+	@echo ""
+
+test_all: test_pmksetup test_pmk test_clean
