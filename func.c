@@ -1292,7 +1292,7 @@ bool pmk_check_variable(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 				pmk_log("no.\n");
 				if (required == true) {
 					rval = false;
-					errorf("variable value does not match ('%s' ! '%s').", value, varval);
+					errorf("variable value does not match ('%s' != '%s').", value, varval);
 				} else {
 					/* define for template */
 					label_set(pgd->labl, cmd->label, false);
