@@ -411,7 +411,7 @@ char *x86_get_std_cpu_vendor(prsdata *pdata, char *civendor) {
 
 bool x86_get_cpuid_data(x86_cpu_cell *cell) {
 	char		 feat_str[TMP_BUF_LEN] = "";
-	int		 i;
+	unsigned int	 i;
 	uint32_t	 buffer[13],
 			 extlevel;
 
@@ -633,22 +633,35 @@ bool x86_set_cpu_data(prsdata *pdata, x86_cpu_cell *pcell, htable *pht) {
 
 #if defined(ARCH_ALPHA)
 
+alpha_cpu_feature	alpha_cpu_feat[] = {
+	{ALPHA_CPU_MASK_FEAT_BWX,	"BWX"},
+	{ALPHA_CPU_MASK_FEAT_FIX,	"FIX"},
+	{ALPHA_CPU_MASK_FEAT_CIX,	"CIX"},
+	{ALPHA_CPU_MASK_FEAT_MVI,	"MVI"},
+	{ALPHA_CPU_MASK_FEAT_PAT,	"PAT"},
+	{ALPHA_CPU_MASK_FEAT_PMI,	"PMI"},
+};
+int nb_feat = sizeof(alpha_cpu_feat) / sizeof(alpha_cpu_feature);
+
 /* XXX */
 bool alpha_set_cpu_data(prsdata *pdata, htable *pht) {
 	char		 buffer[16],
+			 feat_str[TMP_BUF_LEN] = "",
 			*pstr;
 	htable		*phtbis;
-	unsigned long	 implver;
+	unsigned int	 i;
+	unsigned long	 implver,
+			 amask;
 
-/*debugf("alpha_set_cpu_data() : begin");*/
+/*debugf("alpha_set_cpu_data() : end");*/
 	phtbis = (htable *) seek_key(pdata, LIST_ALPHA_CPU_CLASS);
 	if (phtbis != NULL) {
+		/* get cpu class */
 		implver = alpha_exec_implver();
 /*debugf("alpha_set_cpu_data() : implver = '%u'", implver);*/
 
 		if (snprintf_b(buffer, sizeof(buffer), ALPHA_CPU_CLASS_FMT,
 					implver) == false) {
-			/* XXX err msg ? */
 			return(false);
 		}
 /*debugf("alpha_set_cpu_data() : buffer = '%s'", buffer);*/
@@ -661,9 +674,31 @@ bool alpha_set_cpu_data(prsdata *pdata, htable *pht) {
 						pstr) == HASH_ADD_FAIL) {
 			return(false);
 		}
-/*debugf("alpha_set_cpu_data() : end");*/
+
+		/* get cpu features */
+		amask = alpha_exec_amask();
+
+		/* processing feature mask */
+		for (i = 0 ; i < nb_feat ; i++) {
+			if ((amask & alpha_cpu_feat[i].mask) != 0) {
+				strlcat(feat_str, alpha_cpu_feat[i].descr,
+						sizeof(feat_str)); /* no check */
+				if (strlcat_b(feat_str, " ", sizeof(feat_str)) == false)
+					return(false);
+			}
+		}
+
+		/* save feature string */
+		if (hash_update_dup(pht, PMKCONF_HW_ALPHA_CPU_FEATURES,
+				feat_str) == HASH_ADD_FAIL) {
+			return(false);
+		}
+
+/*debugf("alpha_set_cpu_data() : amask = %x", amask);*/
 	}
 
+
+/*debugf("alpha_set_cpu_data() : end");*/
 	return(true);		
 }
 

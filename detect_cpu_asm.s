@@ -227,4 +227,16 @@ $alpha_exec_implver..ng:
         ret $31,($26),1
         .end alpha_exec_implver
 
+
+        .globl alpha_exec_amask
+        .ent alpha_exec_amask
+alpha_exec_amask:
+        .frame $30,0,$26,0
+$alpha_exec_amask..ng:
+        .prologue 0
+        lda $0,-1
+        amask $0,$0
+        ret $31,($26),1
+        .end alpha_exec_amask
+
 #endif /* ARCH_ALPHA */
