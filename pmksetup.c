@@ -78,7 +78,8 @@ int	nbpredef = sizeof(predef) / sizeof(hpair);
  */
 int main(int argc, char *argv[]) {
 	FILE		*config;
-	bool		 process_clopts = false;
+	bool		 process_clopts = false,
+			 cfg_backup = false;
 	char		*pstr;
 	int		 ch,
 			 error = 0;
@@ -203,14 +204,10 @@ int main(int argc, char *argv[]) {
 	/* parse configuration file */
 	config = fopen(PREMAKE_CONFIG_PATH, "r");
 	if (config != NULL) {
+		/* switch backup flag */
+		cfg_backup = true;
+
 		printf("==> Configuration file found: %s\n", PREMAKE_CONFIG_PATH);
-		printf("==> Backing up configuration file: %s\n", PREMAKE_CONFIG_PATH_BAK);
-		if (rename(PREMAKE_CONFIG_PATH,PREMAKE_CONFIG_PATH_BAK) != 0) {
-			fclose(config);
-			errorf("configuration file backup failed: %s.", strerror(errno));
-			exit(EXIT_FAILURE);
-		}
-				
 		if (parse_pmkconf(config, ht, PRS_PMKCONF_SEP, check_opt) == false) {
 			fclose(config);
 			errorf("parsing failed.");
@@ -219,7 +216,7 @@ int main(int argc, char *argv[]) {
 			fclose(config);
 		}
 	} else {
-		printf("==> Configuration file not found, generating one...\n");
+		printf("==> Configuration file not found.\n");
 	}
 
 	printf("==> Merging remaining data...\n");	
@@ -231,10 +228,20 @@ int main(int argc, char *argv[]) {
 	if (close_tmp_config() == false)
 		exit(EXIT_FAILURE);
 
-	if (error == 0)
+	if (cfg_backup == true) {
+		printf("==> Backing up configuration file: %s\n", PREMAKE_CONFIG_PATH_BAK);
+		if (rename(PREMAKE_CONFIG_PATH,PREMAKE_CONFIG_PATH_BAK) != 0) {
+			errorf("configuration file backup failed: %s.", strerror(errno));
+			error = -1;
+		}
+	}
+				
+	if (error == 0) {
 		/* copying the temporary config to the system one */
+		printf("==> Saving configuration file: %s\n", PREMAKE_CONFIG_PATH);
 		if (copy_config(sfn, PREMAKE_CONFIG_PATH) == false)
 			exit(EXIT_FAILURE);
+	}
 
 #ifdef PMKSETUP_DEBUG
 	debugf("%s has not been deleted!", sfn);
@@ -242,14 +249,14 @@ int main(int argc, char *argv[]) {
 	if (unlink(sfn) == -1) {
 		errorf("cannot remove temporary file: '%s' : %s.",
 			sfn, strerror(errno));
-		exit(EXIT_FAILURE);	
+		error = -1;	
 	}
 #endif	/* PMKSETUP_DEBUG */
 
 	if (error != 0) {
-		errorf("returned code '%d' during parsing.", error);
-		exit(error);
+		exit(EXIT_FAILURE);	
 	}
+
 	return(0);
 }
 
