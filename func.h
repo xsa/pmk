@@ -42,7 +42,7 @@
 
 typedef struct {
 	char	kw[MAX_CMD_NAME_LEN];
-	bool	(*fnp)(pmkcmd *, htable *);
+	bool	(*fnp)(pmkcmd *, htable *, pmkdata *);
 } cmdkw;
 
 
@@ -51,12 +51,12 @@ bool check_version(char *, char *);
 
 bool str_to_dynary(char *, char, dynary *);
 
-bool pmk_define(pmkcmd *, htable *);
-bool pmk_target(pmkcmd *, htable *);
-bool pmk_check_binary(pmkcmd *, htable *);
-bool pmk_check_include(pmkcmd *, htable *);
-bool pmk_check_lib(pmkcmd *, htable *);
-bool pmk_check_config(pmkcmd *, htable *);
+bool pmk_define(pmkcmd *, htable *, pmkdata *);
+bool pmk_target(pmkcmd *, htable *, pmkdata *);
+bool pmk_check_binary(pmkcmd *, htable *, pmkdata *);
+bool pmk_check_include(pmkcmd *, htable *, pmkdata *);
+bool pmk_check_lib(pmkcmd *, htable *, pmkdata *);
+bool pmk_check_config(pmkcmd *, htable *, pmkdata *);
 
 
 #endif /* _PMK_FUNC_H_ */

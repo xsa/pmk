@@ -88,6 +88,4 @@ typedef struct {
 } pmkdata;
 
 
-pmkdata gdata;
-
 #endif /* _PMK_H_ */
