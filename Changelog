@@ -1,3 +1,12 @@
+21 Jun 2003 mipsator
+ * added pathtools.c and pathtools.h files.
+ * moved relpath into pathtools.
+ * added chkpath into pathtools.
+ * added path_test.c in test directory.
+
+18 Jun 2003 mipsator
+ * added relpath() to common.
+
 11 Jun 2003 mipsator
  * added srcdir in gdata structure.
  * modified hash_append() to avoid adding separator to an empty string.
