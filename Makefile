@@ -41,7 +41,7 @@ $(PREMAKE): $(P_OBJS)
 $(SETUP): $(S_OBJS)
 	$(CC) -o $(SETUP) $(LDFLAGS) $(S_OBJS)
 
-install:
+install: pmk pmksetup
 	$(INSTALL) -m 755 $(PREMAKE) $(PREFIX)/bin/
 	$(INSTALL) -m 755 $(SETUP) $(PREFIX)/sbin/
 	$(INSTALL) -d $(DATADIR)
@@ -55,3 +55,7 @@ deinstall:
 	rm -f $(PREFIX)/bin/$(PREMAKE)
 	rm -f $(PREFIX)/sbin/$(SETUP)
 	rm -rf $(PREFIX)/share/$(PREMAKE)
+
+test_pmk: pmk
+	@echo "Testing pmk with sample file"
+	pmk -f samples/pmkfile.sample

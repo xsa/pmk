@@ -73,7 +73,17 @@ bool pmk_define(pmkcmd *cmd, htable *ht) {
 */
 
 bool pmk_check_binary(pmkcmd *cmd, htable *ht) {
+	char	*filename;
+	bool	required = TRUE;
+
 	pmk_log("* Checking binary [%s]\n", cmd->label);
+
+	required = check_bool_str(hash_get(ht, "REQUIRED"));
+
+	filename = hash_get(ht, "FILENAME");
+
+	pmk_log("\tFound binary '%s' : ", filename);
+	pmk_log("XXX.\n");
 	return(TRUE);
 }
 
@@ -136,6 +146,18 @@ bool pmk_check_include(pmkcmd *cmd, htable *ht) {
 */
 
 bool pmk_check_lib(pmkcmd *cmd, htable *ht) {
+	char	*libname,
+		*libvers;
+	bool	required = TRUE;
+
 	pmk_log("* Checking library [%s]\n", cmd->label);
+
+	required = check_bool_str(hash_get(ht, "REQUIRED"));
+
+	libname = hash_get(ht, "LIBNAME");
+	libvers = hash_get(ht, "VERSION");
+
+	pmk_log("\tFound library '%s %s' : ", libname, libvers);
+	pmk_log("XXX.\n");
 	return(TRUE);
 }
