@@ -34,9 +34,11 @@
 
 #include <sys/param.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
+#include <unistd.h>
 
-#include "pmk.h"
+#include "premake.h"
 
 /*
 	put env variable in an option
@@ -58,4 +60,29 @@ bool env_to_opt(char *env_name, pmkcmdopt *opt) {
 		
 	}
 	return(rval);
+}
+
+/*
+	get_make_var
+*/
+
+void get_make_var(char *varname) {
+	FILE	*tfd;
+	char	tf[256] = "/tmp/pmk_tst.XXXXXXXX",
+		varstr[256],
+		result[256];
+	int	fd = -1;
+
+	/* XXX mktemp stuff */
+
+	snprintf(varstr, 256, "/usr/bin/make -V %s > %s", varname, tf);
+	system(varstr);
+
+	tfd = fopen(tf, "r");
+	fgets(result, 256, tfd);
+	fclose(tfd);
+
+//	unlink(tf);
+
+	printf("%s => %s\n", varname, result);
 }

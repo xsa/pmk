@@ -40,7 +40,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-#include "pmk.h"
+#include "premake.h"
 
 
 #define PMKSETUP_DEBUG

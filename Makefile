@@ -4,7 +4,8 @@ CC?=		cc
 INSTALL?=	install
 
 CFLAGS?=
-CFLAGS+=	-Wall -Werror
+CFLAGS+=	-Wall
+#CFLAGS+=	-Werror
 #CFLAGS+=	-DSYSCONFDIR=\"/etc/\"
 
 LDFLAGS?=
@@ -19,7 +20,7 @@ DATADIR=	$(PREFIX)/share/$(PREMAKE)
 SAMPLE=		$(PREMAKE)file.sample
 CONFIG=		$(PREMAKE).conf.sample
 
-P_OBJS=		pmk.o common.o
+P_OBJS=		common.o hash.o func.o pmk.o
 S_OBJS=		$(SETUP).o
 
 all: $(PREMAKE) $(SETUP)
