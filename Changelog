@@ -2,6 +2,7 @@
  * added parse_clopt() to handle line command options.
  * added support for addition and removal of variable in pmksetup.
  * fixed command line option support in pmk.
+ * updated pmksetup.8 man page about -r and -u options.
 
 10 Feb 2004 mipsator
  * added 2 sections to the tutorial.
