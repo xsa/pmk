@@ -51,18 +51,19 @@
 
 
 prskw	kw_pmkfile[] = {
-		{"DEFINE",		PMK_TOK_DEFINE, PRS_KW_NODE, PMK_TOK_SETVAR},
-		{"SETTINGS",		PMK_TOK_SETNGS, PRS_KW_NODE, PMK_TOK_SETPRM},
-		{"IF",			PMK_TOK_IFCOND,	PRS_KW_NODE, PRS_TOK_NULL},
-		{"SWITCHES",		PMK_TOK_SWITCH, PRS_KW_CELL, PRS_TOK_NULL},
-		{"CHECK_BINARY",	PMK_TOK_CHKBIN, PRS_KW_CELL, PRS_TOK_NULL},
-		{"CHECK_HEADER",	PMK_TOK_CHKINC, PRS_KW_CELL, PRS_TOK_NULL},
-		{"CHECK_LIB",		PMK_TOK_CHKLIB, PRS_KW_CELL, PRS_TOK_NULL},
-		{"CHECK_CONFIG",	PMK_TOK_CHKCFG, PRS_KW_CELL, PRS_TOK_NULL},
-		{"CHECK_PKG_CONFIG",	PMK_TOK_CHKPKG, PRS_KW_CELL, PRS_TOK_NULL},
-		{"CHECK_TYPE",		PMK_TOK_CHKTYP, PRS_KW_CELL, PRS_TOK_NULL},
-		{"CHECK_VARIABLE",	PMK_TOK_CHKVAR, PRS_KW_CELL, PRS_TOK_NULL},
-		{"CHECK_INCLUDE",	PMK_TOK_CHKINC, PRS_KW_CELL, PRS_TOK_NULL}
+	{"DEFINE",		PMK_TOK_DEFINE,	PRS_KW_NODE, PMK_TOK_SETVAR},
+	{"SETTINGS",		PMK_TOK_SETNGS,	PRS_KW_NODE, PMK_TOK_SETPRM},
+	{"IF",			PMK_TOK_IFCOND,	PRS_KW_NODE, PRS_TOK_NULL},
+	{"SWITCHES",		PMK_TOK_SWITCH,	PRS_KW_CELL, PRS_TOK_NULL},
+	{"CHECK_BINARY",	PMK_TOK_CHKBIN,	PRS_KW_CELL, PRS_TOK_NULL},
+	{"CHECK_HEADER",	PMK_TOK_CHKINC,	PRS_KW_CELL, PRS_TOK_NULL},
+	{"CHECK_LIB",		PMK_TOK_CHKLIB,	PRS_KW_CELL, PRS_TOK_NULL},
+	{"CHECK_CONFIG",	PMK_TOK_CHKCFG,	PRS_KW_CELL, PRS_TOK_NULL},
+	{"CHECK_PKG_CONFIG",	PMK_TOK_CHKPKG,	PRS_KW_CELL, PRS_TOK_NULL},
+	{"CHECK_TYPE",		PMK_TOK_CHKTYP,	PRS_KW_CELL, PRS_TOK_NULL},
+	{"CHECK_VARIABLE",	PMK_TOK_CHKVAR,	PRS_KW_CELL, PRS_TOK_NULL},
+	{"CHECK_INCLUDE",	PMK_TOK_CHKINC,	PRS_KW_CELL, PRS_TOK_NULL}, /* XXX to be removed */
+	{"BUILD_SHLIB_NAME",	PMK_TOK_BLDSLN,	PRS_KW_CELL, PRS_TOK_NULL}
 };
 
 size_t	nbkwpf = sizeof(kw_pmkfile) / sizeof(prskw);
@@ -114,6 +115,9 @@ bool func_wrapper(prscell *pcell, pmkdata *pgd) {
 			break;
 		case PMK_TOK_CHKVAR :
 			rval = pmk_check_variable(&cmd, pcell->data, pgd);
+			break;
+		case PMK_TOK_BLDSLN :
+			rval = pmk_build_shlib_name(&cmd, pcell->data, pgd);
 			break;
 		default :
 			errorf("Unknow token %d", cmd.token);
@@ -1312,6 +1316,121 @@ bool pmk_check_variable(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 
 
 /*
+	build name of a shared library
+*/
+
+/*#define SHLIB_DEBUG 1*/
+
+bool pmk_build_shlib_name(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
+	char	*variable,
+		*versvar,
+		*pstr,
+		*value;
+
+	pmk_log("\n* Building shared library name\n");
+
+	pmk_log("\tShared library support : ");
+
+	if (pgd->slht == NULL) {
+		pmk_log("no.\n");
+		errorf("Your system is not supported yet.");
+		return(false); /* XXX REQUIRED option ? */
+	} else {
+		pmk_log("yes.\n");
+	}
+
+	pstr = po_get_str(hash_get(ht, "NAME"));
+	if (pstr != NULL) {
+#ifdef SHLIB_DEBUG
+debugf("pstr(name) = '%s'", pstr);
+#endif
+		value = process_string(pstr, pgd->htab);
+#ifdef SHLIB_DEBUG
+debugf("value = '%s'", value);
+#endif
+		hash_update(pgd->slht, "SL_LIBNAME", value);
+	}
+
+	pstr = po_get_str(hash_get(ht, "MAJOR"));
+	if (pstr != NULL) {
+#ifdef SHLIB_DEBUG
+debugf("pstr(major) = '%s'", pstr);
+#endif
+		value = process_string(pstr, pgd->htab);
+#ifdef SHLIB_DEBUG
+debugf("value = '%s'", value);
+#endif
+		hash_update(pgd->slht, "SL_MAJOR", value); /* no dup */
+	}
+
+	pstr = po_get_str(hash_get(ht, "MINOR"));
+	if (pstr != NULL) {
+#ifdef SHLIB_DEBUG
+debugf("pstr(minor) = '%s'", pstr);
+#endif
+		value = process_string(pstr, pgd->htab);
+#ifdef SHLIB_DEBUG
+debugf("value = '%s'", value);
+#endif
+		hash_update(pgd->slht, "SL_MINOR", value); /* no dup */
+	}
+
+	variable = po_get_str(hash_get(ht, "VARIABLE"));
+	if (variable != NULL) {
+		pstr = hash_get(pgd->slht, "SL_NAME");
+#ifdef SHLIB_DEBUG
+debugf("pstr(sl_name) = '%s'", pstr);
+#endif
+		value = process_string(pstr, pgd->slht);
+#ifdef SHLIB_DEBUG
+debugf("value = '%s'", value);
+#endif
+		/*hash_update_dup(pgd->slht, "SL_NAME", value);*/
+
+		/* no dup */
+		if (hash_update(pgd->htab, variable, value) == HASH_ADD_FAIL) {
+			/* XXX err msg ? */
+			return(false);
+		}
+		pmk_log("\tSetting %s to '%s'\n", variable, value);
+#ifdef SHLIB_DEBUG
+debugf("save in '%s'", variable);
+#endif
+	} else {
+#ifdef SHLIB_DEBUG
+debugf("variable not set");
+#endif
+	}
+
+	versvar = po_get_str(hash_get(ht, "VERSVAR"));
+	if (versvar != NULL) {
+		pstr = hash_get(pgd->slht, "SL_NAME_VERS");
+#ifdef SHLIB_DEBUG
+debugf("pstr(sl_name_vers) = '%s'", pstr);
+#endif
+		value = process_string(pstr, pgd->slht);
+#ifdef SHLIB_DEBUG
+debugf("value = '%s'", value);
+#endif
+		if (hash_update(pgd->htab, versvar, value) == HASH_ADD_FAIL) {
+			/* XXX err msg ? */
+			return(false);
+		}
+		pmk_log("\tSetting %s to '%s'\n", versvar, value);
+#ifdef SHLIB_DEBUG
+debugf("save in '%s'", versvar);
+#endif
+	} else {
+#ifdef SHLIB_DEBUG
+debugf("versvar not set");
+#endif
+	}
+
+	return(true);
+}
+
+
+/*
 	option functions
 	
 	these functions have the following parameters:
@@ -1332,17 +1451,20 @@ bool pmk_check_variable(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 bool pmk_set_parameter(pmkcmd *cmd, prsopt *popt, pmkdata *pgd) {
 	bool		 rval = false;
 	char		*pstr,
+			/**osname,*/
 			*ccpath;
 	comp_cell	*pcell;
 	comp_data	*cdata;
 	comp_info	 cinfo;
+	/*|+comp_sys	*csys,+|*/
+	/*                *tsys;*/
 	dynary		*da;
 	int		 i = 0,
 			 n;
 	lgdata		*pld;
 
 	/* gnu autoconf compatibility */
-	if (strncmp(popt->key, "AC_COMPAT", sizeof(popt->key)) == 0) {
+	if (strncmp(popt->key, KW_SETNGS_ACCOMP, sizeof(popt->key)) == 0) {
 		pmk_log("\tSetting autoconf compatibility :\n");
 
 		/* XXX must check if valid
@@ -1371,7 +1493,7 @@ bool pmk_set_parameter(pmkcmd *cmd, prsopt *popt, pmkdata *pgd) {
 	}
 
 	/* global language */
-	if (strncmp(popt->key, "LANG", sizeof(popt->key)) == 0) {
+	if (strncmp(popt->key, KW_SETNGS_GLANG, sizeof(popt->key)) == 0) {
 		pmk_log("\tSetting global language :\n");
 
 		/* set global language */
@@ -1393,7 +1515,7 @@ bool pmk_set_parameter(pmkcmd *cmd, prsopt *popt, pmkdata *pgd) {
 	}
 
 	/* set target files */
-	if (strncmp(popt->key, "TARGET", sizeof(popt->key)) == 0) {
+	if (strncmp(popt->key, KW_SETNGS_TARGET, sizeof(popt->key)) == 0) {
 		pmk_log("\tCollecting targets :\n");
 
 		da = po_get_list(popt->value);
@@ -1415,7 +1537,7 @@ bool pmk_set_parameter(pmkcmd *cmd, prsopt *popt, pmkdata *pgd) {
 	}
 
 	/* set target files */
-	if (strncmp(popt->key, "DETECT", sizeof(popt->key)) == 0) {
+	if (strncmp(popt->key, KW_SETNGS_CCDTCT, sizeof(popt->key)) == 0) {
 		pmk_log("\tDetecting compilers :\n");
 
 		da = po_get_list(popt->value);
@@ -1425,7 +1547,7 @@ bool pmk_set_parameter(pmkcmd *cmd, prsopt *popt, pmkdata *pgd) {
 		}
 
 		pmk_log("\t\tGathering data for compiler detection.\n");
-		cdata = parse_comp_file(PMKCOMP_DATA);
+		cdata = parse_comp_file_adv(PMKCOMP_DATA, pgd->htab);
 		if (cdata == NULL) {
 			return(false);
 		}
@@ -1469,6 +1591,10 @@ bool pmk_set_parameter(pmkcmd *cmd, prsopt *popt, pmkdata *pgd) {
 
 			}
 		}
+
+		/* move shared lib hash table into global structure */
+		pgd->slht = cdata->sht;
+		cdata->sht = NULL;
 
 		/* clean cdata */
 		compdata_destroy(cdata);

@@ -1,3 +1,7 @@
+04 Feb 2004 mipsator
+ * improved process_string() to be recursive.
+ * imported experimental shared lib support.
+
 27 Jan 2004 mipsator
  * fixed wrong check of init_var().
 
