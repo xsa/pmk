@@ -134,7 +134,10 @@ bool get_make_var(char *varname, char *result, size_t rsize) {
 	char	 mfn[MAXPATHLEN],
 		 varstr[TMP_BUF_LEN];
 
-	strlcpy(mfn, TMP_MK_FILE, sizeof(mfn)); /* XXX check ? */
+	if (strlcpy_b(mfn, TMP_MK_FILE, sizeof(mfn)) == false) {
+		errorf("failed to create temporary file");
+		return(false);
+	}
 
 	mfp = tmps_open(TMP_MK_FILE, "w", mfn, sizeof(mfn), strlen(MK_FILE_EXT));
 	if (mfp != NULL) {

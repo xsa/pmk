@@ -69,6 +69,9 @@
 
 #define	PMK_ARCH_STR_UNKNOWN	"unknown"
 
+#define ARCH_NB_MAX		32
+
+
 #define PMKCONF_HW_PPC_CPU_ALTIVEC	"HW_PPC_CPU_ALTIVEC"	/* powerpc altivec feature */
 
 

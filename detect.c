@@ -427,8 +427,11 @@ bool detect_compiler(char *cpath, char *blog, comp_data *pcd, comp_info *cinfo) 
 		return(false);
 	}
 	/* build compiler command */
-	snprintf(cfgcmd, sizeof(cfgcmd), CC_TEST_FORMAT,
-		cpath, CC_TEST_BIN, ftmp, blog); /* XXX check */
+	if (snprintf_b(cfgcmd, sizeof(cfgcmd), CC_TEST_FORMAT,
+				cpath, CC_TEST_BIN, ftmp, blog) == false) {
+		errorf("failed to build compiler command line");
+		return(false);
+	}
 
 	/* get result */
 	r = system(cfgcmd);
