@@ -33,12 +33,12 @@ ADD_CPU_FAMILY {
 
 ADD_CPU_FAMILY {
 	NAME = "sparc_32"
-	LIST = ("sparc")
+	LIST = ("sparc","sun4c","sun4d","sun4m")
 }
 
 ADD_CPU_FAMILY {
 	NAME = "sparc_64"
-	LIST = ("sparc64")
+	LIST = ("sparc64","sun4u")
 }
 
 #ADD_CPU_FAMILY {
