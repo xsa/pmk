@@ -17,7 +17,7 @@
 #include "../parse.h"
 #include "../pmk_obj.h"
 
-int main() {
+int main(void) {
 	FILE		*fp;
 	comp_data	*cdata;
 

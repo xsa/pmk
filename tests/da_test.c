@@ -6,6 +6,7 @@
 
 
 #include <stdio.h>
+#include <stdlib.h>
 
 #include "../compat/compat.h"
 #include "../compat/pmk_string.h"
@@ -25,7 +26,7 @@ char	*tval[10] = {
 		"nine"
 };
 
-int main() {
+int main(void) {
 	char	*p;
 	dynary	*da;
 	int	i;

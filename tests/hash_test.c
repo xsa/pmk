@@ -22,7 +22,7 @@ hpair	testab[] = {
 			{ "test3", "test value 3"}
 		};
 
-int main() {
+int main(void) {
 	int	i,
 		n;
 	char	tstr[256],
