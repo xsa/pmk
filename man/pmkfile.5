@@ -23,7 +23,7 @@ is using pseudo types like the following :
 .It Cm bool
 The classical boolean type with TRUE and FALSE values.
 .Pp
-Examples :
+Examples:
 .Bd -literal -offset -indent
  TRUE
  FALSE
@@ -32,7 +32,7 @@ Examples :
 .It Cm identifier
 An identifier is a string of alphanumerical and underscores characters.
 .Pp
-Examples :
+Examples:
 .Bd -literal -offset -indent
  REQUIRED
  a_label 
@@ -43,7 +43,7 @@ Examples :
 This means quoted string which can contain a set of characters delimited
 by quotation marks.
 .Pp
-Examples :
+Examples:
 .Bd -literal -offset -indent
  "simple quoted string"
  "string that contain \\"quotes\\" backslashed"
@@ -56,7 +56,7 @@ Multiple objects are separated with a comma.
 Blanks are currently not allowed beside commas, this means that you can
 find them only in a quoted string of the list.
 .Pp
-Examples :
+Examples:
 .Bd -literal -offset -indent
  ("only_one_string")
  ("added a boolean",TRUE)
@@ -94,7 +94,7 @@ The key name is of identifier type.
 The key value type can be 'bool', 'quoted' or 'list'.
 The right type will depend on the key name (see further).
 .Pp
-Example :
+Example:
 .Bd -literal -offset -indent
 CHECK_INCLUDE(header_sys_param) {
  # following options use different uses of blank characters
@@ -114,7 +114,7 @@ The following commands have no label.
 .It Cm SETTINGS
 This command sets pmk parameters. 
 .Pp
-Arguments :
+Arguments:
 .Bd -literal -offset -indent
 AC_COMPAT : type is 'quoted', enable autoconf compatibility (empty string or filename).
 LANG : type is 'quoted', global default language.
@@ -122,7 +122,7 @@ TARGET : type is 'list', list of target's filenames.
 DETECT : type is 'list', list of compilers to detect (CC and/or CXX).
 .Ed
 .Pp
-Example :
+Example:
 .Bd -literal -offset -indent
 SETTINGS {
  AC_COMPAT="config.h"
@@ -135,12 +135,12 @@ SETTINGS {
 .It Cm DEFINE
 This command permits to define variables.
 .Pp
-Arguments :
+Arguments:
 .Bd -literal -offset
 Those are the variables to be defined (quote data type only).
 .Ed
 .Pp
-Example :
+Example:
 .Bd -literal -offset -indent
 DEFINE {
  PACKAGE="my_prog"
@@ -151,9 +151,9 @@ DEFINE {
 .It Cm SWITCHES
 This command is setting dependency switches (see further DEPEND definition).
 .Pp
-Arguments :
+Arguments:
 .Pp
-Example :
+Example:
 .Bd -literal -offset -indent
 SWITCHES {
  use_curses=TRUE
@@ -178,7 +178,7 @@ A dependency is a label or a switch name.
 The value of each dependencie can be negated by adding a leading '!' sign.
 If at least one of the dependencies is false then the check will be disabled.
 .Pp
-Example :
+Example:
 .Bd -literal -offset -indent
 DEPEND = ("header_gtk","!header_qt")
 .Ed
@@ -200,7 +200,7 @@ Here the list of commands :
 .It Cm CHECK_BINARY
 Check if a binary is in the path.
 .Pp
-Arguments :
+Arguments:
 .Bd -literal -offset -indent
 REQUIRED, DEPEND.
 NAME : type is 'quoted', name of the binary.
@@ -276,9 +276,9 @@ VALUE : type is 'quoted', value to check with the variable, optional.
 It contains other commands that will be executed only if the given
 expression is true.
 .Pp
-Arguments :
+Arguments:
 .Pp
-Example :
+Example:
 .Bd -literal -offset -indent
 IF(header_gtk) {
 	DEFINE {
@@ -290,9 +290,9 @@ IF(header_gtk) {
 It contains other commands that will be executed only if the given
 expression is false.
 .Pp
-Arguments :
+Arguments:
 .Pp
-Example :
+Example:
 .Bd -literal -offset -indent
 ELSE(header_glib) {
 	DEFINE {
@@ -317,7 +317,7 @@ VERSION_MAJ : type is 'quoted', variable name to store library name with major v
 VERSION_FULL : type is 'quoted', variable name to store library name with full version, optional.
 .Ed
 .Pp
-Example :
+Example:
 .Bd -literal -offset -indent
 BUILD_SHLIB_NAME {
 	NAME = "test"
