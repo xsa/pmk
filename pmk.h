@@ -43,7 +43,7 @@
 
 
 /* pmk specific version */
-#define PREMAKE_SUBVER_PMK	"6"
+#define PREMAKE_SUBVER_PMK	"7"
 
 /* prefix character used for commands */
 #define PMK_CHAR_COMMAND	'.'

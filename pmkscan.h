@@ -39,7 +39,7 @@
 #include "hash.h"
 
 /* pmkscan specific version */
-#define PREMAKE_SUBVER_PMKSCAN	"4"
+#define PREMAKE_SUBVER_PMKSCAN	"5"
 
 #ifndef DATADIR
 #define DATADIR		"/usr/local/share/pmk/"

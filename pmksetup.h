@@ -41,7 +41,7 @@
 
 
 /* pmksetup specific version */
-#define PREMAKE_SUBVER_PMKSETUP	"4"
+#define PREMAKE_SUBVER_PMKSETUP	"5"
 
 #define PREMAKE_CONFIG_TMP	"/tmp/pmk.XXXXXXXX"
 
