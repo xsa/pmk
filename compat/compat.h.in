@@ -55,4 +55,7 @@
 /* libgen.h (dirname and filename) */
 @DEF__LIBGEN_H@
 
+/* isblank */
+@DEF__ISBLANK@
+
 #endif /* _PMK_COMPAT_H_ */

@@ -31,10 +31,10 @@
  */
 
 
-#include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "compat/pmk_ctype.h"
 #include "compat/pmk_stdbool.h"
 #include "compat/pmk_string.h"
 

@@ -168,6 +168,12 @@ check_include stdbool.h
 
 check_include libgen.h
 
+#
+# isblank check
+#
+
+check_include_function ctype.h isblank
+
 
 #
 # end
