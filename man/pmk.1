@@ -12,11 +12,11 @@
 .Nm
 .Bk -words
 .Op Fl hlv
-.Op Fl b Ar path 
+.Op Fl b Ar path
 .Op Fl d Ar switch_disable_list
 .Op Fl e Ar switch_enable_list
 .Op Fl f Ar file
-.Op Fl o Ar file 
+.Op Fl o Ar file
 .Op Ar options
 .Ek
 
@@ -43,15 +43,18 @@ Enable check build log.
 .It Fl o Ar file
 Override pmk.conf data with the content of the given file.
 .It Fl v
-Display the version number. 
+Display the version number.
 .El
 
 .Sh FILES
-.Bl -tag -width Ds
+.Bl -tag -width "/etc/pmk/pmk.conf" -compact
 .It Pa pmkfile
-Specification file.
+.Xr pmk 1
+specification file.
 .It Pa /etc/pmk/pmk.conf
-Default location of the configuration file.
+default
+.Xr pmk 1
+configuration file
 .El
 
 .Sh EXAMPLES
@@ -61,7 +64,7 @@ Few examples of pmk command line arguments :
 
  pmk -b src -d use_gtk,use_qt
 
- pmk -f pmk/pmkfile -e use_curses -o pmk/pmkovr 
+ pmk -f pmk/pmkfile -e use_curses -o pmk/pmkovr
 .Ed
 
 .Sh SEE ALSO
@@ -75,7 +78,7 @@ Few examples of pmk command line arguments :
 .An Damien Couderc .
 
 .Sh HISTORY
-The idea to replace configure script was existing since a long time. 
+The idea to replace configure script was existing since a long time.
 But the projet was initiated in the begining of March 2003.
 
 .Sh BUGS

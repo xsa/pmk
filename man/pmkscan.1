@@ -11,7 +11,7 @@
 .Sh SYNOPSIS
 .Nm
 .Bk -words
-.Op Fl b Ar path 
+.Op Fl b Ar path
 .Ek
 
 .Sh DESCRIPTION
@@ -28,15 +28,19 @@ This is optional, default path is the current working directory.
 .It Fl h
 Display usage.
 .It Fl v
-Display the version number. 
+Display the version number.
 .El
 
 .Sh FILES
-.Bl -tag -width Ds
+.Bl -tag -width "/etc/pmk" -compact
+.It Pa pmkfile.scan
+default
+.Xr pmkscan 1
+resulting template
 .It Pa pmkscan.dat
-Pmkscan database.
-.It Pa pmkfile.scan 
-Resulting template.
+default
+.Xr pmkscan 1
+database.
 .El
 
 .Sh SEE ALSO
