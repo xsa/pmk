@@ -1,3 +1,7 @@
+27 Aug 2004 mipsator
+ * fixed bugs in parse_pmkconf().
+ * added more debug stuff.
+
 21 Aug 2004 mipsator
  * added compiler flags in sample bin makefiles.
 
