@@ -40,9 +40,9 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include <unistd.h>
 
+#include "compat/pmk_string.h"
 #include "common.h"
 #include "dynarray.h"
 #include "pmksetup.h"
