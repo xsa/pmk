@@ -1,5 +1,5 @@
 .INCLUDES
-sys/param.h=test_for_sys_param
+sys/param.h=.CHECK_INCLUDE(sys_param_h),REQUIRED=FALSE,INCLUDE=sys/param.h,.END
 dirent.h=test_dirent
 stdbool.h=test_stdbool
 .END

@@ -183,7 +183,7 @@ void write_new_data(htable *ht) {
 
 	/* processing remaining keys */
 	for(i = 0 ; i < n ; i++) {
-		val = hash_get(ht, keys[i]);
+		val = (char *)hash_get(ht, keys[i]);
 		fprintf(sfp, "%s%c%s\n", keys[i], CHAR_ASSIGN_UPDATE, val);
 	}
 
@@ -248,7 +248,7 @@ int parse_conf(FILE *config, htable *ht) {
 				break;
 			default :
 				if (parse_conf_line(line, linenum, &options) == 0) {
-					if ((v = hash_get(ht, options.key)) != NULL)
+					if ((v = (char *)hash_get(ht, options.key)) != NULL)
 						/* checking the VAR<->VALUE separator */
 						switch (options.opchar) {
 							case CHAR_ASSIGN_UPDATE :
@@ -345,15 +345,15 @@ int get_env_vars(htable *ht) {
 		return(-1);
 	}
 
-	if (hash_add(ht, PREMAKE_KEY_OSNAME, utsname.sysname) == HASH_ADD_FAIL)
+	if (hash_add(ht, PREMAKE_KEY_OSNAME, strdup(utsname.sysname)) == HASH_ADD_FAIL)
 		return(-1);
 		verbosef("Setting '%s' => '%s'", PREMAKE_KEY_OSNAME, utsname.sysname);
 
-	if (hash_add(ht, PREMAKE_KEY_OSVERS, utsname.release) == HASH_ADD_FAIL)
+	if (hash_add(ht, PREMAKE_KEY_OSVERS, strdup(utsname.release)) == HASH_ADD_FAIL)
 		return(-1);
 		verbosef("Setting '%s' => '%s'", PREMAKE_KEY_OSVERS, utsname.release);	
 	
-	if (hash_add(ht, PREMAKE_KEY_OSARCH, utsname.machine) == HASH_ADD_FAIL)
+	if (hash_add(ht, PREMAKE_KEY_OSARCH, strdup(utsname.machine)) == HASH_ADD_FAIL)
 		return(-1);
 		verbosef("Setting '%s' => '%s'", PREMAKE_KEY_OSARCH, utsname.machine);
 
@@ -370,7 +370,7 @@ int get_env_vars(htable *ht) {
 	 */
 	char_replace(bin_path, PATH_STR_DELIMITER, CHAR_LIST_SEPARATOR);
 
-	if (hash_add(ht, PREMAKE_KEY_BINPATH, bin_path) == HASH_ADD_FAIL)
+	if (hash_add(ht, PREMAKE_KEY_BINPATH, strdup(bin_path)) == HASH_ADD_FAIL)
 		return(-1);
 	verbosef("Setting '%s' => '%s'", PREMAKE_KEY_BINPATH, bin_path);
 
@@ -400,7 +400,7 @@ int get_binaries(htable *ht) {
 		return(-1);	
 	}
 
-	if (str_to_dynary(hash_get(ht, PREMAKE_KEY_BINPATH), 
+	if (str_to_dynary((char *)hash_get(ht, PREMAKE_KEY_BINPATH), 
 			CHAR_LIST_SEPARATOR, stpath) == 0) {
 		errorf("could not split the PATH environment variable correctly.");
 		da_destroy(stpath);
@@ -408,14 +408,14 @@ int get_binaries(htable *ht) {
 	}
 
 	if (find_file(stpath, "cc", fbin, sizeof(fbin)) == 1) {
-		if (hash_add(ht, "BIN_CC", fbin) == HASH_ADD_FAIL) {
+		if (hash_add(ht, "BIN_CC", strdup(fbin)) == HASH_ADD_FAIL) {
 			da_destroy(stpath);
 			return(-1);
 		}
 		verbosef("Setting '%s' => '%s'", "BIN_CC", fbin);
 	} else {
 		if (find_file(stpath, "gcc", fbin, sizeof(fbin)) == 1) {
-			if (hash_add(ht, "BIN_CC", fbin) == HASH_ADD_FAIL) {
+			if (hash_add(ht, "BIN_CC", strdup(fbin)) == HASH_ADD_FAIL) {
 				da_destroy(stpath);
 				return(-1);
 			}
@@ -429,7 +429,7 @@ int get_binaries(htable *ht) {
 
 	for (i = 0; i < MAXBINS; i++) {
 		if (find_file(stpath, binaries[i][0], fbin, sizeof(fbin)) == 1) {
-			if (hash_add(ht, binaries[i][1], fbin) == HASH_ADD_FAIL) {
+			if (hash_add(ht, binaries[i][1], strdup(fbin)) == HASH_ADD_FAIL) {
 				da_destroy(stpath);
 				return(-1);
 			}

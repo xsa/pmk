@@ -33,7 +33,7 @@
 
 /*******************************************************************
  *                                                                 *
- * String Hash-coding                                              *
+ * Hash-coding functions                                           *
  *                                                                 *
  *******************************************************************/
 
@@ -216,7 +216,7 @@ int hash_destroy(htable *pht) {
 
 	pht : hash structure
 	key : key string
-	value : value string
+	value : value object
 
 	returns an error code :
 		HASH_ADD_FAIL : addition failed.
@@ -225,7 +225,7 @@ int hash_destroy(htable *pht) {
 		HASH_ADD_UPDT : key already exists, change value.
 */
 
-int hash_add(htable *pht, char *key, char *value) {
+int hash_add(htable *pht, char *key, void *value) {
 	int	rval,
 		hash,
 		size;
@@ -261,10 +261,7 @@ int hash_add(htable *pht, char *key, char *value) {
 		free(phc);
 		return(HASH_ADD_FAIL);
 	}
-	if (strlcpy(phc->value, value, sizeof(phc->value)) >= sizeof(phc->value)) {
-		free(phc);
-		return(HASH_ADD_FAIL);
-	}
+	phc->value = value;
 
 	/* compute hash code */
 	hash = hash_compute(key, size);
@@ -310,9 +307,12 @@ int hash_add_cell(hnode *phn, hcell *phc) {
 		while (1) {
 			if (strncmp(phc->key, np->key, sizeof(phc->key)) == 0) {
 				/* key already exists */
-				strlcpy(np->value, phc->value, sizeof(np->value));
+				np->value = phc->value;
+				phc->value = NULL; /* XXX useful ??? */
+
 				/* new cell no longer needed */
 				free(phc);
+
 				return(HASH_ADD_UPDT);
 			} else {
 				if (np->next == NULL) {
@@ -366,7 +366,8 @@ bool hash_add_array(htable *pht, hpair *php, int size) {
 }
 
 /*
-	append a value to the existing
+	append a value to the existing value
+		ONLY APPLY ON (char *) VALUES !!
 
 	pht : hash structure
 	key : key string
@@ -375,8 +376,8 @@ bool hash_add_array(htable *pht, hpair *php, int size) {
 
 	returns an error code.
 
-	NOTE : the separator is only used while appending, if the key doesn't exists
-		then only the value is added.
+	NOTE : the separator is only used while appending,
+		if the key doesn't exists then only the value is added.
 */
 
 int hash_append(htable *pht, char *key, char *value, char *sep) {
@@ -385,9 +386,9 @@ int hash_append(htable *pht, char *key, char *value, char *sep) {
 	int	rval,
 		s;
 
-	pstr = hash_get(pht, key);
+	pstr = (char *)hash_get(pht, key);
 	if (pstr == NULL) {
-		rval = hash_add(pht, key, value);
+		rval = hash_add(pht, key, strdup(value));
 	} else {
 		s = sizeof(buf);
 		if (strlcat(buf, pstr, s) >= s)
@@ -401,7 +402,7 @@ int hash_append(htable *pht, char *key, char *value, char *sep) {
 		if (strlcat(buf, value, s) >= s)
 			return(HASH_ADD_FAIL);
 
-		rval = hash_add(pht, key, buf);
+		rval = hash_add(pht, key, strdup(buf));
 		if (rval == HASH_ADD_UPDT)
 			rval = HASH_ADD_APPD; /* not an update as we append */
 	}
@@ -469,7 +470,7 @@ void hash_delete(htable *pht, char *key) {
 	returns the value or NULL
 */
 
-char *hash_get(htable *pht, char *key) {
+void *hash_get(htable *pht, char *key) {
 	int	hash;
 	hcell	*phc;
 
