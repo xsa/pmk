@@ -38,5 +38,10 @@
 
 #define STRIP_ENV_NAME	"STRIP"
 
+/* Local functions declaration */
+bool	check_mode(char *, mode_t *);
+bool	symbolic_to_octal_mode(char *, mode_t *);
+void	strip(char *);
+void	usage(void);
 
 #endif /* _PMKINSTALL_H_ */
