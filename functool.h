@@ -66,7 +66,6 @@ typedef struct {
 bool	 check_bool_str(char *);
 bool	 invert_bool(bool);
 char	*bool_to_str(bool);
-bool	 check_version(char *, char *);
 bool	 get_file_dir_path(char *, char *, char *, int);
 char	*str_to_def(char *);
 bool	 record_def(htable *, char *, bool);
