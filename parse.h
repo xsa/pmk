@@ -34,8 +34,10 @@
 #ifndef _PMK_PARSE_H_
 #define _PMK_PARSE_H_
 
-#define PMK_CHAR_COMMAND	'.'
 #define PMK_CHAR_COMMENT	'#'
+#define PMK_CHAR_COMMAND	'.'
+#define PMK_CHAR_COMMAND_START	'{'
+#define PMK_CHAR_COMMAND_END	'}'
 #define PMK_CHAR_LABEL_START	'('
 #define PMK_CHAR_LABEL_END	')'
 #define PMK_CHAR_QUOTE_START	'"'
