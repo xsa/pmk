@@ -51,6 +51,13 @@
 #include "compat/pmk_string.h"
 #include "dynarray.h"
 
+/* stuff to support pmk objects */
+#ifdef USE_PMK_OBJ
+	#include "pmk_obj.h"
+	#define free_obj(obj) obj_free(obj)
+#else
+	#define free_obj(obj) free(obj)
+#endif
 
 /*
 	Initialise dynamic array
@@ -202,6 +209,9 @@ void *da_shift(dynary *da) {
 		da->pary[i] = da->pary[i+1];
 	}
 
+	/* clear previous latest element */
+	da->pary[da->nextidx] = NULL;
+
 	/* resize if allocated space is too big */
 	if ((da->nbcell - da->nextidx) > DYNARY_AUTO_GROW) {
 		gsize = da->nbcell - DYNARY_AUTO_GROW;
@@ -242,7 +252,7 @@ void da_destroy(dynary *da) {
 	int	i;
 
 	for (i = 0 ; i < da->nextidx ; i++) {
-		free(da->pary[i]);
+		free_obj(da->pary[i]);
 	}
 	free(da->pary);
 	free(da);

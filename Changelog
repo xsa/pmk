@@ -1,5 +1,6 @@
 11 Aug 2003 mipsator
- * add pmk objects.
+ * added pmk objects.
+ * added pmk object support in hash.
 
 # snapshot 0.5.4
 

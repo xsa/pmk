@@ -49,6 +49,12 @@
 #include "hash.h"
 #include "compat/pmk_string.h"
 
+#ifdef USE_PMK_OBJ
+	#include "pmk_obj.h"
+	#define free_obj(obj) obj_free(obj)
+#else
+	#define free_obj(obj) free(obj)
+#endif
 
 /*
 	compute hash (perfect hashing)
@@ -356,7 +362,7 @@ bool hash_add_array(htable *pht, hpair *php, int size) {
 		return(false);
 
 	for (i = 0 ; (i < size) && (error == false) ; i ++) {
-		if (hash_add(pmht, php[i].key, strdup(php[i].value)) == HASH_ADD_FAIL)
+		if (hash_add(pmht, php[i].key, php[i].value) == HASH_ADD_FAIL)
 			error = true;
 	}
 
@@ -387,27 +393,45 @@ bool hash_add_array(htable *pht, hpair *php, int size) {
 
 int hash_append(htable *pht, char *key, char *value, char *sep) {
 	char	*pstr,
-		 buf[MAX_HASH_VALUE_LEN] = "";
+		*pbuf;
 	int	 rval,
 		 s;
 
+#ifdef USE_PMK_OBJ
+	pstr = (char *)get_obj_data(hash_get(pht, key));
+#else
 	pstr = (char *)hash_get(pht, key);
+#endif
 	if (pstr == NULL) {
+		/* no previous value, adding given data */
+#ifdef USE_PMK_OBJ
+		rval = hash_add(pht, key, mk_obj_str(value));
+#else
 		rval = hash_add(pht, key, strdup(value));
+#endif
 	} else {
-		s = sizeof(buf);
-		if (strlcat(buf, pstr, s) >= s)
+		/* compute needed space */
+		s = strlen(pstr) + strlen(value) + 1;
+		/* allocate space */
+		pbuf = (char *) malloc(s);
+
+		if (strlcat(pbuf, pstr, s) >= s)
 			return(HASH_ADD_FAIL);
-		if ((sep != NULL) && (buf[0] != '\0')) {
+		if ((sep != NULL) && (pbuf[0] != '\0')) {
 			/* adding separator if provided and if
 				string is not empty */
-			if (strlcat(buf, sep, s) >= s)
+			if (strlcat(pbuf, sep, s) >= s)
 				return(HASH_ADD_FAIL);
 		}
-		if (strlcat(buf, value, s) >= s)
+		if (strlcat(pbuf, value, s) >= s)
 			return(HASH_ADD_FAIL);
 
-		rval = hash_add(pht, key, strdup(buf));
+#ifdef USE_PMK_OBJ
+		rval = hash_add(pht, key, mk_obj_str(pbuf));
+		free(pbuf);
+#else
+		rval = hash_add(pht, key, pbuf);
+#endif
 		if (rval == HASH_ADD_UPDT)
 			rval = HASH_ADD_APPD; /* not an update as we append */
 	}
@@ -599,7 +623,7 @@ hkeys *hash_keys(htable *pht) {
 */
 
 void hash_free_hcell(hcell *phc) {
-	free(phc->value);
+	free_obj(phc->value);
 	free(phc);
 }
 
@@ -610,6 +634,7 @@ void hash_free_hcell(hcell *phc) {
 */
 
 void hash_free_hkeys(hkeys *phk) {
+	/* XXX TODO  also free pointed values */
 	free(phk->keys);
 	free(phk);
 }

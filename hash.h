@@ -71,8 +71,8 @@ typedef struct {
 } htable;
 
 typedef struct {
-	char	key[MAX_HASH_KEY_LEN],
-		value[MAX_HASH_VALUE_LEN];
+	char	 key[MAX_HASH_KEY_LEN];
+	void	*value;
 } hpair;
 
 typedef struct {
