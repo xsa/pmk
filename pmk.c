@@ -1,3 +1,5 @@
+/* $Id$ */
+
 /*
  * Copyright (c) 2003 Damien Couderc
  * All rights reserved.
@@ -29,9 +31,9 @@
  */
 
 
-#include <stdio.h>
-#include <err.h>
 #include <sys/param.h>
+#include <err.h>
+#include <stdio.h>
 
 #include "pmk.h"
 

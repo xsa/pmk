@@ -1,3 +1,4 @@
+# $Id$
 
 CC?=		cc
 INSTALL?=	install

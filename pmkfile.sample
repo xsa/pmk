@@ -1,3 +1,6 @@
+# $Id$
+# pmkfile example
+
 # comment
 .DEFINE
 version=0.0
@@ -9,8 +12,6 @@ TYPE=OPTIONAL
 .CHECK_INCLUDE(hdr_glib)
 TYPE=REQUIRED
 .END
-#.IF(lib_gtk)
 .CHECK_BINARY(gtk_config)
 TYPE=REQUIRED
 .END
-#.ENDIF

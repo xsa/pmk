@@ -1,1 +1,5 @@
-RECORD_BINARY(install,/usr/bin/install)
+# $Id$
+# pmk.conf example
+
+OSTYPE=OpenBSD
+INSTALL=/usr/bin/install
