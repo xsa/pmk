@@ -22,7 +22,7 @@ Status flags:
 common:
 -----------------------------------------------------------------------
 	-	tutorial
-damien	-	add a test for pmkinstall
+damien	+	add a test for pmkinstall
 
 
 pmk:
