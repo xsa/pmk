@@ -71,6 +71,7 @@
 #include "func.h"
 #include "common.h"
 
+char	pmkfile[MAXPATHLEN];
 int	cur_line = 0;
 FILE	*logfile;
 
@@ -133,7 +134,7 @@ bool process_cmd(pmkcmd *cmd, htable *ht) {
 
 bool check_cmd(char *cmdname) {
 	if (hash_get(khash, cmdname) == NULL) {
-		errorf_line(PREMAKE_FILENAME, cur_line, "Unknown command %s", cmdname);
+		errorf_line(pmkfile, cur_line, "Unknown command %s", cmdname);
 		return(FALSE);
 	} else {
 		return(TRUE);
@@ -165,7 +166,7 @@ bool parse_cmd(char *line, pmkcmd *command) {
 				/* check uppercase */
 				if (isalpha(line[i]) && islower(line[i])) {
 					/* my god, found a lowercase in command name ! */
-					errorf_line(PREMAKE_FILENAME, cur_line, "Command should be in uppercase");
+					errorf_line(pmkfile, cur_line, "Command should be in uppercase");
 					return(FALSE);
 				} else {
 					/* good boy */
@@ -187,7 +188,7 @@ bool parse_cmd(char *line, pmkcmd *command) {
 			if (line[i] != ')') {
 				if (isalpha(line[i]) == 0 && line[i] != '_') {
 					/* invalid character */
-					errorf_line(PREMAKE_FILENAME, cur_line, "Invalid label name");
+					errorf_line(pmkfile, cur_line, "Invalid label name");
 					return(FALSE);
 					
 				} else {
@@ -218,12 +219,12 @@ bool parse_cmd(char *line, pmkcmd *command) {
 		if (label_found == TRUE) {
 			if (line[i] != '\0') {
 				/* some data remaining after parenthesis */
-				errorf_line(PREMAKE_FILENAME, cur_line, "Trailing garbage after label");
+				errorf_line(pmkfile, cur_line, "Trailing garbage after label");
 				return(FALSE);
 			}
 		} else {
 			/* ending parenthesis missing */
-			errorf_line(PREMAKE_FILENAME, cur_line, "Label not terminated");
+			errorf_line(pmkfile, cur_line, "Label not terminated");
 			return(FALSE);
 		}
 	}
@@ -254,7 +255,7 @@ bool parse_opt(char *line, htable *ht) {
 				buf[j] = '\0';
 				if (strlcpy(tkey, buf, MAX_OPT_NAME_LEN) >= MAX_OPT_NAME_LEN) {
 					/* key name is too long */
-					errorf_line(PREMAKE_FILENAME, cur_line, "Key name is too long");
+					errorf_line(pmkfile, cur_line, "Key name is too long");
 					return(FALSE);
 				} else {
 					keyfound = TRUE;
@@ -263,7 +264,7 @@ bool parse_opt(char *line, htable *ht) {
 			} else {
 				if (isalpha(line[i]) == 0) {
 					/* invalid character */
-					errorf_line(PREMAKE_FILENAME, cur_line, "Malformed option");
+					errorf_line(pmkfile, cur_line, "Malformed option");
 					return(FALSE);
 				} else {
 					buf[j] = line[i];
@@ -282,12 +283,12 @@ bool parse_opt(char *line, htable *ht) {
 	
 	if (keyfound == FALSE) {
 			/* key name undefined */
-			errorf_line(PREMAKE_FILENAME, cur_line, "Malformed option");
+			errorf_line(pmkfile, cur_line, "Malformed option");
 			return(FALSE);
 	} else {
 		if (strlcpy(tval, buf, MAX_OPT_VALUE_LEN) >= MAX_OPT_VALUE_LEN) {
 			/* key value is too long */
-			errorf_line(PREMAKE_FILENAME, cur_line, "Key value is too long");
+			errorf_line(pmkfile, cur_line, "Key value is too long");
 			return(FALSE);
 		} else {
 			/* key name and value are ok */
@@ -335,7 +336,7 @@ bool parse(FILE *fd) {
 					process = TRUE;
 					tabopts = hash_init(MAX_CMD_OPT);
 					if (tabopts == NULL) {
-						errorf_line(PREMAKE_FILENAME, cur_line, "Cannot create hash table");
+						errorf_line(pmkfile, cur_line, "Cannot create hash table");
 						return(FALSE);
 					}
 				} else {
@@ -356,7 +357,7 @@ bool parse(FILE *fd) {
 					} else {
 						/* found another command before end of previous */
 						hash_destroy(tabopts);
-						errorf_line(PREMAKE_FILENAME, cur_line, "%s not found", PMK_END_COMMAND);
+						errorf_line(pmkfile, cur_line, "%s not found", PMK_END_COMMAND);
 						return(FALSE);
 					}
 				}
@@ -368,7 +369,7 @@ bool parse(FILE *fd) {
 
 			default :
 				if (process == FALSE) {
-					errorf_line(PREMAKE_FILENAME, cur_line, "Syntax error");
+					errorf_line(pmkfile, cur_line, "Syntax error");
 					return(FALSE);
 				}
 
@@ -384,7 +385,7 @@ bool parse(FILE *fd) {
 	if (process == TRUE) {
 		/* found EOF before end of command */
 		hash_destroy(tabopts);
-		errorf_line(PREMAKE_FILENAME, cur_line, "%s not found", PMK_END_COMMAND);
+		errorf_line(pmkfile, cur_line, "%s not found", PMK_END_COMMAND);
 		return(FALSE);
 	}
 
@@ -396,7 +397,7 @@ bool parse(FILE *fd) {
 */
 
 void usage(void) {
-	fprintf(stderr, "usage: pmk\n");
+	fprintf(stderr, "usage: pmk [-vh] [-f file] [options]\n");
 }
 
 /*
@@ -410,13 +411,42 @@ int main(int argc, char *argv[]) {
 	char	idxstr[4]; /* max 999 cmds, should be enough :) */
 	int	rval = 0,
 		i,
-		s;
+		s,
+		chr;
+	bool	go_exit = FALSE,
+		pmkfile_set = FALSE;
 
-
-	if (argc != 1) {
-		usage();
-		exit(1);
+	while (go_exit == FALSE) {
+		chr = getopt(argc, argv, "f:hv");
+		if (chr == -1) {
+			go_exit = TRUE;
+		} else {
+			switch (chr) {
+				case 'f' :
+					/* filename */
+					if (strlcpy(pmkfile, optarg, sizeof(pmkfile)) >= sizeof(pmkfile)) {
+						errorf("Cannot use file argument");
+						exit(1);
+					} else {
+						pmkfile_set = TRUE;
+					}
+					break;
+				case 'v' :
+					/* display version */
+					fprintf(stdout, "%s\n", PREMAKE_VERSION);
+					exit(0);
+					break;
+				case 'h' :
+				case '?' :
+				default :
+					usage();
+					exit(1);
+			}
+		}
 	}
+
+	argc = argc - optind;
+	argv = argv + optind;
 
 	/* open configuration file */
 	snprintf(cf, sizeof(cf), "%s/%s", SYSCONFDIR, PREMAKE_CONFIG);
@@ -430,10 +460,18 @@ int main(int argc, char *argv[]) {
 		fclose(cfd);
 	}
 
+	if (argc != 0) {
+		/* XXX parse optional arguments that override pmk.conf */
+		/* as for example PREFIX=/opt/ */
+	}
+
 	/* open pmk file */
-	fd = fopen(PREMAKE_FILENAME, "r");
+	if (pmkfile_set == FALSE) {
+		strlcpy(pmkfile, PREMAKE_FILENAME, sizeof(pmkfile)); /* should not fail */
+	}
+	fd = fopen(pmkfile, "r");
 	if (fd == NULL) {
-		errorf("while opening %s.", PREMAKE_FILENAME);
+		errorf("while opening %s.", pmkfile);
 		exit(1);
 	}
 
@@ -463,7 +501,7 @@ int main(int argc, char *argv[]) {
 
 	if (parse(fd) == FALSE) {
 		/* an error occured while parsing */
-		rval = -1;
+		rval = 1;
 	} else {
 		pmk_log("End of log.\n");
 	}
