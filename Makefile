@@ -76,7 +76,7 @@ test_pmk: pmk
 	@echo "----------------------------------------"
 	@echo ""
 	@echo "-> Running pmk"
-	pmk -f samples/pmkfile.sample
+	./pmk -f samples/pmkfile.sample
 	@echo ""
 	@echo "-> Dumping generated file"
 	@echo "----------------------------------------"
@@ -100,7 +100,7 @@ test_pmksetup: pmksetup
 	@echo "----------------------------------------"
 	@echo ""
 	@echo "-> Running pmksetup"
-	pmksetup
+	./pmksetup
 	@echo ""
 	@echo "-> Dumping temporary file"
 	@echo "----------------------------------------"
