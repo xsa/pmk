@@ -9,23 +9,16 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "../common.c"
-#include "../compat.c"
-#include "../detect_cpu.c"
+#include "../common.h"
+#include "../compat/compat.h"
+#include "../detect_cpu.h"
 #include "../detect_cpu_asm.h"
-#include "../dynarray.c"
-#include "../hash.c"
-#include "../parse.c"
-#include "../pmk_obj.c"
+#include "../dynarray.h"
+#include "../hash.h"
+#include "../parse.h"
+#include "../pmk_obj.h"
 
 #define PMKCPU_DATA	"../data/pmkcpu.dat"
-
-#define MASK_X86_CPU_EXTFAM	0x0ff00000
-#define MASK_X86_CPU_EXTMOD	0x000f0000
-#define MASK_X86_CPU_TYPE	0x0000f000
-#define MASK_X86_CPU_FAMILY	0x00000f00
-#define MASK_X86_CPU_MODEL	0x000000f0
-
 
 int main(void) {
 	char		*pstr;

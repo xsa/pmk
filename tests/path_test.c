@@ -4,8 +4,12 @@
 
 /* path tools test */
 
+#include <sys/param.h>
 #include <stdio.h>
-#include "../pathtools.c"
+
+#include "../compat/compat.h"
+#include "../compat/pmk_stdbool.h"
+#include "../pathtools.h"
 
 char	*chk_paths[4] = {
 		"/usr/./local/bin/../lib//",

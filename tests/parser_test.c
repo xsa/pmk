@@ -5,22 +5,27 @@
 /* parser engine test */
 
 #include <stdio.h>
-#include "../autoconf.c"
-#include "../common.c"
-#include "../cfgtool.c"
-#include "../detect.c"
-#include "../dynarray.c"
-#include "../func.c"
-#include "../functool.c"
-#include "../hash.c"
-#include "../hash_tools.c"
-#include "../pathtools.c"
-#include "../pmk_obj.c"
-#include "../pkgconfig.c"
+#include <stdlib.h>
+
+#include "../autoconf.h"
+#include "../common.h"
+#include "../cfgtool.h"
+#include "../detect.h"
+#include "../dynarray.h"
+#include "../func.h"
+#include "../functool.h"
+#include "../hash.h"
+#include "../hash_tools.h"
+#include "../parse.h"
+#include "../pathtools.h"
+#include "../pmk_obj.h"
+#include "../pkgconfig.h"
 
 #define PRS_DEBUG	1
-#include "../parse.c"
 
+
+extern prskw	kw_pmkfile[];
+extern size_t	nbkwpf;
 
 /*
 	process option line of configuration file

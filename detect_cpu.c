@@ -374,7 +374,7 @@ bool x86_get_cpuid_data(x86_cpu_cell *cell) {
 		buffer[12] = 0;	/* terminate string */
 		cell->cpuname = strdup((char *) buffer); /* XXX check */
 	} else {
-		cell->cpuname[0] = CHAR_EOS;
+		cell->cpuname = NULL;
 	}
 
 	return(true);

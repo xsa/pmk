@@ -9,13 +9,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "../compat.c"
-#include "../common.c"
-#include "../detect.c"
-#include "../dynarray.c"
-#include "../hash.c"
-#include "../parse.c"
-#include "../pmk_obj.c"
+#include "../common.h"
+#include "../compat/compat.h"
+#include "../detect.h"
+#include "../dynarray.h"
+#include "../hash.h"
+#include "../parse.h"
+#include "../pmk_obj.h"
 
 int main() {
 	FILE		*fp;

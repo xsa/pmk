@@ -1,5 +1,8 @@
 26 Nov 2004 mipsator
  * made cpuid_test using compat.
+ * done major clean-up in tests directory (but still need some work).
+ * fixed a bug in x86_get_cpuid_data() that was remaining from before
+   x86_cpu_cell structure changes.
 
 
 25 Nov 2004 mipsator

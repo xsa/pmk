@@ -14,12 +14,35 @@ DEBUG?=		-g
 #LINT_TARGET=	da_test.c
 
 
-CI_OBJS=	../detect_cpu_asm.o cpuid_test.o
+CI_OBJS=	../common.o ../compat.o ../detect_cpu.o ../detect_cpu_asm.o \
+		../dynarray.o ../hash.o ../parse.o ../pmk_obj.o cpuid_test.o
 
-all: hash dynary path parser mkvar comp
+C_OBJS=		../common.o ../compat.o ../detect.o ../dynarray.o ../hash.o \
+		../parse.o ../pmk_obj.o comp_test.o
+
+DA_OBJS=	../compat.o ../dynarray.o da_test.o
+
+GC_OBJS=	../common.o ../compat.o ../detect.o ../dynarray.o ../hash.o \
+		../parse.o ../pmk_obj.o gen_comp_test.o
+
+H_OBJS=		../compat.o ../hash.o hash_test.o
+
+MK_OBJS=	../common.o ../compat.o ../dynarray.o mkvar_test.o
+
+PRS_OBJS=	../autoconf.o ../common.o ../cfgtool.o ../detect.o ../dynarray.o \
+		../func.o ../functool.o ../hash.o ../hash_tools.o ../parse.o \
+		../pathtools.o ../pmk_obj.o ../pkgconfig.o parser_test.o
+
+PTH_OBJS=	../compat.o ../pathtools.o path_test.o
+
+PC_OBJS=	../common.o ../compat.o ../dynarray.o ../hash.o ../parse.o \
+		../pkgconfig.o ../pmk_obj.o pkgconfig_test.o
+
+
+all: comp cpuid dynary gencomp hash mkvar parser path pkgconfig
 
 .c.o:
-	$(CC) $(CFLAGS) -c $<
+	$(CC) $(CFLAGS) -o $@ -c $<
 
 .s.o:
 	$(CPP) $< | $(AS) -o $@
@@ -31,35 +54,37 @@ config:
 		exit 1; \
 	fi
 
-comp: config comp_test.o
-	$(CC) -o comp_test $(LDFLAGS) comp_test.o
+comp: config $(C_OBJS)
+	$(CC) $(LDFLAGS) -o comp_test $(C_OBJS)
 
-cpuid: $(CI_OBJS)
-	$(CC) -o cpuid_test $(CI_OBJS)
+cpuid: config $(CI_OBJS)
+	$(CC) $(LDFLAGS) -o cpuid_test $(CI_OBJS)
 
-dynary: config da_test.o
-	$(CC) -o da_test $(LDFLAGS) da_test.o
+dynary: config $(DA_OBJS)
+	$(CC) $(LDFLAGS) -o da_test $(DA_OBJS)
 
-gencomp: config gen_comp_test.o
-	$(CC) -o gen_comp_test $(LDFLAGS) gen_comp_test.o
+gencomp: config $(GC_OBJS)
+	$(CC) $(LDFLAGS) -o gen_comp_test $(GC_OBJS)
 
-hash: config hash_test.o
-	$(CC) -o hash_test $(LDFLAGS) hash_test.o
+hash: config $(H_OBJS)
+	$(CC) $(LDFLAGS) -o hash_test $(H_OBJS)
 
-mkvar: config mkvar_test.o
-	$(CC) -o mkvar_test $(LDFLAGS) mkvar_test.o
+mkvar: config $(MK_OBJS)
+	$(CC)  $(LDFLAGS) -o mkvar_test $(MK_OBJS)
 
-parser: config parser_test.o
-	$(CC) -o parser_test $(LDFLAGS) parser_test.o
+parser: config $(PRS_OBJS)
+	$(CC) $(LDFLAGS) -o parser_test $(PRS_OBJS)
 
-path: config path_test.o
-	$(CC) -o path_test $(LDFLAGS) path_test.o
+path: config $(PTH_OBJS)
+	$(CC) $(LDFLAGS) -o path_test $(PTH_OBJS)
 
-pkgconfig: config pkgconfig_test.o
-	$(CC) -o pkgconfig_test $(LDFLAGS) pkgconfig_test.o
+pkgconfig: config $(PC_OBJS)
+	$(CC) $(LDFLAGS) -o pkgconfig_test $(PC_OBJS)
 
 clean:
-	rm -f *.o *_test *.core
+	rm -f $(CI_OBJS) $(C_OBJS) $(DA_OBJS) $(GC_OBJS)
+	rm -f $(H_OBJS) $(MK_OBJS) $(P_OBJS)
+	rm -f *_test *.core
 
 #lint:
 #.ifdef LINT_TARGET
