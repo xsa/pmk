@@ -52,12 +52,15 @@ static  char *binaries[MAXBINS][2] = {
 
 
 /* Local functions declaration */
+int	parse_conf(FILE *, htable *);
 int	open_tmp_config(void);
 int	close_tmp_config(void);
 int	get_env_vars(htable *);
 int	get_binaries(htable *);
 int	copy_config(const char *, const char *);
+int	keycomp(const void *, const void *);
 void	char_replace(char *, const char, const char);
+void	write_new_data(htable *);
 void	usage(void);
 
 #endif	/* _PMKSETUP_H_ */
