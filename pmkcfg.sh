@@ -49,6 +49,10 @@ else
 	sysdir=$SYSCONFDIR
 fi
 
+if [ -z "$CC" ]; then
+	CC="cc"
+fi
+
 sconf="$sysdir/pmk"
 
 um_prfx='$(HOME)'
