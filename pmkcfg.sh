@@ -47,7 +47,7 @@ udef="#undef"
 
 check_include() {
 	include="$1"
-	echo $ECHO_N "Checking $include : $ECHO_C"
+	printf "Checking %s : " "$include"
 
 	cat > $testfile <<EOF
 #include <stdio.h>
@@ -86,15 +86,6 @@ do_sed() {
 # init
 #
 
-tmp=`echo -n`
-if [ "$tmp"="-n" ]; then
-	ECHO_N=""
-	ECHO_C="\c"
-else
-	ECHO_N="-n"
-	ECHO_C=""
-fi
-
 cp $template $compat
 
 
@@ -102,7 +93,7 @@ cp $template $compat
 # strlcpy check
 #
 
-echo "Checking strlcpy : \c"
+printf "Checking strlcpy : "
 
 cat > $testfile <<EOF
 #include <stdio.h>
