@@ -36,5 +36,5 @@
 
 typedef struct {
 	char	kw[MAX_CMD_NAME_LEN];
-	bool	(*fname)(pmkcmd *, htable *);
+	bool	(*fnp)(pmkcmd *, htable *);
 } cmdkw;
