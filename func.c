@@ -900,6 +900,7 @@ bool pmk_check_pkg_config(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 		 rval;
 	char	*target,
 		*pipebuf,
+		*pstr,
 		 pc_cmd[MAXPATHLEN],
 		 pc_buf[MAXPATHLEN],
 		*bpath,
@@ -922,7 +923,13 @@ bool pmk_check_pkg_config(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 	}
 
 	/* try to get pkg-config lib path from pmk.conf */
-	pc_path = hash_get(pgd->htab, PMKCONF_PC_PATH_LIB);
+	pstr = hash_get(pgd->htab, PMKCONF_PC_PATH_LIB);
+	if (pstr == NULL) {
+		pmk_log("\tUnable to get %s from pmk.conf.\n", PMKCONF_PC_PATH_LIB);
+		return(false);
+	}
+
+	pc_path = process_string(pstr, pgd->htab);
 	if (pc_path == NULL) {
 		pmk_log("\tUnable to find pkg-config libdir.\n");
 		pmk_log("\tWARNING : pkg-config may not be installed\n");
