@@ -33,18 +33,27 @@
  *
  */
 
+#ifndef _PMK_SYS_TYPES_H_
+#define _PMK_SYS_TYPES_H_
 
 #include <sys/types.h>
 
 #include "compat.h"
+
+/*
+	blkcnt_t type
+*/
 
 #ifndef HAVE_BLKCNT_T
 
 #ifdef __osf__
 /* Tru64 defines int64_t in the following header */
 #include <sys/bitypes.h>
-#endif
+#endif /* __osf__ */
 
 typedef int64_t	blkcnt_t;	/* file block counts */
-#endif
+
+#endif  /* HAVE_BLKCNT_T */
+
+#endif /* _PMK_SYS_TYPES_H_ */
 

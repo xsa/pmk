@@ -34,6 +34,9 @@
  */
 
 
+#ifndef _PMK_UNISTD_H_
+#define _PMK_UNISTD_H_
+
 #include <unistd.h>
 
 #include "compat.h"
@@ -44,5 +47,7 @@
 
 #ifndef HAVE_MKSTEMPS
 #include "mkstemps.h"
-#endif
+#endif /* HAVE_MKSTEMPS */
+
+#endif /* _PMK_UNISTD_H_ */
 

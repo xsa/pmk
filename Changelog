@@ -1,3 +1,6 @@
+11 Jul 2004 mipsator
+ * fixed compatibility headers.
+
 28 Jun 2004 mipsator
  * added variable substitution in pmkscan.
  * cleaned-up Makefile.pmk (obsolete tests).

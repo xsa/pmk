@@ -34,12 +34,15 @@
  */
 
 
+#ifndef _PMK_STRING_H_
+#define _PMK_STRING_H_
+
 #include <string.h>
 
 #include "compat.h"
 
 /*
-	strlcpy
+	strlcpy() function
 
 	Systems known to have compatible strlcpy in string.h :
 		OpenBSD		since 2.4
@@ -62,9 +65,12 @@
 #endif
 
 /*
-	strlcat
+	strlcat() function
 */
 
 #ifndef HAVE_STRLCAT
 #include "strlcat.h"
 #endif
+
+#endif /* _PMK_STRING_H_ */
+
