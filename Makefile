@@ -242,7 +242,7 @@ test_$(INST): $(INST)
 	@echo ""
 	@echo "-> Creating test directory"
 	@echo ""
-	pmkinstall -d -m 770 $(TEST_INST)
+	./$(INST) -d -m 770 $(TEST_INST)
 	@echo ""
 	@echo "-> Checking test directory"
 	@if (test -d "$(TEST_INST)"); then \
@@ -264,8 +264,8 @@ test_$(INST): $(INST)
 	@echo ""
 	@echo "-> Installing test data"
 	@echo ""
-	pmkinstall -m u+rw README $(TEST_TARGET)1
-	pmkinstall -m ug+r README $(TEST_TARGET)2
+	./$(INST) -m u+rw README $(TEST_TARGET)1
+	./$(INST) -m ug+r README $(TEST_TARGET)2
 	@echo ""
 	@echo "-> Checking test file"
 	@echo "";
