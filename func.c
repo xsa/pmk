@@ -514,7 +514,8 @@ bool pmk_check_header(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 	}
 
 	snprintf(cfgcmd, sizeof(cfgcmd), HEADER_CC_FORMAT,
-			ccpath, inc_path, BIN_TEST_NAME, ftmp, pgd->buildlog);
+			ccpath, inc_path, BIN_TEST_NAME, ftmp,
+			pgd->buildlog);
 
 	/* get result */
 	r = system(cfgcmd);
@@ -659,12 +660,9 @@ bool pmk_check_header(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 */
 
 bool pmk_check_lib(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
-	FILE	*tfp;
 	bool	 required,
 		 rslt = true,
-		 loop = true,
 		 clean_funcs = false,
-		 check_funcs = false,
 		 rval;
 	char	 cfgcmd[MAXPATHLEN],
 		 lib_buf[TMP_BUF_LEN] = "",
@@ -695,9 +693,7 @@ bool pmk_check_lib(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 	}
 
 	po = hash_get(ht, KW_OPT_FUNCTION);
-	if (po == NULL) {
-		target = libname;
-	} else {
+	if (po != NULL) {
 		/* KW_OPT_FUNCTION provided */
 		switch (po_get_type(po)) {
 			case PO_STRING:
@@ -727,7 +723,6 @@ bool pmk_check_lib(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 				errorf("syntax error for '%s': bad type.", KW_OPT_FUNCTION);
 				return(false);
 		}
-		check_funcs = true;
 	}
 
 	if (depend_check(ht, pgd) == false) {
@@ -778,57 +773,82 @@ bool pmk_check_lib(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 	/* get actual content of LIBS, no need to check as it is initialised */
 	main_libs = hash_get(pgd->htab, PMKVAL_ENV_LIBS);
 
+	/*
+		check library
+	*/
+	pmk_log("\tFound library '%s' : ", libname);
+
+	if (c_file_builder(ftmp, sizeof(ftmp),LIB_TEST_CODE, libname) == false) {
+		errorf("cannot build test file.");
+		return(false);
+	}
+
+	/* build compiler command */
+	snprintf(cfgcmd, sizeof(cfgcmd), LIB_CC_FORMAT,
+			ccpath, main_libs, BIN_TEST_NAME, libname,
+			ftmp, pgd->buildlog);
+
+	/* get result */
+	r = system(cfgcmd);
+	if (r == 0) {
+		pmk_log("yes.\n");
+		/* define for template */
+		record_def_data(pgd->htab, libname, DEFINE_DEFAULT);
+	} else {
+		pmk_log("no.\n");
+		record_def_data(pgd->htab, libname, NULL);
+		rslt = false;
+	}
+
+	if (unlink(ftmp) == -1) {
+		/* cannot remove temporary file */
+		errorf("cannot remove %s", ftmp);
+	}
+
+	/* No need to check return here as binary could not exists */
+	unlink(BIN_TEST_NAME);
+
+	/*
+		check functions
+	*/
+
 	/* check loop */
-	while (loop == true) {
-		tfp = tmps_open(TEST_FILE_NAME, "w", ftmp, sizeof(ftmp), strlen(C_FILE_EXT));
-		if (tfp != NULL) {
-			if (check_funcs == false) {
-				pmk_log("\tFound library '%s' : ", libname);
-				fprintf(tfp, LIB_TEST_CODE);
-			} else {
-				libfunc = da_shift(funcs);
-				target = libfunc;
-				pmk_log("\tFound function '%s' in '%s' : ", libfunc, libname);
-				fprintf(tfp, LIB_FUNC_TEST_CODE, libfunc, libfunc);
-			}
+	if ((rslt == true) && (funcs != NULL)) {
+		while ((target = da_shift(funcs)) && (target != NULL)) {
+			pmk_log("\tFound function '%s' : ", target);
 
 			/* fill test file */
-			fclose(tfp);
-		} else {
-			errorf("cannot open test file.");
-			return(false);
-		}
+			if (c_file_builder(ftmp, sizeof(ftmp),
+					LIB_FUNC_TEST_CODE, target,
+					target) == false) {
+				errorf("cannot build test file.");
+				return(false);
+			}
 
-		/* build compiler command */
-		snprintf(cfgcmd, sizeof(cfgcmd), LIB_CC_FORMAT,
-			ccpath, main_libs, BIN_TEST_NAME, libname, ftmp, pgd->buildlog);
+			/* build compiler command */
+			snprintf(cfgcmd, sizeof(cfgcmd), LIB_CC_FORMAT,
+				ccpath, main_libs, BIN_TEST_NAME, libname,
+				ftmp, pgd->buildlog);
 	
-		/* get result */
-		r = system(cfgcmd);
-		if (r == 0) {
-			pmk_log("yes.\n");
-			/* define for template */
-			record_def_data(pgd->htab, target, DEFINE_DEFAULT);
-		} else {
-			pmk_log("no.\n");
-			record_def_data(pgd->htab, target, NULL);
-			rslt = false;
-		}
+			/* get result */
+			r = system(cfgcmd);
+			if (r == 0) {
+				pmk_log("yes.\n");
+				/* define for template */
+				record_def_data(pgd->htab, target, DEFINE_DEFAULT);
+			} else {
+				pmk_log("no.\n");
+				record_def_data(pgd->htab, target, NULL);
+				rslt = false;
+			}
 
-		if (unlink(ftmp) == -1) {
-			/* cannot remove temporary file */
-			errorf("cannot remove %s", ftmp);
-		}
+			if (unlink(ftmp) == -1) {
+				/* cannot remove temporary file */
+				errorf("cannot remove %s", ftmp);
+			}
 
-		if (libfunc == NULL) {
 			/* No need to check return here as binary could not exists */
 			unlink(BIN_TEST_NAME);
-			/* exit from loop */
-			loop = false;
-		} else {
-			/* check if list is empty */
-			if (da_usize(funcs) == 0)
-				loop = false;
 		}
 	}
 
