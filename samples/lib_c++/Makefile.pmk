@@ -4,8 +4,10 @@ CXX=		@BIN_CXX@
 AR=		@BIN_AR@
 RANLIB=		@BIN_RANLIB@
 
+CXXFLAGS=	@CXXFLAGS@
+
 ARFLAGS=	cr
-SLCFLAGS=	@SLCFLAGS@
+SLCXXFLAGS=	@SLCXXFLAGS@
 SLLDFLAGS=	@SLLDFLAGS@
 
 NAME=		hello
@@ -26,7 +28,7 @@ all: show $(LIB_STATIC) $(LIB_SHARED) $(NAME) run_$(NAME) clean
 .c.o:
 	@echo ""
 	@echo "-> Building object file"
-	$(CXX) $(CFLAGS) $(SLCFLAGS) -c $<
+	$(CXX) $(CXXFLAGS) $(SLCXXFLAGS) -c $<
 
 show:
 	@echo ""
