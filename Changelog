@@ -10,6 +10,7 @@
 	* process_template() now process dynamic variables.
 	* updated sample makefile to use srcdir and builddir stuff.
  * fixed remaining <string.h> to "compat/string.h".
+ * added BONUS file to talk about reusable components of this package.
 
 18 Jun 2003 mipsator
  * added relpath() to common.
