@@ -37,9 +37,6 @@ int main(void) {
 			 cputype;
 	struct utsname	 utsname;
 	uint32_t	 buffer[13];
-#ifdef ARCH_X86
-	x86_cpu_cell	x86cc;
-#endif
 
 	if (uname(&utsname) == -1) {
 		printf("uname failed.\n");
@@ -55,7 +52,11 @@ int main(void) {
 	pstr = check_cpu_arch(utsname.machine, pdata); /* check */
 	printf("arch = '%s'\n", pstr);
 
+#ifdef ARCH_X86
 	pht = arch_wrapper(pdata, PMK_ARCH_X86_32);
+#else
+	pht = arch_wrapper(pdata, PMK_ARCH_X86_UNKNOWN);
+#endif
 	if (pht != NULL) {
 		phk = hash_keys(pht);
 		if (phk != NULL) {

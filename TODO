@@ -47,7 +47,13 @@ pmk:
 
 pmksetup:
 -----------------------------------------------------------------------
-	-	cpu identification
+	~	cpu identification
+			~ x86* support
+			- ppc support
+			- sparc support
+			- sparc64 support
+			- alpha support
+			! man page update
 	-	cpu optimisation for compiler 
 	-	use fcopy instead of text copy for the temporary file
 	-	option to append to variable of pmk.conf
