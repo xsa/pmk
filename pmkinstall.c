@@ -85,7 +85,8 @@ extern int	 errno;
 */
 
 void strip(char *file) {
-	char	*s_path;
+	char	*s_path,
+		 cmd[MAXPATHLEN];
 
 	s_path = getenv(STRIP_ENV_NAME);
 	if (s_path == NULL) {
