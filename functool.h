@@ -34,12 +34,14 @@
 #ifndef _PMK_FUNCTOOL_H_
 #define _PMK_FUNCTOOL_H_
 
+#include "premake.h"
 #include "compat/pmk_string.h"
 #include "compat/pmk_stdbool.h"
+#include "dynarray.h"
 
 
 bool check_bool_str(char *);
 bool check_version(char *, char *);
-
+bool get_file_path(char *, char *, char *, int);
 
 #endif /* _PMK_FUNCTOOL_H_ */

@@ -35,10 +35,10 @@ CONFIG=		$(PREMAKE).conf.sample
 P_OBJS=		compat.o common.o hash.o func.o functool.o dynarray.o pmk.o
 S_OBJS=		$(SETUP).o common.o hash.o dynarray.o compat.o
 
-all: $(PREMAKE) $(SETUP)
-
 .c.o:
 	$(CC) $(CFLAGS) -c $<
+
+all: $(PREMAKE) $(SETUP)
 
 config:
 	@CC=$(CC) sh pmkcfg.sh

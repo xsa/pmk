@@ -194,9 +194,11 @@ bool pmk_check_lib(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 bool pmk_check_config(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 	FILE	*rpipe;
 	char	version[16],
+		cfgpath[MAXPATHLEN],
 		cfgcmd[MAXPATHLEN],
 		*cfgtool,
-		*libvers;
+		*libvers,
+		*bpath;
 	bool	required = true;
 
 	pmk_log("* Checking with config tool [%s]\n", cmd->label);
@@ -204,24 +206,43 @@ bool pmk_check_config(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 	required = check_bool_str(hash_get(ht, "REQUIRED"));
 
 	cfgtool = hash_get(ht, "CFGTOOL");
+	if (cfgtool == NULL) {
+		errorf("CFGTOOL not provided.");
+		return(false);
+	}
+
 	libvers = hash_get(ht, "VERSION");
+	/* XXX need test ? */
 
-	/* XXX should try to locate cfgtool */
+	bpath = hash_get(gdata->htab, "BIN_PATH");
+	if (bpath == NULL) {
+		errorf("BIN_PATH not available.");
+		return(false);
+	}
+
+	/* try to locate cfgtool */
 	pmk_log("\tFound config tool '%s' : ", cfgtool);
-
-	snprintf(cfgcmd, sizeof(cfgcmd), "%s --version", cfgtool);
+	if (get_file_path(cfgtool, bpath, cfgpath, sizeof(cfgpath)) == false) {
+		pmk_log("no.\n");
+		if (required == true) {
+			return(false);
+		}
+	} else {
+		pmk_log("yes.\n");
+	}
+	
+	snprintf(cfgcmd, sizeof(cfgcmd), "%s --version", cfgpath);
 
 	rpipe = popen(cfgcmd, "r");
 	if (rpipe == NULL) {
-		pmk_log("no.\n");
+		errorf("Cannot get version from '%s'.", cfgcmd);
 		return(false);
 	} else {
-		pmk_log("yes.\n");
 		pmk_log("\tFound version >= %s : ", libvers);
 
 		get_line(rpipe, version, sizeof(version)); /* XXX check returned value ? */
 		/* XXX should check version */
-		pmk_log("yes/no (%s)\n", version);
+		pmk_log("XXX (%s).\n", version);
 
 		pclose(rpipe);
 		return(true);
