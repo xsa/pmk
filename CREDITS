@@ -3,6 +3,8 @@ Additional credits:
 Patches:
 	- Ted Unangst
 		(dynarray rewrite, many fixes)
+	- Pedro Martelletto
+		(check_mode() improvement)
 
 Bug report:
 	- Marek Habersack
