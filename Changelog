@@ -1,6 +1,8 @@
 18 Jul 2004 mipsator
  * clean up the code before starting to play with parse_data().
- * fixed getopt() call in pmkscan.
+ * fixed getopt() parameters in pmkscan.
+ * added option to parse config file in parser_test.
+ * modified parse_pmkconf() to use prseng structure.
 
 13 Jul 2004 mipsator
  * misc fixes and cleanup for experimental parsing engine.
