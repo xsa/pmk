@@ -719,6 +719,7 @@ bool pmk_check_config(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 			*cflags,
 			*libs,
 			*opt;
+	dynary		*defs;
 	cfgtcell	*pcc = NULL;
 	lgdata		*pld;
 
@@ -729,6 +730,18 @@ bool pmk_check_config(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 	if (cfgtool == NULL) {
 		errorf("NAME not assigned in label '%s'.", cmd->label);
 		return(false);
+	}
+
+	/* check dependencies */
+	if (depend_check(ht, pgd) == false) {
+		pmk_log("\t%s\n", pgd->errmsg);
+		if (required == true) {
+			return(false);
+		} else {
+			record_def_data(pgd->htab, cfgtool, NULL);
+			label_set(pgd->labl, cmd->label, false);
+			return(true);
+		}
 	}
 
 	/* check if a module name is given */
@@ -753,6 +766,9 @@ bool pmk_check_config(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 		pmk_log("\tSKIPPED, unknown language.\n");
 		return(invert_bool(required));
 	}
+
+	/* look for additional defines */
+	defs = po_get_list(hash_get(ht, KW_OPT_DEFS));
 
 	/* check for alternative variable for CFLAGS */
 	cflags = po_get_str(hash_get(ht, PMKVAL_ENV_CFLAGS));
@@ -784,17 +800,6 @@ bool pmk_check_config(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 		libs = PMKVAL_ENV_LIBS;
 	}
 
-	if (depend_check(ht, pgd) == false) {
-		pmk_log("\t%s\n", pgd->errmsg);
-		if (required == true) {
-			return(false);
-		} else {
-			record_def_data(pgd->htab, cfgtool, NULL);
-			label_set(pgd->labl, cmd->label, false);
-			return(true);
-		}
-	}
-
 	/* try to locate cfgtool */
 	pmk_log("\tFound config tool '%s' : ", cfgtool);
 	if (get_file_path(cfgtool, bpath, cfgpath, sizeof(cfgpath)) == false) {
@@ -808,7 +813,7 @@ bool pmk_check_config(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 			if (hash_update_dup(pgd->htab, varname, "") == HASH_ADD_FAIL) {
 				errorf(HASH_ERR_UPDT_ARG, varname);
 				return(false);
-		}
+			}
 
 			label_set(pgd->labl, cmd->label, false);
 			return(true);
@@ -874,6 +879,8 @@ bool pmk_check_config(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 	/* record gathered data */
 	record_def_data(pgd->htab, cfgtool, DEFINE_DEFAULT);
 	label_set(pgd->labl, cmd->label, true);
+	/* process additional defines */
+	process_def_list(pgd->htab, defs);
 
 	/* check if specific option exists */
 	if ((pcc != NULL) && (pcc->cflags != NULL)) {
@@ -935,6 +942,7 @@ bool pmk_check_pkg_config(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 		*libvers,
 		*cflags,
 		*libs;
+	dynary	*defs;
 	lgdata	*pld;
 	pkgcell	*ppc;
 	pkgdata	*ppd;
@@ -947,6 +955,18 @@ bool pmk_check_pkg_config(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 	if (target == NULL) {
 		errorf("NAME not assigned in label '%s'.", cmd->label);
 		return(false);
+	}
+
+	/* check dependencies */
+	if (depend_check(ht, pgd) == false) {
+		pmk_log("\t%s\n", pgd->errmsg);
+		if (required == true) {
+			return(false);
+		} else {
+			/* record_def(pgd->htab, target, false); XXX how to manage ? */
+			label_set(pgd->labl, cmd->label, false);
+			return(true);
+		}
 	}
 
 	/* try to get pkg-config lib path from pmk.conf */
@@ -970,6 +990,9 @@ bool pmk_check_pkg_config(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 		pmk_log("\tSKIPPED, unknown language.\n");
 		return(invert_bool(required));
 	}
+
+	/* look for additional defines */
+	defs = po_get_list(hash_get(ht, KW_OPT_DEFS));
 
 	/* check for alternative variable for CFLAGS */
 	cflags = po_get_str(hash_get(ht, PMKVAL_ENV_CFLAGS));
@@ -999,17 +1022,6 @@ bool pmk_check_pkg_config(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 	} else {
 		/* use default library variable */
 		libs = PMKVAL_ENV_LIBS;
-	}
-
-	if (depend_check(ht, pgd) == false) {
-		pmk_log("\t%s\n", pgd->errmsg);
-		if (required == true) {
-			return(false);
-		} else {
-			/* record_def(pgd->htab, target, false); XXX how to manage ? */
-			label_set(pgd->labl, cmd->label, false);
-			return(true);
-		}
 	}
 
 	ppd = pkgdata_init();
@@ -1115,6 +1127,9 @@ bool pmk_check_pkg_config(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 		errorf("failed to gather packages data (pkg_recurse() function call)");
 		return(false);
 	}
+
+	/* process additional defines */
+	process_def_list(pgd->htab, defs);
 
 	/* get cflags recursively */
 	pipebuf = pkg_get_cflags(ppd);

@@ -9,7 +9,6 @@ CFLAGS=		@CFLAGS@
 CXXFLAGS=	@CXXFLAGS@
 
 SLCFLAGS=	@SLCFLAGS@
-SLCXXFLAGS=	@SLCXXFLAGS@
 
 LIBS=		@LIBS@
 
@@ -45,3 +44,4 @@ TOP_BUILDDIR=		@top_builddir@
 test:
 	@echo $(PACKAGE)
 	@echo `$(GTK_CONFIG) --version`
+
