@@ -56,7 +56,7 @@ CHECK_HEADER(string_strlcpy) {
 	FUNCTION = "strlcpy"
 }
 
-# try to found gtk-config in path
+# try to find gtk-config in path
 CHECK_BINARY(bin_gtk_config) {
 	REQUIRED = FALSE
 	DEPEND = ("use_gtk")
