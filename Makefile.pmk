@@ -108,20 +108,31 @@ install: all
 	$(SUDO) $(INSTALL) -d -m 755 $(DESTDIR)$(SBINDIR)
 	$(SUDO) $(INSTALL) -m 755 $(SETUP) $(DESTDIR)$(SBINDIR)/$(SETUP)
 	$(SUDO) $(INSTALL) -d -m 755 $(DESTDIR)$(DATADIR)
-	$(SUDO) $(INSTALL) -m 644 samples/$(SAMPLE) $(DESTDIR)$(DATADIR)/$(SAMPLE)
-	$(SUDO) $(INSTALL) -m 644 samples/$(CONFIG) $(DESTDIR)$(DATADIR)/$(CONFIG)
-	$(SUDO) $(INSTALL) -m 644 data/pmkscan.dat $(DESTDIR)$(DATADIR)/pmkscan.dat
-	$(SUDO) $(INSTALL) -m 644 data/pmkcomp.dat $(DESTDIR)$(DATADIR)/pmkcomp.dat
-	$(SUDO) $(INSTALL) -m 644 data/pmkcfgtool.dat $(DESTDIR)$(DATADIR)/pmkcfgtool.dat
+	$(SUDO) $(INSTALL) -m 644 samples/$(SAMPLE) \
+		$(DESTDIR)$(DATADIR)/$(SAMPLE)
+	$(SUDO) $(INSTALL) -m 644 samples/$(CONFIG) \
+		$(DESTDIR)$(DATADIR)/$(CONFIG)
+	$(SUDO) $(INSTALL) -m 644 data/pmkscan.dat \
+		$(DESTDIR)$(DATADIR)/pmkscan.dat
+	$(SUDO) $(INSTALL) -m 644 data/pmkcomp.dat \
+		$(DESTDIR)$(DATADIR)/pmkcomp.dat
+	$(SUDO) $(INSTALL) -m 644 data/pmkcfgtool.dat \
+		$(DESTDIR)$(DATADIR)/pmkcfgtool.dat
 	$(SUDO) $(INSTALL) -d -m 755 $(DESTDIR)$(MANDIR)/man1
-	$(SUDO) $(INSTALL) -m 444 man/$(PREMAKE).1 $(DESTDIR)$(MANDIR)/man1/$(PREMAKE).1
-	$(SUDO) $(INSTALL) -m 444 man/$(SCAN).1 $(DESTDIR)$(MANDIR)/man1/$(SCAN).1
-	$(SUDO) $(INSTALL) -m 444 man/$(INST).1 $(DESTDIR)$(MANDIR)/man1/$(INST).1
+	$(SUDO) $(INSTALL) -m 444 man/$(PREMAKE).1 \
+		$(DESTDIR)$(MANDIR)/man1/$(PREMAKE).1
+	$(SUDO) $(INSTALL) -m 444 man/$(SCAN).1 \
+		$(DESTDIR)$(MANDIR)/man1/$(SCAN).1
+	$(SUDO) $(INSTALL) -m 444 man/$(INST).1 \
+		$(DESTDIR)$(MANDIR)/man1/$(INST).1
 	$(SUDO) $(INSTALL) -d -m 755 $(DESTDIR)$(MANDIR)/man5
-	$(SUDO) $(INSTALL) -m 444 man/$(PREMAKE).conf.5 $(DESTDIR)$(MANDIR)/man5/$(PREMAKE).conf.5
-	$(SUDO) $(INSTALL) -m 444 man/$(PREMAKE)file.5 $(DESTDIR)$(MANDIR)/man5/$(PREMAKE)file.5
+	$(SUDO) $(INSTALL) -m 444 man/$(PREMAKE).conf.5 \
+		$(DESTDIR)$(MANDIR)/man5/$(PREMAKE).conf.5
+	$(SUDO) $(INSTALL) -m 444 man/$(PREMAKE)file.5 \
+		$(DESTDIR)$(MANDIR)/man5/$(PREMAKE)file.5
 	$(SUDO) $(INSTALL) -d -m 755 $(DESTDIR)$(MANDIR)/man8
-	$(SUDO) $(INSTALL) -m 444 man/$(SETUP).8 $(DESTDIR)$(MANDIR)/man8/$(SETUP).8
+	$(SUDO) $(INSTALL) -m 444 man/$(SETUP).8 \
+		$(DESTDIR)$(MANDIR)/man8/$(SETUP).8
 
 global-deinstall:
 	$(SUDO) rm -rf $(DESTDIR)$(DATADIR)
@@ -162,7 +173,8 @@ $(INST)-clean:
 $(PKGCFG)-clean:
 	rm -f $(PC_OBJS) $(PKGCFG)
 
-clean: $(PREMAKE)-clean $(SETUP)-clean $(SCAN)-clean $(INST)-clean $(PKGCFG)-clean
+clean: $(PREMAKE)-clean $(SETUP)-clean $(SCAN)-clean $(INST)-clean \
+		$(PKGCFG)-clean
 	rm -f *.core
 
 full-clean: clean
@@ -319,7 +331,8 @@ test_clean:
 	@echo "=> End of cleaning."
 	@echo ""
 
-test_all: test_$(SETUP) test_$(PREMAKE) test_$(SCAN) test_$(INST) test_clean
+test_all: install test_$(SETUP) test_$(PREMAKE) test_$(SCAN) test_$(INST) \
+	  test_clean
 
 test_pmk_only: test_$(SETUP) test_$(PREMAKE) test_clean
 
