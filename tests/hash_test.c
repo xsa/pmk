@@ -95,7 +95,7 @@ int main() {
 
 	for(i = 0 ; i < NBKEYS ; i++) {
 		snprintf(tstr, sizeof(tstr), "XXXXXXXXXX");
-		if (mkstemp(tstr) != 0) {
+		if (mktemp(tstr) != NULL) {
 			snprintf(ttstr, sizeof(ttstr), "value.%s", tstr);
 
 			n = hash_add(hp, tstr, strdup(ttstr));
