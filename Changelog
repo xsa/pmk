@@ -1,3 +1,6 @@
+06 Dec 2003  mipsator
+ * moved fcopy() from pmkinstall to common.
+
 # snapshot 0.7.5
 
 30 Nov 2003 mipsator
