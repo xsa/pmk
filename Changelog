@@ -1,3 +1,8 @@
+# snapshot 0.5.2
+
+24 Jul 2003 mipsator
+ * added dir_explore() as first step to recursivity.
+
 23 Jul 2003 mipsator
  * added detection and processing of functions in pmkscan.
  * replaced free() by hash_free_hcell() where needed in hash.
