@@ -101,7 +101,8 @@ prscell *prscell_init(void) {
 
 	pcell = (prscell *) malloc(sizeof(prscell));
 	if (pcell != NULL) {
-		ht = hash_init_adv(MAX_CMD_OPT, (void *)po_free, (void *)po_append);
+		ht = hash_init_adv(MAX_CMD_OPT, (void (*)(void *))po_free,
+				(void *(*)(void *, void *, void *))po_append);
 		if (ht != NULL) {
 			pcell->ht = ht;
 			pcell->next = NULL;

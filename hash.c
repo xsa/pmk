@@ -367,7 +367,7 @@ int hash_add_cell(hnode *phn, hcell *phc) {
 */
 
 bool hash_add_array(htable *pht, hpair *php, int size) {
-	return(hash_add_array_adv(pht, php, size, (void *) strdup));
+	return(hash_add_array_adv(pht, php, size, (void *(*)(void *)) strdup));
 }
 
 /*
