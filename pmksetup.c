@@ -106,6 +106,7 @@ int main(int argc, char *argv[]) {
 			case '?' :
 			default :
 				usage();
+				/* NOTREACHED */
 		}
 	argc -= optind;
 	argv += optind;
