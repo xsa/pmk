@@ -208,7 +208,7 @@ mkf_sed() {
 #
 
 # parse options
-while getopts 'hp:u' arg; do
+while getopts "hp:u" arg; do
 	case $arg in
 		p)
 			echo "overriding prefix with '$OPTARG'"
