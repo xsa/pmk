@@ -105,7 +105,7 @@ bool pmk_check_binary(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 
 	pmk_log("* Checking binary [%s]\n", cmd->label);
 
-	required = check_bool_str(hash_get(ht, "REQUIRED"));
+	required = require_check(ht);
 
 	filename = hash_get(ht, "FILENAME");
 	if (filename == NULL) {
@@ -157,7 +157,7 @@ bool pmk_check_include(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 
 	pmk_log("* Checking include [%s]\n", cmd->label);
 
-	required = check_bool_str(hash_get(ht, "REQUIRED"));
+	required = require_check(ht);
 
 	/* get include filename */
 	incfile = hash_get(ht, "INCLUDE");
@@ -249,7 +249,7 @@ bool pmk_check_lib(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 
 	pmk_log("* Checking library [%s]\n", cmd->label);
 
-	required = check_bool_str(hash_get(ht, "REQUIRED"));
+	required = require_check(ht);
 
 	libname = hash_get(ht, "LIBNAME");
 	if (libname == NULL) {
@@ -339,7 +339,7 @@ bool pmk_check_config(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 
 	pmk_log("* Checking with config tool [%s]\n", cmd->label);
 
-	required = check_bool_str(hash_get(ht, "REQUIRED"));
+	required = require_check(ht);
 
 	cfgtool = hash_get(ht, "CFGTOOL");
 	if (cfgtool == NULL) {
