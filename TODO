@@ -5,7 +5,21 @@ pmk :
 ~ finish pmk(1)
 ~ pmkfile(5)
 ~ compatibility with autoconf (progressing)
-- set CPPFLAGS and LDFLAGS ?
+- add support for CPP in pmk_check_include() and pmk_check_lib().
+- set CPPFLAGS
+- add CHECK_TYPE aka pmk_check_type()
+- set LDFLAGS ?
+- cache ?
+
 
 pmksetup :
 ~ pmk.conf(5)
+- missing checks :
+	- endian type (HW_ENDIAN = BIG_ENDIAN, LITTLE_ENDIAN)
+	- char unsigned (pmk ?)
+	- long double (pmk ?)
+	- "ln -s"
+	- better check for install ?
+	- others ?
+	
+
