@@ -363,15 +363,15 @@ int get_env_vars(htable *ht) {
 		return(-1);
 	}
 
-	if (hash_add(ht, PMKCONF_OS_NAME, strdup(utsname.sysname)) == HASH_ADD_FAIL)
+	if (hash_update_dup(ht, PMKCONF_OS_NAME, utsname.sysname) == HASH_ADD_FAIL)
 		return(-1);
 	verbosef("Setting '%s' => '%s'", PMKCONF_OS_NAME, utsname.sysname);
 
-	if (hash_add(ht, PMKCONF_OS_VERS, strdup(utsname.release)) == HASH_ADD_FAIL)
+	if (hash_update_dup(ht, PMKCONF_OS_VERS, utsname.release) == HASH_ADD_FAIL)
 		return(-1);
 	verbosef("Setting '%s' => '%s'", PMKCONF_OS_VERS, utsname.release);	
 	
-	if (hash_add(ht, PMKCONF_OS_ARCH, strdup(utsname.machine)) == HASH_ADD_FAIL)
+	if (hash_update_dup(ht, PMKCONF_OS_ARCH, utsname.machine) == HASH_ADD_FAIL)
 		return(-1);
 	verbosef("Setting '%s' => '%s'", PMKCONF_OS_ARCH, utsname.machine);
 
@@ -388,7 +388,7 @@ int get_env_vars(htable *ht) {
 	 */
 	char_replace(bin_path, PATH_STR_DELIMITER, CHAR_LIST_SEPARATOR);
 
-	if (hash_add(ht, PMKCONF_PATH_BIN, strdup(bin_path)) == HASH_ADD_FAIL)
+	if (hash_update_dup(ht, PMKCONF_PATH_BIN, bin_path) == HASH_ADD_FAIL)
 		return(-1);
 	verbosef("Setting '%s' => '%s'", PMKCONF_PATH_BIN, bin_path);
 
@@ -420,14 +420,14 @@ int get_binaries(htable *ht) {
 	}
 
 	if (find_file(stpath, "cc", fbin, sizeof(fbin)) == true) {
-		if (hash_add(ht, "BIN_CC", strdup(fbin)) == HASH_ADD_FAIL) {
+		if (hash_update_dup(ht, "BIN_CC", fbin) == HASH_ADD_FAIL) {
 			da_destroy(stpath);
 			return(-1);
 		}
 		verbosef("Setting '%s' => '%s'", "BIN_CC", fbin);
 	} else {
 		if (find_file(stpath, "gcc", fbin, sizeof(fbin)) == true) {
-			if (hash_add(ht, "BIN_CC", strdup(fbin)) == HASH_ADD_FAIL) {
+			if (hash_update_dup(ht, "BIN_CC", fbin) == HASH_ADD_FAIL) {
 				da_destroy(stpath);
 				return(-1);
 			}
@@ -441,7 +441,7 @@ int get_binaries(htable *ht) {
 
 	for (i = 0; i < MAXBINS; i++) {
 		if (find_file(stpath, binaries[i][0], fbin, sizeof(fbin)) == true) {
-			if (hash_add(ht, binaries[i][1], strdup(fbin)) == HASH_ADD_FAIL) {
+			if (hash_update_dup(ht, binaries[i][1], fbin) == HASH_ADD_FAIL) {
 				da_destroy(stpath);
 				return(-1);
 			}
@@ -469,7 +469,7 @@ int predef_vars(htable *pht) {
 
 	for (i = 0 ; i < nbpredef ; i++) {
 		verbosef("Setting '%s' => '%s'", predef[i].key, predef[i].value);
-		if (hash_add(pht, predef[i].key, strdup(predef[i].value)) == HASH_ADD_FAIL) {
+		if (hash_update_dup(pht, predef[i].key, predef[i].value) == HASH_ADD_FAIL) {
 			errorf("failed to add %s.", predef[i].key);
 			return(-1);
 		}
@@ -540,15 +540,15 @@ int check_echo(htable *pht) {
 		}
 	}
 
-	if (hash_add(pht, PMKCONF_AC_ECHO_N, strdup(echo_n)) == HASH_ADD_FAIL)
+	if (hash_update_dup(pht, PMKCONF_AC_ECHO_N, echo_n) == HASH_ADD_FAIL)
 		return(-1);
 	verbosef("Setting '%s' => '%s'", PMKCONF_AC_ECHO_N, echo_n);
 	
-	if (hash_add(pht, PMKCONF_AC_ECHO_C, strdup(echo_c)) == HASH_ADD_FAIL)
+	if (hash_update_dup(pht, PMKCONF_AC_ECHO_C, echo_c) == HASH_ADD_FAIL)
 		return(-1);
 	verbosef("Setting '%s' => '%s'", PMKCONF_AC_ECHO_C, echo_c);
 
-	if (hash_add(pht, PMKCONF_AC_ECHO_T, strdup(echo_t)) == HASH_ADD_FAIL)
+	if (hash_update_dup(pht, PMKCONF_AC_ECHO_T, echo_t) == HASH_ADD_FAIL)
 		return(-1);
 	verbosef("Setting '%s' => '%s'", PMKCONF_AC_ECHO_T, echo_t);
 
@@ -580,7 +580,7 @@ bool byte_order_check(htable *pht) {
 		}
 	}
 
-	if (hash_add(pht, PMKCONF_HW_BYTEORDER, strdup(bo_type)) == HASH_ADD_FAIL)
+	if (hash_update_dup(pht, PMKCONF_HW_BYTEORDER, bo_type) == HASH_ADD_FAIL)
 		return(false);
 
 	verbosef("Setting '%s' => '%s'", PMKCONF_HW_BYTEORDER, bo_type);
