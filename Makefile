@@ -6,32 +6,45 @@ INSTALL?=	install
 CFLAGS?=
 CFLAGS+=	-Wall
 #CFLAGS+=	-DSYSCONFDIR=\"/etc/\"
+
+LDFLAGS?=
+
 PREFIX?=	/usr/local
 DEBUG?=		-g
 
-PNAME=		pmk
-DATADIR=	$(PREFIX)/share/$(PNAME)
-SAMPLE=		$(PNAME)file.sample
-CONFIG=		$(PNAME).conf.sample
+PREMAKE=	pmk
+SETUP=		pmksetup
 
-SRCS=		pmk.c pmk.h
-OBJS=		pmk.o
+DATADIR=	$(PREFIX)/share/$(PREMAKE)
+SAMPLE=		$(PREMAKE)file.sample
+CONFIG=		$(PREMAKE).conf.sample
 
-$(PNAME): $(OBJS)
-	$(CC) $(DEBUG) -o $(PNAME) $(OBJS) $(CFLAGS)
+P_OBJS=		$(PREMAKE).o
+S_OBJS=		$(SETUP).o
 
-all: $(PNAME)
+all: $(PREMAKE) $(SETUP)
+
+.c.o:
+	$(CC) $(CFLAGS) -c $<
+
+$(PREMAKE): $(P_OBJS)
+	$(CC) -o $(PREMAKE) $(LDFLAGS) $(P_OBJS)
+
+$(SETUP): $(S_OBJS)
+	$(CC) -o $(SETUP) $(LDFLAGS) $(S_OBJS)
 
 install:
-	$(INSTALL) -m 755 $(PNAME) $(PREFIX)/bin/
+	$(INSTALL) -m 755 $(PREMAKE) $(PREFIX)/bin/
+	$(INSTALL) -m 755 $(SETUP) $(PREFIX)/sbin/
 	$(INSTALL) -d $(DATADIR)
 	$(INSTALL) -m 644 $(SAMPLE) $(DATADIR)
 	$(INSTALL) -m 644 $(CONFIG) $(DATADIR)
 
 clean:
-	rm -f $(OBJS) $(PNAME)
+	rm -f $(P_OBJS) $(S_OBJS) $(PREMAKE) $(SETUP)
 
 deinstall:
-	rm -f $(PREFIX)/bin/$(PNAME)
-	rm -rf $(PREFIX)/share/$(PNAME)
+	rm -f $(PREFIX)/bin/$(PREMAKE)
+	rm -f $(PREFIX)/bin/$(SETUP)
+	rm -rf $(PREFIX)/share/$(PREMAKE)
 
