@@ -400,8 +400,14 @@ bool prs_get_line(FILE *fp, char *line, size_t lsize) {
 */
 
 bool prs_fill_buf(prseng *peng) {
+#ifdef DEBUG_PRS
+	char	 buf[16]; /* only for debug */
+#endif
 	size_t	 s;
 
+#ifdef DEBUG_PRS
+	debugf("prs_fill_buf(): _IN_.");
+#endif
 	if (peng->prscur == NULL) {
 #ifdef DEBUG_PRS
 		debugf("prs_fill_buf(): init offset.");
@@ -410,7 +416,8 @@ bool prs_fill_buf(prseng *peng) {
 		peng->offset = 0;
 	} else {
 #ifdef DEBUG_PRS
-		/*debugf("prs_fill_buf(): scurs = '%s'.", scurs);*/
+		strlcpy(buf, peng->prscur, sizeof(buf));
+		debugf("prs_fill_buf(): cursor (before) = '%s'.", buf);
 #endif
 		/* compute offset */
 		peng->offset = peng->prscur - peng->prsbuf + peng->offset;
@@ -454,8 +461,10 @@ bool prs_fill_buf(prseng *peng) {
 	}
 
 #ifdef DEBUG_PRS
-	/*debugf("prs_fill_buf(): return = '%s'", peng->prscur);*/
+	strlcpy(buf, peng->prscur, sizeof(buf));
+	debugf("prs_fill_buf(): cursor (after) = '%s'.", buf);
 	debugf("prs_fill_buf(): cursor on line %d", peng->linenum);
+	debugf("prs_fill_buf(): _OUT_.");
 #endif
 	/* buffer filled, return pointer to the first character */
 	return(true);
@@ -521,7 +530,6 @@ void skip_useless(prseng *peng) {
 #ifdef DEBUG_PRS
 	debugf("skip_useless() : process start on line %d", peng->linenum);
 #endif
-	/*pstr = peng->prscur;*/
 	while (loop == true) {
 		/* skip blanck characters */
 		while (isblank(*peng->prscur) != 0) {
@@ -536,7 +544,17 @@ void skip_useless(prseng *peng) {
 #endif
 				/* comment is one line length,
 				 * look for the next end of line */
-				peng->prscur = strchr(peng->prscur, CHAR_CR);
+				while ((*peng->prscur != CHAR_CR) &&
+						(*peng->prscur != CHAR_EOS)) {
+					peng->prscur++;
+#ifdef DEBUG_PRS
+					debugf("skipping '%c'.", *peng->prscur); 
+#endif
+				}
+
+				if (*peng->prscur == CHAR_CR)
+					peng->prscur++;
+
 				/* don't break to use following
 				 * incrementation to skip end of line */
 
@@ -1513,6 +1531,9 @@ bool process_opt(htable *pht, prsopt *popt) {
 bool parse_pmkconf(FILE *fp, htable *pht, char *seplst, bool (*func)(htable *, prsopt *)) {
 	bool	 loop = true;
 	char	*pstr = NULL;
+#ifdef DEBUG_PRS
+	char	 buf[32];
+#endif
 	prseng	*peng;
 	prsopt	 opt;
 
@@ -1538,17 +1559,34 @@ bool parse_pmkconf(FILE *fp, htable *pht, char *seplst, bool (*func)(htable *, p
 
 				/* mark end of line */
 				pstr = strchr(peng->prscur, CHAR_CR);
-				*pstr = CHAR_EOS;
+				if (pstr != NULL)
+					*pstr = CHAR_EOS;
 
 				/* copy comment */
 				opt.value = po_mk_str(peng->prscur);
+#ifdef DEBUG_PRS
+				strlcpy(buf, po_get_str(opt.value), sizeof(buf));
+				debugf("parse_pmkconf() : found comment '%s'.", buf);
+#endif
 
-				/* unmark and update cursor */
-				*pstr = CHAR_CR;
-				peng->prscur = pstr++;
+				if (pstr != NULL) {
+					/* unmark and update cursor */
+					*pstr = CHAR_CR;
+					peng->prscur = pstr + 1;
+				} else {
+					peng->prscur = strchr(peng->prscur, CHAR_EOS);
+				}
+
+#ifdef DEBUG_PRS
+				strlcpy(buf, peng->prscur, sizeof(buf));
+				debugf("parse_pmkconf() : cursor after comment '%s'.", buf);
+#endif
 
 				/* process option */
-				func(pht, &opt);
+				if (func(pht, &opt) == false) {
+					errorf("line %d : processing failed", peng->linenum);
+					return(false);
+				}
 				break;
 
 			case CHAR_CR :
@@ -1556,12 +1594,19 @@ bool parse_pmkconf(FILE *fp, htable *pht, char *seplst, bool (*func)(htable *, p
 				strlcpy(opt.key, "", sizeof(opt.key)); /* don't check */
 				opt.opchar = CHAR_EOS;
 				opt.value = po_mk_str("");
+#ifdef DEBUG_PRS
+				strlcpy(buf, po_get_str(opt.value), sizeof(buf));
+				debugf("parse_pmkconf() : found empty line.");
+#endif
 
 				/* update cursor */
-				peng->prscur = pstr++;
+				peng->prscur++;
 
 				/* process option */
-				func(pht, &opt);
+				if (func(pht, &opt) == false) {
+					errorf("line %d : processing failed", peng->linenum);
+					return(false);
+				}
 				break;
 
 			case CHAR_EOS :
@@ -1571,7 +1616,8 @@ bool parse_pmkconf(FILE *fp, htable *pht, char *seplst, bool (*func)(htable *, p
 
 			default :
 #ifdef DEBUG_PRS
-				/*debugf("parse_pmkconf(): opt line to parse = '%s'.", peng->prscur);*/
+				strlcpy(buf, po_get_str(opt.value), sizeof(buf));
+				debugf("parse_pmkconf(): opt line to parse = '%s'.", buf);
 #endif
 				if (parse_opt(peng, &opt, seplst) == true) {
 					/* parse ok */

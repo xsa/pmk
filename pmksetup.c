@@ -433,6 +433,9 @@ bool check_opt(htable *cht, prsopt *popt) {
 	if ((popt->opchar == CHAR_COMMENT) || (popt->opchar == CHAR_EOS)) {
 		/* found comment or empty line */
 		fprintf(sfp, "%s\n", optval);
+#ifdef PMKSETUP_DEBUG
+		debugf("check_opt() appended '%s\n'", optval);
+#endif
 		return(true);
 	}
 
@@ -464,6 +467,9 @@ bool check_opt(htable *cht, prsopt *popt) {
 					case PMKSTP_REC_UPDT :
 						/* update value */
 						fprintf(sfp, PMKSTP_WRITE_FORMAT, popt->key, CHAR_ASSIGN_UPDATE, recval);
+#ifdef PMKSETUP_DEBUG
+						debugf("check_opt() appended '" PMKSTP_WRITE_FORMAT "'", popt->key, CHAR_ASSIGN_UPDATE, recval);
+#endif
 						break;
 
 				}
@@ -473,6 +479,9 @@ bool check_opt(htable *cht, prsopt *popt) {
 			case CHAR_ASSIGN_STATIC :
 				/* static definition, stay unchanged */
 				fprintf(sfp, PMKSTP_WRITE_FORMAT, popt->key, CHAR_ASSIGN_STATIC, optval);
+#ifdef PMKSETUP_DEBUG
+				debugf("check_opt() appended '" PMKSTP_WRITE_FORMAT "'", popt->key, CHAR_ASSIGN_STATIC, optval);
+#endif
 				hash_delete(cht, popt->key);
 				break;
 
