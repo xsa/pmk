@@ -507,6 +507,7 @@ bool pmk_check_config(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 
 	/* check for alternative variable for CFLAGS */
 	cflags = hash_get(ht, "CFLAGS");
+	/* cflags = hash_get(ht, "CPPFLAGS"); */
 	if (cflags != NULL) {
 		/* init alternative variable */
 		hash_append(gdata->htab, cflags, "", " "); /* XXX check ? */
