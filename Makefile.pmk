@@ -77,6 +77,7 @@ I_OBJS=		common.o compat.o dynarray.o pathtools.o $(INST).o
 PC_OBJS=	cfgtool.o common.o compat.o dynarray.o hash.o parse.o \
 		pkgconfig.o pmk_obj.o $(PKGCFG).o
 
+
 .c.o:
 	$(CC) $(PMKCFLAGS) -c $<
 
@@ -116,12 +117,14 @@ install: all
 		$(DESTDIR)$(DATADIR)/$(SAMPLE)
 	$(INSTALL) -m 644 samples/$(CONFIG) \
 		$(DESTDIR)$(DATADIR)/$(CONFIG)
-	$(INSTALL) -m 644 data/pmkscan.dat \
-		$(DESTDIR)$(DATADIR)/pmkscan.dat
-	$(INSTALL) -m 644 data/pmkcomp.dat \
-		$(DESTDIR)$(DATADIR)/pmkcomp.dat
 	$(INSTALL) -m 644 data/pmkcfgtool.dat \
 		$(DESTDIR)$(DATADIR)/pmkcfgtool.dat
+	$(INSTALL) -m 644 data/pmkcomp.dat \
+		$(DESTDIR)$(DATADIR)/pmkcomp.dat
+	$(INSTALL) -m 644 data/pmkcpu.dat \
+		$(DESTDIR)$(DATADIR)/pmkcpu.dat
+	$(INSTALL) -m 644 data/pmkscan.dat \
+		$(DESTDIR)$(DATADIR)/pmkscan.dat
 	$(INSTALL) -d -m 755 $(DESTDIR)$(MANDIR)/man1
 	$(INSTALL) -m 444 man/$(PREMAKE).1 \
 		$(DESTDIR)$(MANDIR)/man1/$(PREMAKE).1
