@@ -83,3 +83,16 @@ LIST_X86_CPU_MODEL {
 	"EF15" = "PENTIUM4"
 }
 
+LIST_X86_CPU_CLASS {
+	DEFAULT = "i386"
+	"INTEL_FAM4" = "i486"
+	"INTEL_FAM5" = "i586"
+	"INTEL_FAM6" = "i686"
+	"INTEL_EFAM0" = "i686"	# pentium4
+	"AMD_FAM4" = "i486"
+	"AMD_FAM5" = "i586"
+	"AMD_FAM6" = "i686"
+	"UNKNOWN_FAM4" = "i486"
+	"UNKNOWN_FAM5" = "i586"
+}
+

@@ -39,45 +39,77 @@
 
 #include <inttypes.h>
 #include "cpu_arch_def.h"
+#include "hash.h"
 #include "parse.h"
+
+
+/***************
+ * common code *
+ ***************/
+
 
 #define CPU_ARCH_ADD		1
 #define LIST_X86_CPU_VENDOR	2
 #define LIST_X86_CPU_MODEL	3
+#define LIST_X86_CPU_CLASS	4
+
+#define	PMK_ARCH_UNKNOW		0
+#define	PMK_ARCH_X86_32		1
+
+#define	PMK_ARCH_STR_UNKNOWN	"unknown"
+
+#define PMKCONF_HW_PPC_CPU_ALTIVEC	"HW_PPC_CPU_ALTIVEC"	/* powerpc altivec feature */
 
 
-/* x86 specific */
-#ifdef ARCH_X86
-#define MASK_X86_CPU_EXTFAM	0x0ff00000
-#define MASK_X86_CPU_EXTMOD	0x000f0000
-#define MASK_X86_CPU_TYPE	0x0000f000
-#define MASK_X86_CPU_FAMILY	0x00000f00
-#define MASK_X86_CPU_MODEL	0x000000f0
-#endif /* ARCH_X86 */
-
-
-#ifdef ARCH_X86
-typedef struct {
-	bool		cpuid;
-	char		vendor[13],
-			cpuname[49];
-	unsigned char	pmkfam,
-			pmkmod,
-			family,
-			model,
-			extfam,
-			extmod;
-	uint32_t	level;
-} x86_cpu_cell;
-#endif
-
-
+void	*seek_key(prsdata *, int);
 prsdata	*parse_cpu_data(char *);
 char	*check_cpu_arch(char *, prsdata *);
+htable	*arch_wrapper(prsdata *, unsigned char);
+
+
+/****************
+ * x86 specific *
+ ****************/
 
 #ifdef ARCH_X86
-char	*x86_get_std_cpu_vendor(prsdata *, char *);
-bool	 x86_get_cpuid_data(x86_cpu_cell *);
+
+#define X86_CPU_MASK_EXTFAM	0x0ff00000
+#define X86_CPU_MASK_EXTMOD	0x000f0000
+#define X86_CPU_MASK_TYPE	0x0000f000
+#define X86_CPU_MASK_FAMILY	0x00000f00
+#define X86_CPU_MASK_MODEL	0x000000f0
+
+#define PMKCONF_HW_X86_CPU_FAMILY	"HW_X86_CPU_FAMILY"	/* family */
+#define PMKCONF_HW_X86_CPU_MODEL	"HW_X86_CPU_MODEL"	/* model */
+#define PMKCONF_HW_X86_CPU_EXTFAM	"HW_X86_CPU_EXTFAM"	/* extended family */
+#define PMKCONF_HW_X86_CPU_EXTMOD	"HW_X86_CPU_EXTMOD"	/* extended model */
+#define PMKCONF_HW_X86_CPU_NAME		"HW_X86_CPU_NAME"	/* name optionaly provided by cpuid */
+#define PMKCONF_HW_X86_CPU_FEATURES	"HW_X86_CPU_FEATURES"	/* MMX,SSE,SSE2,HTT, etc ... */
+#define PMKCONF_HW_X86_CPU_VENDOR	"HW_X86_CPU_VENDOR"	/* vendor name from cpuid */
+#define PMKCONF_HW_X86_CPU_STD_VENDOR	"HW_X86_CPU_STD_VENDOR"	/* "standard" vendor name : INTEL, AMD, etc ... */
+#define PMKCONF_HW_X86_CPU_CLASS	"HW_X86_CPU_CLASS"	/* ex: i386, i486, i586, etc ... */
+
+#define X86_CPU_CLASS_FAMILY_FMT	"%s_FAM%d"		/* standard vendor, family */
+#define X86_CPU_CLASS_EXTFAM_FMT	"%s_EFAM%d"		/* standard vendor, extended family */
+
+
+typedef struct {
+	bool		 cpuid;
+	char		*vendor,
+			*cpuname,
+			*stdvendor;
+	unsigned char	 family,
+			 model,
+			 extfam,
+			 extmod;
+	uint32_t	 level;
+} x86_cpu_cell;
+
+x86_cpu_cell	*x86_cpu_cell_init(void);
+void		 x86_cpu_cell_destroy(x86_cpu_cell *);
+char		*x86_get_std_cpu_vendor(prsdata *, char *);
+bool		 x86_get_cpuid_data(x86_cpu_cell *);
+bool		 x86_set_cpu_data(prsdata *, x86_cpu_cell *, htable *);
 #endif /* ARCH_X86 */
 
 #endif /* _DETECT_CPU_H_ */
