@@ -36,7 +36,6 @@
 #include <sys/types.h>
 #include <sys/utsname.h>
 
-#include <err.h>
 #include <dirent.h>
 #include <stdio.h>
 #include <stdlib.h>
