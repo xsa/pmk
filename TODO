@@ -7,7 +7,7 @@ pmk :
 - finish parser
 - pmk.1
 
-premake :
+pmksetup :
 - gathering values in pmksetup (*1)
 - copy data from configuration file in temporary file line per line (*2)
 - include check of line in data copy for update of value (need *1 and *2)
