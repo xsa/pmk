@@ -382,8 +382,9 @@ int hash_append(htable *pht, char *key, char *value, char *sep) {
 		s = sizeof(buf);
 		if (strlcat(buf, pstr, s) >= s)
 			return(HASH_ADD_FAIL);
-		if (sep != NULL) {
-			/* adding separator if provided */
+		if ((sep != NULL) && (buf[0] != '\0')) {
+			/* adding separator if provided and if
+				string is not empty */
 			if (strlcat(buf, sep, s) >= s)
 				return(HASH_ADD_FAIL);
 		}
