@@ -15,7 +15,7 @@ on a given platform.
 
 .Sh DATA TYPES
 .Nm
-is using pseudo types like the following:
+uses pseudo types like the following:
 .Bl -tag -width Ds
 .It Cm bool
 The classical boolean type with TRUE and FALSE values.
@@ -165,14 +165,15 @@ SWITCHES {
 .Pp
 All these commands need a label.
 .Pp
-They all can have the following optional arguments:
+They can all have the following optional arguments:
 .Bl -tag -width Ds
 .It Cm REQUIRED
 Specify if this test is required to achieve the configuration.
 Type is 'bool'.
-If not specified it is TRUE by default.
+If not specified, it is TRUE by default.
 .It Cm DEPEND
-Specify check dependencies. Type is 'list'.
+Specify check dependencies.
+Type is 'list'.
 A dependency is a label or a switch name.
 The value of each dependencie can be negated by adding a leading '!' sign.
 If at least one of the dependencies is false then the check will be disabled.
@@ -259,7 +260,7 @@ HEADER : type is quoted, name of the header where to find the given type.
 MEMBER : type is quoted, name of a member of the structure given in NAME to be checked.
 .Ed
 .It Cm CHECK_VARIABLE
-Check if the given variable exists and optionally it's value.
+Check if the given variable does exist and optionally its value.
 .Pp
 Arguments:
 .Bd -literal -offset -indent
