@@ -72,10 +72,11 @@ bool	 scan_dir(char *, pkgdata *);
 bool	 parse_keyword(pkgcell *, char *, char *);
 char	*process_variables(char *, htable *);
 pkgcell	*parse_pc_file(char *);
+pkgcell	*pkg_cell_add(pkgdata *ppd, char *mod);
 bool	 pkg_recurse(pkgdata *, char *);
-bool	 pkg_start_recurse(pkgdata *, char *, pkgcell *);
 char	*pkg_get_cflags(pkgdata *);
 char	*pkg_get_libs(pkgdata *);
+bool	 pkg_mod_exists(pkgdata *ppd, char *mod);
 
 #endif /* _PMK_PKGCONFIG_H_ */
 

@@ -34,19 +34,17 @@ int main(int argc, char *argv[]) {
 
 	if (argc == 2) {
 		mod = argv[1];
-		pstr = hash_get(ppd->files, mod);
-		if (pstr != NULL) {
+		if (pkg_mod_exists(ppd, mod) == true) {
 			printf("module '%s' found (in file '%s')\n", mod, pstr);
-			ppc = parse_pc_file(pstr);
+			ppc = pkg_cell_add(ppd, mod);
 
 			printf("module name = %s\n", ppc->name);
 			printf("module description = %s\n", ppc->descr);
 			printf("module version = %s\n", ppc->version);
 			printf("module requires: %s\n", ppc->requires);
 			/*printf("module  = %s\n", ppc->);*/
-			/* XXX clean ppc */
 
-			/* XXX */
+			/* get cflags and libs */
 			if (pkg_recurse(ppd, mod) == false) {
 				errorf("failed on recurse !");
 			} else {
@@ -58,7 +56,9 @@ int main(int argc, char *argv[]) {
 		}
 	}
 
-/*debugf("destroy pkgdata");*/
+#ifdef PKGCFG_DEBUG
+debugf("destroy pkgdata");
+#endif
 	pkgdata_destroy(ppd);
 
 	return(0);
