@@ -35,6 +35,8 @@
 
 
 #include <sys/stat.h>
+#include <ctype.h>
+#include <stdlib.h>
 #include <fcntl.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -45,15 +47,40 @@
 #include "premake.h"
 
 
+#define DEFAULT_MODE	S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH
+
 extern char	*optarg;
 extern int	 optind;
 
 
 /*
+	check_mode
+*/
+
+mode_t check_mode(char *mstr) {
+	int	nb = 0;
+	mode_t	mode = 0;
+
+	if (mstr == NULL)
+		return(-1);
+
+	if (isdigit(*mstr) != 0) {
+		/* octal value */
+		mode = (mode_t) strtol(mstr, NULL, 8); /* XXX check !! */		
+	} else {
+		/* symbolic value */
+		errorf("symbolic value not yet supported");
+		exit(1);
+	}
+
+	return(mode);
+}
+
+/*
 	copy file
 */
 
-bool fcopy(char *src, char *dst) {
+bool fcopy(char *src, char *dst, int mode) {
 	static char	cbuf[S_BLKSIZE];
 	bool		exit = false,
 			rval = true;
@@ -67,7 +94,7 @@ bool fcopy(char *src, char *dst) {
 		errorf("Cannot open %s.", src);
 		return(false);
 	}
-	dst_fd = open(dst, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR);
+	dst_fd = open(dst, O_WRONLY | O_CREAT, mode);
 	if (dst_fd == -1) {
 		errorf("Cannot open %s.", dst);
 		return(false);
@@ -127,6 +154,7 @@ void usage(void) {
 int main(int argc, char *argv[]) {
 	bool	 go_exit = false;
 	char	 chr;
+	int	 mode = DEFAULT_MODE;
 	
 	while (go_exit == false) {
 		chr = getopt(argc, argv, "bcdgh:m:o:stv");
@@ -155,7 +183,8 @@ int main(int argc, char *argv[]) {
 
 				case 'm' :
 					/* specify mode */
-					/* XXX TODO */
+					mode = (int) check_mode(optarg);
+/*debugf("mode = %o", mode);*/
 					break;
 
 				case 'o' :
@@ -194,7 +223,7 @@ int main(int argc, char *argv[]) {
 		usage();
 	}
 
-	if (fcopy(argv[0], argv[1]) == false) {
+	if (fcopy(argv[0], argv[1], mode) == false) {
 		/* copy failed */
 		exit(1);
 	}

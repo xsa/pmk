@@ -1,6 +1,7 @@
 24 Nov 2003 mipsator
  * started to rewrite pmkinstall from scratch (much easier than making
 	xinstall portable).
+ * implemented -m option (only octal values).
 
 23 Nov 2003 mipsator
  * removed oboslete definitions in kw_pmkscan[].
