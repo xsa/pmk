@@ -46,10 +46,11 @@
 #	define MAX_HASH_VALUE_LEN 512
 #endif
 
-#define HASH_ADD_FAIL	0
+#define HASH_ADD_FAIL	0 /* addition or appending failed */
 #define HASH_ADD_OKAY	1 /* first add */
 #define HASH_ADD_COLL	2 /* collision, key chained */
 #define HASH_ADD_UPDT	3 /* key already exists, change value */
+#define HASH_ADD_APPD	4 /* value appended */
 
 
 typedef struct shcell {
@@ -84,7 +85,7 @@ int	hash_destroy(htable *);
 int	hash_add(htable *, char *, char *);
 int	hash_add_cell(hnode *, hcell *);
 bool	hash_add_array(htable *, hpair *, int);
-void	hash_append(htable *, char *, char *);
+int	hash_append(htable *, char *, char *, char *);
 void	hash_delete(htable *, char *);
 char	*hash_get(htable *, char *);
 int	hash_merge(htable *, htable *);

@@ -1,3 +1,10 @@
+02 Jun 2003 mipsator
+ * improved hash_append().
+ * updated hash_test.c to test appending function.
+
+01 Jun 2003 mipsator
+ * added hash_append().
+
 31 May 2003 mipsator
  * added strlcat.c and strlcat.h in compat directory.
  * pmkcfg.sh now have a check for strlcat.
