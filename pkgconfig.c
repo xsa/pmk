@@ -1,7 +1,7 @@
 /* $Id$ */
 
 /*
- * Copyright (c) 2003 Damien Couderc
+ * Copyright (c) 2003-2004 Damien Couderc
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -46,6 +46,7 @@
 #include "hash.h"
 #include "parse.h"
 #include "pkgconfig.h"
+#include "pmk.h"
 #include "premake.h"
 
 
@@ -56,7 +57,8 @@
  * env PKG_CONFIG_LIBDIR => replace default location (aka prefix/lib/pkgconfig)
  */
 
-#define PKGCFG_HTABLE_SIZE 32
+#define PKGCFG_HTABLE_SIZE	32
+#define PKGCFG_TOK_ADDCT	1
 
 #define PKGCFG_KW_NAME	0
 #define PKGCFG_KW_DESCR	1
@@ -66,6 +68,7 @@
 #define PKGCFG_KW_CFLGS	5
 #define PKGCFG_KW_CFLCT	6
 
+/* pc file keywords */
 pkgkw	kw_pkg[] = {
 		{"Name",	PKGCFG_KW_NAME},
 		{"Description",	PKGCFG_KW_DESCR},
@@ -76,8 +79,14 @@ pkgkw	kw_pkg[] = {
 		{"CFlags",	PKGCFG_KW_CFLGS},
 		{"Conflicts",	PKGCFG_KW_CFLCT}
 };
-
 size_t	nb_pkgkw = sizeof(kw_pkg) / sizeof(pkgkw);
+
+/* config tools data file keyword */
+prskw	kw_pmkcfgtool[] = {
+	{"ADD_CFGTOOL", PKGCFG_TOK_ADDCT, PRS_KW_CELL}
+};
+int	nbkwct = sizeof(kw_pmkcfgtool) / sizeof(prskw);
+
 
 /*
 	XXX
@@ -622,6 +631,249 @@ bool pkg_mod_exists(pkgdata *ppd, char *mod) {
 		return(false);
 	} else {
 		return(true);
+	}
+}
+
+/*
+	add a new config toom cell
+
+	pcd : config tool data structure
+	pht : parsed data
+
+	return : boolean
+*/
+
+bool add_cfgtool(cfgtdata *pcd, htable *pht) {
+	cfgtcell	*pcell;
+	char		*pstr;
+
+	pcell = (cfgtcell *) malloc(sizeof(cfgtcell));
+	if (pcell == NULL)
+		return(false);
+
+	pstr = po_get_str(hash_get(pht, "NAME"));
+	if (pstr == NULL) {
+		free(pcell);
+		return(false);
+	} else {
+		pcell->name = strdup(pstr);
+	}
+
+	pstr = po_get_str(hash_get(pht, "BINARY"));
+	if (pstr == NULL) {
+		free(pcell);
+		return(false);
+	} else {
+		pcell->binary = strdup(pstr);
+	}
+
+	pstr = po_get_str(hash_get(pht, "VERSION"));
+	if (pstr != NULL) {
+		pcell->version = strdup(pstr);
+	} else {
+		pcell->version = NULL;
+	}
+
+	pstr = po_get_str(hash_get(pht, "MODULE"));
+	if (pstr != NULL) {
+		pcell->module = strdup(pstr);
+	} else {
+		pcell->module = NULL;
+	}
+
+	pstr = po_get_str(hash_get(pht, "CFLAGS"));
+	if (pstr != NULL) {
+		pcell->cflags = strdup(pstr);
+	} else {
+		pcell->cflags = NULL;
+	}
+
+	pstr = po_get_str(hash_get(pht, "LIBS"));
+	if (pstr != NULL) {
+		pcell->libs = strdup(pstr);
+	} else {
+		pcell->libs = NULL;
+	}
+
+	hash_update(pcd->by_mod, pcell->name, pcell); /* no need to strdup */ /* XXX check */
+#ifdef PKGCFG_DEBUG
+debugf("added cfgtcell '%s'", pcell->name);
+#endif
+	hash_update(pcd->by_bin, pcell->binary, pcell->name); /* no need to strdup */ /* XXX check */
+#ifdef PKGCFG_DEBUG
+debugf("added cfgtcell '%s'", pcell->binary);
+#endif
+
+	return(true);
+}
+
+/*
+	free cfgtcell structure
+*/
+
+void cfgtcell_destroy(cfgtcell *pcc) {
+#ifdef PKGCFG_DEBUG
+debugf("free cfgtcell '%s'", pcc->name);
+#endif
+	free(pcc->name);
+	free(pcc->binary);
+	if (pcc->version != NULL)
+		free(pcc->version);
+	if (pcc->module != NULL)
+		free(pcc->module);
+	if (pcc->cflags != NULL)
+		free(pcc->cflags);
+	if (pcc->libs != NULL)
+		free(pcc->libs);
+	free(pcc);
+}
+
+/*
+	parse data from PMKCFG_DATA file
+
+	cdfile : compilers data file
+
+	return : compiler data structure or NULL
+*/
+
+cfgtdata *parse_cfgt_file(void) {
+	FILE		*fd;
+	bool		 rval;
+	cfgtdata	*pcd;
+	prscell		*pcell;
+	prsdata		*pdata;
+
+	/* initialize parsing structure */
+	pdata = prsdata_init();
+	if (pdata == NULL) {
+		errorf("cannot intialize prsdata.");
+		return(NULL);
+	}
+
+	/* initialise configt tool data structure */
+	pcd = (cfgtdata *) malloc(sizeof(cfgtdata));
+	if (pcd == NULL) {
+		prsdata_destroy(pdata);
+		debugf("cannot initialize config tool data");
+		return(NULL);
+	}
+
+	/* initialize config tool hash table */
+	pcd->by_mod = hash_init_adv(32, NULL, (void (*)(void *)) cfgtcell_destroy, NULL); /* XXX 32 => HARDCODE !!! */
+	if (pcd->by_mod == NULL) {
+		free(pcd);
+		prsdata_destroy(pdata);
+		debugf("cannot initialize config tool hash table");
+		return(NULL);
+	}
+
+	/* initialize config tool hash table */
+	pcd->by_bin = hash_init(32); /* XXX 32 => HARDCODE !!! */
+	if (pcd->by_bin == NULL) {
+		hash_destroy(pcd->by_mod);
+		free(pcd);
+		prsdata_destroy(pdata);
+		debugf("cannot initialize config tool hash table");
+		return(NULL);
+	}
+
+	fd = fopen(PMKCFG_DATA, "r");
+	if (fd == NULL) {
+		hash_destroy(pcd->by_mod);
+		hash_destroy(pcd->by_bin);
+		free(pcd);
+		prsdata_destroy(pdata);
+		errorf("cannot open '%s'", PMKCFG_DATA);
+		return(NULL);
+	}
+
+	/* parse data file and fill prsdata strucutre */
+	rval = parse_pmkfile(fd, pdata, kw_pmkcfgtool, nbkwct);
+	fclose(fd);
+
+	if (rval == true) {
+		pcell = pdata->tree->first;
+		while (pcell != NULL) {
+			switch(pcell->token) {
+				case PKGCFG_TOK_ADDCT :
+					add_cfgtool(pcd, pcell->data);
+					break;
+			
+				default :
+					errorf("parsing of data file failed.");
+					hash_destroy(pcd->by_mod);
+					hash_destroy(pcd->by_bin);
+					free(pcd);
+					prsdata_destroy(pdata);
+					return(NULL);
+					break;
+			}
+
+			pcell = pcell->next;
+		}
+	} else {
+		errorf("parsing of data file failed.");
+		hash_destroy(pcd->by_mod);
+		hash_destroy(pcd->by_bin);
+		free(pcd);
+		prsdata_destroy(pdata);
+		return(NULL);
+	}
+
+	/* parsing data no longer needed */
+	prsdata_destroy(pdata);
+
+	return(pcd);
+}
+
+/*
+	XXX
+*/
+
+bool cfgtcell_get_binary(pmkdata *pgd, char *mod, char *buf, size_t sb) {
+	cfgtcell	*pcc;
+	cfgtdata	*pcd;
+
+	/* init config tool data if it does not exist */
+	if (pgd->cfgt == NULL) {
+		pgd->cfgt = parse_cfgt_file();
+	}
+
+	pcd = pgd->cfgt;
+
+	pcc = hash_get(pcd->by_mod, mod);
+	if (pcc == NULL) {
+		/* not found */
+		return(false);
+	} else {
+		/* found, copy */
+		strlcpy(buf, pcc->binary, sb);
+		return(true);
+	}
+}
+
+/*
+	XXX
+*/
+
+cfgtcell *cfgtcell_get_cell(pmkdata *pgd, char *binary) {
+	cfgtdata	*pcd;
+	char		*mod;
+
+	/* init config tool data if it does not exist */
+	if (pgd->cfgt == NULL) {
+		pgd->cfgt = parse_cfgt_file();
+	}
+
+	pcd = pgd->cfgt;
+
+	mod = hash_get(pcd->by_bin, binary);
+	if (mod == NULL) {
+		/* not found */
+		return(NULL);
+	} else {
+		/* found, copy */
+		return(hash_get(pcd->by_mod, mod));
 	}
 }
 

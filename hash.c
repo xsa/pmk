@@ -6,7 +6,7 @@
  */
 
 /*
- * Copyright (c) 2003 Damien Couderc
+ * Copyright (c) 2003-2004 Damien Couderc
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -692,13 +692,16 @@ hkeys *hash_keys(htable *pht) {
 
 void hash_free_hcell(htable *pht, hcell *phc) {
 	if (phc != NULL) {
+		if (phc->value != NULL) {
+			if (pht->freeobj != NULL)
+#ifdef HASH_DEBUG
+		debugf("free phcell '%s' data", phc->key);
+#endif
+				pht->freeobj(phc->value);
+		}
 #ifdef HASH_DEBUG
 		debugf("free phcell '%s'", phc->key);
 #endif
-		if (phc->value != NULL) {
-			if (pht->freeobj != NULL)
-				pht->freeobj(phc->value);
-		}
 		free(phc);
 	}
 }
@@ -710,7 +713,7 @@ void hash_free_hcell(htable *pht, hcell *phc) {
 */
 
 void hash_free_hkeys(hkeys *phk) {
-	/* XXX TODO  also free pointed values */
+	/* XXX TODO  also free pointed values ? */
 	free(phk->keys);
 	free(phk);
 }

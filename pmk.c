@@ -6,7 +6,7 @@
  */
 
 /*
- * Copyright (c) 2003 Damien Couderc
+ * Copyright (c) 2003-2004 Damien Couderc
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -489,13 +489,21 @@ void clean(pmkdata *pgd) {
 	if (pgd->labl != NULL) {
 		hash_destroy(pgd->labl);
 	}
-
+/* XXX should destroy
+	if (pgd->cfgt != NULL) {
+		hash_destroy(pgd->cfgt);
+	}
+*/
 	if (pgd->tlist != NULL) {
 		da_destroy(pgd->tlist);
 	}
 
 	if (pgd->ac_file != NULL) {
 		free(pgd->ac_file);
+	}
+
+	if (pgd->lang != NULL) {
+		free(pgd->lang);
 	}
 }
 

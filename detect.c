@@ -1,7 +1,7 @@
 /* $Id$ */
 
 /*
- * Copyright (c) 2003 Damien Couderc
+ * Copyright (c) 2003-2004 Damien Couderc
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -62,6 +62,23 @@ void compdata_destroy(comp_data *pcd) {
 }
 
 /*
+	clean comp_cell structure
+
+	pcc : structure to clean
+
+	return : -
+*/
+
+void compcell_destroy(comp_cell *pcc) {
+	free(pcc->c_id);
+	free(pcc->descr);
+	free(pcc->c_macro);
+	free(pcc->v_macro);
+	free(pcc->slflags);
+	free(pcc);
+}
+
+/*
 	add a new compiler cell
 
 	pcd : compiler data structure
@@ -118,7 +135,7 @@ bool add_compiler(comp_data *pcd, htable *pht) {
 		pcell->slflags = strdup(pstr);
 	}
 
-	hash_update(pcd->cht, pcell->c_id, pcell); /* no need to strdup */
+	hash_update(pcd->cht, pcell->c_id, pcell); /* no need to strdup */ /* XXX check */
 
 	return(true);
 }
@@ -177,7 +194,7 @@ comp_data *parse_comp_file(char *cdfile) {
 	}
 
 	/* init compilers hash table */
-	cdata->cht = hash_init(MAX_COMP);
+	cdata->cht = hash_init_adv(MAX_COMP, NULL, (void (*)(void *)) compcell_destroy, NULL);
 	if (cdata->cht == NULL) {
 		free(cdata);
 		prsdata_destroy(pdata);
@@ -229,7 +246,7 @@ comp_data *parse_comp_file(char *cdfile) {
 }
 
 /*
-	detect compiler
+	generate test file
 
 	fp : target file
 	pcd : compiler data structure

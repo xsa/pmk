@@ -672,21 +672,25 @@ bool pmk_check_lib(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 
 /*
 	check with *-config utility
+
+	XXX add MODULE option ?
 */
 
 bool pmk_check_config(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
-	FILE	*rpipe;
-	bool	 required = true,
-		 rval = false;
-	char	 pipebuf[TMP_BUF_LEN],
-		 cfgpath[MAXPATHLEN],
-		 cfgcmd[MAXPATHLEN],
-		*cfgtool,
-		*varname,
-		*libvers,
-		*bpath,
-		*cflags,
-		*libs;
+	FILE		*rpipe;
+	bool		 required = true,
+			 rval = false;
+	char		 pipebuf[TMP_BUF_LEN],
+			 cfgpath[MAXPATHLEN],
+			 cfgcmd[MAXPATHLEN],
+			*cfgtool,
+			*varname,
+			*libvers,
+			*bpath,
+			*cflags,
+			*libs,
+			*opt;
+	cfgtcell	*pcc = NULL;
 
 	pmk_log("\n* Checking with config tool [%s]\n", cmd->label);
 	required = require_check(ht);
@@ -762,11 +766,28 @@ bool pmk_check_config(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 			return(false);
 		}
 	}
-	
+
+	/* check if specific tool option exists */
+	pmk_log("\tUsing specific options : ");
+	pcc = cfgtcell_get_cell(pgd, cfgtool);
+	if (pcc != NULL) {
+		pmk_log("yes\n");
+	} else {
+		pmk_log("no\n");
+	}
+
 	libvers = po_get_str(hash_get(ht, "VERSION"));
+
+	/* if VERSION is provided then check it */
 	if (libvers != NULL) {
-		/* if VERSION is provided then check it */
-		snprintf(cfgcmd, sizeof(cfgcmd), "%s --version 2>/dev/null", cfgpath);
+		/* check if specific option exists */
+		if ((pcc != NULL) && (pcc->version != NULL)) {
+			opt = pcc->version;
+		} else {
+			opt = CFGTOOL_OPT_VERSION;
+		}
+
+		snprintf(cfgcmd, sizeof(cfgcmd), "%s %s 2>/dev/null", cfgpath, opt);
 
 		rpipe = popen(cfgcmd, "r");
 		if (rpipe == NULL) {
@@ -803,7 +824,15 @@ bool pmk_check_config(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 	record_val(pgd->htab, cfgtool, "");
 	label_set(pgd->labl, cmd->label, true);
 
-	snprintf(cfgcmd, sizeof(cfgcmd), "%s --cflags", cfgpath);
+	/* check if specific option exists */
+	if ((pcc != NULL) && (pcc->cflags != NULL)) {
+		opt = pcc->cflags;
+	} else {
+		opt = CFGTOOL_OPT_CFLAGS;
+	}
+
+	snprintf(cfgcmd, sizeof(cfgcmd), "%s %s 2>/dev/null", cfgpath, opt);
+
 	rpipe = popen(cfgcmd, "r");
 	if (rpipe != NULL) {
 		/* put result in CFLAGS */
@@ -830,7 +859,15 @@ bool pmk_check_config(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 		}
 	}
 
-	snprintf(cfgcmd, sizeof(cfgcmd), "%s --libs", cfgpath);
+	/* check if specific option exists */
+	if ((pcc != NULL) && (pcc->libs != NULL)) {
+		opt = pcc->libs;
+	} else {
+		opt = CFGTOOL_OPT_LIBS;
+	}
+
+	snprintf(cfgcmd, sizeof(cfgcmd), "%s %s 2>/dev/null", cfgpath, opt);
+
 	rpipe = popen(cfgcmd, "r");
 	if (rpipe != NULL) {
 		/* put result in LIBS */
@@ -887,14 +924,14 @@ bool pmk_check_pkg_config(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 		 rval;
 	char	*target,
 #ifndef EXPERIMENTAL_PKGCONFIG
-		 pc_cmd[MAXPATHLEN],
-		 pc_buf[MAXPATHLEN],
 		 pipebuf[TMP_BUF_LEN],
-		*bpath,
 		*pc_path = NULL,
 #else
 		*pipebuf,
 #endif
+		 pc_cmd[MAXPATHLEN],
+		 pc_buf[MAXPATHLEN],
+		*bpath,
 		*libvers,
 		*cflags,
 		*libs;
@@ -1007,6 +1044,34 @@ bool pmk_check_pkg_config(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 		pkgdata_destroy(ppd);
 #endif
 		pmk_log("no.\n");
+
+#ifdef EXPERIMENTAL_PKGCONFIG
+		/* get binary path */
+		bpath = hash_get(pgd->htab, PMKCONF_PATH_BIN);
+		if (bpath == NULL) {
+		        errorf("%s not available.", PMKCONF_PATH_BIN);
+			return(false);
+		}
+
+		/* set config tool filename */
+		if (cfgtcell_get_binary(pgd, target, pc_cmd, sizeof(pc_cmd)) == false) {
+			snprintf(pc_cmd, sizeof(pc_cmd), "%s-config", target); /* XXX check */
+		}
+
+		/* looking for it in the path */
+		if (get_file_path(pc_cmd, bpath, pc_buf, sizeof(pc_buf)) == true) {
+			/* use CHECK_CONFIG */
+			pmk_log("\tFound alternative '%s' tool.\n", pc_cmd);
+
+			/* override NAME to use divert on CHECK_CONFIG */
+			hash_update(ht, "NAME", po_mk_str(pc_cmd));
+			pmk_log("\tWARNING: rerouting to CHECK_CONFIG\n");
+			pmk_log("\tPlease consider using directly CHECK_CONFIG with '%s'\n", pc_cmd);
+
+			/* call pmk_check_config with the config tool */
+			return(pmk_check_config(cmd, ht, pgd));
+		}
+#endif
 		if (required == true) {
 			return(false);
 		} else {

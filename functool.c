@@ -1,7 +1,7 @@
 /* $Id$ */
 
 /*
- * Copyright (c) 2003 Damien Couderc
+ * Copyright (c) 2003-2004 Damien Couderc
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -446,7 +446,7 @@ bool depend_check(htable *lht, pmkdata *gd) {
 		}
 	}
 
-	da_destroy(da); /* not really useful but save memory */
+	hash_delete(lht, "DEPEND"); /* not really useful but save memory */
 
 	return(rval);
 }

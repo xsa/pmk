@@ -1,7 +1,7 @@
 /* $Id$ */
 
 /*
- * Copyright (c) 2003 Damien Couderc
+ * Copyright (c) 2003-2004 Damien Couderc
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,7 +39,20 @@
 
 #define PKGCONFIG_DIR		"/usr/local/lib/pkgconfig" /* XXX XXX XXX hardcode !!!!! should use prefix */
 
+#ifndef DATADIR
+/* for lint */
+#define DATADIR	"./data"
+#endif
+
+#define PMKCFG_DATA	DATADIR "/pmkcfgtool.dat"
+
 #define PKGCFG_HT_SIZE	512
+
+#define CFGTOOL_OPT_VERSION	"--version"
+#define CFGTOOL_OPT_CFLAGS	"--cflags"
+#define CFGTOOL_OPT_LIBS	"--libs"
+
+/* packages strucutres */
 
 typedef struct s_pkgcell {
 	char	*name,
@@ -63,20 +76,43 @@ typedef struct s_pkgkw {
 } pkgkw;
 
 
+/* config tool structures */
+
+typedef struct s_cfgtcell {
+	char	*name,
+		*binary,
+		*version,
+		*module,
+		*cflags,
+		*libs;
+} cfgtcell;
+
+
+typedef struct s_cfgtdata {
+	htable	*by_mod,
+		*by_bin;
+} cfgtdata;
+
 /* functions protos */
-pkgcell	*pkgcell_init();
-void	 pkgcell_destroy(pkgcell *);
-pkgdata	*pkgdata_init();
-void	 pkgdata_destroy(pkgdata *);
-bool	 scan_dir(char *, pkgdata *);
-bool	 parse_keyword(pkgcell *, char *, char *);
-char	*process_variables(char *, htable *);
-pkgcell	*parse_pc_file(char *);
-pkgcell	*pkg_cell_add(pkgdata *ppd, char *mod);
-bool	 pkg_recurse(pkgdata *, char *);
-char	*pkg_get_cflags(pkgdata *);
-char	*pkg_get_libs(pkgdata *);
-bool	 pkg_mod_exists(pkgdata *ppd, char *mod);
+pkgcell		*pkgcell_init();
+void		 pkgcell_destroy(pkgcell *);
+pkgdata		*pkgdata_init();
+void		 pkgdata_destroy(pkgdata *);
+bool		 scan_dir(char *, pkgdata *);
+bool		 parse_keyword(pkgcell *, char *, char *);
+char		*process_variables(char *, htable *);
+pkgcell		*parse_pc_file(char *);
+pkgcell		*pkg_cell_add(pkgdata *ppd, char *mod);
+bool		 pkg_recurse(pkgdata *, char *);
+char		*pkg_get_cflags(pkgdata *);
+char		*pkg_get_libs(pkgdata *);
+bool		 pkg_mod_exists(pkgdata *ppd, char *mod);
+
+bool		 add_cfgtool(cfgtdata *, htable *);
+void		 cfgtcell_destroy(cfgtcell *);
+cfgtdata	*parse_cfgt_file();
+bool		 cfgtcell_get_binary(pmkdata *, char *, char *, size_t);
+cfgtcell	*cfgtcell_get_cell(pmkdata *, char *);
 
 #endif /* _PMK_PKGCONFIG_H_ */
 

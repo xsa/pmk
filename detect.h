@@ -1,7 +1,7 @@
 /* $Id$ */
 
 /*
- * Copyright (c) 2003 Damien Couderc
+ * Copyright (c) 2003-2004 Damien Couderc
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -101,6 +101,7 @@
 	"\treturn(0);\n" \
 	"}\n"
 
+/* compiler data structures */
 
 typedef struct {
 	char	*c_id,
@@ -120,7 +121,10 @@ typedef struct {
 } comp_data;
 
 
+/* function protos */
+
 void		 compdata_destroy(comp_data *);
+void		 compcell_destroy(comp_cell *);
 bool		 add_compiler(comp_data *, htable *);
 comp_cell	*comp_get(comp_data *, char *c_id);
 char		*comp_get_descr(comp_data *, char *);
