@@ -169,6 +169,14 @@
 #define HW_ENDIAN_LITTLE	"LITTLE_ENDIAN"
 #define HW_ENDIAN_UNKNOWN	"UNKNOWN_ENDIAN"
 
+/* make specific variable names */
+#define MK_VAR_CFLAGS	"CFLAGS"
+#define MK_VAR_CXXFLAGS	"CXXFLAGS"
+#define MK_VAR_CPPFLAGS	"CPPFLAGS"
+#define MK_VAR_LDFLAGS	"LDFLAGS"
+#define MK_VAR_LIBS	"LIBS"
+#define MK_VAR_DEBUG	"DEBUG"
+
 /* maximal size of an error message */
 #define MAX_ERR_MSG_LEN		256
 
