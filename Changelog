@@ -1,3 +1,5 @@
+# snapshot 0.7.9
+
 02 Jan 2004 xsa
  * added PC_PATH_LIB to pmk.conf (look if PREFIX/lib/pkgconfig exists).
  * updated pmk.conf.5 accordinally.

@@ -1,7 +1,7 @@
 /* $Id$ */
 
 /*
- * Copyright (c) 2003 Damien Couderc
+ * Copyright (c) 2003-2004 Damien Couderc
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -88,7 +88,7 @@
 
 #define PREMAKE_MAJOR		"0"
 #define PREMAKE_MINOR		"7"
-#define PREMAKE_SNAP		"8" /* only used for snapshots */
+#define PREMAKE_SNAP		"9" /* only used for snapshots */
 #define PREMAKE_VERSION		PREMAKE_MAJOR "." PREMAKE_MINOR
 
 #define PREMAKE_CONFIG		"pmk.conf"
