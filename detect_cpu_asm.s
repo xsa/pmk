@@ -39,7 +39,12 @@
 
 .text
 
-#ifdef ARCH_X86
+#ifdef ARCH_X86_32
+
+/*
+ *	X86 32 bits code
+ */
+
 
 	.align	16,0x90
 
@@ -51,7 +56,7 @@
 	.globl	x86_check_cpuid_flag
 
 x86_check_cpuid_flag:
-	pushl	%ecx		/* save ebx register */
+	pushl	%ecx		/* save ecx register */
 
 	pushfl
 	popl	%eax		/* get eflags */
@@ -69,7 +74,7 @@ x86_check_cpuid_flag:
 	pushl	%ecx
 	popfl			/* put original state back */
 
-	popl	%ecx		/* restore ebx register */
+	popl	%ecx		/* restore ecx register */
 
 	andl	$0x200000,%eax	/* keep CPU ID  flag only */
 	rorl	$21,%eax	/* and shift it to bit 0 */
@@ -107,12 +112,87 @@ x86_exec_cpuid:
 	ret
 
 
-#endif
+#endif /* ARCH_X86_32 */
+
+#ifdef ARCH_X86_64
+
+/*
+ *	X86 64 bits code
+ */
+
+
+	.align	16,0x90
+
+
+/*
+	check if cpuid is available
+*/
+
+	.globl	x86_check_cpuid_flag
+
+x86_check_cpuid_flag:
+	pushq	%rcx		/* save rcx register */
+
+	pushfq
+	popq	%rax		/* get eflags */
+
+	movq	%rax,%rcx	/* save flags */
+
+	xorq	$0x200000,%rax	/* clear CPU ID flag */
+
+	pushq	%rax
+	popfq			/* load eflags */
+
+	pushfl
+	popq	%rax		/* get current eflags state */
+
+	pushq	%rcx
+	popfq			/* put original state back */
+
+	popq	%rcx		/* restore ebx register */
+
+	andq	$0x200000,%rax	/* keep CPU ID  flag only */
+	rorq	$21,%rax	/* and shift it to bit 0 */
+
+	ret
+
+/*
+	exec cpuid function
+
+	returns: pointer to static buffer
+*/
+
+	.globl x86_exec_cpuid
+
+x86_exec_cpuid:
+	/* get function number */
+	movl	4(%rsp),%eax
+
+	pushq	%rbx
+	pushq	%rcx
+	pushq	%rdx
+
+	cpuid
+
+	/* copy register values */
+	movl	%eax,x86_cpu_reg_eax
+	movl	%ebx,x86_cpu_reg_ebx
+	movl	%ecx,x86_cpu_reg_ecx
+	movl	%edx,x86_cpu_reg_edx
+
+	popq	%rdx
+	popq	%rcx
+	popq	%rbx
+
+	ret
+
+
+#endif /* ARCH_X86_64 */
 
 
 .data
 
-#ifdef ARCH_X86
+#if defined(ARCH_X86_32) || defined(ARCH_X86_64)
 
 	.globl x86_cpu_reg_eax
 x86_cpu_reg_eax:
@@ -130,6 +210,6 @@ x86_cpu_reg_ecx:
 x86_cpu_reg_edx:
 	.long 0
 
-#endif
+#endif /* ARCH_X86_32 || ARCH_X86_64 */
 
 

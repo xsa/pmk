@@ -86,7 +86,7 @@ unsigned char	 arch_name_to_id(char *);
  * x86 specific *
  ****************/
 
-#ifdef ARCH_X86
+#ifdef ARCH_X86_32
 
 #define X86_CPU_MASK_EXTFAM	0x0ff00000
 #define X86_CPU_MASK_EXTMOD	0x000f0000
@@ -189,7 +189,7 @@ void		 x86_cpu_cell_destroy(x86_cpu_cell *);
 char		*x86_get_std_cpu_vendor(prsdata *, char *);
 bool		 x86_get_cpuid_data(x86_cpu_cell *);
 bool		 x86_set_cpu_data(prsdata *, x86_cpu_cell *, htable *);
-#endif /* ARCH_X86 */
+#endif /* ARCH_X86_32 */
 
 #endif /* _DETECT_CPU_H_ */
 
