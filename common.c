@@ -43,6 +43,7 @@
 #include <sys/param.h>
 #include <dirent.h>
 #include <errno.h>
+#include <limits.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -66,7 +67,7 @@
 		- false when error or eof occured
 */
 
-bool get_line(FILE *fd, char *line, int lsize) {
+bool get_line(FILE *fd, char *line, size_t lsize) {
 	char	*p;
 
 	if (fgets(line, lsize, fd) != NULL) {
@@ -126,7 +127,7 @@ bool env_to_opt(char *env_name, pmkcmdopt *opt) {
 	return true on success
 */
 
-bool get_make_var(char *varname, char *result, int rsize) {
+bool get_make_var(char *varname, char *result, size_t rsize) {
 	FILE	*mfp,
 		*tfp;
 	bool	 rval;
@@ -199,6 +200,23 @@ debugf(MKVAR_FMT_MK, varname, MKVAR_FILE);
 
 	return(rval);
 }
+
+/*
+	split a string into a dynamic array (one separator)
+*/
+
+bool str_to_ulong(char *str, int base, long *value) {
+	char	*ep;
+
+	*value = strtoul(str, &ep, base);
+	if (*str == '\0' || *ep != '\0')
+		return(false); /* not a number */
+	if ((errno == ERANGE) && (*value == ULONG_MAX))
+		return(false); /* out of range */
+	
+	return(true);
+}
+
 
 /*
 	split a string into a dynamic array (one separator)
@@ -288,7 +306,7 @@ dynary *str_to_dynary_adv(char *str, char *seplst) {
 	returns true on success
 */
 
-bool find_file_dir(dynary *da, char *fname, char *fpath, int fplen) {
+bool find_file_dir(dynary *da, char *fname, char *fpath, size_t fplen) {
 	FILE		*fp;
 	bool		 found = false;
 	char		 tstr[MAXPATHLEN],
@@ -327,7 +345,7 @@ bool find_file_dir(dynary *da, char *fname, char *fpath, int fplen) {
 	returns true on success
 */
 
-bool find_file(dynary *da, char *fname, char *fpath, int fplen) {
+bool find_file(dynary *da, char *fname, char *fpath, size_t fplen) {
 	bool	rval = false;
 
 	if (find_file_dir(da, fname, fpath, fplen) == true) {
@@ -351,7 +369,7 @@ bool find_file(dynary *da, char *fname, char *fpath, int fplen) {
 	returns true if filename is found in one of the list's path
 */
 
-bool get_file_path(char *filename, char *path, char *storage, int size) {
+bool get_file_path(char *filename, char *path, char *storage, size_t size) {
 	bool	 rval = false;
 	dynary	*bplst;
 
@@ -630,7 +648,7 @@ FILE *tmp_open(char *tfile, char *mode, char *buf, size_t bsize) {
 	return : file structure or NULL
 */
 
-FILE *tmps_open(char *tfile, char *mode, char *buf, size_t bsize, int slen) {
+FILE *tmps_open(char *tfile, char *mode, char *buf, size_t bsize, size_t slen) {
 	int	fd;
 
 	/* copy file name in buf */
