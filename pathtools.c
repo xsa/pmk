@@ -271,9 +271,9 @@ bool abspath(char *base, char *rel, char *buffer) {
 		return(false);
 	}
 
-	strlcpy(tmp_buf, base, MAXPATHLEN); /* no check */
-	strlcat(tmp_buf, "/", MAXPATHLEN); /* no check */
-	if (strlcat_b(tmp_buf, rel, MAXPATHLEN) == false)
+	strlcpy(tmp_buf, base, sizeof(tmp_buf)); /* no check */
+	strlcat(tmp_buf, "/", sizeof(tmp_buf)); /* no check */
+	if (strlcat_b(tmp_buf, rel, sizeof(tmp_buf)) == false)
 		return(false);
 
 	return(chkpath(tmp_buf, buffer));
@@ -323,6 +323,9 @@ bool makepath(char *path, mode_t mode) {
 
 	/* work on a copy */
 	copy = strdup(path);
+	if (copy == NULL)
+		return(false);
+
 	pstr = copy;
 	pstr++; /* skip leading separator */
 	while (bexit != true) {
