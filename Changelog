@@ -1,3 +1,5 @@
+# snapshot 0.7.5
+
 30 Nov 2003 mipsator
  * added optional HEADER in CHECK_TYPE command.
  * updated pmkcfg.sh and pmkfile to check blkcnt_t correctly.
