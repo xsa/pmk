@@ -511,7 +511,7 @@ bool pmk_check_header(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 
 	if (unlink(ftmp) == -1) {
 		/* cannot remove temporary file */
-		errorf("Can not remove %s", ftmp);
+		errorf("cannot remove %s", ftmp);
 	}
 
 	if (incfunc == NULL) {
@@ -660,7 +660,7 @@ bool pmk_check_lib(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 
 	if (unlink(ftmp) == -1) {
 		/* cannot remove temporary file */
-		errorf("Can not remove %s", ftmp);
+		errorf("cannot remove %s", ftmp);
 	}
 
 	/* No need to check return here as binary could not exists */
@@ -1210,7 +1210,7 @@ bool pmk_check_type(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 
 	if (unlink(ftmp) == -1) {
 		/* cannot remove temporary file */
-		errorf("Can not remove %s", ftmp);
+		errorf("cannot remove %s", ftmp);
 	}
 
 	/* No need to check return here as binary could not exists */
