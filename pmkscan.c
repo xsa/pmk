@@ -39,9 +39,9 @@
 #include <regex.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
 
 #include "compat/pmk_string.h"
+#include "compat/pmk_unistd.h"
 #include "common.h"
 #include "dirent.h"
 #include "dynarray.h"

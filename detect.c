@@ -37,8 +37,8 @@
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
 
+#include "compat/pmk_unistd.h"
 #include "common.h"
 #include "detect.h"
 
