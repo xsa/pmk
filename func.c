@@ -569,10 +569,12 @@ bool pmk_check_lib(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 		 rval;
 	char	 cfgcmd[MAXPATHLEN],
 		 lib_buf[TMP_BUF_LEN] = "",
+		*main_libs,
 		*ccpath,
 		*libname,
 		*libfunc,
 		*target,
+		*libs,
 		*pstr;
 	dynary	*da;
 	int	 r,
@@ -610,6 +612,13 @@ bool pmk_check_lib(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 		}
 	}
 
+	/* check for alternative variable for LIBS */
+	libs = po_get_str(hash_get(ht, "LIBS"));
+	if (libs != NULL) {
+		/* init alternative variable */
+		hash_append(gdata->htab, libs, strdup(""), " "); /* XXX check ? */
+	}
+
 	/* get the language used */
 	pld = get_lang(ht, gdata);
 	if (pld == NULL) {
@@ -626,30 +635,8 @@ bool pmk_check_lib(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 		pmk_log("\tUse %s language with %s compiler.\n", pld->name, pld->comp);
 	}
 
-	/* use each element of LIB_PATH with -L */
-	pstr = (char *) hash_get(gdata->htab, PMKCONF_PATH_LIB);
-	if (pstr == NULL) {
-		/* OBSOLETE, check for BIN_PATH for compatibility with 6.0 */
-		pstr = (char *) hash_get(gdata->htab, PREMAKE_KEY_LIBPATH);
-		if (pstr == NULL) {
-			strlcpy(lib_buf, "", sizeof(lib_buf));
-		} else {
-			pmk_log("\tWARNING : LIB_PATH is obsolete, update pmk.conf with pmksetup.\n");
-		}
-	} else {
-		r = sizeof(lib_buf);
-		da = str_to_dynary(pstr, CHAR_LIST_SEPARATOR); /* XXX TODO PATH */
-		if (da == NULL) {
-			errorf("ARG XXX TODO");  /* XXX TODO PATH CHECK HERE */
-			return(false);
-		}
-
-		for (i=0 ; i < da_usize(da) ; i++) {
-			strlcat(lib_buf, " -L", r);
-			strlcat(lib_buf, da_idx(da, i), r);
-		}
-		da_destroy(da);
-	}
+	/* check for alternative variable for LIBS */
+	main_libs = hash_get(gdata->htab, "LIBS"); /* XXX check useful ? */
 
 	tfp = fopen(TEST_FILE_NAME, "w");
 	if (tfp != NULL) {
@@ -669,8 +656,9 @@ bool pmk_check_lib(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 	}
 
 	snprintf(cfgcmd, sizeof(cfgcmd), "%s %s -o %s -l%s %s >/dev/null 2>&1",
-						ccpath, lib_buf, BIN_TEST_NAME,
+						ccpath, main_libs, BIN_TEST_NAME,
 						libname, TEST_FILE_NAME);
+
 	/* get result */
 	r = system(cfgcmd);
 	if (r == 0) {
@@ -681,7 +669,18 @@ bool pmk_check_lib(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 		label_set(gdata->labl, cmd->label, true);
 
 		snprintf(lib_buf, sizeof(lib_buf), "-l%s", libname);
-		hash_append(gdata->htab, "LIBS", strdup(lib_buf), " "); /* XXX check */
+
+		/* check for alternative variable for LIBS */
+		if (libs != NULL) {
+			/* put result in special LIBS variable */
+			single_append(gdata->htab, libs, strdup(lib_buf)); /* XXX check */
+		} else {
+			/* put result in LIBS */
+			if (single_append(gdata->htab, "LIBS", strdup(lib_buf)) == false) {
+				errorf("hash add failed");
+				return(false);
+			}
+		}
 
 		rval = true;
 	} else {
