@@ -127,6 +127,39 @@ int da_push(dynary *da, char *str) {
 }
 
 /*
+	Pop the last value of the array
+	
+	da : dynamic array
+
+	return the last element or NULL
+*/
+
+char *da_pop(dynary *da) {
+	char	*p = NULL,
+		**tary;
+	size_t	gsize;
+
+	da->nextidx--;
+	p = da->pary[da->nextidx];
+	da->pary[da->nextidx] = NULL;
+
+	/* resize if allocated space is too big */
+	if ((da->nbcell - da->nextidx) > DYNARY_AUTO_GROW) {
+		gsize = da->nbcell - DYNARY_AUTO_GROW;
+
+		tary = realloc(da->pary, gsize * sizeof(char *));
+		if (tary == NULL) {
+			/* beware, da->pary is still allocated */
+			return (NULL);
+		}
+		da->pary = tary;
+		da->nbcell = gsize;
+	}
+
+	return(p);
+}
+
+/*
 	Get a value
 
 	da : dynamic array
