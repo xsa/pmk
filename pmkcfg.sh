@@ -206,7 +206,7 @@ if [ $usermode = 1 ]; then
 	else
 		mkf_sed 'BASE' "$base"
 	fi
-	mkf_sed 'CONFDIR' '$(BASE)/.pmk'
+	mkf_sed 'CONFDIR' '$(HOME)/.pmk'
 	mkf_sed 'BINDIR' '$(BASE)/bin'
 	mkf_sed 'SBINDIR' '$(BASE)/bin'
 	mkf_sed 'DATADIR' '$(CONFDIR)'
