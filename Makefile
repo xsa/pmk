@@ -113,6 +113,7 @@ install: all
 	$(SUDO) $(INSTALL) -m 644 samples/$(CONFIG) $(DESTDIR)$(DATADIR)
 	$(SUDO) $(INSTALL) -m 644 data/pmkscan.dat $(DESTDIR)$(DATADIR)
 	$(SUDO) $(INSTALL) -m 644 data/pmkcomp.dat $(DESTDIR)$(DATADIR)
+	$(SUDO) $(INSTALL) -m 644 data/pmkcfgtool.dat $(DESTDIR)$(DATADIR)
 	$(SUDO) $(INSTALL) -d -m 755 $(DESTDIR)$(MANDIR)/man1
 	$(SUDO) $(INSTALL) -m 444 man/$(PREMAKE).1 $(DESTDIR)$(MANDIR)/man1/$(PREMAKE).1
 	$(SUDO) $(INSTALL) -m 444 man/$(SCAN).1 $(DESTDIR)$(MANDIR)/man1/$(SCAN).1

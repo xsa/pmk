@@ -1,0 +1,50 @@
+# pmk configuration tools data
+
+# config tools with non standard options or specific name
+# means different than --version, --cflags and --libs
+
+# known compliant tools : glib-config
+
+# example
+#ADD_CFGTOOL {
+#	NAME = "module name"
+#	BINARY = "tool filename"
+#	VERSION = "version option"
+#	CFLAGS = "cflags option"
+#	LIBS = "libs option"
+#}
+
+
+# gtk+ is named gtk-config in place or gtk+-config
+ADD_CFGTOOL {
+	NAME = "gtk+"
+	BINARY = "gtk-config"
+#	VERSION = ""
+#	CFLAGS = ""
+#	LIBS = ""
+}
+
+ADD_CFGTOOL {
+	NAME = "libgnomevfs"
+	BINARY = "gnome-vfs-config"
+}
+
+ADD_CFGTOOL {
+	NAME = "imlib"
+	BINARY = "imlib-config"
+	CFLAGS = "--cflags-gdk"
+	LIBS = "--libs-gdk"
+}
+
+ADD_CFGTOOL {
+	NAME = "orbit-client"
+	BINARY = "orbit-config"
+	MODULE = "client"
+}
+
+ADD_CFGTOOL {
+	NAME = "orbit-server"
+	BINARY = "orbit-config"
+	MODULE = "server"
+}
+

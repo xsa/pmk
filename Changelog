@@ -1,3 +1,8 @@
+02 Jan 2004 mipsator
+ * added diverting from CHECK_PKG_CONFIG to CHECK_CONFIG.
+ * added data file for specific config tool options.
+ * added support for specific config tool options (huge).
+
 01 Jan 2004 mipsator
  * added pkg_cell_add() and pkg_mod_exists() in pkgconfig.
  * rewritten pkg_recurse() to use pkg_cell_add().

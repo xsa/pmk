@@ -1,7 +1,7 @@
 /* $Id$ */
 
 /*
- * Copyright (c) 2003 Damien Couderc
+ * Copyright (c) 2003-2004 Damien Couderc
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -95,6 +95,7 @@ typedef struct {
 typedef struct {
 	htable	*htab,
 		*labl;
+	void	*cfgt;
 	dynary	*tlist;
 	char	*ac_file,
 		*lang,
