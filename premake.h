@@ -33,6 +33,8 @@
 #ifndef _PREMAKE_H_
 #define _PREMAKE_H_
 
+#include "compat/stdbool.h"
+
 #ifndef SYSCONFDIR
 #	define SYSCONFDIR	"/etc"
 #endif
@@ -101,9 +103,5 @@
 #define TOK_CHK_BIN	 2
 #define TOK_CHK_INC	 3
 #define TOK_CHK_LIB	 4
-
-
-/* boolean type */
-typedef unsigned char bool;
 
 #endif /* _PREMAKE_H_ */
