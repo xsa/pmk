@@ -61,20 +61,20 @@ pmkscan
 
 pmkinstall
 -----------------------------------------------------------------------
-mips	~!	full rewrite
+mips	~	full rewrite
 			+ copy done
-			~ mode option
-				- suid and sgid bits ?
+			+ mode option
+				+ suid and sgid bits ?
 				+ missing operators (-=)
 			+ dir creation
 			+ owner
 			+ group
-			~ strip
+			+ strip
 dwecker			- backup ?
 
 
 pmkpkg
 -----------------------------------------------------------------------
-mips	~.	make specs, this tool should handle install and 
+mips	~	make specs, this tool should handle install and 
 			deinstall operations
 
