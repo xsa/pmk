@@ -2,6 +2,7 @@
  * fixed specific deinstall stuff in Makefile.
  * fixed setting of shared lib cflags.
  * fixed init of ac_file and lang in global data.
+ * added support for shared libs linking flags.
 
 # snapshot 0.7.11
 

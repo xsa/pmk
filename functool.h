@@ -49,6 +49,8 @@
 #define CFLG_NAME_LEN	64
 #define SHFLG_NAME_LEN	64
 
+#define SL_LDFLAG_VARNAME	"SLLDFLAGS"
+
 #define CHAR_VERSION_SEPARATOR	'.'
 
 

@@ -74,7 +74,8 @@ void compcell_destroy(comp_cell *pcc) {
 	free(pcc->descr);
 	free(pcc->c_macro);
 	free(pcc->v_macro);
-	free(pcc->slflags);
+	free(pcc->slcflags);
+	free(pcc->slldflags);
 	free(pcc);
 }
 
@@ -130,9 +131,16 @@ bool add_compiler(comp_data *pcd, htable *pht) {
 
 	pstr = po_get_str(hash_get(pht, "SLCFLAGS"));
 	if (pstr == NULL) {
-		pcell->slflags = strdup(""); /* XXX need better ? */
+		pcell->slcflags = strdup(""); /* XXX need better ? */
 	} else {
-		pcell->slflags = strdup(pstr);
+		pcell->slcflags = strdup(pstr);
+	}
+
+	pstr = po_get_str(hash_get(pht, "SLLDFLAGS"));
+	if (pstr == NULL) {
+		pcell->slldflags = strdup(""); /* XXX need better ? */
+	} else {
+		pcell->slldflags = strdup(pstr);
 	}
 
 	hash_update(pcd->cht, pcell->c_id, pcell); /* no need to strdup */ /* XXX check */
