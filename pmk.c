@@ -95,6 +95,11 @@ bool process_dyn_var(pmkdata *pgd, char *template) {
 	/* get template path */
 	/* NOTE : we use strdup to avoid problem with linux's dirname */
 	pstr = strdup(template);
+	if (pstr == NULL) {
+		free(pstr);
+		errorf(ERRMSG_MEM);
+		return(false);
+	}
 	strlcpy(stpath, dirname(pstr), sizeof(stpath));
 	free(pstr);
 
@@ -363,7 +368,9 @@ bool process_template(char *template, pmkdata *pgd) {
 	char	*plb,
 		*pbf,
 		*ptn,
+		*tptn,
 		*pfn,
+		*tpfn,
 		*ptmp,
 		 lbuf[MAXPATHLEN],
 		 buf[MAXPATHLEN],
@@ -376,7 +383,18 @@ bool process_template(char *template, pmkdata *pgd) {
 	pht = pgd->htab;
 
 	/* save template name */
-	ptn = strdup(basename(template));
+	tptn = basename(template);
+	if (tptn == NULL) {
+		errorf("couldn't extract the base portion of '%s' : %s.",
+			template, strerror(errno));
+		return(false);
+	}
+	ptn = strdup(tptn);
+	if (ptn == NULL) {
+		free(ptn);
+		errorf(ERRMSG_MEM);
+		return(false);
+	}	
 
 	/* get the file name */
 	if (strlcpy(lbuf, ptn, sizeof(lbuf)) >= sizeof(lbuf)) {
@@ -394,11 +412,27 @@ bool process_template(char *template, pmkdata *pgd) {
 	}
 
 	/* save generated file name */
-	pfn = strdup(basename(lbuf));
+	tpfn = basename(lbuf);
+	if (tpfn == NULL) {
+		errorf("couldn't extract the base portion of '%s' : %s.",
+			lbuf, strerror(errno));
+		return(false);
+	}
+	pfn = strdup(tpfn);
+	if (pfn == NULL) {
+		free(pfn);
+		errorf(ERRMSG_MEM);
+		return(false);
+	}
 
 	/* get relative path from srcdir */
 	/* NOTE : we use strdup to avoid problem with linux's dirname */
 	ptmp = strdup(template);
+	if (ptmp == NULL) {
+		free(ptmp);
+		errorf(ERRMSG_MEM);
+		return(false);
+	}
 	relpath(pgd->srcdir, dirname(ptmp), buf); /* XXX check ? */
 	free(ptmp);
 	/* apply to basedir */
@@ -559,7 +593,8 @@ bool parse_cmdline(char **val, int nbval, pmkdata *pgd) {
 				return(false);
 			}
 
-			if (hash_update(ht, opt.key, pstr) == HASH_ADD_FAIL) { /* no need to strdup */
+			/* no need to strdup */
+			if (hash_update(ht, opt.key, pstr) == HASH_ADD_FAIL) {
 				errorf("%s.", PRS_ERR_HASH);
 				rval = false;
 			}
@@ -666,11 +701,19 @@ int main(int argc, char *argv[]) {
 				case 'e' :
 					/* enable switch(es) */
 					enable_sw = strdup(optarg);
+					if (enable_sw == NULL) {
+						errorf(ERRMSG_MEM);
+						exit(EXIT_FAILURE);
+					}
 					break;
 
 				case 'd' :
 					/* disable switch(es) */
 					disable_sw = strdup(optarg);
+					if (disable_sw == NULL) {
+						errorf(ERRMSG_MEM);
+						exit(EXIT_FAILURE);
+					}
 					break;
 
 				case 'f' :
@@ -684,6 +727,11 @@ int main(int argc, char *argv[]) {
 					/* path of pmkfile is also the srcdir base */
 					/* NOTE : we use strdup to avoid problem with linux's dirname */
 					pstr = strdup(pgd->pmkfile);
+					if (pstr == NULL) {
+						free(pstr);
+						errorf(ERRMSG_MEM);
+						exit(EXIT_FAILURE);
+					}
 					strlcpy(pgd->srcdir, dirname(pstr), sizeof(pgd->srcdir)); /* XXX check ??? */
 					free(pstr);
 
@@ -754,7 +802,7 @@ int main(int argc, char *argv[]) {
 		if (parse_pmkconf(fp, pgd->htab, PRS_PMKCONF_SEP, process_opt) == false) {
 			/* parsing failed */
 			clean(pgd);
-			errorf("failed to parse '%s'.", PREMAKE_CONFIG_PATH);
+			errorf(ERRMSG_PARSE, PREMAKE_CONFIG_PATH);
 			exit(EXIT_FAILURE);
 		}
 		fclose(fp);
@@ -762,7 +810,7 @@ int main(int argc, char *argv[]) {
 	} else {
 		/* configuration file not found */
 		clean(pgd);
-		errorf("cannot parse '%s', run pmksetup.", PREMAKE_CONFIG_PATH);
+		errorf(ERRMSG_PARSE " Run pmksetup(8).", PREMAKE_CONFIG_PATH);
 		exit(EXIT_FAILURE);
 	}
 
@@ -814,7 +862,7 @@ int main(int argc, char *argv[]) {
 			if (parse_pmkconf(fp, pgd->htab, PRS_PMKCONF_SEP, process_opt) == false) {
 				/* parsing failed */
 				clean(pgd);
-				errorf("failed to parse '%s'.", pgd->ovrfile);
+				errorf(ERRMSG_PARSE, pgd->ovrfile);
 				exit(EXIT_FAILURE);
 			}
 			fclose(fp);
@@ -842,9 +890,9 @@ int main(int argc, char *argv[]) {
 	}
 
 	/* open log file */
-	if (pmk_log_open(PREMAKE_LOG) == false) {
+	if (pmk_log_open(PMK_LOG) == false) {
 		clean(pgd);
-		errorf("while opening '%s'.", PREMAKE_LOG);
+		errorf("while opening '%s'.", PMK_LOG);
 		exit(EXIT_FAILURE);
 	}
 

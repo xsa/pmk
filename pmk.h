@@ -70,8 +70,10 @@
 
 #define PMK_TMP_AC_CONF TMPDIR "/pmk_ac_XXXXXXXX"
 
-/* build logs */
-#define PMK_BUILD_LOG	"pmk_build.log"
+/* logs */
+#define PMK_LOG_EXT	".log"
+#define PMK_LOG		"pmk" PMK_LOG_EXT
+#define PMK_BUILD_LOG	"pmk_build" PMK_LOG_EXT
 
 
 /* pmk data */

@@ -42,11 +42,11 @@
 #include "pmk_obj.h"
 
 /* We include sys/param.h to get MAXPATHLEN.
-   This is known to work under following operanding systems :
+   This is known to work under following operating systems:
 	OpenBSD
 	FreeBSD
 	NetBSD
-	MACOSX
+	Mac OS X
 	Solaris
 	SunOS
 	HP-UX
@@ -63,7 +63,7 @@
 
 
    Comments about this stuff is welcome. If your system is not
-   supported then take contact with us to fix it.
+   supported then get in touch with us to fix it.
 */
 #include <sys/param.h>
 #ifndef MAXPATHLEN
@@ -118,7 +118,6 @@
 #define PREMAKE_CONFIG		"pmk.conf"
 #define PREMAKE_FILENAME	"pmkfile"
 #define PREMAKE_PKGFILE		"pkgfile"
-#define PREMAKE_LOG		"pmk.log"
 
 #define PREMAKE_CONFIG_PATH	CONFDIR "/" PREMAKE_CONFIG
 #define PREMAKE_CONFIG_PATH_BAK	PREMAKE_CONFIG_PATH ".bak"
