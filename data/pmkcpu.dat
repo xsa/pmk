@@ -28,7 +28,7 @@ ADD_CPU_FAMILY {
 
 ADD_CPU_FAMILY {
 	NAME = "ppc"
-	LIST = ("ppc","powerpc","Power Macintosh")
+	LIST = ("ppc","powerpc","Power Macintosh","macppc")
 }
 
 ADD_CPU_FAMILY {
