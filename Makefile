@@ -46,12 +46,11 @@ SC_OBJS=	$(SCAN).o common.o compat.o dynarray.o parse.o hash.o pmk_obj.o
 .c.o:
 	$(CC) $(CFLAGS) -c $<
 
+all: $(PREMAKE) $(SETUP) $(SCAN)
+
 # specific object files
 $(SCAN).o:
 	$(CC) $(CFLAGS) -DDATADIR=\"$(DATADIR)\" -c $(SCAN).c
-
-
-all: $(PREMAKE) $(SETUP) $(SCAN)
 
 config:
 	@if (pmk -v >/dev/null); then \
