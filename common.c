@@ -193,8 +193,10 @@ debugf(MKVAR_FMT_MK, varname, MKVAR_FILE);
 
 	if (unlink(MKVAR_FILE) == -1) {
 		/* cannot remove temporary file */
+#ifdef MKVAR_DEBUG
 		errorf("Cannot remove temporary file: %s : %s", 
 			mfn, strerror(errno));
+#endif
 	}
 
 	return(rval);
