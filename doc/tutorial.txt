@@ -15,15 +15,15 @@ $Id$
 
 As make is using a makefile, the pmk binary is using a pmkfile. This
 file contains a set of commands that perform checks of source
-dependencies. Following to that, template files are processed to build
-final after tags substitutions.
+dependencies. Following to that, template files are processed to generate
+a final file after tags substitutions.
 
 
 
 2) The settings
    ------------
 
-The first command you will found in a pmkfile is named SETTINGS. Its
+The first command you will find in a pmkfile is named SETTINGS. Its
 function is to define global settings. To begin we are going to use
 only one template for the makefile. See the following example:
 
@@ -54,15 +54,15 @@ they will be replaced by the variables values.
 4) First check
    -----------
 
-Lets say that we have a hello.c file that need for example the string
-header. For that we use the CHECK_HEADER command like following:
+Lets say that we have a hello.c file that needs the string header
+For that we use the CHECK_HEADER command like following:
 
 CHECK_HEADER(header_misc_code) {
 	NAME = "string.h"
 }
 
-The NAME option gives the header to check. Lets see what gives our
-actual pmkfile. First create the template with the following command:
+The NAME option contains the header to check. Lets see what our actual
+pmkfile contains. First we create the template with the following command:
 
 echo "PACKAGE=@PACKAGE@" > Makefile.in
 echo "VERSION=@VERSION@" >> Makefile.in
@@ -104,7 +104,7 @@ __[FILE]________________________________________________________[END]__
 5) Using external libraries
    ------------------------
 
-Our hello program also need the curses library. To check if this
+Our hello program also needs the curses library. To check if this
 library is present we will use the following command:
 
 CHECK_LIB(lib_curses) {
@@ -122,7 +122,7 @@ __[OUTPUT]____________________________________________________[BEGIN]__
 
 __[OUTPUT]______________________________________________________[END]__
 
-We could also check for a specific fonction in the library:
+We could also check for a specific function in the library:
 
 CHECK_LIB(lib_curses) {
 	NAME = "curses"
@@ -148,10 +148,10 @@ We'll see later how to use an alternate variable.
 6) Playing with pkg-config support
    -------------------------------
 
-Let's say that our package has the gtkhello.c source that build a gtk
-version of hello program. That said we need to check if gtk is present
+Let's say that our package has the gtkhello.c source that builds a gtk
+version of our hello program. That said we need to check if gtk is present
 on the system. We have two possibilities to do that: first by using
-pkg-config or secondly by checking the library.
+pkg-config or second by checking the library.
 
 We are going to learn how to check gtk via pkgconfig support:
 
@@ -191,7 +191,7 @@ __[OUTPUT]____________________________________________________[BEGIN]__
 __[OUTPUT]______________________________________________________[END]__
 
 As you can see the compiler and linker flags are automatically stored
-in the default CFLAGS and LIBS variables. Your can provide alternate
+in the default CFLAGS and LIBS variables. You can provide alternate
 variables with the CFLAGS and LIBS options like following:
 
 CHECK_PKG_CONFIG(pc_gtk) {
@@ -227,7 +227,7 @@ CHECK_TYPE(type_bool_isoc) {
 	NAME = "_Bool"
 }
 
-As my compiler is not compliant i got an error:
+As my compiler is not fully ISO C99 compliant i get an error:
 
 __[OUTPUT]____________________________________________________[BEGIN]__
 
@@ -238,7 +238,7 @@ Error : failed to find type '_Bool'.
 __[OUTPUT]______________________________________________________[END]__
 
 This test could be useful to detect compilers that are ISO C99
-compliant. For those who are not we could include an external
+compliant. For those which are not we could include an external
 definition of this type. That said, pmk is exiting with an error by
 default if a check fails. To avoid this we'll use the REQUIRED option:
 
@@ -306,7 +306,7 @@ __[FILE]________________________________________________________[END]__
 
 The @DEF___BOOL@ has been replaced by "#undef HAVE__BOOL". Now we can
 add the code to include the definition of _Bool type if it does not
-exists.
+exist.
 
 __[FILE]______________________________________________________[BEGIN]__
 /* ISO C compatibility header */
