@@ -61,6 +61,9 @@
 #define	ECHO_NL		"\\n"
 #define	ECHO_HT		"\\t"
 
+#define STR_FOR_REMOVE	"RESERVED__FOR__REMOVAL"
+
+
 /*
  * Look for location of some predefined binaries.
  * Be sure to update this list in premake.h as well.
@@ -84,6 +87,7 @@ static  char *binaries[MAXBINS][2] = {
 
 
 /* Local functions declaration */
+bool	gather_data(htable *);
 bool	check_opt(htable *, prsopt *);
 int	open_tmp_config(void);
 int	close_tmp_config(void);

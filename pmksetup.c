@@ -74,36 +74,70 @@ int	nbpredef = sizeof(predef) / sizeof(hpair);
  */
 int main(int argc, char *argv[]) {
 	FILE		*config;
+	bool		 process_clopts = false;
+	htable		*ht;
 	int		 ch,
 			 error = 0;
-	htable		*ht;
+	prsopt		 opt;
 	
 	extern int	 optind,
 			 errno;
 
 
 #ifndef PMK_USERMODE
-	uid_t		 uid;
-
 	/* pmksetup(8) must be run as root */
-	if ((uid = getuid()) != 0) {
+	if (getuid() != 0) {
 		errorf("you must be root.");
 		exit(EXIT_FAILURE);
 	}
 #endif
 
 	__progname = argv[0];
-	
-	while ((ch = getopt(argc, argv, "hvV")) != -1)
+
+	if ((ht = hash_init(MAX_CONF_OPT)) == NULL) {
+		errorf("cannot create hash table.");
+		exit(EXIT_FAILURE);
+	}
+
+	/*while ((ch = getopt(argc, argv, "a:hr:u:vV")) != -1)*/
+	while ((ch = getopt(argc, argv, "hr:u:vV")) != -1)
 		switch(ch) {
+			case 'r' :
+				/* mark to be deleted in hash */
+				if (hash_update_dup(ht, optarg, STR_FOR_REMOVE) == HASH_ADD_FAIL) {
+					errorf("hash update failed.");
+					exit(EXIT_FAILURE);
+				}
+
+				process_clopts = true;
+				break;
+
+			case 'u' :
+				if (parse_clopt(optarg, &opt, PRS_PMKCONF_SEP) == false) {
+					errorf("bad argument for -a option: %s.", optarg);
+					exit(EXIT_FAILURE);
+				}
+
+				/* add in hash */
+				if (hash_update_dup(ht, opt.key, opt.value) == HASH_ADD_FAIL) {
+					errorf("hash update failed.");
+					exit(EXIT_FAILURE);
+				}
+				/* XXX TODO destroy data */
+
+				process_clopts = true;
+				break;
+
 			case 'v' :
 				fprintf(stderr, "%s\n", PREMAKE_VERSION);
 				exit(EXIT_SUCCESS);
 				break;
+
 			case 'V' :
 				if (0 == verbose_flag)
 					verbose_flag = 1;
 				break;
+
 			case '?' :
 			default :
 				usage();
@@ -112,11 +146,6 @@ int main(int argc, char *argv[]) {
 	argc -= optind;
 	argv += optind;
 
-
-	if ((ht = hash_init(MAX_CONF_OPT)) == NULL) {
-		errorf("cannot create hash table.");
-		exit(EXIT_FAILURE);
-	}
 
 	printf("PMKSETUP version %s", PREMAKE_VERSION);
 #ifdef DEBUG
@@ -134,25 +163,10 @@ int main(int argc, char *argv[]) {
 		}
 	}
 
-	printf("==> Looking for default parameters...\n");
-	if ((get_env_vars(ht) == -1) || (get_binaries(ht) == -1))
-		exit(EXIT_FAILURE);
-
-	if (predef_vars(ht) == -1) {
-		errorf("predefined variables."); 
-		exit(EXIT_FAILURE);
-	}
-
-	check_libpath(ht);
-
-	if (byte_order_check(ht) == false) {
-		errorf("failure in byte order check.");
-		exit(EXIT_FAILURE);
-	}
-
-	if (check_echo(ht) == -1) {
-		errorf("failure in echo check.");
-		exit(EXIT_FAILURE);
+	if (process_clopts == false) {
+		/* standard behavior */
+		if (gather_data(ht) == false)
+			exit(EXIT_FAILURE);
 	}
 
 	if ((open_tmp_config() == -1))
@@ -162,8 +176,13 @@ int main(int argc, char *argv[]) {
 	if ((config = fopen(PREMAKE_CONFIG_PATH, "r")) != NULL) {
 		printf("==> Configuration file found: %s\n", PREMAKE_CONFIG_PATH);
 		/* XXX FIXME TODO check ? */
-		parse_pmkconf(config, ht, PRS_PMKCONF_SEP, check_opt);
-		fclose(config);
+		if (parse_pmkconf(config, ht, PRS_PMKCONF_SEP, check_opt) == false) {
+			fclose(config);
+			errorf("parsing failed.");
+			exit(EXIT_FAILURE);
+		} else {
+			fclose(config);
+		}
 	} else {
 		printf("==> Configuration file not found, generating one...\n");
 	}
@@ -199,6 +218,37 @@ int main(int argc, char *argv[]) {
 	return(0);
 }
 
+/*
+ * gathering of system data, predefinied data, ...
+ */
+
+bool gather_data(htable *pht) {
+	printf("==> Looking for default parameters...\n");
+
+	/* gather env variables and look for specific binaries */
+	if ((get_env_vars(pht) == -1) || (get_binaries(pht) == -1))
+		return(false);
+
+	/* set predifined variables */
+	if (predef_vars(pht) == -1) {
+		errorf("predefined variables."); 
+		return(false);
+	}
+
+	check_libpath(pht);
+
+	if (byte_order_check(pht) == false) {
+		errorf("failure in byte order check.");
+		return(false);
+	}
+
+	if (check_echo(pht) == -1) {
+		errorf("failure in echo check.");
+		return(false);
+	}
+
+	return(true);
+}
 
 /*
  * write remaining data
@@ -218,7 +268,12 @@ void write_new_data(htable *ht) {
 		/* processing remaining keys */
 		for(i = 0 ; i < phk->nkey ; i++) {
 			val = (char *) hash_get(ht, phk->keys[i]);
-			fprintf(sfp, PMKSTP_WRITE_FORMAT, phk->keys[i], CHAR_ASSIGN_UPDATE, val);
+
+			/* check if this key is marked for being removed */
+			if (strncmp(val, STR_FOR_REMOVE, sizeof(STR_FOR_REMOVE)) != 0) {
+				/* add value */
+				fprintf(sfp, PMKSTP_WRITE_FORMAT, phk->keys[i], CHAR_ASSIGN_UPDATE, val);
+			}
 		}
 
 		hash_free_hkeys(phk);
@@ -266,12 +321,19 @@ bool check_opt(htable *pht, prsopt *popt) {
 		return(true);
 	}
 
-	if ((recval = (char *) hash_get(pht, popt->key)) != NULL) {
+	recval = (char *) hash_get(pht, popt->key);
+	if (recval != NULL) {
 		/* checking the VAR<->VALUE separator */
 		switch (popt->opchar) {
 			case CHAR_ASSIGN_UPDATE :
-				/* get newer value */
-				fprintf(sfp, PMKSTP_WRITE_FORMAT, popt->key, CHAR_ASSIGN_UPDATE, recval);
+				/* check if this key is marked for being removed */
+				if (strncmp(recval, STR_FOR_REMOVE, sizeof(STR_FOR_REMOVE)) != 0) {
+					/* update value */
+					fprintf(sfp, PMKSTP_WRITE_FORMAT, popt->key, CHAR_ASSIGN_UPDATE, recval);
+				} else {
+					verbosef("Removing '%s'", popt->key);
+				}
+
 				hash_delete(pht, popt->key);
 				break;
 
@@ -728,11 +790,15 @@ void verbosef(const char *fmt, ...) {
  * pmksetup(8) usage
  */
 void usage(void) {
-	fprintf(stderr, "Usage: %s [options]\n", __progname);
-	fprintf(stderr, "Options:\n");
-	fprintf(stderr, "  -h	Display this help menu\n"); 
-	fprintf(stderr, "  -v	Display version number\n");
-	fprintf(stderr, "  -V	Verbose, display debugging messages\n");
+	/*fprintf(stderr, "Usage: %s [-hvV] [-a var=val] "*/
+	fprintf(stderr, "Usage: %s [-hvV] "
+		"[-r var] [-u var=val]\n", __progname);
+	/*fprintf(stderr, "\t-a var=val   Append to a variable in pmk.conf\n");*/
+	fprintf(stderr, "\t-r var       Remove a variable in pmk.conf\n");
+	fprintf(stderr, "\t-u var=val   Update a variable in pmk.conf\n");
+	fprintf(stderr, "\t-h           Display this help menu\n"); 
+	fprintf(stderr, "\t-v           Display version number\n");
+	fprintf(stderr, "\t-V           Verbose, display debugging messages\n");
 	exit(EXIT_FAILURE);
 }
 
