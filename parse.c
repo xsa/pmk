@@ -62,14 +62,14 @@ prsdata *prsdata_init(void) {
 	pdata = (prsdata *) malloc(sizeof(prsdata));
 	if (pdata != NULL) {
 		pdata->linenum = 0;
-		pdata->tree = NULL;
+		pdata->tree = prsnode_init();
 	}
 
 	return(pdata);
 }
 
 /*
-	free space allocated by parsing structure
+	free space allocated by parsing data structure
 
 	pdata : structure to clean
 */
@@ -77,6 +77,42 @@ prsdata *prsdata_init(void) {
 void prsdata_destroy(prsdata *pdata) {
 	prsnode_destroy(pdata->tree);
 	free(pdata);
+}
+
+/*
+	initialize parsing engine structure
+
+	return : prseng structure
+*/
+
+prseng *prseng_init(void) {
+	prseng	*peng;
+
+	peng = (prseng *) malloc(sizeof(prseng));
+	if (peng != NULL) {
+		peng->fp = NULL;
+		peng->eof = false;
+		peng->prscur = NULL;
+		peng->phtkw = NULL;
+		peng->linenum = 1;
+		peng->offset = 0;
+		peng->curnode = NULL;
+	}
+
+	return(peng);
+}
+
+/*
+	free space allocated by parsing engine structure
+
+	pdata : structure to clean
+*/
+
+void prseng_destroy(prseng *peng) {
+	/* destroy keyword hash table */
+	hash_destroy(peng->phtkw);
+	/* free structure */
+	free(peng);
 }
 
 /*
@@ -339,6 +375,77 @@ bool prs_get_line(FILE *fp, char *line, size_t lsize) {
 }
 
 /*
+        fill parsing engine's buffer
+
+        XXX
+
+        return:
+                - true: buffer filled
+                - false: end of file or error
+*/
+
+bool prs_fill_buf(prseng *peng) {
+	size_t	 s;
+
+	if (peng->prscur == NULL) {
+#ifdef DEBUG_PRS
+		debugf("prs_fill_buf(): init offset.");
+#endif
+		/* initialise offset */
+		peng->offset = 0;
+	} else {
+#ifdef DEBUG_PRS
+		/*debugf("prs_fill_buf(): scurs = '%s'.", scurs);*/
+#endif
+		/* compute offset */
+		peng->offset = peng->prscur - peng->prsbuf + peng->offset;
+	}
+
+#ifdef DEBUG_PRS
+		debugf("prs_fill_buf(): offset = %d.", peng->offset);
+#endif
+
+	/* set the reading pointer at desired offset */
+	fseek(peng->fp, peng->offset, SEEK_SET);
+
+	/* fill buffer with size - 1 characters */
+	s = fread((void *) peng->prsbuf, sizeof(char), (sizeof(peng->prsbuf ) - 1), peng->fp);
+#ifdef DEBUG_PRS
+	debugf("prs_fill_buf(): read %d chars", s);
+#endif
+
+	/* put EOS right after the last read char */
+	peng->prsbuf[s] = CHAR_EOS;
+#ifdef DEBUG_PRS
+	debugf("prs_fill_buf(): set prsbuf[%d] to End Of String", s);
+#endif
+
+	/* rewind cursor to the beginning of the buffer */
+	peng->prscur = (char *)peng->prsbuf;
+
+	/* ferror ? */
+	if (ferror(peng->fp) != 0) {
+#ifdef DEBUG_PRS
+		debugf("prs_fill_buf(): ferror XXX");
+#endif
+		return(false);
+	}
+
+	if (feof(peng->fp) != 0) {
+		peng->eof = true;
+#ifdef DEBUG_PRS
+		debugf("prs_fill_buf(): set end of file flag");
+#endif
+	}
+
+#ifdef DEBUG_PRS
+	/*debugf("prs_fill_buf(): return = '%s'", peng->prscur);*/
+#endif
+	/* buffer filled, return pointer to the first character */
+	return(true);
+}
+
+/*
 	create hash table with keyword structures
 
 	kwtab : keyword table
@@ -382,6 +489,59 @@ char *skip_blank(char *pstr) {
 		pstr++;
 	}
 	return(pstr);
+}
+
+/*
+	skip useless text (blanks, comments, empty lines)
+
+	pstr: starting pointer
+
+	return: start of non useless text
+*/
+
+void skip_useless(prseng *peng) {
+	bool	 loop = true;
+
+#ifdef DEBUG_PRS
+	debugf("skip_useless() : process start on line %d", peng->linenum);
+#endif
+	/*pstr = peng->prscur;*/
+	while (loop == true) {
+		/* skip blanck characters */
+		while (isblank(*peng->prscur) != 0) {
+			peng->prscur++;
+		}
+
+		switch (*peng->prscur) {
+			case PMK_CHAR_COMMENT:
+#ifdef DEBUG_PRS
+				debugf("skip_useless() : skip comment on line %d.", peng->linenum);
+				/*debugf("skip_useless() : comment : '%s'.", peng->prscur);*/
+#endif
+				/* comment is one line length,
+				 * look for the next end of line */
+				peng->prscur = strchr(peng->prscur, CHAR_CR);
+				/* don't break to use following
+				 * incrementation to skip end of line */
+
+			case CHAR_CR:
+#ifdef DEBUG_PRS
+				debugf("skip_useless() : found new line at %d.", peng->linenum);
+#endif
+				peng->prscur++;
+				peng->linenum++;
+				break;
+
+			default:
+				/* found non useless char */
+				loop = false;
+		}
+	}
+
+	/*peng->prscur = pstr;*/
+#ifdef DEBUG_PRS
+	debugf("skip_useless() : process ended on line %d", peng->linenum);
+#endif
 }
 
 /*
@@ -510,11 +670,11 @@ char *parse_quoted(char *pstr, pmkobj *po, size_t size) {
 	}
 
 	pbuf = buffer;
-	while ((*pstr != PMK_CHAR_QUOTE_END) && (*pstr != CHAR_EOS)) {
+	while ((*pstr != PMK_CHAR_QUOTE_END) && (*pstr != CHAR_CR) && (*pstr != CHAR_EOS)) {
 		/* found escape character */
 		if (*pstr == PMK_CHAR_ESCAPE) {
 			pstr++;
-			if (*pstr == CHAR_EOS) {
+			if ((*pstr == CHAR_CR) || (*pstr == CHAR_EOS)) {
 				/* misplaced escape character */
 				strlcpy(parse_err, "trailing escape character.", sizeof(parse_err));
 				return(NULL);
@@ -760,56 +920,60 @@ char *parse_data(char *pstr, pmkobj *po, size_t size) {
 }
 
 /*
-	parse a command
+        parse command header
 
-	line : line to parse
-	phkw : keyword hash table 
-
-	return : parsing cell structure
+        XXX
 */
 
-prscell *parse_cell(char *line, htable *phkw) {
+prscell *parse_cmd_header(prseng *peng, prsnode *pnode) {
 	char	 name[CMD_LEN],
 		*pstr;
 	prscell	*pcell;
 	prskw	*pkw;
 
-	pstr = parse_identifier(line, name, sizeof(name));
+	pstr = parse_identifier(peng->prsbuf, name, sizeof(name));
 	if (pstr == NULL) {
 		strlcpy(parse_err, "command parsing failed.", sizeof(parse_err));
 		return(NULL);
 	}
 #ifdef DEBUG_PRS
-	debugf("command = '%s'", name);
+	debugf("parse_cmd_header(): cmd name = '%s'", name);
 #endif
 
-	/* set token */
-	pkw = hash_get(phkw, name);
+	/* check validity of the command */
+	pkw = hash_get(peng->phtkw, name);
 	if (pkw != NULL) {
+		/* command ok, creating cell */
 		pcell = prscell_init(pkw->token, pkw->type, pkw->subtoken);
 		if (pcell == NULL) {
 			strlcpy(parse_err, "pcell init failed.", sizeof(parse_err));
 			return(NULL);
 		}
 #ifdef DEBUG_PRS
-		debugf("token = %d", pcell->token);
+		debugf("parse_cmd_header(): cmd token = %d", pcell->token);
+		debugf("parse_cmd_header(): cmd type = %d", pcell->type);
 #endif
 	} else {
+		/* unknown command */
 		strlcpy(parse_err, "unknown command.", sizeof(parse_err));
 		return(NULL);
 	}
 
+	/* look for a label */
 	if (*pstr == PMK_CHAR_LABEL_START) {
+		/* label delimiter found */
 		pstr++;
+		/* get label name */
 		pstr = parse_label(pstr, pcell->label, sizeof(pcell->label));
 		if (pstr == NULL) {
 			strlcpy(parse_err, "label parsing failed.", sizeof(parse_err));
 			return(NULL);
 		}
 #ifdef DEBUG_PRS
-		debugf("label = '%s'", pcell->label);
+		debugf("parse_cmd_header(): cmd label = '%s'", pcell->label);
 #endif
 
+		/* check label's ending delimiter */
 		if (*pstr != PMK_CHAR_LABEL_END) {
 			/* label name must be immediately followed by closing delimiter */
 			strlcpy(parse_err, "label parsing failed.", sizeof(parse_err));
@@ -818,10 +982,14 @@ prscell *parse_cell(char *line, htable *phkw) {
 			pstr ++;
 		}
 #ifdef DEBUG_PRS
+		debugf("parse_cmd_header(): parsed command '%s' with label '%s'", name, pcell->label);
 	} else {
-		strlcpy(pcell->label, "", sizeof(pcell->label));
+		debugf("parse_cmd_header(): parsed command '%s' with no label", name);
 #endif
 	}
+
+
+	/* look for command block starting sequence */
 
 	if (*pstr != ' ') {
 		strlcpy(parse_err, PRS_ERR_UNKNOWN, sizeof(parse_err));
@@ -837,15 +1005,16 @@ prscell *parse_cell(char *line, htable *phkw) {
 		pstr++;
 	}
 
-	if (*pstr != CHAR_EOS) {
+	if (*pstr != CHAR_CR) {
 		strlcpy(parse_err, PRS_ERR_TRAILING, sizeof(parse_err));
 		return(NULL);
 	}
 
-#ifdef DEBUG_PRS
-	debugf("command '%s' with label '%s'", name, pcell->label);
-#endif
-	/* everything is ok */
+	/* add cell in the node */
+	prsnode_add(pnode, pcell); /* XXX check */
+	
+	peng->prscur = pstr;
+
 	return(pcell);
 }
 
@@ -864,7 +1033,7 @@ bool parse_opt(char *line, prsopt *popt, char *seplst) {
 	pmkobj	 po;
 
 #ifdef DEBUG_PRS
-	debugf("line = '%s'", line);
+	debugf("parse_opt() : line = '%s'", line);
 #endif
 
 	pstr = parse_key(line, &po, sizeof(popt->key));
@@ -877,7 +1046,7 @@ bool parse_opt(char *line, prsopt *popt, char *seplst) {
 	}
 
 #ifdef DEBUG_PRS
-	debugf("key = '%s'", popt->key);
+	debugf("parse_opt() : key = '%s'", popt->key);
 #endif
 
 	pstr = skip_blank(pstr);
@@ -891,7 +1060,7 @@ bool parse_opt(char *line, prsopt *popt, char *seplst) {
 		pstr++;
 	}
 #ifdef DEBUG_PRS
-	debugf("assign = '%c'", popt->opchar);
+	debugf("parse_opt() : assign = '%c'", popt->opchar);
 #endif
 
 	pstr = skip_blank(pstr);
@@ -911,16 +1080,16 @@ bool parse_opt(char *line, prsopt *popt, char *seplst) {
 #ifdef DEBUG_PRS
 	switch (popt->value->type) {
 		case PO_BOOL :
-			debugf("value = *BOOL*");
+			debugf("parse_opt() : value = *BOOL*");
 			break;
 		case PO_STRING :
-			debugf("value = '%s'", popt->value->data);
+			debugf("parse_opt() : value = '%s'", popt->value->data);
 			break;
 		case PO_LIST :
-			debugf("value = (*LIST*)");
+			debugf("parse_opt() : value = (*LIST*)");
 			break;
 		default :
-			debugf("value = !unknown type!");
+			debugf("parse_opt() : value = !unknown type!");
 			break;
 	}
 #endif
@@ -929,6 +1098,83 @@ bool parse_opt(char *line, prsopt *popt, char *seplst) {
 		strlcpy(parse_err, PRS_ERR_TRAILING, sizeof(parse_err));
 		return(false);
 	}
+
+	return(true);
+}
+
+bool parse_opt_new(prseng *peng, prsopt *popt, char *seplst) {
+	char	*pstr;
+	pmkobj	 po;
+
+#ifdef DEBUG_PRS
+	/*debugf("parse_opt_new() : line = '%s'", peng->prscur);*/
+#endif
+
+	pstr = parse_key(peng->prscur, &po, sizeof(popt->key));
+	if (pstr == NULL) {
+		strlcpy(parse_err, PRS_ERR_SYNTAX, sizeof(parse_err));
+		return(false);
+	} else {
+		strlcpy(popt->key, po.data, sizeof(popt->key));
+		free(po.data);
+	}
+
+#ifdef DEBUG_PRS
+	debugf("parse_opt_new() : key = '%s'", popt->key);
+#endif
+
+	pstr = skip_blank(pstr);
+
+	/* check if character is in separator list */
+	if (strchr(seplst, *pstr) == NULL) {
+		strlcpy(parse_err, PRS_ERR_SYNTAX, sizeof(parse_err));
+		return(false);
+	} else {
+		popt->opchar = *pstr;
+		pstr++;
+	}
+#ifdef DEBUG_PRS
+	debugf("parse_opt_new() : assign = '%c'", popt->opchar);
+#endif
+
+	pstr = skip_blank(pstr);
+
+	popt->value = (pmkobj *) malloc(sizeof(pmkobj));
+	if (popt->value == NULL) {
+		strlcpy(parse_err, PRS_ERR_ALLOC, sizeof(parse_err));
+		return(false);
+	}
+
+	pstr = parse_data(pstr, popt->value, OPT_VALUE_LEN);
+	if (pstr == NULL) {
+		strlcpy(parse_err, PRS_ERR_SYNTAX, sizeof(parse_err));
+		return(false);
+	}
+
+#ifdef DEBUG_PRS
+	switch (popt->value->type) {
+		case PO_BOOL :
+			debugf("parse_opt_new() : value = *BOOL*");
+			break;
+		case PO_STRING :
+			debugf("parse_opt_new() : value = '%s'", popt->value->data);
+			break;
+		case PO_LIST :
+			debugf("parse_opt_new() : value = (*LIST*)");
+			break;
+		default :
+			debugf("parse_opt_new() : value = !unknown type!");
+			break;
+	}
+#endif
+
+	/*if (*pstr != CHAR_EOS) {                                        */
+	/*        strlcpy(parse_err, PRS_ERR_TRAILING, sizeof(parse_err));*/
+	/*        return(false);                                          */
+	/*}                                                               */
+
+	/* update cursor */
+	peng->prscur = pstr;
 
 	return(true);
 }
@@ -986,204 +1232,215 @@ bool parse_clopt(char *line, prsopt *popt, char *seplst) {
 }
 
 /*
-	parse node
+        parse a block of options
 
-	fp : file structure
-	pdata : parsing data structure
-	phkw : keyword hash table
-	pcell : parsing cell structure
-
-	return : boolean
+        XXX
 */
 
-bool parse_node(FILE *fp, prsdata *pdata, htable *phkw, prscell *pcell) {
+bool parse_opt_block(prsdata *pdata, prseng *peng, prscell *pcell, bool chk_delim) {
 	bool	 loop = true;
-	char	 buf[MAX_LINE_LEN],
-		*pbuf;
 	prscell	*ncell;
-	prsnode *pnode;
+	prsnode	*pnode;
 	prsopt	 opt,
 		*nopt;
 
+	/*pstr = peng->prscur; |+ XXX should take beginning of buffer ? useless ? +|*/
+
 	pnode = pcell->data;
 
-	if (pnode->token == PRS_TOK_NULL) {
-		/* XXX i'm unable to remember what i wanted to put as comment :) */
-		return(parse_line(fp, pdata, phkw, pnode));
+	if ((pcell->type == PRS_KW_NODE) && (pnode->token == PRS_TOK_NULL)) {
+		/* found a block node (like for example IF command) => parse the block */
+		return(parse_cmd_block(pdata, peng, pnode, false));
 	} else {
-		while ((loop == true) && (prs_get_line(fp, buf, sizeof(buf)) == true)) {
-			pbuf = buf;
+		while (loop == true) {
+			/* skip useless text */
+			skip_useless(peng);
+			/* update buffer window */
+			prs_fill_buf(peng); /* XXX check */
 
-			/* update current line number */
-			pdata->linenum++;
+			switch(*peng->prscur) {
+				case PMK_CHAR_COMMAND_END :
+#ifdef DEBUG_PRS
+					debugf("parse_opt_block() : found end of block character.");
+#endif
+					peng->prscur++;
 
-			/* check first character */
-			switch (*pbuf) {
-				case CHAR_COMMENT :
-				case CHAR_EOS :
-					/* empty line */
+					if (chk_delim == true) {
+						/* XXX should return(false) instead ?*/
+						loop = false;
+					} else {
+						/* XXX should not found that ? */
+						return(false);
+					}
 					break;
 
-				case PMK_CHAR_COMMAND_END :
-					loop = false;
+				case CHAR_EOS :
+					if (chk_delim == true) {
+						/* delimiter not found */
+						return(false);
+					} else {
+						/* main loop, no delimiter */
+						return(true);
+					}
 					break;
 
 				default :
-					if (parse_opt(pbuf, &opt, PRS_PMKFILE_SEP) == false) {
+#ifdef DEBUG_PRS
+					debugf("parse_opt_block() : calling parse_opt_new()");
+#endif
+					/* XXX XXX parse_opt does not update frame pointer */
+					if (parse_opt_new(peng, &opt, PRS_PMKFILE_SEP) == false) {
 						errorf("line %d : %s", pdata->linenum, parse_err);
 #ifdef DEBUG_PRS
-						debugf("parse_opt returned false");
+						debugf("parse_opt_block() : parse_opt_new() returned false");
 #endif
 						prscell_destroy(pcell);
 						return(false);
 					} else {
 #ifdef DEBUG_PRS
-						debugf("recording '%s' key", opt.key);
+						debugf("parse_opt_block() : recording '%s' key", opt.key);
 #endif
-						/* init item's pcell */
-						ncell = prscell_init(pnode->token,
-								PRS_KW_ITEM, PRS_TOK_NULL);
-						if (ncell == NULL) {
-							errorf("prscell init failed");
-							return(false);
+						switch (pcell->type) {
+							case PRS_KW_NODE :
+								/* process a node */
+								/* init item's pcell */
+								ncell = prscell_init(pnode->token,
+									PRS_KW_ITEM, PRS_TOK_NULL);
+								if (ncell == NULL) {
+									errorf("parse_opt_block() : prscell init failed");
+									return(false);
+								}
+
+								nopt = ncell->data;
+
+								/* duplicate opt content in item */
+								strlcpy(nopt->key, opt.key, sizeof(opt.key));
+								nopt->value = opt.value;
+
+								/* add item in cell node */
+								prsnode_add(pnode, ncell);
+								break;
+
+							case PRS_KW_CELL :
+								/* process a command */
+								if (hash_update(pcell->data, opt.key, opt.value) == HASH_ADD_FAIL) { /* no need to strdup */
+									strlcpy(parse_err, PRS_ERR_HASH, sizeof(parse_err));
+									return(false);
+								}
+								break;
 						}
 
-						nopt = ncell->data;
-
-						/* duplicate opt content in item */
-						strlcpy(nopt->key, opt.key, sizeof(opt.key));
-						nopt->value = opt.value;
-
-						/* add item in cell node */
-						prsnode_add(pnode, ncell);
 					}
 					break;
 			}
 		}
 	}
+
 	return(true);
 }
 
 /*
-	parse command
+        parse a block of commands
 
-	fp : file structure
-	pdata : parsing data structure
-	pcell : parsing cell structure 
-
-	return : boolean
+        XXX
 */
 
-bool parse_command(FILE *fp, prsdata *pdata, prscell *pcell) {
+bool parse_cmd_block(prsdata *pdata, prseng *peng, prsnode *pnode, bool chk_delim) {
 	bool	 loop = true;
-	char	 buf[MAX_LINE_LEN],
-		*pbuf;
-	prsopt	 opt;
+	prscell	*pcell;
 
-	while ((loop == true) && (prs_get_line(fp, buf, sizeof(buf)) == true)) {
-		pbuf = buf;
+	/*pstr = peng->prscur; |+ XXX should take beginning of buffer ? useless ? +|*/
 
-		/* update current line number */
-		pdata->linenum++;
-
-		/* check first character */
-		switch (*pbuf) {
-			case CHAR_COMMENT :
-			case CHAR_EOS :
-				/* empty line */
-				break;
-
-			case PMK_CHAR_COMMAND_END :
-				loop = false;
-				break;
-
-			default :
-				if (parse_opt(pbuf, &opt, PRS_PMKFILE_SEP) == false) {
-					errorf("line %d : %s", pdata->linenum, parse_err);
+	if (chk_delim == true) {
 #ifdef DEBUG_PRS
-					debugf("parse_opt returned false");
+		debugf("parse_cmd_block() : checking beginning of the block sequence.");
 #endif
-					prscell_destroy(pcell);
+		/* check the start sequence of the command block */
+		if (*peng->prscur != ' ') {
+			strlcpy(parse_err, PRS_ERR_UNKNOWN, sizeof(parse_err));
+			return(false);
+		} else {
+			peng->prscur++;
+		}
+
+		if (*peng->prscur != PMK_CHAR_COMMAND_START) {
+			strlcpy(parse_err, PRS_ERR_TRAILING, sizeof(parse_err));
+			return(false);
+		} else {
+			peng->prscur++;
+		}
+
+		if (*peng->prscur != CHAR_CR) {
+			strlcpy(parse_err, PRS_ERR_TRAILING, sizeof(parse_err));
+			return(false);
+		} else {
+			peng->prscur++;
+		}
+#ifdef DEBUG_PRS
+		debugf("parse_cmd_block() : found beginning of the block sequence.");
+#endif
+	}
+
+	/*peng->prscur = pstr;*/
+
+	while (loop == true) {
+		/* skip useless text */
+		skip_useless(peng);
+		/* update buffer window */
+		prs_fill_buf(peng);
+
+#ifdef DEBUG_PRS
+		debugf("parse_cmd_block() : checking character.");
+#endif
+		switch(*peng->prscur) {
+			case PMK_CHAR_COMMAND_END :
+#ifdef DEBUG_PRS
+				debugf("parse_cmd_block() : found end of command character.");
+#endif
+
+				peng->prscur++;
+
+				if (chk_delim == true) {
+					/* XXX should return(false) instead ?*/
+					loop = false;
+				} else {
+					/* XXX should not found that ? */
+					return(false);
+				}
+				break;
+
+			case CHAR_EOS :
+#ifdef DEBUG_PRS
+				debugf("parse_cmd_block() : found end of string character.");
+#endif
+				if (chk_delim == true) {
+					/* delimiter not found */
 					return(false);
 				} else {
-#ifdef DEBUG_PRS
-					debugf("recording '%s' key", opt.key);
-#endif
-
-					if (hash_update(pcell->data, opt.key, opt.value) == HASH_ADD_FAIL) { /* no need to strdup */
-						strlcpy(parse_err, PRS_ERR_HASH, sizeof(parse_err));
-						return(false);
-					}
+					/* main loop, no delimiter */
+					return(true);
 				}
-				break;
-		}
-	}
-	return(true);
-}
-
-/*
-	parse line 
-
-	fp : file structure
-	pdata : parsing data structure
-	phkw : keyword hash table
-	pnode : parent node 
-
-	return : boolean
-*/
-
-bool parse_line(FILE *fp, prsdata *pdata, htable *phkw, prsnode *pnode) {
-	bool	 loop = true;
-	char	 buf[MAX_LINE_LEN],
-		*pbuf;
-	prscell	*pcell = NULL;
-
-	while ((loop == true) && (prs_get_line(fp, buf, sizeof(buf)) == true)) {
-
-		/* update current line number */
-		pdata->linenum++;
-
-		pbuf = buf;
-
-		switch(*pbuf) {
-			case PMK_CHAR_COMMAND_END :
-				loop = false;
-				break;
-
-		/* check first character, skip comment or empty line */
-			case CHAR_COMMENT :
-			case CHAR_EOS :
 				break;
 
 			default :
-				/* parse command and label */
-				pcell = parse_cell(pbuf, phkw);
-				if (pcell == NULL) {
-					errorf("line %d : %s", pdata->linenum, parse_err);
+				if (chk_delim == true) {
+					/* return() XXX TODO not NULL */
+				}
+
 #ifdef DEBUG_PRS
-					debugf("parse_cell returned NULL");
+				debugf("parse_cmd_block() : parsing command header.");
 #endif
+				pcell = parse_cmd_header(peng, pnode);
+				if (pcell == NULL) {
+					/* XXX error msg ? */
 					return(false);
 				}
 
 #ifdef DEBUG_PRS
-				debugf("type = %d", pcell->type);
+				debugf("parse_cmd_block() : parsing command boby.");
 #endif
-			
-				prsnode_add(pnode, pcell);
+				parse_opt_block(pdata, peng, pcell, true);
 
-				switch (pcell->type) {
-					case PRS_KW_NODE :
-						/* process a nde */
-						if (parse_node(fp, pdata, phkw, pcell) == false)
-							return(false);
-						break;
-					case PRS_KW_CELL :
-						/* process a command */
-						if (parse_command(fp, pdata, pcell) == false)
-							return(false);
-						break;
-				}
 		}
 
 	}
@@ -1203,15 +1460,29 @@ bool parse_line(FILE *fp, prsdata *pdata, htable *phkw, prsnode *pnode) {
 */
 
 bool parse_pmkfile(FILE *fp, prsdata *pdata, prskw kwtab[], size_t size) {
-	htable	*phkw;
-	prsnode	*tnode;
+	prseng	*peng;
 
-	tnode = prsnode_init();
-	pdata->tree = tnode;
+	peng = prseng_init();
+	if (peng == NULL) {
+		/* cannot init engine structure */
+		errorf("init of parsing engine structure failed.");
+		return(false);
+	} else {
+		/* set file pointer */
+		peng->fp = fp;
+		/* init hash table of command keywords */
+		peng->phtkw = keyword_hash(kwtab, size);
+		/*|+ set current node +|      */
+		/*peng->curnode = pdata->tree;*/
+	}
 
-	phkw = keyword_hash(kwtab, size);
+	/* update buffer window */
+	prs_fill_buf(peng); /* XXX check */
 
-	if (parse_line(fp, pdata, phkw, tnode) != true) {
+	/*if (parse_line(fp, pdata, phkw, tnode) != true) {*/
+	if (parse_cmd_block(pdata, peng, pdata->tree, false) != true) {
+		/* display error message */
+		errorf("line %d : %s", peng->linenum, parse_err);
 		return(false);
 	}
 

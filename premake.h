@@ -176,6 +176,9 @@
 /* end of string */
 #define CHAR_EOS		'\0'
 
+/* carriage return */
+#define CHAR_CR                 '\n'
+
 /* pmk.conf separators */
 #define CHAR_ASSIGN_UPDATE	'='
 #define CHAR_ASSIGN_STATIC	':'
