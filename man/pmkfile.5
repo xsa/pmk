@@ -138,6 +138,19 @@ Example :
  FILENAME="config.h"
  }
 .Ed
+
+.It Cm SWITCHES
+This command is setting dependency switches (see further DEPEND definition).
+.Pp
+Arguments :
+.Pp
+Example :
+.Bd -literal -offset -indent
+ .SWITCHES {
+ use_curses=TRUE
+ use_gtk=FALSE
+ }
+.Ed
 .El
 
 .Sh STANDARD COMMANDS
@@ -150,7 +163,8 @@ They all can have the following optional arguments :
 Specify if this test is required to achieve the configuration. Recommended type is 'word'.
 If not specified it is TRUE by default.
 .It Cm DEPEND
-Specify check dependencies. Type is 'list'. If a dependancy is already false then the test will be false.
+Specify check dependencies. Type is 'list'. A dependency is a label or a switch name.
+If at least one of the dependencies is false then the check will be disabled.
 .El
 .Pp
 Some of these commands can also have the following arguments :

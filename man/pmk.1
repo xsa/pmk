@@ -3,18 +3,23 @@
 .Dd March 28, 2003
 .Dt PMK 1
 .Os
+
 .Sh NAME
 .Nm pmk
 .Nd configuring tool
+
 .Sh SYNOPSIS
 .Nm
 .Bk -words
 .Op Fl hv
 .Op Fl b Ar path 
+.Op Fl d Ar switch_disable_list
+.Op Fl e Ar switch_enable_list
 .Op Fl f Ar file 
 .Op Fl o Ar file 
 .Op Ar options
 .Ek
+
 .Sh DESCRIPTION
 .Nm
 is a configuring tool which aims to help building project on different operating systems.
@@ -23,6 +28,10 @@ The options are as follows:
 .Bl -tag -width Ds
 .It Fl b Ar path
 Use given path as basedir.
+.It Fl d Ar switch_disable_list
+Provide a list of switches to disable.
+.It Fl e Ar switch_enable_list
+Provide a list of switches to enable.
 .It Fl f Ar file
 Use an alternate file instead of
 .Xr pmkfile 5 .
@@ -33,6 +42,7 @@ Override pmk.conf data with the content of the given file.
 .It Fl v
 Display the version number. 
 .El
+
 .Sh FILES
 .Bl -tag -width "/etc/pmk.conf" -compact
 .It Pa pmkfile
@@ -40,15 +50,29 @@ Specification file.
 .It Pa /etc/pmk.conf
 Default location of the configuration file.
 .El
+
+.Sh EXAMPLES
+Few examples of pmk command line arguments :
+.Bd -literal -offset -indent
+ pmk -v
+
+ pmk -b src -d use_gtk,use_qt
+
+ pmk -f pmk/pmkfile -e use_curses -o pmk/pmkovr 
+.Ed
+
 .Sh SEE ALSO
 .Xr make 1 ,
 .Xr pmkfile 5 ,
 .Xr pmk.conf 5 ,
 .Xr pmksetup 8
+
 .Sh AUTHOR
 .An Damien Couderc
+
 .Sh HISTORY
 The idea to replace configure script was existing since a long time. 
 But the projet was initiated in the begining of March 2003.
+
 .Sh BUGS
 You have to find them.
