@@ -84,9 +84,7 @@ cfgum:
 	fi
 	@echo 'Done.'
 
-config:
-	@echo 'Not configured, read INSTALL file.'
-	@exit 1
+config: @MKTARGET@
 
 $(PREMAKE): config $(P_OBJS)
 	$(CC) -o $(PREMAKE) $(LDFLAGS) $(P_OBJS)
@@ -300,5 +298,7 @@ test_clean:
 	@echo ""
 
 test_all: test_$(SETUP) test_$(PREMAKE) test_$(SCAN) test_$(INST) test_clean
+
+test_pmk_only: test_$(SETUP) test_$(PREMAKE) test_clean
 
 test: test_all
