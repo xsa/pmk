@@ -8,6 +8,7 @@
  * defined values can contain variable.
  * added some support for global language.
  * updated pmkfile.sample and pmkscan.dat to new format.
+ * removed redundant code in pmk_target() and pmk_ac_acompat().
 
 05 Sep 2003 mipsator
  * improved parser engine again (first part).
