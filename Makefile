@@ -10,7 +10,7 @@ CFLAGS+=	-Wall
 
 # Debug stuff
 #CFLAGS+=	-DPMK_DEBUG
-CFLAGS+=	-DPMKSETUP_DEBUG
+#CFLAGS+=	-DPMKSETUP_DEBUG
 
 # Here you can change the default location of pmk.conf
 #CFLAGS+=	-DSYSCONFDIR=\"/etc/\"
@@ -19,8 +19,6 @@ LDFLAGS?=
 
 PREFIX?=	/usr/local
 DEBUG?=		-g
-
-LINT_TARGET=	pmk.c
 
 PREMAKE=	pmk
 SETUP=		pmksetup
@@ -62,20 +60,20 @@ deinstall:
 	rm -f $(PREFIX)/man/man1/$(PREMAKE).1
 	rm -f $(PREFIX)/man/man8/$(SETUP).8
 
-lint:
-.ifdef LINT_TARGET
-	lint $(LINT_TARGET)
-.else
-	@echo "LINT_TARGET not set."
-.endif
-
 test_pmk: pmk
 	@echo ""
 	@echo "=> Testing pmk with sample files"
 	@echo ""
-	@echo "-> Dumping target file"
+	@echo "-> Dumping target files"
+	@echo ""
+	@echo "samples/Makefile.sample.pmk"
 	@echo "----------------------------------------"
 	@cat samples/Makefile.sample.pmk
+	@echo "----------------------------------------"
+	@echo ""
+	@echo "samples/Makefile.sample.pmk"
+	@echo "----------------------------------------"
+	@cat samples/Makefile.samplebis.pmk
 	@echo "----------------------------------------"
 	@echo ""
 	@echo "-> Running pmk"

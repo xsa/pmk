@@ -39,15 +39,26 @@
 
 #define MAXTOKENS	128	/* max slots in the paths array */
 
+/* structure to store multiple path */
 typedef struct {
 	int	pathnum;
 	char	*pathlst[MAXTOKENS];
 } mpath;
 
+/* struct to store pmk.conf defines */
+typedef struct {
+        char    key[MAX_OPT_NAME_LEN],
+                val[MAX_OPT_VALUE_LEN],
+		opchar;
+} cfg_opt;
+
+
 FILE	*pmk_log_fp;
 
 
 bool get_line(FILE *, char *, int);
+int parse_conf_line(char *, int, cfg_opt *);
+
 bool env_to_opt(char *, pmkcmdopt *);
 bool get_make_var(char *, char *, int);
 

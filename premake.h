@@ -75,8 +75,14 @@
 
 
 /* prefix character used for comments */
-#define CHAR_COMMENT	'#'
+#define CHAR_COMMENT		'#'
 
+/* end of string */
+#define CHAR_EOS		'\0'
+
+/* pmk.conf separators */
+#define CHAR_ASSIGN_UPDATE	'='
+#define CHAR_ASSIGN_STATIC	':'
 
 /* maximal size of an error message */
 #define MAX_ERR_MSG_LEN		256

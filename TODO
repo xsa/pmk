@@ -2,7 +2,7 @@ common :
 - write specs somewhere in a draft
 
 pmk :
-- handle multiple target files
++ handle multiple target files
 - include reading of pmk.conf
 - pmkfile(5)
 

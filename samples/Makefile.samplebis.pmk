@@ -1,8 +1,8 @@
 # Makefile example
 
 TPATH=@TPATH@
-BINPROG=@PREFIX@/bin/@PROGNAME@
+BINPROG=$(TPATH)/bin/@PROGNAME@
 
 test:
 	@echo "running $(BINPROG)"
-	$(BINPROG) $(TPATH)/pwet
+	$(BINPROG) /c_colon

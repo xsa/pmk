@@ -73,7 +73,73 @@ bool get_line(FILE *fd, char *line, int lsize) {
 }
 
 /*
+	Parses a given line.
+     
+	line: line to parse
+	linenum: line number
+	opts: struct where where we store the key->value data   
+
+	returns:  0 on success
+		 -1 on failure
+*/
+
+int parse_conf_line(char *line, int linenum, cfg_opt *opts) {
+	char	key[MAX_OPT_NAME_LEN],
+		value[MAX_OPT_VALUE_LEN],
+		c;
+	int	i = 0, j = 0, k = 0,
+		found_op = 0;
+
+
+	while ((c = line[i]) != '\0') {
+		if (found_op == 0) {
+			if ((c == CHAR_ASSIGN_UPDATE) || (c == CHAR_ASSIGN_STATIC)) {
+				/* operator found, terminate key and copy key name in struct */
+				found_op = 1;
+				key[j] = '\0';
+				strncpy(opts->key, key, MAX_OPT_NAME_LEN);
+
+				/* set operator in struct */
+				opts->opchar = c;
+			} else {
+				key[j] = c;
+				j++;
+				if (j > MAX_OPT_NAME_LEN) {
+					/* too small, cannot store key name */
+					errorf_line(PREMAKE_CONFIG_PATH, linenum, "key name too long.");
+					return(-1);
+				}
+			}
+		} else {
+			value[k] = c;
+			k++;
+			if (k > MAX_OPT_VALUE_LEN) {
+				/* too small, cannot store key value */
+				errorf_line(PREMAKE_CONFIG_PATH, linenum, "key value too long.");
+				return(-1);
+			}
+		}
+		i++;
+	}
+	if (found_op == 1) {
+		/* line parsed without any error */
+		value[k] = '\0';
+		strncpy(opts->val, value, MAX_OPT_VALUE_LEN);
+		return(0);			
+	} else {
+		/* missing operator */
+		errorf_line(PREMAKE_CONFIG_PATH, linenum, "operator not found.");
+		return(-1);
+	}
+}
+
+/*
 	put env variable in an option
+
+	env_name : variable name
+	opt : option struct
+
+	returns TRUE if env_name exists
 */
 
 bool env_to_opt(char *env_name, pmkcmdopt *opt) {
@@ -164,6 +230,9 @@ bool get_make_var(char *varname, char *result, int rsize) {
  *	str: string to split
  *	stpath: pointer to the struct where we'll store the paths 
  *	delimiter: string delimiter(s)
+ *
+ *	returns:  0 on success
+ *		 -1 on failure
  */       
 int strsplit(char *str, mpath *stpath, char *delimiter) {
 	int	i = 0;
@@ -189,6 +258,9 @@ int strsplit(char *str, mpath *stpath, char *delimiter) {
  *      file_name : name of the file to search
  *      file_path : storage of the full path if find
  *      fp_len : size of the storage, usually MAXPATHLEN
+ *
+ *	returns:  0 on success
+ *		 -1 on failure
  */
 int find_file(mpath *stp, char *file_name, char *file_path, int fp_len) { 
 	DIR	*dirp;
