@@ -28,13 +28,14 @@ NetBSD		1.6ZI		sgimips		PMK 0.8.1	OK		Martin Reindl		gcc-3.3.2
 NetBSD		2.0G		sparc		PMK 0.8.1-s2	OK		Martin Reindl		gcc-3.3.3
 NetBSD		1.6ZG		sparc64		PMK 0.8.1	OK		Martin Reindl		gcc-3.3.2
 OpenBSD		3.4		alpha		PMK 0.8.1	OK		Martin Reindl		gcc-2.95.3
+OpenBSD		3.5		amd64		PMK 0.8.1-s3	OK		Martin Reindl		gcc-3.3.2
 OpenBSD		3.4		i386		PMK 0.8.1	OK		Damien Couderc		gcc-2.95.3
 OpenBSD		3.5		hppa		PMK 0.8.1	OK		Martin Reindl		gcc-2.95.3
 OpenBSD		3.5		mac68k		PMK 0.8.1-s2	OK		Martin Reindl		gcc-2.95.3
 OpenBSD		3.3		macppc		PMK 0.7.10	OK		Sascha Welter		gcc-2.95.3
 OpenBSD		3.4		macppc		PMK 0.8.1	OK		Xavier Santolaria	gcc-3.3.2
 OpenBSD		3.4		sparc		PMK 0.8.1	OK		Damien Couderc		gcc-2.95.3 
-OpenBSD		3.4		sparc64		PMK 0.8.1	OK		Damien Couderc		gcc-2.95.3 
+OpenBSD		3.5		sparc64		PMK 0.8.1-s3	OK		Martin Reind		gcc-3.3.2 
 OpenBSD		3.4		vax		PMK 0.8.1	OK		Martin Reindl		gcc-2.95.3
 OSF1 (Tru64)	5.1		alpha		PMK 0.7.11	OK		Martin Reindl		Compaq C V6.5-011
 OSF1 (Tru64)	5.1B		alpha		PMK 0.8.1	OK		Damien Couderc		Compaq C V6.5-207, gmake-3.79.1
