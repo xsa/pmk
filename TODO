@@ -49,9 +49,9 @@ pmksetup:
 -----------------------------------------------------------------------
 	~	cpu identification
 			~ x86* support
-			- ppc support
+			- ppc support (priviledged)
 			- sparc support
-			- sparc64 support
+			- sparc64 support (priviledged)
 			- alpha support
 			! man page update
 	-	cpu optimisation for compiler 
