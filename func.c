@@ -384,7 +384,7 @@ bool pmk_check_header(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 	/* get the language used */
 	pld = get_lang(ht, pgd);
 	if (pld == NULL) {
-		pmk_log("\tSKIPPED, unknow language.\n");
+		pmk_log("\tSKIPPED, unknown language.\n");
 		return(invert_bool(required));
 	}
 
@@ -578,7 +578,7 @@ bool pmk_check_lib(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 	/* get the language used */
 	pld = get_lang(ht, pgd);
 	if (pld == NULL) {
-		pmk_log("\tSKIPPED, unknow language.\n");
+		pmk_log("\tSKIPPED, unknown language.\n");
 		return(invert_bool(required));
 	}
 
@@ -1299,7 +1299,7 @@ bool pmk_check_type(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 	/* get the language used */
 	pld = get_lang(ht, pgd);
 	if (pld == NULL) {
-		pmk_log("\tSKIPPED, unknow language.\n");
+		pmk_log("\tSKIPPED, unknown language.\n");
 		return(invert_bool(required));
 	}
 

@@ -281,7 +281,7 @@ bool check_opt(htable *pht, prsopt *popt) {
 
 				default :
 					/* should not happen now */
-					errorf("unknow operator '%c'", popt->opchar);
+					errorf("unknown operator '%c'.", popt->opchar);
 					return(false);
 					break;
 		}
