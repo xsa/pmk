@@ -24,7 +24,7 @@ Indented lines means subtask.
 common:
 -----------------------------------------------------------------------
 	-	tutorial
-mips	+	improve test_pmkinstall to check more modes
+	+	improve test_pmkinstall to check more modes
 	-	add test target in tests/Makefile
 	-	improve comp_test usage
 	-	update README and INSTALL

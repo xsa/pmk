@@ -1,5 +1,9 @@
 #pmk compilers data
 
+# SLCFLAGS = shared libs compiler flags
+# SLLDFLAGS = shared libs linking flags
+# SLSUFFIX = shared lib suffix (needed ?)
+
 ADD_COMPILER {
 	ID = "tendra"
 	DESCR = "TenDRA"
@@ -11,6 +15,7 @@ ADD_COMPILER {
 	DESCR = "GNU gcc"
 	MACRO = "__GNUC__"
 	VERSION = "(__GNUC__ * 100 + __GNUC_MINOR__)"
+	SLCFLAGS = "-fPIC"
 }
 
 ADD_COMPILER {
@@ -18,6 +23,7 @@ ADD_COMPILER {
 	DESCR = "Sun Workshop C"
 	MACRO = "__SUNPRO_C"
 	VERSION = "__SUNPRO_C"
+	SLCFLAGS = "-KPIC"
 }
 
 ADD_COMPILER {
@@ -25,6 +31,7 @@ ADD_COMPILER {
 	DESCR = "Sun Workshop C++"
 	MACRO = "__SUNPRO_CC"
 	VERSION = "__SUNPRO_CC"
+	SLCFLAGS = "-KPIC"
 }
 
 ADD_COMPILER {
@@ -45,6 +52,7 @@ ADD_COMPILER {
 	ID = "hpcc"
 	DESCR = "HP Ansi C"
 	MACRO = "__HP_cc"
+	SLCFLAGS = "+Z"
 }
 
 ADD_COMPILER {
@@ -52,6 +60,7 @@ ADD_COMPILER {
 	DESCR = "HP Ansi C++"
 	MACRO = "__HP_aCC"
 	VERSION = "__HP_aCC"
+	SLCFLAGS = "+Z"
 }
 
 ADD_COMPILER {
@@ -80,5 +89,6 @@ ADD_COMPILER {
 	DESCR = "SGI MIPSpro"
 	MACRO = "__sgi"
 	VERSION = "__COMPILER_VERSION"
+	SLCFLAGS = "-KPIC"
 }
 

@@ -41,6 +41,7 @@
 #include "compat/pmk_unistd.h"
 #include "autoconf.h"
 #include "common.h"
+#include "detect.h"
 #include "func.h"
 #include "functool.h"
 #include "hash.h"
@@ -62,7 +63,7 @@ prskw	kw_pmkfile[] = {
 		{"CHECK_INCLUDE",	PMK_TOK_CHKINC, PRS_KW_CELL, PRS_TOK_NULL}
 };
 
-int	nbkwpf = sizeof(kw_pmkfile) / sizeof(prskw);
+size_t	nbkwpf = sizeof(kw_pmkfile) / sizeof(prskw);
 
 
 bool func_wrapper(prscell *pcell, pmkdata *pgd) {
@@ -1292,11 +1293,14 @@ bool pmk_check_variable(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 */
 
 bool pmk_set_parameter(pmkcmd *cmd, prsopt *popt, pmkdata *pgd) {
-	bool	 rval = false;
-	char	*pstr;
-	dynary	*da;
-	int	 i = 0,
-		 n;
+	bool		 rval = false;
+	char		*pstr,
+			*ccpath;
+	comp_data	*cdata;
+	comp_info	 cinfo;
+	dynary		*da;
+	int		 i = 0,
+			 n;
 
 	/* gnu autoconf compatibility */
 	if (strncmp(popt->key, "AC_COMPAT", sizeof(popt->key)) == 0) {
@@ -1366,6 +1370,45 @@ bool pmk_set_parameter(pmkcmd *cmd, prsopt *popt, pmkdata *pgd) {
 		pgd->tlist = da;
 
 		pmk_log("\t\tTotal %d target(s) added.\n", n);
+
+		return(true);
+	}
+
+	/* set target files */
+	if (strncmp(popt->key, "DETECT", sizeof(popt->key)) == 0) {
+		pmk_log("\tDetecting compilers :\n");
+
+		da = po_get_list(popt->value);
+		if (da == NULL) {
+			errorf("syntax error in DETECT.");
+			return(false);
+		}
+
+		pmk_log("\t\tGathering data for compiler detection.\n");
+		cdata = parse_comp_file(PMKCOMP_DATA);
+		if (cdata == NULL) {
+			return(false);
+		}
+
+		n = da_usize(da);
+		for (i=0 ; i < n ; i++) {
+			pstr = da_idx(da, i);
+			pmk_log("\t\tDetecting '%s' : ", pstr);
+			/* get the appropriate compiler */
+			ccpath = get_comp_path(pgd->htab, pstr);
+			if (ccpath == NULL) {
+				errorf("\ncannot get compiler path ('%s').\n", pstr);
+				return(false);
+			} else {
+				if (detect_compiler(ccpath, pgd->buildlog, cdata, &cinfo) == true) {
+					pmk_log("%s (version %s).\n",
+						comp_get_descr(cdata, cinfo.c_id), cinfo.version);
+				}
+
+			}
+		}
+
+		/* XXX TODO clean cdata */
 
 		return(true);
 	}

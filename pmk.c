@@ -50,7 +50,6 @@
 #include "compat/pmk_unistd.h"
 #include "autoconf.h"
 #include "common.h"
-#include "detect.h"
 #include "func.h"
 #include "pathtools.h"
 #include "pmk.h"
@@ -61,7 +60,7 @@
 extern char	*optarg;
 extern int	 optind;
 extern prskw	 kw_pmkfile[];
-extern int	 nbkwpf;
+extern size_t	 nbkwpf;
 
 int		 cur_line = 0;
 
@@ -524,8 +523,6 @@ int main(int argc, char *argv[]) {
 			*enable_sw = NULL,
 			*disable_sw = NULL,
 			 buf[MAXPATHLEN];
-	comp_data	*cdata;
-	comp_info	 cinfo;
 	dynary		*da;
 	int		 rval = 0,
 			 nbpd,
@@ -758,27 +755,6 @@ int main(int argc, char *argv[]) {
 	pmk_log("Loaded %d overridden variables.\n", nbcd);
 	pmk_log("Total : %d variables.\n\n", hash_nbkey(gdata.htab));
 
-
-	pmk_log("Gathering data for compiler detection.\n");
-	cdata = parse_comp_file(PMKCOMP_DATA);
-	if (cdata == NULL) {
-		clean(&gdata);
-		exit(EXIT_FAILURE);
-	}
-
-	/* should do it elsewhere ? only when using shared libs ? */
-	pmk_log("Detecting compiler : ");
-	pstr = hash_get(gdata.htab, PMKCONF_BIN_CC);
-	if (pstr != NULL) {
-		if (detect_compiler(pstr, gdata.buildlog, cdata, &cinfo) == true) {
-			pmk_log("%s (version %s)", comp_get_descr(cdata, cinfo.c_id),
-							cinfo.version);
-		}
-	} else {
-		debugf("error");
-	}
-	pmk_log(".\n\n");
-
 	pmk_log("Parsing '%s'\n", gdata.pmkfile);
 
 	/* open pmk file */
@@ -802,7 +778,7 @@ int main(int argc, char *argv[]) {
 	fflush(fp);
 	fclose(fp);
 
-	pmk_log("Processing commands :\n");
+	pmk_log("\nProcessing commands :\n");
 	if (process_cmd(pdata, &gdata) == false) {
 		/* an error occured while parsing */
 		rval = 1;

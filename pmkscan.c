@@ -75,7 +75,7 @@ prskw	kw_pmkscan[] = {
 		{"FUNCTIONS",	PSC_TOK_FUNC, PRS_KW_CELL}
 };
 
-int	nbkwps = sizeof(kw_pmkscan) / sizeof(prskw);
+size_t	nbkwps = sizeof(kw_pmkscan) / sizeof(prskw);
 
 extern char	*optarg;
 extern int	 optind;
@@ -153,7 +153,7 @@ char *regex_check(char *pattern, char *line) {
 
 	if (regexec(&re, line, 2, rm, 0) == 0) {
 		/* copy header name */
-		strlcpy(idtf, (char *) (line + rm[1].rm_so), rm[1].rm_eo - rm[1].rm_so + 1);
+		strlcpy(idtf, (char *) (line + rm[1].rm_so), (size_t) (rm[1].rm_eo - rm[1].rm_so + 1));
 
 		rval =idtf;
 	} else {
