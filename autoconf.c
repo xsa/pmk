@@ -35,6 +35,8 @@
 
 
 #include <sys/stat.h>
+
+#include <errno.h>
 #include <stdio.h>
 
 #include "compat/pmk_sys_types.h"
@@ -178,15 +180,22 @@ bool ac_parse_config(pmkdata *pgd) {
 	fclose(fp_out);
 
 	if (fe == 0) {
-		unlink(ftmp);
+		if (unlink(ftmp) == -1)
+			errorf(ERRMSG_REMOVE_TMP, ftmp, strerror(errno));
 		return(false);
 	}
 
 	/* erase orig and copy new one */
-	unlink(fname);
+	if (unlink(fname) == -1) {
+		errorf(ERRMSG_REMOVE, fname, strerror(errno));
+		return(false);
+	}
 	rval = copy_text_file(ftmp, fname);
 
-	unlink(ftmp);
+	if (unlink(ftmp) == -1) {
+		errorf(ERRMSG_REMOVE_TMP, ftmp, strerror(errno));
+		return(false);
+	}
 
 	pmk_log("Saved '%s'.\n", fname);
 
