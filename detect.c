@@ -206,7 +206,7 @@ comp_data *parse_comp_file(char *cdfile) {
 	if (fd == NULL) {
 		free(cdata);
 		prsdata_destroy(pdata);
-		errorf("cannot open '%s'", cdfile);
+		errorf("cannot open '%s' : %s.", cdfile, strerror(errno));
 		return(NULL);
 	}
 
