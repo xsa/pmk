@@ -106,7 +106,7 @@ test_pmk: pmk
 	@echo "----------------------------------------"
 	@echo ""
 	@echo "-> Running pmk"
-	./pmk -b samples -f samples/pmkfile.sample
+	./pmk -b samples -f samples/pmkfile.sample -o samples/ovrfile.sample
 	@echo ""
 	@echo "-> Dumping generated files"
 	@echo ""
