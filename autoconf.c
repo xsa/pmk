@@ -238,6 +238,10 @@ void ac_set_variables(htable *pht) {
 	pstr = (char *) hash_get(pht, "PREFIX");
 	hash_add(pht, "prefix", strdup(pstr));
 	
+	pstr = (char *) hash_get(pht, "SYSCONFDIR");
+	hash_add(pht, "sysconfdir", strdup(pstr));
+
+	
 	hash_add(pht, "exec_prefix", strdup("${prefix}"));
 	hash_add(pht, "bindir", strdup("${exec_prefix}/bin"));
 	hash_add(pht, "sbindir", strdup("${exec_prefix}/sbin"));
@@ -247,11 +251,34 @@ void ac_set_variables(htable *pht) {
 	hash_add(pht, "includedir", strdup("${prefix}/include"));
 	hash_add(pht, "mandir", strdup("${prefix}/man"));
 	hash_add(pht, "infodir", strdup("${prefix}/info"));
+	hash_add(pht, "sharedstatedir", strdup("${prefix}/com"));
+	hash_add(pht, "localstatedir", strdup("${prefix}/var"));
 
 	hash_add(pht, "INSTALL_DATA", strdup("${INSTALL} -m 644"));
 	hash_add(pht, "INSTALL_PROGRAM", strdup("${INSTALL}"));
 	hash_add(pht, "INSTALL_SCRIPT", strdup("${INSTALL}"));
 	hash_add(pht, "INSTALL_STRIP_PROGRAM", strdup("${SHELL} $(install_sh) -c -s"));
+
+/*	XXX TODO verify the following */
+	hash_add(pht, "SET_MAKE", strdup(""));
+	hash_add(pht, "AMDEP_TRUE", strdup(""));
+	hash_add(pht, "AMDEP_FALSE", strdup("#"));
+	hash_add(pht, "AMTAR", strdup("echo 'ARG!'"));
+	hash_add(pht, "AUTOCONF", strdup("echo 'ARG!'"));
+	hash_add(pht, "AUTOHEADER", strdup("echo 'ARG!'"));
+	hash_add(pht, "AUTOMAKE", strdup("echo 'ARG!'"));
+	hash_add(pht, "MAKEINFO", strdup("echo 'ARG!'"));
+	hash_add(pht, "ECHO_C", strdup(""));
+	hash_add(pht, "ECHO_N", strdup(""));
+	hash_add(pht, "ECHO_T", strdup(""));
+	hash_add(pht, "EXEEXT", strdup("")); /* cygwin shit ! */
+	hash_add(pht, "PACKAGE_BUGREPORT", strdup(""));
+	hash_add(pht, "PACKAGE_NAME", strdup(""));
+	hash_add(pht, "PACKAGE_STRING", strdup(""));
+	hash_add(pht, "PACKAGE_TARNAME", strdup(""));
+	hash_add(pht, "PACKAGE_VERSION", strdup(""));
+	hash_add(pht, "PACKAGE_SEPARATOR", strdup(""));
+
 
 	/* byte order */
 	pstr = (char *) hash_get(pht, PMKCONF_HW_BYTEORDER);

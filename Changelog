@@ -4,6 +4,8 @@
  * added init_var() in pmk to set specific variables.
  * added more stuff in ac_set_variables().
  * added PMKCONF_BIN_CC in premake header.
+ * more in init_var() and ac_set_variables().
+ * improved process_template() to set configure_input tag.
 
 30 Sep 2003 mipsator
  * changed USERMODE by PMK_USERMODE to avoid conflicts.

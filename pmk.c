@@ -73,6 +73,9 @@ void init_var(htable *pht) {
 	hash_add(pht, "LIBS", strdup("")); /* XXX check ? */
 	hash_add(pht, "LDFLAGS", strdup("")); /* XXX check ? */
 
+	hash_add(pht, "OBJEXT", strdup("o")); /* XXX check ? */
+
+
 	pstr = hash_get(pht, PMKCONF_BIN_CC);
 	if (pstr != NULL)
 		hash_add(pht, "CC", strdup(pstr));
@@ -84,6 +87,10 @@ void init_var(htable *pht) {
 	pstr = hash_get(pht, PMKCONF_BIN_INSTALL);
 	if (pstr != NULL)
 		hash_add(pht, "INSTALL", strdup(pstr));
+
+	pstr = hash_get(pht, PMKCONF_BIN_RANLIB);
+	if (pstr != NULL)
+		hash_add(pht, "RANLIB", strdup(pstr));
 
 	pstr = hash_get(pht, PMKCONF_BIN_SH);
 	if (pstr != NULL)
@@ -139,17 +146,23 @@ bool process_template(char *template, pmkdata *pgd) {
 	char	*plb,
 		*pbf,
 		*ptbf,
+		*ptn,
+		*pfn,
 		*ptmp,
 		 lbuf[MAXPATHLEN],
 		 buf[MAXPATHLEN],
 		 tbuf[MAXPATHLEN],
-		 fpath[MAXPATHLEN];
+		 fpath[MAXPATHLEN],
+		 cibuf[TMP_BUF_LEN];
 	htable	*ht;
 
 	ht = pgd->htab;
 
+	/* save template name */
+	ptn = strdup(basename(template));
+
 	/* get the file name */
-	if (strlcpy(lbuf, basename(template), sizeof(lbuf)) >= sizeof(lbuf)) {
+	if (strlcpy(lbuf, ptn, sizeof(lbuf)) >= sizeof(lbuf)) {
 		errorf("buffer overflow");
 		return(false);
 	}
@@ -162,6 +175,9 @@ bool process_template(char *template, pmkdata *pgd) {
 		errorf("error while creating name of template");
 		return(false);
 	}
+
+	/* save generated file name */
+	pfn = strdup(basename(lbuf));
 
 	/* get relative path from srcdir */
 	/* NOTE : we use strdup to avoid problem with linux's dirname */
@@ -195,6 +211,11 @@ bool process_template(char *template, pmkdata *pgd) {
 		ac_flag = true;
 		ac_process_dyn_var(ht, pgd, template); /* XXX should use directly path */
 	}
+
+	snprintf(cibuf, sizeof(cibuf), "%s, generated from %s by PMK.", pfn, ptn);
+	hash_add(pgd->htab, "configure_input", strdup(cibuf)); /* XXX check ? */
+	free(ptn);
+	free(pfn);
 
 	while (fgets(lbuf, sizeof(lbuf), tfd) != NULL) {
 		plb = lbuf;
@@ -274,7 +295,9 @@ bool process_template(char *template, pmkdata *pgd) {
 		/* clean dyn_var */
 		ac_clean_dyn_var(ht);
 	}
-	
+
+	hash_delete(pgd->htab, "configure_input");
+		
 	return(true);
 }
 
