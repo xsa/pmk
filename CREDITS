@@ -5,12 +5,13 @@ Patches:
 		(dynarray rewrite, many fixes)
 
 Bug report:
-	- Jean-Pierre Ritschard
-		(memory fault in pmk)
 	- Marek Habersack
 		(dirname failure with glibc implementation)
+	- Jean-Pierre Ritschard
+		(memory fault in pmk)
 
 Testers:
+	- Fiesh
 	- Saad Khadi
 	- Francois Petitjean
-	- Fiesh
+	- Martin Reindl
