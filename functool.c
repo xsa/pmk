@@ -530,7 +530,7 @@ lgdata *check_lang_comp(char *comp) {
 	pht : hash table that should contain LANG 
 	pgd : global data structure 
 
-	return : lgdata structure or NULL for unknow language
+	return : lgdata structure or NULL for unknown language
 */
 
 lgdata *get_lang(htable *pht, pmkdata *pgd) {

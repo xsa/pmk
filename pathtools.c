@@ -276,10 +276,10 @@ bool abspath(char *base, char *rel, char *buffer) {
 }
 
 /*
-	provide an absolute path from a path with unknow type.
+	provide an absolute path from a path with unknown type.
 
 	base : absolute base path
-	upath : path with unknow type (relative or absolute)
+	upath : path with unknown type (relative or absolute)
 	buffer : MAXPATHLEN sized buffer
 
 	NOTE : if upath is absolute then buffer is filled with

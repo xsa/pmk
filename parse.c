@@ -859,7 +859,7 @@ bool parse_opt(char *line, prsopt *popt, char *seplst) {
 			debugf("value = (*LIST*)");
 			break;
 		default :
-			debugf("value = !unknow type!");
+			debugf("value = !unknown type!");
 			break;
 	}
 #endif
