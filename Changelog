@@ -1,3 +1,5 @@
+# snapshot 0.7.7
+
 17 Dec 2003  mipsator
  * added pmkcomp.dat in data directory.
  * moved compiler detection data in pmkcomp.dat file.
