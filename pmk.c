@@ -90,6 +90,10 @@ cmdkw		functab[] = {
 
 /*
 	read configuration file
+
+	ht : hash table that will contain data
+
+	returns TRUE on success
 */
 
 bool read_conf(htable *ht) {
@@ -117,8 +121,7 @@ bool read_conf(htable *ht) {
 			default :
 				if (parse_conf_line(buf, ln, &co) == 0) {
 					/* parse ok */
-					hash_add(ht, co.key, co.val);
-					/* XXX */
+					hash_add(ht, co.key, co.val); /* XXX test ?*/
 				} else {
 					/* incorrect line */
 					return(FALSE);
@@ -143,6 +146,7 @@ bool read_conf(htable *ht) {
 	process the target file to replace tags
 
 	target : path of the target file
+	ht : global data
 
 	returns TRUE on success
 */
@@ -275,6 +279,12 @@ bool process_template(char *template, htable *ht) {
 
 /*
 	process a command
+
+	cmd : structure of the command to be processed
+	ht : command options
+	gdata : global data
+
+	returns TRUE on success
 */
 
 bool process_cmd(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
@@ -405,11 +415,13 @@ bool parse_cmd(char *line, pmkcmd *command) {
 	parse an option line
 
 	line : option line
+	ht : hash table to store option
+	display : enable error messages if TRUE
 
 	returns a boolean
 */
 
-bool parse_opt(char *line, htable *ht) {
+bool parse_opt(char *line, htable *ht, bool display) {
 	char	buf[MAXPATHLEN],
 		tkey[MAX_OPT_NAME_LEN],
 		tval[MAX_OPT_VALUE_LEN];
@@ -424,16 +436,18 @@ bool parse_opt(char *line, htable *ht) {
 				buf[j] = '\0';
 				if (strlcpy(tkey, buf, MAX_OPT_NAME_LEN) >= MAX_OPT_NAME_LEN) {
 					/* key name is too long */
-					errorf_line(pmkfile, cur_line, "Key name is too long");
+					if (display == TRUE)
+						errorf_line(pmkfile, cur_line, "Key name is too long");
 					return(FALSE);
 				} else {
 					keyfound = TRUE;
 					j = 0;
 				}
 			} else {
-				if (isalpha(line[i]) == 0) {
+				if ((isalpha(line[i]) == 0) && (line[i] != '_')) {
 					/* invalid character */
-					errorf_line(pmkfile, cur_line, "Malformed option");
+					if (display == TRUE)
+						errorf_line(pmkfile, cur_line, "Malformed option");
 					return(FALSE);
 				} else {
 					buf[j] = line[i];
@@ -452,16 +466,18 @@ bool parse_opt(char *line, htable *ht) {
 	
 	if (keyfound == FALSE) {
 			/* key name undefined */
-			errorf_line(pmkfile, cur_line, "Malformed option");
+			if (display == TRUE)
+				errorf_line(pmkfile, cur_line, "Malformed option");
 			return(FALSE);
 	} else {
 		if (strlcpy(tval, buf, MAX_OPT_VALUE_LEN) >= MAX_OPT_VALUE_LEN) {
 			/* key value is too long */
-			errorf_line(pmkfile, cur_line, "Key value is too long");
+			if (display == TRUE)
+				errorf_line(pmkfile, cur_line, "Key value is too long");
 			return(FALSE);
 		} else {
 			/* key name and value are ok */
-			hash_add(ht, tkey, tval);
+			hash_add(ht, tkey, tval); /* XXX test */
 			return(TRUE);
 		}
 	}
@@ -471,6 +487,7 @@ bool parse_opt(char *line, htable *ht) {
 	parse the configuration file
 
 	fd : file descriptor
+	gdata : pmkdata struct
 
 	returns a boolean
 */
@@ -539,7 +556,7 @@ bool parse(FILE *fp, pmkdata *gdata) {
 					return(FALSE);
 				}
 
-				if (parse_opt(buf, tabopts) == FALSE) {
+				if (parse_opt(buf, tabopts, TRUE) == FALSE) {
 					/* line number and error message already set */
 					hash_destroy(tabopts);
 					return(FALSE);
@@ -566,6 +583,28 @@ bool parse(FILE *fp, pmkdata *gdata) {
 }
 
 /*
+	process command line values
+
+	val : array of defines
+	nbval : size of the array
+	ht : storage for parsed values
+
+	returns TRUE on success
+*/
+
+bool parse_cmdline(char **val, int nbval, htable *ht) {
+	int	i;
+	bool	rval = TRUE;
+
+	for (i = 0 ; (i < nbval) && (rval == TRUE) ; i++) {
+		/* parse option */
+		rval = parse_opt(val[i], ht, FALSE);
+	}
+
+	return(rval);
+}
+
+/*
 	usage
 */
 
@@ -581,6 +620,8 @@ int main(int argc, char *argv[]) {
 	FILE	*fd;
 	char	idxstr[4]; /* max 999 cmds, should be enough :) */
 	int	rval = 0,
+		nbpd,
+		nbcd,
 		i,
 		s,
 		chr;
@@ -624,18 +665,24 @@ int main(int argc, char *argv[]) {
 	/* initialise global data has htable */
 	gdata.htab = hash_init(MAX_DATA_KEY);
 
-	/* open configuration file */
-	if (read_conf(gdata.htab) == FALSE) {
-		/* no pmksetup available so we ignore this error temporary ...
-		return(-1);
-		*/
+	if (read_conf(gdata.htab) == TRUE) {
+		nbpd = hash_nbkey(gdata.htab);
 	} else {
-		debugf("Parsed configuration file.");
+		/* configuration file not found */
+		hash_destroy(gdata.htab);
+		return(1);
 	}
 
 	if (argc != 0) {
-		/* XXX parse optional arguments that override pmk.conf */
-		/* as for example PREFIX=/opt/ */
+		/* parse optional arguments that override pmk.conf */
+		if (parse_cmdline(argv, argc, gdata.htab) == TRUE) {
+			nbcd = argc;
+		} else {
+			errorf("incorrect optional arguments");
+			return(1);
+		}
+	} else {
+		nbcd = 0;
 	}
 
 	/* open pmk file */
@@ -650,38 +697,45 @@ int main(int argc, char *argv[]) {
 
 	/* open log file */
 	if (pmk_log_open(PREMAKE_LOG) == FALSE) {
+		errorf("while opening %s.", PREMAKE_LOG);
 		exit(1);
 	}
 
-	pmk_log("PreMaKe version %s\n", PREMAKE_VERSION);
-	pmk_log("Hashing pmk keywords ");
+	pmk_log("PreMaKe version %s\n\n", PREMAKE_VERSION);
 	s = sizeof(functab) / sizeof(cmdkw); /* compute number of keywords */
 	keyhash = hash_init(s);
 	if (keyhash != NULL) {
 		/* fill keywords hash */
 		for(i = 0 ; i < s ; i++) {
 			snprintf(idxstr, 4, "%d", i);
-			hash_add(keyhash, functab[i].kw, idxstr);
+			hash_add(keyhash, functab[i].kw, idxstr); /* XXX test ? */
 		}
 	}
 	/* print number of hashed command */
-	pmk_log("(%d)\n", keyhash->count);
+	pmk_log("Hashed %d pmk keywords.\n", keyhash->count);
 
+	pmk_log("Loaded %d predefinined variables.\n", nbpd);
+	pmk_log("Loaded %d overrided variables.\n", nbcd);
+	pmk_log("Total : %d variables.\n\n", hash_nbkey(gdata.htab));
+
+	pmk_log("Processing '%s' :\n", pmkfile);
 	if (parse(fd, &gdata) == FALSE) {
 		/* an error occured while parsing */
 		rval = 1;
 	} else {
-		pmk_log("\n");
+		pmk_log("\nProcess templates :\n");
 
 		da = gdata.tlist;
-		for (i = 0 ; i < da_size(da) ; i++) {
-			process_template(da_idx(da, i), gdata.htab);
+		for (i = 0 ; (i < da_size(da)) && (rval == 0) ; i++) {
+			if (process_template(da_idx(da, i), gdata.htab) == FALSE) {
+				/* failure while processing template */
+				rval = 1;
+			}
 		}
 		
 		da_destroy(da);
 
-		pmk_log("\n");
-		pmk_log("End of log.\n");
+		pmk_log("\nEnd of log\n");
 	}
 
 	/* flush and close files */
@@ -694,6 +748,9 @@ int main(int argc, char *argv[]) {
 	if (keyhash != NULL) {
 		hash_destroy(keyhash);
 	}
+
+	/* clean global data */
+	hash_destroy(gdata.htab);
 
 	return(rval);
 }
