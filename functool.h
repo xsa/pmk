@@ -66,6 +66,7 @@ bool	 invert_bool(bool);
 char	*bool_to_str(bool);
 bool	 get_file_dir_path(char *, char *, char *, int);
 char	*str_to_def(char *);
+char	*build_def_name(char *);
 bool	 record_def(htable *, char *, bool);
 bool	 record_val(htable *, char *, char *);
 bool	 label_set(htable *, char *, bool);
