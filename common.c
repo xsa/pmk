@@ -6,8 +6,8 @@
  */
 
 /*
- * Copyright (c) 2003 Damien Couderc
- * Copyright (c) 2003 Xavier Santolaria
+ * Copyright (c) 2003-2004 Damien Couderc
+ * Copyright (c) 2003-2004 Xavier Santolaria
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
