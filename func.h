@@ -71,5 +71,6 @@ bool pmk_check_binary(pmkcmd *, htable *, pmkdata *);
 bool pmk_check_include(pmkcmd *, htable *, pmkdata *);
 bool pmk_check_lib(pmkcmd *, htable *, pmkdata *);
 bool pmk_check_config(pmkcmd *, htable *, pmkdata *);
+bool pmk_check_pkg_config(pmkcmd *, htable *, pmkdata *);
 
 #endif /* _PMK_FUNC_H_ */
