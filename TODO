@@ -22,18 +22,17 @@ Indented lines means subtask.
 
 common:
 -----------------------------------------------------------------------
-	-	track and code missing checks for snprintf and strl*
+	+?	track and code missing checks for snprintf and strl*
 	~R	tutorial
 	~.	improve test_pmkinstall to check more modes
-	-.	add test target in tests/Makefile
 	+	update README and INSTALL
-	~	new samples
+	~!	new samples
+        	        - add a sample that show architecture data from pmk
 
 
 pmk:
 -----------------------------------------------------------------------
-	-	update manpage (pmk.conf)
-	-.	check if ~/.pmk.conf is available
+	-!	check if ~/.pmk.conf is available
 	~.	compatibility with autoconf (progressing) :
 			~ support for DEFS (-D options to pass to the compiler)
 			- support for LDFLAGS (misc linker options) ?
@@ -45,25 +44,18 @@ pmk:
 pmksetup:
 -----------------------------------------------------------------------
 	~	cpu identification
-			+ x86_32 support
-			+ x86_64 support
 			- ppc support (priviledged)
 			- sparc support
 			- sparc64 support (priviledged)
-			+ alpha support
-			+ ia64 support
 			~ man page update
 	-	cpu optimisation for compiler 
 	-	option to append to variable of pmk.conf
 	!	clean temporary files on error
 	-	missing checks :
-		        . check install binary and use pmkinstall instead if not compatible
 			- char unsigned (pmk ?)
 			- long double (pmk ?)
 			- better check for install ?
 			- others ?
-	+	privilege separation (PRIVSEP branch)
-	+	keep ':' as separator in PATH_BIN (add warning to launch pmksetup for refreshing the variable) 
 
 
 pmkscan
@@ -74,8 +66,7 @@ pmkscan
 
 pmkinstall
 -----------------------------------------------------------------------
-	+	fragment main loop in functions, it's too large
-	-.	backup option ?
+	+	backup option
 
 
 pmkshgen
@@ -94,7 +85,7 @@ pmkpc
 			- PMKPC_OPT_VAR_SILC
 			- PMKPC_OPT_VAR_STDO
 	~	man page
-	-	special expression ('' quoted), post 0.8
+	-.	special expression ('' quoted), post 0.8
 
 misc
 -----------------------------------------------------------------------

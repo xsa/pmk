@@ -1,3 +1,6 @@
+25 Feb 2005 mipsator
+ * implemented backup options in pmkinstall.
+
 05 Feb 2005 mipsator
  * fragmented pmkinstall main loop into sub functions.
 

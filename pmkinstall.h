@@ -36,7 +36,27 @@
 #ifndef _PMKINSTALL_H_
 #define _PMKINSTALL_H_
 
-#define STRIP_ENV_NAME	"STRIP"
+#define STRIP_ENV_NAME          "STRIP"
+
+#define DEFAULT_BACKUP_SFX      ".old"
+
+/* default mode */
+#define DEFAULT_MODE	S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH
+
+/* mode masks */
+#define USR_MASK	S_IRWXU | S_ISUID		/* user */
+#define GRP_MASK	S_IRWXG	| S_ISGID		/* group */
+#define OTH_MASK	S_IRWXO				/* other */
+#define FULL_MASK	USR_MASK | GRP_MASK | OTH_MASK	/* all */
+
+/* perm masks */
+#define R_PERM		S_IRUSR | S_IRGRP | S_IROTH		/* read */
+#define W_PERM		S_IWUSR | S_IWGRP | S_IWOTH		/* write */
+#define X_PERM		S_IXUSR | S_IXGRP | S_IXOTH		/* execute */
+#define S_PERM		S_ISUID | S_ISGID			/* user/group ids */
+#define FULL_PERM	R_PERM | W_PERM | X_PERM | S_PERM	/* all */
+
+
 
 /* Local functions declaration */
 void	strip(char *);

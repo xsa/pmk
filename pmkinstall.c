@@ -57,28 +57,14 @@
 
 /*#define INST_DEBUG	1*/
 
-/* default mode */
-#define DEFAULT_MODE	S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH
-
-/* mode masks */
-#define USR_MASK	S_IRWXU | S_ISUID		/* user */
-#define GRP_MASK	S_IRWXG	| S_ISGID		/* group */
-#define OTH_MASK	S_IRWXO				/* other */
-#define FULL_MASK	USR_MASK | GRP_MASK | OTH_MASK	/* all */
-
-/* perm masks */
-#define R_PERM		S_IRUSR | S_IRGRP | S_IROTH		/* read */
-#define W_PERM		S_IWUSR | S_IWGRP | S_IWOTH		/* write */
-#define X_PERM		S_IXUSR | S_IXGRP | S_IXOTH		/* execute */
-#define S_PERM		S_ISUID | S_ISGID			/* user/group ids */
-#define FULL_PERM	R_PERM | W_PERM | X_PERM | S_PERM	/* all */
-
 
 extern char	*optarg;
 extern int	 optind;
 #ifndef errno
 extern int	 errno;
 #endif
+
+char		*bsfx = DEFAULT_BACKUP_SFX; /* backup extension */
 
 
 /*
@@ -446,6 +432,7 @@ void usage(void) {
 int main(int argc, char *argv[]) {
 	struct stat	 sb;
 	bool		 create_dir = false,
+			 do_backup = false,
 			 do_chown = false,
 			 do_strip = false,
 			 go_exit = false;
@@ -453,7 +440,8 @@ int main(int argc, char *argv[]) {
 			*ostr = NULL,
 			*src,
 			*dst,
-			 dir[MAXPATHLEN];
+			 dir[MAXPATHLEN],
+			 backup[MAXPATHLEN];
 	gid_t		 gid = (gid_t) -1;
 	int		 chr;
 	mode_t		 mode = DEFAULT_MODE,
@@ -461,17 +449,23 @@ int main(int argc, char *argv[]) {
 	uid_t		 uid = (uid_t) -1;
 	unsigned int	 src_idx,
 			 last_idx;
-	
+
 	while (go_exit == false) {
-		chr = getopt(argc, argv, "bcdg:hm:o:stv");
+		chr = getopt(argc, argv, "B:bcdg:hm:o:stv");
 		if (chr == -1) {
 			go_exit = true;
 		} else {
 			switch (chr) {
+				case 'B' :
+					bsfx = optarg;
+#ifdef INST_DEBUG
+					debugf("backup suffix = %s", bsfx);
+#endif
+					break;
+
 				case 'b' :
 					/* backup */
-					/* XXX TODO */
-					errorf("-b option has not been implemented yet");
+					do_backup = true;
 					break;
 
 				case 'c' :
@@ -601,7 +595,7 @@ int main(int argc, char *argv[]) {
 				/* many checks to do (is a directory, etc ...) */
 				tmode = sb.st_mode & S_IFDIR;
 				if (tmode == 0) {
-					/* not a directory, XXX backup ? */
+					/* not a directory */
 					unlink(dst);
 				} else {
 					/* build destination */
@@ -613,6 +607,25 @@ int main(int argc, char *argv[]) {
 
 					/* set dst for further operations */
 					dst = dir;
+				}
+			}
+
+
+			/* backup, check dst again as it could have been modified */
+			if ((do_backup == true) && (stat(dst, &sb) == 0)) {
+#ifdef INST_DEBUG
+				debugf("backup of '%s'", dst);
+#endif
+				if (snprintf_b(backup, sizeof(backup),
+						"%s%s", dst, bsfx) == false) {
+					errorf("failed to generate backup name for '%s': %s.",
+							dst, strerror(errno));
+					/* XXX exit ? */
+				}
+
+				if (rename(dst, backup) != 0) {
+					errorf("failed to backup %s: %s.",
+							dst, strerror(errno));
 				}
 			}
 
