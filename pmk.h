@@ -76,7 +76,7 @@
 #define PMK_TMP_AC_CONF TMPDIR "/pmk_ac_XXXXXXXX"
 
 /* build logs */
-#define PMK_BUILD_LOG	"pmk_check_build.log"
+#define PMK_BUILD_LOG	"pmk_build.log"
 
 /* command option type */
 typedef struct {
