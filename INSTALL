@@ -1,36 +1,51 @@
-INSTALL
--------
+Pre Make Kit INSTALL file
 
-To build and install pmk on your system :
+Document revision:
+$Id$
 
-Easy method :
 
-For a global use (with root privileges):
+Installing PMK
+--------------
 
-  make clean cfgrm
+To build and install pmk on your system use one of the two following
+methods:
+
+1) The pmkcfg.sh configuration script:
+  sh pmkcfg.sh
   make
   make install
 
-In user mode (without root privileges):
-
-  make clean cfgum
+2) Using previously installed pmk binary:
+  pmk
   make
   make install
 
 
-Advanced method :
-The pmkcfg.sh script has the following options :
+More about pmkcfg.sh
+--------------------
+
+The script has the following options:
 
   -u sets user mode as on
   -p permits to override the default prefix used for BASE.
 
-The default prefixes are :
+The default prefixes are:
 
   - global mode : /usr/local or $PREFIX if it is set in env
   - user mode : $HOME
 
 Example:
-If you want a global use with /opt as prefix you will use the following :
 
+If you want a global use with /opt as prefix you will use the following:
   sh pmkcfg.sh -p /opt
+
+
+More about the pmkfile
+----------------------
+
+The sw_usermode switch is available to set user mode as on.
+
+To use it do the following:
+  pmk -e sw_usermode
+
 
