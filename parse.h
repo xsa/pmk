@@ -48,7 +48,7 @@ typedef struct {
 } prsdata;
 
 prsdata	*prsdata_init(void);
-/*void	 prsdata_destroy(prsdata *); XXX TODO */
+void	 prsdata_destroy(prsdata *);
 prscell	*prscell_init(void);
 void	 prscell_destroy(prscell *);
 bool	 parse_cell(char *, prscell *);
