@@ -61,11 +61,13 @@ pmkinstall
 -----------------------------------------------------------------------
 damien	~!	full rewrite
 		+ copy done
-		~ mode option (almost done)
-		- dir creation
+		~ mode option
+			- suid and sgid bits ?
+			- missing operators (-=)
+		+ dir creation
 		+ owner
 		+ group
-		- strip
+		~ strip
 		- backup ?
 
 
