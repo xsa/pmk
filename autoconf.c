@@ -166,15 +166,9 @@ bool ac_parse_config(pmkdata *pgd) {
 	template : target file
 */
 
-void ac_process_dyn_var(htable *pht, pmkdata *pgd, char *template) {
-	char	*srcdir,
-		*basedir,
-		*pstr,
-		 buf[MAXPATHLEN],
-		 ac_dir[MAXPATHLEN],
-		 abs_ad[MAXPATHLEN],
-		 abs_bd[MAXPATHLEN],
-		 abs_sd[MAXPATHLEN];
+void ac_process_dyn_var(pmkdata *pgd, char *template) {
+	char	*pstr;
+	htable	*pht;
 
 	/* should process variables like following (if i believe autoconf manual) :
 		- srcdir : the relative path to the directory that contains the source code for that `Makefile'.
@@ -187,48 +181,43 @@ void ac_process_dyn_var(htable *pht, pmkdata *pgd, char *template) {
 		- top_builddir : the relative path to the top-level of the current build tree.
 			In the top-level directory, this is the same as builddir.
 		- abs_top_builddir : absolute path of top_builddir.
+
+	   The pmk directories should be equivalent to that.
 	*/
 
-	srcdir = pgd->srcdir;
-	basedir = pgd->basedir;
-
-	/* extract ac_dir from template
-		NOTE : ac_dir is relative */
-	/* NOTE : we use strdup to avoid problem with linux's dirname */
-	pstr = strdup(template);
-	strlcpy(abs_ad, dirname(pstr), sizeof(abs_ad));
-	free(pstr);
-	relpath(srcdir, abs_ad, ac_dir);
+	pht = pgd->htab;
 
 	/* init builddir */
-	/*pstr = hash_get(pht, PMK_DIR_BLD_ROOT_ABS);*/
-	hash_add(pht, "abs_top_builddir", strdup(basedir));
+	pstr = hash_get(pht, PMK_DIR_BLD_ROOT_ABS);
+	hash_add(pht, "abs_top_builddir", strdup(pstr));
 
 	/* set abs_builddir */
-	abspath(basedir, ac_dir, abs_bd);
-	hash_add(pht, "abs_builddir", strdup(abs_bd));
+	pstr = hash_get(pht, PMK_DIR_BLD_ABS);
+	hash_add(pht, "abs_builddir", strdup(pstr));
 
 	/* compute top_builddir */
-	relpath(abs_bd, basedir, buf);
-	hash_add(pht, "top_builddir", strdup(buf));
+	pstr = hash_get(pht, PMK_DIR_BLD_ROOT_REL);
+	hash_add(pht, "top_builddir", strdup(pstr));
 
 	/* Mr GNU said : rigorously equal to ".". So i did :) */
-	hash_add(pht, "builddir", strdup("."));
+	pstr = hash_get(pht, PMK_DIR_BLD_REL);
+	hash_add(pht, "builddir", strdup(pstr));
 
 	/* set absolute srcdir */
-	hash_add(pht, "abs_top_srcdir", strdup(srcdir));
+	pstr = hash_get(pht, PMK_DIR_SRC_ROOT_ABS);
+	hash_add(pht, "abs_top_srcdir", strdup(pstr));
 
 	/* compute top_srcdir */
-	relpath(abs_bd, srcdir, buf);
-	hash_add(pht, "top_srcdir", strdup(buf));
+	pstr = hash_get(pht, PMK_DIR_SRC_ROOT_REL);
+	hash_add(pht, "top_srcdir", strdup(pstr));
 
 	/* absolute path of template */
-	abspath(srcdir, ac_dir, abs_sd);
-	hash_add(pht, "abs_srcdir", strdup(abs_sd));
+	pstr = hash_get(pht, PMK_DIR_SRC_ABS);
+	hash_add(pht, "abs_srcdir", strdup(pstr));
 
 	/* relative path to template */
-	relpath(abs_bd, abs_sd, buf);
-	hash_add(pht, "srcdir", strdup(buf));
+	pstr = hash_get(pht, PMK_DIR_SRC_REL);
+	hash_add(pht, "srcdir", strdup(pstr));
 }
 
 /*

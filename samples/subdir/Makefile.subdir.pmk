@@ -15,14 +15,14 @@ BUILDDIR_ROOT_ABS=	@builddir_root_abs@
 BUILDDIR_ROOT_REL=	@builddir_root_rel@
 
 # autoconf directories
-SRCDIR=		@srcdir@
-ABS_SRCDIR=	@abs_srcdir@
-TOP_SRCDIR=	@top_srcdir@
-ABS_TOP_SRCDIR=	@abs_top_srcdir@
-BUILDDIR=		@builddir@
+ABS_SRCDIR=		@abs_srcdir@
+SRCDIR=			@srcdir@
+ABS_TOP_SRCDIR=		@abs_top_srcdir@
+TOP_SRCDIR=		@top_srcdir@
 ABS_BUILDDIR=		@abs_builddir@
-TOP_BUILDDIR=		@top_builddir@
+BUILDDIR=		@builddir@
 ABS_TOP_BUILDDIR=	@abs_top_builddir@
+TOP_BUILDDIR=		@top_builddir@
 
 test:
 	@echo $(PACKAGE)

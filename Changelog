@@ -4,6 +4,9 @@
 	pmkfile location
  * added defines for pmk's specific directories (builddir, ...).
  * updated samples of pmkfile and Makefiles.
+ * use pmk values for autoconf directories.
+ * modified arguments of ac_process_dyn_var() and process_dyn_var().
+ * reorganised order of autoconf directories in Makefiles samples.
 
 18 Oct 2003 mipsator
  * fixed computing of top_srcdir.

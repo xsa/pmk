@@ -71,7 +71,7 @@ int		 cur_line = 0;
 	pht : XXX
 */
 
-void process_dyn_var(htable *pht, pmkdata *pgd, char *template) {
+void process_dyn_var(pmkdata *pgd, char *template) {
 	char	*srcdir,
 		*basedir,
 		*pstr,
@@ -79,6 +79,9 @@ void process_dyn_var(htable *pht, pmkdata *pgd, char *template) {
 		 rpath[MAXPATHLEN],
 		 stpath[MAXPATHLEN],
 		 btpath[MAXPATHLEN];
+	htable	*pht;
+
+	pht = pgd->htab;
 
 	srcdir = pgd->srcdir;
 	basedir = pgd->basedir;
@@ -246,9 +249,9 @@ bool process_template(char *template, pmkdata *pgd) {
 		 tpath[MAXPATHLEN],
 		 fpath[MAXPATHLEN],
 		 cibuf[TMP_BUF_LEN];
-	htable	*ht;
+	htable	*pht;
 
-	ht = pgd->htab;
+	pht = pgd->htab;
 
 	/* save template name */
 	ptn = strdup(basename(template));
@@ -298,17 +301,17 @@ bool process_template(char *template, pmkdata *pgd) {
 		return(false);
 	}
 
-	process_dyn_var(ht, pgd, template); /* XXX should use directly path ? */
+	process_dyn_var(pgd, template); /* XXX should use directly path ? */
 
 	if (pgd->ac_file == NULL) {
 		ac_flag = false;
 	} else {
 		ac_flag = true;
-		ac_process_dyn_var(ht, pgd, template); /* XXX should use directly path ? */
+		ac_process_dyn_var(pgd, template); /* XXX should use directly path ? */
 	}
 
 	snprintf(cibuf, sizeof(cibuf), "%s, generated from %s by PMK.", pfn, ptn);
-	hash_add(pgd->htab, "configure_input", strdup(cibuf)); /* XXX check ? */
+	hash_add(pht, "configure_input", strdup(cibuf)); /* XXX check ? */
 	free(ptn);
 	free(pfn);
 
@@ -329,7 +332,7 @@ bool process_template(char *template, pmkdata *pgd) {
 				plb = ptmp;
 
 				if (*ptmp == PMK_TAG_CHAR) {
-					ptmp = (char *) hash_get(ht, tbuf);
+					ptmp = (char *) hash_get(pht, tbuf);
 					if (ptmp == NULL) {
 						/* not a valid tag, put it back */
 						*pbf = PMK_TAG_CHAR; /* first tag character */
@@ -373,10 +376,10 @@ bool process_template(char *template, pmkdata *pgd) {
 
 	if (ac_flag == true) {
 		/* clean dyn_var */
-		ac_clean_dyn_var(ht);
+		ac_clean_dyn_var(pht);
 	}
 
-	hash_delete(pgd->htab, "configure_input");
+	hash_delete(pht, "configure_input");
 		
 	return(true);
 }
