@@ -62,15 +62,18 @@ typedef struct {
 
 typedef struct {
 	int	size,
-		count;
-	hnode	*nodetab;
+		count,
+		autogrow;
+	hnode	*nodetab; /* array of hnode */
 } htable;
 
 
 int	hash_compute(char *, int);
 htable	*hash_init(int);
+int	hash_resize(htable *, int);
 int	hash_destroy(htable *);
 int	hash_add(htable *, char *, char *);
+int	hash_add_cell(hnode *, hcell *);
 void	hash_delete(htable *, char *);
 char	*hash_get(htable *, char *);
 int	hash_merge(htable *, htable *);

@@ -96,6 +96,7 @@ htable *hash_init(int table_size) {
 	}
 
 	for(i = 0 ; i < table_size ; i++) {
+		phn[i].nbcoll = -1;
 		phn[i].first = NULL;
 		phn[i].last = NULL;
 	}
@@ -103,9 +104,42 @@ htable *hash_init(int table_size) {
 	/* finish init */
 	pht->size = table_size;
 	pht->count = 0;
+	pht->autogrow = 0; /* disabled by default */
 	pht->nodetab = phn;
 
 	return(pht);
+}
+
+/*
+*/
+
+int hash_resize(htable *ht, int newsize) {
+	hcell	*phc;
+	hnode	*newhn;
+	int	h,
+		i;
+
+	/* allocate new node table */
+	newhn = (hnode *) malloc(sizeof(hnode) * newsize);
+	if (newhn == NULL)
+		return(0); /* XXX */
+
+	/* init */
+	for (i = 0 ; i < newsize ; i++) {
+		newhn[i].nbcoll = -1; /* XXX */
+		newhn[i].first = NULL;
+		newhn[i].last = NULL;
+	}
+
+	for (i = 0 ; i < ht->size ; i++) {
+		phc = ht->nodetab[i].first;
+		while (phc != NULL) {
+			h = hash_compute(phc->key, newsize);
+			hash_add_cell(&ht->nodetab[h], phc); /* XXX */
+			phc = phc->next;
+		}
+	}
+	return(1); /* XXX */
 }
 
 /*
@@ -144,7 +178,7 @@ int hash_destroy(htable *pht) {
 }
 
 /*
-	add a key
+	add a key in the hash table
 
 	pht : hash structure
 	key : key string
@@ -160,12 +194,9 @@ int hash_destroy(htable *pht) {
 int hash_add(htable *pht, char *key, char *value) {
 	int	rval,
 		hash,
-		size,
-		exit,
-		i;
-	hnode	*phn = NULL;
-	hcell	*phc = NULL,
-		*np = NULL;
+		size;
+	hnode	*phn;
+	hcell	*phc = NULL;
 
 	rval = HASH_ADD_FAIL;
 
@@ -174,10 +205,15 @@ int hash_add(htable *pht, char *key, char *value) {
 	hash = hash_compute(key, size);
 
 	/* test remaing free cells */
-	i = pht->count;
-	if (i >= size) {
+	if (pht->count >= size) {
 		/* number of cell is higher than the supposed table size */
-		return(0);
+		if (pht->autogrow == 0) {
+			/* fixed size */
+			return(HASH_ADD_FAIL);
+		} else {
+			/* resize the hash table (long) */
+			hash_resize(pht, size * 2); /* XXX check ? */
+		}
 	}
 
 	
@@ -187,46 +223,64 @@ int hash_add(htable *pht, char *key, char *value) {
 	strlcpy(phc->value, value, MAX_HASH_VALUE_LEN);
 	phc->next = NULL;
 
-	phn = pht->nodetab;
+	phn = &pht->nodetab[hash];
+	rval = hash_add_cell(phn, phc);
 
-	if (phn[hash].first == NULL) {
-		/* hash code unused */
-		phn[hash].first = phc;
-		phn[hash].last = phc;
-
+	if (rval == HASH_ADD_OKAY || rval == HASH_ADD_COLL)
 		pht->count++;
-		rval = HASH_ADD_OKAY;
+
+	return(rval);
+}
+
+/*
+	add a new cell in a node
+
+	phn : storage node
+	phc : cell to add
+
+	returns an error code :
+		HASH_ADD_OKAY : added (no collision).
+		HASH_ADD_COLL : added (collision, key chained).
+		HASH_ADD_UPDT : key already exists, change value.
+
+	note : this function does not increment the cell number of the hash table.
+*/
+
+int hash_add_cell(hnode *phn, hcell *phc) {
+	hcell	*np;
+
+	if (phn->first == NULL) {
+		/* hash code unused */
+		phn->first = phc;
+		phn->last = phc;
+
+		return(HASH_ADD_OKAY);
 	} else {
 		/* collision, hash code already used */
-		np = phn[hash].first;
-		exit = 0;
+		np = phn->first;
+
 		/* looking for last element */
-		while (exit == 0) {
-			if (strncmp(key, np->key, MAX_HASH_KEY_LEN) == 0) {
+		while (1) {
+			if (strncmp(phc->key, np->key, sizeof(phc->key)) == 0) {
 				/* key already exists */
-				strlcpy(np->value, value, MAX_HASH_VALUE_LEN);
-				rval = HASH_ADD_UPDT;
-				exit = 1;
+				strlcpy(np->value, phc->value, sizeof(np->value));
 				/* new cell no longer needed */
 				free(phc);
+				return(HASH_ADD_UPDT);
 			} else {
 				if (np->next == NULL) {
 					/* last element found */
-					phn[hash].last = phc;
+					phn->last = phc;
 					/* chaining new cell */
 					np->next = phc;
 
-					pht->count++;
-					rval = HASH_ADD_COLL;
-					exit = 1;
+					return(HASH_ADD_COLL);
 				} else {
 					np = np->next;
 				}
 			}
 		}
 	}
-
-	return(rval);
 }
 
 /*
@@ -335,8 +389,8 @@ int hash_merge(htable *dst_ht, htable *src_ht) {
 		p = src_ht->nodetab[i].first;
 		while (p != NULL) {
 			/* add the key in dst_ht */
-			hash_add(dst_ht, p->key, p->value);
-			c++; /* merged one more key */
+			if (hash_add(dst_ht, p->key, p->value) != HASH_ADD_FAIL)
+				c++; /* merged one more key */
 			p = p->next;
 		}
 	}
