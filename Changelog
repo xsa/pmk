@@ -1,3 +1,6 @@
+12 Jan 2004 mipsator
+ * imported preliminary code for our pkg-config alternative.
+
 11 Jan 2004 mipsator
  * added more C++ support in some checks (handle CXXFLAGS when needed).
  * improved some checks to be more verbose on used variables.
