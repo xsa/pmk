@@ -107,7 +107,7 @@ test_pmk: pmk
 	@echo "----------------------------------------"
 	@echo ""
 	@echo "-> Removing generated files"
-	rm -f samples/Makefile.sample samples/Makefile.samplebis pmk.log
+	rm -f samples/Makefile.sample samples/Makefile.samplebis pmk.log pmk.conf
 	@echo ""
 	@echo "=> End of test"
 	@echo ""
