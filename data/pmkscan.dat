@@ -13,4 +13,5 @@
 .FUNCTIONS {
 strlcpy=("# checking strlcpy in string.h",".CHECK_INCLUDE(function_strlcpy) {","REQUIRED=FALSE","LANG=","INCLUDE=\"string.h\"","FUNCTION=strlcpy","}")
 strlcat=("# checking strlcat in string.h",".CHECK_INCLUDE(function_strlcat) {","REQUIRED=FALSE","LANG=","INCLUDE=\"string.h\"","FUNCTION=strlcat","}")
+isblank=("# checking isblank in ctype.h",".CHECK_INCLUDE(function_isblank) {","REQUIRED=FALSE","LANG=","INCLUDE=\"ctype.h\"","FUNCTION=isblank","}")
 }
