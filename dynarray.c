@@ -65,7 +65,7 @@ dynary *da_init(void) {
 	if (ptr != NULL) {
 		ptr->nbcell = 0;
 		ptr->nextidx = 0;
-		ptr->pary = malloc(DYNARY_AUTO_GROW * sizeof(char *));
+		ptr->pary = malloc(DYNARY_AUTO_GROW * sizeof(void *));
 	}
 
 	return(ptr);
@@ -81,9 +81,9 @@ dynary *da_init(void) {
 */
 
 bool da_resize(dynary *da, size_t nsize) {
-	char	**tary;
+	void	**tary;
 
-	tary = realloc(da->pary, nsize * sizeof(char *));
+	tary = realloc(da->pary, nsize * sizeof(void *));
 	if (tary != NULL) {
 		da->pary = tary;
 		da->nbcell = nsize;
@@ -117,20 +117,13 @@ size_t	da_usize(dynary *da) {
 	Add a new value at the end of the array
 
 	da : dynamic array
-	str : string to append
+	pval : string to append
 
 	return : boolean
 */
 
-bool da_push(dynary *da, char *str) {
-	char	 *dup;
-	size_t	  gsize;
-
-	dup = strdup(str);
-	if (dup == NULL) {
-		/* strdup failed */
-		return(false);
-	}
+bool da_push(dynary *da, void *pval) {
+	size_t	gsize;
 
 	if (da->nbcell == da->nextidx) {
 		/* compute growing size */
@@ -143,7 +136,7 @@ bool da_push(dynary *da, char *str) {
 	}
 
 	/* insert in last place */
-	da->pary[da->nextidx] = dup;
+	da->pary[da->nextidx] = pval;
 	da->nextidx++;
 	
 	return(true);
@@ -157,8 +150,8 @@ bool da_push(dynary *da, char *str) {
 	return : the last element or NULL
 */
 
-char *da_pop(dynary *da) {
-	char	 *p;
+void *da_pop(dynary *da) {
+	void	 *p;
 	size_t	  gsize;
 
 	if (da->nextidx == 0) {
@@ -191,8 +184,8 @@ char *da_pop(dynary *da) {
 	return : the first cell
 */
 
-char *da_shift(dynary *da) {
-	char	*r;
+void *da_shift(dynary *da) {
+	void	*p;
 	int	 i;
 	size_t	 gsize;
 
@@ -201,7 +194,7 @@ char *da_shift(dynary *da) {
 		return(NULL);
 	}
 
-	r = da->pary[0];
+	p = da->pary[0];
 	da->nextidx--;
 
 	/* shift remaining values */
@@ -219,7 +212,7 @@ char *da_shift(dynary *da) {
 		}
 	}
 
-	return(r);
+	return(p);
 }
 
 /*
@@ -231,7 +224,7 @@ char *da_shift(dynary *da) {
 	returns value or NULL
 */
 
-char *da_idx(dynary *da, int idx) {
+void *da_idx(dynary *da, int idx) {
 	if (idx >= da->nextidx) {
 		return(NULL);
 	}
