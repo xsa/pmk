@@ -54,7 +54,7 @@ described below:
 3) Supported Platforms
 ----------------------
 
-- Any POSIX compliant plaftorm should be supported. Actually we try to
+- Any POSIX compliant platform should be supported. Actually we try to
   test our suite on the most different platforms we can.
   A summary of these tests can be found in the STATUS file. Be sure to
   also read the BUGS file.
