@@ -11,8 +11,9 @@ ADD_SYSTEM {
 	NAME = "MySystem"
 	SL_EXT = "shared library extension"
 	SL_VERSION = "$SL_MAJOR.$SL_MINOR"
-	SL_NAME = "simple shared library name building"
-	SL_NAME_VERS = "versioned shared library name building"
+	SL_LIBNAME = "lib$SL_NAME$SL_EXT"
+	SL_LIBNAME_VMAJ = "$SL_LIBNAME.$SL_MAJOR"
+	SL_LIBNAME_VFULL = "$SL_LIBNAME.$SL_VERSION"
 }
 
 pmkfile command:
@@ -21,7 +22,7 @@ BUILD_SHLIB_NAME(?) {
 	NAME = "library name"
 	MAJOR = "major version"
 	MINOR = "minor version"
-	VARIABLE = "storage variable"
+	VERSION_NONE = "storage variable"
 }
 
 
@@ -29,11 +30,22 @@ example:
 
 (pmkcomp.dat)
 ADD_SYSTEM {
+	NAME = "Darwin"
+	SL_EXT = ".dylib"
+	SL_VERSION = "$SL_MAJOR.$SL_MINOR"
+	SL_LIBNAME = "lib$SL_NAME$SL_EXT"
+	SL_LIBNAME_VMAJ = "lib$SL_NAME.$SL_MAJOR$SL_EXT"
+	SL_LIBNAME_VFULL = "lib$SL_NAME.$SL_VERSION$SL_EXT"
+	SLLDFLAGS_gcc = "-dynamiclib"
+}
+
+ADD_SYSTEM {
 	NAME = "OpenBSD"
 	SL_EXT = ".so"
 	SL_VERSION = "$SL_MAJOR.$SL_MINOR"
-	SL_NAME = "lib$SL_LIBNAME$SL_EXT"
-	SL_NAME_VERS = "$SL_NAME.$SL_VERSION"
+	SL_LIBNAME = "lib$SL_NAME$SL_EXT"
+	SL_LIBNAME_VMAJ = "$SL_LIBNAME.$SL_MAJOR"
+	SL_LIBNAME_VFULL = "$SL_LIBNAME.$SL_VERSION"
 }
 
 (pmkfile)
@@ -47,8 +59,8 @@ BUILD_SHLIB_NAME(?) {
 	NAME = "$LIBPMK_NAME"
 	MAJOR = "$LIBPMK_MAJ"
 	MINOR = "$LIBPMK_MIN"
-	VARIABLE = "LIBNAME"
-	VERSVAR = "LIBNAMEV"
+	VERSION_NONE = "LIBNAME"
+	VERSION_FULL = "LIBNAMEV"
 }
 
 (makefile template)
