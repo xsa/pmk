@@ -146,6 +146,11 @@ unsigned char	 arch_name_to_id(char *);
 #define X86_CPU_MASK_FEAT_CX16	0x00002000	/* bit 13 */
 #define X86_CPU_MASK_FEAT_ETPRD	0x00004000	/* bit 14 */
 
+/* extended feature register (edx) */
+#define X86_CPU_MASK_FEAT_LM		0x20000000	/* bit 29 */
+#define X86_CPU_MASK_FEAT_EXT3DN	0x40000000	/* bit 30 */
+#define X86_CPU_MASK_FEAT_3DNOW		0x80000000	/* bit 31 */
+
 
 #define PMKCONF_HW_X86_CPU_FAMILY	"HW_X86_CPU_FAMILY"	/* family */
 #define PMKCONF_HW_X86_CPU_MODEL	"HW_X86_CPU_MODEL"	/* model */

@@ -162,7 +162,11 @@ bool add_compiler(comp_data *pcd, htable *pht) {
 	if (pstr == NULL) {
 		pcell->v_macro = strdup(DEF_NOVERSION);
 	} else {
-		snprintf(tstr, sizeof(tstr), DEF_VERSION, pstr);
+		if (snprintf_b(tstr, sizeof(tstr),
+					DEF_VERSION, pstr) == false) {
+			free(pcell);
+			return(false);
+		}
 		pcell->v_macro = strdup(tstr);
 	}
 
@@ -424,7 +428,7 @@ bool detect_compiler(char *cpath, char *blog, comp_data *pcd, comp_info *cinfo) 
 	}
 	/* build compiler command */
 	snprintf(cfgcmd, sizeof(cfgcmd), CC_TEST_FORMAT,
-		cpath, CC_TEST_BIN, ftmp, blog);
+		cpath, CC_TEST_BIN, ftmp, blog); /* XXX check */
 
 	/* get result */
 	r = system(cfgcmd);

@@ -1,3 +1,9 @@
+26 Dec 2004 mipsator
+ * added snprintf_b(), strlcat_b() and strlcpy_b() in pmk_string.c.
+ * added support for AMD cpu feature detection.
+ * replaced some snprintf(), strlcat() and strlcpy() with their boolean
+   counterparts.
+
 25 Dec 2004 mipsator
  * fixed respect of CC in pmkcfg.sh script.
  * added DEFS usage in pmkfile.5.

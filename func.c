@@ -513,9 +513,9 @@ bool pmk_check_header(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 		return(false);
 	}
 
-	snprintf(cfgcmd, sizeof(cfgcmd), HEADER_CC_FORMAT,
+	snprintf_b(cfgcmd, sizeof(cfgcmd), HEADER_CC_FORMAT,
 			ccpath, inc_path, BIN_TEST_NAME, ftmp,
-			pgd->buildlog);
+			pgd->buildlog); /* XXX check ? */
 
 	/* get result */
 	r = system(cfgcmd);
@@ -554,8 +554,9 @@ bool pmk_check_header(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 			}
 
 
-			snprintf(cfgcmd, sizeof(cfgcmd), HEADER_CC_FORMAT,
-				ccpath, inc_path, BIN_TEST_NAME, ftmp, pgd->buildlog);
+			snprintf_b(cfgcmd, sizeof(cfgcmd), HEADER_CC_FORMAT,
+					ccpath, inc_path, BIN_TEST_NAME,
+					ftmp, pgd->buildlog); /* XXX check ? */
 
 			/* get result */
 			r = system(cfgcmd);
@@ -600,8 +601,10 @@ bool pmk_check_header(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 			btmp[strlen(btmp) - 1] = 'o';
 
 			/* build compiler command */
-			snprintf(cfgcmd, sizeof(cfgcmd), HEADER_FUNC_CC_FORMAT,
-				ccpath, inc_path, btmp, ftmp, pgd->buildlog);
+			snprintf_b(cfgcmd, sizeof(cfgcmd),
+					HEADER_FUNC_CC_FORMAT, ccpath,
+					inc_path, btmp, ftmp,
+					pgd->buildlog); /* XXX check ? */
 
 			/* get result */
 			r = system(cfgcmd);
@@ -784,9 +787,9 @@ bool pmk_check_lib(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 	}
 
 	/* build compiler command */
-	snprintf(cfgcmd, sizeof(cfgcmd), LIB_CC_FORMAT,
-			ccpath, main_libs, BIN_TEST_NAME, libname,
-			ftmp, pgd->buildlog);
+	snprintf_b(cfgcmd, sizeof(cfgcmd), LIB_CC_FORMAT, ccpath,
+			main_libs, BIN_TEST_NAME, libname, ftmp,
+			pgd->buildlog); /* XXX test ? */
 
 	/* get result */
 	r = system(cfgcmd);
@@ -826,9 +829,9 @@ bool pmk_check_lib(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 			}
 
 			/* build compiler command */
-			snprintf(cfgcmd, sizeof(cfgcmd), LIB_CC_FORMAT,
+			snprintf_b(cfgcmd, sizeof(cfgcmd), LIB_CC_FORMAT,
 				ccpath, main_libs, BIN_TEST_NAME, libname,
-				ftmp, pgd->buildlog);
+				ftmp, pgd->buildlog); /* XXX check ? */
 	
 			/* get result */
 			r = system(cfgcmd);
@@ -857,7 +860,8 @@ bool pmk_check_lib(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 			/* process additional defines */
 			process_def_list(pgd->htab, defs);
 
-			snprintf(lib_buf, sizeof(lib_buf), "-l%s", libname);
+			snprintf_b(lib_buf, sizeof(lib_buf), "-l%s",
+					libname); /* XXX check ? */
 
 			/* put result in LIBS or alternative variable */
 			if (single_append(pgd->htab, libs, strdup(lib_buf)) == false) {
@@ -1229,7 +1233,7 @@ bool pmk_check_pkg_config(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 
 		/* set config tool filename */
 		if (cfgtcell_get_binary(pgd->cfgt, target, pc_cmd, sizeof(pc_cmd)) == false) {
-			if (snprintf(pc_cmd, sizeof(pc_cmd), "%s-config", target) >= (int) sizeof(pc_cmd)) {
+			if (snprintf_b(pc_cmd, sizeof(pc_cmd), "%s-config", target) == false) {
 				errorf("overflow in snprintf().");
 				return(false);
 			}
@@ -1412,8 +1416,8 @@ bool pmk_check_type(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 	}
 
 	/* build compiler command */
-	snprintf(cfgcmd, sizeof(cfgcmd), TYPE_CC_FORMAT,
-		ccpath, BIN_TEST_NAME, ftmp, pgd->buildlog);
+	snprintf_b(cfgcmd, sizeof(cfgcmd), TYPE_CC_FORMAT,
+		ccpath, BIN_TEST_NAME, ftmp, pgd->buildlog); /* XXX check */
 
 	/* get result */
 	r = system(cfgcmd);
@@ -1848,12 +1852,14 @@ bool pmk_setparam_detect(pmkcmd *cmd, prsopt *popt, pmkdata *pgd) {
 				pld = check_lang_comp(pstr);
 				if (pld != NULL) {
 					/* check if an override exists for compiler flags */
-					if (snprintf(buf, sizeof(buf), "%s_%s", pld->slflg, cinfo.c_id) >= (int)sizeof(buf)) {
+					if (snprintf_b(buf, sizeof(buf), "%s_%s",
+								pld->slflg, cinfo.c_id) == false) {
 						errorf("overflow.\n");
 						return(false);
 					}
 
-					if (cdata->sht != NULL) { /* XXX need to skip if system has no data ? */
+					if (cdata->sht != NULL) {
+						/* XXX need to skip if system has no data ? */
 						ostr = hash_get(cdata->sht, buf);
 					} else {
 						ostr = NULL;
@@ -1872,7 +1878,9 @@ bool pmk_setparam_detect(pmkcmd *cmd, prsopt *popt, pmkdata *pgd) {
 						return(false);
 
 					/* check if an override exists for linking flags */
-					if (snprintf(buf, sizeof(buf), "%s_%s", SL_LDFLAG_VARNAME, cinfo.c_id) >= (int) sizeof(buf)) {
+					if (snprintf_b(buf, sizeof(buf),
+							"%s_%s", SL_LDFLAG_VARNAME,
+							cinfo.c_id) == false) {
 						errorf("overflow.\n");
 						return(false);
 					}
@@ -1965,7 +1973,9 @@ bool pmk_set_variable(pmkcmd *cmd, prsopt *popt, pmkdata *pgd) {
 				errorf("unable to build define name for '%s'.", popt->key);
 				return(false);
 			}
-			if (snprintf(buffer, sizeof(buffer), "#define %s \"%s\"", popt->key, value) >= (int) sizeof(buffer)) {
+			if (snprintf_b(buffer, sizeof(buffer),
+					"#define %s \"%s\"", popt->key,
+					value) == false) {
 				errorf("buffer overflow for define value of '%s'.", popt->key);
 				return(false);
 			}

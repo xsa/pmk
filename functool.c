@@ -105,9 +105,9 @@ char *bool_to_str(bool value) {
 	static char	bstr[6];
 
 	if (value == true) {
-		snprintf(bstr, sizeof(bstr), BOOL_STRING_TRUE);
+		snprintf(bstr, sizeof(bstr), BOOL_STRING_TRUE); /* no check */
 	} else {
-		snprintf(bstr, sizeof(bstr), BOOL_STRING_FALSE);
+		snprintf(bstr, sizeof(bstr), BOOL_STRING_FALSE); /* no check */
 	}
 	return(bstr);
 }
@@ -195,7 +195,7 @@ char *build_def_name(char *name) {
 	if (semidef == NULL)
 		return(NULL);
 
-	if (snprintf(def_str, sizeof(def_str), "DEF__%s", semidef) >= (int) sizeof(def_str))
+	if (snprintf_b(def_str, sizeof(def_str), "DEF__%s", semidef) == false)
 		return(NULL);
 
 	return(def_str);
@@ -221,17 +221,19 @@ bool record_def(htable *ht, char *name, bool status) {
 	if (semidef == NULL)
 		return(false);
 
-	if (snprintf(def_str, sizeof(def_str), "DEF__%s", semidef) >= (int) sizeof(def_str))
+	if (snprintf_b(def_str, sizeof(def_str), "DEF__%s", semidef) == false)
 		return(false);
 
-	if (snprintf(have_str, sizeof(def_str), "HAVE_%s", semidef) >= (int) sizeof(def_str))
+	if (snprintf_b(have_str, sizeof(def_str), "HAVE_%s", semidef) == false)
 		return(false);
 
 	if (status == true) {
-		if (snprintf(def_val, sizeof(def_str), "#define %s 1", have_str) >= (int) sizeof(def_str))
+		if (snprintf_b(def_val, sizeof(def_str),
+					"#define %s 1", have_str) == false)
 			return(false);
 	} else {
-		if (snprintf(def_val, sizeof(def_str), "#undef %s", have_str) >= (int) sizeof(def_str))
+		if (snprintf_b(def_val, sizeof(def_str),
+					"#undef %s", have_str) == false)
 			return(false);
 	}
 	
@@ -269,10 +271,10 @@ bool record_def_data(htable *ht, char *name, char *value) {
 	if (semidef == NULL)
 		return(false);
 
-	if (snprintf(def_str, sizeof(def_str), "DEF__%s", semidef) >= (int) sizeof(def_str))
+	if (snprintf_b(def_str, sizeof(def_str), "DEF__%s", semidef) == false)
 		return(false);
 
-	if (snprintf(have_str, sizeof(def_str), "HAVE_%s", semidef) >= (int) sizeof(def_str))
+	if (snprintf_b(have_str, sizeof(def_str), "HAVE_%s", semidef) == false)
 		return(false);
 
 	if (value != NULL) {
@@ -284,10 +286,13 @@ bool record_def_data(htable *ht, char *name, char *value) {
 		debugf("record_def_data() : recorded '%s' with '%s'", have_str, value);
 #endif
 
-		if (snprintf(def_val, sizeof(def_str), "#define %s %s", have_str, value) >= (int) sizeof(def_str))
+		if (snprintf_b(def_val, sizeof(def_str),
+					"#define %s %s",
+					have_str, value) == false)
 			return(false);
 	} else {
-		if (snprintf(def_val, sizeof(def_str), "#undef %s", have_str) >= (int) sizeof(def_str))
+		if (snprintf_b(def_val, sizeof(def_str),
+					"#undef %s", have_str) == false)
 			return(false);
 	}
 	
@@ -319,14 +324,13 @@ bool record_def_data(htable *ht, char *name, char *value) {
 bool record_val(htable *ht, char *name, char *value) {
 	char	*semidef,
 		 have_str[MAX_HASH_VALUE_LEN];
-	int	 s;
 
 	semidef = str_to_def(name);
 	if (semidef == NULL)
 		return(false);
 
-	s = sizeof(have_str);
-	if (snprintf(have_str, s, "HAVE_%s", semidef) >= s)
+	if (snprintf_b(have_str, sizeof(have_str),
+					"HAVE_%s", semidef) == false)
 		return(false);
 
 	if (hash_update_dup(ht, have_str, value) == HASH_ADD_FAIL)
@@ -439,7 +443,8 @@ bool depend_check(htable *lht, pmkdata *gd) {
 	da = po_get_list(po);
 	if (da == NULL) {
 		/* DEPEND is not a list */
-		snprintf(gd->errmsg, sizeof(gd->errmsg), "Syntax error in DEPEND !");
+		strlcpy(gd->errmsg, "Syntax error in DEPEND !",
+					sizeof(gd->errmsg));
 		return(false);
 	}
 
@@ -448,7 +453,8 @@ bool depend_check(htable *lht, pmkdata *gd) {
 		fdep = da_idx(da, i);
 		if (label_check(gd->labl, fdep) == false) {
 			rval = false;
-			snprintf(gd->errmsg, sizeof(gd->errmsg), "Required '%s' dependency failed.", fdep);
+			snprintf(gd->errmsg, sizeof(gd->errmsg),
+					"Required '%s' dependency failed.", fdep);
 		}
 	}
 
@@ -569,7 +575,9 @@ lgdata *get_lang(htable *pht, pmkdata *pgd) {
 char *get_comp_path(htable *pht, char *compname) {
 	char	key[OPT_NAME_LEN];
 
-	snprintf(key, sizeof(key), "BIN_%s", compname);
+	if (snprintf_b(key, sizeof(key), "BIN_%s", compname) == false)
+		return(NULL);
+
 	return((char *) hash_get(pht, key));
 }
 

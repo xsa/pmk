@@ -157,14 +157,17 @@ debugf(MKVAR_FMT_MK, varname, MKVAR_FILE);
 		return(false);
 	}
 
-	snprintf(varstr, sizeof(varstr), MKVAR_FMT_CMD, mfn);
+	if (snprintf_b(varstr, sizeof(varstr), MKVAR_FMT_CMD, mfn) == false)
+		return(false);
+
 	if (system(varstr) == 0) {
 		tfp = fopen(MKVAR_FILE, "r");
 		if (tfp != NULL) {
 			/* catch output of make */
 			if (get_line(tfp, result, rsize) == false) {
 #ifdef MKVAR_DEBUG
-				errorf("failed to get result from '%s' : %s.", varstr, strerror(errno));
+				errorf("failed to get result from '%s' : %s.",
+						varstr, strerror(errno));
 #endif
 				rval = false;
 			}
@@ -173,13 +176,15 @@ debugf(MKVAR_FMT_MK, varname, MKVAR_FILE);
 			rval = true;
 		} else {
 #ifdef MKVAR_DEBUG
-			errorf("failed to open '%s' : %s.", varstr, strerror(errno));
+			errorf("failed to open '%s' : %s.", varstr,
+						strerror(errno));
 #endif
 			rval = false;
 		}
 	} else {
 #ifdef MKVAR_DEBUG
-		errorf("failed to execute '%s' : %s.", varstr, strerror(errno));
+		errorf("failed to execute '%s' : %s.", varstr,
+						strerror(errno));
 #endif
 		rval = false;
 	}
