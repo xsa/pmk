@@ -259,6 +259,57 @@ bool str_to_dynary(char *str, char sep, dynary *da) {
 	return(TRUE);
 }
 
+/*
+	find a file in the specified list of path
+
+	da : path list
+	fname : file to search
+	fpath : storage of the full path
+	fplen : size of the storage
+
+	returns TRUE on success
+
+	XXX not yet tested
+*/
+
+bool find_file_bis(dynary *da, char *fname, char *fpath, int fplen) {
+	DIR		*dp;
+	struct dirent	*de;
+	int		i;
+	char		*path;
+	bool		found,
+			exit;
+
+	found = FALSE;
+	for (i = 0 ; (i < da_size(da)) && (found == FALSE) ; i++) {
+		path = da_idx(da, i);
+		dp = opendir(path);
+		if (dp == NULL) {
+			errorf("could not open directory: %s", path);
+			return(FALSE);
+		}
+		exit = FALSE;
+		while (exit == FALSE) {
+			de = readdir(dp);
+			if (de != NULL) {
+				if (strncmp(de->d_name, fname, sizeof(fname)) == 0) {
+					if (snprintf(fpath, fplen, "%s/%s", path, fname) < fplen) {
+						/* fpath set */
+						found = TRUE;
+					}
+					exit = TRUE;
+				}
+			} else {
+				/* no more entry */
+				exit = TRUE;
+			}
+		}
+		closedir(dp);
+	}
+
+	return(found);
+}
+
 /*              
  * split strings using 'delimiter'
  * 
@@ -269,6 +320,7 @@ bool str_to_dynary(char *str, char sep, dynary *da) {
  *	returns:  0 on success
  *		 -1 on failure
  */       
+
 int strsplit(char *str, mpath *stpath, char *delimiter) {
 	int	i = 0;
 	char	*p, *last;
@@ -283,8 +335,6 @@ int strsplit(char *str, mpath *stpath, char *delimiter) {
 	stpath->pathnum = i;
 	return(0);
 }
-
-
 
 /* 
  * find a file in a specified path;
@@ -316,7 +366,7 @@ int find_file(mpath *stp, char *file_name, char *file_path, int fp_len) {
 			if (dp->d_ino == 0)
 				continue;
 
-			if ((strncmp(dp->d_name, file_name, fp_len) == 0) &&
+			if ((strncmp(dp->d_name, file_name, sizeof(file_name)) == 0) &&
 				(snprintf(file_path, fp_len, "%s/%s",
 					path[i], file_name) < fp_len)) {
 						closedir(dirp);
