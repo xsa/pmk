@@ -289,7 +289,7 @@ bool find_file(dynary *da, char *fname, char *fpath, int fplen) {
 		while (exit == false) {
 			de = readdir(dp);
 			if (de != NULL) {
-				if (strncmp(de->d_name, fname, sizeof(de->d_name)) == 0) {
+				if (strncmp(de->d_name, fname, strlen(fname)) == 0) {
 					if (snprintf(fpath, fplen, "%s/%s", path, fname) < fplen) {
 						/* fpath set */
 						found = true;
