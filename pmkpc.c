@@ -313,6 +313,12 @@ debugf("{main} id = %d", poc->id);
 					opt_exists = true;
 					break;
 
+				case PMKPC_OPT_HELP :
+					fprintf(stderr, "For detailed help "
+						"please see the pmkpc(1) "
+						"man page.\n");
+					exit(EXIT_FAILURE);
+
 				case PMKPC_OPT_USAGE :
 					usage();
 					exit(EXIT_FAILURE);
@@ -321,7 +327,6 @@ debugf("{main} id = %d", poc->id);
 				case PMKPC_OPT_LISTALL :
 				case PMKPC_OPT_UNINST :
 				case PMKPC_OPT_DEBUG :
-				case PMKPC_OPT_HELP :
 				case PMKPC_OPT_ATLVERS :
 				case PMKPC_OPT_EXTVERS :
 				case PMKPC_OPT_MAXVERS :
