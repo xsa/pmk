@@ -439,7 +439,7 @@ if [ -z "$CC" ]; then
 	if check_binary cc; then
 		CC="cc"
 	else
-		printf "Unable to find C compiler"
+		printf "Unable to find C compiler.\n"
 		exit 0
 	fi
 else
@@ -452,7 +452,7 @@ fi
 #
 
 if ! check_binary cpp; then
-	printf "Unable to find C preprocessor"
+	printf "Unable to find C preprocessor.\n"
 	exit 0
 fi
 
@@ -461,7 +461,7 @@ fi
 #
 
 if ! check_binary as; then
-	printf "Unable to find assembler"
+	printf "Unable to find assembler.\n"
 	exit 0
 fi
 
