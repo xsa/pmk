@@ -49,7 +49,7 @@ CHECK_HEADER(sys_param) {
 }
 
 # check function strlcpy in string.h
-CHECK_HEADER(string_strcpy) {
+CHECK_HEADER(string_strlcpy) {
 	REQUIRED = FALSE
 	NAME = "string.h"
 	FUNCTION = "strlcpy"
