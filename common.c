@@ -133,14 +133,16 @@ bool get_make_var(char *varname, char *result, int rsize) {
 	FILE	*mfp,
 		*tfp;
 	bool	 rval;
-	char	 mfn[] = "/tmp/pmk_mkf.XXXXXXXX",
+	char	 mfn[MAXPATHLEN],
 		 varstr[TMP_BUF_LEN];
 	int	 mfd = -1;
+
+	strlcpy(mfn, TMP_MK_FILE, sizeof(mfn));
 
 	mfd = mkstemp(mfn);
 	if (mfd == -1) {
 		/* name randomize failed */
-		fprintf(stderr, "Failed to randomize filename\n");
+		errorf("Failed to randomize filename\n");
 		return(false);
 	}
 
@@ -156,7 +158,7 @@ bool get_make_var(char *varname, char *result, int rsize) {
 		fprintf(mfp, "all:\n\t@echo \"$(%s)\" > %s", varname, MKVAR_FILE);
 		fclose(mfp);
 	} else {
-		fprintf(stderr, "Failed to open %s\n", mfn);
+		errorf("Failed to open %s\n", mfn);
 		return(false);
 	}
 
@@ -184,13 +186,13 @@ bool get_make_var(char *varname, char *result, int rsize) {
 
 	if (unlink(mfn) == -1) {
 		/* cannot remove temporary file */
-		fprintf(stderr, "Cannot remove temporary file: %s : %s", 
+		errorf("Cannot remove temporary file: %s : %s", 
 			mfn, strerror(errno));
 	}
 
 	if (unlink(MKVAR_FILE) == -1) {
 		/* cannot remove temporary file */
-		fprintf(stderr, "Cannot remove temporary file: %s : %s", 
+		errorf("Cannot remove temporary file: %s : %s", 
 			mfn, strerror(errno));
 	}
 
@@ -538,5 +540,22 @@ bool fcopy(char *src, char *dst, mode_t mode) {
 	return(true);
 }
 
+/*
+	tmp_open
+*/
 
+FILE *tmp_open(char *fname, char *mode) {
+	char	buf[MAXPATHLEN];
+	int	fd;
 
+	/* copy file name in buf */
+	strlcpy(buf, fname, sizeof(buf));
+
+	/* randomize file name */
+	fd = mkstemp(buf);
+	if (fd == -1) {
+		return(NULL);
+	}
+
+	return(fdopen(fd, mode));
+}

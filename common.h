@@ -49,6 +49,9 @@
 
 #define MAXTOKENS	128	/* max slots in the paths array */
 
+#define TMP_MK_FILE	TMPDIR "/pmk_XXXXXXXX.mk"
+
+
 /* structure to store multiple path */
 typedef struct {
 	int	 pathnum;
@@ -87,5 +90,7 @@ bool	 pmk_log(const char *, ...);
 
 bool	 copy_text_file(char *, char *);
 bool	 fcopy(char *, char *, mode_t);
+
+FILE	*tmp_open(char *, char *);
 
 #endif /* _PMK_COMMON_H_ */
