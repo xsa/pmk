@@ -66,8 +66,8 @@
 	return : resulting hash
 */
 
-int hash_compute(char *key, int table_size) {
-	int		len = 0,
+uint hash_compute(char *key, size_t table_size) {
+	uint		len = 0,
 			hash = 0;
 	unsigned char	c;
 	
@@ -94,7 +94,7 @@ int hash_compute(char *key, int table_size) {
 	return : a pointer to the hash structure
 */
 
-htable *hash_init(int table_size) {
+htable *hash_init(size_t table_size) {
 	return(hash_init_adv(table_size, (void *(*)(void *))strdup, free, hash_str_append));
 }
 
@@ -112,10 +112,11 @@ htable *hash_init(int table_size) {
 	(see hash_append_str for an example).
 */
 
-htable *hash_init_adv(int table_size, void *(*dupfunc)(void *),
+htable *hash_init_adv(size_t table_size, void *(*dupfunc)(void *),
 		void (*freefunc)(void *),
 		void *(*appdfunc)(void *, void *, void *)) {
-	int	 i;
+
+	uint	 i;
 	htable	*pht;
 	hnode	*phn;
 
@@ -161,12 +162,12 @@ htable *hash_init_adv(int table_size, void *(*dupfunc)(void *),
 	return : boolean 
 */
 
-bool hash_resize(htable *ht, int newsize) {
+bool hash_resize(htable *ht, size_t newsize) {
 	hcell	*phc,
-		*next;
+			*next;
 	hnode	*newhn;
-	int	 c = 0,
-		 h,
+	size_t	 c = 0;
+	uint	 h,
 		 i;
 
 	/* allocate new node table */
@@ -217,12 +218,12 @@ void hash_set_grow(htable *ht) {
 	return : number of keys deleted
 */
 
-int hash_destroy(htable *pht) {
-	int	 i,
-		 s,
-		 c = 0;
+size_t hash_destroy(htable *pht) {
 	hcell	*p,
 		*t;
+	size_t	 s,
+		 c = 0;
+	uint	 i;
 
 	if (pht == NULL)
 		return(0);
@@ -261,7 +262,7 @@ int hash_destroy(htable *pht) {
 		HASH_ADD_UPDT : key already exists, change value.
 */
 
-int hash_add(htable *pht, char *key, void *value) {
+uint hash_add(htable *pht, char *key, void *value) {
 	return(hash_update(pht, key, value));
 }
 
@@ -280,12 +281,12 @@ int hash_add(htable *pht, char *key, void *value) {
 		HASH_ADD_UPDT : key already exists, change value.
 */
 
-int hash_update(htable *pht, char *key, void *value) {
-	int	 rval,
-		 hash,
-		 size;
+uint hash_update(htable *pht, char *key, void *value) {
+	uint	 hash;
+	uint	 rval;
 	hnode	*phn;
 	hcell	*phc = NULL;
+	size_t	 size;
 
 	rval = HASH_ADD_FAIL;
 
@@ -332,9 +333,19 @@ int hash_update(htable *pht, char *key, void *value) {
 
 /*
 	update or add a key in the hash table but duplicate the value
+
+	pht : hash structure
+	key : key string
+	value : value object
+
+	return : an error code
+		HASH_ADD_FAIL : addition failed.
+		HASH_ADD_OKAY : added (no collision).
+		HASH_ADD_COLL : added (collision, key chained).
+		HASH_ADD_UPDT : key already exists, change value.
 */
 
-int hash_update_dup(htable *pht, char *key, void *value) {
+uint hash_update_dup(htable *pht, char *key, void *value) {
 	return(hash_update(pht, key, pht->dupobj(value)));
 }
 
@@ -353,7 +364,7 @@ int hash_update_dup(htable *pht, char *key, void *value) {
 	NOTE : this function does not increment the cell number of the hash table.
 */
 
-int hash_add_cell(hnode *phn, hcell *phc) {
+uint hash_add_cell(hnode *phn, hcell *phc) {
 	hcell	*np;
 
 	phc->next = NULL;
@@ -404,7 +415,7 @@ int hash_add_cell(hnode *phn, hcell *phc) {
 	return : boolean 
 */
 
-bool hash_add_array(htable *pht, hpair *php, int size) {
+bool hash_add_array(htable *pht, hpair *php, size_t size) {
 	return(hash_add_array_adv(pht, php, size, (void *(*)(void *)) strdup));
 }
 
@@ -419,11 +430,11 @@ bool hash_add_array(htable *pht, hpair *php, int size) {
 	return : boolean
 */
 
-bool hash_add_array_adv(htable *pht, hpair *php, int size, void *(dupfunc)(void *)) {
-	htable	*pmht;
-	int	 i;
+bool hash_add_array_adv(htable *pht, hpair *php, size_t size, void *(dupfunc)(void *)) {
 	bool	 error = false,
 		 rval = false;
+	htable	*pmht;
+	uint	 i;
 
 	pmht = hash_init(size);
 	if (pmht == NULL)
@@ -457,10 +468,10 @@ bool hash_add_array_adv(htable *pht, hpair *php, int size, void *(dupfunc)(void 
 	return : an error code.
 */
 
-int hash_append(htable *pht, char *key, void *value, void *misc) {
+uint hash_append(htable *pht, char *key, void *value, void *misc) {
+	uint	 rval;
 	void	*pobj,
 		*robj;
-	int	 rval;
 
 	if (value == NULL) {
 #ifdef HASH_DEBUG
@@ -505,9 +516,9 @@ int hash_append(htable *pht, char *key, void *value, void *misc) {
 */
 
 void hash_delete(htable *pht, char *key) {
-	int	 hash;
 	hcell	*phc,
 		*last;
+	uint	 hash;
 
 	/* compute hash code */
 	hash = hash_compute(key, pht->size);
@@ -558,8 +569,8 @@ void hash_delete(htable *pht, char *key) {
 */
 
 void *hash_get(htable *pht, char *key) {
-	int	 hash;
 	hcell	*phc;
+	uint	 hash;
 
 	/* compute hash code */
 	hash = hash_compute(key, pht->size);
@@ -589,11 +600,11 @@ void *hash_get(htable *pht, char *key) {
 	return : number of merged key
 */
 
-int hash_merge(htable *dst_ht, htable *src_ht) {
-	int	 i,
-		 s,
-		 c = 0;
+size_t hash_merge(htable *dst_ht, htable *src_ht) {
 	hcell	*p;
+	size_t	 s,
+		 c = 0;
+	uint	 i;
 
 	/* get table size */
 	s = src_ht->size;
@@ -625,7 +636,7 @@ int hash_merge(htable *dst_ht, htable *src_ht) {
 	return : number of keys
 */
 
-int hash_nbkey(htable *pht) {
+size_t hash_nbkey(htable *pht) {
 	return(pht->count);
 }
 
@@ -640,10 +651,10 @@ int hash_nbkey(htable *pht) {
 */
 
 hkeys *hash_keys(htable *pht) {
-	int	  i,
-		  j = 0;
 	hcell	 *p;
 	hkeys	 *phk;
+	uint	  i,
+		  j = 0;
 
 	/* init hkeys struct to be returned */
 	phk = (hkeys *)malloc(sizeof(hkeys));
