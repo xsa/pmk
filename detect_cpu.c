@@ -453,11 +453,9 @@ bool x86_get_cpuid_data(x86_cpu_cell *cell) {
 				return(false);
 		}
 	}
-	cell->features = strdup(feat_str);
 
+	/* check extended cpu level */
 	x86_exec_cpuid(0x80000000);
-
-	/* save extended cpu level */
 	extlevel = x86_cpu_reg_eax;
 
 	if (extlevel >= 0x80000001) {
@@ -475,6 +473,9 @@ bool x86_get_cpuid_data(x86_cpu_cell *cell) {
 			}
 		}
 	}
+
+	/* save feature string */
+	cell->features = strdup(feat_str);
 
 	if (extlevel >= 0x80000002) {
 		/* get the cpu name */
