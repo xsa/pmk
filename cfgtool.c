@@ -393,6 +393,8 @@ cfgtcell *cfgtcell_get_cell(cfgtdata *pcd, char *binary) {
 	vstr : option string to get version
 	buffer : storage buffer for the result
 	sbuf : size of buffer
+
+	returns : true on success else false
 */
 
 bool ct_get_version(char *ctpath, char *vstr, char *buffer, size_t sbuf) {
@@ -401,14 +403,14 @@ bool ct_get_version(char *ctpath, char *vstr, char *buffer, size_t sbuf) {
 	char	 cfgcmd[MAXPATHLEN];
 
 
-	snprintf(cfgcmd, sizeof(cfgcmd), CT_FORMAT_VERSION, ctpath, vstr);
+	if (snprintf_b(cfgcmd, sizeof(cfgcmd),
+			CT_FORMAT_VERSION, ctpath, vstr) == false)
+		return(false);
 
 	rpipe = popen(cfgcmd, "r");
 	if (rpipe != NULL) {
 		/* get version line */
-		if (get_line(rpipe, buffer, sbuf) == true) {
-			rval = true;
-		}
+		rval = get_line(rpipe, buffer, sbuf);
 
 		pclose(rpipe);
 	}
@@ -423,6 +425,8 @@ bool ct_get_version(char *ctpath, char *vstr, char *buffer, size_t sbuf) {
 	vstr : option string to get version
 	buffer : storage buffer for the result
 	sbuf : size of buffer
+
+	returns : true on success else false
 */
 
 bool ct_get_data(char *ctpath, char *ostr, char *mod, char *buffer, size_t sbuf) {
@@ -432,18 +436,20 @@ bool ct_get_data(char *ctpath, char *ostr, char *mod, char *buffer, size_t sbuf)
 
 	if (mod == NULL) {
 		/* no module */
-		snprintf(cfgcmd, sizeof(cfgcmd), CT_FORMAT_DATA, ctpath, ostr);
+		if (snprintf_b(cfgcmd, sizeof(cfgcmd), CT_FORMAT_DATA,
+						ctpath, ostr) == false)
+			return(false);
 	} else {
 		/* use module */
-		snprintf(cfgcmd, sizeof(cfgcmd), CT_FORMAT_DATA_MOD, ctpath, ostr, mod);
+		if (snprintf_b(cfgcmd, sizeof(cfgcmd), CT_FORMAT_DATA_MOD,
+						ctpath, ostr, mod) == false)
+			return(false);
 	}
 
 	rpipe = popen(cfgcmd, "r");
 	if (rpipe != NULL) {
 		/* get version line */
-		if (get_line(rpipe, buffer, sbuf) == true) {
-			rval = true;
-		}
+		rval = get_line(rpipe, buffer, sbuf);
 
 		pclose(rpipe);
 	}

@@ -297,6 +297,13 @@ x86_cpu_feature	x86_cpu_feat_reg2[] = {
 };
 int nb_feat_reg2 = sizeof(x86_cpu_feat_reg2) / sizeof(x86_cpu_feature);
 
+x86_cpu_feature	x86_cpu_feat_extreg[] = {
+	{X86_CPU_MASK_FEAT_LM,		"LM"},
+	{X86_CPU_MASK_FEAT_EXT3DN,	"EXT3DN"},
+	{X86_CPU_MASK_FEAT_3DNOW,	"3DNOW"}
+};
+int nb_feat_extreg = sizeof(x86_cpu_feat_extreg) / sizeof(x86_cpu_feature);
+
 
 /****
  functions
@@ -389,7 +396,8 @@ char *x86_get_std_cpu_vendor(prsdata *pdata, char *civendor) {
 bool x86_get_cpuid_data(x86_cpu_cell *cell) {
 	char		 feat_str[TMP_BUF_LEN] = "";
 	int		 i;
-	uint32_t	 buffer[13];
+	uint32_t	 buffer[13],
+			 extlevel;
 
 	if (x86_check_cpuid_flag() == 0) {
 		/* no cpuid flag => 386 or old 486 */
@@ -442,13 +450,24 @@ bool x86_get_cpuid_data(x86_cpu_cell *cell) {
 	cell->features = strdup(feat_str);
 
 	x86_exec_cpuid(0x80000000);
-	/*if (x86_cpu_reg_eax >= 0x80000001) {*/
-	/*        |+ get the cpu name +|      */
-	/*        x86_exec_cpuid(0x80000001); */
-	/*                                    */
-	/*        |+ XXX check 3Dnow & co +|  */
-	/*}                                   */
-	if (x86_cpu_reg_eax >= 0x80000002) {
+
+	/* save extended cpu level */
+	extlevel = x86_cpu_reg_eax;
+
+	if (extlevel >= 0x80000001) {
+		/* get extended cpu features */
+		x86_exec_cpuid(0x80000001);
+
+		/* processing extended feature register */
+		for (i = 0 ; i < nb_feat_extreg ; i++) {
+			if ((x86_cpu_reg_edx & x86_cpu_feat_extreg[i].mask) != 0) {
+				strlcat(feat_str, x86_cpu_feat_extreg[i].descr, sizeof(feat_str));
+				strlcat(feat_str, " ", sizeof(feat_str)); /* XXX check ? */
+			}
+		}
+	}
+
+	if (extlevel >= 0x80000002) {
 		/* get the cpu name */
 		x86_exec_cpuid(0x80000002);
 		buffer[0] = x86_cpu_reg_eax;
@@ -486,22 +505,30 @@ bool x86_set_cpu_data(prsdata *pdata, x86_cpu_cell *pcell, htable *pht) {
 		*pstr;
 	htable	*phtbis;
 
-	snprintf(buffer, sizeof(buffer), "%u", pcell->family); /* XXX check */
+	if (snprintf_b(buffer, sizeof(buffer), "%u", pcell->family) == false)
+		return(false);
+
 	if (hash_update_dup(pht, PMKCONF_HW_X86_CPU_FAMILY, buffer) == HASH_ADD_FAIL) {
 		return(false);
 	}
 
-	snprintf(buffer, sizeof(buffer), "%u", pcell->model); /* XXX check */
+	if (snprintf_b(buffer, sizeof(buffer), "%u", pcell->model) == false)
+		return(false);
+
 	if (hash_update_dup(pht, PMKCONF_HW_X86_CPU_MODEL, buffer) == HASH_ADD_FAIL) {
 		return(false);
 	}
 
-	snprintf(buffer, sizeof(buffer), "%u", pcell->extfam); /* XXX check */
+	if (snprintf_b(buffer, sizeof(buffer), "%u", pcell->extfam) == false)
+		return(false);
+
 	if (hash_update_dup(pht, PMKCONF_HW_X86_CPU_EXTFAM, buffer) == HASH_ADD_FAIL) {
 		return(false);
 	}
 
-	snprintf(buffer, sizeof(buffer), "%u", pcell->extmod); /* XXX check */
+	if (snprintf_b(buffer, sizeof(buffer), "%u", pcell->extmod) == false)
+		return(false);
+
 	if (hash_update_dup(pht, PMKCONF_HW_X86_CPU_EXTMOD, buffer) == HASH_ADD_FAIL) {
 		return(false);
 	}
@@ -537,28 +564,28 @@ bool x86_set_cpu_data(prsdata *pdata, x86_cpu_cell *pcell, htable *pht) {
 	phtbis = (htable *) seek_key(pdata, LIST_X86_CPU_CLASS);
 	if (phtbis != NULL) {
 		if (pcell->family < 15) {
-			snprintf(buffer, sizeof(buffer), X86_CPU_CLASS_FAMILY_FMT,
-					pcell->stdvendor, pcell->family);
-/*debugf("key = '%s'", buffer);*/
+			snprintf_b(buffer, sizeof(buffer),
+					X86_CPU_CLASS_FAMILY_FMT,
+					pcell->stdvendor, pcell->family); /* XXX check ? */
 			pstr = po_get_str(hash_get(phtbis, buffer)); /* no check needed */
 		} else {
-			snprintf(buffer, sizeof(buffer), X86_CPU_CLASS_EXTFAM_FMT,
-					pcell->stdvendor, pcell->extfam);
-/*debugf("key = '%s'", buffer);*/
+			snprintf_b(buffer, sizeof(buffer),
+					X86_CPU_CLASS_EXTFAM_FMT,
+					pcell->stdvendor, pcell->extfam); /* XXX check ? */
 			pstr = po_get_str(hash_get(phtbis, buffer)); /* no check needed */
 		}
 
 		if (pstr == NULL) {
 			/* not found, get default */
-/*debugf("getting default");*/
-			pstr = po_get_str(hash_get(phtbis, "DEFAULT")); /* XXX check */
+			pstr = po_get_str(hash_get(phtbis, "DEFAULT")); /* XXX check ? */
 		}
 
-		if (hash_update_dup(pht, PMKCONF_HW_X86_CPU_CLASS, pstr) == HASH_ADD_FAIL) {
+		if (hash_update_dup(pht, PMKCONF_HW_X86_CPU_CLASS,
+						pstr) == HASH_ADD_FAIL) {
 			return(false);
 		}
 	} else {
-		printf("DEBUG key not found\n");
+		errorf("failed to find '%s' key\n", LIST_X86_CPU_CLASS);
 	}
 
 	return(true);
