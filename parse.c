@@ -45,7 +45,7 @@
 #include "parse.h"
 
 
-#define DEBUG_PRS	1
+/*#define DEBUG_PRS	1*/
 
 char	parse_err[MAX_ERR_MSG_LEN];
 
