@@ -207,7 +207,22 @@ bool		 x86_set_cpu_data(prsdata *, x86_cpu_cell *, htable *);
 #define ALPHA_CPU_CLASS_FMT	"IMPLVER_%u"
 #define ALPHA_CPU_UNKNOWN	"unknown"
 
+#define ALPHA_CPU_MASK_FEAT_BWX		0x00000001	/* bit  0 */
+#define ALPHA_CPU_MASK_FEAT_FIX		0x00000002	/* bit  1 */
+#define ALPHA_CPU_MASK_FEAT_CIX		0x00000004	/* bit  2 */
+#define ALPHA_CPU_MASK_FEAT_MVI		0x00000100	/* bit  8 */
+#define ALPHA_CPU_MASK_FEAT_PAT		0x00000200	/* bit  9 */
+#define ALPHA_CPU_MASK_FEAT_PMI		0x00001000	/* bit 12 */
+
+
 #define PMKCONF_HW_ALPHA_CPU_CLASS	"HW_ALPHA_CPU_CLASS"	/* ex: EV4, EV5, EV6 */
+#define PMKCONF_HW_ALPHA_CPU_FEATURES	"HW_ALPHA_CPU_FEATURES"	/* BWX, FIX, CIX, MVI, PAT, PMI */
+
+
+typedef struct {
+	uint32_t	 mask;
+	char		*descr;
+} alpha_cpu_feature;
 
 
 bool alpha_set_cpu_data(prsdata *, htable *);
