@@ -34,6 +34,7 @@
  */
 
 
+#include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -53,11 +54,30 @@ extern char	*optarg;
 extern int	 optind;
 
 pcopt	pcoptions[] = {
-		{"version",	false,	PMKPC_OPT_VERSION},
-		{"modversion",	false,	PMKPC_OPT_MODVERS},
-		{"cflags",	false,	PMKPC_OPT_CFLAGS},
-		{"libs",	false,	PMKPC_OPT_LIBS},
-		{"exists",	false,	PMKPC_OPT_EXISTS}
+		{"version",			false,	PMKPC_OPT_VERSION},
+		{"atleast-pkgconfig-version",	false,	PMKPC_OPT_ATLPKGVERS}, /* XXX arg */
+		{"exists",			false,	PMKPC_OPT_EXISTS},
+		{"list-all",			false,	PMKPC_OPT_LISTALL},
+		{"uninstalled",			false,	PMKPC_OPT_UNINST},
+		{"debug",			false,	PMKPC_OPT_DEBUG},
+		{"help",			false,	PMKPC_OPT_HELP},
+		{"usage",			false,	PMKPC_OPT_USAGE},
+		{"modversion",			false,	PMKPC_OPT_MODVERS},
+		{"atleast-version",		false,	PMKPC_OPT_ATLVERS}, /* XXX arg */
+		{"exact-version",		false,	PMKPC_OPT_EXTVERS}, /* XXX arg */
+		{"max-version",			false,	PMKPC_OPT_MAXVERS}, /* XXX arg */
+		{"cflags",			false,	PMKPC_OPT_CFLAGS},
+		{"cflags-only-I",		false,	PMKPC_OPT_CFLAGS_ONLY_PATH},
+		{"cflags-only-other",		false,	PMKPC_OPT_CFLAGS_ONLY_OTHER},
+		{"libs",			false,	PMKPC_OPT_LIBS},
+		{"libs_only_l",			false,	PMKPC_OPT_LIBS_ONLY_LIB},
+		{"libs_only_L",			false,	PMKPC_OPT_LIBS_ONLY_PATH},
+		{"libs_only_other",		false,	PMKPC_OPT_LIBS_ONLY_OTHER},
+		{"variable",			false,	PMKPC_OPT_VAR}, /* XXX arg */
+		{"define-variable",		false,	PMKPC_OPT_VAR_DEF}, /* XXX arg */
+		{"print-errors",		false,	PMKPC_OPT_VAR_PRNT},
+		{"silence-errors",		false,	PMKPC_OPT_VAR_SILC},
+		{"errors-to-stdout",		false,	PMKPC_OPT_VAR_STDO},
 };
 size_t	nbpcopt = sizeof(pcoptions) / sizeof(pcopt);
 
@@ -110,7 +130,7 @@ debugf("{pcgetopt} ac = %d", ac);
 
 	opt = av[idx];
 	
-	if (opt[0]!= '-' && opt[1]!= '-') {
+	if ((opt[0] != '-') || (opt[1] != '-')) {
 #ifdef DEBUG_PMKPC
 debugf("{pcgetopt} full opt = '%s'", opt);
 #endif
@@ -134,6 +154,7 @@ debugf("{pcgetopt} idx = %d", idx);
 		if (strncmp(pcoptions[i].name, opt, l) == 0) {
 			/* known option */
 			poc->id = pcoptions[i].id;
+			poc->err = pcoptions[i].name;
 
 			if (pcoptions[i].arg == true) {
 				/* got argument */
@@ -149,7 +170,7 @@ debugf("{pcgetopt} idx = %d", idx);
 	}
 
 	poc->id = PMKPC_OPT_UNKNOWN;
-	poc->arg = opt;
+	poc->err = opt;
 
 	return(true);
 }
@@ -217,6 +238,14 @@ int main(int argc, char *argv[]) {
 		exit(EXIT_FAILURE);
 	}
 
+	/* initialise global data hash table */
+	gdata.pht = hash_init(MAX_DATA_KEY);
+	if (gdata.pht == NULL) {
+		clean(&gdata);
+		errorf("cannot initialize hash table for data.");
+		exit(EXIT_FAILURE);
+	}
+
 	while (poc->idx != argc) {
 		if (pcgetopt(argc, argv, poc) == true) {
 #ifdef DEBUG_PMKPC
@@ -244,21 +273,61 @@ debugf("{main} id = %d", poc->id);
 					opt_exists = true;
 					break;
 
+				case PMKPC_OPT_ATLPKGVERS :
+				case PMKPC_OPT_LISTALL :
+				case PMKPC_OPT_UNINST :
+				case PMKPC_OPT_DEBUG :
+				case PMKPC_OPT_HELP :
+				case PMKPC_OPT_USAGE :
+				case PMKPC_OPT_ATLVERS :
+				case PMKPC_OPT_EXTVERS :
+				case PMKPC_OPT_MAXVERS :
+				case PMKPC_OPT_CFLAGS_ONLY_PATH	:
+				case PMKPC_OPT_CFLAGS_ONLY_OTHER :
+				case PMKPC_OPT_LIBS_ONLY_LIB :
+				case PMKPC_OPT_LIBS_ONLY_PATH :
+				case PMKPC_OPT_LIBS_ONLY_OTHER :
+				case PMKPC_OPT_VAR :
+				case PMKPC_OPT_VAR_DEF :
+				case PMKPC_OPT_VAR_PRNT :
+				case PMKPC_OPT_VAR_SILC :
+				case PMKPC_OPT_VAR_STDO :
+					optcell_destroy(poc);
+					clean(&gdata);
+					errorf("option '--%s' is not yet implemented.", poc->err);
+					exit(EXIT_FAILURE);
+					break;
+
 				case PMKPC_OPT_UNKNOWN :
 				default :
 					optcell_destroy(poc);
 					clean(&gdata);
-					errorf("unknown option '%s'.", poc->arg);
+					errorf("unknown option '--%s'.", poc->err);
 					exit(EXIT_FAILURE);
 					break;
 			}
 		} else {
+			mod = argv[poc->idx];
+
+			if (mod[0] == '-') {
+				switch (mod[1]) {
+					case '?' :
+						debugf("usage()");
+						exit(EXIT_FAILURE);
+						break;
+					default :
+						errorf("unknow option -%c", mod[1]);
+						exit(EXIT_SUCCESS);
+						break;
+				}
+			} else {
+				/* add new module */
+				da_push(gdata.pda, strdup(mod)); /* XXX check */
 #ifdef DEBUG_PMKPC
-debugf("{main} new mod = '%s'", argv[poc->idx]);
+debugf("{main} new mod = '%s'", mod);
 #endif
-			/* add new module */
-			da_push(gdata.pda, strdup(argv[poc->idx])); /* XXX check */
-			poc->idx++;
+				poc->idx++;
+			}
 		}
 	}
 
@@ -270,14 +339,6 @@ debugf("{main} new mod = '%s'", argv[poc->idx]);
 		exit(EXIT_SUCCESS);
 	}
 
-	/* initialise global data hash table */
-	gdata.pht = hash_init(MAX_DATA_KEY);
-	if (gdata.pht == NULL) {
-		clean(&gdata);
-		errorf("cannot initialize hash table for data.");
-		exit(EXIT_FAILURE);
-	}
-
 	fp = fopen(PREMAKE_CONFIG_PATH, "r");
 	if (fp != NULL) {
 		if (parse_pmkconf(fp, gdata.pht, PRS_PMKCONF_SEP, process_opt) == false) {
@@ -285,8 +346,16 @@ debugf("{main} new mod = '%s'", argv[poc->idx]);
 			clean(&gdata);
 			errorf("failed to parse '%s'.", PREMAKE_CONFIG_PATH);
 			exit(EXIT_FAILURE);
+#ifdef DEBUG_PMKPC
+		} else {
+debugf("{main} parsed '%s'", PREMAKE_CONFIG_PATH);
+#endif
 		}
 		fclose(fp);
+	} else {
+		clean(&gdata);
+		errorf("cannot open '%s' : %s.", PREMAKE_CONFIG_PATH, strerror(errno));
+		exit(EXIT_FAILURE);
 	}
 
 	/* try to get pkg-config lib path from pmk.conf */
