@@ -86,7 +86,8 @@ do_sed() {
 # init
 #
 
-if [ `echo -n`="-n" ]; then
+tmp=`echo -n`
+if [ "$tmp"="-n" ]; then
 	ECHO_N=""
 	ECHO_C="\c"
 else
