@@ -59,7 +59,6 @@
 #	include <sys/param.h>
 #endif
 
-
 #include <ctype.h>
 #include <stdarg.h>
 #include <stdio.h>
@@ -74,10 +73,10 @@
 
 char	pmkfile[MAXPATHLEN];
 int	cur_line = 0;
-FILE	*logfile;
 
 /* keyword data */
-htable		*khash;
+htable		*keyhash,
+		*datahash;
 cmdkw		functab[] = {
 	{"DEFINE", pmk_define},
 	{"CHECK_BINARY", pmk_check_binary},
@@ -88,25 +87,6 @@ cmdkw		functab[] = {
 
 
 /*
-*/
-
-void pmk_log(const char *fmt, ...) {
-	va_list	plst;
-	char	buf[256];
-
-	va_start(plst, fmt);
-	vsnprintf(buf, sizeof(buf), fmt, plst);
-	va_end(plst);
-
-	if (logfile != NULL) {
-		fprintf(logfile, buf);
-		fprintf(stdout, buf);
-	} else {
-		errorf("Unable to log.");
-	}
-}
-
-/*
 	process a command
 */
 
@@ -115,7 +95,7 @@ bool process_cmd(pmkcmd *cmd, htable *ht) {
 	int	idx;
 	bool	rval = FALSE;
 	
-	aidx = hash_get(khash, cmd->name);
+	aidx = hash_get(keyhash, cmd->name);
 	if (aidx != NULL) {
 		/* getting index of function in functab */
 		idx = atoi(aidx);
@@ -135,7 +115,7 @@ bool process_cmd(pmkcmd *cmd, htable *ht) {
 */
 
 bool check_cmd(char *cmdname) {
-	if (hash_get(khash, cmdname) == NULL) {
+	if (hash_get(keyhash, cmdname) == NULL) {
 		errorf_line(pmkfile, cur_line, "Unknown command %s", cmdname);
 		return(FALSE);
 	} else {
@@ -475,28 +455,26 @@ int main(int argc, char *argv[]) {
 	}
 
 	/* open log file */
-	logfile = fopen(PREMAKE_LOG, "w");
-	if (logfile == NULL) {
-		errorf("while opening %s.", PREMAKE_LOG);
+	if (pmk_log_open(PREMAKE_LOG) == FALSE) {
 		exit(1);
 	}
-	pmk_log("PreMaKe version %s\n", PREMAKE_VERSION);
 
+	pmk_log("PreMaKe version %s\n", PREMAKE_VERSION);
 	pmk_log("Hashing pmk keywords ");
 	s = sizeof(functab) / sizeof(cmdkw); /* compute number of keywords */
-	khash = hash_init(s);
-	if (khash != NULL) {
+	keyhash = hash_init(s);
+	if (keyhash != NULL) {
 		/* fill keywords hash */
 		for(i = 0 ; i < s ; i++) {
 			snprintf(idxstr, 4, "%d", i);
 			/* XXX
 			debugf("add '%s' to keyword hash (%s)\n", functab[i].kw, idxstr);
 			*/
-			hash_add(khash, functab[i].kw, idxstr);
+			hash_add(keyhash, functab[i].kw, idxstr);
 		}
 	}
 	/* print number of hashed command */
-	pmk_log("(%d)\n", khash->count);
+	pmk_log("(%d)\n", keyhash->count);
 
 	if (parse(fd) == FALSE) {
 		/* an error occured while parsing */
@@ -506,15 +484,14 @@ int main(int argc, char *argv[]) {
 	}
 
 	/* flush and close files */
-	fflush(logfile);
-	fclose(logfile);
+	pmk_log_close();
 
 	fflush(fd);
 	fclose(fd);
 
 	/* clear cmd hash */
-	if (khash != NULL) {
-		hash_destroy(khash);
+	if (keyhash != NULL) {
+		hash_destroy(keyhash);
 	}
 
 	return(rval);
