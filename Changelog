@@ -1,3 +1,6 @@
+25 Jun 2003 mipsator
+ * updated pmk man page.
+
 24 Jun 2003 mipsator
  * added uabspath() in pathtools.
  * added -b option to set basedir.
