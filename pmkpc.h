@@ -69,8 +69,17 @@
 #define PMKPC_OPT_VAR_SILC		43
 #define PMKPC_OPT_VAR_STDO		44
 
+
+/* compatibility version with pkg-config */
 #define PMKPC_COMPAT_VERSION	"0.15.0"
 
+/* separator for option's argument */
+#define PMKPC_ARG_SEP		'='
+
+/* maximum option size */
+#define PMKPC_MAX_OPT_SIZE	64
+
+/* usage related defines */
 #define PMKPC_USAGE_STR		"Usage: pmkpc"
 #define PMKPC_USAGE_OPEN_OPT	" [--"
 #define PMKPC_USAGE_CLOSE_OPT	"]"

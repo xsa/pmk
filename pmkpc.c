@@ -56,7 +56,7 @@ extern int	 optind;
 
 pcopt	pcoptions[] = {
 		{"version",			false,	PMKPC_OPT_VERSION,		NULL},
-		{"atleast-pkgconfig-version",	false,	PMKPC_OPT_ATLPKGVERS,		PC_USAGE_VERSION},
+		{"atleast-pkgconfig-version",	true,	PMKPC_OPT_ATLPKGVERS,		PC_USAGE_VERSION},
 		{"exists",			false,	PMKPC_OPT_EXISTS,		NULL},
 		{"list-all",			false,	PMKPC_OPT_LISTALL,		NULL},
 		{"uninstalled",			false,	PMKPC_OPT_UNINST,		NULL},
@@ -64,9 +64,9 @@ pcopt	pcoptions[] = {
 		{"help",			false,	PMKPC_OPT_HELP,			NULL},
 		{"usage",			false,	PMKPC_OPT_USAGE,		NULL},
 		{"modversion",			false,	PMKPC_OPT_MODVERS,		NULL},
-		{"atleast-version",		false,	PMKPC_OPT_ATLVERS,		PC_USAGE_VERSION},
-		{"exact-version",		false,	PMKPC_OPT_EXTVERS,		PC_USAGE_VERSION},
-		{"max-version",			false,	PMKPC_OPT_MAXVERS,		PC_USAGE_VERSION},
+		{"atleast-version",		true,	PMKPC_OPT_ATLVERS,		PC_USAGE_VERSION},
+		{"exact-version",		true,	PMKPC_OPT_EXTVERS,		PC_USAGE_VERSION},
+		{"max-version",			true,	PMKPC_OPT_MAXVERS,		PC_USAGE_VERSION},
 		{"cflags",			false,	PMKPC_OPT_CFLAGS,		NULL},
 		{"cflags-only-I",		false,	PMKPC_OPT_CFLAGS_ONLY_PATH,	NULL},
 		{"cflags-only-other",		false,	PMKPC_OPT_CFLAGS_ONLY_OTHER,	NULL},
@@ -74,8 +74,8 @@ pcopt	pcoptions[] = {
 		{"libs_only_l",			false,	PMKPC_OPT_LIBS_ONLY_LIB,	NULL},
 		{"libs_only_L",			false,	PMKPC_OPT_LIBS_ONLY_PATH,	NULL},
 		{"libs_only_other",		false,	PMKPC_OPT_LIBS_ONLY_OTHER,	NULL},
-		{"variable",			false,	PMKPC_OPT_VAR,			PC_USAGE_VARNAME},
-		{"define-variable",		false,	PMKPC_OPT_VAR_DEF,		PC_USAGE_VARVAL},
+		{"variable",			true,	PMKPC_OPT_VAR,			PC_USAGE_VARNAME},
+		{"define-variable",		true,	PMKPC_OPT_VAR_DEF,		PC_USAGE_VARVAL},
 		{"print-errors",		false,	PMKPC_OPT_VAR_PRNT,		NULL},
 		{"silence-errors",		false,	PMKPC_OPT_VAR_SILC,		NULL},
 		{"errors-to-stdout",		false,	PMKPC_OPT_VAR_STDO,		NULL},
@@ -114,7 +114,9 @@ void optcell_destroy(optcell *poc) {
 */
 
 bool pcgetopt(int ac, char *av[], optcell *poc) {
-	char		*opt;
+	static char	 buf[PMKPC_MAX_OPT_SIZE];
+	char		*opt,
+			*pstr;
 	size_t		 l;
 	unsigned int	 i,
 			 idx;
@@ -144,6 +146,28 @@ debugf("{pcgetopt} full opt = '%s'", opt);
 #ifdef DEBUG_PMKPC
 debugf("{pcgetopt} opt = '%s'", opt);
 #endif
+
+		/* option have argument ? */
+		pstr = strchr(opt, PMKPC_ARG_SEP);
+		if (pstr != NULL) {
+			/* argument found */
+			strlcpy(buf, opt, sizeof(buf)); /* XXX check ? */
+
+			/* delimit option name */
+			buf[pstr - opt] = CHAR_EOS;
+
+			/* save argument position */
+			pstr++;
+			poc->arg = pstr;
+#ifdef DEBUG_PMKPC
+debugf("{pcgetopt} opt arg = '%s'", poc->arg);
+#endif
+
+			/* set opt back to the beginning of the option */
+			opt = buf;
+
+		}
+
 		l = strlen(opt);
 		idx++;
 #ifdef DEBUG_PMKPC
@@ -156,14 +180,6 @@ debugf("{pcgetopt} idx = %d", idx);
 			/* known option */
 			poc->id = pcoptions[i].id;
 			poc->err = pcoptions[i].name;
-
-			if (pcoptions[i].arg == true) {
-				/* got argument */
-
-				/* XXX check idx >= ac */
-				poc->arg = av[idx];
-				idx++;
-			}
 
 			poc->idx = idx;
 			return(true);
@@ -240,6 +256,7 @@ int main(int argc, char *argv[]) {
 	FILE		*fp;
 	bool		 opt_version = false,
 			 opt_modvers = false,
+			 opt_cmp_modvers = false,
 			 opt_exists = false,
 			 opt_cflags = false,
 			 opt_libs = false;
@@ -249,9 +266,12 @@ int main(int argc, char *argv[]) {
 			*bpath,
 			*opt,
 			*pc_path,
+			*mvers = NULL,
+			 cmp_type = CHAR_EOS,
 			 pc_cmd[MAXPATHLEN],
 			 pc_buf[MAXPATHLEN],
 			 buf[TMP_BUF_LEN];
+	int		 r;
 	optcell		*poc;
 	pcdata		 gdata;
 	pkgcell		*ppc;
@@ -301,6 +321,24 @@ debugf("{main} id = %d", poc->id);
 					opt_modvers = true;
 					break;
 
+				case PMKPC_OPT_ATLVERS :
+					cmp_type = 'a';
+					opt_cmp_modvers = true;
+					mvers = poc->arg;
+					break;
+
+				case PMKPC_OPT_EXTVERS :
+					cmp_type = 'e';
+					opt_cmp_modvers = true;
+					mvers = poc->arg;
+					break;
+
+				case PMKPC_OPT_MAXVERS :
+					cmp_type = 'm';
+					opt_cmp_modvers = true;
+					mvers = poc->arg;
+					break;
+
 				case PMKPC_OPT_CFLAGS :
 					opt_cflags = true;
 					break;
@@ -327,9 +365,6 @@ debugf("{main} id = %d", poc->id);
 				case PMKPC_OPT_LISTALL :
 				case PMKPC_OPT_UNINST :
 				case PMKPC_OPT_DEBUG :
-				case PMKPC_OPT_ATLVERS :
-				case PMKPC_OPT_EXTVERS :
-				case PMKPC_OPT_MAXVERS :
 				case PMKPC_OPT_CFLAGS_ONLY_PATH	:
 				case PMKPC_OPT_CFLAGS_ONLY_OTHER :
 				case PMKPC_OPT_LIBS_ONLY_LIB :
@@ -430,9 +465,53 @@ debugf("module '%s' found", mod);
 #endif
 			ppc = pkg_cell_add(gdata.ppd, mod); /* ppc is part of ppd, don't destroy */
 
+			/* display mod version */
 			if (opt_modvers == true) {
 				/* print module version */
 				printf("%s\n", ppc->version);
+			}
+
+			/* check version */
+			if (opt_cmp_modvers == true) {
+				/* compare module version */
+				r = compare_version(mvers, ppc->version);
+				switch (cmp_type) {
+					case 'a':
+						if (r < 0) {
+							clean(&gdata);
+							/* XXX be more verbose ? */
+							/*errorf("module version (%s) is smaller than %s",*/
+							/*        ppc->version, mvers);                   */
+							exit(EXIT_FAILURE);
+						}
+						break; /* not reached */
+
+					case 'e':
+						if (r != 0) {
+							clean(&gdata);
+							/* XXX be more verbose ? */
+							/*errorf("module version (%s) is not equal to %s",*/
+							/*        ppc->version, mvers);                   */
+							exit(EXIT_FAILURE);
+						}
+						break; /* not reached */
+
+					case 'm':
+						if (r > 0) {
+							clean(&gdata);
+							/* XXX be more verbose ? */
+							/*errorf("module version (%s) is greater than %s",*/
+							/*        ppc->version, mvers);                   */
+							exit(EXIT_FAILURE);
+						}
+						break; /* not reached */
+
+					default:
+						clean(&gdata);
+						errorf("unknown comparison type !");
+						exit(EXIT_FAILURE);
+						break; /* not reached */
+				}
 			}
 
 			if ((opt_cflags == true) || (opt_libs == true)) {
