@@ -457,11 +457,11 @@ bool dir_explore(htable *pht, scandata *psd, char *path) {
 }
 
 /*
-	usage
+	pmkscan(1) usage
 */
 
 void usage(void) {
-	fprintf(stderr, "usage: pmkscan [-vh] [path]\n");
+	fprintf(stderr, "usage: pmkscan [-hv] [path]\n");
 }
 
 
