@@ -604,7 +604,6 @@ hkeys *hash_keys(htable *pht) {
 
 		if (pht->count == 0)
 			return(NULL);
-		}
 
 		phk->nkey = pht->count;
 
