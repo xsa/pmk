@@ -29,6 +29,7 @@ LIST_ARCH_EQUIV {
 
 	#ia_64
 	"ia_64" = "ia_64"
+	"ia64" = "ia_64"
 
 	# ppc
 	"ppc" = "ppc"
