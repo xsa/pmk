@@ -1,5 +1,7 @@
 25 Jun 2003 mipsator
  * updated pmk man page.
+ * added option to load a file that override pmk.conf (not tested yet).
+ * updated man page.
 
 24 Jun 2003 mipsator
  * added uabspath() in pathtools.

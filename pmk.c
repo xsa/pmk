@@ -65,13 +65,13 @@ htable		*keyhash;
 	returns true on success
 */
 
-bool read_conf(htable *ht) {
+bool read_conf(htable *ht, char *filename) {
 	FILE	*fp;
 	char	buf[MAX_LINE_LEN];
 	int	ln = 0;
 	cfg_opt	co;
 
-	fp = fopen(PREMAKE_CONFIG_PATH, "r");
+	fp = fopen(filename, "r");
 	if (fp == NULL) {
 		errorf("cannot open %s.", PREMAKE_CONFIG_PATH);
 		return(false);
@@ -157,7 +157,7 @@ bool process_template(char *template, pmkdata *pgd) {
 	/* apply to basedir */
 	abspath(pgd->basedir, buf, tbuf); /* XXX check ? */
 
-	/* XXX should create directories of the path ? */
+	/* XXX TODO should create directories of the path ? */
 	
 	/* append filename */
 	abspath(tbuf, lbuf, fpath);
@@ -652,6 +652,7 @@ int main(int argc, char *argv[]) {
 	FILE	*fd;
 	bool	go_exit = false,
 		pmkfile_set = false,
+		ovrfile_set = false,
 		basedir_set = false;
 	char	*pstr,
 		buf[MAXPATHLEN],
@@ -668,7 +669,7 @@ int main(int argc, char *argv[]) {
 	getcwd(buf, sizeof(buf));
 
 	while (go_exit == false) {
-		chr = getopt(argc, argv, "b:f:hv");
+		chr = getopt(argc, argv, "b:f:ho:v");
 		if (chr == -1) {
 			go_exit = true;
 		} else {
@@ -684,7 +685,8 @@ int main(int argc, char *argv[]) {
 					break;
 
 				case 'f' :
-					/* filename */
+					/* pmk file path */
+					/* XXX check if path is valid */
 					if (uabspath(buf, optarg, gdata.pmkfile) == false) {
 						errorf("Cannot use file argument");
 						exit(1);
@@ -694,6 +696,17 @@ int main(int argc, char *argv[]) {
 					strlcpy(gdata.srcdir, dirname(gdata.pmkfile), sizeof(gdata.pmkfile)); /* XXX check ??? */
 
 					pmkfile_set = true;
+					break;
+
+				case 'o' :
+					/* file path to override pmk.conf */
+					/* XXX check if path is valid */
+					if (uabspath(buf, optarg, gdata.ovrfile) == false) {
+						errorf("Cannot use file argument");
+						exit(1);
+					}
+
+					ovrfile_set = true;
 					break;
 
 				case 'v' :
@@ -733,12 +746,12 @@ int main(int argc, char *argv[]) {
 			snprintf(idxstr, 4, "%d", i);
 			if (hash_add(keyhash, functab[i].kw, idxstr) == HASH_ADD_FAIL) {
 				errorf("hash failure");
-				return(1);
+				exit(1);
 			}
 		}
 	} else {
 		errorf("cannot initialize keyword table");
-		return(1);
+		exit(1);
 	}
 
 	/* initialise global data has htable */
@@ -746,7 +759,7 @@ int main(int argc, char *argv[]) {
 	if (gdata.htab == NULL) {
 		clean(&gdata);
 		errorf("cannot initialize hash table for data.");
-		return(1);
+		exit(1);
 	} else {
 		/* initialize some variables */
 		hash_add(gdata.htab, "CFLAGS", ""); /* XXX check ? */
@@ -757,25 +770,38 @@ int main(int argc, char *argv[]) {
 	if (gdata.labl == NULL) {
 		clean(&gdata);
 		errorf("cannot initialize hash table for labels.");
-		return(1);
+		exit(1);
 	}
 
-	if (read_conf(gdata.htab) == true) {
+	if (read_conf(gdata.htab, PREMAKE_CONFIG_PATH) == true) {
 		nbpd = hash_nbkey(gdata.htab);
 	} else {
 		/* configuration file not found */
 		clean(&gdata);
-		return(1);
+		errorf("cannot open '%s', run pmksetup");
+		exit(1);
+	}
+
+	if (ovrfile_set == true) {
+		/* read override file */
+		if (read_conf(gdata.htab, gdata.ovrfile) == true) {
+			nbpd = hash_nbkey(gdata.htab);
+		} else {
+			/* configuration file not found */
+			clean(&gdata);
+			errorf("cannot open '%s', run pmksetup");
+			exit(1);
+		}
 	}
 
 	if (argc != 0) {
-		/* parse optional arguments that override pmk.conf */
+		/* parse optional arguments that override pmk.conf and override file */
 		if (parse_cmdline(argv, argc, &gdata) == true) {
 			nbcd = argc;
 		} else {
 			clean(&gdata);
 			errorf("incorrect optional arguments");
-			return(1);
+			exit(1);
 		}
 	} else {
 		nbcd = 0;
