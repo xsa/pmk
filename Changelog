@@ -1,3 +1,7 @@
+13 Jan 2004 mipsator
+ * improved pmkpc to not care about argument order (like pkg-config).
+ * added support for multiple module.
+
 12 Jan 2004 mipsator
  * imported preliminary code for our pkg-config alternative.
  * got rid of cfgrm, cfgum and config targets in Makefile template.
