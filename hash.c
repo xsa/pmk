@@ -1,6 +1,11 @@
 /* $Id$ */
 
 /*
+ * Credits for patches :
+ *	- Marek Habersack
+ */
+
+/*
  * Copyright (c) 2003 Damien Couderc
  * All rights reserved.
  *
