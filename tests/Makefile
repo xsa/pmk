@@ -12,7 +12,7 @@ DEBUG?=		-g
 
 #LINT_TARGET=	da_test.c
 
-all: hash dynary path parser mkvar
+all: hash dynary path parser mkvar comp
 
 .c.o:
 	$(CC) $(CFLAGS) -c $<
@@ -31,6 +31,9 @@ parser: parser_test.o
 
 mkvar: mkvar_test.o
 	$(CC) -o mkvar_test $(LDFLAGS) mkvar_test.o
+
+comp: comp_test.o
+	$(CC) -o comp_test $(LDFLAGS) comp_test.o
 
 clean:
 	rm -f *.o *_test *.core
