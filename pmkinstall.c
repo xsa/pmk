@@ -245,20 +245,15 @@ debugf("perm = %o", perm);
 bool check_mode(char *mstr, mode_t *pmode) {
 	long	 mode = 0;
 	mode_t	 mask;
-	char	*ep;
 
 	if (mstr == NULL)
 		return(false);
 
 	if (isdigit(*mstr) != 0) {
 		/* octal value */
-		mode = strtol(mstr, &ep, 8);
-		if (*mstr == '\0' || *ep != '\0')
-			return(false); /* not a number */
-		if (errno == ERANGE && (mode == LONG_MIN || mode == LONG_MAX))
-			return(false); /* invalid number */
-		if (mode < 0 || mode > USHRT_MAX)
-			return(false); /* invalid mode */
+		if (str_to_ulong(mstr, 8, &mode) == false) {
+			return(false); /* unable to get numerical value */
+		}
 	} else {
 		/* symbolic value */
 		if (symbolic_to_octal_mode(mstr, (mode_t *)&mode) == false) {
