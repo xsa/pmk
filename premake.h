@@ -90,11 +90,19 @@
 #	define TMPBINDIR	"."
 #endif
 
-
+/* major version */
 #define PREMAKE_MAJOR		"0"
+/* minor version */
 #define PREMAKE_MINOR		"7"
-#define PREMAKE_SNAP		"12a" /* only used for snapshots */
+/* only used for snapshots, comment for release */
+#define PREMAKE_SNAP		"12a"
+
+/* build version string */
+#ifndef PREMAKE_SNAP
 #define PREMAKE_VERSION		PREMAKE_MAJOR "." PREMAKE_MINOR
+#else
+#define PREMAKE_VERSION		PREMAKE_MAJOR "." PREMAKE_MINOR "." PREMAKE_SNAP
+#endif
 
 #define PREMAKE_CONFIG		"pmk.conf"
 #define PREMAKE_FILENAME	"pmkfile"
