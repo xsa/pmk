@@ -77,7 +77,7 @@ PC_OBJS=	cfgtool.o common.o dynarray.o hash.o parse.o \
 	$(CC) $(PMKCFLAGS) -c $<
 
 # main target
-all: $(PREMAKE) $(SETUP) $(SCAN) $(INST)
+all: $(PREMAKE) $(SETUP) $(SCAN) $(INST) $(PKGCFG)
 
 showmode:
 	@printf "Makefile is configured in '%s' mode.\n" $(MKTARGET)
@@ -104,6 +104,7 @@ install: all
 	$(SUDO) $(INSTALL) -m 755 $(PREMAKE) $(DESTDIR)$(BINDIR)/$(PREMAKE)
 	$(SUDO) $(INSTALL) -m 755 $(SCAN) $(DESTDIR)$(BINDIR)/$(SCAN)
 	$(SUDO) $(INSTALL) -m 755 $(INST) $(DESTDIR)$(BINDIR)/$(INST)
+	$(SUDO) $(INSTALL) -m 755 $(PKGCFG) $(DESTDIR)$(BINDIR)/$(PKGCFG)
 	$(SUDO) $(INSTALL) -d -m 755 $(DESTDIR)$(SBINDIR)
 	$(SUDO) $(INSTALL) -m 755 $(SETUP) $(DESTDIR)$(SBINDIR)/$(SETUP)
 	$(SUDO) $(INSTALL) -d -m 755 $(DESTDIR)$(DATADIR)
@@ -126,6 +127,7 @@ deinstall:
 	$(SUDO) rm -f $(DESTDIR)$(BINDIR)/$(PREMAKE)
 	$(SUDO) rm -f $(DESTDIR)$(BINDIR)/$(SCAN)
 	$(SUDO) rm -f $(DESTDIR)$(BINDIR)/$(INST)
+	$(SUDO) rm -f $(DESTDIR)$(BINDIR)/$(PKGCFG)
 	$(SUDO) rm -f $(DESTDIR)$(SBINDIR)/$(SETUP)
 	$(SUDO) rm -f $(DESTDIR)$(DATADIR)/$(SAMPLE)
 	$(SUDO) rm -f $(DESTDIR)$(DATADIR)/$(CONFIG)
