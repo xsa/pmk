@@ -2,6 +2,7 @@
  * added gen_test_file() to automate test file generation in detect. 
  * improved detect_compiler() to store data about the compiler.
  * updated use of detect_compiler() in pmk.
+ * added comp_test.c in tests directory.
 
 # snapshot 0.7.6
 
