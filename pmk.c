@@ -157,41 +157,65 @@ void init_var(pmkdata *pgd) {
 
 	pht = pgd->htab;
 
-	get_make_var("CFLAGS", buf, sizeof(buf));
+	pstr = MK_VAR_CFLAGS;
+	if (get_make_var(pstr, buf, sizeof(buf)) == false) {
+		buf[0] = CHAR_EOS;
+		pmk_log("unable to get %s value, set as empty\n");
+	}
 #ifdef PMK_DEBUG
-debugf("CFLAGS = '%s'", buf);
+debugf("%s = '%s'", pstr, buf);
 #endif
-	hash_update_dup(pht, "CFLAGS", buf); /* XXX check ? */
+	hash_update_dup(pht, pstr, buf); /* XXX check ? */
 
-	get_make_var("CXXFLAGS", buf, sizeof(buf));
+	pstr = MK_VAR_CXXFLAGS;
+	if (get_make_var(pstr, buf, sizeof(buf)) == false) {
+		buf[0] = CHAR_EOS;
+		pmk_log("unable to get %s value, set as empty\n");
+	}
 #ifdef PMK_DEBUG
-debugf("CXXFLAGS = '%s'", buf);
+debugf("%s = '%s'", pstr, buf);
 #endif
-	hash_update_dup(pht, "CXXFLAGS", buf); /* XXX check ? */
+	hash_update_dup(pht, pstr, buf); /* XXX check ? */
 
-	get_make_var("CPPFLAGS", buf, sizeof(buf));
+	pstr = MK_VAR_CPPFLAGS;
+	if (get_make_var(pstr, buf, sizeof(buf)) == false) {
+		buf[0] = CHAR_EOS;
+		pmk_log("unable to get %s value, set as empty\n");
+	}
 #ifdef PMK_DEBUG
-debugf("CPPFLAGS = '%s'", buf);
+debugf("%s = '%s'", pstr, buf);
 #endif
-	hash_update_dup(pht, "CPPFLAGS", buf); /* XXX check ? */
+	hash_update_dup(pht, pstr, buf); /* XXX check ? */
 
-	get_make_var("LIBS", buf, sizeof(buf));
+	pstr = MK_VAR_LDFLAGS;
+	if (get_make_var(pstr, buf, sizeof(buf)) == false) {
+		buf[0] = CHAR_EOS;
+		pmk_log("unable to get %s value, set as empty\n");
+	}
 #ifdef PMK_DEBUG
-debugf("LIBS = '%s'", buf);
+debugf("%s = '%s'", pstr, buf);
 #endif
-	hash_update_dup(pht, "LIBS", buf); /* XXX check ? */
+	hash_update_dup(pht, pstr, buf); /* XXX check ? */
 
-	get_make_var("LDFLAGS", buf, sizeof(buf));
+	pstr = MK_VAR_LIBS;
+	if (get_make_var(pstr, buf, sizeof(buf)) == false) {
+		buf[0] = CHAR_EOS;
+		pmk_log("unable to get %s value, set as empty\n");
+	}
 #ifdef PMK_DEBUG
-debugf("LDFLAGS = '%s'", buf);
+debugf("%s = '%s'", pstr, buf);
 #endif
-	hash_update_dup(pht, "LDFLAGS", buf); /* XXX check ? */
+	hash_update_dup(pht, pstr, buf); /* XXX check ? */
 
-	get_make_var("DEBUG", buf, sizeof(buf));
+	pstr = MK_VAR_DEBUG;
+	if (get_make_var(pstr, buf, sizeof(buf)) == false) {
+		buf[0] = CHAR_EOS;
+		pmk_log("unable to get %s value, set as empty\n");
+	}
 #ifdef PMK_DEBUG
-debugf("DEBUG = '%s'", buf);
+debugf("%s = '%s'", pstr, buf);
 #endif
-	hash_update_dup(pht, "DEBUG", buf); /* XXX check ? */
+	hash_update_dup(pht, pstr, buf); /* XXX check ? */
 
 	/* autoconf shit ? */
 	hash_update_dup(pht, "OBJEXT", "o"); /* XXX check ? */

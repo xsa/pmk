@@ -52,7 +52,7 @@
 #define MK_FILE_EXT	".mk"
 #define TMP_MK_FILE	TMPDIR "/pmk_XXXXXXXX" MK_FILE_EXT
 #define MKVAR_FILE	"make_var_result"
-#define MKVAR_FMT_MK	"all:\n\t@printf \"%%s\\n\" $(%s) > %s"	
+#define MKVAR_FMT_MK	"all:\n\t@printf \"%%s\\n\" $(%s) >%s"	
 #define MKVAR_FMT_CMD	"make -f %s >/dev/null 2>&1"
 #define EMPTY_OPT_VALUE ""
 
