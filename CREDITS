@@ -21,6 +21,8 @@ Bug report:
 		(dirname failure with glibc implementation)
 	- Jean-Pierre Ritschard
 		(memory fault in pmk)
+	- Han Boetes
+		(memory fault in pmk_set_variable() due to a missing check)
 
 Notices:
 	- Pedro Martelletto
@@ -36,3 +38,4 @@ Testers:
 	- Francois Petitjean
 	- Martin Reindl
 	- Sascha Welter
+

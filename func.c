@@ -1731,6 +1731,7 @@ bool pmk_setparam_detect(pmkcmd *cmd, prsopt *popt, pmkdata *pgd) {
 
 bool pmk_set_variable(pmkcmd *cmd, prsopt *popt, pmkdata *pgd) {
 	char	 buffer[TMP_BUF_LEN], /* XXX */
+		*pstr,
 		*value,
 		*defname;
 	int	 hval;
@@ -1739,7 +1740,12 @@ bool pmk_set_variable(pmkcmd *cmd, prsopt *popt, pmkdata *pgd) {
 	if (hash_get(pgd->htab, popt->key) == NULL) {
 */
 		/* process value string */
-		value = process_string(po_get_str(popt->value), pgd->htab);
+		pstr = po_get_str(popt->value);
+		if (pstr == NULL) {
+			errorf("bad value for '%s'.", popt->key);
+			return(false);
+		}
+		value = process_string(pstr, pgd->htab);
 		if (value != NULL) {
 			hval = hash_update(pgd->htab, popt->key, value); /* no need to strdup */
 			/* check return for message : defined or redefined */
