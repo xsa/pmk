@@ -43,7 +43,7 @@
 #endif
 
 /* check x86 64 bits architecture */
-#if defined(__AMD64__) || defined(AMD64) || defined(__amd64__) \
+#if defined(__AMD64__) || defined(AMD64) || defined(__amd64__) || \
 	defined(__x86_64__) || defined(_M_AMD64)
 #define ARCH_X86_64	1
 #endif
