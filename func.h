@@ -39,6 +39,13 @@
 #include "common.h"
 #include "functool.h"
 
+/* format string for include check */
+#define INC_TEST_CODE	"#include <stdio.h>\n" \
+			"#include <%s>\n" \
+			"int main() {return(0);}"
+
+#define INC_TEST_NAME	"test.c"
+#define BIN_TEST_NAME	"test_bin"
 
 typedef struct {
 	char	kw[MAX_CMD_NAME_LEN];

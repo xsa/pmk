@@ -32,7 +32,9 @@
 
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
 #include "func.h"
 
@@ -96,7 +98,7 @@ bool pmk_target(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 
 bool pmk_check_binary(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 	char	*filename;
-	bool	required = true;
+	bool	required;
 
 	pmk_log("* Checking binary [%s]\n", cmd->label);
 
@@ -114,12 +116,13 @@ bool pmk_check_binary(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 */
 
 bool pmk_check_include(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
+	FILE	*tfp;
+	bool	required,
+		rval;
 	char	*incfile,
 		*incfunc,
-		incpath[MAXPATHLEN],
-		strbuf[512]; /* storage buffer */
-	FILE	*ifp;
-	bool	required = true;
+		cfgcmd[MAXPATHLEN];
+	int	r;
 
 	pmk_log("* Checking include [%s]\n", cmd->label);
 
@@ -135,35 +138,43 @@ bool pmk_check_include(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 	/* check if a function must be searched */
 	incfunc = hash_get(ht, "FUNCTION");
 
-	/* XXX should look in INC_PATH */
-	snprintf(incpath, MAXPATHLEN, "/usr/include/%s", incfile);
-
-	ifp = fopen(incpath, "r");
-
+	/* XXX should use INC_PATH with -I ? */
 	pmk_log("\tFound header '%s' : ", incfile);
-	if (ifp != NULL) {
-		pmk_log("yes.\n");
-		if (incfunc != NULL) {
-			pmk_log("\tFound function '%s' : ", incfunc);
-			while (get_line(ifp, strbuf, sizeof(strbuf)) == true) {
-				/* XXX should check in a better way ? */
-				if (strstr(strbuf, incfunc) != NULL) {
-					pmk_log("yes.\n");
-					return(true);
-				}
-			}
-			pmk_log("no.\n");
-			errorf("Failed to find '%s' in '%s'", incfunc, incfile);
-			return(false);
-		} else {
-			/* no function to test */
-			return(true);
-		}
+
+	tfp = fopen(INC_TEST_NAME, "w");
+	if (tfp != NULL) {
+		/* fill test file */
+		fprintf(tfp, INC_TEST_CODE, incfile);
+		fclose(tfp);
 	} else {
-		errorf("Failed to find %s", incfunc, incfile);
-		pmk_log("no.\n");
+		errorf("cannot open test file.");
 		return(false);
 	}
+
+	snprintf(cfgcmd, sizeof(cfgcmd), "cc -o %s %s > /dev/null 2>&1", BIN_TEST_NAME, INC_TEST_NAME);
+	/* get result */
+	r = system(cfgcmd);
+	if (r == 0) {
+		pmk_log("yes.\n");
+		/* XXX must define HAVE_... */
+		rval = true;
+	} else {
+		pmk_log("no.\n");
+		if (required == true) {
+			rval = false;
+		} else {
+			rval = true;
+		}
+	}
+
+	if (unlink(INC_TEST_NAME) == -1) {
+		/* cannot remove temporary file */
+		fprintf(stderr, "Can not remove %s\n", INC_TEST_NAME);
+	}
+
+	unlink(BIN_TEST_NAME);
+
+	return(rval);
 }
 
 /*
@@ -238,7 +249,7 @@ bool pmk_check_config(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 
 		rpipe = popen(cfgcmd, "r");
 		if (rpipe == NULL) {
-			errorf("Cannot get version from '%s'.", cfgcmd);
+			errorf("Cannot get version from '%s'.", cfgcmd); /* XXX should correct this message ? */
 			return(false);
 		} else {
 			pmk_log("\tFound version >= %s : ", libvers);
