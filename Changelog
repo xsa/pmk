@@ -1,3 +1,7 @@
+14 May 2003 mipsator
+ * moved functab and misc related.
+ * use hash_add_array() in hash_test.
+
 06 May 2003 mipsator
  * use depend_check() in check functions.
  * rewritten depend_check().

@@ -46,20 +46,14 @@
 
 extern char	*optarg;
 extern int	optind;
+extern cmdkw	functab[];
+extern int	nbfunc;
 
 char	pmkfile[MAXPATHLEN];
 int	cur_line = 0;
 
 /* keyword data */
 htable		*keyhash;
-cmdkw		functab[] = {
-	{"DEFINE", pmk_define},
-	{"TARGET", pmk_target},
-	{"CHECK_BINARY", pmk_check_binary},
-	{"CHECK_INCLUDE", pmk_check_include},
-	{"CHECK_LIB", pmk_check_lib},
-	{"CHECK_CONFIG", pmk_check_config}
-};
 
 
 /*
@@ -644,7 +638,6 @@ int main(int argc, char *argv[]) {
 		nbpd,
 		nbcd,
 		i,
-		s,
 		chr;
 	bool	go_exit = false,
 		pmkfile_set = false;
@@ -683,11 +676,10 @@ int main(int argc, char *argv[]) {
 	argc = argc - optind;
 	argv = argv + optind;
 
-	s = sizeof(functab) / sizeof(cmdkw); /* compute number of keywords */
-	keyhash = hash_init(s);
+	keyhash = hash_init(nbfunc);
 	if (keyhash != NULL) {
 		/* fill keywords hash */
-		for(i = 0 ; i < s ; i++) {
+		for(i = 0 ; i < nbfunc ; i++) {
 			snprintf(idxstr, 4, "%d", i);
 			hash_add(keyhash, functab[i].kw, idxstr); /* XXX test ? */
 		}
