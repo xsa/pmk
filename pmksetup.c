@@ -251,21 +251,6 @@ bool check_opt(htable *pht, prsopt *popt) {
 	char	*recval,
 		*optval;
 
-	/* OBSOLETE, warning about compatibility with <0.6 */
-	if (strncmp(popt->key, PREMAKE_KEY_BINPATH, sizeof(popt->key)) == 0) {
-		printf("WARNING : %s is obsoleted by %s. Removing is recommended.\n",
-				PREMAKE_KEY_BINPATH, PMKCONF_PATH_BIN);
-	}
-	if (strncmp(popt->key, PREMAKE_KEY_INCPATH, sizeof(popt->key)) == 0) {
-		printf("WARNING : %s is obsoleted by %s. Removing is recommended.\n",
-				PREMAKE_KEY_INCPATH, PMKCONF_PATH_INC);
-	}
-	if (strncmp(popt->key, PREMAKE_KEY_LIBPATH, sizeof(popt->key)) == 0) {
-		printf("WARNING : %s is obsoleted by %s. Removing is recommended.\n",
-				PREMAKE_KEY_LIBPATH, PMKCONF_PATH_LIB);
-	}
-	/* end of OBSOLETE stuff */
-
 	optval = po_get_str(popt->value);
 
 	if ((popt->opchar == CHAR_COMMENT) || (popt->opchar == CHAR_EOS)) {

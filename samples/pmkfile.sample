@@ -27,7 +27,7 @@ SWITCHES {
 # check availability of termcap library
 CHECK_LIB(lib_termcap) {
 	REQUIRED = FALSE
-	LIBNAME = "termcap"
+	NAME = "termcap"
 }
 
 # check function getwin in libcurses

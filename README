@@ -1,10 +1,5 @@
 The pmk project try to provide an alternative to gnu configure.
 
-NOTE: OBSOLETE ?
-HP systems seems to have 'make' unable to use '+=' operator.
-This results in an incompatibility with our Makefile so we recommand to
-use gmake instead of original make.
-
 There is two way for using pmk. The first is the common installation
 that need root privileges and that allow all users to acces pmk. The
 second is the user mode that install binaries in $HOME/bin/ and data in
