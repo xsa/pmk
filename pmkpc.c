@@ -508,7 +508,7 @@ debugf("{main} id = %d", poc->id);
 						exit(EXIT_FAILURE);
 						break;
 					default :
-						errorf("unknow option -%c",
+						errorf("unknown option -%c",
 							mod[1]);
 						exit(EXIT_SUCCESS);
 						break;
