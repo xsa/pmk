@@ -170,7 +170,6 @@ bool process_node(prsnode *pnode, pmkdata *pgd) {
 /*
 	define variables
 
-	XXX TODO process variables in order (and also search in global htable).
 */
 
 bool pmk_define(pmkcmd *cmd, prsnode *pnode, pmkdata *gdata) {
@@ -341,7 +340,7 @@ bool pmk_check_binary(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 		/* OBSOLETE, check for BIN_PATH for compatibility with 6.0 */
 		bpath = hash_get(gdata->htab, PREMAKE_KEY_BINPATH);
 		if (bpath == NULL) {
-			errorf("BIN_PATH not available.");
+			errorf("%s not available.", PMKCONF_PATH_BIN);
 			return(false);
 		}
 		pmk_log("\tWARNING : BIN_PATH is obsolete, update pmk.conf with pmksetup.\n");
@@ -353,10 +352,7 @@ bool pmk_check_binary(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 			return(false);
 		} else {
 			record_def(gdata->htab, filename, false);
-			if (hash_add(gdata->htab, varname, strdup("")) == HASH_ADD_FAIL) {
-				errorf("hash error.");
-				return(false);
-			}
+			/* not found => not added in htab */ 
 			label_set(gdata->labl, cmd->label, false);
 			return(true);
 		}
@@ -400,12 +396,13 @@ bool pmk_check_include(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 	FILE	*tfp;
 	bool	 required,
 		 rval;
-	char	 inc_path[TMP_BUF_LEN] = "",
+	char	 inc_path[MAXPATHLEN],
 		 cfgcmd[MAXPATHLEN],
 		*incfile,
 		*incfunc,
 		*target,
 		*ccpath,
+		*cflags,
 		*pstr;
 	dynary	*da;
 	int	 r,
@@ -461,29 +458,35 @@ bool pmk_check_include(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 		pmk_log("\tUse %s language with %s compiler.\n", pld->name, pld->comp);
 	}
 
+	/* check for alternative variable for CFLAGS */
+	cflags = po_get_str(hash_get(ht, "CFLAGS"));
+	if (cflags != NULL) {
+		/* init alternative variable */
+		if (hash_append(gdata->htab, cflags, strdup(""), " ") == HASH_ADD_FAIL) {
+			errorf("hash error.");
+			return(false);
+		}
+	}
+
 	/* use each element of INC_PATH with -I */
 	pstr = (char *) hash_get(gdata->htab, PMKCONF_PATH_INC);
 	if (pstr == NULL) {
 		/* OBSOLETE, check for BIN_PATH for compatibility with 6.0 */
 		pstr = (char *) hash_get(gdata->htab, PREMAKE_KEY_INCPATH);
 		if (pstr == NULL) {
-			strlcpy(inc_path, "", sizeof(inc_path));
-		} else {
-			pmk_log("\tWARNING : INC_PATH is obsolete, update pmk.conf with pmksetup.\n");
-		}
-	} else {
-		r = sizeof(inc_path);
-		da = str_to_dynary(pstr, CHAR_LIST_SEPARATOR);
-		if (da == NULL) {
-			errorf("ARG XXX TODO");  /* XXX TODO PATH CHECK HERE */
+			errorf("%s not available.", PMKCONF_PATH_INC);
 			return(false);
 		}
+		pmk_log("\tWARNING : INC_PATH is obsolete, update pmk.conf with pmksetup.\n");
+	}
 
-		for (i=0 ; i < da_usize(da) ; i++) {
-			strlcat(inc_path, " -I", r); /* XXX check */
-			strlcat(inc_path, da_idx(da, i), r);
-		}
-		da_destroy(da);
+	if (get_file_dir_path(incfile, pstr, inc_path, sizeof(inc_path)) == true) {
+		pstr = strdup(inc_path);
+		strlcpy(inc_path, "-I", sizeof(inc_path));
+		strlcat(inc_path, pstr, sizeof(inc_path));
+	} else {
+		/* include not found, init inc_path with "" */
+		strlcpy(inc_path, "", sizeof(inc_path));
 	}
 
 	/* fill test file */
@@ -508,6 +511,7 @@ bool pmk_check_include(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 	snprintf(cfgcmd, sizeof(cfgcmd), "%s %s -o %s %s > /dev/null 2>&1",
 						ccpath, inc_path,
 						BIN_TEST_NAME, TEST_FILE_NAME);
+
 	/* get result */
 	r = system(cfgcmd);
 	if (r == 0) {
@@ -516,6 +520,16 @@ bool pmk_check_include(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 		record_def(gdata->htab, target, true);
 		record_val(gdata->htab, target, "");
 		label_set(gdata->labl, cmd->label, true);
+
+		/* check for alternative variable for CFLAGS */
+		if (cflags != NULL) {
+			/* put result in special CFLAGS variable */
+			single_append(gdata->htab, cflags, strdup(inc_path)); /* XXX check */
+		} else {
+			/* put result in CFLAGS */
+			single_append(gdata->htab, "CFLAGS", strdup(inc_path)); /* XXX check */
+		}
+
 		rval = true;
 	} else {
 		pmk_log("no.\n");
@@ -710,6 +724,7 @@ bool pmk_check_config(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 		 cfgpath[MAXPATHLEN],
 		 cfgcmd[MAXPATHLEN],
 		*cfgtool,
+		*varname,
 		*libvers,
 		*bpath,
 		*cflags,
@@ -725,6 +740,14 @@ bool pmk_check_config(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 		if (cfgtool == NULL) {
 			errorf("NAME not assigned in label '%s'.", cmd->label);
 			return(false);
+		}
+	}
+
+	varname = po_get_str(hash_get(ht, "VARIABLE"));
+	if (varname == NULL) {
+		varname = po_get_str(hash_get(ht, "VARNAME")); /* OBSOLETE */
+		if (varname == NULL) {
+			varname = str_to_def(cfgtool);
 		}
 	}
 
@@ -780,6 +803,11 @@ bool pmk_check_config(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 		}
 	} else {
 		pmk_log("yes.\n");
+		/* recording path of config tool */
+		if (hash_add(gdata->htab, varname, strdup(cfgpath)) == HASH_ADD_FAIL) {
+			errorf("hash error.");
+			return(false);
+		}
 	}
 	
 	libvers = po_get_str(hash_get(ht, "VERSION"));
@@ -1201,14 +1229,20 @@ bool pmk_check_variable(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 
 		value = po_get_str(hash_get(ht, "VALUE"));
 		if (value == NULL) {
-			record_val(gdata->htab, var, "");
+// XXX !!!			record_val(gdata->htab, var, "");
+// XXX ???			record_def(gdata->htab, var, true);
+			label_set(gdata->labl, cmd->label, true);
+
 			rval = true;
 		} else {
 			pmk_log("\tVariable match value '%s' : ", value);
 
 			if (strncmp(value, varval, sizeof(varval)) == 0) {
 				pmk_log("yes.\n");
-				record_val(gdata->htab, var, "");
+// XXX !!!				record_val(gdata->htab, var, "");
+// XXX ???				record_def(gdata->htab, var, true);
+				label_set(gdata->labl, cmd->label, true);
+
 				rval = true;
 			} else {
 				pmk_log("no.\n");
@@ -1233,14 +1267,11 @@ bool pmk_check_variable(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 		}
 	}
 
-	record_def(gdata->htab, var, rval);
-	label_set(gdata->labl, cmd->label, rval);
-
 	return(rval);
 }
 
 /*
-	set variable
+	set parameter 
 */
 
 bool pmk_set_parameter(pmkcmd *cmd, prsopt *popt, pmkdata *gdata) {
@@ -1331,19 +1362,24 @@ bool pmk_set_parameter(pmkcmd *cmd, prsopt *popt, pmkdata *gdata) {
 bool pmk_set_variable(pmkcmd *cmd, prsopt *popt, pmkdata *gdata) {
 	char	*value;
 
+/* XXX better way to do (specific hash for override)
 	if (hash_get(gdata->htab, popt->key) == NULL) {
+*/
 		/* process value string */
 		value = process_string(po_get_str(popt->value), gdata->htab);
 		if (value != NULL) {
 			hash_add(gdata->htab, popt->key, value); /* no need to strdup */
-			pmk_log("\tAdded '%s' variable.\n", popt->key);
+			/* XXX TODO check return for message : defined or redefined */
+			pmk_log("\tdefined '%s' variable.\n", popt->key);
 		} else {
 			pmk_log("\tFailed processing of '%s'.\n", popt->key);
 			return(false);
 		}
+/*
 	} else {
 		pmk_log("\tSkipped '%s' define (overriden).\n", popt->key);
 	}
+*/
 	return(true);
 }
 

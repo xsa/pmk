@@ -214,6 +214,39 @@ bool get_file_path(char *filename, char *path, char *storage, int size) {
 }
 
 /*
+	get directory of given filename in given path list
+
+	filename : name of the file to look for
+	path : string of the list of path
+	storage : storage for resulting directory
+	size : size of storage
+
+	returns true if filename is found in one of the list's path
+*/
+
+bool get_file_dir_path(char *filename, char *path, char *storage, int size) {
+	bool	 rval = false;
+	dynary	*bplst;
+
+	/* fill dynary with path */
+	bplst= str_to_dynary(path, CHAR_LIST_SEPARATOR);
+	if (bplst == NULL) {
+		errorf("Failed to put a path into a dynamic array.");
+		return(false);
+	}
+
+	/* try to locate cfgtool */
+	if (find_file_dir(bplst, filename, storage, size) == true) {
+		rval = true;
+	} else {
+		rval = false;
+	}
+
+	da_destroy(bplst);
+	return(rval);
+}
+
+/*
 	generate semi-definition from a string
 
 	str : string to use
@@ -609,3 +642,39 @@ char *process_string(char *pstr, htable *pht) {
 	*pbuf = CHAR_EOS;
 	return(strdup(buf));
 }
+
+/*
+	append only if not already in the string
+
+	pht : hash table
+	key : key where to append
+	value : value to append
+*/
+
+bool single_append(htable *pht, char *key, char *value) {
+	bool	 found = false;
+	char	*cval,
+		*pstr;
+
+	cval = hash_get(pht, key);
+
+	pstr = strstr(cval, value);
+	while ((pstr != NULL) && (found == false)) {
+		pstr = pstr + strlen (value);
+		if ((*pstr == ' ') || (*pstr == CHAR_EOS)) {
+			/* found existing value */
+			found = true;
+		}
+		pstr = strstr(cval, value);
+	}
+
+	if (found == false) {
+		if (hash_append(pht, key, strdup(value), " ") == HASH_ADD_FAIL) {
+			/* add failed */
+			return(false);
+		}
+	}
+
+	return(true);
+}
+

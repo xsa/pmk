@@ -236,6 +236,45 @@ dynary *str_to_dynary(char *str, char sep) {
 }
 
 /*
+	find if one dir contain a given file in the specified list of path
+
+	da : path list
+	fname : file to search
+	fpath : storage of the directory
+	fplen : size of the storage
+
+	returns true on success
+*/
+
+bool find_file_dir(dynary *da, char *fname, char *fpath, int fplen) {
+	FILE		*fp;
+	bool		 found = false;
+	char		 tstr[MAXPATHLEN],
+			*path;
+	int		 i;
+
+	for (i = 0 ; (i < da_usize(da)) && (found == false) ; i++) {
+		path = da_idx(da, i);
+
+		strlcpy(tstr, path, sizeof(tstr));
+		strlcat(tstr, "/", sizeof(tstr));
+		if (strlcat(tstr, fname, sizeof(tstr)) < sizeof(tstr)) {
+			fp = fopen(tstr, "r");
+			if (fp != NULL) {
+				fclose(fp);
+				if (strlcpy(fpath, path, fplen) < fplen) {
+					/* fpath correctly set */
+					found = true;
+				}
+			}
+		}
+
+	}
+
+	return(found);
+}
+
+/*
 	find a file in the specified list of path
 
 	da : path list
@@ -247,48 +286,16 @@ dynary *str_to_dynary(char *str, char sep) {
 */
 
 bool find_file(dynary *da, char *fname, char *fpath, int fplen) {
-	struct dirent	*de;
-	DIR		*dp;
-	bool		 found,
-			 exit;
-	char		*path;
-	int		 i;
-	size_t		 rsize;
+	bool	rval = false;
 
-	found = false;
-	rsize = sizeof(de->d_name);
-
-	for (i = 0 ; (i < da_usize(da)) && (found == false) ; i++) {
-		path = da_idx(da, i);
-		if (path == NULL) {
-			/* skipping */
-			dp = NULL;
-		} else {
-			/* got a path, opening */
-			dp = opendir(path);
-		}
-		
-		if (dp != NULL) {
-			exit = false;
-			while (exit == false) {
-				de = readdir(dp);
-				if (de != NULL) {
-					/* found right filename ? */
-					if (strncmp(de->d_name, fname, rsize) == 0) {
-						if (snprintf(fpath, fplen, "%s/%s", path, fname) < fplen) {
-							/* fpath set */
-							found = true;
-						}
-						exit = true;
-					}
-				} else
-					/* no more entry */
-					exit = true;
-			}
-			closedir(dp);
+	if (find_file_dir(da, fname, fpath, fplen) == true) {
+		strlcat(fpath, "/", fplen); /* no need to check here */
+		if (strlcat(fpath, fname, fplen) < fplen) {
+			/* fpath set correctly */
+			rval = true;
 		}
 	}
-	return(found);
+	return(rval);
 }
 
 

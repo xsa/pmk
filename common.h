@@ -63,6 +63,7 @@ bool	 get_make_var(char *, char *, int);
 
 dynary	*str_to_dynary(char *, char);
 bool	 find_file(dynary *, char *, char *, int);
+bool	 find_file_dir(dynary *, char *, char *, int);
 
 void	 errorf(const char *, ...);
 void	 errorf_line(char *, int, const char *, ...);

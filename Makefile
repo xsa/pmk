@@ -5,22 +5,22 @@ DEBUG?=		-g
 INSTALL=	install
 
 # base path for install
-BASE=		$(HOME)
+BASE=		/usr/local
 
 # configuration file location
-CONFDIR=	$(BASE)/.pmk
+CONFDIR=	$(SYSCONFDIR)/pmk
 
 BINDIR=		$(BASE)/bin
-SBINDIR=	$(BASE)/bin
-DATADIR=	$(CONFDIR)
-MANDIR=		$(CONFDIR)
+SBINDIR=	$(BASE)/sbin
+DATADIR=	$(BASE)/share/$(PREMAKE)
+MANDIR=		$(BASE)/man
 
 SYSCONFDIR=	/etc
 
 CFGFLAGS=	-DSYSCONFDIR=\"$(SYSCONFDIR)\" -DCONFDIR=\"$(CONFDIR)\"
 
 # Flag to enable pmk in user mode (check INSTALL file for details).
-USERMODE=	-DUSERMODE
+USERMODE=	
 
 # Edit and use the following if needed :
 
