@@ -36,6 +36,12 @@
 #include "hash.h"	 
 #include "premake.h"
 
+
+#define PREMAKE_CONFIG_TMP	"/tmp/pmk.XXXXXXXX"
+
+/* buffer size in the copy_config() function */
+#define MAX_LINE_BUF		MAX_LINE_LEN
+
 #define MAX_CONF_OPT		256	/* XXX temp maximum hash entries */
 #define PATH_STR_DELIMITER	':'	/* string delimiter of the $PATH variable */    
 #define MAXBINS			5	/* max slots in the binaries array */

@@ -50,12 +50,6 @@
 
 char	*__progname;		/* program name from argv[0] */
 
-#define PREMAKE_CONFIG_TMP	"/tmp/pmk.XXXXXXXX"
-
-/* buffer size in the copy_config() function */
-#define	MAX_LINE_BUF		MAX_LINE_LEN
-
-
 int	verbose_flag = 0;	/* -V option at the cmd-line */ 
 char	sfn[MAXPATHLEN];	/* scratch file name */		
 FILE	*sfp;			/* scratch file pointer */
