@@ -541,6 +541,7 @@ bool process_cmd(prsdata *pdata, pmkdata *pgd) {
 
 bool parse_cmdline(char **val, int nbval, pmkdata *pgd) {
 	bool	 rval = true;
+	char	*pstr;
 	htable	*ht;
 	int	 i;
 	prsopt	 opt;
@@ -552,7 +553,13 @@ bool parse_cmdline(char **val, int nbval, pmkdata *pgd) {
 		/* parse option */
 		rval = parse_clopt(val[i], &opt, PRS_PMKCONF_SEP);
 		if (rval == true) {
-			if (hash_update(ht, opt.key, opt.value) == HASH_ADD_FAIL) { /* no need to strdup */
+			pstr = po_get_str(opt.value);
+			if (pstr == NULL) {
+				errorf("unable to get value for %s.", opt.key);
+				return(false);
+			}
+
+			if (hash_update(ht, opt.key, pstr) == HASH_ADD_FAIL) { /* no need to strdup */
 				errorf("%s.", PRS_ERR_HASH);
 				rval = false;
 			}
