@@ -1,3 +1,6 @@
+26 Jul 2003 mipsator
+ * added dir_recurse() in pmkscan to make it scanning a complete tree.
+
 # snapshot 0.5.2
 
 24 Jul 2003 mipsator

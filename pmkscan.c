@@ -38,6 +38,8 @@
 
 #include "compat/pmk_string.h"
 #include "common.h"
+#include "dirent.h"
+#include "dynarray.h"
 #include "parse.h"
 #include "pmkscan.h"
 #include "premake.h"
@@ -49,7 +51,7 @@
 	pdata : parsing data structure
 	scandata : scanning data structure
 
-	returns : boolean (true on success)
+	return : boolean (true on success)
 */
 
 bool parse_data(prsdata *pdata, scandata *sdata) {
@@ -94,7 +96,7 @@ bool parse_data(prsdata *pdata, scandata *sdata) {
 	pattern : pattern to use
 	line : string to check
 
-	returns : found string or NULL
+	return : found string or NULL
 */
 
 char *regex_check(char *pattern, char *line) {
@@ -127,7 +129,7 @@ char *regex_check(char *pattern, char *line) {
 	ht_fam : identifier family hash table
 	phtgen : datagen hash table
 
-	returns : -
+	return : -
 */
 
 void idtf_check(char *idtf, htable *ht_fam, htable *phtgen) {
@@ -162,7 +164,7 @@ void idtf_check(char *idtf, htable *ht_fam, htable *phtgen) {
 	scandata : scanning data
 	phtgen : ouput hash table
 
-	returns : boolean
+	return : boolean
 */
 
 bool parse_c_file(char *filename, scandata *sdata, htable *phtgen) {
@@ -209,6 +211,8 @@ bool parse_c_file(char *filename, scandata *sdata, htable *phtgen) {
 
 	ofile : file name
 	pht : output hash table
+
+	return : -
 */
 
 bool output_file(char *ofile, htable *pht) {
@@ -240,23 +244,67 @@ bool output_file(char *ofile, htable *pht) {
 }
 
 /*
-	XXX
+	find directories recursively
+
+	pda : dynarray to store directories
+	path : starting path
+
+	return : -
 */
 
-void dir_explore(htable *pht, scandata *psd) {
+void dir_recurse(dynary *pda, char *path) {
+	DIR		*pd;
+	struct dirent	*pde;
+	char		 buf[MAXPATHLEN];
+
+	pd = opendir(path);
+	if (pd != NULL) {
+		/* this is a directory, save it */
+#ifdef DEBUG
+		debugf("Add directory '%s' into list.", path);
+#endif
+		da_push(pda, path);
+
+		/* check directory entries one by one */
+		do {
+			pde = readdir(pd);
+			if (pde != NULL) {
+				/* avoid entries starting by '.' */
+				if (pde->d_name[0] != '.') {
+					snprintf(buf, sizeof(buf), "%s/%s", path, pde->d_name);
+					/* try to recurse the resulting path */
+					dir_recurse(pda, buf);
+				}
+			}
+		} while (pde != NULL);
+	}
+}
+
+/*
+	launch scan on selected files of a directory
+
+	pht : output hash table
+	psd : scanned data
+	path : directory to scan
+
+	return : -
+*/
+
+void dir_explore(htable *pht, scandata *psd, char *path) {
+	char	buf[MAXPATHLEN];
 	int	i;
 	glob_t	g;
 
-	printf("Parsing C related files :\n");
-
-	i = glob("*.c", GLOB_NOSORT, NULL, &g);
+	snprintf(buf, sizeof(buf), "%s/*.c", path);
+	i = glob(buf, GLOB_NOSORT, NULL, &g);
 #ifdef DEBUG
 	if (i == 0) {
 		printf("Globbing of *.c files successful.\n");
 	}
 #endif
 
-	i = glob("*.h", GLOB_NOSORT | GLOB_APPEND, NULL, &g);
+	snprintf(buf, sizeof(buf), "%s/*.h", path);
+	i = glob(buf, GLOB_NOSORT | GLOB_APPEND, NULL, &g);
 #ifdef DEBUG
 	if (i == 0) {
 		printf("Globbing of *.h files successful.\n");
@@ -264,14 +312,12 @@ void dir_explore(htable *pht, scandata *psd) {
 #endif
 
 	for (i = 0 ; i < g.gl_pathc ; i++) {
-		printf("\t'%s' :", g.gl_pathv[i]);
+		printf("\t'%s'", g.gl_pathv[i]);
 		parse_c_file(g.gl_pathv[i], psd, pht);
-		printf("\tdone.\n");
+		printf(" done.\n");
 	}
 
 	globfree(&g);
-	printf("Parsing Ok.\n\n");
-
 }
 
 /*
@@ -291,6 +337,8 @@ void usage(void) {
 */
 
 int main(int argc, char *argv[]) {
+	char		*p;
+	dynary		*pda;
 	htable		*pfdata;
 	prsdata		*pdata;
 	scandata	 sd;
@@ -315,8 +363,23 @@ int main(int argc, char *argv[]) {
 	}
 	printf("Ok\n\n");
 
+	pda = da_init();
+	/* XXX TODO check */
+
 	pfdata = hash_init(256); /* XXX can do better :) */
-	dir_explore(pfdata, &sd);
+	/* XXX TODO check */
+
+	dir_recurse(pda, ".");
+#ifdef DEBUG
+	printf("dir_recurse finished.\n");
+#endif
+
+	printf("Start parsing files :\n");
+	do {
+		p = da_pop(pda);
+		dir_explore(pfdata, &sd, p);
+	} while (p != NULL);
+	printf("Parsing Ok.\n\n");
 
 	printf("Generating scan result ...\n");
 	output_file(PMKSCAN_OUTPUT, pfdata);
@@ -325,6 +388,7 @@ int main(int argc, char *argv[]) {
 	printf("PMKSCAN finished.\n\n");
 
 	hash_destroy(pfdata);
+	da_destroy(pda);
 
 	return(0);
 }
