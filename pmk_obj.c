@@ -46,7 +46,7 @@
 
 	value : boolean to objectify
 
-	return : objet
+	return : object
 */
 
 pmkobj *po_mk_bool(bool value) {
@@ -74,7 +74,7 @@ pmkobj *po_mk_bool(bool value) {
 
 	str : string to objectify
 
-	return : objet
+	return : object
 */
 
 pmkobj *po_mk_str(char *str) {
@@ -160,7 +160,7 @@ pmkobj *po_dup(pmkobj *po) {
 /*
 	get object type
 
-	po : objet
+	po : object
 
 	return : type of object
 */
@@ -176,7 +176,7 @@ potype po_get_type(pmkobj *po) {
 /*
 	get object data
 
-	po : objet
+	po : object
 
 	return : generic data of object or NULL
 */
