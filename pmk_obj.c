@@ -149,3 +149,74 @@ void po_free(pmkobj *po) {
 	}
 }
 
+pmkobj *po_append(void *orig, void *value, void *misc) {
+	char	*pbuf;
+	pmkobj	*po_orig,
+		*po_value,
+		*po;
+	size_t	 s;
+
+	po_orig = (pmkobj *) orig;
+	po_value = (pmkobj *) value;
+
+	if (value == NULL)
+		return(NULL);
+
+	if (po_orig->type != po_value->type)
+		return(NULL);
+
+	po = (pmkobj *) malloc(sizeof(pmkobj));
+	if (po == NULL) {
+		return(NULL);
+	}
+
+	switch (po_orig->type) {
+		case PO_STRING :
+			/* compute needed space */
+			if (misc != NULL) {
+				s = strlen((char *) misc);
+			} else {
+				s = 0;
+			}
+			s = s + strlen(po_orig->data) + strlen(po_value->data) + 1;
+
+			/* allocate space */
+			pbuf = (char *) malloc(s);
+
+			if (strlcat(pbuf, po_orig->data, s) >= s) {
+				free(value);
+				free(pbuf);
+				return(NULL);
+			}
+	
+			if ((misc != NULL) && (pbuf[0] != '\0')) {
+				/* adding separator if provided and if
+					string is not empty */
+				if (strlcat(pbuf, (char *) misc, s) >= s) {
+					free(value);
+					free(pbuf);
+					return(NULL);
+				}
+			}
+			if (strlcat(pbuf, po_value->data, s) >= s) {
+				free(value);
+				free(pbuf);
+				return(NULL);
+			}
+
+			po = po_mk_str(pbuf);
+			free(value);
+			free(pbuf);
+			break;
+		case PO_LIST :
+			/* XXX TODO */
+			return(NULL);
+			break;
+
+		default :
+			return(NULL);
+			break;
+	}
+
+	return(po);
+}
