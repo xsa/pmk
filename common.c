@@ -90,26 +90,79 @@ bool env_to_opt(char *env_name, pmkcmdopt *opt) {
 }
 
 /*
-	get_make_var
+	get variable content from make
+
+	varname: name of the variable like for example CC
+	result: storage of result
+	rsize: result size
+
+	return TRUE on success
 */
 
-void get_make_var(char *varname) {
-	FILE	*tfd;
-	char	tf[256] = "/tmp/pmk_tst.XXXXXXXX",
-		varstr[256],
-		result[256];
-	int	fd = -1;
+bool get_make_var(char *varname, char *result, int rsize) {
+	FILE	*mfp,
+		*tfp;
+	/* XXX 256 => berk berk berk ! */
+	char	mfn[256] = "/tmp/pmk_mkf.XXXXXXXX",
+		tfn[256] = "/tmp/pmk_tst.XXXXXXXX",
+		varstr[256];
+	int	mfd = -1,
+		tfd = -1;
+	bool	rval;
 
-	/* XXX mktemp stuff */
+	mfd = mkstemp(mfn);
+	if (mfd == -1) {
+		/* name randomize failed */
+		fprintf(stderr, "Failed to randomize filename\n");
+		return(FALSE);
+	}
 
-	snprintf(varstr, 256, "/usr/bin/make -V %s > %s", varname, tf);
-	system(varstr);
+	tfd = mkstemp(tfn);
+	if (tfd == -1) {
+		/* name randomize failed */
+		fprintf(stderr, "Failed to randomize filename\n");
+		return(FALSE);
+	}
 
-	tfd = fopen(tf, "r");
-	get_line(tfd, result, 256);
-	fclose(tfd);
+	mfp = fdopen(mfd, "w");
+	if (mfp != NULL) {
+		/* create a tmp makefile with the following format :
+			test:
+				@echo ${VARNAME}
 
-	unlink(tf);
+		   /!\ should check content of VARNAME, could result
+		   in a security breach. XXX
+		*/
+		fprintf(mfp, "test:\n\t@echo ${%s}", varname);
+		fclose(mfp);
+	} else {
+		fprintf(stderr, "Failed to open %s\n", tfn);
+		return(FALSE);
+	}
 
-	printf("%s => %s\n", varname, result);
+	tfp = fdopen(tfd, "r");
+	if (tfp != NULL) {
+		/* catch output of make */
+		snprintf(varstr, 256, "/usr/bin/make -f %s > %s", mfn, tfn);
+		system(varstr);
+
+		get_line(tfp, result, rsize);
+		fclose(tfp);
+
+		rval = TRUE;
+	} else {
+		fprintf(stderr, "Failed to open %s\n", tfn);
+		rval = FALSE;
+	}
+
+	if (unlink(mfn) == -1) {
+		/* cannot remove temporary file */
+		fprintf(stderr, "Can not remove %s\n", mfn);
+	}
+	if (unlink(tfn) == -1) {
+		/* cannot remove temporary file */
+		fprintf(stderr, "Can not remove %s\n", tfn);
+	}
+
+	return(rval);
 }
