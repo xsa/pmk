@@ -1,3 +1,11 @@
 HP systems (tru64, hpux) :
   - default make does not support '+=' operator (eg: CFLAGS+=-DBLAH does
     not work). Use of GNU/make is recommended to build the package.
+
+CYGWIN :
+  - cygwin seems to not handle perfectly its binaries, a 'which gcc' give
+    the path to gcc but when you're looking for it directly with dir
+    functions you can't get it because its real name is gcc.exe ...
+    So we decided to stop cygwin support until they learn how to make
+    their system working transparently (yes, between the lines you can
+    read cygwin sucks).
