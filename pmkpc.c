@@ -443,7 +443,8 @@ debugf("{main} id = %d", poc->id);
 				case PMKPC_OPT_VAR_PRNT :
 				case PMKPC_OPT_VAR_SILC :
 				case PMKPC_OPT_VAR_STDO :
-					errorf("option '--%s' is not yet implemented.", poc->err);
+					errorf("option '--%s' is not yet "
+						"implemented.", poc->err);
 					optcell_destroy(poc);
 					clean(&gdata);
 					exit(EXIT_FAILURE);
@@ -451,9 +452,10 @@ debugf("{main} id = %d", poc->id);
 
 				case PMKPC_OPT_UNKNOWN :
 				default :
+					errorf("unknown option '--%s'.",
+						poc->err);
 					optcell_destroy(poc);
 					clean(&gdata);
-					errorf("unknown option '--%s'.", poc->err);
 					exit(EXIT_FAILURE);
 					break;
 			}
@@ -467,7 +469,8 @@ debugf("{main} id = %d", poc->id);
 						exit(EXIT_FAILURE);
 						break;
 					default :
-						errorf("unknow option -%c", mod[1]);
+						errorf("unknow option -%c", 
+							mod[1]);
 						exit(EXIT_SUCCESS);
 						break;
 				}
