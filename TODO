@@ -28,15 +28,12 @@ mreindl	~.	latex version of tutorial
 	-.	add test target in tests/Makefile
 	+	update README and INSTALL
 	~	new samples:
-			+	prog c
 			-	prog c++
-			+	lib c
-			-	lib c++
+			+	lib c++
 
 
 pmk:
 -----------------------------------------------------------------------
-	+	MODULE support in CHECK_CONFIG
 	+	linking flags for shared libraries (starting with our
 		supported platforms)
 	+	test of shared lib support
@@ -72,7 +69,6 @@ pmkscan
 
 pmkinstall
 -----------------------------------------------------------------------
-	+	finish usage()
 	-.	backup option ?
 
 
