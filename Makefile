@@ -37,11 +37,11 @@ install:
 	$(INSTALL) -m 755 $(PREMAKE) $(PREFIX)/bin/
 	$(INSTALL) -m 755 $(SETUP) $(PREFIX)/sbin/
 	$(INSTALL) -d $(DATADIR)
-	$(INSTALL) -m 644 $(SAMPLE) $(DATADIR)
-	$(INSTALL) -m 644 $(CONFIG) $(DATADIR)
+	$(INSTALL) -m 644 samples/$(SAMPLE) $(DATADIR)
+	$(INSTALL) -m 644 samples/$(CONFIG) $(DATADIR)
 
 clean:
-	rm -f $(P_OBJS) $(S_OBJS) $(PREMAKE) $(SETUP)
+	rm -f $(P_OBJS) $(S_OBJS) $(PREMAKE) $(SETUP) *.core
 
 deinstall:
 	rm -f $(PREFIX)/bin/$(PREMAKE)

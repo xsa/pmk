@@ -1,0 +1,11 @@
+# $Id$
+# pmk.conf example
+
+# misc
+OSTYPE=OpenBSD
+PREFIX=/usr/local
+SYSCONFDIR=/etc
+
+# binary locations
+GREP=/usr/bin/grep
+INSTALL=/usr/bin/install
