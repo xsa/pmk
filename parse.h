@@ -97,7 +97,7 @@
 #define MAX_CMD_OPT		32
 
 /* parsing buffer size */
-#define PRS_BUF_LEN            512
+#define PRS_BUF_LEN            1024
 
 /* keyword structure */
 typedef struct {
