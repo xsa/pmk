@@ -27,7 +27,7 @@ DATADIR=	$(PREFIX)/share/$(PREMAKE)
 SAMPLE=		$(PREMAKE)file.sample
 CONFIG=		$(PREMAKE).conf.sample
 
-P_OBJS=		common.o hash.o func.o pmk.o dynarray.o
+P_OBJS=		common.o hash.o func.o pmk.o dynarray.o compat.o
 S_OBJS=		$(SETUP).o common.o hash.o dynarray.o
 
 all: config $(PREMAKE) $(SETUP)

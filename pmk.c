@@ -60,13 +60,13 @@
 #endif
 
 #include <ctype.h>
-#include <libgen.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 
-#include "compat/pmk_string.h" /* needed to use strlcpy */
+#include "compat/pmk_libgen.h" /* basename, dirname */
+#include "compat/pmk_string.h" /* strlcpy */
 #include "pmk.h"
 #include "func.h"
 #include "common.h"
