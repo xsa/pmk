@@ -60,6 +60,8 @@ int	nbfunc = sizeof(functab) / sizeof(cmdkw);
 	gdata : global data
 
 	returns bool
+
+	XXX need to check return value of record_def, record_val and label_set ?
 */
 
 /*
@@ -162,15 +164,6 @@ bool pmk_check_binary(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 
 	required = require_check(ht);
 
-	if (depend_check(ht, gdata) == false) {
-		pmk_log("\t%s\n", gdata->errmsg);
-		if (required == true) {
-			return(false);
-		} else {
-			return(true);
-		}
-	}
-
 	filename = hash_get(ht, "FILENAME");
 	if (filename == NULL) {
 		errorf("FILENAME not assigned in label '%s'", cmd->label);
@@ -183,6 +176,17 @@ bool pmk_check_binary(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 		return(false);
 	}
 
+	if (depend_check(ht, gdata) == false) {
+		pmk_log("\t%s\n", gdata->errmsg);
+		if (required == true) {
+			return(false);
+		} else {
+			record_def(gdata->htab, filename, false);
+			label_set(gdata->labl, cmd->label, false);
+			return(true);
+		}
+	}
+
 	/* try to locate binary */
 	pmk_log("\tFound binary '%s' : ", filename);
 	if (get_file_path(filename, bpath, binpath, sizeof(binpath)) == false) {
@@ -191,14 +195,15 @@ bool pmk_check_binary(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 			return(false);
 		} else {
 			/* define for template */
+			record_def(gdata->htab, filename, false);
 			label_set(gdata->labl, cmd->label, false);
 			return(true);
 		}
 	} else {
 		pmk_log("yes.\n");
 		/* define for template */
-		record_def(gdata->htab, filename, true); /* XXX check ?*/
-		record_val(gdata->htab, filename, binpath); /* XXX check ? */
+		record_def(gdata->htab, filename, true);
+		record_val(gdata->htab, filename, binpath);
 		label_set(gdata->labl, cmd->label, true);
 		return(true);
 	}
@@ -226,15 +231,6 @@ bool pmk_check_include(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 
 	required = require_check(ht);
 
-	if (depend_check(ht, gdata) == false) {
-		pmk_log("\t%s\n", gdata->errmsg);
-		if (required == true) {
-			return(false);
-		} else {
-			return(true);
-		}
-	}
-
 	/* get include filename */
 	incfile = hash_get(ht, "INCLUDE");
 	if (incfile == NULL) {
@@ -244,17 +240,31 @@ bool pmk_check_include(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 
 	/* check if a function must be searched */
 	incfunc = hash_get(ht, "FUNCTION");
+	if (incfunc == NULL) {
+		target = incfile;
+	} else {
+		target = incfunc;
+	}
+
+	if (depend_check(ht, gdata) == false) {
+		pmk_log("\t%s\n", gdata->errmsg);
+		if (required == true) {
+			return(false);
+		} else {
+			record_def(gdata->htab, target, false);
+			label_set(gdata->labl, cmd->label, false);
+			return(true);
+		}
+	}
 
 	tfp = fopen(INC_TEST_NAME, "w");
 	if (tfp != NULL) {
 		if (incfunc == NULL) {
 			pmk_log("\tFound header '%s' : ", incfile);
 			fprintf(tfp, INC_TEST_CODE, incfile);
-			target = incfile;
 		} else {
 			pmk_log("\tFound function '%s' in '%s' : ", incfunc, incfile);
 			fprintf(tfp, INC_FUNC_TEST_CODE, incfile, incfunc);
-			target = incfunc;
 		}
 
 		/* fill test file */
@@ -293,8 +303,8 @@ bool pmk_check_include(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 	if (r == 0) {
 		pmk_log("yes.\n");
 		/* define for template */
-		record_def(gdata->htab, target, true); /* XXX check ? */
-		record_val(gdata->htab, target, ""); /* XXX check ? */
+		record_def(gdata->htab, target, true);
+		record_val(gdata->htab, target, "");
 		label_set(gdata->labl, cmd->label, true);
 		rval = true;
 	} else {
@@ -308,7 +318,7 @@ bool pmk_check_include(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 			}
 		} else {
 			/* define for template */
-			record_def(gdata->htab, target, false); /* XXX check ?*/
+			record_def(gdata->htab, target, false);
 			label_set(gdata->labl, cmd->label, false);
 			rval = true;
 		}
@@ -347,15 +357,6 @@ bool pmk_check_lib(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 
 	required = require_check(ht);
 
-	if (depend_check(ht, gdata) == false) {
-		pmk_log("\t%s\n", gdata->errmsg);
-		if (required == true) {
-			return(false);
-		} else {
-			return(true);
-		}
-	}
-
 	libname = hash_get(ht, "LIBNAME");
 	if (libname == NULL) {
 		errorf("LIBNAME not assigned in label '%s'.", cmd->label);
@@ -363,17 +364,31 @@ bool pmk_check_lib(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 	}
 
 	libfunc = hash_get(ht, "FUNCTION");
+	if (libfunc == NULL) {
+		target = libname;
+	} else {
+		target = libfunc;
+	}
+
+	if (depend_check(ht, gdata) == false) {
+		pmk_log("\t%s\n", gdata->errmsg);
+		if (required == true) {
+			return(false);
+		} else {
+			record_def(gdata->htab, target, false);
+			label_set(gdata->labl, cmd->label, false);
+			return(true);
+		}
+	}
 
 	tfp = fopen(INC_TEST_NAME, "w");
 	if (tfp != NULL) {
 		if (libfunc == NULL) {
 			pmk_log("\tFound library '%s' : ", libname);
 			fprintf(tfp, LIB_TEST_CODE);
-			target = libname;
 		} else {
 			pmk_log("\tFound function '%s' in '%s' : ", libfunc, libname);
 			fprintf(tfp, LIB_FUNC_TEST_CODE, libfunc, libfunc);
-			target = libfunc;
 		}
 
 		/* fill test file */
@@ -412,11 +427,13 @@ bool pmk_check_lib(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 	if (r == 0) {
 		pmk_log("yes.\n");
 		/* define for template */
-		record_def(gdata->htab, target, true); /* XXX check ?*/
-		record_val(gdata->htab, target, ""); /* XXX check ? */
-		snprintf(lib_buf, sizeof(lib_buf), "-l%s", libname);
-		hash_append(gdata->htab, "LIBS", lib_buf, " "); /* XXX check ? */
+		record_def(gdata->htab, target, true);
+		record_val(gdata->htab, target, "");
 		label_set(gdata->labl, cmd->label, true);
+
+		snprintf(lib_buf, sizeof(lib_buf), "-l%s", libname);
+		hash_append(gdata->htab, "LIBS", lib_buf, " ");
+
 		rval = true;
 	} else {
 		pmk_log("no.\n");
@@ -429,7 +446,7 @@ bool pmk_check_lib(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 			}
 		} else {
 			/* define for template */
-			record_def(gdata->htab, target, false); /* XXX check ? */
+			record_def(gdata->htab, target, false);
 			label_set(gdata->labl, cmd->label, false);
 			rval = true;
 		}
@@ -465,15 +482,6 @@ bool pmk_check_config(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 
 	required = require_check(ht);
 
-	if (depend_check(ht, gdata) == false) {
-		pmk_log("\t%s\n", gdata->errmsg);
-		if (required == true) {
-			return(false);
-		} else {
-			return(true);
-		}
-	}
-
 	cfgtool = hash_get(ht, "CFGTOOL");
 	if (cfgtool == NULL) {
 		errorf("CFGTOOL not assigned in label '%s'.", cmd->label);
@@ -486,6 +494,17 @@ bool pmk_check_config(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 		return(false);
 	}
 
+	if (depend_check(ht, gdata) == false) {
+		pmk_log("\t%s\n", gdata->errmsg);
+		if (required == true) {
+			return(false);
+		} else {
+			record_def(gdata->htab, cfgtool, false);
+			label_set(gdata->labl, cmd->label, false);
+			return(true);
+		}
+	}
+
 	/* try to locate cfgtool */
 	pmk_log("\tFound config tool '%s' : ", cfgtool);
 	if (get_file_path(cfgtool, bpath, cfgpath, sizeof(cfgpath)) == false) {
@@ -493,7 +512,8 @@ bool pmk_check_config(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 		if (required == true) {
 			return(false);
 		} else {
-			/* XXX DEF_XXX_CONFIG */
+			record_def(gdata->htab, cfgtool, false);
+			label_set(gdata->labl, cmd->label, false);
 			return(true);
 		}
 	} else {
@@ -518,8 +538,9 @@ bool pmk_check_config(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 				rval = true;
 			
 				/* XXX do we keep cfgtool for the tag ? */
-				record_def(gdata->htab, cfgtool, true); /* XXX check ?*/
-				record_val(gdata->htab, cfgtool, ""); /* XXX check ? */
+				record_def(gdata->htab, cfgtool, true);
+				record_val(gdata->htab, cfgtool, "");
+				label_set(gdata->labl, cmd->label, true);
 
 				snprintf(cfgcmd, sizeof(cfgcmd), "%s --cflags", cfgpath);
 				rpipe = popen(cfgcmd, "r");
@@ -542,16 +563,17 @@ bool pmk_check_config(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 				/* XXX LDFLAGS, CPPFLAGS, LDFLAGS ? */
 			} else {
 				pmk_log("no (%s).\n", pipebuf);
+
 				if (required == true) {
 					rval = false;
 				} else {
-					/* XXX DEV_ */
+					record_def(gdata->htab, cfgtool, false);
+					label_set(gdata->labl, cmd->label, false);
 					rval = true;
 				}
 			}
 		}
 	}
 
-	/* XXX HAVE_... */
 	return(rval);
 }
