@@ -30,27 +30,44 @@
  *
  */
 
-#ifndef _PMK_FUNC_H_
-#define _PMK_FUNC_H_
 
-#include "premake.h"
-#include "pmk.h"
-#include "hash.h"
-#include "common.h"
+#include <stdio.h>
+
 #include "functool.h"
 
 
-typedef struct {
-	char	kw[MAX_CMD_NAME_LEN];
-	bool	(*fnp)(pmkcmd *, htable *, pmkdata *);
-} cmdkw;
+/*
+	check boolean string
 
+	str : string to check
 
-bool pmk_define(pmkcmd *, htable *, pmkdata *);
-bool pmk_target(pmkcmd *, htable *, pmkdata *);
-bool pmk_check_binary(pmkcmd *, htable *, pmkdata *);
-bool pmk_check_include(pmkcmd *, htable *, pmkdata *);
-bool pmk_check_lib(pmkcmd *, htable *, pmkdata *);
-bool pmk_check_config(pmkcmd *, htable *, pmkdata *);
+	returns true is str is "true" else returns false
 
-#endif /* _PMK_FUNC_H_ */
+	NOTE : strncmp checks only on a length of 6 because
+		lenght of "true" is 5 and "false" is 6 chr.
+		If str is longer we don't need to check as
+		we are sure that the result is false.
+
+*/
+
+bool check_bool_str(char *str) {
+	if (strncmp(str, "true", 6) == 0) {
+		return(true);
+	} else {
+		return(false);
+	}
+}
+
+/*
+	check version
+
+	vref : reference version
+	vers : version to check
+
+	returns true is vers >= vref
+*/
+
+bool check_version(char *vref, char *vers) {
+	/* XXX to do */
+	return(true);
+}

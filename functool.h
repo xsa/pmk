@@ -1,4 +1,4 @@
-/* $Id$ */
+/* $Id$
 
 /*
  * Copyright (c) 2003 Damien Couderc
@@ -30,27 +30,16 @@
  *
  */
 
-#ifndef _PMK_FUNC_H_
-#define _PMK_FUNC_H_
 
-#include "premake.h"
-#include "pmk.h"
-#include "hash.h"
-#include "common.h"
-#include "functool.h"
+#ifndef _PMK_FUNCTOOL_H_
+#define _PMK_FUNCTOOL_H_
+
+#include "compat/pmk_string.h"
+#include "compat/pmk_stdbool.h"
 
 
-typedef struct {
-	char	kw[MAX_CMD_NAME_LEN];
-	bool	(*fnp)(pmkcmd *, htable *, pmkdata *);
-} cmdkw;
+bool check_bool_str(char *);
+bool check_version(char *, char *);
 
 
-bool pmk_define(pmkcmd *, htable *, pmkdata *);
-bool pmk_target(pmkcmd *, htable *, pmkdata *);
-bool pmk_check_binary(pmkcmd *, htable *, pmkdata *);
-bool pmk_check_include(pmkcmd *, htable *, pmkdata *);
-bool pmk_check_lib(pmkcmd *, htable *, pmkdata *);
-bool pmk_check_config(pmkcmd *, htable *, pmkdata *);
-
-#endif /* _PMK_FUNC_H_ */
+#endif /* _PMK_FUNCTOOL_H_ */
