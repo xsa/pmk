@@ -25,6 +25,9 @@ dynary: da_test.o
 path: path_test.o
 	$(CC) -o path_test $(LDFLAGS) path_test.o
 
+parser: parser_test.o
+	$(CC) -o parser_test $(LDFLAGS) parser_test.o
+
 clean:
 	rm -f *.o *_test *.core
 
