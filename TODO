@@ -34,6 +34,7 @@ mreindl	~.	latex version of tutorial
 
 pmk:
 -----------------------------------------------------------------------
+	-	check if ~/.pmk.conf is available
 	+	linking flags for shared libraries (starting with our
 		supported platforms)
 	+	test of shared lib support
@@ -49,7 +50,8 @@ pmk:
 
 pmksetup:
 -----------------------------------------------------------------------
-	-	rewrite engine for better flexibility.
+mips	~	rewrite engine for better flexibility.
+	-	create .bak or .old of pmk.conf
 	+	options to update or remove a variable of pmk.conf
 	-	option to append to variable of pmk.conf
 	!	clean temporary files on error
