@@ -1394,11 +1394,6 @@ bool parse_opt(prseng *peng, prsopt *popt, char *seplst) {
 			break;
 	}
 #endif
-	/* XXX permit trailing garbage such as comment ? */
-	/*if (*peng->prscur != CHAR_CR) {                                 */
-	/*        strlcpy(parse_err, PRS_ERR_TRAILING, sizeof(parse_err));*/
-	/*        return(false);                                          */
-	/*}                                                               */
 
 	return(true);
 }
@@ -1543,37 +1538,47 @@ bool check_opt_type(kw_t *pkw, pmkobj *po) {
 bool check_option(prseng *peng, prsopt *ppo, kwopt_t *pkwo) {
 	kw_t	*pkw;
 
-	/* check required options */
-	pkw = check_opt_avl(ppo->key, pkwo->req, pkwo->nbreq);
-	if (pkw != NULL) {
-		/* decrement required option counter */
-		peng->nbreq--;
-		if (check_opt_type(pkw, ppo->value) == false) {
-			/* wrong option type */
-			snprintf(parse_err, sizeof(parse_err),
-					PRS_ERR_TYP_OPT, ppo->key);
-			return(false);
-		}
-	} else {
-		/* check optional options */
-		pkw = check_opt_avl(ppo->key, pkwo->opt, pkwo->nbopt);
-		if (pkw == NULL) {
-			/* provided option is not expected */
-			snprintf(parse_err, sizeof(parse_err),
-					PRS_ERR_INV_OPT, ppo->key);
-			return(false);
+	if (pkwo->req != NULL) {
+		/* check given required options */
+		pkw = check_opt_avl(ppo->key, pkwo->req, pkwo->nbreq);
+		if (pkw != NULL) {
+			/* check option's type */
+			if (check_opt_type(pkw, ppo->value) == false) {
+				/* wrong option type */
+				snprintf(parse_err, sizeof(parse_err),
+						PRS_ERR_TYP_OPT, ppo->key);
+				return(false);
+			}
+			/* decrement required option counter */
+			peng->nbreq--;
+			return(true);
 		}
 
-		if (check_opt_type(pkw, ppo->value) == false) {
-			/* wrong option type */
-			snprintf(parse_err, sizeof(parse_err),
-					PRS_ERR_TYP_OPT, ppo->key);
-			return(false);
+		if (pkwo->opt == NULL) {
+			/* allow any optional variable names */
+			return(true);
 		}
 	}
 
-	/* option is ok */
-	return(true);
+	if (pkwo->opt != NULL) {
+		/* check given optional options */
+		pkw = check_opt_avl(ppo->key, pkwo->opt, pkwo->nbopt);
+		if (pkw != NULL) {
+			/* check option's type */
+			if (check_opt_type(pkw, ppo->value) == false) {
+				/* wrong option type */
+				snprintf(parse_err, sizeof(parse_err),
+						PRS_ERR_TYP_OPT, ppo->key);
+				return(false);
+			}
+			return(true);
+		}
+	}
+
+	/* provided option is not expected */
+	snprintf(parse_err, sizeof(parse_err),
+					PRS_ERR_INV_OPT, ppo->key);
+	return(false);
 }
 
 

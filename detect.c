@@ -42,19 +42,73 @@
 #include "common.h"
 #include "detect.h"
 
-prskw	kw_pmkcomp[] = {
-	{"ADD_COMPILER",	PCC_TOK_ADDC,	PRS_KW_CELL,	NULL},
-	{"ADD_SYSTEM",		PCC_TOK_ADDS,	PRS_KW_CELL,	NULL}
+
+/*************
+ keyword data
+***********************************************************************/
+
+/* ADD_COMPILER options */
+kw_t	req_addcomp[] = {
+		{CC_KW_ID,	PO_STRING},
+		{CC_KW_DESCR,	PO_STRING},
+		{CC_KW_MACRO,	PO_STRING}
 };
 
+kw_t	opt_addcomp[] = {
+		{CC_KW_VERSION,		PO_STRING},
+		{CC_KW_SLCFLAGS,	PO_STRING},
+		{CC_KW_SLLDFLAGS,	PO_STRING}
+};
+
+kwopt_t	kw_addcomp = {
+	req_addcomp,
+	sizeof(req_addcomp) / sizeof(kw_t),
+	opt_addcomp,
+	sizeof(opt_addcomp) / sizeof(kw_t)
+};
+
+/* ADD_SYSTEM options */
+kw_t	req_addsys[] = {
+		{"NAME",		PO_STRING},
+		{"SL_EXT",		PO_STRING},
+		{"SL_VERSION",		PO_STRING},
+		{"SL_LIBNAME",		PO_STRING},
+		{"SL_LIBNAME_VMAJ",	PO_STRING},
+		{"SL_LIBNAME_VFULL",	PO_STRING}
+};
+
+kwopt_t	kw_addsys = {
+	req_addsys,
+	sizeof(req_addsys) / sizeof(kw_t),
+	NULL,	/* allow 'custom' options */
+	0
+};
+
+
+prskw	kw_pmkcomp[] = {
+	{"ADD_COMPILER",	PCC_TOK_ADDC,	PRS_KW_CELL,	PRS_TOK_NULL,	&kw_addcomp},
+	{"ADD_SYSTEM",		PCC_TOK_ADDS,	PRS_KW_CELL,	PRS_TOK_NULL,	&kw_addsys}
+};
 int	nbkwpc = sizeof(kw_pmkcomp) / sizeof(prskw);
 
 
-/*
+/**********
+ functions
+***********************************************************************/
+
+/****************
+ compdata_init()
+
+ DESCR
 	init comp_data structure
 
-	return : new structure or NULL
-*/
+ IN
+	csize: compilers hash table size 
+	ssize: systems hash table size
+
+ OUT
+	new structure or NULL
+***********************************************************************/
 
 comp_data *compdata_init(size_t csize, size_t ssize) {
 	comp_data	*cdata;
@@ -85,26 +139,38 @@ comp_data *compdata_init(size_t csize, size_t ssize) {
 	return(cdata);
 }
 
-/*
+
+/*******************
+ compdata_destroy()
+
+ DESCR
 	clean comp_data structure
 
-	pcd : structure to clean
+ IN
+	pcd: structure to clean
 
-	return : -
-*/
+ OUT
+	NONE
+***********************************************************************/
 
 void compdata_destroy(comp_data *pcd) {
 	hash_destroy(pcd->cht);
 	hash_destroy(pcd->sht);
 }
 
-/*
+
+/*******************
+ compcell_destroy()
+
+ DESCR
 	clean comp_cell structure
 
-	pcc : structure to clean
+ IN
+	pcc: structure to clean
 
-	return : -
-*/
+ OUT
+	NONE
+***********************************************************************/
 
 void compcell_destroy(comp_cell *pcc) {
 	free(pcc->c_id);
@@ -116,14 +182,20 @@ void compcell_destroy(comp_cell *pcc) {
 	free(pcc);
 }
 
-/*
+
+/***************
+ add_compiler()
+
+ DESCR
 	add a new compiler cell
 
-	pcd : compiler data structure
-	pht : parsed data
+ IN
+	pcd: compiler data structure
+	pht: parsed data
 
-	return : boolean
-*/
+ OUT
+	boolean
+***********************************************************************/
 
 bool add_compiler(comp_data *pcd, htable *pht) {
 	comp_cell	*pcell;
@@ -134,7 +206,7 @@ bool add_compiler(comp_data *pcd, htable *pht) {
 	if (pcell == NULL)
 		return(false);
 
-	pstr = po_get_str(hash_get(pht, "ID"));
+	pstr = po_get_str(hash_get(pht, CC_KW_ID));
 	if (pstr == NULL) {
 		free(pcell);
 		return(false);
@@ -142,7 +214,7 @@ bool add_compiler(comp_data *pcd, htable *pht) {
 		pcell->c_id = strdup(pstr);
 	}
 
-	pstr = po_get_str(hash_get(pht, "DESCR"));
+	pstr = po_get_str(hash_get(pht, CC_KW_DESCR));
 	if (pstr == NULL) {
 		free(pcell);
 		return(false);
@@ -150,7 +222,7 @@ bool add_compiler(comp_data *pcd, htable *pht) {
 		pcell->descr = strdup(pstr);
 	}
 
-	pstr = po_get_str(hash_get(pht, "MACRO"));
+	pstr = po_get_str(hash_get(pht, CC_KW_MACRO));
 	if (pstr == NULL) {
 		free(pcell);
 		return(false);
@@ -158,7 +230,7 @@ bool add_compiler(comp_data *pcd, htable *pht) {
 		pcell->c_macro = strdup(pstr);
 	}
 
-	pstr = po_get_str(hash_get(pht, "VERSION"));
+	pstr = po_get_str(hash_get(pht, CC_KW_VERSION));
 	if (pstr == NULL) {
 		pcell->v_macro = strdup(DEF_NOVERSION);
 	} else {
@@ -170,14 +242,14 @@ bool add_compiler(comp_data *pcd, htable *pht) {
 		pcell->v_macro = strdup(tstr);
 	}
 
-	pstr = po_get_str(hash_get(pht, "SLCFLAGS"));
+	pstr = po_get_str(hash_get(pht, CC_KW_SLCFLAGS));
 	if (pstr == NULL) {
 		pcell->slcflags = strdup(""); /* default to empty string */
 	} else {
 		pcell->slcflags = strdup(pstr);
 	}
 
-	pstr = po_get_str(hash_get(pht, "SLLDFLAGS"));
+	pstr = po_get_str(hash_get(pht, CC_KW_SLLDFLAGS));
 	if (pstr == NULL) {
 		pcell->slldflags = strdup(""); /* default to empty string */
 	} else {
@@ -191,14 +263,20 @@ bool add_compiler(comp_data *pcd, htable *pht) {
 	return(true);
 }
 
-/*
+
+/*************
+ add_system()
+
+ DESCR
 	add a new system cell
 
-	pcd : compiler data structure
-	pht : parsed data
+ IN
+	pcd: compiler data structure
+	pht: parsed data
 
-	return : boolean
-*/
+ OUT
+	boolean
+***********************************************************************/
 
 bool add_system(comp_data *pcd, htable *pht, char *osname) {
 	char		*name,
@@ -228,22 +306,38 @@ bool add_system(comp_data *pcd, htable *pht, char *osname) {
 	return(true);
 }
 
-/*
+
+/***********
+ comp_get()
+
+ DESCR
 	get compiler data
 
+ IN
 	pcd : compiler data structure
 	c_id : compiler id
 
-	return : compiler cell structure
-*/
+ OUT
+	compiler cell structure
+***********************************************************************/
 
 comp_cell *comp_get(comp_data *pcd, char *c_id) {
 	return(hash_get(pcd->cht, c_id));
 }
 
-/*
+
+/*****************
+ comp_get_descr()
+
+ DESCR
 	get compiler descr
-*/
+
+ IN
+	pcd:	compiler data structure
+	c_id:	compiler id
+ OUT
+	compiler description
+***********************************************************************/
 
 char *comp_get_descr(comp_data *pcd, char *c_id) {
 	comp_cell	*pcell;
@@ -253,14 +347,20 @@ char *comp_get_descr(comp_data *pcd, char *c_id) {
 	return(pcell->descr);
 }
 
-/*
+
+/**********************
+ parse_comp_file_adv()
+
+ DESCR
 	parse data from PMKCOMP_DATA file
 
-	cdfile : compilers data file
+ IN
+	cdfile: compilers data file
 	pht: config hash table
 
-	return : compiler data structure or NULL
-*/
+ OUT
+	compiler data structure or NULL
+***********************************************************************/
 
 comp_data *parse_comp_file_adv(char *cdfile, htable *pht) {
 	FILE		*fd;
@@ -350,26 +450,38 @@ comp_data *parse_comp_file_adv(char *cdfile, htable *pht) {
 	return(cdata);
 }
 
-/*
+
+/******************
+ parse_comp_file()
+
+ DESCR
 	parse data from PMKCOMP_DATA file
 
-	cdfile : compilers data file
+ IN
+	cdfile: compilers data file
 
-	return : compiler data structure or NULL
-*/
+ OUT
+	compiler data structure or NULL
+***********************************************************************/
 
 comp_data *parse_comp_file(char *cdfile) {
 	return(parse_comp_file_adv(cdfile, NULL));
 }
 
-/*
+
+/****************
+ gen_test_file()
+
+ DESCR
 	generate test file
 
-	fp : target file
-	pcd : compiler data structure
+ IN
+	fp: target file
+	pcd: compiler data structure
 
-	return : boolean
-*/
+ OUT
+	boolean
+***********************************************************************/
 
 bool gen_test_file(FILE *fp, comp_data *pcd) {
 	comp_cell	*pcell;
@@ -397,16 +509,22 @@ bool gen_test_file(FILE *fp, comp_data *pcd) {
 	return(true);
 }
 
-/*
+
+/******************
+ detect_compiler()
+
+ DESCR
 	detect compiler
 
-	cpath : compiler path
-	blog : buildlog file or /dev/null
-	pcd : compiler data structure
-	cinfo : compiler info structure
+ IN
+	cpath: compiler path
+	blog: buildlog file or /dev/null
+	pcd: compiler data structure
+	cinfo: compiler info structure
 
-	return : boolean
-*/
+ OUT
+	boolean
+***********************************************************************/
 
 bool detect_compiler(char *cpath, char *blog, comp_data *pcd, comp_info *cinfo) {
 	FILE		*tfp,

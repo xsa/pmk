@@ -41,6 +41,8 @@
 #include "pmk_obj.h"
 #include "premake.h"
 
+#define KW_SIZEOF(s)	sizeof(s) / sizeof(kw_t)
+
 /*
 #define LIST_SUPPORT	1
 */

@@ -1,3 +1,9 @@
+23 Mar 2005 mipsator
+ * added option checking for compiler data.
+ * improved option checking so we can specify required options and
+   allow any optional options. Or having no required options but a
+   specified bunch of optional options.
+
 20 Mar 2005 mipsator
  * improved the parser to allow type checking of options.
 
