@@ -296,14 +296,14 @@ bool pmk_check_binary(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 	pmk_log("\n* Checking binary [%s]\n", cmd->label);
 	required = require_check(ht);
 
-	filename = po_get_str(hash_get(ht, "NAME"));
+	filename = po_get_str(hash_get(ht, KW_OPT_NAME));
 	if (filename == NULL) {
 		errorf("NAME not assigned in label '%s'", cmd->label);
 		return(false);
 	}
 
 	/* check if a variable name is given */
-	varname = po_get_str(hash_get(ht, "VARIABLE"));
+	varname = po_get_str(hash_get(ht, KW_OPT_VARIABLE));
 	if (varname == NULL) {
 		/* if not then use default naming scheme */
 		varname = str_to_def(filename);
@@ -391,14 +391,14 @@ bool pmk_check_header(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 	required = require_check(ht);
 
 	/* get include filename */
-	incfile = po_get_str(hash_get(ht, "NAME"));
+	incfile = po_get_str(hash_get(ht, KW_OPT_NAME));
 	if (incfile == NULL) {
 		errorf("NAME not assigned in label '%s'", cmd->label);
 		return(false);
 	}
 
 	/* check if a function must be searched */
-	incfunc = po_get_str(hash_get(ht, "FUNCTION"));
+	incfunc = po_get_str(hash_get(ht, KW_OPT_FUNCTION));
 	if (incfunc == NULL) {
 		target = incfile;
 	} else {
@@ -530,7 +530,7 @@ bool pmk_check_header(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 	}
 
 	/* process additional defines */
-	da = po_get_list(hash_get(ht, "DEFS"));
+	da = po_get_list(hash_get(ht, KW_OPT_DEFS));
 	if (da != NULL) {
 		n = da_usize(da);
 		for (i = 0 ; i < n ; i++) {
@@ -585,13 +585,13 @@ bool pmk_check_lib(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 
 	required = require_check(ht);
 
-	libname = po_get_str(hash_get(ht, "NAME"));
+	libname = po_get_str(hash_get(ht, KW_OPT_NAME));
 	if (libname == NULL) {
 		errorf("NAME not assigned in label '%s'.", cmd->label);
 		return(false);
 	}
 
-	libfunc = po_get_str(hash_get(ht, "FUNCTION"));
+	libfunc = po_get_str(hash_get(ht, KW_OPT_FUNCTION));
 	if (libfunc == NULL) {
 		target = libname;
 	} else {
@@ -626,7 +626,7 @@ bool pmk_check_lib(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 	}
 
 	/* check for alternative variable for LIBS */
-	libs = po_get_str(hash_get(ht, "LIBS"));
+	libs = po_get_str(hash_get(ht, KW_OPT_LIBS));
 	if (libs != NULL) {
 		/* init alternative variable */
                 if (hash_get(pgd->htab, libs) == NULL) {
@@ -701,7 +701,7 @@ bool pmk_check_lib(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 	}
 
 	/* process additional defines */
-	da = po_get_list(hash_get(ht, "DEFS"));
+	da = po_get_list(hash_get(ht, KW_OPT_DEFS));
 	if (da != NULL) {
 		n = da_usize(da);
 		for (i = 0 ; i < n ; i++) {
@@ -747,17 +747,17 @@ bool pmk_check_config(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 	pmk_log("\n* Checking with config tool [%s]\n", cmd->label);
 	required = require_check(ht);
 
-	cfgtool = po_get_str(hash_get(ht, "NAME"));
+	cfgtool = po_get_str(hash_get(ht, KW_OPT_NAME));
 	if (cfgtool == NULL) {
 		errorf("NAME not assigned in label '%s'.", cmd->label);
 		return(false);
 	}
 
 	/* check if a module name is given */
-	modname = po_get_str(hash_get(ht, "MODULE"));
+	modname = po_get_str(hash_get(ht, KW_OPT_MODULE));
 
 	/* check if a variable name is given */
-	varname = po_get_str(hash_get(ht, "VARIABLE"));
+	varname = po_get_str(hash_get(ht, KW_OPT_VARIABLE));
 	if (varname == NULL) {
 		/* if not then use default naming scheme */
 		varname = str_to_def(cfgtool);
@@ -792,7 +792,7 @@ bool pmk_check_config(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 	}
 
 	/* check for alternative variable for LIBS */
-	libs = po_get_str(hash_get(ht, "LIBS"));
+	libs = po_get_str(hash_get(ht, KW_OPT_LIBS));
 	if (libs != NULL) {
 		/* init alternative variable */
                 if (hash_get(pgd->htab, libs) == NULL) {
@@ -859,7 +859,7 @@ bool pmk_check_config(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 		pmk_log("no\n");
 	}
 
-	libvers = po_get_str(hash_get(ht, "VERSION"));
+	libvers = po_get_str(hash_get(ht, KW_OPT_VERSION));
 
 	/* if VERSION is provided then check it */
 	if (libvers != NULL) {
@@ -966,7 +966,7 @@ bool pmk_check_pkg_config(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 
 	required = require_check(ht);
 
-	target = po_get_str(hash_get(ht, "NAME"));
+	target = po_get_str(hash_get(ht, KW_OPT_NAME));
 	if (target == NULL) {
 		errorf("NAME not assigned in label '%s'.", cmd->label);
 		return(false);
@@ -1010,7 +1010,7 @@ bool pmk_check_pkg_config(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 	}
 
 	/* check for alternative variable for LIBS */
-	libs = po_get_str(hash_get(ht, "LIBS"));
+	libs = po_get_str(hash_get(ht, KW_OPT_LIBS));
 	if (libs != NULL) {
 		/* init alternative variable */
                 if (hash_get(pgd->htab, libs) == NULL) {
@@ -1081,7 +1081,7 @@ bool pmk_check_pkg_config(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 			pmk_log("\tFound alternative '%s' tool.\n", pc_cmd);
 
 			/* override NAME to use divert on CHECK_CONFIG */
-			hash_update(ht, "NAME", po_mk_str(pc_cmd));
+			hash_update(ht, KW_OPT_NAME, po_mk_str(pc_cmd));
 			pmk_log("\tWARNING: rerouting to CHECK_CONFIG\n");
 			pmk_log("\tPlease consider using directly CHECK_CONFIG with '%s'\n", pc_cmd);
 
@@ -1100,7 +1100,7 @@ bool pmk_check_pkg_config(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 		pmk_log("yes.\n");
 	}
 
-	libvers = po_get_str(hash_get(ht, "VERSION"));
+	libvers = po_get_str(hash_get(ht, KW_OPT_VERSION));
 	if (libvers != NULL) {
 		/* if VERSION is provided then check it */
 		ppc = pkg_cell_add(ppd, target);
@@ -1201,17 +1201,17 @@ bool pmk_check_type(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 
 	required = require_check(ht);
 
-	type = po_get_str(hash_get(ht, "NAME"));
+	type = po_get_str(hash_get(ht, KW_OPT_NAME));
 	if (type == NULL) {
 		errorf("NAME not assigned in label '%s'", cmd->label);
 		return(false);
 	}
 
 	/* check if an header must be used */
-	header = po_get_str(hash_get(ht, "HEADER"));
+	header = po_get_str(hash_get(ht, KW_OPT_HEADER));
 
 	/* check if a structure member is given */
-	member = po_get_str(hash_get(ht, "MEMBER"));
+	member = po_get_str(hash_get(ht, KW_OPT_MEMBER));
 
 	if (depend_check(ht, pgd) == false) {
 		pmk_log("\t%s\n", pgd->errmsg);
@@ -1293,7 +1293,7 @@ bool pmk_check_type(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 	}
 
 	/* process additional defines */
-	da = po_get_list(hash_get(ht, "DEFS"));
+	da = po_get_list(hash_get(ht, KW_OPT_DEFS));
 	if (da != NULL) {
 		n = da_usize(da);
 		for (i = 0 ; i < n ; i++) {
@@ -1334,7 +1334,7 @@ bool pmk_check_variable(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 
 	required = require_check(ht);
 
-	var = po_get_str(hash_get(ht, "NAME"));
+	var = po_get_str(hash_get(ht, KW_OPT_NAME));
 	if (var == NULL) {
 		errorf("NAME not assigned in label '%s'", cmd->label);
 		return(false);
@@ -1358,7 +1358,7 @@ bool pmk_check_variable(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 	if (varval != NULL) {
 		pmk_log("yes.\n");
 
-		value = po_get_str(hash_get(ht, "VALUE"));
+		value = po_get_str(hash_get(ht, KW_OPT_VALUE));
 		if (value == NULL) {
 			label_set(pgd->labl, cmd->label, true);
 
@@ -1395,7 +1395,7 @@ bool pmk_check_variable(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 	}
 
 	/* process additional defines */
-	da = po_get_list(hash_get(ht, "DEFS"));
+	da = po_get_list(hash_get(ht, KW_OPT_DEFS));
 	if (da != NULL) {
 		n = da_usize(da);
 		for (i = 0 ; i < n ; i++) {
@@ -1435,7 +1435,7 @@ bool pmk_build_shlib_name(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 		pmk_log("yes.\n");
 	}
 
-	pstr = po_get_str(hash_get(ht, "NAME"));
+	pstr = po_get_str(hash_get(ht, KW_OPT_NAME));
 	if (pstr != NULL) {
 #ifdef SHLIB_DEBUG
 debugf("pstr(name) = '%s'", pstr);
@@ -1447,7 +1447,7 @@ debugf("value = '%s'", value);
 		hash_update(pgd->slht, SL_KW_LIB_NAME, value);
 	}
 
-	pstr = po_get_str(hash_get(ht, "MAJOR"));
+	pstr = po_get_str(hash_get(ht, KW_OPT_MAJOR));
 	if (pstr != NULL) {
 #ifdef SHLIB_DEBUG
 debugf("pstr(major) = '%s'", pstr);
@@ -1459,7 +1459,7 @@ debugf("value = '%s'", value);
 		hash_update(pgd->slht, SL_KW_LIB_MAJ, value); /* no dup */
 	}
 
-	pstr = po_get_str(hash_get(ht, "MINOR"));
+	pstr = po_get_str(hash_get(ht, KW_OPT_MINOR));
 	if (pstr != NULL) {
 #ifdef SHLIB_DEBUG
 debugf("pstr(minor) = '%s'", pstr);
@@ -1475,7 +1475,7 @@ debugf("value = '%s'", value);
 	variable = po_get_str(hash_get(ht, KW_SL_VERS_NONE));
 	/* COMPAT old name                                        */
 	/*if (variable == NULL)                                   */
-	/*        variable = po_get_str(hash_get(ht, "VARIABLE"));*/
+	/*        variable = po_get_str(hash_get(ht, KW_OPT_VARIABLE));*/
 	if (variable != NULL) {
 		pstr = hash_get(pgd->slht, SL_KW_LIB_VNONE);
 #ifdef SHLIB_DEBUG
