@@ -542,14 +542,14 @@ bool fcopy(char *src, char *dst, mode_t mode) {
 
 /*
 	tmp_open
+	XXX TODO descr
 */
 
-FILE *tmp_open(char *fname, char *mode) {
-	char	buf[MAXPATHLEN];
+FILE *tmp_open(char *tfile, char *mode, char *buf, size_t bsize) {
 	int	fd;
 
 	/* copy file name in buf */
-	strlcpy(buf, fname, sizeof(buf));
+	strlcpy(buf, tfile, bsize);
 
 	/* randomize file name */
 	fd = mkstemp(buf);
@@ -559,3 +559,24 @@ FILE *tmp_open(char *fname, char *mode) {
 
 	return(fdopen(fd, mode));
 }
+
+/*
+	tmps_open
+	XXX TODO descr
+*/
+
+FILE *tmps_open(char *tfile, char *mode, char *buf, size_t bsize, int slen) {
+	int	fd;
+
+	/* copy file name in buf */
+	strlcpy(buf, tfile, bsize);
+
+	/* randomize file name */
+	fd = mkstemps(buf, slen);
+	if (fd == -1) {
+		return(NULL);
+	}
+
+	return(fdopen(fd, mode));
+}
+

@@ -3,6 +3,8 @@
  * updated func.c to use tmp_open().
  * changed remaining fprintf() to sterr into errorf() in common.
  * added preliminary TMPDIR stuff.
+ * rewritten tmp_open() and added tmps_open() in common.
+ * finished c test file randomization in func.
 
 10 Dec 2003  mipsator
  * added new option to pmk to enable check build logging.
