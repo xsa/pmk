@@ -1,0 +1,7 @@
+/* $Id$ */
+
+/* availability of strlcpy() */
+@DEF__STRLCPY@
+
+/* availability of strlcat() */
+@DEF__STRLCAT@
