@@ -1,5 +1,7 @@
 15 Aug 2003 mipsator
  * added po_append() to pmk_obj.
+ * adapted solution of dynarray to hash functions.
+ * sync with new hash functions.
 
 14 Aug 2003 mipsator
  * found a better solution to handle structure freeing in dynarray.
