@@ -1,3 +1,6 @@
+18 Aug 2003 mipsator
+ * added po_get_str() and po_get_list in pmk_obj.
+
 17 Aug 2003 mipsator
  * fixed a small bug in depend_check().
  * finished parser improvement for list parsing.

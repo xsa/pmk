@@ -57,6 +57,8 @@ pmkobj	*po_mk_hash(htable *);
 pmkobj	*po_dup(pmkobj *);
 potype	 po_get_type(pmkobj *);
 void	*po_get_data(pmkobj *);
+char	*po_get_str(pmkobj *);
+dynary	*po_get_list(pmkobj *);
 void	 po_free(pmkobj *);
 pmkobj	*po_append(void *, void *, void *);
 
