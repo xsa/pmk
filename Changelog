@@ -1,4 +1,5 @@
 26 Apr 2003 mipsator
+ * improved str_to_dynary() and parse_conf_line().
  * pmk_check_include() has been updated to check function again.
 
 25 Apr 2003 mipsator

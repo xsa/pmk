@@ -87,47 +87,50 @@ bool get_line(FILE *fd, char *line, int lsize) {
 */
 
 int parse_conf_line(char *line, int linenum, cfg_opt *opts) {
-	char	key[MAX_OPT_NAME_LEN],
-		value[MAX_OPT_VALUE_LEN],
-		c;
-	int	i = 0, j = 0, k = 0,
+	char	*pkey,
+		*pval;
+	int	sk,
+		sv,
 		found_op = 0;
 
-
-	while ((c = line[i]) != CHAR_EOS) {
+	sk = sizeof(opts->key);
+	sv = sizeof(opts->val);
+	pkey = opts->key;
+	pval = opts->val;
+	while (*line != CHAR_EOS) {
 		if (found_op == 0) {
-			if ((c == CHAR_ASSIGN_UPDATE) || (c == CHAR_ASSIGN_STATIC)) {
+			if ((*line == CHAR_ASSIGN_UPDATE) || (*line == CHAR_ASSIGN_STATIC)) {
 				/* operator found, terminate key and copy key name in struct */
 				found_op = 1;
-				key[j] = CHAR_EOS;
-				strlcpy(opts->key, key, MAX_OPT_NAME_LEN); /* XXX test ? */
+				*pkey = CHAR_EOS;
 
 				/* set operator in struct */
-				opts->opchar = c;
+				opts->opchar = *pkey;
 			} else {
-				key[j] = c;
-				j++;
-				if (j > MAX_OPT_NAME_LEN) {
+				*pkey = *line;
+				pkey++;
+				sk--;
+				if (sk == 0) {
 					/* too small, cannot store key name */
 					errorf_line(PREMAKE_CONFIG_PATH, linenum, "key name too long.");
 					return(-1);
 				}
 			}
 		} else {
-			value[k] = c;
-			k++;
-			if (k > MAX_OPT_VALUE_LEN) {
+			*pval = *line;
+			pval++;
+			sv--;
+			if (sv == 0) {
 				/* too small, cannot store key value */
 				errorf_line(PREMAKE_CONFIG_PATH, linenum, "key value too long.");
 				return(-1);
 			}
 		}
-		i++;
+		line++;
 	}
 	if (found_op == 1) {
 		/* line parsed without any error */
-		value[k] = CHAR_EOS;
-		strlcpy(opts->val, value, MAX_OPT_VALUE_LEN); /* XXX test ? */
+		*pval = CHAR_EOS;
 		return(0);			
 	} else {
 		/* missing operator */
@@ -238,24 +241,32 @@ bool get_make_var(char *varname, char *result, int rsize) {
 */
 
 bool str_to_dynary(char *str, char sep, dynary *da) {
-	char	buf[MAXPATHLEN];
-	int	i = 0,
-		j = 0;
+	char	buf[MAXPATHLEN],
+		*pbuf;
+	int	s;
 
-	while (str[i] != CHAR_EOS) {
-		if (str[i] == sep) {
-			buf[j] = CHAR_EOS;
+	s = sizeof(buf);
+	pbuf = buf;
+	while (*str != CHAR_EOS) {
+		if (*str == sep) {
+			*pbuf = CHAR_EOS;
 			if (da_push(da, buf) == false) {
 				return(false);
 			}
-			j = 0;
+			pbuf = buf;
+			s = sizeof(buf);
 		} else {
-			buf[j] = str[i];
-			j++;
+			*pbuf = *str;
+			pbuf++;
+			s--;
+			if (s == 0) {
+				/* not enough space in buffer */
+				return(false);
+			}
 		}
-		i++;
+		str++;
 	}
-	buf[j] = CHAR_EOS;
+	*pbuf = CHAR_EOS;
 	if (da_push(da, buf) == false) {
 		return(false);
 	}
