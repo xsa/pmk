@@ -1,3 +1,6 @@
+13 Aug 2003 mipsator
+ * more (disabled) stuff for list support.
+
 12 Aug 2003 mipsator
  * renamed pmk objects function in the same style as hash and dynarray.
  * misc renaming into sources.
