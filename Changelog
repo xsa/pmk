@@ -1,3 +1,5 @@
+# snapshot 0.4.6
+
 26 Jun 2003 mipsator
  * added override file sample.
  * updated Makefile to use override file sample.
