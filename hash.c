@@ -724,7 +724,7 @@ void hash_free_hcell(htable *pht, hcell *phc) {
 */
 
 void hash_free_hkeys(hkeys *phk) {
-	/* XXX TODO  also free pointed values ? */
+	/* doesn't free pointed values */
 	free(phk->keys);
 	free(phk);
 }
