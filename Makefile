@@ -4,9 +4,9 @@ CC?=		cc
 INSTALL?=	install
 
 CFLAGS?=
-CFLAGS+=	-Wall
+#CFLAGS+=	-Wall
 #CFLAGS+=	-Werror
-CFLAGS+=	-ansi -pedantic
+#CFLAGS+=	-ansi -pedantic
 
 # Debug stuff
 #CFLAGS+=	-DPMK_DEBUG
