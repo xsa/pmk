@@ -4,10 +4,8 @@ CC?=		cc
 DEBUG?=		-g
 
 # On some platforms install is not BSD compatible
-# so you can use pmkinstall instead of install.
-# For example HP-UX's install is not compatible.
-INSTALL=	install
-#INSTALL=	pmkinstall
+# so we use our own install program.
+INSTALL=	pmkinstall
 
 SYSCONFDIR=	/etc
 
