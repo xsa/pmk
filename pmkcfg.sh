@@ -240,7 +240,7 @@ if [ $usermode = 1 ]; then
 	mkf_sed 'BINDIR' '$(BASE)/bin'
 	mkf_sed 'SBINDIR' '$(BASE)/bin'
 	mkf_sed 'DATADIR' '$(CONFDIR)'
-	mkf_sed 'MANDIR' '$(CONFDIR)'
+	mkf_sed 'MANDIR' '$(BASE)/man'
 else
 	echo "USERMODE OFF."
 
