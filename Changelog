@@ -1,6 +1,7 @@
 26 Jan 2005 mipsator
  * fixed segfault in x86 cpu detection.
  * added __ALPHA in alpha architecture macro.
+ * fixed call order for setegid(), setgid(), seteuid() and setuid().
 
 21 Jan 2005 mipsator
  * keep the PATH separator as is instead of replacing it with a comma.

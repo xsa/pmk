@@ -914,24 +914,27 @@ void child_loop(uid_t uid, gid_t gid, int argc, char *argv[]) {
 #ifndef WITHOUT_FORK
 	if (getuid() == 0) {
 		/* user has root privs, DROP THEM ! */
-		if (setegid(gid) != 0) {
-			/* failed to change egid */
-			errorf(EMSG_PRIV_FMT, "egid");
-			_exit(EXIT_FAILURE);
-		}
 		if (setgid(gid) != 0) {
 			/* failed to change gid */
 			errorf(EMSG_PRIV_FMT, "gid");
 			_exit(EXIT_FAILURE);
 		}
-		if (seteuid(uid) != 0) {
-			/* failed to change euid */
-			errorf(EMSG_PRIV_FMT, "euid");
+
+		if (setegid(gid) != 0) {
+			/* failed to change egid */
+			errorf(EMSG_PRIV_FMT, "egid");
 			_exit(EXIT_FAILURE);
 		}
+
 		if (setuid(uid) != 0) {
 			/* failed to change uid */
 			errorf(EMSG_PRIV_FMT, "uid");
+			_exit(EXIT_FAILURE);
+		}
+
+		if (seteuid(uid) != 0) {
+			/* failed to change euid */
+			errorf(EMSG_PRIV_FMT, "euid");
 			_exit(EXIT_FAILURE);
 		}
 	}
