@@ -27,7 +27,8 @@ PREFIX?=	/usr/local
 DEBUG?=		-g
 
 PREMAKE=	pmk
-SETUP=		pmksetup
+SETUP=		$(PREMAKE)setup
+SCAN=		$(PREMAKE)scan
 
 BINDIR=		$(PREFIX)/bin/
 SBINDIR=	$(PREFIX)/sbin/
@@ -38,8 +39,9 @@ SAMPLE=		$(PREMAKE)file.sample
 CONFIG=		$(PREMAKE).conf.sample
 
 P_OBJS=		compat.o common.o hash.o func.o functool.o \
-		dynarray.o autoconf.o pathtools.o pmk.o
+		dynarray.o autoconf.o pathtools.o parse.o pmk.o
 S_OBJS=		$(SETUP).o common.o hash.o dynarray.o compat.o
+SC_OBJS=	$(SCAN).o common.o compat.o dynarray.o parse.o hash.o
 
 .c.o:
 	$(CC) $(CFLAGS) -c $<
@@ -55,6 +57,9 @@ $(PREMAKE): config $(P_OBJS)
 
 $(SETUP): config $(S_OBJS)
 	$(CC) -o $(SETUP) $(LDFLAGS) $(S_OBJS)
+
+${SCAN}: config $(SC_OBJS)
+	$(CC) -o $(SCAN) $(LDFLAGS) $(SC_OBJS)
 
 install: all
 	$(INSTALL) -d -m 755 $(BINDIR)
@@ -72,8 +77,17 @@ install: all
 	$(INSTALL) -d -m 755 $(MANDIR)/man8
 	$(INSTALL) -m 444 man/$(SETUP).8 $(MANDIR)/man8/$(SETUP).8
 
-clean:
-	rm -f $(P_OBJS) $(S_OBJS) $(PREMAKE) $(SETUP) compat/compat.h config *.core
+$(PREMAKE)-clean:
+	rm -f $(P_OBJS) $(PREMAKE)
+
+$(SETUP)-clean:
+	rm -f $(S_OBJS) $(SETUP)
+
+$(SCAN)-clean:
+	rm -f $(SC_OBJS) $(SCAN)
+
+clean: $(PREMAKE)-clean $(SETUP)-clean $(SCAN)-clean
+	rm -f compat/compat.h config *.core
 
 deinstall:
 	rm -f $(BINDIR)$(PREMAKE)
