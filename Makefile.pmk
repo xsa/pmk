@@ -59,8 +59,7 @@ I_OBJS=		common.o dynarray.o pathtools.o $(INST).o
 	$(CC) $(PMKCFLAGS) -c $<
 
 # main target
-all: $(PREMAKE) $(SETUP) $(SCAN)
-# $(INST) is still a work in progress
+all: $(PREMAKE) $(SETUP) $(SCAN) $(INST)
 
 # specific object files
 $(SCAN).o:
@@ -108,7 +107,7 @@ install: all
 	$(INSTALL) -d -m 755 $(DESTDIR)$(BINDIR)
 	$(INSTALL) -m 755 $(PREMAKE) $(DESTDIR)$(BINDIR)/$(PREMAKE)
 	$(INSTALL) -m 755 $(SCAN) $(DESTDIR)$(BINDIR)/$(SCAN)
-#	$(INSTALL) -m 755 $(INST) $(DESTDIR)$(BINDIR)/$(INST)
+	$(INSTALL) -m 755 $(INST) $(DESTDIR)$(BINDIR)/$(INST)
 	$(INSTALL) -d -m 755 $(DESTDIR)$(SBINDIR)
 	$(INSTALL) -m 755 $(SETUP) $(DESTDIR)$(SBINDIR)/$(SETUP)
 	$(INSTALL) -d -m 755 $(DESTDIR)$(DATADIR)
@@ -128,7 +127,7 @@ install: all
 deinstall:
 	rm -f $(DESTDIR)$(BINDIR)/$(PREMAKE)
 	rm -f $(DESTDIR)$(BINDIR)/$(SCAN)
-#	rm -f $(DESTDIR)$(BINDIR)/$(INST)
+	rm -f $(DESTDIR)$(BINDIR)/$(INST)
 	rm -f $(DESTDIR)$(SBINDIR)/$(SETUP)
 	rm -rf $(DESTDIR)$(DATADIR)
 	rm -f $(DESTDIR)$(BASE)/man/man1/$(PREMAKE).1
@@ -265,25 +264,26 @@ test_$(INST): $(INST)
 	@echo ""
 	@echo "-> Installing test data"
 	@echo ""
-	pmkinstall -m u+rw README $(TEST_TARGET)
+	pmkinstall -m u+rw README $(TEST_TARGET)1
+	pmkinstall -m ug+r README $(TEST_TARGET)2
 	@echo ""
 	@echo "-> Checking test file"
-	@if (test -f "$(TEST_TARGET)"); then \
-		echo ""; \
-		echo "- - - - - - - - - - - - - - - - - - -" \
-			"- - - - - - - - - - - - - - - - - -"; \
-		echo ""; \
-		ls -l $(TEST_TARGET); \
-		echo ""; \
-		echo "- - - - - - - - - - - - - - - - - - -" \
-			"- - - - - - - - - - - - - - - - - -"; \
-		echo ""; \
-		echo "Directory OK."; \
-	else \
-		echo ""; \
-		echo "Failed."; \
-		exit 1; \
-	fi
+	@echo "";
+	@echo "- - - - - - - - - - - - - - - - - - -" \
+		"- - - - - - - - - - - - - - - - - -";
+	@echo "";
+	@for i in 1 2; do \
+		if (test -f "$(TEST_TARGET)$$i"); then \
+			ls -l $(TEST_TARGET)$$i; \
+		else \
+			echo "$(TEST_TARGET)$$i failed."; \
+			exit 1; \
+		fi \
+	done
+	@echo "";
+	@echo "- - - - - - - - - - - - - - - - - - -" \
+		"- - - - - - - - - - - - - - - - - -";
+	@echo "";
 	@echo ""
 	@echo "=> End of test"
 	@echo ""
@@ -293,6 +293,7 @@ test_clean:
 	@echo ""
 	@echo "=> Removing generated files"
 	rm -rf $(TEST_SAMPLE)
+	rm -rf $(TEST_TARGET)*
 	rm -rf $(TEST_INST)
 	rm -f samples/ac_config.h pmkfile.scan pmk.log
 
@@ -300,6 +301,6 @@ test_clean:
 	@echo "=> End of cleaning."
 	@echo ""
 
-test_all: all test_$(SETUP) test_$(PREMAKE) test_$(SCAN) test_clean
+test_all: all test_$(SETUP) test_$(PREMAKE) test_$(SCAN) test_$(INST) test_clean
 
 test: test_all
