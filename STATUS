@@ -1,3 +1,9 @@
+Pre Make Kit STATUS file
+
+Document revision:
+$Id$
+
+
 Sys name	Sys Version	OS arch.	PMK Version	PMK Status	Reported by		Misc data
 ~~~~~~~~~~~~~~~ ~~~~~~~~~~~~~~~ ~~~~~~~~~~~~~~~ ~~~~~~~~~~~~~~~ ~~~~~~~~~~~~~~~	~~~~~~~~~~~~~~~~~~~~~~~	~~~~~~~~~~~~~~~~~~~~~~~~
 AIX		4.3.3		ppc		PMK 0.6		OK (USER_TEST)	Martin Reindl		AIX C COmpiler 4.4.0.2, install -d doesn't work 

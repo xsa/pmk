@@ -1,23 +1,32 @@
+Pre Make Kit README file
+
+Document revision:
 $Id$
 
-The pmk project tries to provide an alternative to GNU configure.
+
+Introduction
+------------
+
+The pmk project tries to provide an alternative to GNU autoconf.
+
+
+1) Installation Steps
+---------------------
 
 There are two basic ways of using pmk. The first one is the common
 installation that needs root privileges and that allows all users to
 access pmk. The second one is the "user mode" that installs binaries in
 $HOME/bin/ and data in $HOME/.pmk/ of the user doing the installation.
 
-1) Installation Steps
-
 - There are two targets to configure pmk before building it.
 
  Configuring with root mode:
 
-  make cfgrm
+  sh pmkcfg.sh
 
  Else in user mode:
 
-  make cfgum
+  sh pmkcfg.sh -u
 
  After configuring you can build the package with:
 
@@ -29,10 +38,12 @@ $HOME/bin/ and data in $HOME/.pmk/ of the user doing the installation.
 
 
 2) Testing
+----------
 
 - Now if you feel like testing the whole suite, follow these steps:
 
-  make clean cfgum
+  (make clean)
+  sh pmkcfg.sh -u
   make install
   make test
   make deinstall
@@ -50,6 +61,7 @@ For more experienced users it is possible to directly use the pmkcfg.sh
 script, see INSTALL for further information.
 
 3) Supported Platforms
+----------------------
 
 - Any POSIX compliant plaftorm should be supported. Actually we try to
   test our suite on the most different platforms we can.
@@ -61,3 +73,4 @@ script, see INSTALL for further information.
   decision yet about how to deal with this. But as this system is not
   able to identify itself correctly we do not support it until futher
   decision.
+

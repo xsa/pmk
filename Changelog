@@ -5,6 +5,8 @@
  * modified clean target in Makefile template.
  * updated pmkcfg.sh and pmkfile to set the used mode.
  * added support for pmkpc in Makefile template.
+ * removed Makefile which is now useless.
+ * updated documentation.
 
 11 Jan 2004 mipsator
  * added more C++ support in some checks (handle CXXFLAGS when needed).
