@@ -1,4 +1,7 @@
 04 May 2003 mipsator
+ * added autogrow in htable.
+ * added hash_resize(), not tested yet.
+ * added hash_add_cell() and make hash_add() and hash_resize() using it.
  * implemented depend_check().
  * added checks in str_to_def().
  * more checks in record_def().
