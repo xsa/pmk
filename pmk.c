@@ -130,7 +130,7 @@ bool read_conf(htable *ht) {
 				}
 				break;
 		}
-		ln++;
+		ln++; /* increment line number */
 	}
 
 	if (feof(fp) == 0) {
@@ -160,36 +160,35 @@ bool process_template(char *template, htable *ht) {
 		*destfile,
 		*dup_p,
 		*dup_d,
-		*dotidx,
-		*value,
+		*plb,
+		*pbf,
+		*ptbf,
+		*ptmp,
 		final[MAXPATHLEN],
 		lbuf[MAXPATHLEN],
 		buf[MAXPATHLEN],
 		tbuf[MAXPATHLEN];
-	int	i,
-		j,
-		k;
 	bool	replace;
 
 	dup_p = strdup(template);
 	path = dirname(dup_p);
 	if (path == NULL) {
-		errorf("Not enough memory !!");
+		errorf("not enough memory !!");
 		return(false);
 	}
 	dup_d = strdup(template);
 	destfile = basename(dup_d);
 	if (destfile == NULL) {
-		errorf("Not enough memory !!");
+		errorf("not enough memory !!");
 		return(false);
 	}
 
 	/* remove suffix */
-	dotidx = strrchr(destfile, '.');
-	if (dotidx != NULL) {
-		*dotidx = CHAR_EOS;
+	ptmp = strrchr(destfile, '.');
+	if (ptmp != NULL) {
+		*ptmp = CHAR_EOS;
 	} else {
-		errorf("Error while creating name for template %s", destfile);
+		errorf("error while creating name for template %s", destfile);
 		return(false);
 	}
 
@@ -200,82 +199,82 @@ bool process_template(char *template, htable *ht) {
 
 	tfd = fopen(template, "r");
 	if (tfd == NULL) {
-		errorf("Cannot open %s.", template);
+		errorf("cannot open %s.", template);
 		return(false);
 	}
 
 	dfd = fopen(final, "w");
 	if (dfd == NULL) {
 		fclose(tfd);
-		errorf("Cannot open %s.", final);
+		errorf("cannot open %s.", final);
 		return(false);
 	}
 
 	while (fgets(lbuf, sizeof(lbuf), tfd) != NULL) {
-		i = 0;
-		j = 0;
-		k = 0;
+		plb = lbuf;
+		pbf = buf;
+		ptbf = tbuf;
 		replace = false;
-		while (lbuf[i] != CHAR_EOS) {
+		while (*plb != CHAR_EOS) {
 			if (replace == false) {
-				if (lbuf[i] == PMK_TAG_CHAR) {
+				if (*plb == PMK_TAG_CHAR) {
 					/* found begining of tag */
 					replace = true;
 				} else {
 					/* copy normal text */
-					buf[j] = lbuf[i];
-					j++;
+					*pbf = *plb;
+					pbf++;
 				}
 			} else {
-				if (lbuf[i] == PMK_TAG_CHAR) {
+				if (*plb == PMK_TAG_CHAR) {
 					/* tag identified */
 					replace = false;
-					tbuf[k] = CHAR_EOS;
+					*ptbf = CHAR_EOS;
 
-					value = hash_get(ht, tbuf);
-					if (value == NULL) {
-						/* not a valid tag */
-						buf[j] = PMK_TAG_CHAR;
-						j++;
-						k = 0;
-						while (tbuf[k] != CHAR_EOS) {
-							buf[j] = tbuf[k];
-							j++;
-							k++;
+					ptmp = hash_get(ht, tbuf);
+					if (ptmp == NULL) {
+						/* not a valid tag, put it back */
+						*pbf = PMK_TAG_CHAR;
+						pbf++;
+
+						ptmp = tbuf;
+						while (*ptmp != CHAR_EOS) {
+							*pbf = *ptmp;
+							pbf++;
+							ptmp++;
 						}
-						buf[j] = PMK_TAG_CHAR;
-						j++;
+						*pbf = PMK_TAG_CHAR;
+						pbf++;
 					} else {
 						/* replace with value */
-						k = 0;
-						while (value[k] != CHAR_EOS) {
-							buf[j] = value[k];
-							j++;
-							k++;
+						while (*ptmp != CHAR_EOS) {
+							*pbf = *ptmp;
+							pbf++;
+							ptmp++;
 						}
 					}
-					k = 0;
+					ptbf = tbuf;
 				} else {
 					/* continue getting tag name */
-					tbuf[k] = lbuf[i];
-					k++;
+					*ptbf = *plb;
+					ptbf++;
 				}
 			}
-			i++;
+			plb++;
 		}
 		if (replace == true) {
 			/* not a tag, copy tbuf in buf */
-			buf[j] = PMK_TAG_CHAR;
-			j++;
-			tbuf[k] = CHAR_EOS;
-			k = 0;
-			while (tbuf[k] != CHAR_EOS) {
-				buf[j] = tbuf[k];
-				j++;
-				k++;
+			*pbf = PMK_TAG_CHAR;
+			pbf++;
+			*ptbf = CHAR_EOS;
+			ptmp = tbuf;
+			while (*ptmp != CHAR_EOS) {
+				*pbf = *ptmp;
+				pbf++;
+				ptmp++;
 			}
 		}
-		buf[j] = CHAR_EOS;
+		*pbf = CHAR_EOS;
 		/* saving parsed line */
 		fprintf(dfd, "%s", buf);
 	}
