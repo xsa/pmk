@@ -8,6 +8,7 @@
  * added mkvar_test.c in tests directory.
  * added mkvar target in tests makefile.
  * rewritten get_make_var() to work with gnu make.
+ * added compat to I_OBJS to fix pmkinstall build.
 
 27 Nov 2003 mipsator
  * updated pmkinstall man page.
