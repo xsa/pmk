@@ -9,6 +9,7 @@
 #include "../hash.c"
 
 #define TAB_SIZE 256
+#define NBKEYS 255
 
 
 int main() {
@@ -21,12 +22,29 @@ int main() {
 	printf("Testing init\n");
 	hp = hash_init(TAB_SIZE);
 
-	printf("Adding random keys\n");
-/*
+	printf("Adding test key\n");
 	hash_add(hp, "prefix", "/usr/locallll");
-*/
 
-	for(i = 0 ; i < 255 ; i++) {
+	printf("Testing key : ");
+	if (hash_get(hp, "prefix") == NULL) {
+		printf("not found\n");
+	} else {
+		printf("found\n");
+	}
+
+	printf("Removing test key\n");
+	hash_delete(hp, "prefix");
+
+	printf("Testing key : ");
+	if (hash_get(hp, "prefix") == NULL) {
+		printf("not found\n");
+	} else {
+		printf("found\n");
+	}
+
+	printf("Adding %d random keys\n", NBKEYS);
+
+	for(i = 0 ; i < NBKEYS ; i++) {
 		snprintf(tstr, sizeof(tstr), "XXXXXXXXXX");
 		if (mktemp(tstr) != NULL) {
 			snprintf(ttstr, sizeof(ttstr), "value.%s", tstr);
@@ -52,11 +70,6 @@ int main() {
 		} else {
 			printf("Random value failed\n");
 		}
-	}
-
-	printf("Testing key\n");
-	if (hash_get(hp, "prefix") == NULL) {
-		printf("key prefix not found\n");
 	}
 
 	printf("Testing destroy\n");
