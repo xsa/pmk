@@ -236,12 +236,14 @@ bool relpath(char *from, char *to, char *buffer) {
 	while (*from != CHAR_EOS) {
 		if (*from == CHAR_SEP) {
 			/* one more */
-			strlcat(buffer, "../", MAXPATHLEN);
+			if (strlcat_b(buffer, "../", MAXPATHLEN) == false)
+				return(false);
 		}
 		from++;
 	}
 	/* appending remaining value of "to" */
-	strlcat(buffer, to, MAXPATHLEN);
+	if (strlcat_b(buffer, to, MAXPATHLEN) == false)
+		return(false);
 
 	if (buffer[0] == CHAR_EOS) {
 		/* same path, return "." */
@@ -269,9 +271,10 @@ bool abspath(char *base, char *rel, char *buffer) {
 		return(false);
 	}
 
-	strlcpy(tmp_buf, base, MAXPATHLEN);
-	strlcat(tmp_buf, "/", MAXPATHLEN);
-	strlcat(tmp_buf, rel, MAXPATHLEN);
+	strlcpy(tmp_buf, base, MAXPATHLEN); /* no check */
+	strlcat(tmp_buf, "/", MAXPATHLEN); /* no check */
+	if (strlcat_b(tmp_buf, rel, MAXPATHLEN) == false)
+		return(false);
 
 	return(chkpath(tmp_buf, buffer));
 }

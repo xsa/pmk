@@ -495,11 +495,17 @@ bool pmk_check_header(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 			errorf(ERRMSG_MEM);
 			return(false);
 		}
-		strlcpy(inc_path, "-I", sizeof(inc_path));
-		strlcat(inc_path, pstr, sizeof(inc_path));
+		strlcpy(inc_path, "-I", sizeof(inc_path)); /* no check */
+		if (strlcat_b(inc_path, pstr, sizeof(inc_path)) == false) {
+			errorf("failed to add '%s' in include path.", inc_path);
+			return(false);
+		}
 	} else {
 		/* include not found, init inc_path with "" */
-		strlcpy(inc_path, "", sizeof(inc_path));
+		if (strlcpy_b(inc_path, "", sizeof(inc_path)) == false) {
+			errorf("failed to initialise include path.");
+			return(false);
+		}
 	}
 
 
@@ -597,7 +603,10 @@ bool pmk_check_header(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 			}
 
 			/* compute object file name */
-			strlcpy(btmp, ftmp, sizeof(btmp));
+			if (strlcpy_b(btmp, ftmp, sizeof(btmp)) == false) {
+				errorf("cannot build objet file name.");
+				return(false);
+			}
 			btmp[strlen(btmp) - 1] = 'o';
 
 			/* build compiler command */

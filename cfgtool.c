@@ -354,7 +354,9 @@ bool cfgtcell_get_binary(cfgtdata *pcd, char *mod, char *buf, size_t sb) {
 		return(false);
 	} else {
 		/* found, copy */
-		strlcpy(buf, pcc->binary, sb);
+		if (strlcpy_b(buf, pcc->binary, sb) == false)
+			return(false);
+
 		return(true);
 	}
 }
