@@ -440,7 +440,6 @@ bool require_check(htable *pht) {
 	switch(po_get_type(req)) {
 		case PO_BOOL :
 			rval = po_get_bool(req);
-debugf("require get bool object : '%s'", bool_to_str(rval));
 			break;
 		case PO_STRING :
 			rval = check_bool_str(po_get_str(req));

@@ -129,7 +129,8 @@ char	*parse_list(char *, pmkobj *, size_t);
 char	*parse_key(char *, pmkobj *, size_t);
 char	*parse_data(char *, pmkobj *, size_t);
 prscell	*parse_cell(char *, htable *);
-bool	 parse_pmkfile(FILE *, prsdata *, prskw [], size_t);
 bool	 parse_opt(char *, prsopt *, char *);
+bool	 parse_pmkfile(FILE *, prsdata *, prskw [], size_t);
+bool	 parse_pmkconf(FILE *, htable *, char *, bool (*)(htable *, prsopt *));
 
 #endif /* _PMK_PARSE_H_ */

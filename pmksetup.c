@@ -124,17 +124,13 @@ int main(int argc, char *argv[]) {
 	if ((open_tmp_config() == -1))
 		exit(1);
 
+	/* parse configuration file */
 	if ((config = fopen(PREMAKE_CONFIG_PATH, "r")) != NULL) {
 		printf("==> Configuration file found: %s\n", PREMAKE_CONFIG_PATH);
-
-		/* parse configuration file */
-		error = parse_conf(config, ht);
-		/* XXX shouldn't stop on error before merging ??? */
-
+		parse_pmkconf(config, ht, PRS_PMKCONF_SEP, check_opt); /* XXX FIXME TODO check ? */
 		fclose(config);
 	} else {
 		printf("==> Configuration file not found, generating one...\n");
-		config = NULL;
 	}
 
 	printf("==> Merging remaining data...\n");	
@@ -211,74 +207,48 @@ int keycomp(const void *a, const void *b) {
 	return(strcmp(*(const char **)a, *(const char **)b));
 }
 
-
 /*
- * Parse configuration
+ *	check and process option
  *
- *	config: old configuration file
- *	ht: hash table
+ *	pht : htable for comparison
+ *	popt : option to process
  *
- *	returns error code
+ *	return : boolean
  */
-int parse_conf(FILE *config, htable *ht) {
-	prsopt	 opt;
-	char	 line[MAX_LINE_LEN],
-		*v;	
-	int	 linenum = 0,
-		 error = 0;
 
-	/* parsing the configuration file */
-	while (get_line(config, line, sizeof(line)) == true) {
-		linenum++;
+bool check_opt(htable *pht, prsopt *popt) {
+	char	*recval,
+		*optval;
 
-		/* checking first character of the line */
-		switch (line[0]) {
-			case CHAR_COMMENT :
-				fprintf(sfp, "%s\n", line);
+	optval = po_get_str(popt->value);
+
+	if ((recval = (char *) hash_get(pht, popt->key)) != NULL) {
+		/* checking the VAR<->VALUE separator */
+		switch (popt->opchar) {
+			case CHAR_ASSIGN_UPDATE :
+				/* get newer value */
+				fprintf(sfp, PMKSTP_WRITE_FORMAT, popt->key, CHAR_ASSIGN_UPDATE, recval);
+				hash_delete(pht, popt->key);
 				break;
-			case '\0' :	/* empty char */
-				fprintf(sfp, "%s\n", line);
+
+			case CHAR_ASSIGN_STATIC :
+				/* static definition, stay unchanged */ 
+				fprintf(sfp, PMKSTP_WRITE_FORMAT, popt->key, CHAR_ASSIGN_STATIC, optval);
+				hash_delete(pht, popt->key);
 				break;
-			case '\t' :	/* TAB char */
-				errorf_line(PREMAKE_CONFIG_PATH, linenum, "syntax error."); 
-				return(-1);
-				break;
-			default :
-				if (parse_opt(line, &opt, PRS_PMKCONF_SEP) == true) {
-					if ((v = (char *) hash_get(ht, opt.key)) != NULL)
-						/* checking the VAR<->VALUE separator */
-						switch (opt.opchar) {
-							case CHAR_ASSIGN_UPDATE :
-								/* get newer value */
-								fprintf(sfp, PMKSTP_WRITE_FORMAT,
-									opt.key, CHAR_ASSIGN_UPDATE, v);
-								hash_delete(ht, opt.key);
-								break;
-							case CHAR_ASSIGN_STATIC :
-								/* static definition, stay unchanged */ 
-								fprintf(sfp, PMKSTP_WRITE_FORMAT,
-									opt.key, CHAR_ASSIGN_STATIC, po_get_str(opt.value));
-								hash_delete(ht, opt.key);
-								break;
-							default :
-								/* should not happen now */
-								errorf("unknow operator '%c'", opt.opchar);
-								error = 1;
-								break;
-						}
-					else
-						fprintf(sfp, PMKSTP_WRITE_FORMAT,
-							opt.key, opt.opchar, po_get_str(opt.value));
-				} else {
-					errorf("parse_opt failed");
-					error = 1;
-				}
-				break;
+
+				default :
+					/* should not happen now */
+					errorf("unknow operator '%c'", popt->opchar);
+					return(false);
+					break;
 		}
+	} else {
+		fprintf(sfp, PMKSTP_WRITE_FORMAT, popt->key, popt->opchar, optval);
 	}
-	return(error);
-}
 
+	return(true);
+}
 
 /*
  * Open temporary configuration file
@@ -349,17 +319,17 @@ int get_env_vars(htable *ht) {
 		return(-1);
 	}
 
-	if (hash_add(ht, PREMAKE_KEY_OSNAME, strdup(utsname.sysname)) == HASH_ADD_FAIL)
+	if (hash_add(ht, PMKCONF_OS_NAME, strdup(utsname.sysname)) == HASH_ADD_FAIL)
 		return(-1);
-	verbosef("Setting '%s' => '%s'", PREMAKE_KEY_OSNAME, utsname.sysname);
+	verbosef("Setting '%s' => '%s'", PMKCONF_OS_NAME, utsname.sysname);
 
-	if (hash_add(ht, PREMAKE_KEY_OSVERS, strdup(utsname.release)) == HASH_ADD_FAIL)
+	if (hash_add(ht, PMKCONF_OS_VERS, strdup(utsname.release)) == HASH_ADD_FAIL)
 		return(-1);
-	verbosef("Setting '%s' => '%s'", PREMAKE_KEY_OSVERS, utsname.release);	
+	verbosef("Setting '%s' => '%s'", PMKCONF_OS_VERS, utsname.release);	
 	
-	if (hash_add(ht, PREMAKE_KEY_OSARCH, strdup(utsname.machine)) == HASH_ADD_FAIL)
+	if (hash_add(ht, PMKCONF_OS_ARCH, strdup(utsname.machine)) == HASH_ADD_FAIL)
 		return(-1);
-	verbosef("Setting '%s' => '%s'", PREMAKE_KEY_OSARCH, utsname.machine);
+	verbosef("Setting '%s' => '%s'", PMKCONF_OS_ARCH, utsname.machine);
 
 
 	/* getting the environment variable PATH */
@@ -457,8 +427,8 @@ int get_binaries(htable *ht) {
  */ 
 int predef_vars(htable *ht) {
 	hpair	predef[] = {
-			{PREMAKE_KEY_SYSCONFDIR,	SYSCONFDIR},
-			{PREMAKE_KEY_PREFIX,		"/usr/local"},
+			{PMKCONF_MISC_SYSCONFDIR,	SYSCONFDIR},
+			{PMKCONF_MISC_PREFIX,		"/usr/local"},
 			{PREMAKE_KEY_INCPATH,		"/usr/include"},
 			{PREMAKE_KEY_LIBPATH,		"/usr/lib"}
 		};
@@ -466,8 +436,8 @@ int predef_vars(htable *ht) {
 	if (hash_add_array(ht, predef, sizeof(predef)/sizeof(hpair)) == false) 
 		return(-1);
 
-	verbosef("Setting '%s' => '%s'", PREMAKE_KEY_SYSCONFDIR, SYSCONFDIR);
-	verbosef("Setting '%s' => '%s'", PREMAKE_KEY_PREFIX, "/usr/local");
+	verbosef("Setting '%s' => '%s'", PMKCONF_MISC_SYSCONFDIR, SYSCONFDIR);
+	verbosef("Setting '%s' => '%s'", PMKCONF_MISC_PREFIX, "/usr/local");
 	verbosef("Setting '%s' => '%s'", PREMAKE_KEY_INCPATH, "/usr/include");
 	verbosef("Setting '%s' => '%s'", PREMAKE_KEY_LIBPATH, "/usr/lib");
 
@@ -499,10 +469,10 @@ bool byte_order_check(htable *pht) {
 		}
 	}
 
-	if (hash_add(pht, PREMAKE_KEY_BYTEORDER, strdup(bo_type)) == HASH_ADD_FAIL)
+	if (hash_add(pht, PMKCONF_HW_BYTEORDER, strdup(bo_type)) == HASH_ADD_FAIL)
 		return(false);
 
-	verbosef("Setting '%s' => '%s'", PREMAKE_KEY_BYTEORDER, bo_type);
+	verbosef("Setting '%s' => '%s'", PMKCONF_HW_BYTEORDER, bo_type);
 
 	return(true);
 }

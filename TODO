@@ -14,7 +14,7 @@ pmk :
 	- VPATH ?
 ! cache ? (hash table with binary location, ...)
 - more C++ support
-! finish global LANG
++ finish global LANG
 ~ replace po_get_data
 - CHECK_VARIABLE ? (cinepaint)
 - verify in CHECK_BINARY that program has executable right ?

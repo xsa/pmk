@@ -60,61 +60,21 @@ int		 cur_line = 0;
 
 
 /*
-	read configuration file
+	process option line of configuration file
 
-	ht : hash table that will contain data
-	filename : file to read
+	pht : storage hash table
+	popt : option structure to record
 
 	return : boolean
 */
 
-bool read_conf(htable *ht, char *filename) {
-	FILE	*fp;
-	prsopt	 opt;
-	char	 buf[MAX_LINE_LEN];
-	int	 ln = 0;
-
-	fp = fopen(filename, "r");
-	if (fp == NULL) {
-		errorf("cannot open '%s' (read_conf).", filename);
+bool process_opt(htable *pht, prsopt *popt) {
+	if (hash_add(pht, popt->key, strdup(po_get_str(popt->value))) == HASH_ADD_FAIL) {
+		errorf("hash failure.");
 		return(false);
+	} else {
+		return(true);
 	}
-
-	while (get_line(fp, buf, sizeof(buf)) == true) {
-		switch (buf[0]) {
-			case CHAR_COMMENT :
-				/* ignore comment */
-				break;
-
-			case CHAR_EOS :
-				/* ignore empty line */
-				break;
-
-			default :
-				if (parse_opt(buf, &opt, PRS_PMKCONF_SEP) == true) {
-					/* parse ok */
-					if (hash_add(ht, opt.key, strdup(po_get_str(opt.value))) == HASH_ADD_FAIL) {
-						errorf("hash failure.");
-						return(false);
-					}
-				} else {
-					/* incorrect line */
-					return(false);
-				}
-				break;
-		}
-		ln++; /* increment line number */
-	}
-
-	if (feof(fp) == 0) {
-		/* error occuered before EOF */
-		errorf_line(PREMAKE_CONFIG_PATH, cur_line, "end of file not reached.");
-		return(false);
-	}
-
-	fclose(fp);
-
-	return(true);
 }
 
 /*
@@ -359,7 +319,7 @@ void usage(void) {
 */
 
 int main(int argc, char *argv[]) {
-	FILE	*fd;
+	FILE	*fp;
 	bool	 go_exit = false,
 		 pmkfile_set = false,
 		 ovrfile_set = false,
@@ -492,12 +452,20 @@ int main(int argc, char *argv[]) {
 		exit(1);
 	}
 
-	if (read_conf(gdata.htab, PREMAKE_CONFIG_PATH) == true) {
+	fp = fopen(PREMAKE_CONFIG_PATH, "r");
+	if (fp != NULL) {
+		if (parse_pmkconf(fp, gdata.htab, PRS_PMKCONF_SEP, process_opt) == false) {
+			/* parsing failed */
+			clean(&gdata);
+			errorf("failed to parse '%s'", PREMAKE_CONFIG_PATH);
+			exit(1);
+		}
+		fclose(fp);
 		nbpd = hash_nbkey(gdata.htab);
 	} else {
 		/* configuration file not found */
 		clean(&gdata);
-		errorf("cannot open '%s', run pmksetup", PREMAKE_CONFIG_PATH);
+		errorf("cannot parse '%s', run pmksetup", PREMAKE_CONFIG_PATH);
 		exit(1);
 	}
 
@@ -534,12 +502,20 @@ int main(int argc, char *argv[]) {
 
 	if (ovrfile_set == true) {
 		/* read override file */
-		if (read_conf(gdata.htab, gdata.ovrfile) == true) {
+		fp = fopen(gdata.ovrfile, "r");
+		if (fp != NULL) {
+			if (parse_pmkconf(fp, gdata.htab, PRS_PMKCONF_SEP, process_opt) == false) {
+				/* parsing failed */
+				clean(&gdata);
+				errorf("failed to parse '%s'", gdata.ovrfile);
+				exit(1);
+			}
+			fclose(fp);
 			nbpd = hash_nbkey(gdata.htab);
 		} else {
 			/* configuration file not found */
 			clean(&gdata);
-			errorf("cannot open '%s', run pmksetup");
+			errorf("cannot parse '%s'");
 			exit(1);
 		}
 	}
@@ -578,25 +554,25 @@ int main(int argc, char *argv[]) {
 	pmk_log("Parsing '%s'\n", gdata.pmkfile);
 
 	/* open pmk file */
-	fd = fopen(gdata.pmkfile, "r");
-	if (fd == NULL) {
+	fp = fopen(gdata.pmkfile, "r");
+	if (fp == NULL) {
 		clean(&gdata);
 		errorf("while opening %s.", gdata.pmkfile);
 		exit(1);
 	}
 
-	if (parse_pmkfile(fd, pdata, kw_pmkfile, nbkwpf) == false) {
+	if (parse_pmkfile(fp, pdata, kw_pmkfile, nbkwpf) == false) {
 		/* XXX too much things here */
 		clean(&gdata);
-		fflush(fd);
-		fclose(fd);
+		fflush(fp);
+		fclose(fp);
 		pmk_log_close();
 		errorf("while opening %s.", gdata.pmkfile);
 		exit(1);
 	}
 
-	fflush(fd);
-	fclose(fd);
+	fflush(fp);
+	fclose(fp);
 
 	pmk_log("Processing commands :\n");
 	if (process_cmd(pdata, &gdata) == false) {

@@ -19,14 +19,23 @@ is a file containing specifications that help configuring a package build on a g
 .Nm
 is using pseudo types like the following :
 .Bl -tag -width Ds
-.It Cm word
-A word is a set of alphanumerical and underscores characters.
+.It Cm bool
+The classical boolean type with TRUE and FALSE values.
 .Pp
 Examples :
 .Bd -literal -offset -indent
- a_word
- onlyalphanum
- but_underscores_are_nicer
+ TRUE
+ FALSE
+.Ed
+
+.It Cm identifier
+An identifier is a string of alphanumerical and underscores characters.
+.Pp
+Examples :
+.Bd -literal -offset -indent
+ REQUIRED
+ a_label 
+ underscores_are_nice
 .Ed
 
 .It Cm quoted
@@ -40,14 +49,14 @@ Examples :
 .Ed
 
 .It Cm list
-It is a set of 'word' and 'quoted' objects in brackets separated with a comma.
+It is one or more of the previous types between brackets. Multiple objects are separated with a comma.
 Blanks are currently not allowed beside commas, this means that you can find them only in a quoted string of the list.
 .Pp
 Examples :
 .Bd -literal -offset -indent
- (one_word_list)
- ("another list with only one element")
- (mixed_list_of,words,"and","quoted strings")
+ ("only_one_string")
+ ("added a boolean",TRUE)
+ (mixed_list_of,"words","and",TRUE,"quoted strings")
 .Ed
 .El
 
@@ -75,9 +84,9 @@ A definition line has the following format :
 <?blank><key name><?blank>=<?blank><key value>
 .Ed
 .Pp
-The key name type is 'word' (but could be 'quoted' for exceptions).
+The key name is of identifier type.
 .Pp
-The key value type can be 'word', 'quoted' or 'list'. The right type will depend on the key name (see further).
+The key value type can be 'bool', 'quoted' or 'list'. The right type will depend on the key name (see further).
 .Pp
 Example :
 .Bd -literal -offset -indent
@@ -104,7 +113,7 @@ Arguments :
 Example :
 .Bd -literal -offset -indent
 DEFINE {
- PACKAGE=my_prog
+ PACKAGE="my_prog"
  VERSION="0.1"
 }
 .Ed
@@ -114,9 +123,9 @@ This command sets pmk parameters.
 .Pp
 Arguments :
 .Bd -literal -offset -indent
-AC_COMPAT : type 'quoted', enable autoconf compatibility (empty string or filename).
-LANG : type 'quoted', global default language.
-TARGET : type 'list', list of target's filenames.
+AC_COMPAT : type is 'quoted', enable autoconf compatibility (empty string or filename).
+LANG : type is 'quoted', global default language.
+TARGET : type is 'list', list of target's filenames.
 .Ed
 .Pp
 Example :
@@ -149,7 +158,7 @@ All these commands need a label.
 They all can have the following optional arguments :
 .Bl -tag -width Ds
 .It Cm REQUIRED
-Specify if this test is required to achieve the configuration. Recommended type is 'word'.
+Specify if this test is required to achieve the configuration. Recommended type is 'bool'.
 If not specified it is TRUE by default.
 .It Cm DEPEND
 Specify check dependencies. Type is 'list'. A dependency is a label or a switch name.
@@ -164,7 +173,7 @@ Specify the language used in the following list :
 C
 C++
 .Ed
-.Pp Recommended type is 'quoted'. By default \\"C\\" is the used language.
+.Pp Type is 'quoted', by default \\"C\\" is the used language.
 .El
 .Pp
 Here the list of commands :
@@ -174,8 +183,8 @@ Check if a binary is in the path.
 .Pp
 Arguments :
 .Bd -literal -offset -indent
-FILENAME : name of the binary. Recommended type is 'quoted'.
-VARNAME : variable name to store the path. Recommended type is 'quoted'.
+FILENAME : type is 'quoted', name of the binary.
+VARNAME : type is 'quoted', variable name to store the path.
 .Ed
 .It Cm CHECK_INCLUDE
 Check language header and optionally a function.
@@ -183,8 +192,8 @@ Check language header and optionally a function.
 Arguments:
 .Bd -literal -offset -indent
 REQUIRED, DEPEND, LANG.
-INCLUDE : name of the header. Type should be 'quoted'.
-FUNCTION : function to check, optional. Type can be word or quoted.
+INCLUDE : type is 'quoted', name of the header.
+FUNCTION : type is 'quoted', function to check, optional.
 .Ed
 .It Cm CHECK_LIB
 Check a library and optionally a function.
@@ -192,8 +201,8 @@ Check a library and optionally a function.
 Arguments:
 .Bd -literal -offset -indent
 REQUIRED, DEPEND, LANG.
-LIBNAME : library name to check. Recommended type is 'quoted'.
-FUNCTION : function to check, optional. Type can be word or quoted.
+LIBNAME : type is 'quoted', library name to check.
+FUNCTION : type is 'quoted', function to check, optional.
 .Ed
 .It Cm CHECK_CONFIG
 Check using a *-config tool.
@@ -201,10 +210,10 @@ Check using a *-config tool.
 Arguments:
 .Bd -literal -offset -indent
 REQUIRED, DEPEND.
-CFGTOOL : config tool name. Type should be 'quoted'.
-VERSION : minimal version needed, optional. Type should be 'quoted'.
-CFLAGS : variable name to store CFLAGS values, optional. Type can be 'word' or 'quoted'.
-LIBS : variable name to store LIBS values, optional. Type can be 'word' or 'quoted'.
+CFGTOOL : type is 'quoted', config tool name.
+VERSION : type is 'quoted', minimal version needed, optional.
+CFLAGS : type is 'quoted', variable name to store CFLAGS values, optional.
+LIBS : type is 'quoted', variable name to store LIBS values, optional.
 .Ed
 .It Cm CHECK_PKG_CONFIG
 Check a package using pkg-config.
@@ -212,10 +221,10 @@ Check a package using pkg-config.
 Arguments:
 .Bd -literal -offset -indent
 REQUIRED, DEPEND.
-PACKAGE : package name. Type should be 'quoted'.
-VERSION : minimal version needed, optional. Type should be 'quoted'.
-CFLAGS : variable name to store CFLAGS values, optional. Type can be 'word' or 'quoted'.
-LIBS : variable name to store LIBS values, optional. Type can be 'word' or 'quoted'.
+PACKAGE : type is 'quoted', package name.
+VERSION : type is 'quoted', minimal version needed, optional.
+CFLAGS : type is 'quoted', variable name to store CFLAGS values, optional.
+LIBS : type is 'quoted', variable name to store LIBS values, optional.
 .Ed
 .It Cm CHECK_TYPE
 Check if the given type exists.
@@ -223,7 +232,7 @@ Check if the given type exists.
 Arguments:
 .Bd -literal -offset -indent
 REQUIRED, DEPEND, LANG.
-TYPE : type name. Type can be 'word' or 'quoted'.
+TYPE : type is 'quoted', type name to check.
 .Ed
 .El
 
