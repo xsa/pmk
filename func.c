@@ -161,3 +161,44 @@ bool pmk_check_lib(pmkcmd *cmd, htable *ht) {
 	pmk_log("XXX.\n");
 	return(TRUE);
 }
+
+/*
+	check with *-config utility
+*/
+
+bool pmk_check_config(pmkcmd *cmd, htable *ht) {
+	FILE	*rpipe;
+	char	version[16],
+		cfgcmd[MAXPATHLEN],
+		*cfgtool,
+		*libvers;
+	bool	required = TRUE;
+
+	pmk_log("* Checking with config tool [%s]\n", cmd->label);
+
+	required = check_bool_str(hash_get(ht, "REQUIRED"));
+
+	cfgtool = hash_get(ht, "CFGTOOL");
+	libvers = hash_get(ht, "VERSION");
+
+	pmk_log("\tFound config tool '%s' : ", cfgtool);
+
+	/* XXX should try to locate cfgtool */
+	snprintf(cfgcmd, sizeof(cfgcmd), "%s --version", cfgtool);
+
+	rpipe = popen(cfgcmd, "r");
+	if (rpipe == NULL) {
+		pmk_log("no.\n");
+		return(FALSE);
+	} else {
+		pmk_log("yes.\n");
+		pmk_log("\tFound version >= %s : ", libvers);
+
+		get_line(rpipe, version, sizeof(version));
+		/* XXX should check version */
+		pmk_log("yes/no (%s)\n", version);
+
+		pclose(rpipe);
+		return(TRUE);
+	}
+}
