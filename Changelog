@@ -3,6 +3,9 @@
  * added sub versions for all tools.
  * added display of subversion and snapversion in debug mode.
  * misc replacements in pmksetup.
+ * misc checks.
+ * added pmkscan in Makefile.
+ * added missing pmkscan.dat in data.
 
 15 Jul 2003 mipsator
  * add parse.c and parse.h with a new shared parsing engine.

@@ -1,0 +1,7 @@
+.INCLUDES
+sys_param=test_for_sys_param
+.END
+
+.FUNCTIONS
+strlcpy=test_for_strlcpy
+.END
