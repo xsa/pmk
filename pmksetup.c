@@ -149,6 +149,11 @@ int main(int argc, char *argv[]) {
 		exit(1);
 	}
 
+	if (check_echo(ht) == -1) {
+		errorf("failure in echo check.");
+		exit(1);
+	}
+
 	if ((open_tmp_config() == -1))
 		exit(1);
 
@@ -471,6 +476,84 @@ int predef_vars(htable *pht) {
 	return(0);
 }
 
+/*
+ *	pht: hash table where we have to store the values
+ *
+ *	returns:  0 on success
+ *		 -1 on failure
+ */
+int check_echo(htable *pht) {
+	FILE	*echo_pipe = NULL;
+	char	buf[TMP_BUF_LEN],
+		echocmd[MAXPATHLEN];
+	char	*echo_n, *echo_c, *echo_t;
+	size_t	s;
+
+	snprintf(echocmd, sizeof(echocmd),
+		"echo \"one\\c\"; echo -n two; echo three"); 
+
+	if ((echo_pipe = popen(echocmd, "r")) == NULL) {
+		errorf("unable to execute %s", echocmd);
+		return(-1);
+	}
+
+	s = fread(buf, sizeof(char), sizeof(buf), echo_pipe);
+	buf[s] = CHAR_EOS;
+
+	if (feof(echo_pipe) == 0) {
+		errorf("pipe not empty.");
+		pclose(echo_pipe);
+		return(-1);
+	}
+
+	pclose(echo_pipe);
+
+	if (strncmp(buf, "one\\c\n-n two\nthree\n", sizeof(buf)) == 0) {
+		/* ECHO_N= ECHO_C='\n' ECHO_T='\t' */
+		echo_n = ECHO_EMPTY;
+		echo_c = ECHO_NL;
+		echo_t = ECHO_HT;
+	} else {
+		if (strncmp(buf, "one\\c\ntwothree\n", sizeof(buf)) == 0) {
+			/* ECHO_N='-n' ECHO_C= ECHO_T= */
+			echo_n = ECHO_N;
+			echo_c = ECHO_EMPTY;
+			echo_t = ECHO_EMPTY;
+		} else {
+			if (strncmp(buf, "one-n two\nthree\n", sizeof(buf)) == 0) {
+				/* ECHO_N= ECHO_C='\c' ECHO_T=  */
+				echo_n = ECHO_EMPTY;
+				echo_c = ECHO_C;
+				echo_t = ECHO_EMPTY;
+			} else {
+				if (strncmp(buf, "onetwothree\n", sizeof(buf)) == 0) {
+					/* ECHO_N= ECHO_C='\\c' ECHO_T= */
+					echo_n = ECHO_EMPTY;
+					echo_c = ECHO_C;
+					echo_t = ECHO_EMPTY;
+				} else {
+					errorf("unable to set ECHO_* variables.");
+					return(-1);
+				}
+			}
+		}
+	}
+
+	if (hash_add(pht, PMKCONF_AC_ECHO_N, strdup(echo_n)) == HASH_ADD_FAIL)
+		return(-1);
+	verbosef("Setting '%s' => '%s'", PMKCONF_AC_ECHO_N, echo_n);
+	
+	if (hash_add(pht, PMKCONF_AC_ECHO_C, strdup(echo_c)) == HASH_ADD_FAIL)
+		return(-1);
+	verbosef("Setting '%s' => '%s'", PMKCONF_AC_ECHO_C, echo_c);
+
+	if (hash_add(pht, PMKCONF_AC_ECHO_T, strdup(echo_t)) == HASH_ADD_FAIL)
+		return(-1);
+	verbosef("Setting '%s' => '%s'", PMKCONF_AC_ECHO_T, echo_t);
+
+	return(0);
+}
+
 
 /*
 	byte order check
@@ -492,7 +575,7 @@ bool byte_order_check(htable *pht) {
 		    ((((char *)&num)[1]) == 0x43) && ((((char *)&num)[0]) == 0x44) ) {
 			strlcpy(bo_type, HW_ENDIAN_LITTLE, sizeof(bo_type));
 		} else {
-			strlcpy(bo_type, HW_ENDIAN_UNKNOW, sizeof(bo_type));
+			strlcpy(bo_type, HW_ENDIAN_UNKNOWN, sizeof(bo_type));
 		}
 	}
 

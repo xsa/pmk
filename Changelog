@@ -1,3 +1,7 @@
+27 Nov 2003 xsa
+ * added ECHO_N, ECHO_C, ECHO_T variables to pmk.conf 
+   for autoconf compat. 
+
 26 Nov 2003 mipsator
  * added test_pmkinstall target in makefiles.
  * improved mode operator support in pmkinstall.

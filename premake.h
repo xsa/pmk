@@ -128,6 +128,9 @@
 #define PMKCONF_MISC_SYSCONFDIR	"SYSCONFDIR"
 #define PMKCONF_MISC_PREFIX	"PREFIX"
 
+#define PMKCONF_AC_ECHO_N	"AC_ECHO_N"
+#define PMKCONF_AC_ECHO_C	"AC_ECHO_C"
+#define PMKCONF_AC_ECHO_T	"AC_ECHO_T"
 
 /* prefix character used for comments */
 #define CHAR_COMMENT		'#'
@@ -143,7 +146,7 @@
 /* hw values */
 #define HW_ENDIAN_BIG		"BIG_ENDIAN"
 #define HW_ENDIAN_LITTLE	"LITTLE_ENDIAN"
-#define HW_ENDIAN_UNKNOW	"UNKNOW_ENDIAN"
+#define HW_ENDIAN_UNKNOWN	"UNKNOWN_ENDIAN"
 
 /* maximal size of an error message */
 #define MAX_ERR_MSG_LEN		256
