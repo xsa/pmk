@@ -73,9 +73,6 @@
 
 #define MAX_CONF_OPT		256	/* XXX temp maximum hash entries */
 
-/* string delimiter of the $PATH variable */
-#define PATH_STR_DELIMITER	':'
-
 #define ECHO_CMD	"echo \"one\\c\"; echo -n two; echo three"
 #define	ECHO_EMPTY	""
 #define	ECHO_N		"-n"
@@ -131,8 +128,7 @@ bool	get_cpu_data(htable *);
 bool	dir_exists(const char *);
 bool	byte_order_check(htable *);
 int	keycomp(const void *, const void *);
-void	char_replace(char *, const char, const char);
-void	write_new_data(htable *);
+bool	write_new_data(htable *);
 void	verbosef(const char *, ...);
 void	usage(void);
 bool	detection_loop(int, char *[]);
