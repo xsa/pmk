@@ -321,12 +321,13 @@ pmkobj *po_append(void *orig, void *value, void *misc) {
 			} else {
 				s = 0;
 			}
-			s = s + strlen(po_orig->data) + strlen(po_value->data) + 1;
+			s = s + strlen(po_orig->data) +
+					strlen(po_value->data) + 1;
 
 			/* allocate space */
 			pbuf = (char *) malloc(s);
 
-			if (strlcat(pbuf, po_orig->data, s) >= s) {
+			if (strlcat_b(pbuf, po_orig->data, s) == false) {
 				free(value);
 				free(pbuf);
 				return(NULL);
@@ -335,13 +336,14 @@ pmkobj *po_append(void *orig, void *value, void *misc) {
 			if ((misc != NULL) && (pbuf[0] != '\0')) {
 				/* adding separator if provided and if
 					string is not empty */
-				if (strlcat(pbuf, (char *) misc, s) >= s) {
+				if (strlcat_b(pbuf, (char *) misc,
+							s) == false) {
 					free(value);
 					free(pbuf);
 					return(NULL);
 				}
 			}
-			if (strlcat(pbuf, po_value->data, s) >= s) {
+			if (strlcat_b(pbuf, po_value->data, s) == false) {
 				free(value);
 				free(pbuf);
 				return(NULL);

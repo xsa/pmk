@@ -100,11 +100,13 @@ void strip(char *file) {
 		errorf("%s env variable not set, skipping.", STRIP_ENV_NAME);
 	} else {
 		/* build the command */
-		snprintf(cmd, sizeof(cmd), "%s %s", s_path, file);
-
-		/* stripping */
-		if (system(cmd) != EXIT_SUCCESS) {
-			errorf("strip failed.");
+		if (snprintf_b(cmd, sizeof(cmd), "%s %s", s_path, file) == false) {
+			errorf("failed to build strip command, skipping.");
+		} else {
+			/* stripping */
+			if (system(cmd) != EXIT_SUCCESS) {
+				errorf("strip failed.");
+			}
 		}
 	}
 }
@@ -470,7 +472,7 @@ debugf("create dir '%s'", src);
 			/* create path */
 			if (*src == CHAR_SEP) {
 			/* absolute path, copy */
-				if (strlcpy(dir, src, sizeof(dir)) >= sizeof(dir)) {
+				if (strlcpy_b(dir, src, sizeof(dir)) == false) {
 					errorf("overflow detected in directory creation (abs. path).");
 					exit(EXIT_FAILURE);
 				}
@@ -481,8 +483,8 @@ debugf("create dir '%s'", src);
 					exit(EXIT_FAILURE);
 				}
 				/* appending path */
-				strlcat(dir, STR_SEP, sizeof(dir));
-				if (strlcat(dir, src, sizeof(dir)) >= sizeof(dir)) {
+				strlcat(dir, STR_SEP, sizeof(dir)); /* no check */
+				if (strlcat_b(dir, src, sizeof(dir)) == false) {
 					errorf("overflow detected in directory creation (rel. path).");
 					exit(EXIT_FAILURE);
 				}
@@ -522,8 +524,11 @@ debugf("initial dst = '%s'", dst);
 					/* not a directory, XXX backup ? */
 					unlink(dst);
 				} else {
-					strlcpy(dir, dst, sizeof(dir));
-					strlcat(dir, STR_SEP, sizeof(dir));
+					strlcpy(dir, dst, sizeof(dir)); /* no check */
+					if (strlcat_b(dir, STR_SEP, sizeof(dir)) == false) {
+						errorf("overflow detected in destination.");
+						exit(EXIT_FAILURE);
+					}
 
 					pstr = basename(src);
 					if (pstr == NULL) {
@@ -531,7 +536,7 @@ debugf("initial dst = '%s'", dst);
 						exit(EXIT_FAILURE);
 					}
 
-					if (strlcat(dir, pstr, sizeof(dir)) >= sizeof(dir)) {
+					if (strlcat_b(dir, pstr, sizeof(dir)) == false) {
 						errorf("overflow detected in destination.");
 						exit(EXIT_FAILURE);
 					}

@@ -520,7 +520,8 @@ bool open_tmp_config(void) {
 	int	fd;
 
 	/* creating temporary file to build new configuration file */
-	snprintf(sfn, sizeof(sfn), PREMAKE_CONFIG_TMP);
+	if (snprintf_b(sfn, sizeof(sfn), PREMAKE_CONFIG_TMP) == false)
+		return(false);
 
 	fd = mkstemp(sfn);
 	if (fd == -1) {
@@ -715,11 +716,11 @@ bool predef_vars(htable *pht) {
 bool check_echo(htable *pht) {
 	FILE	*echo_pipe = NULL;
 	char	buf[TMP_BUF_LEN],
-		echocmd[MAXPATHLEN];
+		echocmd[TMP_BUF_LEN];
 	char	*echo_n, *echo_c, *echo_t;
 	size_t	s;
 
-	snprintf(echocmd, sizeof(echocmd), ECHO_CMD);
+	snprintf(echocmd, sizeof(echocmd), ECHO_CMD); /* should not fail */
 
 	if ((echo_pipe = popen(echocmd, "r")) == NULL) {
 		errorf("unable to execute '%s'.", echocmd);
@@ -800,18 +801,23 @@ bool check_libpath(htable *pht) {
 
 	/* build the path dynamically */
 	/* variable prefix */
-	strlcpy(libpath, "$", sizeof(libpath));
+	strlcpy(libpath, "$", sizeof(libpath)); /* should not fail */
 
 	/* prefix variable name */
-	strlcat(libpath, PMKCONF_MISC_PREFIX, sizeof(libpath));
+	strlcat(libpath, PMKCONF_MISC_PREFIX,
+				sizeof(libpath)); /* no check yet */
 
 	/* pkgconfig path suffix */
-	strlcat(libpath, PMKVAL_LIB_PKGCONFIG, sizeof(libpath));
+	if (strlcat_b(libpath, PMKVAL_LIB_PKGCONFIG,
+				sizeof(libpath)) == false)
+		return(false);
 
 	if (hash_get(pht, PMKCONF_BIN_PKGCONFIG) != NULL) {
 		if (dir_exists(libpath) == 0) {
-			if (record_data(pht, PMKCONF_PC_PATH_LIB, 'u', libpath) == false)
+			if (record_data(pht, PMKCONF_PC_PATH_LIB,
+						'u', libpath) == false)
 				return(false);
+
 			verbosef("Setting '%s' => '%s'",
 					PMKCONF_PC_PATH_LIB, libpath);
 		} else {
@@ -922,13 +928,18 @@ bool byte_order_check(htable *pht) {
 
 	if (((((char *)&num)[0]) == 0x41) && ((((char *)&num)[1]) == 0x42) &&
 	    ((((char *)&num)[2]) == 0x43) && ((((char *)&num)[3]) == 0x44)) {
-		strlcpy(bo_type, HW_ENDIAN_BIG, sizeof(bo_type));
+		strlcpy(bo_type, HW_ENDIAN_BIG,
+				sizeof(bo_type)); /* should not fail */
 	} else {
-		if ( ((((char *)&num)[3]) == 0x41) && ((((char *)&num)[2]) == 0x42) &&
-		    ((((char *)&num)[1]) == 0x43) && ((((char *)&num)[0]) == 0x44) ) {
-			strlcpy(bo_type, HW_ENDIAN_LITTLE, sizeof(bo_type));
+		if (((((char *)&num)[3]) == 0x41) &&
+				((((char *)&num)[2]) == 0x42) &&
+				((((char *)&num)[1]) == 0x43) &&
+				((((char *)&num)[0]) == 0x44)) {
+			strlcpy(bo_type, HW_ENDIAN_LITTLE,
+					sizeof(bo_type)); /* should not fail */
 		} else {
-			strlcpy(bo_type, HW_ENDIAN_UNKNOWN, sizeof(bo_type));
+			strlcpy(bo_type, HW_ENDIAN_UNKNOWN,
+					sizeof(bo_type)); /* should not fail */
 		}
 	}
 

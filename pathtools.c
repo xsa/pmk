@@ -247,7 +247,7 @@ bool relpath(char *from, char *to, char *buffer) {
 
 	if (buffer[0] == CHAR_EOS) {
 		/* same path, return "." */
-		strlcpy(buffer, ".", MAXPATHLEN);
+		strlcpy(buffer, ".", MAXPATHLEN); /* should not fail */
 	}
 
 	return(true);

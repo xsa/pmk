@@ -163,7 +163,7 @@ debugf("{pcgetopt} opt = '%s'", opt);
 		pstr = strchr(opt, PMKPC_ARG_SEP);
 		if (pstr != NULL) {
 			/* argument found */
-			if (strlcpy(buf, opt, sizeof(buf)) >= sizeof(buf)) {
+			if (strlcpy_b(buf, opt, sizeof(buf)) == false) {
 #ifdef PMKPC_DEBUG
 				debugf("{pcgetopt} strlcpy failed for '%s'", opt);
 #endif
@@ -249,7 +249,13 @@ bool list_all(pkgdata *ppd) {
 	}
 
 	/* build format string to align descriptions */
-	snprintf(fmt, sizeof(fmt), "%%-%us %%s\n", (unsigned int)maxs);
+	if (snprintf_b(fmt, sizeof(fmt), "%%-%us %%s\n",
+				(unsigned int)maxs) == false) {
+		/* cleaning */
+		hash_free_hkeys(phk);
+		free(descr);
+		return(false);
+	}
 
 	for(i = 0 ; i < phk->nkey ; i++) {
 		if (rval == true) {
@@ -301,15 +307,21 @@ void usage(void) {
 	cursor = strlen(PMKPC_USAGE_STR);
 
 	for (i = 0; i < nbpcopt; i++) {
-		strlcpy(option, PMKPC_USAGE_OPEN_OPT, sizeof(option));
-		strlcat(option, pcoptions[i].name, sizeof(option));
+		strlcpy(option, PMKPC_USAGE_OPEN_OPT,
+					sizeof(option)); /* no check needed */
+		strlcat(option, pcoptions[i].name,
+					sizeof(option)); /* no check needed */
 
 		if (pcoptions[i].usagearg != NULL) {
-			strlcat(option, "=", sizeof(option));
-			strlcat(option, pcoptions[i].usagearg, sizeof(option));
+			strlcat(option, "=",
+					sizeof(option)); /* no check needed */
+			strlcat(option, pcoptions[i].usagearg,
+					sizeof(option)); /* no check needed */
 		}
 
-		strlcat(option, PMKPC_USAGE_CLOSE_OPT, sizeof(option));
+		strlcat(option, PMKPC_USAGE_CLOSE_OPT,
+					sizeof(option)); /* no check needed */
+
 		olen = strlen(option);
 		cursor += olen;
 
@@ -692,8 +704,9 @@ debugf("module not found");
 
 			/* set config tool filename */
 			if (cfgtcell_get_binary(pcd, mod, pc_cmd, sizeof(pc_cmd)) == false) {
-				if (snprintf(pc_cmd, sizeof(pc_cmd), "%s-config", mod) >= (int) sizeof(pc_cmd)) {
-					errorf("overflow in snprintf while building configure tool name.");
+				if (snprintf_b(pc_cmd, sizeof(pc_cmd),
+						"%s-config", mod) == false) {
+					errorf("failed to build configure tool name.");
 					exit(EXIT_FAILURE);
 				}
 			}

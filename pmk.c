@@ -99,7 +99,12 @@ bool process_dyn_var(pmkdata *pgd, char *template) {
 		errorf(ERRMSG_MEM);
 		return(false);
 	}
-	strlcpy(stpath, dirname(pstr), sizeof(stpath));
+
+	if (strlcpy_b(stpath, dirname(pstr), sizeof(stpath)) == false) {
+		free(pstr);
+		errorf(PMK_ERR_OVRFLOW);
+		return(false);
+	}
 	free(pstr);
 
 	/* compute relative path */
@@ -297,7 +302,8 @@ debugf("%s = '%s'", pstr, buf);
 	pstr = hash_get(pht, PMKCONF_BIN_INSTALL);
 	if (pstr != NULL) {
 	        /* append -c for compat with autoconf*/
-	        snprintf(buf, sizeof(buf), "%s -c", pstr);
+	        if (snprintf_b(buf, sizeof(buf), "%s -c", pstr) == false)
+			return(false);
 		if (hash_update_dup(pht, "INSTALL", buf) == HASH_ADD_FAIL)
 			return(false);
 	}
@@ -392,8 +398,8 @@ bool process_template(char *template, pmkdata *pgd) {
 	}	
 
 	/* get the file name */
-	if (strlcpy(lbuf, ptn, sizeof(lbuf)) >= sizeof(lbuf)) {
-		errorf("buffer overflow.");
+	if (strlcpy_b(lbuf, ptn, sizeof(lbuf)) == false) {
+		errorf(PMK_ERR_OVRFLOW);
 		return(false);
 	}
 
@@ -470,9 +476,14 @@ bool process_template(char *template, pmkdata *pgd) {
 			return(false); /* XXX error message ? */
 	}
 
-	snprintf(cibuf, sizeof(cibuf), "%s, generated from %s by PMK.", pfn, ptn);
+	if (snprintf_b(cibuf, sizeof(cibuf),
+				"%s generated from %s by PMK.",
+				pfn, ptn) == false)
+		return(false);
+
 	if (hash_update_dup(pht, "configure_input", cibuf) == HASH_ADD_FAIL)
 		return(false);
+
 	free(ptn);
 	free(pfn);
 
@@ -719,15 +730,24 @@ int main(int argc, char *argv[]) {
 						exit(EXIT_FAILURE);
 					}
 
-					/* path of pmkfile is also the srcdir base */
-					/* NOTE : we use strdup to avoid problem with linux's dirname */
+					/*
+						path of pmkfile is also the srcdir base
+
+						NOTE : we use strdup to avoid
+						problem with linux's dirname
+					*/
 					pstr = strdup(pgd->pmkfile);
 					if (pstr == NULL) {
 						free(pstr);
 						errorf(ERRMSG_MEM);
 						exit(EXIT_FAILURE);
 					}
-					strlcpy(pgd->srcdir, dirname(pstr), sizeof(pgd->srcdir)); /* XXX check ??? */
+					if (strlcpy_b(pgd->srcdir, dirname(pstr),
+							sizeof(pgd->srcdir)) == false) {
+						free(pstr);
+						errorf(PMK_ERR_OVRFLOW);
+						exit(EXIT_FAILURE);
+					}
 					free(pstr);
 
 					pmkfile_set = true;
@@ -770,19 +790,36 @@ int main(int argc, char *argv[]) {
 
 	/* set basedir if needed */
 	if (basedir_set == false) {
-		strlcpy(pgd->basedir, buf, sizeof(pgd->basedir));
+		if (strlcpy_b(pgd->basedir, buf,
+					sizeof(pgd->basedir)) == false) {
+			errorf("failed to set 'basedir'.");
+			exit(EXIT_FAILURE);
+		}
 	}
 
 	/* set pmkfile and srcdir if needed */
 	if (pmkfile_set == false) {
-		strlcpy(pgd->srcdir, buf, sizeof(pgd->srcdir));
+		if (strlcpy_b(pgd->srcdir, buf,
+					sizeof(pgd->srcdir)) == false) {
+			errorf("failed to set 'srcdir'.");
+			exit(EXIT_FAILURE);
+		}
+
 		abspath(pgd->srcdir, PREMAKE_FILENAME, pgd->pmkfile); /* should not fail */
 	}
 
 	if (buildlog == true) {
-		strlcpy(pgd->buildlog, PMK_BUILD_LOG, sizeof(pgd->buildlog));
+		if (strlcpy_b(pgd->buildlog, PMK_BUILD_LOG,
+					sizeof(pgd->buildlog)) == false) {
+			errorf(PMK_ERR_BLDLOG);
+			exit(EXIT_FAILURE);
+		}
 	} else {
-		strlcpy(pgd->buildlog, "/dev/null", sizeof(pgd->buildlog));
+		if (strlcpy_b(pgd->buildlog, "/dev/null",
+					sizeof(pgd->buildlog)) == false) {
+			errorf(PMK_ERR_BLDLOG);
+			exit(EXIT_FAILURE);
+		}
 	}
 
 	/* init prsdata structure */
