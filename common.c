@@ -38,7 +38,6 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include <unistd.h>
 
 #include "common.h"
@@ -97,7 +96,7 @@ int parse_conf_line(char *line, int linenum, cfg_opt *opts) {
 				/* operator found, terminate key and copy key name in struct */
 				found_op = 1;
 				key[j] = CHAR_EOS;
-				strncpy(opts->key, key, MAX_OPT_NAME_LEN);
+				strlcpy(opts->key, key, MAX_OPT_NAME_LEN); /* XXX test ? */
 
 				/* set operator in struct */
 				opts->opchar = c;
@@ -124,7 +123,7 @@ int parse_conf_line(char *line, int linenum, cfg_opt *opts) {
 	if (found_op == 1) {
 		/* line parsed without any error */
 		value[k] = CHAR_EOS;
-		strncpy(opts->val, value, MAX_OPT_VALUE_LEN);
+		strlcpy(opts->val, value, MAX_OPT_VALUE_LEN); /* XXX test ? */
 		return(0);			
 	} else {
 		/* missing operator */
@@ -149,11 +148,11 @@ bool env_to_opt(char *env_name, pmkcmdopt *opt) {
 	env_val = getenv(env_name);
 	if (env_val == NULL) {
 		/* env variable name not found */
-		strncpy(opt->value, EMPTY_OPT_VALUE, sizeof(EMPTY_OPT_VALUE));
+		strlcpy(opt->value, EMPTY_OPT_VALUE, sizeof(EMPTY_OPT_VALUE)); /* XXX test ? */
 		rval = false;
 	} else {
 		/* okay get it */
-		strncpy(opt->value, env_val, sizeof(env_val));
+		strlcpy(opt->value, env_val, sizeof(env_val)); /* XXX test ? */
 		rval = true;
 		
 	}
