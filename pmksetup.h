@@ -127,11 +127,14 @@ bool	check_echo(htable *);
 bool	check_libpath(htable *);
 bool	get_cpu_data(htable *);
 bool	dir_exists(const char *);
-bool	byte_order_check(htable *pht);
+bool	byte_order_check(htable *);
 int	keycomp(const void *, const void *);
 void	char_replace(char *, const char, const char);
 void	write_new_data(htable *);
-void	verbosef(const char *fmt, ...);
+void	verbosef(const char *, ...);
 void	usage(void);
+bool	detection_loop(int, char *[]);
+void	child_loop(uid_t, gid_t, int, char *[]);
+void	parent_loop(pid_t);
 
 #endif	/* _PMKSETUP_H_ */
