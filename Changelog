@@ -1,3 +1,5 @@
+# snapshot 0.8.1-s4
+
 15 Aug 2004 mipsator
  * added missing support of additional defines in CHECK_CONFIG and
    CHECK_PKG_CONFIG.
