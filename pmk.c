@@ -674,7 +674,7 @@ int main(int argc, char *argv[]) {
 		pmk_log("\n");
 
 		da = gdata.tlist;
-		for (i=0 ; i < da_size(da) ; i++) {
+		for (i = 0 ; i < da_size(da) ; i++) {
 			process_template(da_idx(da, i), gdata.htab);
 		}
 		
