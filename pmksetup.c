@@ -446,6 +446,10 @@ int get_binaries(htable *ht) {
  *		 -1 on failure
  */ 
 int predef_vars(htable *ht) {
+	if (hash_add(ht, PREMAKE_KEY_SYSCONFDIR, SYSCONFDIR) == HASH_ADD_FAIL)
+		return(-1);
+	verbosef("Setting '%s' => '%s'", PREMAKE_KEY_SYSCONFDIR, SYSCONFDIR);
+
 	if (hash_add(ht, PREMAKE_KEY_PREFIX, "/usr/local") == HASH_ADD_FAIL)
 		return(-1);
 	verbosef("Setting '%s' =>'%s'", PREMAKE_KEY_PREFIX, "/usr/local");
