@@ -859,6 +859,12 @@ bool detection_loop(int argc, char *argv[]) {
 	argc -= optind;
 	argv += optind;
 
+	printf("PMKSETUP version %s", PREMAKE_VERSION);
+#ifdef DEBUG
+	printf(" [SUB #%s] [SNAP #%s]", PREMAKE_SUBVER_PMKSETUP, PREMAKE_SNAP);
+#endif /* DEBUG */
+	printf("\n\n");
+
 	if (process_clopts == false) {
 		/* standard behavior, gathering data */
 		if (gather_data(ht) == false)
@@ -905,12 +911,6 @@ bool detection_loop(int argc, char *argv[]) {
  */
 
 void child_loop(uid_t uid, gid_t gid, int argc, char *argv[]) {
-	printf("PMKSETUP version %s", PREMAKE_VERSION);
-#ifdef DEBUG
-	printf(" [SUB #%s] [SNAP #%s]", PREMAKE_SUBVER_PMKSETUP, PREMAKE_SNAP);
-#endif /* DEBUG */
-	printf("\n\n");
-
 #ifndef WITHOUT_FORK
 	if (getuid() == 0) {
 		/* user has root privs, DROP THEM ! */
