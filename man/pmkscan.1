@@ -1,0 +1,49 @@
+.\" $Id$
+
+.Dd March 28, 2003
+.Dt PMKSCAN 1
+.Os
+
+.Sh NAME
+.Nm pmkscan
+.Nd source scanning tool
+
+.Sh SYNOPSIS
+.Nm
+.Bk -words
+.Op Fl b Ar path 
+.Ek
+
+.Sh DESCRIPTION
+.Nm
+is a tool which scan the sources for registered data (see pmkscan.dat) and create
+a pmkfile template (named pmkfile.scan) containing the result of the scan.
+.Pp
+The options are as follows:
+.Bl -tag -width Ds
+.It Fl b Ar path
+Use given path as initial scanned directory. This is optional, default path is the current working directory.
+.It Fl h
+Display usage.
+.It Fl v
+Display the version number. 
+.El
+
+.Sh FILES
+.Bl -tag -width "pmkfile.scan" -compact
+.It Pa pmkscan.dat
+Pmkscan database.
+.It Pa pmkfile.scan 
+Resulting template.
+.El
+
+.Sh SEE ALSO
+.Xr pmk 1 ,
+.Xr pmkfile 5
+
+.Sh AUTHOR
+.An Damien Couderc
+.Sh HISTORY
+The idea to replace configure script was existing since a long time. 
+But the projet was initiated in the begining of March 2003.
+
