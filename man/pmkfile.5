@@ -210,7 +210,7 @@ type is 'quoted', name of the binary.
 .It Dv VARIABLE
 type is 'quoted', variable name to store the path.
 .El
-.It Cm CHECK_INCLUDE
+.It Cm CHECK_HEADER
 Check language header and optionally a function.
 .Pp
 Arguments:
@@ -221,7 +221,7 @@ Arguments:
 .It Dv NAME
 type is 'quoted', name of the header.
 .It Dv FUNCTION
-type is 'quoted', function to check, optional.
+type is 'quoted' or 'list', name or list of functions to check, optional.
 .It Dv CFLAGS
 type is 'quoted', variable name to store CFLAGS values, optional.
 .El
@@ -236,7 +236,7 @@ Arguments:
 .It Dv NAME
 type is 'quoted', name of the library to check.
 .It Dv FUNCTION
-type is 'quoted', function to check, optional.
+type is 'quoted' or 'list', name or list of functions to check, optional.
 .It Dv LIBS
 type is 'quoted', variable name to store LIBS values, optional.
 .El

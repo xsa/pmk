@@ -1,4 +1,8 @@
 26 sep 2004 mipsator
+ * updated pmkfile.5 to sync with latest changes.
+ * updated README and INSTALL to warn about non POSIX compliant shells.
+
+26 sep 2004 mipsator
  * improved CHECK_LIB to handle more than one function. 
 
 24 sep 2004 mipsator
