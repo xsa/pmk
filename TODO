@@ -10,6 +10,7 @@ pmk :
 - set LDFLAGS ?
 - cache ? (binary location, etc...)
 - more C++ support
+- global LANG
 
 pmksetup :
 ~ pmk.conf(5)
