@@ -63,7 +63,7 @@ pmksetup:
 			- better check for install ?
 			- others ?
 	+	privilege separation (PRIVSEP branch)
-	~!R	keep ':' as separator in PATH_BIN (add warning to launch pmksetup for refreshing the variable) 
+	+	keep ':' as separator in PATH_BIN (add warning to launch pmksetup for refreshing the variable) 
 
 
 pmkscan
@@ -74,7 +74,7 @@ pmkscan
 
 pmkinstall
 -----------------------------------------------------------------------
-	-!	fragment main loop in functions, it's too large
+	+	fragment main loop in functions, it's too large
 	-.	backup option ?
 
 
