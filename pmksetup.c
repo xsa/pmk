@@ -221,16 +221,10 @@ int parse_conf(FILE *config, htable *ht) {
 		*v;	
 	int	 linenum = 0,
 		 error = 0;
-	size_t	 len;	
 
 	/* parsing the configuration file */
-	while (fgets(line, sizeof(line), config) != NULL) {
+	while (get_line(config, line, sizeof(line)) == true) {
 		linenum++;
-		len = strlen(line);
-
-		/* replace the trailing '\n' by a NULL char */
-		if (line[len - 1] == '\n')
-			line[len - 1] = CHAR_EOS;
 
 		/* checking first character of the line */
 		switch (line[0]) {
