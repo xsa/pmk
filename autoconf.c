@@ -66,6 +66,7 @@ bool ac_parse_config(pmkdata *pgd) {
 		 buf[TMP_BUF_LEN],
 		 fsrc[MAXPATHLEN],
 		 fname[MAXPATHLEN],
+		 ftmp[MAXPATHLEN],
 		*fpath,
 		*pstr;
 	htable	*ht;
@@ -93,7 +94,7 @@ bool ac_parse_config(pmkdata *pgd) {
 	}
 
 	/* open temporary file ? */
-	fp_out = fopen(PMK_TMP_AC_CONF, "w");
+	fp_out = tmp_open(PMK_TMP_AC_CONF, "w", ftmp, sizeof(ftmp));
 	if (fp_out == NULL) {
 		fclose(fp_in);
 		return(false);
@@ -148,15 +149,15 @@ bool ac_parse_config(pmkdata *pgd) {
 	fclose(fp_out);
 
 	if (fe == 0) {
-		unlink(PMK_TMP_AC_CONF);
+		unlink(ftmp);
 		return(false);
 	}
 
 	/* erase orig and copy new one */
 	unlink(fname);
-	rval = copy_text_file(PMK_TMP_AC_CONF, fname);
+	rval = copy_text_file(ftmp, fname);
 
-	unlink(PMK_TMP_AC_CONF);
+	unlink(ftmp);
 
 	pmk_log("Saved '%s'.\n", fname);
 
