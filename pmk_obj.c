@@ -99,6 +99,30 @@ pmkobj *po_mk_hash(htable *pht) {
 }
 
 /*
+	XXX useful ?
+*/
+
+pmkobj *po_dup(pmkobj *po) {
+	pmkobj	*dup;
+
+	dup = (pmkobj *) malloc(sizeof(pmkobj));
+	if (dup != NULL) {
+		dup->type = po->type;
+		switch (dup->type) {
+			case PO_STRING :
+				dup->data = strdup(po->data);
+				break;
+
+			default :
+				return(NULL); /* XXX TODO */
+				break;
+		}
+	}
+
+	return(dup);
+}
+
+/*
 	XXX
 */
 
@@ -148,6 +172,10 @@ void po_free(pmkobj *po) {
 		free(po);
 	}
 }
+
+/*
+	XXX
+*/
 
 pmkobj *po_append(void *orig, void *value, void *misc) {
 	char	*pbuf;
