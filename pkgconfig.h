@@ -37,7 +37,8 @@
 #ifndef _PMK_PKGCONFIG_H_
 #define _PMK_PKGCONFIG_H_
 
-#include "pmk.h"
+#include "dynarray.h"
+#include "hash.h"
 
 #ifndef DATADIR
 /* for lint */
