@@ -4,6 +4,7 @@
  * updated use of detect_compiler() in pmk.
  * added comp_test.c in tests directory.
  * fixed function detection in CHECK_HEADER.
+ * added support for sudo in makefiles.
 
 # snapshot 0.7.6
 
