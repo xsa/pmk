@@ -1,0 +1,15 @@
+# $Id$
+
+CC?=	@BIN_CC@
+
+NAME=	hello
+
+all: $(NAME)
+
+hello:
+	$(CC) $(CFLAGS) -o $(NAME) $(NAME).c
+
+clean:
+	rm -f $(NAME)
+	rm -f Makefile config.h
+	rm -f *.core *.log
