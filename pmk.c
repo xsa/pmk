@@ -187,10 +187,10 @@ pmkdata *pmkdata_init(void) {
 	/* init template list */
 	ppd->tlist = NULL;
 
-	/* XXX */
+	/* init autoconf file */
 	ppd->ac_file = NULL;
 
-	/* XXX */
+	/* init default language */
 	ppd->lang = NULL;
 
 	/* init on demand */
@@ -205,8 +205,6 @@ pmkdata *pmkdata_init(void) {
 	pgd : global data structure
 
         return : -
-
-        NOTE : XXX check hash_add ?
 */
 
 bool init_var(pmkdata *pgd) {

@@ -44,6 +44,11 @@
 
 #define AC_VALUE_DEF	"-DHAVE_CONFIG_H"
 
+#define AC_ECHO_N	"ECHO_N"
+#define AC_ECHO_C	"ECHO_C"
+#define AC_ECHO_T	"ECHO_T"
+
+
 bool	ac_parse_config(pmkdata *);
 bool	ac_process_dyn_var(pmkdata *, char *);
 void	ac_clean_dyn_var(htable *);

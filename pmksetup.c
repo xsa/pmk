@@ -144,7 +144,7 @@ bool gather_data(htable *pht) {
 
  	/* gather env variables and look for specific binaries */
 	if (get_binaries(pht) == false) {
-		errorf("failed to get binaries."); /* XXX TODO better msg :) */
+		errorf("failed to locate binaries.");
 		return(false);
 	}
  
@@ -164,7 +164,7 @@ bool gather_data(htable *pht) {
 
 	/* try to detect cpu family and specific data */
 	if (get_cpu_data(pht) == false) {
-		/*errorf("failure in cpu detection."); XXX*/
+		errorf("failure in cpu detection.");
 		return(false);
 	}
 
@@ -292,7 +292,7 @@ bool check_opt(htable *cht, prsopt *popt) {
 		return(true);
 	}
 
-	/* XXX check value */
+	/* XXX check value ? */
 	recval = po_get_str(ppo->value);
 
 #ifdef PMKSETUP_DEBUG
@@ -413,7 +413,7 @@ bool get_binaries(htable *pht) {
 
 	pstr = po_get_str(ppo->value);
 	if (pstr == NULL) {
-		/* XXX error */
+		errorf("unable to get binary path value.");
 		return(false);
 	}
 
@@ -658,7 +658,7 @@ bool get_cpu_data(htable *pht) {
 		phk = hash_keys(spht);
 		if (phk != NULL) {
 			for(i = 0 ; i < phk->nkey ; i++) {
-				pstr = hash_get(spht, phk->keys[i]); /* XXX check ? */
+				pstr = hash_get(spht, phk->keys[i]); /* should not be NULL */
 
 				if (record_data(pht, phk->keys[i], 'u', pstr) == false)
 					return(false);
@@ -983,7 +983,7 @@ void parent_loop(pid_t pid) {
 	}
 #endif /* WITHOUT_FORK */
 
-	if (sfp != NULL) { /* XXX needed ? */
+	if (sfp != NULL) {
 		if (fclose(sfp) != 0) {
 			/* hazardous result => exit */
 			errorf("cannot close temporary file '%s' : %s.",

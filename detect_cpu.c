@@ -215,7 +215,7 @@ htable *arch_wrapper(prsdata *pdata, char *arch_name) {
 
 	arch_id = arch_name_to_id(arch_name);
 
-	pht = hash_init(16); /* XXX hardcode, check */
+	pht = hash_init(ARCH_NB_MAX);
 	if (pht == NULL) {
 		printf("DEBUG pht init failed !\n");
 		return(NULL);
@@ -243,7 +243,7 @@ htable *arch_wrapper(prsdata *pdata, char *arch_name) {
 
 			x86_cpu_cell_destroy(pcell);
 #else /* ARCH_X86_32 || ARCH_X86_64 */
-			errorf("architecture mismatch.");
+			errorf("architecture mismatch for '%s'.", arch_name);
 			return(NULL);
 #endif /* ARCH_X86_32 || ARCH_X86_64 */
 			break;
@@ -255,16 +255,19 @@ htable *arch_wrapper(prsdata *pdata, char *arch_name) {
 				return(NULL);
 			}
 #else /* ARCH_ALPHA */
-			errorf("architecture mismatch.");
+			errorf("architecture mismatch for '%s'.", arch_name);
 			return(NULL);
 #endif /* ARCH_ALPHA */
 			break;
 
 		case PMK_ARCH_IA_64 :
 #if defined(ARCH_IA64)
-			ia64_get_cpuid_data(pdata, pht); /* XXX */
+			if (ia64_get_cpuid_data(pdata, pht) == false) {
+				errorf("failed to record cpu data.");
+				return(NULL);
+			}
 #else /* ARCH_IA64 */
-			errorf("architecture mismatch.");
+			errorf("architecture mismatch for '%s'.", arch_name);
 			return(NULL);
 #endif /* ARCH_IA64 */
 
@@ -407,7 +410,7 @@ char *x86_get_std_cpu_vendor(prsdata *pdata, char *civendor) {
 		pcell = pcell->next;
 	}
 
-	/* XXX useless ? */
+	/* in case we don't find anything */
 	if (vendor == NULL)
 		vendor = PMK_ARCH_STR_UNKNOWN;
 
@@ -610,20 +613,24 @@ bool x86_set_cpu_data(prsdata *pdata, x86_cpu_cell *pcell, htable *pht) {
 	phtbis = (htable *) seek_key(pdata, LIST_X86_CPU_CLASS);
 	if (phtbis != NULL) {
 		if (pcell->family < 15) {
-			snprintf_b(buffer, sizeof(buffer),
+			snprintf_b(buffer, sizeof(buffer), /* no check needed */
 					X86_CPU_CLASS_FAMILY_FMT,
-					pcell->stdvendor, pcell->family); /* XXX check ? */
+					pcell->stdvendor, pcell->family);
 			pstr = po_get_str(hash_get(phtbis, buffer)); /* no check needed */
 		} else {
-			snprintf_b(buffer, sizeof(buffer),
+			snprintf_b(buffer, sizeof(buffer), /* no check needed */
 					X86_CPU_CLASS_EXTFAM_FMT,
-					pcell->stdvendor, pcell->extfam); /* XXX check ? */
+					pcell->stdvendor, pcell->extfam);
 			pstr = po_get_str(hash_get(phtbis, buffer)); /* no check needed */
 		}
 
 		if (pstr == NULL) {
 			/* not found, get default */
-			pstr = po_get_str(hash_get(phtbis, "DEFAULT")); /* XXX check ? */
+			pstr = po_get_str(hash_get(phtbis, "DEFAULT"));
+			if (pstr == NULL) {
+				errorf("failed to get default value for cpu family (%s).", buffer);
+				return(false);
+			}
 		}
 
 		if (hash_update_dup(pht, PMKCONF_HW_X86_CPU_CLASS,
@@ -743,7 +750,12 @@ size_t nb_feat = sizeof(ia64_cpu_feat) / sizeof(ia64_cpu_feature);
 ****/
 
 /*
-	XXX
+	gather and save ia64 cpu data
+
+	pdata: parsing data structure
+	pht: storage hash table
+
+	returns: true on success else false
 */
 
 bool ia64_get_cpuid_data(prsdata *pdata, htable *pht) {
@@ -793,15 +805,19 @@ bool ia64_get_cpuid_data(prsdata *pdata, htable *pht) {
 
 	phtbis = (htable *) seek_key(pdata, LIST_IA64_CPU_CLASS);
 	if (phtbis != NULL) {
-		snprintf_b(buffer, sizeof(buffer),
-				IA64_CPU_CLASS_FAMILY_FMT, rslt); /* XXX check ? */
+		snprintf_b(buffer, sizeof(buffer), /* no check needed */
+				IA64_CPU_CLASS_FAMILY_FMT, rslt);
 /*debugf("buffer = '%s'", buffer);*/
 
 		pstr = po_get_str(hash_get(phtbis, buffer)); /* no check needed */
 		if (pstr == NULL) {
 /*debugf("getting default");*/
 			/* not found, get default */
-			pstr = po_get_str(hash_get(phtbis, "DEFAULT")); /* XXX check !!! */
+			pstr = po_get_str(hash_get(phtbis, "DEFAULT"));
+			if (pstr == NULL) {
+				errorf("failed to get default value for cpu class family.");
+				return(false);
+			}
 		}
 /*debugf("pstr = '%s'", pstr);*/
 

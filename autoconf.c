@@ -420,54 +420,41 @@ bool ac_set_variables(htable *pht) {
 /* use values from pmk.conf */
 	pstr = (char *) hash_get(pht, PMKCONF_AC_ECHO_C);
 	if (pstr != NULL) {
-		if (hash_update_dup(pht, "ECHO_C", pstr) == HASH_ADD_FAIL)
+		if (hash_update_dup(pht, AC_ECHO_C, pstr) == HASH_ADD_FAIL) {
+			errorf("failed to set '%s'.", AC_ECHO_C);
 			return(false);
-	} /* XXX need else ? */
+		}
+	}
 
 	pstr = (char *) hash_get(pht, PMKCONF_AC_ECHO_N);
 	if (pstr != NULL) {
-		if (hash_update_dup(pht, "ECHO_N", pstr) == HASH_ADD_FAIL)
+		if (hash_update_dup(pht, AC_ECHO_N, pstr) == HASH_ADD_FAIL) {
+			errorf("failed to set '%s'.", AC_ECHO_N);
 			return(false);
-	} /* XXX need else ? */
+		}
+	}
 
 	pstr = (char *) hash_get(pht, PMKCONF_AC_ECHO_T);
 	if (pstr != NULL) {
-		if (hash_update_dup(pht, "ECHO_T", pstr) == HASH_ADD_FAIL)
+		if (hash_update_dup(pht, AC_ECHO_T, pstr) == HASH_ADD_FAIL) {
+			errorf("failed to set '%s'.", AC_ECHO_T);
 			return(false);
-	} /* XXX need else ? */
+		}
+	}
 
 /* XXX TODO verify the following */
 	/*hash_add(pht, "SET_MAKE", strdup(""));                            */
-	/*hash_add(pht, "AMDEP_TRUE", strdup(""));                          */
-	/*hash_add(pht, "AMDEP_FALSE", strdup("#"));                        */
-	/*hash_add(pht, "AMDEPBACKSLASH", strdup("\\"));                    */
-	/*hash_add(pht, "AMTAR", strdup("echo 'PMK: set as useless'"));     */
 	/*hash_add(pht, "ACLOCAL", strdup("echo 'PMK: set as useless'"));   */
 	/*hash_add(pht, "AUTOCONF", strdup("echo 'PMK: set as useless'"));  */
 	/*hash_add(pht, "AUTOHEADER", strdup("echo 'PMK: set as useless'"));*/
 	/*hash_add(pht, "AUTOMAKE", strdup("echo 'PMK: set as useless'"));  */
 	/*hash_add(pht, "MAKEINFO", strdup("echo 'PMK: set as useless'"));  */
 	/*hash_add(pht, "EXEEXT", strdup("")); |+ cygwin shit ! +|          */
-	/*hash_add(pht, "PACKAGE_BUGREPORT", strdup(""));                   */
-	/*hash_add(pht, "PACKAGE_NAME", strdup(""));                        */
-	/*hash_add(pht, "PACKAGE_STRING", strdup(""));                      */
-	/*hash_add(pht, "PACKAGE_TARNAME", strdup(""));                     */
-	/*hash_add(pht, "PACKAGE_VERSION", strdup(""));                     */
-	/*hash_add(pht, "PACKAGE_SEPARATOR", strdup(""));                   */
-	/*hash_add(pht, "CYGPATH_W", strdup(""));                           */
 	/*hash_add(pht, "DEPDIR", strdup(".deps"));                         */
 	/*hash_add(pht, "CCDEPMODE", strdup(""));                           */
 	/*hash_add(pht, "LIBOBJS", strdup(""));                             */
 	/*hash_add(pht, "LTLIBOBJS", strdup(""));                           */
 	/*hash_add(pht, "PATH_SEPARATOR", strdup(":")); |+ default shell is sh +|*/
-
-        /* XXX AC_CHECK_PROG stuff, should be moved somewhere */
-	/*pstr = (char *) hash_get(pht, "CC");                        */
-	/*hash_update_dup(pht, "ac_ct_CC", pstr); |+ XXX shit ? +|    */
-	/*pstr = (char *) hash_get(pht, "RANLIB");                    */
-	/*hash_update_dup(pht, "ac_ct_RANLIB", pstr); |+ XXX shit ? +|*/
-	/*pstr = (char *) hash_get(pht, "STRIP");                     */
-	/*hash_update_dup(pht, "ac_ct_STRIP", pstr); |+ XXX shit ? +| */
 
 	if (hash_update_dup(pht, "install_sh", "pmkinstall") == HASH_ADD_FAIL)
 		return(false); /* provide our own */
