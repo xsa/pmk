@@ -31,21 +31,15 @@
  */
 
 
-#include "compat/compat.h"
+#include <ctype.h>
 
-#ifndef HAVE_STRLCPY
-#include "compat/strlcpy.c"
-#endif
+#include "compat.h"
 
-#ifndef HAVE_STRLCAT
-#include "compat/strlcat.c"
-#endif
-
-#ifndef HAVE_LIBGEN_H
-#include "compat/basename.c"
-#include "compat/dirname.c"
-#endif
+/*
+	isblank() function
+*/
 
 #ifndef HAVE_ISBLANK
-#include "compat/isblank.c"
+#include "isblank.h"
 #endif
+

@@ -30,22 +30,11 @@
  *
  */
 
+#ifndef _ISBLANK_H_
+#define _ISBLANK_H_
 
-#include "compat/compat.h"
+int isblank(int);
 
-#ifndef HAVE_STRLCPY
-#include "compat/strlcpy.c"
-#endif
 
-#ifndef HAVE_STRLCAT
-#include "compat/strlcat.c"
-#endif
+#endif /* _ISBLANK_H_ */
 
-#ifndef HAVE_LIBGEN_H
-#include "compat/basename.c"
-#include "compat/dirname.c"
-#endif
-
-#ifndef HAVE_ISBLANK
-#include "compat/isblank.c"
-#endif

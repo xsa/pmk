@@ -30,22 +30,12 @@
  *
  */
 
+#include "isblank.h"
 
-#include "compat/compat.h"
+int isblank(int c) {
+	if (c == ' ' || c == '\t')
+		return (1);
+	else
+		return(0);
+}
 
-#ifndef HAVE_STRLCPY
-#include "compat/strlcpy.c"
-#endif
-
-#ifndef HAVE_STRLCAT
-#include "compat/strlcat.c"
-#endif
-
-#ifndef HAVE_LIBGEN_H
-#include "compat/basename.c"
-#include "compat/dirname.c"
-#endif
-
-#ifndef HAVE_ISBLANK
-#include "compat/isblank.c"
-#endif
