@@ -287,13 +287,36 @@ bool parse_cell(char *line, prscell *pcell) {
 		pstr ++;
 	}
 
+	/* old format compatibility */
+	if (*pstr == CHAR_EOS) {
+#ifdef DEBUG_PRS
+		debugf("command '%s' with label '%s'", pcell->name, pcell->label);
+#endif
+		/* everything is ok */
+		return(true);
+	}
+
+	if (*pstr != ' ') {
+		strlcpy(parse_err, PRS_ERR_UNKNOWN, sizeof(parse_err));
+		return(false);
+	} else {
+		pstr++;
+	}
+
+	if (*pstr != PMK_CHAR_COMMAND_START) {
+		strlcpy(parse_err, PRS_ERR_TRAILING, sizeof(parse_err));
+		return(false);
+	} else {
+		pstr++;
+	}
+
 	if (*pstr != CHAR_EOS) {
 		strlcpy(parse_err, PRS_ERR_TRAILING, sizeof(parse_err));
 		return(false);
 	}
 
 #ifdef DEBUG_PRS
-			debugf("command '%s' with label '%s'", pcell->name, pcell->label);
+	debugf("command '%s' with label '%s'", pcell->name, pcell->label);
 #endif
 	/* everything is ok */
 	return(true);
@@ -415,15 +438,15 @@ bool parse(FILE *fp, prsdata *pdata) {
 
 			case PMK_CHAR_COMMAND :
 				if (process == false) {
-					pcell = prscell_init(); /* XXX TODO check if null */
+					pcell = prscell_init();
 					if (pcell == NULL) {
-						/* XXX error */
+						/* XXX TODO error */
 						return(false);
 					}
 
 					/* parse command and label */
 					if (parse_cell(buf, pcell) == false) { /* XXX TODO should use prsdata */
-						errorf("%s", parse_err);
+						errorf("line %d : %s", cur_line, parse_err);
 #ifdef DEBUG_PRS
 						debugf("parse_cell returned false");
 #endif
@@ -451,6 +474,21 @@ bool parse(FILE *fp, prsdata *pdata) {
 					}
 				}
 				break;
+			case PMK_CHAR_COMMAND_END :
+				if (process == true) {
+					process = false;
+						
+					if (pdata->last != NULL) {
+						pdata->last->next = pcell;
+					} else {
+						pdata->first = pcell;
+					}
+					pdata->last = pcell;
+				} else {
+					errorf("line %d : %s not found", cur_line, PMK_END_COMMAND);
+					return(false);
+				}
+				break;
 
 			case CHAR_EOS :
 				/* empty line */
@@ -463,7 +501,6 @@ bool parse(FILE *fp, prsdata *pdata) {
 				}
 
 				if (parse_opt(buf, pcell->ht) == false) {
-					/* line number and error message already set <= XXX FALSE !! TODO */
 					errorf("%s", parse_err);
 #ifdef DEBUG_PRS
 					debugf("parse_opt returned false");
