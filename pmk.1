@@ -1,4 +1,4 @@
-.Dd "March 2003"
+.Dd March 28, 2003
 .Dt PMK 1
 .Os
 .Sh NAME
@@ -6,33 +6,41 @@
 .Nd configuring tool
 .Sh SYNOPSIS
 .Nm
-.Op -vh
-.Op -f file
-.Op options
+.Bk -words
+.Op Fl hv
+.Op Fl f Ar file 
+.Op Ar options
+.Ek
 .Sh DESCRIPTION
 .Nm
-is a configuring tool which aims to help building project on different operanding systems.
-.Ss Options :
-.Tp
-\-v
-.Dl Display version.
-.Tp
-\-h
-.Dl Display usage.
-.Tp
-\-f \fIfile\fR
-.Dl Use \fIfile\fR instead of \fBpmkfile\fR.
-.Sh FILES
-pmkfile
-pmk.conf
+is a configuring tool which aims to help building project on different operating systems.
 .Pp
+The options are as follows:
+.Bl -tag -width Ds
+.It Fl f Ar file
+Use an alternate file instead of
+.Xr pmkfile 5 .
+.It Fl h
+Display usage.
+.It Fl v
+Display the version number. 
+.El
+.Sh FILES
+.Bl -tag -width "/etc/pmk.conf" -compact
+.It Pa pmkfile
+Specification file.
+.It Pa /etc/pmk.conf
+Default location of the configuration file.
+.El
 .Sh SEE ALSO
+.Xr make 1 ,
 .Xr pmkfile 5 ,
 .Xr pmk.conf 5 ,
 .Xr pmksetup 8
 .Sh AUTHOR
 .An Damien Couderc
 .Sh HISTORY
-The idea to replace configure script was existing since a long time. But the projet was initiated in the begining of March 2003
+The idea to replace configure script was existing since a long time. 
+But the projet was initiated in the begining of March 2003.
 .Sh BUGS
 You have to found them.
