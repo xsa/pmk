@@ -1,3 +1,6 @@
+23 Jul 2003 mipsator
+ * added detection and processing of functions in pmkscan.
+
 22 Jul 2003 mipsator
  * rewritten hash_keys() to return a new structure (hkeys).
  * fix use of hash_keys() in sources.

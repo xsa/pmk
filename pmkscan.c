@@ -84,17 +84,81 @@ bool parse_data(prsdata *pdata, scandata *sdata) {
 }
 
 /*
-	parsefile
+	check a line with regex pattern
+
+	pattern : pattern to use
+	line : string to check
+
+	returns : found string or NULL
+*/
+
+char *regex_check(char *pattern, char *line) {
+	static char	 idtf[TMP_BUF_LEN];
+	char		*tline,
+			*rval;
+	regex_t		 re;
+	regmatch_t	 rm[1];
+
+	if (regcomp(&re, pattern, REG_EXTENDED) != 0)
+		return(NULL);
+
+	if (regexec(&re, tline, 2, rm, 0) == 0) {
+		/* copy header name */
+		strlcpy(idtf, (char *) (line + rm[1].rm_so), rm[1].rm_eo - rm[1].rm_so + 1);
+
+		rval =idtf;
+	} else {
+		rval = NULL;
+	}
+
+	regfree(&re);
+
+	return(rval);
+}
+
+/*
+	check identifier and store relative data in datagen htable
+
+	idtf : identifier string
+	ht_fam : identifier family hash table
+	phtgen : datagen hash table
+
+	returns : -
+*/
+
+void idtf_check(char *idtf, htable *ht_fam, htable *phtgen) {
+	char	*pval,
+		*p;
+
+	/* check data for this identifier */
+	pval = (char *)hash_get(ht_fam, idtf);
+	if (pval != NULL) {
+		if ((char *)hash_get(phtgen, idtf) == NULL) {
+			/* XXX temporary */
+			p = strdup(pval);
+			pval = p;
+			while (*p != CHAR_EOS) {
+				if (*p == ',')
+					*p = '\n';
+
+				p++;
+			}
+
+			/* record header data */
+			hash_add(phtgen, idtf, pval);
+		}
+	}
+}
+
+
+/*
+	parsefile XXX
 */
 
 bool parse_c_file(char *filename, scandata *sdata, htable *phtgen) {
 	FILE		*fp;
 	char		 line[TMP_BUF_LEN], /* XXX better size of buffer ? */
-			 idtf[TMP_BUF_LEN],
-			*pval,
 			*p;
-	regex_t		 re_inc;
-	regmatch_t	 rm_inc[1];
 
 	fp = fopen(filename, "r");
 	if (fp == NULL) {
@@ -104,43 +168,26 @@ bool parse_c_file(char *filename, scandata *sdata, htable *phtgen) {
 
 	/* main parsing */
 	while (get_line(fp, line, sizeof(line)) == true) {
-		/* init regexp */
-		regcomp(&re_inc, "^#include[[:blank:]]+<([^>]+)>", REG_EXTENDED); /* XXX check */
-
-		if (regexec(&re_inc, line, 2, rm_inc, 0) == 0) {
-			/* found an include */
-			*(line + rm_inc[1].rm_eo) = CHAR_EOS;
-
-			/* copy header name */
-			strlcpy(idtf, (char *) (line + rm_inc[1].rm_so), sizeof(idtf));
-
-			/* check data for this header */
-			pval = (char *)hash_get(sdata->includes, idtf);
-			if (pval != NULL) {
-				if ((char *)hash_get(phtgen, idtf) == NULL) {
+		/* check for include */
+		p = regex_check("^#include[[:blank:]]+<([^>]+)>", line);
+		if (p != NULL) {
 #ifdef DEBUG
-					printf("Setting header '%s'\n", idtf);
+			printf("Found header '%s'\n", p);
 #endif
 
-					/* XXX temporary */
-					p = strdup(pval);
-					pval = p;
-					while (*p != CHAR_EOS) {
-						if (*p == ',')
-							*p = '\n';
+			idtf_check(p, sdata->includes, phtgen);
+		}
 
-						p++;
-					}
+		/* check for function */
+		p = regex_check("([[:alnum:]_]+)[[:blank:]]*\\(", line);
+		if (p != NULL) {
+#ifdef DEBUG
+			printf("Found function '%s'\n", p);
+#endif
 
-					/* record header data */
-					hash_add(phtgen, idtf, pval);
-				}
-			}
+			idtf_check(p, sdata->functions, phtgen);
 		}
 	}
-
-	/* clean regexps */
-	regfree(&re_inc);
 
 	fclose(fp);
 
