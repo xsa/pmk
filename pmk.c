@@ -753,6 +753,10 @@ int main(int argc, char *argv[]) {
 		exit(1);
 	}
 
+	/* init srcdir and basedir */
+	strlcpy(gdata.srcdir, dirname(pmkfile), sizeof(gdata.srcdir)); /* XXX check ? */
+	getcwd(gdata.basedir, sizeof(gdata.basedir)); /* XXX check ? */
+
 	/* open log file */
 	if (pmk_log_open(PREMAKE_LOG) == false) {
 		clean(&gdata);

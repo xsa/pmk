@@ -7,6 +7,7 @@ pmk :
 ~ compatibility with autoconf (progressing)
 	- srcdir stuff
 	- builddir stuff
+- add an option to read additional arguments from a file
 
 pmksetup :
 ~ pmk.conf(5)

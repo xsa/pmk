@@ -93,7 +93,8 @@ typedef struct {
 		*labl;
 	dynary	*tlist;
 	char	*ac_file,
-		*srcdir,
+		srcdir[MAXPATHLEN],
+		basedir[MAXPATHLEN],
 		errmsg[MAX_ERRMSG_LEN];
 } pmkdata;
 
