@@ -30,7 +30,12 @@
  *
  */
 
+#include <sys/param.h>
+#include <err.h>
 #include <stdio.h>
+#include <stdlib.h>
+
+#include "pmk.h"
 
 /*
 	usage
@@ -45,7 +50,39 @@ void usage(void) {
 */
 
 int main(int argc, char *argv[]) {
+	FILE	*cfd,
+		*tfd;
+	char	cf[MAXPATHLEN],
+		tf[MAXPATHLEN];
+	bool	exists=FALSE;
+
+	/* try to open configuration file iif it exists */
+	snprintf(cf, sizeof(cf), "%s/%s", SYSCONFDIR, PREMAKE_CONFIG);
+	cfd = fopen(cf, "r");
+	if (cfd != NULL) {
+		exists=TRUE;
+	}
+
+	/* bad bad bad, yes it will be changed to something appropriate */
+	/* mkstemp powah */
+	snprintf(tf, sizeof(tf), "/tmp/pmktmp");
+	tfd = fopen(tf, "w");
+	if (tfd == NULL) {
+		/* Hey man ! What's going on ?? */
+		warn("%s", tf);
+		exit(1);
+	}
+
 	printf("Hey you know what ? I'm doing nothing :)\n");
+
+
+	fclose(tfd);
+	if (exists == TRUE) {
+		fclose(cfd);
+	}
+
+	/* finished playing with temporary file */
+	/* code to overwrite old configuration file */
 
 	return(0);
 }
