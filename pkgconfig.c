@@ -384,7 +384,7 @@ char *process_variables(char *pstr, htable *pht) {
 					pstr++;
 					pstr = parse_identifier(pstr, var, size);
 					if (pstr == NULL) {
-/*						debugf("parse_idtf returned null."); XXX */
+						/* debugf("parse_idtf returned null."); */
 						return(NULL);
 					} else {
 						/* check if identifier exists */
@@ -419,7 +419,7 @@ char *process_variables(char *pstr, htable *pht) {
 					pstr++;
 					size--;
 					if (size == 0) {
-/*						debugf("overflow."); XXX */
+						/* debugf("overflow."); */
 						return(NULL);
 					}
 					bs = false;
@@ -434,7 +434,7 @@ char *process_variables(char *pstr, htable *pht) {
 	}
 
 	if (size == 0) {
-/*		debugf("overflow."); XXX */
+		/* debugf("overflow."); */
 		return(NULL);
 	}
 
@@ -487,7 +487,11 @@ pkgcell *parse_pc_file(char *pcfile) {
 debugf("keyword = '%s', value = '%s', string = '%s'", buf, pps, pstr);
 #endif
 				/* set variable with parsed data */
-				parse_keyword(ppc, buf, pps); /* XXX check ? */
+				if (parse_keyword(ppc, buf, pps) == false) {
+					errorf("cannot fill pkgcell structure (keyword).");
+					pkgcell_destroy(ppc);
+					return(NULL);
+				}
 				break;
 
 			case '=' :
@@ -500,9 +504,11 @@ debugf("keyword = '%s', value = '%s', string = '%s'", buf, pps, pstr);
 #ifdef PKGCFG_DEBUG
 debugf("variable = '%s', value = '%s', string = '%s'", buf, pps, pstr);
 #endif
-				/* store variable in hash, XXX add only ? */
+				/* store variable in hash */
 				if (hash_update_dup(ppc->variables, buf, pps) == HASH_ADD_FAIL)
-					return(false);
+					errorf("cannot fill pkgcell structure (variables).");
+					pkgcell_destroy(ppc);
+					return(NULL);
 
 				break;
 
@@ -586,7 +592,7 @@ debugf("recursing '%s'", reqs);
 
 	pda = str_to_dynary_adv(reqs, " ,");
 	if (pda == NULL) {
-		/* XXX errof */
+		errorf("failed to process requirements in pkg_recurse().");
 		return(false);
 	}
 
@@ -596,7 +602,11 @@ debugf("recursing '%s'", reqs);
 
 		/*  check if module has been already processed */
 		if (hash_get(ppd->cells, mod) == NULL) {
-			pkg_cell_add(ppd, mod); /* XXX check */
+			if (pkg_cell_add(ppd, mod) == NULL) {
+				errorf("failed to add a cell in pkg_recurse().");
+				da_destroy(pda);
+				return(false);
+			}
 		}
 	}
 

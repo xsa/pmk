@@ -516,7 +516,7 @@ char *process_string(char *pstr, htable *pht) {
 					pstr++;
 					pstr = parse_idtf(pstr, var, size);
 					if (pstr == NULL) {
-/*						debugf("parse_idtf returned null."); XXX */
+						/* debugf("parse_idtf returned null."); */
 						return(NULL);
 					} else {
 						/* check if identifier exists */
@@ -555,7 +555,7 @@ char *process_string(char *pstr, htable *pht) {
 					pstr++;
 					size--;
 					if (size == 0) {
-/*						debugf("overflow."); XXX */
+					/* debugf("overflow."); */
 						return(NULL);
 					}
 					bs = false;
@@ -570,7 +570,7 @@ char *process_string(char *pstr, htable *pht) {
 	}
 
 	if (size == 0) {
-/*		debugf("overflow."); XXX */
+		/* debugf("overflow.");*/
 		return(NULL);
 	}
 

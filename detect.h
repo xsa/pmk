@@ -124,16 +124,6 @@ typedef struct {
 		*version;
 } comp_info;
 
-/* XXX to remove
-typedef struct {
-	char	*sl_ext,
-		*sl_version,
-		*sl_name,
-		*sl_namevers,
-		*ovr_gcc;
-} comp_sys;
-*/
-
 typedef struct {
 	htable	*cht,
 		*sht;
