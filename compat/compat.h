@@ -44,6 +44,10 @@
 		SCO OpenServer	since 5.0.6
 		SunOs		since 5.8
 
+	Systems without strlcpy in string.h :
+		AIX		(4.3)
+		glibc based	(at least before 4 Mar 2002)
+
 	Note: Feel free to send us a notice if your system is not
 		listed here but should be.
 
