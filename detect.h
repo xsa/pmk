@@ -46,6 +46,11 @@
 #define DATADIR	"/DATADIR_not_defined"
 #endif
 
+
+/**********
+ constants
+***********************************************************************/
+
 #define PMKCOMP_DATA	DATADIR "/pmkcomp.dat"
 
 #define PCC_TOK_ADDC	1
@@ -67,6 +72,19 @@
 
 #define SL_LDFLAG_VARNAME	"SLLDFLAGS"
 
+
+/*************
+ keyword data
+***********************************************************************/
+
+/* ADD_COMPILER keyword options */
+#define CC_KW_ID	"ID"
+#define CC_KW_DESCR	"DESCR"
+#define CC_KW_MACRO	"MACRO"
+#define CC_KW_VERSION	"VERSION"
+#define CC_KW_SLCFLAGS	"SLCFLAGS"
+#define CC_KW_SLLDFLAGS	"SLLDFLAGS"
+
 /* reserved variable name */
 #define SL_KW_LIB_VNONE	"SL_LIBNAME"
 #define SL_KW_LIB_VMAJ	"SL_LIBNAME_VMAJ"
@@ -75,6 +93,10 @@
 #define SL_KW_LIB_MAJ	"SL_MAJOR"
 #define SL_KW_LIB_MIN	"SL_MINOR"
 
+
+/**********************
+ code of various tests 
+***********************************************************************/
 
 /* header of test code */
 #define COMP_TEST_HEADER \
@@ -108,7 +130,10 @@
 	"\treturn(0);\n" \
 	"}\n"
 
-/* compiler data structures */
+
+/*************************
+ compiler data structures
+***********************************************************************/
 
 typedef struct {
 	char	*c_id,
@@ -130,7 +155,9 @@ typedef struct {
 } comp_data;
 
 
-/* function protos */
+/********************
+ function prototypes
+***********************************************************************/
 
 comp_data	*compdata_init(size_t, size_t);
 void		 compdata_destroy(comp_data *);
@@ -145,3 +172,4 @@ bool		 gen_test_file(FILE *, comp_data *);
 bool		 detect_compiler(char *, char *, comp_data *, comp_info *);
 
 #endif /* _DETECT_H_ */
+
