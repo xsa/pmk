@@ -40,6 +40,12 @@ test_lib_c:
 	@echo ""
 	@cd lib_c && make
 	@echo ""
+	@echo "-> Running program"
+	@echo ""
+	@echo "--exec-begin----------------------------"
+	@cd lib_c; LD_LIBRARY_PATH=. hello
+	@echo "--exec-end------------------------------"
+	@echo ""
 	@echo "-> cleaning"
 	@echo ""
 	@cd lib_c && make clean
