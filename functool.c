@@ -37,6 +37,11 @@
 #include <unistd.h>
 
 #include "functool.h"
+#include "premake.h"
+#include "compat/pmk_string.h"
+#include "hash.h"
+#include "dynarray.h"
+#include "common.h"
 
 
 /*
@@ -411,97 +416,4 @@ bool require_check(htable *pht) {
 	}
 
 	return(check_bool_str(req));
-}
-
-/*
-	parse a config file assuming compatibility with autoconf
-
-	ht : def table
-*/
-
-bool parse_ac_config(htable *ht, char *fpath) {
-	FILE	*fp_in,
-		*fp_out;
-	bool	rval = true;
-	char	line[TMP_BUF_LEN],
-		buf[TMP_BUF_LEN],
-		ftmp[MAXPATHLEN],
-		*pstr;
-	int	i,
-		s,
-		fe;
-
-	strlcpy(ftmp, "config_tmp", sizeof(ftmp)); /* XXX check ? */
-	fp_out = fopen(ftmp, "w");
-	if (fp_out == NULL)
-		return(false);
-
-	fp_in = fopen(fpath, "r");
-	if (fp_in == NULL) {
-		fclose(fp_out);
-		return(false);
-	}
-
-	while (get_line(fp_in, line, sizeof(line)) == true) {
-		/* look for '#define' */
-		pstr = strstr(line, "#define");
-		if (pstr == NULL) {
-			/* else try to find '#undef' */
-			pstr = strstr(line, "#undef");
-			if (pstr != NULL) {
-				/* jump after "#undef" */
-				pstr = pstr + sizeof("#undef");
-			}
-		} else {
-			/* jump after "#define" */
-			pstr = pstr + sizeof("#define");
-		}
-
-		if (pstr != NULL) {
-			/* look for the definition name */
-			while (isspace(*pstr) != 0) {
-				/* ignore spaces */
-				pstr++;
-			}
-			s = sizeof(line);
-			i = 0;
-			while (((*pstr == '_') || (isalpha(*pstr) != 0)) && (i < s)) {
-				buf[i] = *pstr;
-				pstr++;
-				i++;
-			}
-			buf[i] = CHAR_EOS;
-
-			/* check the defined value */
-			pstr = hash_get(ht, buf);
-			/* XXX could use value of DEF__ */
-			if (pstr != NULL) {
-				/* debugf("defining '%s'", buf); XXX */
-				fprintf(fp_out, "#define %s 1\t/* pmk parsed */\n", buf);
-			} else {
-				/* debugf("undefining '%s'", buf); XXX */
-				fprintf(fp_out, "#undef %s\t/* pmk parsed */\n", buf);
-			}
-		} else {
-			/* write line as is */
-			fprintf(fp_out, "%s\n", line);
-		}
-	}
-
-	fe = feof(fp_in);
-	fclose(fp_in);
-	fclose(fp_out);
-
-	if (fe == 0) {
-		unlink(ftmp);
-		return(false); /* XXX correct ? */
-	}
-
-	/* erase orig and copy new one */
-	unlink(fpath);
-	rval = copy_text_file(ftmp, fpath);
-
-	unlink(ftmp);
-
-	return(rval);
 }

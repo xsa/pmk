@@ -1,3 +1,7 @@
+07 Jun 2003 mipsator
+ * cleaned-up and reorganized includes.
+ * added autoconf.c and autoconf.h for autoconf compatibility stuff.
+
 05 Jun 2003 mipsator
  * massive changes in func.c to complete check functions.
  	(added missing record_def, record_val and label_set

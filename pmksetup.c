@@ -46,7 +46,6 @@
 #include "common.h"
 #include "dynarray.h"
 #include "pmksetup.h"
-#include "premake.h"
 
 
 char	*__progname;		/* program name from argv[0] */

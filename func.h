@@ -33,11 +33,7 @@
 #ifndef _PMK_FUNC_H_
 #define _PMK_FUNC_H_
 
-#include "premake.h"
 #include "pmk.h"
-#include "hash.h"
-#include "common.h"
-#include "functool.h"
 
 /* format string for include check */
 #define INC_TEST_CODE	"#include <stdio.h>\n" \

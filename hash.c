@@ -35,6 +35,7 @@
 #include <stdlib.h>
 
 #include "hash.h"
+#include "compat/pmk_string.h"
 
 
 /*

@@ -39,9 +39,10 @@
 
 #include "compat/pmk_libgen.h" /* basename, dirname */
 #include "compat/pmk_string.h" /* strlcpy */
-#include "pmk.h"
-#include "func.h"
+#include "autoconf.h"
 #include "common.h"
+#include "func.h"
+#include "pmk.h"
 
 
 extern char	*optarg;
@@ -783,7 +784,7 @@ int main(int argc, char *argv[]) {
 
 		if (gdata.ac_file != NULL) {
 			pmk_log("\nProcess '%s' for autoconf compatibility.\n", gdata.ac_file);
-			parse_ac_config(gdata.htab, gdata.ac_file);
+			ac_parse_config(gdata.htab, gdata.ac_file);
 		}
 
 		pmk_log("\nEnd of log\n");

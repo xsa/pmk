@@ -36,7 +36,12 @@
 #include <string.h>
 #include <unistd.h>
 
+#include "common.h"
 #include "func.h"
+#include "functool.h"
+#include "hash.h"
+#include "pmk.h"
+#include "premake.h"
 
 
 cmdkw	functab[] = {

@@ -33,7 +33,6 @@
 #define EMPTY_OPT_VALUE ""
 
 #include <sys/param.h>
-
 #include <dirent.h>
 #include <errno.h>
 #include <stdarg.h>
@@ -41,6 +40,9 @@
 #include <stdlib.h>
 #include <unistd.h>
 
+#include "premake.h"
+#include "compat/pmk_string.h"
+#include "dynarray.h"
 #include "common.h"
 
 
