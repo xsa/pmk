@@ -301,8 +301,9 @@ bool find_file(dynary *da, char *fname, char *fpath, int fplen) {
 	found = false;
 	rsize = sizeof(de->d_name);
 
-	for (i = 0 ; (i < da_size(da)) && (found == false) ; i++) {
+	for (i = 0 ; (i < da_usize(da)) && (found == false) ; i++) {
 		path = da_idx(da, i);
+		/* XXX should check path */
 		dp = opendir(path);
 		
 		if (dp != NULL) {

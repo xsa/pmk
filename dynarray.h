@@ -34,21 +34,21 @@
 #ifndef _PMK_DYNARRAY_H_
 #define _PMK_DYNARRAY_H_
 
-typedef struct s_da_cell {
-	char			*val;
-	struct s_da_cell	*next;
-} da_cell;
+#ifndef DYNARY_AUTO_GROW
+#define	DYNARY_AUTO_GROW	4
+#endif
 
 typedef struct {
-	int	nbcell;
+	int	nbcell,
+		nextidx;
 
-	da_cell	*first,
-		*last;
+	char	**pary;
 } dynary;
 
 
 dynary	*da_init(void);
 int	da_size(dynary *);
+int	da_usize(dynary *);
 int	da_push(dynary *, char *);
 char	*da_idx(dynary *, int);
 void	da_destroy(dynary *);

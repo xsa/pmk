@@ -729,13 +729,13 @@ int main(int argc, char *argv[]) {
 		pmk_log("\nProcess templates :\n");
 
 		da = gdata.tlist;
-		for (i = 0 ; (i < da_size(da)) && (rval == 0) ; i++) {
+		for (i = 0 ; (i < da_usize(da)) && (rval == 0) ; i++) {
+			/* XXX should check is da_idx returns null */
 			if (process_template(da_idx(da, i), gdata.htab) == false) {
 				/* failure while processing template */
 				rval = 1;
 			}
 		}
-		
 		da_destroy(da);
 
 		pmk_log("\nEnd of log\n");
