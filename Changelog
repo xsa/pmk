@@ -3,6 +3,7 @@
  * improved detect_compiler() to store data about the compiler.
  * updated use of detect_compiler() in pmk.
  * added comp_test.c in tests directory.
+ * fixed function detection in CHECK_HEADER.
 
 # snapshot 0.7.6
 

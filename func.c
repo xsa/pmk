@@ -442,8 +442,13 @@ bool pmk_check_header(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 	}
 
 	/* build compiler command */
-	snprintf(cfgcmd, sizeof(cfgcmd), HEADER_CC_FORMAT,
-		ccpath, inc_path, BIN_TEST_NAME, ftmp, pgd->buildlog);
+	if (incfunc == NULL) {
+		snprintf(cfgcmd, sizeof(cfgcmd), HEADER_CC_FORMAT,
+			ccpath, inc_path, BIN_TEST_NAME, ftmp, pgd->buildlog);
+	} else {
+		snprintf(cfgcmd, sizeof(cfgcmd), HEADER_FUNC_CC_FORMAT,
+			ccpath, inc_path, ftmp, pgd->buildlog);
+	}
 
 	/* get result */
 	r = system(cfgcmd);
