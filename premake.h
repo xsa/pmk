@@ -232,5 +232,8 @@
 /* size for temporary buffers */
 #define TMP_BUF_LEN		512
 
+/* string delimiter PATH variables */
+#define PATH_STR_DELIMITER	':'
+
 
 #endif /* _PREMAKE_H_ */

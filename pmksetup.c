@@ -36,6 +36,7 @@
 
 
 /*#define PMKSETUP_DEBUG 1*/
+/*#define WITHOUT_FORK 1*/
 
 /* include it first as if it was <sys/types.h> - this will avoid errors */
 #include "compat/pmk_sys_types.h"
@@ -75,7 +76,7 @@ int	nbpredef = sizeof(predef) / sizeof(hpair);
 
 
 /*
- * record data
+ * Record data
  *
  *	pht: hash table
  *	key: record name
@@ -110,7 +111,8 @@ bool record_data(htable *pht, char *key, char opchar, char *value) {
 		default :
 			/* unknown operation */
 #ifdef PMKSETUP_DEBUG
-	debugf("unknown '%c' operator in record_data.", opchar);
+			debugf("unknown '%c' operator in record_data.",
+								opchar);
 #endif
 			return(false);
 	}
@@ -123,9 +125,8 @@ bool record_data(htable *pht, char *key, char opchar, char *value) {
 	return(true);
 }
 
-
 /*
- * gathering of system data, predefinied data, ...
+ * Gathering of system data, predefinied data, ...
  *
  *	pht: storage hash table
  *
@@ -135,10 +136,18 @@ bool record_data(htable *pht, char *key, char opchar, char *value) {
 bool gather_data(htable *pht) {
 	printf("==> Looking for default parameters...\n");
 
-	/* gather env variables and look for specific binaries */
-	if ((get_env_vars(pht) == false) || (get_binaries(pht) == false))
-		return(false);	/* XXX error messages ? */
+	/* gather env variables */
+	if (get_env_vars(pht) == false) {
+		errorf("failed to gather env variables.");
+		return(false);
+	}
 
+ 	/* gather env variables and look for specific binaries */
+	if (get_binaries(pht) == false) {
+		errorf("failed to get binaries."); /* XXX TODO better msg :) */
+		return(false);
+	}
+ 
 	/* set predifined variables */
 	if (predef_vars(pht) == false) {
 		errorf("predefined variables.");
@@ -168,59 +177,62 @@ bool gather_data(htable *pht) {
 }
 
 /*
- * write remaining data
+ * Write remaining data
  *
  * 	pht: hash table
  *
  * 	returns: -
  */
-void write_new_data(htable *pht) {
+
+bool write_new_data(htable *pht) {
 	char		*val;
 	hkeys		*phk;
 	prsopt		*ppo;
 	unsigned int	 i;
 
 	phk = hash_keys(pht);
-	if (phk != NULL) {
-		/* sort hash table */
-		qsort(phk->keys, phk->nkey, sizeof(char *), keycomp);
+	if (phk == NULL) {
+		verbosef("Nothing to merge.");
+		return(true);
+	}
 
-		/* processing remaining keys */
-		for(i = 0 ; i < phk->nkey ; i++) {
+	/* sort hash table */
+	qsort(phk->keys, phk->nkey, sizeof(char *), keycomp);
+
+	/* processing remaining keys */
+	for(i = 0 ; i < phk->nkey ; i++) {
 #ifdef PMKSETUP_DEBUG
-	debugf("write_new_data: processing '%s'", phk->keys[i]);
+		debugf("write_new_data: processing '%s'", phk->keys[i]);
 #endif
-			ppo = hash_get(pht, phk->keys[i]);
-			if (ppo == NULL) {
-#ifdef PMKSETUP_DEBUG
-				debugf("write_new_data: unable to get '%s' record.", phk->keys[i]);
-#endif
-				/* XXX  exit ? */
-			} else {
-				/* check if this key is marked for being removed */
-				if (ppo->opchar != PMKSTP_REC_REMV) {
-					/* add value */
-					val = po_get_str(ppo->value);
-					if (val != NULL) {
-						fprintf(sfp, PMKSTP_WRITE_FORMAT, phk->keys[i], CHAR_ASSIGN_UPDATE, val);
-#ifdef PMKSETUP_DEBUG
-					} else {
-						debugf("write_new_data: skipping '%s', empty value.", phk->keys[i]);
-#endif
-						/* XXX  exit ? */
-					}
-#ifdef PMKSETUP_DEBUG
-				} else {
-					debugf("write_new_data: skipping '%s', remove record.", phk->keys[i]);
-#endif
-				}
-			}
+		ppo = hash_get(pht, phk->keys[i]);
+		if (ppo == NULL) {
+			errorf("unable to get '%s' record.", phk->keys[i]);
+			return(false);
 		}
 
-		hash_free_hkeys(phk);
-	} else {
-		verbosef("Nothing to merge.");
+		/* check if this key is marked for being removed */
+		if (ppo->opchar == PMKSTP_REC_REMV) {
+#ifdef PMKSETUP_DEBUG
+			debugf("write_new_data: skipping '%s', remove record.",
+								phk->keys[i]);
+#endif
+			continue;
+		}
+
+		/* add value */
+		val = po_get_str(ppo->value);
+		if (val == NULL) {
+			errorf("'%s' key has an empty value.", phk->keys[i]);
+			return(false);
+		}
+
+		fprintf(sfp, PMKSTP_WRITE_FORMAT, phk->keys[i],
+						CHAR_ASSIGN_UPDATE, val);
 	}
+
+	hash_free_hkeys(phk);
+
+	return(true);
 }
 
 
@@ -237,12 +249,13 @@ void write_new_data(htable *pht) {
  *		less than 0 according as the character a is
  *		greather, equal to, or less than the character b.
  */
+
 int keycomp(const void *a, const void *b) {
-	return(strcmp((const char *) a, (const char *) b));
+	return(strcmp(*(const char **) a, *(const char **) b));
 }
 
 /*
- * check and process option
+ * Check and process option
  *
  *	pht: htable for comparison
  *	popt: option to process
@@ -271,58 +284,60 @@ bool check_opt(htable *cht, prsopt *popt) {
 #endif
 
 	ppo = hash_get(ht, popt->key);
-	/*if ((ppo != NULL) && (ppo->value != NULL)) {*//* on remove value is NULL !!! */
-	if (ppo != NULL) {
-		/* XXX check value */
-		recval = po_get_str(ppo->value);
-
+	if (ppo == NULL) {
 #ifdef PMKSETUP_DEBUG
-		debugf("check_opt: original opchar '%c'", popt->opchar);
-#endif
-
-		/* checking the VAR<->VALUE separator */
-		switch (popt->opchar) {
-			case CHAR_ASSIGN_UPDATE :
-#ifdef PMKSETUP_DEBUG
-				debugf("check_opt: update opchar '%c'", ppo->opchar);
-#endif
-				switch (ppo->opchar) {
-					case PMKSTP_REC_REMV :
-						/* do nothing, value will not be refreshed */
-						verbosef("Removing '%s'", popt->key);
-						break;
-					case PMKSTP_REC_UPDT :
-						/* update value */
-						fprintf(sfp, PMKSTP_WRITE_FORMAT, popt->key, CHAR_ASSIGN_UPDATE, recval);
-#ifdef PMKSETUP_DEBUG
-						debugf("check_opt() appended '" PMKSTP_WRITE_FORMAT "'", popt->key, CHAR_ASSIGN_UPDATE, recval);
-#endif
-						break;
-
-				}
-				hash_delete(cht, popt->key);
-				break;
-
-			case CHAR_ASSIGN_STATIC :
-				/* static definition, stay unchanged */
-				fprintf(sfp, PMKSTP_WRITE_FORMAT, popt->key, CHAR_ASSIGN_STATIC, optval);
-#ifdef PMKSETUP_DEBUG
-				debugf("check_opt() appended '" PMKSTP_WRITE_FORMAT "'", popt->key, CHAR_ASSIGN_STATIC, optval);
-#endif
-				hash_delete(cht, popt->key);
-				break;
-
-			default :
-				/* should not happen now */
-				errorf("unknown operator '%c'.", popt->opchar);
-				return(false);
-				break;
-		}
-	} else {
-#ifdef PMKSETUP_DEBUG
-	debugf("check_opt: key '%s' does not exist.", popt->key);
+		debugf("check_opt: key '%s' does not exist.", popt->key);
 #endif
 		fprintf(sfp, PMKSTP_WRITE_FORMAT, popt->key, popt->opchar, optval);
+		return(true);
+	}
+
+	/* XXX check value */
+	recval = po_get_str(ppo->value);
+
+#ifdef PMKSETUP_DEBUG
+	debugf("check_opt: original opchar '%c'", popt->opchar);
+#endif
+
+	/* checking the VAR<->VALUE separator */
+	switch (popt->opchar) {
+		case CHAR_ASSIGN_UPDATE :
+#ifdef PMKSETUP_DEBUG
+			debugf("check_opt: update opchar '%c'", ppo->opchar);
+#endif
+			switch (ppo->opchar) {
+				case PMKSTP_REC_REMV :
+					/* do nothing, value will not be refreshed */
+					verbosef("Removing '%s'", popt->key);
+					break;
+
+				case PMKSTP_REC_UPDT :
+					/* update value */
+					fprintf(sfp, PMKSTP_WRITE_FORMAT, popt->key, CHAR_ASSIGN_UPDATE, recval);
+#ifdef PMKSETUP_DEBUG
+					debugf("check_opt() appended '" PMKSTP_WRITE_FORMAT "'", popt->key, CHAR_ASSIGN_UPDATE, recval);
+#endif
+					break;
+
+			}
+
+			hash_delete(cht, popt->key);
+			break;
+
+		case CHAR_ASSIGN_STATIC :
+			/* static definition, stay unchanged */
+			fprintf(sfp, PMKSTP_WRITE_FORMAT, popt->key, CHAR_ASSIGN_STATIC, optval);
+#ifdef PMKSETUP_DEBUG
+			debugf("check_opt() appended '" PMKSTP_WRITE_FORMAT "'", popt->key, CHAR_ASSIGN_STATIC, optval);
+#endif
+			hash_delete(cht, popt->key);
+			break;
+
+		default :
+			/* should not happen now */
+			errorf("unknown operator '%c'.", popt->opchar);
+			return(false);
+			break;
 	}
 
 	return(true);
@@ -335,6 +350,7 @@ bool check_opt(htable *cht, prsopt *popt) {
  *
  *	return:  boolean
  */
+
 bool get_env_vars(htable *pht) {
 	struct utsname	 utsname;
 	char		*bin_path;
@@ -362,19 +378,12 @@ bool get_env_vars(htable *pht) {
 		return(false);
 	}
 
-	/*
-	 * replace the string separator in the PATH
-	 * to fit to our standards
-	 */
-	char_replace(bin_path, PATH_STR_DELIMITER, CHAR_LIST_SEPARATOR);
-
 	if (record_data(pht, PMKCONF_PATH_BIN, 'u', bin_path) == false)
 		return(false);
 	verbosef("Setting '%s' => '%s'", PMKCONF_PATH_BIN, bin_path);
 
 	return(true);
 }
-
 
 /*
  * Look for location of some predefined binaries
@@ -383,6 +392,7 @@ bool get_env_vars(htable *pht) {
  *
  *	returns: boolean
  */
+
 bool get_binaries(htable *pht) {
 	char		 fbin[MAXPATHLEN],	/* full binary path */
 			*pstr;
@@ -407,7 +417,7 @@ bool get_binaries(htable *pht) {
 		return(false);
 	}
 
-	stpath = str_to_dynary(pstr , CHAR_LIST_SEPARATOR);
+	stpath = str_to_dynary(pstr , PATH_STR_DELIMITER);
 	if (stpath == NULL) {
 		errorf("could not split the PATH environment variable correctly.");
 		return(false);	
@@ -457,6 +467,7 @@ bool get_binaries(htable *pht) {
  *
  *	returns:  boolean
  */
+
 bool predef_vars(htable *pht) {
 	int	i;
 
@@ -472,12 +483,13 @@ bool predef_vars(htable *pht) {
 }
 
 /*
- * check echo output
+ * Check echo output
  *
  *	pht: hash table where we have to store the values
  *
  *	returns:  boolean
  */
+
 bool check_echo(htable *pht) {
 	FILE	*echo_pipe = NULL;
 	char	buf[TMP_BUF_LEN],
@@ -551,7 +563,7 @@ bool check_echo(htable *pht) {
 
 
 /*
- * check pkgconfig libpath
+ * Check pkgconfig libpath
  *
  *	pht: hash table where we have to store the values
  *
@@ -593,7 +605,7 @@ bool check_libpath(htable *pht) {
 }
 
 /*
- * check the cpu family 
+ * Check the cpu family 
  *
  *	uname_m: uname machine string 
  *
@@ -664,7 +676,7 @@ bool get_cpu_data(htable *pht) {
 }
 
 /*
- * check if a directory does exist
+ * Check if a directory does exist
  *
  *	fdir: directory to search
  *
@@ -688,7 +700,7 @@ bool dir_exists(const char *fdir) {
 }
 
 /*
- * byte order check
+ * Byte order check
  *
  *	pht: hash table to store value
  *
@@ -724,28 +736,6 @@ bool byte_order_check(htable *pht) {
 	return(true);
 }
 
-
-/*
- * Replace a character in a string
- *
- *	buf: string we want to modify
- *	search: the char with want to replace
- *	replace: the new char which will replace 'search'
- *
- *	return: -
- */
-void char_replace(char *buf, const char search, const char replace) {
-	char	c;
-	int	i = 0;
-
-	while ((c = buf[i]) != CHAR_EOS) {
-		if (c == search)
-			c = replace;
-		buf[i] = c;
-		i++;
-	}
-}
-
 /*
  * Simple formated verbose function
  *
@@ -753,6 +743,7 @@ void char_replace(char *buf, const char search, const char replace) {
  *
  *	returns: -
  */
+
 void verbosef(const char *fmt, ...) {
 	char	buf[MAX_ERR_MSG_LEN];
 	va_list	plst;
@@ -766,10 +757,10 @@ void verbosef(const char *fmt, ...) {
 	}
 }
 
-
 /*
  * pmksetup(8) usage
  */
+
 void usage(void) {
 	fprintf(stderr, "usage: pmksetup [-hVv] "
 		"[-r variable] [-u variable=value]\n");
@@ -777,13 +768,14 @@ void usage(void) {
 }
 
 /*
- * detection loop
+ * Detection loop
  *
  *	argc:	argument number
  *	argv:	argument array
  *
  *	returns: true on success else false
  */
+
 bool detection_loop(int argc, char *argv[]) {
 	FILE		*config;
 	bool		 process_clopts = false,
@@ -795,14 +787,7 @@ bool detection_loop(int argc, char *argv[]) {
 	extern int	 optind;
 #ifndef errno
 	extern int	 errno;
-#endif
-
-
-	ht = hash_init_adv(MAX_CONF_OPT, NULL, (void (*)(void *)) prsopt_destroy, NULL);
-	if (ht == NULL) {
-		errorf("cannot create hash table.");
-		return(false);
-	}
+#endif /* errno */
 
 	/*while ((ch = getopt(argc, argv, "a:hr:u:vV")) != -1)*/
 	while ((ch = getopt(argc, argv, "hr:u:vV")) != -1)
@@ -900,16 +885,16 @@ bool detection_loop(int argc, char *argv[]) {
 		printf("==> Configuration file not found.\n");
 	}
 
-	printf("==> Merging remaining data...\n");	
+	printf("==> Merging remaining data...\n");
 	/* writing the remaining data stored in the hash */
-	write_new_data(ht);
-	/* destroying the hash once we're done with it */	
-	hash_destroy(ht);
+	if (write_new_data(ht) == false)
+		return(false);
+
 	return(true);
 }
 
 /*
- * child main loop
+ * Child main loop
  *
  *	uid:	privsep user id
  *	gid:	privsep user group
@@ -923,9 +908,10 @@ void child_loop(uid_t uid, gid_t gid, int argc, char *argv[]) {
 	printf("PMKSETUP version %s", PREMAKE_VERSION);
 #ifdef DEBUG
 	printf(" [SUB #%s] [SNAP #%s]", PREMAKE_SUBVER_PMKSETUP, PREMAKE_SNAP);
-#endif
+#endif /* DEBUG */
 	printf("\n\n");
 
+#ifndef WITHOUT_FORK
 	if (getuid() == 0) {
 		/* user has root privs, DROP THEM ! */
 		if (setegid(gid) != 0) {
@@ -949,17 +935,31 @@ void child_loop(uid_t uid, gid_t gid, int argc, char *argv[]) {
 			_exit(EXIT_FAILURE);
 		}
 	}
+#endif /* WITHOUT_FORK */
+
 #ifdef PMKSETUP_DEBUG
 	debugf("gid = %d", getgid());
 	debugf("uid = %d", getuid());
-#endif
+#endif /* PMKSETUP_DEBUG */
 
-	if (detection_loop(argc, argv) == false)
+	ht = hash_init_adv(MAX_CONF_OPT, NULL, (void (*)(void *)) prsopt_destroy, NULL);
+	if (ht == NULL) {
+		errorf("cannot create hash table.");
 		exit(EXIT_FAILURE);
+	}
+
+	if (detection_loop(argc, argv) == false) {
+		hash_destroy(ht);
+		exit(EXIT_FAILURE);
+	}
+
+	/* destroying the hash once we're done with it */
+	hash_destroy(ht);
+		
 }
 
 /*
- * parent main loop
+ * Parent main loop
  *
  *	pid: pid of the child
  *
@@ -968,13 +968,20 @@ void child_loop(uid_t uid, gid_t gid, int argc, char *argv[]) {
 
 void parent_loop(pid_t pid) {
 	bool	error = false;
+#ifndef WITHOUT_FORK
 	int	status;
 
 	waitpid(pid, &status, WUNTRACED);
 
 #ifdef PMKSETUP_DEBUG
 	debugf("waitpid() status = %d", WEXITSTATUS(status));
-#endif
+#endif /* PMKSETUP_DEBUG */
+
+	if (status != 0) {
+		errorf("child failed (status %d)", status);
+		exit(EXIT_FAILURE);
+	}
+#endif /* WITHOUT_FORK */
 
 	if (sfp != NULL) { /* XXX needed ? */
 		if (fclose(sfp) != 0) {
@@ -1035,7 +1042,7 @@ void parent_loop(pid_t pid) {
 }
 
 /*
- * main loop
+ * Main loop
  */
 
 int main(int argc, char *argv[]) {
@@ -1047,7 +1054,7 @@ int main(int argc, char *argv[]) {
 	if (getuid() == 0) {
 #ifdef PMKSETUP_DEBUG
 		debugf("PRIVSEP_USER = '%s'", PRIVSEP_USER);
-#endif
+#endif /* PMKSETUP_DEBUG */
 		pw = getpwnam(PRIVSEP_USER);
 		if (pw == NULL) {
 			errorf("cannot get user data for '%s'.", PRIVSEP_USER);
@@ -1064,6 +1071,7 @@ int main(int argc, char *argv[]) {
 		exit(EXIT_FAILURE);
 	}
 
+#ifndef WITHOUT_FORK
 	/* forking detection code */
 	pid = fork();
 	switch (pid) {
@@ -1074,14 +1082,21 @@ int main(int argc, char *argv[]) {
 
 		case 0:
 			/* child start here after forking */
+#endif /* WITHOUT_FORK */
 			child_loop(uid, gid, argc, argv);
+#ifndef WITHOUT_FORK
 			break;
 
 		default:
 			/* parent continue here after forking */
+#else
+			pid = getpid();
+#endif /* WITHOUT_FORK */
 			parent_loop(pid);
+#ifndef WITHOUT_FORK
 			break;
 	}
+#endif /* WITHOUT_FORK */
 
 	return(EXIT_SUCCESS);
 
