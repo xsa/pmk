@@ -42,7 +42,10 @@
 #define PMK_CHAR_COMMAND	'.'
 
 /* keyword to mark end of command */
-#define PMK_END_COMMAND	".END"
+#define PMK_END_COMMAND		".END"
+
+/* character to assign a value to a key */
+#define PMK_KEY_CHAR		'='
 
 /* maximal size of a command */
 #define MAX_CMD_NAME_LEN	64
@@ -67,6 +70,5 @@ typedef struct {
 	char		name[MAX_CMD_NAME_LEN],
 			label[MAX_LABEL_NAME_LEN];
 } pmkcmd;
-
 
 #endif /* _PMK_H_ */
