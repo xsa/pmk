@@ -221,7 +221,7 @@ int main(int argc, char *argv[]) {
 	/* destroying the hash once we'r done with it */	
 	hash_destroy(ht);
 
-	if (close_tmp_config() < 0)
+	if (close_tmp_config() == false)
 		exit(EXIT_FAILURE);
 
 	if (error == 0)
@@ -304,11 +304,11 @@ bool gather_data(htable *pht) {
 	printf("==> Looking for default parameters...\n");
 
 	/* gather env variables and look for specific binaries */
-	if ((get_env_vars(pht) == -1) || (get_binaries(pht) == -1))
+	if ((get_env_vars(pht) == false) || (get_binaries(pht) == false))
 		return(false);
 
 	/* set predifined variables */
-	if (predef_vars(pht) == -1) {
+	if (predef_vars(pht) == false) {
 		errorf("predefined variables."); 
 		return(false);
 	}
@@ -320,7 +320,7 @@ bool gather_data(htable *pht) {
 		return(false);
 	}
 
-	if (check_echo(pht) == -1) {
+	if (check_echo(pht) == false) {
 		errorf("failure in echo check.");
 		return(false);
 	}
@@ -365,8 +365,10 @@ void write_new_data(htable *pht) {
 #ifdef PMKSETUP_DEBUG
 					} else {
 						debugf("write_new_data: skipping '%s', empty value.", phk->keys[i]);
+#endif
 						/* XXX  exit ? */
 					}
+#ifdef PMKSETUP_DEBUG
 				} else {
 					debugf("write_new_data: skipping '%s', remove record.", phk->keys[i]);
 #endif
