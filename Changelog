@@ -1,6 +1,8 @@
 30 Dec 2003 mipsator
  * imported some code for internal support of pkgconfig.
  * added pkgconfig_test.c in tests.
+ * added variable substitution in pkgconfig support.
+ * added pkg_recurse() in pkgconfig to prepare for recursion.
 
 29 Dec 2003 mipsator
  * moved hash_add() as hash_update() and kept hash_add() as an alias.
