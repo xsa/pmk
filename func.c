@@ -111,13 +111,21 @@ bool pmk_target(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 */
 
 bool pmk_ac_compat(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
-	char	*pstr;
+	char	*acfile,
+		*pstr;
 
-/*
+/* XXX must check if valid
 	pstr = hash_get(gdata->htab, "SYSCONFDIR");
 	hash_add(gdata->htab, "sysconfdir", pstr);
 */
 
+	/* if a file is given then it will be parsed later */
+	acfile= hash_get(ht, "FILENAME");
+	if (acfile != NULL) {
+		gdata->ac_file = acfile;
+	}
+
+	/* compatibility tags */
 	pstr = hash_get(gdata->htab, "PREFIX");
 	hash_add(gdata->htab, "prefix", pstr);
 	
