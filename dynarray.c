@@ -72,13 +72,35 @@ dynary *da_init(void) {
 }
 
 /*
+	Resize the array to the given size
+
+	da : array to resize
+	nsize : new size
+
+	return : boolean
+*/
+
+bool da_resize(dynary *da, size_t nsize) {
+	char	**tary;
+
+	tary = realloc(da->pary, nsize * sizeof(char *));
+	if (tary != NULL) {
+		da->pary = tary;
+		da->nbcell = nsize;
+		return(true);
+	} else {
+		return(false);
+	}
+}
+
+/*
 	Get the size of the array
 
 	returns number of cell of the array
 */
 
-int	da_size(dynary *da) {
-	return(da->nbcell);
+size_t	da_size(dynary *da) {
+	return((size_t) da->nbcell);
 }
 
 /*
@@ -87,8 +109,8 @@ int	da_size(dynary *da) {
 	returns the number of 'used' cells
 */
 
-int	da_usize(dynary *da) {
-	return(da->nextidx);
+size_t	da_usize(dynary *da) {
+	return((size_t) da->nextidx);
 }
 
 /*
@@ -97,38 +119,34 @@ int	da_usize(dynary *da) {
 	da : dynamic array
 	str : string to append
 
-	returns 1 on success else 0 on failure
+	return : boolean
 */
 
-int da_push(dynary *da, char *str) {
-	char	 *dup,
-		**tary;
+bool da_push(dynary *da, char *str) {
+	char	 *dup;
 	size_t	  gsize;
 
 	dup = strdup(str);
 	if (dup == NULL) {
 		/* strdup failed */
-		return(0);
+		return(false);
 	}
 
 	if (da->nbcell == da->nextidx) {
 		/* compute growing size */
 		gsize = (da->nbcell + DYNARY_AUTO_GROW);
 
-		tary = realloc(da->pary, gsize * sizeof(char *));
-		if (tary == NULL) {
-			/* beware, da->pary is still allocated */
-			return (0);
+		if (da_resize(da, gsize) == false) {
+			/* cannot resize dynary */
+			return(false);
 		}
-		da->pary = tary;
-		da->nbcell = gsize;
 	}
 
 	/* insert in last place */
 	da->pary[da->nextidx] = dup;
 	da->nextidx++;
 	
-	return(1);
+	return(true);
 }
 
 /*
@@ -136,13 +154,17 @@ int da_push(dynary *da, char *str) {
 	
 	da : dynamic array
 
-	return the last element or NULL
+	return : the last element or NULL
 */
 
 char *da_pop(dynary *da) {
-	char	 *p = NULL,
-		**tary;
+	char	 *p;
 	size_t	  gsize;
+
+	if (da->nextidx == 0) {
+		/* empty */
+		return(NULL);
+	}
 
 	da->nextidx--;
 	p = da->pary[da->nextidx];
@@ -152,16 +174,52 @@ char *da_pop(dynary *da) {
 	if ((da->nbcell - da->nextidx) > DYNARY_AUTO_GROW) {
 		gsize = da->nbcell - DYNARY_AUTO_GROW;
 
-		tary = realloc(da->pary, gsize * sizeof(char *));
-		if (tary == NULL) {
-			/* beware, da->pary is still allocated */
+		if (da_resize(da, gsize) == false) {
+			/* cannot resize dynary */
 			return (NULL);
 		}
-		da->pary = tary;
-		da->nbcell = gsize;
 	}
 
 	return(p);
+}
+
+/*
+	Pop the first value and shift the array
+
+	da : dynamic array
+
+	return : the first cell
+*/
+
+char *da_shift(dynary *da) {
+	char	*r;
+	int	 i;
+	size_t	 gsize;
+
+	if (da->nextidx == 0) {
+		/* empty */
+		return(NULL);
+	}
+
+	r = da->pary[0];
+	da->nextidx--;
+
+	/* shift remaining values */
+	for (i = 0 ; i < da->nextidx ; i++) {
+		da->pary[i] = da->pary[i+1];
+	}
+
+	/* resize if allocated space is too big */
+	if ((da->nbcell - da->nextidx) > DYNARY_AUTO_GROW) {
+		gsize = da->nbcell - DYNARY_AUTO_GROW;
+
+		if (da_resize(da, gsize) == false) {
+			/* cannot resize dynary */
+			return (NULL);
+		}
+	}
+
+	return(r);
 }
 
 /*
@@ -190,7 +248,7 @@ char *da_idx(dynary *da, int idx) {
 void da_destroy(dynary *da) {
 	int	i;
 
-	for (i = 0; i < da->nextidx; i++) {
+	for (i = 0 ; i < da->nextidx ; i++) {
 		free(da->pary[i]);
 	}
 	free(da->pary);
