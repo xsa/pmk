@@ -19,7 +19,7 @@ test_bin_c:
 	@echo ""
 	@echo "=> Testing C binary building"
 	@echo ""
-	@echo "-> Runing pmk"
+	@echo "-> Running pmk"
 	@echo ""
 	@cd bin_c && pmk
 	@echo ""
@@ -28,11 +28,24 @@ test_bin_c:
 	@echo "=> End of test"
 	@echo ""
 
+test_bin_cxx:
+	@echo ""
+	@echo "=> Testing C++ binary building"
+	@echo ""
+	@echo "-> Running pmk"
+	@echo ""
+	@cd bin_c++ && pmk
+	@echo ""
+	@cd bin_c++ && make
+	@echo ""
+	@echo "=> End of test"
+	@echo ""
+
 test_lib_c:
 	@echo ""
 	@echo "=> Testing C library building"
 	@echo ""
-	@echo "-> Runing pmk"
+	@echo "-> Running pmk"
 	@echo ""
 	@cd lib_c && pmk
 	@echo ""
@@ -45,7 +58,7 @@ test_lib_cxx:
 	@echo ""
 	@echo "=> Testing C++ library building"
 	@echo ""
-	@echo "-> Runing pmk"
+	@echo "-> Running pmk"
 	@echo ""
 	@cd lib_c++ && pmk
 	@echo ""
@@ -149,7 +162,7 @@ test_pmk_only: test_$(SETUP) test_$(PREMAKE) test_clean
 test_old_all: test_pmk_only
 
 # all binary tests
-test_bins: test_bin_c
+test_bins: test_bin_c test_bin_cxx
 
 # all scan tests
 test_scans: test_scan_c
