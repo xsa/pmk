@@ -2,7 +2,9 @@
 
 CC?=		cc
 DEBUG?=		-g
-INSTALL=	install
+
+# on some platforms install is not BSD compatible, so we use our own.
+INSTALL=	./pmkinstall
 
 SYSCONFDIR=	/etc
 
@@ -109,11 +111,11 @@ install: all
 	$(SUDO) $(INSTALL) -d -m 755 $(DESTDIR)$(SBINDIR)
 	$(SUDO) $(INSTALL) -m 755 $(SETUP) $(DESTDIR)$(SBINDIR)/$(SETUP)
 	$(SUDO) $(INSTALL) -d -m 755 $(DESTDIR)$(DATADIR)
-	$(SUDO) $(INSTALL) -m 644 samples/$(SAMPLE) $(DESTDIR)$(DATADIR)
-	$(SUDO) $(INSTALL) -m 644 samples/$(CONFIG) $(DESTDIR)$(DATADIR)
-	$(SUDO) $(INSTALL) -m 644 data/pmkscan.dat $(DESTDIR)$(DATADIR)
-	$(SUDO) $(INSTALL) -m 644 data/pmkcomp.dat $(DESTDIR)$(DATADIR)
-	$(SUDO) $(INSTALL) -m 644 data/pmkcfgtool.dat $(DESTDIR)$(DATADIR)
+	$(SUDO) $(INSTALL) -m 644 samples/$(SAMPLE) $(DESTDIR)$(DATADIR)/$(SAMPLE)
+	$(SUDO) $(INSTALL) -m 644 samples/$(CONFIG) $(DESTDIR)$(DATADIR)/$(CONFIG)
+	$(SUDO) $(INSTALL) -m 644 data/pmkscan.dat $(DESTDIR)$(DATADIR)/pmkscan.dat
+	$(SUDO) $(INSTALL) -m 644 data/pmkcomp.dat $(DESTDIR)$(DATADIR)/pmkcomp.dat
+	$(SUDO) $(INSTALL) -m 644 data/pmkcfgtool.dat $(DESTDIR)$(DATADIR)/pmkcfgtool.dat
 	$(SUDO) $(INSTALL) -d -m 755 $(DESTDIR)$(MANDIR)/man1
 	$(SUDO) $(INSTALL) -m 444 man/$(PREMAKE).1 $(DESTDIR)$(MANDIR)/man1/$(PREMAKE).1
 	$(SUDO) $(INSTALL) -m 444 man/$(SCAN).1 $(DESTDIR)$(MANDIR)/man1/$(SCAN).1
