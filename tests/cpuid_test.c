@@ -52,11 +52,7 @@ int main(void) {
 	pstr = check_cpu_arch(utsname.machine, pdata); /* check */
 	printf("arch = '%s'\n", pstr);
 
-#ifdef ARCH_X86
-	pht = arch_wrapper(pdata, PMK_ARCH_X86_32);
-#else
-	pht = arch_wrapper(pdata, PMK_ARCH_X86_UNKNOWN);
-#endif
+	pht = arch_wrapper(pdata, pstr);
 	if (pht != NULL) {
 		phk = hash_keys(pht);
 		if (phk != NULL) {

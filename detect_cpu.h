@@ -53,18 +53,32 @@
 #define LIST_X86_CPU_MODEL	3
 #define LIST_X86_CPU_CLASS	4
 
-#define	PMK_ARCH_UNKNOWN		0
+#define	PMK_ARCH_UNKNOWN	0
 #define	PMK_ARCH_X86_32		1
+#define	PMK_ARCH_X86_64		2
+#define	PMK_ARCH_SPARC		3
+#define	PMK_ARCH_SPARC64	4
+#define	PMK_ARCH_IA_64		5
+#define	PMK_ARCH_PPC		6
+#define	PMK_ARCH_ALPHA		7
+#define	PMK_ARCH_M68K		8
+#define	PMK_ARCH_VAX		9
 
 #define	PMK_ARCH_STR_UNKNOWN	"unknown"
 
 #define PMKCONF_HW_PPC_CPU_ALTIVEC	"HW_PPC_CPU_ALTIVEC"	/* powerpc altivec feature */
 
 
+typedef struct {
+	char		*name;
+	unsigned char	 id;
+} arch_cell;
+
+
 void	*seek_key(prsdata *, int);
 prsdata	*parse_cpu_data(char *);
 char	*check_cpu_arch(char *, prsdata *);
-htable	*arch_wrapper(prsdata *, unsigned char);
+htable	*arch_wrapper(prsdata *, char *);
 
 
 /****************

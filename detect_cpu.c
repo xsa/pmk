@@ -59,6 +59,20 @@ prskw	kw_pmkcpu[] = {
 int	nbkwc = sizeof(kw_pmkcpu) / sizeof(prskw);
 
 
+arch_cell	arch_tab[] = {
+	{"x86_32",	PMK_ARCH_X86_32},
+	{"x86_64",	PMK_ARCH_X86_64},
+	{"sparc32",	PMK_ARCH_SPARC},
+	{"sparc64",	PMK_ARCH_SPARC64},
+	{"ia_64",	PMK_ARCH_IA_64},
+	{"ppc",		PMK_ARCH_PPC},
+	{"alpha",	PMK_ARCH_ALPHA},
+	{"m68k",	PMK_ARCH_M68K},
+	{"vax",		PMK_ARCH_VAX}
+};
+int	nbarch = sizeof(arch_tab) / sizeof(arch_cell);
+
+
 /*
 	XXX
 */
@@ -170,14 +184,37 @@ char *check_cpu_arch(char *uname_m, prsdata *pdata) {
 /*
 	XXX
 
-	returns:  cpu architecture string or NULL
+	returns:  architecture identifier
 */
 
-htable *arch_wrapper(prsdata *pdata, unsigned char arch_id) {
+unsigned char arch_name_to_id(char *arch_name) {
+	int		i;
+	unsigned char	id = PMK_ARCH_UNKNOWN;
+
+	for(i = 0 ; i < nbarch ; i++) {
+		if (strncmp(arch_name, arch_tab[i].name, sizeof(arch_name)) == 0) {
+			id = arch_tab[i].id;
+			break;
+		}
+	}
+
+	return(id);
+}
+
+/*
+	XXX
+
+	returns: hash table with values or NULL
+*/
+
+htable *arch_wrapper(prsdata *pdata, char *arch_name) {
 	htable		*pht;
+	unsigned char	 arch_id;
 #ifdef ARCH_X86
 	x86_cpu_cell	*pcell;
 #endif
+
+	arch_id = arch_name_to_id(arch_name);
 
 	pht = hash_init(16); /* XXX hardcode, check */
 	if (pht == NULL) {
