@@ -5,6 +5,7 @@
  * added comp_test.c in tests directory.
  * fixed function detection in CHECK_HEADER.
  * added support for sudo in makefiles.
+ * improved cleaning and added missing code in detect_compiler().
 
 # snapshot 0.7.6
 
