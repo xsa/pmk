@@ -34,19 +34,21 @@
  */
 
 
-#include <fcntl.h>
 #include <sys/stat.h>
+#include <sys/time.h>
+#include <fcntl.h>
 
 #define MKSTEMPS_REPLACE_CHAR	'X'
 
 int mkstemps(char *template, int suffixlen) {
-	char	 subst[] = "aZbY0cXdWe1VfUgT2hSiRj3QkPlO4mNnMo5LpKqJ6rIsHt7GuFvE8wDxCy9BzA",
-		*start,
-		*end,
-		*p;
-	int	 fd,
-		 len,
-		 i;
+	struct timeval	 tv;
+	char		 subst[] = "aZbY0cXdWe1VfUgT2hSiRj3QkPlO4mNnMo5LpKqJ6rIsHt7GuFvE8wDxCy9BzA",
+			*start,
+			*end,
+			*p;
+	int		 fd,
+			 len,
+			 i;
 
 	/* forwarding to end of template */
 	for (p = template ; *p != '\0' ; p++);
@@ -72,8 +74,8 @@ int mkstemps(char *template, int suffixlen) {
 
 	/* intialise random() */
 	len = strlen(subst);
-	srandom(len);
-	srandomdev();
+	gettimeofday(&tv, NULL);
+	srandom(len * (unsigned int) template * tv.tv_sec + tv.tv_usec);
 
 	/* lets go replacing the stuff */
 	for (p = start ; p <= end ; p++) {
