@@ -1,3 +1,4 @@
+#!/bin/sh
 # $Id$
 
 # Copyright (c) 2003-2004 Damien Couderc
@@ -258,7 +259,7 @@ if [ $usermode = 1 ]; then
 	else
 		mkf_sed 'BASE' "$base"
 	fi
-	mkf_sed 'MKTARGET' 'cfgum'
+	mkf_sed 'MKTARGET' 'user'
 	mkf_sed 'CONFDIR' '$(HOME)/.pmk'
 	mkf_sed 'BINDIR' '$(BASE)/bin'
 	mkf_sed 'SBINDIR' '$(BASE)/bin'
@@ -273,7 +274,7 @@ else
 	else
 		mkf_sed 'BASE' "$base"
 	fi
-	mkf_sed 'MKTARGET' 'cfgrm'
+	mkf_sed 'MKTARGET' 'global'
 	mkf_sed 'CONFDIR' '$(SYSCONFDIR)/pmk'
 	mkf_sed 'BINDIR' '$(BASE)/bin'
 	mkf_sed 'SBINDIR' '$(BASE)/sbin'

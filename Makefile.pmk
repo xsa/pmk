@@ -41,10 +41,13 @@ USERMODE=	@USERMODE@
 PMKCFLAGS= $(WARN) $(DBGFLAGS) $(CFGFLAGS) $(USERMODE) $(CFLAGS) \
 		-DDATADIR=\"$(DATADIR)\"
 
+MKTARGET=	@MKTARGET@
+
 PREMAKE=	pmk
 SETUP=		$(PREMAKE)setup
 SCAN=		$(PREMAKE)scan
 INST=           $(PREMAKE)install
+PKGCFG=		$(PREMAKE)pc
 
 SAMPLE=		$(PREMAKE)file.sample
 CONFIG=		$(PREMAKE).conf.sample
@@ -60,6 +63,7 @@ P_OBJS=		autoconf.o common.o compat.o detect.o dynarray.o func.o \
 S_OBJS=		common.o compat.o dynarray.o hash.o parse.o pmk_obj.o $(SETUP).o
 SC_OBJS=	common.o compat.o dynarray.o hash.o parse.o pmk_obj.o $(SCAN).o
 I_OBJS=		common.o compat.o dynarray.o pathtools.o $(INST).o
+PC_OBJS=	common.o dynarray.o hash.o parse.o pkgconfig.o pmk_obj.o $(PKGCFG).o
 
 .c.o:
 	$(CC) $(PMKCFLAGS) -c $<
@@ -67,44 +71,25 @@ I_OBJS=		common.o compat.o dynarray.o pathtools.o $(INST).o
 # main target
 all: $(PREMAKE) $(SETUP) $(SCAN) $(INST)
 
-cfgrm:
-	@if ($(PREMAKE) -v >/dev/null 2>&1); then \
-		echo 'Configure using pmk.'; \
-		$(PREMAKE); \
-	else \
-		echo 'Configure using pmkcfg.sh'; \
-		CC=$(CC) sh pmkcfg.sh; \
-	fi
-	@echo 'OK' > cfgrm
-	@rm -f cfgum
-	@echo 'Done.'
+showmode:
+	@printf "Makefile is in '%s' mode.\n" $(MKTARGET)
 
-cfgum:
-	@if ($(PREMAKE) -v >/dev/null 2>&1); then \
-		echo 'Configure using pmk.'; \
-		$(PREMAKE) -e sw_usermode; \
-	else \
-		echo 'Configure using pmkcfg.sh'; \
-		CC=$(CC) sh pmkcfg.sh -u; \
-	fi
-	@echo 'OK' > cfgum
-	@rm -f cfgrm
-	@echo 'Done.'
+sm: showmode
 
-config: @MKTARGET@
-	@echo 'OK' > config
-
-$(PREMAKE): config $(P_OBJS)
+$(PREMAKE): $(P_OBJS)
 	$(CC) -o $(PREMAKE) $(LDFLAGS) $(P_OBJS)
 
-$(SETUP): config $(S_OBJS)
+$(SETUP): $(S_OBJS)
 	$(CC) -o $(SETUP) $(LDFLAGS) $(S_OBJS)
 
-$(SCAN): config $(SC_OBJS)
+$(SCAN): $(SC_OBJS)
 	$(CC) -o $(SCAN) $(LDFLAGS) $(SC_OBJS)
 
-$(INST): config $(I_OBJS)
+$(INST): $(I_OBJS)
 	$(CC) -o $(INST) $(LDFLAGS) $(I_OBJS)
+
+$(PKGCFG): $(PC_OBJS)
+	$(CC) -o $(PKGCFG) $(LDFLAGS) $(PC_OBJS)
 
 install: all
 	$(SUDO) $(INSTALL) -d -m 755 $(DESTDIR)$(BINDIR)
@@ -161,8 +146,14 @@ $(SCAN)-clean:
 $(INST)-clean:
 	rm -f $(I_OBJS) $(INST)
 
-clean: $(PREMAKE)-clean $(SETUP)-clean $(SCAN)-clean $(INST)-clean
-	rm -f compat/compat.h config cfgum cfgrm *.core
+$(PKGCFG)-clean:
+	rm -f $(PC_OBJS) $(PKGCFG)
+
+clean: $(PREMAKE)-clean $(SETUP)-clean $(SCAN)-clean $(INST)-clean $(PKGCFG)-clean
+	rm -f *.core
+
+fclean: clean
+	rm -f compat/compat.h Makefile
 
 test_$(PREMAKE): $(PREMAKE)
 	@echo ""
