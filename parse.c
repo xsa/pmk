@@ -130,6 +130,109 @@ void	prscell_destroy(prscell *pcell) {
 }
 
 /*
+	get quoted string
+*/
+
+char *parse_quoted(char *pstr, char *buffer, size_t size) {
+	while ((*pstr != PMK_CHAR_QUOTE_END) && (*pstr != CHAR_EOS)) {
+		if (size > 1) {
+			*buffer = *pstr;
+			pstr++;
+			buffer++;
+			size--;
+		} else {
+			return(NULL);
+		}
+	}
+
+	if (*pstr == PMK_CHAR_QUOTE_END) {
+		/* found end of quoted string */
+		*buffer = CHAR_EOS;
+		pstr++;
+		return(pstr);
+	} else {
+		/* end of quoting not found */
+		return(NULL);
+	}
+}
+
+/*
+	get list
+
+	NOTE: code is especially redundant as it will create pmk object later.
+*/
+
+char *parse_list(char *pstr, char *buffer, size_t size) {
+	while ((*pstr != PMK_CHAR_LIST_END) && (*pstr != CHAR_EOS)) {
+		if (size > 1) {
+			*buffer = *pstr;
+			pstr++;
+			buffer++;
+			size--;
+		} else {
+			return(NULL);
+		}
+	}
+
+	if (*pstr == PMK_CHAR_LIST_END) {
+		/* found end of list */
+		*buffer = CHAR_EOS;
+		pstr++;
+		return(pstr);
+	} else {
+		/* end of list not found */
+		return(NULL);
+	}
+}
+
+/*
+	get word XXX
+*/
+
+char *parse_word(char *pstr, char *buffer, size_t size) {
+	char	*rptr;
+
+	switch (*pstr) {
+		case '"' :
+			pstr++;
+			rptr = parse_quoted(pstr, buffer, size);
+			break;
+
+		case '(' :
+			pstr++;
+			rptr = parse_list(pstr, buffer, size);
+			break;
+
+		default :
+			while ((isalnum(*pstr) != 0) || (*pstr == '_')) {
+				if (size > 1) {
+					*buffer = *pstr;
+					pstr++;
+					buffer++;
+					size--;
+				} else {
+					return(NULL);
+				}
+			}
+			*buffer = CHAR_EOS;
+			rptr = pstr;
+			break;
+	}
+	return(rptr);
+}
+
+/*
+	skip blank character(s)
+*/
+
+char *skip_blank(char *pstr) {
+	while (isblank(*pstr) != 0) {
+		pstr++;
+	}
+	return(pstr);
+}
+
+/*
 	parse a command
 
 	line : line to parse
@@ -249,129 +352,71 @@ bool parse_cell(char *line, prscell *pcell) {
 */
 
 bool parse_opt(char *line, htable *ht) {
-	bool	f_key = false,
-		f_oper = false,
-		f_value = false,
-		f_qmark = false;
-	char	buf[MAXPATHLEN], /* XXX buf len ? */
-		tkey[MAX_OPT_NAME_LEN],
-		tval[MAX_OPT_VALUE_LEN];
-	int	j = 0;
+	char	 key[MAX_OPT_NAME_LEN],
+		 value[MAX_OPT_VALUE_LEN],
+		*pstr;
 
 #ifdef DEBUG_PRS
-	debugf("parsing opt line '%s'", line);
+	debugf("line = '%s'", line);
 #endif
-	do {
-#ifdef DEBUG_PRS
-		debugf("chr = '%c'", *line);
-#endif
-		if ((f_qmark == true) || (*line == CHAR_EOS)) {
-#ifdef DEBUG_PRS
-			debugf("qmark or EOS ('%c')", *line);
-#endif
-			switch (*line) {
-				case '"' :
-				case CHAR_EOS :
-					buf[j] = CHAR_EOS;
-					j++;
-					f_qmark = false;
-
-					if (f_key == false) {
-#ifdef DEBUG_PRS
-						debugf("key is '%s'", buf);
-#endif
-						/* set the key */
-						if (strlcpy(tkey, buf, MAX_OPT_VALUE_LEN) >= MAX_OPT_VALUE_LEN) {
-							/* key value is too long */
-							strlcpy(parse_err, "key value too long.", sizeof(parse_err));
-							return(false);
-						} else {
-							f_key = true;
-							j = 0;
-						}
-					} else {
-						if (f_value == false) {
-#ifdef DEBUG_PRS
-							debugf("value is '%s'", buf);
-#endif
-							/* XXX TODO strdup should be enough here */
-							if (strlcpy(tval, buf, MAX_OPT_VALUE_LEN) >= MAX_OPT_VALUE_LEN) {
-								/* key value is too long */
-								strlcpy(parse_err, "key value too long.", sizeof(parse_err));
-								return(false);
-							} else {
-								f_value = true;
-								j = 0;
-							}
-						}
-					}
-					break;
-
-				default :
-					buf[j] = *line;
-#ifdef DEBUG_PRS
-					debugf("add chr '%c', j = %d", *line, j);
-#endif
-					j++;
-					break;
-			}
-		} else {
-			/* if not a blank character */
-			if (isblank(*line) == 0) {
-				switch (*line) {
-					case PMK_KEY_CHAR :
-						if (f_key == true) {
-							f_oper = true;
-						} else {
-							if (j != 0) {
-								buf[j] = CHAR_EOS;
-								if (strlcpy(tkey, buf, MAX_OPT_VALUE_LEN) >= MAX_OPT_VALUE_LEN) {
-									/* key value is too long */
-									strlcpy(parse_err, "key value too long.", sizeof(parse_err));
-									return(false);
-								} else {
-									f_key = true;
-									j = 0;
-								}
-							} else {
-								strlcpy(parse_err, "operator without key.", sizeof(parse_err));
-								return(false);
-							}
-						}
-						break;
-
-					case '"' :
-						f_qmark = true;
-						break;
-
-					default :
-						if ((isalpha(*line) != 0) || (*line == '_')) {
-							buf[j] = *line;
-							j++;
-						} else {
-							strlcpy(parse_err, "syntax error.", sizeof(parse_err));
-							return(false);
-						}
-				}
-			}
-		}
-	} while (*line++ != CHAR_EOS);
-
-	if (f_value == true) {
-#ifdef DEBUG_PRS
-		debugf("recording '%s' with '%s'", tkey, tval);
-#endif
-		/* key name and value are ok */
-		if (hash_add(ht, tkey, strdup(tval)) == HASH_ADD_FAIL) {
-			errorf("hash failure.");
-			return false;
-		}
-		return(true);
-	} else {
-		/* value not found */
-		strlcpy(parse_err, "value not found.", sizeof(parse_err));
+	pstr = skip_blank(line);
+	if (pstr == NULL) {
+		strlcpy(parse_err, PRS_ERR_UNKNOWN, sizeof(parse_err));
 		return(false);
 	}
+
+	pstr = parse_word(pstr, key, sizeof(key));
+	if (pstr == NULL) {
+		strlcpy(parse_err, PRS_ERR_SYNTAX, sizeof(parse_err));
+		return(false);
+	}
+#ifdef DEBUG_PRS
+	debugf("key = '%s'", key);
+#endif
+
+	pstr = skip_blank(pstr);
+	if (pstr == NULL) {
+		strlcpy(parse_err, PRS_ERR_SYNTAX, sizeof(parse_err));
+		return(false);
+	}
+
+	if (*pstr != PMK_CHAR_ASSIGN) {
+		strlcpy(parse_err, PRS_ERR_SYNTAX, sizeof(parse_err));
+		return(false);
+	} else {
+		pstr++;
+	}
+
+	pstr = skip_blank(pstr);
+	if (pstr == NULL) {
+		strlcpy(parse_err, PRS_ERR_SYNTAX, sizeof(parse_err));
+		return(false);
+	}
+
+	pstr = parse_word(pstr, value, sizeof(value));
+	if (pstr == NULL) {
+		strlcpy(parse_err, PRS_ERR_SYNTAX, sizeof(parse_err));
+		return(false);
+	}
+#ifdef DEBUG_PRS
+	debugf("value = '%s'", value);
+#endif
+
+	if (*pstr != CHAR_EOS) {
+		strlcpy(parse_err, PRS_ERR_TRAILING, sizeof(parse_err));
+		return(false);
+	}
+
+#ifdef DEBUG_PRS
+	debugf("recording '%s' with '%s'", key, value);
+#endif
+	/* key name and value are ok */
+	if (hash_add(ht, key, strdup(value)) == HASH_ADD_FAIL) {
+		strlcpy(parse_err, PRS_ERR_HASH, sizeof(parse_err));
+		return(false);
+	}
+
+	return(true);
 }
 
 /*

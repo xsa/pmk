@@ -34,6 +34,19 @@
 #ifndef _PMK_PARSE_H_
 #define _PMK_PARSE_H_
 
+#define PMK_CHAR_COMMAND	'.'
+#define PMK_CHAR_QUOTE_START	'"'
+#define PMK_CHAR_QUOTE_END	PMK_CHAR_QUOTE_START
+#define PMK_CHAR_LIST_START	'('
+#define PMK_CHAR_LIST_END	')'
+#define PMK_CHAR_ASSIGN		'='
+
+#define PRS_ERR_HASH		"hash add failure."
+#define PRS_ERR_SYNTAX		"syntax error."
+#define PRS_ERR_TRAILING	"trailing garbage after value."
+#define PRS_ERR_UNKNOWN		"unknown error."
+
+
 typedef struct sprscell {
 	char		 name[MAX_OPT_NAME_LEN],
 			 label[MAX_LABEL_NAME_LEN];

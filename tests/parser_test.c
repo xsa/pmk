@@ -2,6 +2,8 @@
 #include "../common.c"
 #include "../dynarray.c"
 #include "../hash.c"
+
+#define DEBUG_PRS	1
 #include "../parse.c"
 
 int main(int argc, char *argv[]) {
