@@ -401,7 +401,7 @@ bool pmk_check_header(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 	if (cflags != NULL) {
 		/* init alternative variable */
                 if (hash_get(pgd->htab, cflags) == NULL) {
-                        if (hash_add(pgd->htab, cflags, "") == HASH_ADD_FAIL) {
+                        if (hash_add(pgd->htab, cflags, strdup("")) == HASH_ADD_FAIL) {
         			errorf("hash error.");
         			return(false);
                         }
@@ -567,7 +567,7 @@ bool pmk_check_lib(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 	if (libs != NULL) {
 		/* init alternative variable */
                 if (hash_get(pgd->htab, libs) == NULL) {
-                        if (hash_add(pgd->htab, libs, "") == HASH_ADD_FAIL) {
+                        if (hash_add(pgd->htab, libs, strdup("")) == HASH_ADD_FAIL) {
         			errorf("hash error.");
         			return(false);
                         }
@@ -713,7 +713,7 @@ bool pmk_check_config(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 	if (cflags != NULL) {
 		/* init alternative variable */
                 if (hash_get(pgd->htab, cflags) == NULL) {
-                        if (hash_add(pgd->htab, cflags, "") == HASH_ADD_FAIL) {
+                        if (hash_add(pgd->htab, cflags, strdup("")) == HASH_ADD_FAIL) {
         			errorf("hash error.");
         			return(false);
                         }
@@ -725,7 +725,7 @@ bool pmk_check_config(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 	if (libs != NULL) {
 		/* init alternative variable */
                 if (hash_get(pgd->htab, libs) == NULL) {
-                        if (hash_add(pgd->htab, libs, "") == HASH_ADD_FAIL) {
+                        if (hash_add(pgd->htab, libs, strdup("")) == HASH_ADD_FAIL) {
         			errorf("hash error.");
         			return(false);
                         }
@@ -918,7 +918,7 @@ bool pmk_check_pkg_config(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 	if (cflags != NULL) {
 		/* init alternative variable */
                 if (hash_get(pgd->htab, cflags) == NULL) {
-                        if (hash_add(pgd->htab, cflags, "") == HASH_ADD_FAIL) {
+                        if (hash_add(pgd->htab, cflags, strdup("")) == HASH_ADD_FAIL) {
         			errorf("hash error.");
         			return(false);
                         }
@@ -930,7 +930,7 @@ bool pmk_check_pkg_config(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 	if (libs != NULL) {
 		/* init alternative variable */
                 if (hash_get(pgd->htab, libs) == NULL) {
-                        if (hash_add(pgd->htab, libs, "") == HASH_ADD_FAIL) {
+                        if (hash_add(pgd->htab, libs, strdup("")) == HASH_ADD_FAIL) {
         			errorf("hash error.");
         			return(false);
                         }
@@ -1296,11 +1296,13 @@ bool pmk_set_parameter(pmkcmd *cmd, prsopt *popt, pmkdata *pgd) {
 	bool		 rval = false;
 	char		*pstr,
 			*ccpath;
+	comp_cell	*pcell;
 	comp_data	*cdata;
 	comp_info	 cinfo;
 	dynary		*da;
 	int		 i = 0,
 			 n;
+	lgdata		*pld;
 
 	/* gnu autoconf compatibility */
 	if (strncmp(popt->key, "AC_COMPAT", sizeof(popt->key)) == 0) {
@@ -1403,12 +1405,24 @@ bool pmk_set_parameter(pmkcmd *cmd, prsopt *popt, pmkdata *pgd) {
 				if (detect_compiler(ccpath, pgd->buildlog, cdata, &cinfo) == true) {
 					pmk_log("%s (version %s).\n",
 						comp_get_descr(cdata, cinfo.c_id), cinfo.version);
+
+					/* set shared lib flags */
+					pld = check_lang_comp(pstr);
+					if (pld != NULL) {
+						pcell = comp_get(cdata, cinfo.c_id);
+						pmk_log("\t\tSetting %s to '%s'\n", pld->slflg, pcell->slflags);
+						hash_add(pgd->htab, pld->slflg, strdup(pcell->slflags)); /* XXX check */
+					} else {
+						errorf("unable to set shared library compiler flags (%s).\n", pld->slflg);
+						return(false);
+					}
 				}
 
 			}
 		}
 
-		/* XXX TODO clean cdata */
+		/* clean cdata */
+		compdata_destroy(cdata);
 
 		return(true);
 	}

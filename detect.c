@@ -50,6 +50,18 @@ int	nbkwpc = sizeof(kw_pmkcomp) / sizeof(prskw);
 
 
 /*
+	clean comp_data structure
+
+	pcd : structure to clean
+
+	return : -
+*/
+
+void compdata_destroy(comp_data *pcd) {
+	hash_destroy(pcd->cht);
+}
+
+/*
 	add a new compiler cell
 
 	pcd : compiler data structure
@@ -62,9 +74,6 @@ bool add_compiler(comp_data *pcd, htable *pht) {
 	comp_cell	*pcell;
 	char	*pstr,
 		 tstr[255]; /* XXX need define ? */
-	htable	*pcht;
-
-	pcht = pcd->cht;
 
 	pcell = (comp_cell *) malloc(sizeof(comp_cell));
 	if (pcell == NULL)
@@ -102,7 +111,14 @@ bool add_compiler(comp_data *pcd, htable *pht) {
 		pcell->v_macro = strdup(tstr);
 	}
 
-	hash_add(pcd->cht, pcell->c_id, pcell);
+	pstr = po_get_str(hash_get(pht, "SLFLAGS"));
+	if (pstr == NULL) {
+		pcell->slflags = strdup(""); /* XXX need better ? */
+	} else {
+		pcell->slflags = strdup(pstr);
+	}
+
+	hash_add(pcd->cht, pcell->c_id, pcell); /* no need to strdup */
 
 	return(true);
 }
@@ -124,10 +140,10 @@ comp_cell *comp_get(comp_data *pcd, char *c_id) {
 	get compiler descr
 */
 
-char *comp_get_descr(comp_data *cdata, char *c_id) {
+char *comp_get_descr(comp_data *pcd, char *c_id) {
 	comp_cell	*pcell;
 
-	pcell = hash_get(cdata->cht, c_id);
+	pcell = hash_get(pcd->cht, c_id);
 
 	return(pcell->descr);
 }

@@ -106,7 +106,8 @@ typedef struct {
 	char	*c_id,
 		*descr,
 		*c_macro,
-		*v_macro;
+		*v_macro,
+		*slflags;
 } comp_cell;
 
 typedef struct {
@@ -119,6 +120,7 @@ typedef struct {
 } comp_data;
 
 
+void		 compdata_destroy(comp_data *);
 bool		 add_compiler(comp_data *, htable *);
 comp_cell	*comp_get(comp_data *, char *c_id);
 char		*comp_get_descr(comp_data *, char *);

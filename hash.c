@@ -54,6 +54,9 @@
 
 /*#define HASH_DEBUG 1*/
 
+#ifdef HASH_DEBUG
+#include "common.h"
+#endif
 
 /*
 	compute hash (perfect hashing)
