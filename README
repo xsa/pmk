@@ -58,6 +58,6 @@ $HOME/bin/ and data in $HOME/.pmk/ of the user doing the installation.
 - It seems that Debian/KNetBSD is returning the 'NetBSD' string when
   using uname to know the operating system name. We didn't took any
   decision yet about how to deal with this. But as this system is not
-  able to identify itself correctly we do not support it until futher
+  able to identify itself correctly we do not support it until further
   decision.
 
