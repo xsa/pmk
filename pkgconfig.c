@@ -38,8 +38,10 @@
 #include <dirent.h>
 #include <errno.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 #include "compat/pmk_stdbool.h"
+#include "compat/pmk_string.h"
 #include "common.h"
 #include "hash.h"
 #include "parse.h"
@@ -78,10 +80,74 @@ pkgkw	kw_pkg[] = {
 size_t	nb_pkgkw = sizeof(kw_pkg) / sizeof(pkgkw);
 
 /*
+	XXX
+*/
+
+void pkgcell_destroy(pkgcell *ppc) {
+	free(ppc->name);
+	free(ppc->descr);
+	free(ppc->version);
+	free(ppc->requires);
+	free(ppc->libs);
+	free(ppc->cflags);
+	hash_destroy(ppc->variables);
+}
+
+/*
+	XXX
+*/
+
+pkgdata *pkgdata_init(void) {
+	pkgdata	*ppd;
+
+	ppd = (pkgdata *) malloc(sizeof(pkgdata));
+	if (ppd == NULL)
+		return(NULL);
+
+	/* init pc files hash table */
+	ppd->files = hash_init(PKGCFG_HT_SIZE);
+	if (ppd->files == NULL) {
+		free(ppd);
+		return(NULL);
+	}
+
+	/* init package cells hash table */
+	ppd->cells = hash_init_adv(PKGCFG_HT_SIZE, NULL,
+		(void (*)(void *))pkgcell_destroy, NULL);
+	if (ppd->cells == NULL) {
+		hash_destroy(ppd->files);
+		free(ppd);
+		return(NULL);
+	}
+
+	/* init recursed modules hash table */
+	ppd->mods = da_init();
+	if (ppd->mods == NULL) {
+		hash_destroy(ppd->files);
+		hash_destroy(ppd->cells);
+		free(ppd);
+		return(NULL);
+	}
+
+	return(ppd);
+}
+
+/*
+	XXX
+*/
+
+void pkgdata_destroy(pkgdata *ppd) {
+	hash_destroy(ppd->files);
+	hash_destroy(ppd->cells);
+	da_destroy(ppd->mods);
+	free(ppd);
+}
+
+/*
 	scan given directory for pc files
 */
 
-bool scan_dir(char *dir, htable *pht) {
+bool scan_dir(char *dir, pkgdata *ppd) {
 	struct dirent	*pde;
 	DIR		*pdir;
 	char		*pstr,
@@ -116,7 +182,7 @@ bool scan_dir(char *dir, htable *pht) {
 				strlcat(fpath, "/", sizeof(fpath));
 				strlcat(fpath, pstr, sizeof(fpath));
 
-				hash_update_dup(pht, buf, fpath);
+				hash_update_dup(ppd->files, buf, fpath);
 				/* XXX should use had_add_dup */
 				/* and detect if the package has already been detected */
 
@@ -355,52 +421,48 @@ debugf("unknown = '%s'", line);
 /*
 */
 
-void pkg_collect(void) {
-	
-}
-
-/*
-*/
-
-htable *pkg_recurse(htable *mod_tab, char *reqs) {
+bool pkg_recurse(pkgdata *ppd, char *reqs) {
 	char		*mod,
 			*pcf;
 	dynary		*pda;
-	htable		*pht;
 	pkgcell		*ppc;
 	unsigned int	 i;
 
-	pda = str_to_dynary(reqs, ' ');
+#ifdef PKGCFG_DEBUG
+debugf("recursing '%s'", reqs);
+#endif
+
+	pda = str_to_dynary_adv(reqs, " ,");
 	if (pda == NULL) {
 		/* XXX errof */
-		return(NULL);
+		return(false);
 	}
-
-	pht = hash_init(32); /* XXX hardcode !!!! */
-	if (pht == NULL) {
-		/* XXX errof */
-		da_destroy(pda);
-		return(NULL);
-	}
-
 
 	for (i = 0 ; i < da_usize(pda) ; i++) {
 		/* get module name */
 		mod = da_idx(pda, i);
 
 		/* get pc file name */
-		pcf = hash_get(mod_tab, mod);
+		pcf = hash_get(ppd->files, mod);
 
 		/* parse pc file */
 		ppc = parse_pc_file(pcf);
 
 		/* store pkgcell in hash */
-		hash_update(pht, mod, ppc); /* XXX check */
+		hash_update(ppd->cells, mod, ppc); /* XXX check */
+
+#ifdef PKGCFG_DEBUG
+debugf("adding pkgcell for '%s'", mod);
+#endif
+		if (ppc->requires != NULL) {
+			pkg_recurse(ppd, ppc->requires); /* XXX check */
+		}
 	}
 
-	return(pht);
-}
+	da_destroy(pda);
 
+	return(true);
+}
 
 /*
 */

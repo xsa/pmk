@@ -5,6 +5,7 @@
 /* pkg-config tools test */
 
 #define PKGCFG_DEBUG	1
+/*#define HASH_DEBUG	1*/
 
 #include <stdio.h>
 
@@ -18,22 +19,24 @@
 #include "../premake.h"
 
 int main(int argc, char *argv[]) {
-	char	*pstr;
-	htable	*pht;
+	char	*mod,
+		*pstr;
 	pkgcell	*ppc;
+	pkgdata	*ppd;
 
-	pht = hash_init(512);
-	if (pht == NULL) {
-		errorf("cannot init hash table.");
+	ppd = pkgdata_init();
+	if (ppd == NULL) {
+		errorf("cannot init pkgdata.");
 		exit(EXIT_FAILURE);
 	}
 
-	scan_dir(PKGCONFIG_DIR, pht);
+	scan_dir(PKGCONFIG_DIR, ppd);
 
 	if (argc == 2) {
-		pstr = hash_get(pht, argv[1]);
+		mod = argv[1];
+		pstr = hash_get(ppd->files, mod);
 		if (pstr != NULL) {
-			printf("module '%s' found (in file '%s')\n", argv[1], pstr);
+			printf("module '%s' found (in file '%s')\n", mod, pstr);
 			ppc = parse_pc_file(pstr);
 
 			printf("module name = %s\n", ppc->name);
@@ -41,12 +44,19 @@ int main(int argc, char *argv[]) {
 			printf("module version = %s\n", ppc->version);
 			printf("module requires: %s\n", ppc->requires);
 			/*printf("module  = %s\n", ppc->);*/
+			/* XXX clean ppc */
+
+			/* XXX */
+			if (pkg_recurse(ppd, mod) == false) {
+				errorf("failed on recurse !");
+			}
 		} else {
 			printf("module not found\n");
 		}
 	}
 
-	hash_destroy(pht);
+debugf("destroy pkgdata");
+	pkgdata_destroy(ppd);
 
 	return(0);
 }
