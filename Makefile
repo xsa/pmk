@@ -83,6 +83,7 @@ install: all
 	$(INSTALL) -m 644 data/pmkscan.dat $(DATADIR)
 	$(INSTALL) -d -m 755 $(MANDIR)/man1
 	$(INSTALL) -m 444 man/$(PREMAKE).1 $(MANDIR)/man1/$(PREMAKE).1
+	$(INSTALL) -m 444 man/$(SCAN).1 $(MANDIR)/man1/$(SCAN).1
 	$(INSTALL) -d -m 755 $(MANDIR)/man5
 	$(INSTALL) -m 444 man/$(PREMAKE).conf.5 $(MANDIR)/man5/$(PREMAKE).conf.5
 	$(INSTALL) -m 444 man/$(PREMAKE)file.5 $(MANDIR)/man5/$(PREMAKE)file.5
@@ -107,6 +108,7 @@ deinstall:
 	rm -f $(SBINDIR)$(SETUP)
 	rm -rf $(DATADIR)
 	rm -f $(PREFIX)/man/man1/$(PREMAKE).1
+	rm -f $(PREFIX)/man/man1/$(SCAN).1
 	rm -f $(PREFIX)/man/man8/$(SETUP).8
 	rm -f $(PREFIX)/man/man5/$(PREMAKE).conf.5
 
