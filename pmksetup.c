@@ -573,7 +573,7 @@ int check_libpath(htable *pht) {
 				return(-1);
 			verbosef("Setting '%s' => '%s'", PMKCONF_PC_PATH_LIB, libpath);
 		} else {
-			errorf("%s does not exist.", libpath);
+			verbosef("**warning: %s does not exist.", libpath);
 		}
 	}
 	return(0);
