@@ -1,3 +1,6 @@
+17 Aug 2003 mipsator
+ * fixed a small bug in depend_check().
+
 16 Aug 2003 mipsator
  * added po_dup() in pmk_obj.
 

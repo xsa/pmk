@@ -378,7 +378,7 @@ bool depend_check(htable *lht, pmkdata *gd) {
 	dynary	*da;
 	int	 i;
 
-	deplst = (char *)hash_get(lht, "DEPEND");
+	deplst = (char *) po_get_data(hash_get(lht, "DEPEND"));
 	if (deplst == NULL) {
 		/* no dependencies, check is true */
 		return(true);
