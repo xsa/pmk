@@ -118,11 +118,15 @@ EOF
 	if $CC -o $testbin $testfile >/dev/null 2>&1; then
 		sed_define "def" "$header"
 		echo "yes"
+		r=0
 	else
 		sed_define "udef" "$header"
 		echo "no"
+		r=1
 	fi
 	rm -f $testfile $testbin
+
+	return $r
 }
 
 check_header_function() {
@@ -144,11 +148,15 @@ EOF
 	if $CC -o $testobj -c $testfile >/dev/null 2>&1; then
 		sed_define "def" "$function"
 		echo "yes"
+		r=0
 	else
 		sed_define "udef" "$function"
 		echo "no"
+		r=1
 	fi
 	rm -f $testfile $testobj
+
+	return $r
 }
 
 check_lib_function() {
@@ -170,12 +178,15 @@ EOF
 	if $CC -o $testobj -l$lib $testfile >/dev/null 2>&1; then
 		sed_define "def" "$function"
 		echo "yes"
+		r=0
 	else
 		sed_define "udef" "$function"
 		echo "no"
+		r=1
 	fi
 	rm -f $testfile $testobj
 
+	return $r
 }
 
 check_type() {
@@ -197,11 +208,15 @@ EOF
 	if $CC -o $testbin $testfile >/dev/null 2>&1; then
 		sed_define "def" "$type"
 		echo "yes"
+		r=0
 	else
 		sed_define "udef" "$type"
 		echo "no"
+		r=1
 	fi
 	rm -f $testfile $testbin
+
+	return $r
 }
 
 check_type_header() {
@@ -225,11 +240,15 @@ EOF
 	if $CC -o $testbin $testfile >/dev/null 2>&1; then
 		sed_define "def" "$type"
 		echo "yes"
+		r=0
 	else
 		sed_define "udef" "$type"
 		echo "no"
+		r=1
 	fi
 	rm -f $testfile $testbin
+
+	return $r
 }
 
 sed_define() {
@@ -373,7 +392,11 @@ check_header_function unistd.h mkstemps
 # dirname check
 #
 
-check_lib_function gen dirname
+if check_lib_function gen dirname; then
+	mkf_sed 'LGEN_FLAGS' "-lgen"
+else
+	mkf_sed 'LGEN_FLAGS' ""
+fi
 
 #
 # end

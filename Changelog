@@ -1,3 +1,6 @@
+06 Sep 2004 mipsator
+ * improved pmkcfg.sh function to return test status (0 or 1).
+
 05 Sep 2004 mipsator
  * added check_lib_function() in pmkcfg.sh (preliminary stuff).
 

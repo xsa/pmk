@@ -22,6 +22,8 @@ MANDIR=		@MANDIR@
 
 CFGFLAGS=	-DSYSCONFDIR=\"$(SYSCONFDIR)\" -DCONFDIR=\"$(CONFDIR)\"
 
+LGEN_FLAGS=	@LGEN_FLAGS@
+
 # Flag to enable pmk in user mode (check INSTALL file for details).
 USERMODE=	@USERMODE@
 
