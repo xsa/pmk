@@ -349,7 +349,7 @@ int get_binaries(htable *ht) {
 	}
 
 	for (i = 0; i < MAXBINS; i++) {
-		if (find_file_bis(stpath, binaries[i][0], fbin, MAXPATHLEN) == 1) {
+		if (find_file(stpath, binaries[i][0], fbin, MAXPATHLEN) == 1) {
 			if (verbose_flag == 1) 
 				debugf("\tFound '%s'\t(%s)", binaries[i][0], fbin);
 
