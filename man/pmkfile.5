@@ -130,6 +130,9 @@ SETTINGS {
 This command permits to define variables.
 .Pp
 Arguments :
+.Bd -literal -offset
+Those are the variables to be defined (quote data type only).
+.Ed
 .Pp
 Example :
 .Bd -literal -offset -indent
@@ -271,6 +274,19 @@ Example :
 IF(header_gtk) {
 	DEFINE {
 		HAVE_GTK = "1"
+	}
+}
+.Ed
+.It Cm ELSE(expression)
+It contains other commands that will be executed only if the given expression is false.
+.Pp
+Arguments :
+.Pp
+Example :
+.Bd -literal -offset -indent
+ELSE(header_glib) {
+	DEFINE {
+		HAVE_GLIB = "0"
 	}
 }
 .Ed

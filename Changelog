@@ -4,6 +4,7 @@
  * removed redundant (and confusing dependency in samples/pmkfile.sample
    (noticed by Han Boetes).
  * added ELSE command to be less confusing than IF(!label).
+ * updated pmkfile.5 with new ELSE command.
 
 # snapshot 0.8.1-s3
 
