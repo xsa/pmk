@@ -32,8 +32,10 @@
 
 
 #include <sys/param.h>
+#include <ctype.h>
 #include <err.h>
 #include <stdio.h>
+#include <string.h>
 
 #include "pmk.h"
 
