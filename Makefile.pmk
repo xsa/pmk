@@ -196,7 +196,7 @@ clean: $(PREMAKE)-clean $(SETUP)-clean $(SCAN)-clean $(INST)-clean \
 	rm -f *.core
 
 dist-clean: clean
-	rm -f compat/compat.h Makefile
+	rm -f compat/compat.h Makefile tests/Makefile
 
 full-clean: dist-clean
 fclean: full-clean
