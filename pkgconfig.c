@@ -495,8 +495,9 @@ debugf("keyword = '%s', value = '%s', string = '%s'", buf, pps, pstr);
 #ifdef PKGCFG_DEBUG
 debugf("variable = '%s', value = '%s', string = '%s'", buf, pps, pstr);
 #endif
-				/* store variable in hash */
-				hash_update_dup(ppc->variables, buf, pps); /* XXX check, add only ? */
+				/* store variable in hash, XXX add only ? */
+				if (hash_update_dup(ppc->variables, buf, pps) == HASH_ADD_FAIL)
+					return(false);
 
 				break;
 

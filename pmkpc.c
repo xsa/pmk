@@ -255,6 +255,7 @@ void usage(void) {
 int main(int argc, char *argv[]) {
 	FILE		*fp;
 	bool		 opt_version = false,
+			 opt_atl_vers = false,
 			 opt_modvers = false,
 			 opt_cmp_modvers = false,
 			 opt_exists = false,
@@ -267,6 +268,7 @@ int main(int argc, char *argv[]) {
 			*opt,
 			*pc_path,
 			*mvers = NULL,
+			*pvers = NULL,
 			 cmp_type = CHAR_EOS,
 			 pc_cmd[MAXPATHLEN],
 			 pc_buf[MAXPATHLEN],
@@ -317,6 +319,11 @@ debugf("{main} id = %d", poc->id);
 					opt_version = true;
 					break;
 
+				case PMKPC_OPT_ATLPKGVERS :
+					opt_atl_vers = true;
+					pvers = poc->arg;
+					break;
+
 				case PMKPC_OPT_MODVERS :
 					opt_modvers = true;
 					break;
@@ -361,7 +368,6 @@ debugf("{main} id = %d", poc->id);
 					usage();
 					exit(EXIT_FAILURE);
 
-				case PMKPC_OPT_ATLPKGVERS :
 				case PMKPC_OPT_LISTALL :
 				case PMKPC_OPT_UNINST :
 				case PMKPC_OPT_DEBUG :
@@ -420,6 +426,16 @@ debugf("{main} new mod = '%s'", mod);
 		printf("%s\n", PMKPC_COMPAT_VERSION);
 		clean(&gdata);
 		exit(EXIT_SUCCESS);
+	}
+
+	if (opt_atl_vers == true) {
+		clean(&gdata);
+		/* check if compat version is at least the specified one */
+		if (compare_version(pvers, PMKPC_COMPAT_VERSION) < 0) {
+			exit(EXIT_FAILURE);
+		} else {
+			exit(EXIT_SUCCESS);
+		}
 	}
 
 	fp = fopen(PREMAKE_CONFIG_PATH, "r");

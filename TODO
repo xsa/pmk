@@ -24,7 +24,7 @@ Indented lines means subtask.
 common:
 -----------------------------------------------------------------------
 	-	tutorial
-	~	improve test_pmkinstall to check more modes
+	~	improve test_pmkinstall to check more modes (octal values)
 	-.	add test target in tests/Makefile
 	+	update README and INSTALL
 	~	new samples : prog c & c++, lib c & c++
@@ -79,7 +79,7 @@ mips	~.	make specs, this tool should handle install and
 pmkpc
 -----------------------------------------------------------------------
 	~	missing options
-			- PMKPC_OPT_ATLPKGVERS :
+			+ PMKPC_OPT_ATLPKGVERS :
 			- PMKPC_OPT_LISTALL :
 			- PMKPC_OPT_UNINST :
 			- PMKPC_OPT_DEBUG :
@@ -93,6 +93,6 @@ pmkpc
 			- PMKPC_OPT_VAR_PRNT :
 			- PMKPC_OPT_VAR_SILC :
 			- PMKPC_OPT_VAR_STDO :
-	-	man page
+	~	man page
 	-	special expression ('' quoted)
 

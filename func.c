@@ -1363,7 +1363,8 @@ bool pmk_set_parameter(pmkcmd *cmd, prsopt *popt, pmkdata *pgd) {
 		}
 
 		/* compatibility tags */
-		ac_set_variables(pgd->htab);
+		if (ac_set_variables(pgd->htab) == false)
+			return(false); /* XXX error message ? */
 		pmk_log("\t\tSet specific variables.\n");
 
 		return(true);
@@ -1450,11 +1451,13 @@ bool pmk_set_parameter(pmkcmd *cmd, prsopt *popt, pmkdata *pgd) {
 						/* set shared lib compiler flags */
 						pcell = comp_get(cdata, cinfo.c_id);
 						pmk_log("\t\tSetting %s to '%s'\n", pld->slflg, pcell->slcflags);
-						hash_update_dup(pgd->htab, pld->slflg, pcell->slcflags); /* XXX check */
+						if (hash_update_dup(pgd->htab, pld->slflg, pcell->slcflags) == HASH_ADD_FAIL)
+							return(false);
 
 						/* set shared lib linking flags */
 						pmk_log("\t\tSetting %s to '%s'\n", SL_LDFLAG_VARNAME, pcell->slldflags);
-						hash_update_dup(pgd->htab, SL_LDFLAG_VARNAME, pcell->slldflags); /* XXX check */
+						if (hash_update_dup(pgd->htab, SL_LDFLAG_VARNAME, pcell->slldflags) == HASH_ADD_FAIL)
+							return(false);
 					} else {
 						errorf("unable to set shared library compiler flags (%s).\n", pld->slflg);
 						return(false);

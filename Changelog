@@ -1,3 +1,14 @@
+25 Jan 2004 mipsator
+ * added support for --atleast-pkgconfig-version in pmkpc.
+ * added man page for pmkpc.
+ * added missing checks for hash_update* almost everywhere.
+
+25 Jan 2004 sourceforge
+ * repaired developer cvs server
+
+22 Jan 2004 sourceforge
+ * broken developer cvs server
+
 21 Jan 2004 xsa
  * added the --usage option in pmkpc.
  * added the --help option in pmkpc.

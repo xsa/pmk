@@ -76,7 +76,7 @@ int		 cur_line = 0;
 	return : -
 */
 
-void process_dyn_var(pmkdata *pgd, char *template) {
+bool process_dyn_var(pmkdata *pgd, char *template) {
 	char	*srcdir,
 		*basedir,
 		*pstr,
@@ -102,43 +102,51 @@ void process_dyn_var(pmkdata *pgd, char *template) {
 
 	/* compute builddir_abs with relative path */
 	abspath(basedir, rpath, btpath); 
-	hash_update_dup(pht, PMK_DIR_BLD_ABS, btpath);
+	if (hash_update_dup(pht, PMK_DIR_BLD_ABS, btpath) == HASH_ADD_FAIL)
+		return(false);
 #ifdef PMK_DEBUG
 	debugf("%s = '%s'", PMK_DIR_BLD_ABS, buf);
 #endif
 
 	/* compute relative path to builddir root */
 	relpath(btpath, basedir, buf);
-	hash_update_dup(pht, PMK_DIR_BLD_ROOT_REL, buf);
+	if (hash_update_dup(pht, PMK_DIR_BLD_ROOT_REL, buf) == HASH_ADD_FAIL)
+		return(false);
 #ifdef PMK_DEBUG
 	debugf("%s = '%s'", PMK_DIR_BLD_ROOT_REL, buf);
 #endif
 
 	/* set buildir_rel to '.', useful ? */
-	hash_update_dup(pht, PMK_DIR_BLD_REL, ".");
+	if (hash_update_dup(pht, PMK_DIR_BLD_REL, ".") == HASH_ADD_FAIL)
+		return(false);
 #ifdef PMK_DEBUG
 	debugf("%s = '%s'", PMK_DIR_BLD_REL, buf);
 #endif
 
 	/* compute and set relative path from basedir to srcdir */
 	relpath(btpath, srcdir, buf);
-	hash_update_dup(pht, PMK_DIR_SRC_ROOT_REL, buf);
+	if (hash_update_dup(pht, PMK_DIR_SRC_ROOT_REL, buf) == HASH_ADD_FAIL)
+		return(false);
 #ifdef PMK_DEBUG
 	debugf("%s = '%s'", PMK_DIR_SRC_ROOT_REL, buf);
 #endif
 
 	/* set absolute path of template */
-	hash_update_dup(pht, PMK_DIR_SRC_ABS, stpath);
+	if (hash_update_dup(pht, PMK_DIR_SRC_ABS, stpath) == HASH_ADD_FAIL)
+		return(false);
 #ifdef PMK_DEBUG
 	debugf("%s = '%s'", PMK_DIR_SRC_ABS, buf);
 #endif
 
 	/* compute and set relative path from template to builddir */
 	relpath(btpath, stpath, buf);
-	hash_update_dup(pht, PMK_DIR_SRC_REL, buf);
+	if (hash_update_dup(pht, PMK_DIR_SRC_REL, buf) == HASH_ADD_FAIL)
+		return(false);
 #ifdef PMK_DEBUG
 	debugf("%s = '%s'", PMK_DIR_SRC_REL, buf);
 #endif
+
+	return(true);
 }
 
 /*
@@ -191,7 +199,7 @@ pmkdata *pmkdata_init(void) {
         NOTE : XXX check hash_add ?
 */
 
-void init_var(pmkdata *pgd) {
+bool init_var(pmkdata *pgd) {
 	char	 buf[TMP_BUF_LEN],
                 *pstr;
 	htable	*pht;
@@ -200,7 +208,8 @@ void init_var(pmkdata *pgd) {
 
 	pstr = MK_VAR_CFLAGS;
 	if (get_make_var(pstr, buf, sizeof(buf)) == true) {
-		hash_update_dup(pht, pstr, buf); /* XXX check ? */
+		if (hash_update_dup(pht, pstr, buf) == HASH_ADD_FAIL)
+		return(false);
 	}
 #ifdef PMK_DEBUG
 debugf("%s = '%s'", pstr, buf);
@@ -208,100 +217,133 @@ debugf("%s = '%s'", pstr, buf);
 
 	pstr = MK_VAR_CXXFLAGS;
 	if (get_make_var(pstr, buf, sizeof(buf)) == true) {
-		hash_update_dup(pht, pstr, buf); /* XXX check ? */
+		if (hash_update_dup(pht, pstr, buf) == HASH_ADD_FAIL)
+		return(false);
 	}
 #ifdef PMK_DEBUG
 debugf("%s = '%s'", pstr, buf);
 #endif
-	hash_update_dup(pht, pstr, buf); /* XXX check ? */
+	if (hash_update_dup(pht, pstr, buf) == HASH_ADD_FAIL)
+		return(false);
 
 	pstr = MK_VAR_CPPFLAGS;
 	if (get_make_var(pstr, buf, sizeof(buf)) == true) {
-		hash_update_dup(pht, pstr, buf); /* XXX check ? */
+		if (hash_update_dup(pht, pstr, buf) == HASH_ADD_FAIL)
+			return(false);
 	}
 #ifdef PMK_DEBUG
 debugf("%s = '%s'", pstr, buf);
 #endif
-	hash_update_dup(pht, pstr, buf); /* XXX check ? */
+	if (hash_update_dup(pht, pstr, buf) == HASH_ADD_FAIL)
+		return(false);
 
 	pstr = MK_VAR_LDFLAGS;
 	if (get_make_var(pstr, buf, sizeof(buf)) == true) {
-		hash_update_dup(pht, pstr, buf); /* XXX check ? */
+		if (hash_update_dup(pht, pstr, buf) == HASH_ADD_FAIL)
+			return(false);
 	}
 #ifdef PMK_DEBUG
 debugf("%s = '%s'", pstr, buf);
 #endif
-	hash_update_dup(pht, pstr, buf); /* XXX check ? */
+	if (hash_update_dup(pht, pstr, buf) == HASH_ADD_FAIL)
+		return(false);
 
 	pstr = MK_VAR_LIBS;
 	if (get_make_var(pstr, buf, sizeof(buf)) == true) {
-		hash_update_dup(pht, pstr, buf); /* XXX check ? */
+		if (hash_update_dup(pht, pstr, buf) == HASH_ADD_FAIL)
+			return(false);
 	}
 #ifdef PMK_DEBUG
 debugf("%s = '%s'", pstr, buf);
 #endif
-	hash_update_dup(pht, pstr, buf); /* XXX check ? */
+	if (hash_update_dup(pht, pstr, buf) == HASH_ADD_FAIL)
+		return(false);
 
 	pstr = MK_VAR_DEBUG;
 	if (get_make_var(pstr, buf, sizeof(buf)) == true) {
-		hash_update_dup(pht, pstr, buf); /* XXX check ? */
+		if (hash_update_dup(pht, pstr, buf) == HASH_ADD_FAIL)
+			return(false);
 	}
 #ifdef PMK_DEBUG
 debugf("%s = '%s'", pstr, buf);
 #endif
-	hash_update_dup(pht, pstr, buf); /* XXX check ? */
+	if (hash_update_dup(pht, pstr, buf) == HASH_ADD_FAIL)
+		return(false);
 
 	/* autoconf shit ? */
-	hash_update_dup(pht, "OBJEXT", "o"); /* XXX check ? */
+	if (hash_update_dup(pht, "OBJEXT", "o") == HASH_ADD_FAIL)
+		return(false);
 
 
 	pstr = hash_get(pht, PMKCONF_BIN_CC);
-	if (pstr != NULL)
-		hash_update_dup(pht, "CC", pstr);
+	if (pstr != NULL) {
+		if (hash_update_dup(pht, "CC", pstr) == HASH_ADD_FAIL)
+			return(false);
+	}
 
 	pstr = hash_get(pht, PMKCONF_BIN_CXX);
-	if (pstr != NULL)
-		hash_update_dup(pht, "CXX", pstr);
+	if (pstr != NULL) {
+		if (hash_update_dup(pht, "CXX", pstr) == HASH_ADD_FAIL)
+			return(false);
+	}
 
 	pstr = hash_get(pht, PMKCONF_BIN_CPP);
-	if (pstr != NULL)
-		hash_update_dup(pht, "CPP", pstr);
+	if (pstr != NULL) {
+		if (hash_update_dup(pht, "CPP", pstr) == HASH_ADD_FAIL)
+			return(false);
+	}
 
 	pstr = hash_get(pht, PMKCONF_BIN_INSTALL);
         /* append -c for compat with autoconf*/
         snprintf(buf, sizeof(buf), "%s -c", pstr);
-	if (pstr != NULL)
-		hash_update_dup(pht, "INSTALL", buf);
+	if (pstr != NULL) {
+		if (hash_update_dup(pht, "INSTALL", buf) == HASH_ADD_FAIL)
+			return(false);
+	}
 
 	pstr = hash_get(pht, PMKCONF_BIN_RANLIB);
-	if (pstr != NULL)
-		hash_update_dup(pht, "RANLIB", pstr);
+	if (pstr != NULL) {
+		if (hash_update_dup(pht, "RANLIB", pstr) == HASH_ADD_FAIL)
+			return(false);
+	}
 
 	pstr = hash_get(pht, PMKCONF_BIN_SH);
-	if (pstr != NULL)
-		hash_update_dup(pht, "SHELL", pstr);
+	if (pstr != NULL) {
+		if (hash_update_dup(pht, "SHELL", pstr) == HASH_ADD_FAIL)
+			return(false);
+	}
 
 	pstr = hash_get(pht, PMKCONF_BIN_STRIP);
-	if (pstr != NULL)
-		hash_update_dup(pht, "STRIP", pstr);
+	if (pstr != NULL) {
+		if (hash_update_dup(pht, "STRIP", pstr) == HASH_ADD_FAIL)
+			return(false);
+	}
 
 	pstr = hash_get(pht, PMKCONF_BIN_AWK);
-	if (pstr != NULL)
-		hash_update_dup(pht, "AWK", pstr);
+	if (pstr != NULL) {
+		if (hash_update_dup(pht, "AWK", pstr) == HASH_ADD_FAIL)
+			return(false);
+	}
 
 	pstr = hash_get(pht, PMKCONF_BIN_EGREP);
-	if (pstr != NULL)
-		hash_update_dup(pht, "EGREP", pstr);
+	if (pstr != NULL) {
+		if (hash_update_dup(pht, "EGREP", pstr) == HASH_ADD_FAIL)
+			return(false);
+	}
 
 	/* set absolute paths */
-	hash_update_dup(pht, PMK_DIR_SRC_ROOT_ABS, pgd->srcdir);
+	if (hash_update_dup(pht, PMK_DIR_SRC_ROOT_ABS, pgd->srcdir) == HASH_ADD_FAIL)
+			return(false);
 #ifdef PMK_DEBUG
 	debugf("%s = '%s'", PMK_DIR_SRC_ROOT_ABS, pgd->srcdir);
 #endif
-	hash_update_dup(pht, PMK_DIR_BLD_ROOT_ABS, pgd->basedir);
+	if (hash_update_dup(pht, PMK_DIR_BLD_ROOT_ABS, pgd->basedir) == HASH_ADD_FAIL)
+			return(false);
 #ifdef PMK_DEBUG
 	debugf("%s = '%s'", PMK_DIR_BLD_ROOT_ABS, pgd->basedir);
 #endif
+
+	return(true);
 }
 
 /*
@@ -385,17 +427,22 @@ bool process_template(char *template, pmkdata *pgd) {
 		return(false);
 	}
 
-	process_dyn_var(pgd, template); /* XXX should use directly path ? */
+	/* XXX should use directly path ? */
+	if (process_dyn_var(pgd, template) == false)
+		return(false); /* XXX error message ? */
 
 	if (pgd->ac_file == NULL) {
 		ac_flag = false;
 	} else {
 		ac_flag = true;
-		ac_process_dyn_var(pgd, template); /* XXX should use directly path ? */
+		/* XXX should use directly path ? */
+		if (ac_process_dyn_var(pgd, template) == false)
+			return(false); /* XXX error message ? */
 	}
 
 	snprintf(cibuf, sizeof(cibuf), "%s, generated from %s by PMK.", pfn, ptn);
-	hash_update_dup(pht, "configure_input", cibuf); /* XXX check ? */
+	if (hash_update_dup(pht, "configure_input", cibuf) == HASH_ADD_FAIL)
+		return(false);
 	free(ptn);
 	free(pfn);
 
@@ -712,7 +759,12 @@ int main(int argc, char *argv[]) {
 	}
 
 	/* initialize some variables */
-	init_var(pgd);
+	if (init_var(pgd) == true) {
+		/* hash error on variable initialization */
+		clean(pgd);
+		errorf("cannot parse '%s', run pmksetup.", PREMAKE_CONFIG_PATH);
+		exit(EXIT_FAILURE);
+	}
 
 	if (enable_sw != NULL) {
 		/* command line switches to enable */
@@ -720,7 +772,8 @@ int main(int argc, char *argv[]) {
 		if (da != NULL) {
 			pstr = da_pop(da);	
 			while (pstr != NULL) {
-				hash_update_dup(pgd->labl, pstr, BOOL_STRING_TRUE); /* XXX BOOL */
+				if (hash_update_dup(pgd->labl, pstr, BOOL_STRING_TRUE) == HASH_ADD_FAIL)
+					return(false);
 				ovrsw++; /* increment number of overriden switches */
 				free(pstr);
 				pstr = da_pop(da);	
@@ -736,7 +789,8 @@ int main(int argc, char *argv[]) {
 			do {
 				pstr = da_pop(da);
 				if (pstr != NULL) {
-					hash_update_dup(pgd->labl, pstr, BOOL_STRING_FALSE); /* XXX BOOL check */
+					if (hash_update_dup(pgd->labl, pstr, BOOL_STRING_FALSE) == HASH_ADD_FAIL)
+						return(false);
 					ovrsw++; /* increment number of overriden switches */
 					free(pstr);
 				}

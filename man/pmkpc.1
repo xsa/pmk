@@ -1,0 +1,94 @@
+.\" $Id$
+
+.Dd January 20, 2004
+.Dt PMKPC 1
+.Os
+
+.Sh NAME
+.Nm pmkpc
+.Nd Packages metainformation management tool. 
+
+.Sh SYNOPSIS
+.Nm
+.B pmkpc
+[options] [modules]
+.E
+
+.Sh DESCRIPTION
+.Nm
+is a tool that gather metainformation about installed libraries that
+provide pkg-config data files. It aims to be an alternative to the
+pkg-config tool.
+
+.Sh OPTIONS
+.Pp
+The options are as follows:
+.Bl -tag -width Ds
+.It --version
+Display compatibility version relative to pkgconfig.
+.It --atleast-pkgconfig-version
+Check if compatibility version is at least equal or greater than the
+version provided as an argument.
+.It --modversion
+Display the version of the given library modules using one line for
+each version.
+.It --atleast-version
+Check if each module version is at least equal or greater than the
+version provided as an argument.
+.It --exact-version
+Check if each module version is at equal to the version provided as an
+argument.
+.It --max-version
+Check if each module version is at least equal or smaller than the
+version provided as an argument.
+.It --exists
+Check if given library modules exists.
+.It --cflags
+Display pre-processor and compiler flags for given library modules.
+Duplicates values are automatically removed.
+.It --libs
+Display linker flags for given library modules. Duplicates values are
+automatically removed.
+.It --help
+Only for compatibility with pkg-config. Refers to this man page.
+.It --usage
+Display usage.
+.El
+
+.Pp
+The following options have not been implemented yet:
+.Bd -literal -offset -indent
+--list-all
+--uninstalled
+--debug
+--cflags-only-I
+--cflags-only-other
+--libs_only_l
+--libs_only_L
+--libs_only_other
+--variable
+--define-variable
+--print-errors
+--silence-errors
+--errors-to-stdout
+.Ed
+
+.Sh FILES
+.Bl -tag -width "pmkfile.scan" -compact
+.It Pa pmkcfgtool.dat
+Config tool specific data.
+.El
+
+.Sh SEE ALSO
+.Xr pkg-config 1
+
+.Sh AUTHOR
+.An Damien Couderc
+.Sh HISTORY
+Initialy pmk was using pkg-config in a sub shell. Further, internal
+support was developed to improve the speed of data gathering. While
+studying the code of pkg-config we discovered some chunks of code that
+were unsafe (malloc return unchecked, use of strcpy without any check,
+...). Knowing that we decided to try to do a safer implementation and
+pmkpc was born.
+
