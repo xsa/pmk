@@ -235,18 +235,25 @@ bool symbolic_to_octal_mode(char *mstr, mode_t *pmode) {
 */
 
 bool check_mode(char *mstr, mode_t *pmode) {
-	mode_t	mode = 0,
-		mask;
+	long	 mode = 0;
+	mode_t	 mask;
+	char	*ep;
 
 	if (mstr == NULL)
 		return(false);
 
 	if (isdigit(*mstr) != 0) {
 		/* octal value */
-		mode = strtol(mstr, NULL, 8); /* XXX check !! */		
+		mode = strtol(mstr, NULL, 8);
+		if (*mstr == '\0' || *ep != '\0')
+			return(false); /* not a number */
+		if (errno == ERANGE && (mode == LONG_MIN || mode == LONG_MAX))
+			return(false); /* invalid number */
+		if (mode < 0 || mode > USHRT_MAX)
+			return(false); /* invalid mode */
 	} else {
 		/* symbolic value */
-		if (symbolic_to_octal_mode(mstr, &mode) == false) {
+		if (symbolic_to_octal_mode(mstr, (mode_t *)&mode) == false) {
 			return(false);
 		};
 	}
@@ -257,7 +264,7 @@ bool check_mode(char *mstr, mode_t *pmode) {
 	umask(mask);
 
 	/* apply umask */
-	*pmode = mode & (~mask);
+	*pmode = ((mode_t)mode) & (~mask);
 
 	return(true);
 }
