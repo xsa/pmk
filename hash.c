@@ -226,7 +226,8 @@ int hash_add(htable *pht, char *key, char *value) {
 
 	remove a key from the hash table
 
-	...
+	pht : hash table
+	key : key to search
 */
 
 void hash_delete(htable *pht, char *key) {
@@ -255,6 +256,7 @@ void hash_delete(htable *pht, char *key) {
 				}
 			}
 			free(phc);
+			phc = NULL;
 
 			pht->count--;
 		} else {
@@ -263,7 +265,7 @@ void hash_delete(htable *pht, char *key) {
 			phc = phc->next;
 		}
 	}
-	/* key not found ?!?! */
+	/* key not found */
 }
 
 /*
@@ -271,6 +273,8 @@ void hash_delete(htable *pht, char *key) {
 
 	pht : hash table
 	key : key to search
+
+	returns the value or NULL
 */
 
 char *hash_get(htable *pht, char *key) {
