@@ -50,7 +50,7 @@
 #define DEBUG_PRS	1
 */
 
-char	parse_err[MAX_ERRMSG_LEN];
+char	parse_err[MAX_ERR_MSG_LEN];
 
 
 /*
