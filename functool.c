@@ -416,7 +416,8 @@ bool parse_ac_config(htable *ht, char *fpath) {
 	FILE	*fp_in,
 		*fp_out;
 	bool	rval = true;
-	char	buf[TMP_BUF_LEN],
+	char	line[TMP_BUF_LEN],
+		buf[TMP_BUF_LEN],
 		ftmp[MAXPATHLEN],
 		*pstr;
 	int	i = 0,
@@ -434,10 +435,10 @@ bool parse_ac_config(htable *ht, char *fpath) {
 		return(false);
 	}
 
-	while (get_line(fp_in, buf, sizeof(buf)) == true) {
-		pstr = strstr(buf, "#define");
+	while (get_line(fp_in, line, sizeof(line)) == true) {
+		pstr = strstr(line, "#define");
 		if (pstr == NULL) {
-			pstr = strstr(buf, "#undef");
+			pstr = strstr(line, "#undef");
 		}
 
 		if (pstr != NULL) {
@@ -452,7 +453,7 @@ bool parse_ac_config(htable *ht, char *fpath) {
 			} else {
 				pstr++;
 			}
-			s = sizeof(buf);
+			s = sizeof(line);
 			while ((*pstr != '_') && (isalpha(*pstr) != 0) && (i < s)) {
 				buf[i] = *pstr;
 				pstr++;
@@ -464,11 +465,15 @@ bool parse_ac_config(htable *ht, char *fpath) {
 			pstr = hash_get(ht, buf);
 			if (pstr != NULL) {
 				/* XXX to finish */
+				debugf("found '%s' = '%s'", buf, pstr);
 			} else {
 				/* XXX to finish */
+				debugf("unknow '%s'", buf);
 			}
+			fprintf(fp_out, line); /* XXX temporary */
 		} else {
 			/* write line as is */
+			fprintf(fp_out, line);
 		}
 	}
 
