@@ -249,7 +249,7 @@ bool list_all(pkgdata *ppd) {
 	}
 
 	/* build format string to align descriptions */
-	snprintf(fmt, sizeof(fmt), "%%-%us %%s\n", maxs);
+	snprintf(fmt, sizeof(fmt), "%%-%us %%s\n", (unsigned int)maxs);
 
 	for(i = 0 ; i < phk->nkey ; i++) {
 		if (rval == true) {
