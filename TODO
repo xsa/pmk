@@ -1,8 +1,5 @@
 common :
 - tutorial 
-+ improve parser to parse variables
-+ force types in parser
-! missing function comments
 
 pmk :
 + update pmk.1
@@ -14,7 +11,6 @@ pmk :
 	- VPATH ?
 ! cache ? (hash table with binary location, ...)
 - more C++ support
-+ finish global LANG
 ~ replace po_get_data
 - CHECK_VARIABLE ? (cinepaint)
 - verify in CHECK_BINARY that program has executable right ?
