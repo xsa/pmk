@@ -49,8 +49,8 @@ TEST_SAMPLE=	test_samples
 TEST_INST=	test_pmkinstall
 TEST_TARGET=	$(TEST_INST)/$(INST).test
 
-P_OBJS=		autoconf.o common.o compat.o dynarray.o func.o functool.o \
-		hash.o parse.o pmk_obj.o pathtools.o $(PREMAKE).o
+P_OBJS=		autoconf.o common.o compat.o detect.o dynarray.o func.o \
+		functool.o hash.o parse.o pmk_obj.o pathtools.o $(PREMAKE).o
 S_OBJS=		common.o compat.o dynarray.o hash.o parse.o pmk_obj.o $(SETUP).o
 SC_OBJS=	common.o compat.o dynarray.o hash.o parse.o pmk_obj.o $(SCAN).o
 I_OBJS=		common.o compat.o dynarray.o pathtools.o $(INST).o
@@ -180,7 +180,7 @@ test_$(PREMAKE): $(PREMAKE)
 	@echo "----------------------------------------"
 	@echo ""
 	@echo "-> Running pmk"
-	./$(PREMAKE) -b $(TEST_SAMPLE) -e use_gtk -f samples/pmkfile.sample -o samples/ovrfile.sample
+	./$(PREMAKE) -l -b $(TEST_SAMPLE) -e use_gtk -f samples/pmkfile.sample -o samples/ovrfile.sample
 	@echo ""
 	@echo "-> Dumping generated files"
 	@echo ""
@@ -295,7 +295,7 @@ test_clean:
 	rm -rf $(TEST_SAMPLE)
 	rm -rf $(TEST_TARGET)*
 	rm -rf $(TEST_INST)
-	rm -f samples/ac_config.h pmkfile.scan pmk.log
+	rm -f samples/ac_config.h pmkfile.scan pmk*.log
 
 	@echo ""
 	@echo "=> End of cleaning."

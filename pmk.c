@@ -50,6 +50,7 @@
 #include "compat/pmk_string.h" /* strlcpy */
 #include "autoconf.h"
 #include "common.h"
+#include "detect.h"
 #include "func.h"
 #include "pathtools.h"
 #include "pmk.h"
@@ -754,6 +755,15 @@ int main(int argc, char *argv[]) {
 	pmk_log("Loaded %d overridden switches.\n", ovrsw);
 	pmk_log("Loaded %d overridden variables.\n", nbcd);
 	pmk_log("Total : %d variables.\n\n", hash_nbkey(gdata.htab));
+
+	pmk_log("Detecting compiler : ");
+	pstr = hash_get(gdata.htab, PMKCONF_BIN_CC);
+	if (pstr != NULL) {
+		detect_compiler(pstr, &gdata);
+	} else {
+		debugf("error");
+	}
+	pmk_log(".\n\n");
 
 	pmk_log("Parsing '%s'\n", gdata.pmkfile);
 

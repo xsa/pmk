@@ -34,77 +34,56 @@
  */
 
 
-#ifndef _PMK_H_
-#define _PMK_H_
+#include <stdio.h>
+#include <stdlib.h>
 
-#include "dynarray.h"
-#include "hash.h"
-#include "premake.h"
-
-
-/* pmk specific version */
-#define PREMAKE_SUBVER_PMK	"7"
-
-/* character to assign a value to a key */
-#define PMK_KEY_CHAR		'='
-
-/* character used as delimiter for template tags */
-#define PMK_TAG_CHAR		'@'
-
-/* maximal number of options per command */
-#define MAX_CMD_OPT		32
-
-/* maximal number of templates */
-#define MAX_TEMPLATES		32
-
-/* maximal number of key in data hash */
-#define MAX_DATA_KEY		1024
-
-/* maximal number of key in label hash */
-#define MAX_LABEL_KEY		1024
-
-/* pmk's directory tags */
-#define PMK_DIR_BLD_ABS "builddir_abs"
-#define PMK_DIR_BLD_REL "builddir_rel"
-#define PMK_DIR_BLD_ROOT_ABS "builddir_root_abs"
-#define PMK_DIR_BLD_ROOT_REL "builddir_root_rel"
-#define PMK_DIR_SRC_ABS "srcdir_abs"
-#define PMK_DIR_SRC_REL "srcdir_rel"
-#define PMK_DIR_SRC_ROOT_ABS "srcdir_root_abs"
-#define PMK_DIR_SRC_ROOT_REL "srcdir_root_rel"
-
-#define PMK_TMP_AC_CONF TMPDIR "/pmk_ac_XXXXXXXX"
-
-/* build logs */
-#define PMK_BUILD_LOG	"pmk_build.log"
+#include "common.h"
+#include "detect.h"
 
 
-/* command option type */
-typedef struct {
-	char	name[OPT_NAME_LEN],
-		value[OPT_VALUE_LEN];
-} pmkcmdopt;
+/*
+	detect compiler
+*/
 
-/* command type */
-typedef struct {
-	int	 token;
-	char	*label;
-} pmkcmd;
+bool detect_compiler(char *cpath, pmkdata *pgd) {
+	FILE	*tfp,
+		*rpipe;
+	char	 cfgcmd[MAXPATHLEN],
+		 ftmp[MAXPATHLEN],
+		 pipebuf[TMP_BUF_LEN];
+	int	 r;
 
-/* pmk data */
-typedef struct {
-	htable	*htab,
-		*labl;
-	dynary	*tlist;
-	char	*ac_file,
-		*lang,
-		 basedir[MAXPATHLEN],
-		 srcdir[MAXPATHLEN],
-		 pmkfile[MAXPATHLEN],
-		 ovrfile[MAXPATHLEN],
-		 buildlog[MAXPATHLEN],
-		 errmsg[MAX_ERR_MSG_LEN];
-} pmkdata;
+	tfp = tmps_open(CC_TEST_FILE, "w", ftmp, sizeof(ftmp), sizeof(CC_TFILE_EXT));
+	if (tfp != NULL) {
+		/* fill test file */
+		fprintf(tfp, COMPILER_TEST);
+		fclose(tfp);
+	} else {
+		errorf("cannot open test file ('%s').", ftmp);
+		return(false);
+	}
 
+	/* build compiler command */
+	snprintf(cfgcmd, sizeof(cfgcmd), CC_TEST_FORMAT,
+		cpath, CC_TEST_BIN, ftmp, pgd->buildlog);
 
-#endif /* _PMK_H_ */
+	/* get result */
+	r = system(cfgcmd);
+	if (r == 0) {
+		rpipe = popen(CC_TEST_BIN, "r");
+		if (rpipe != NULL) {
+			if (get_line(rpipe, pipebuf, sizeof(pipebuf)) == false) {
+				errorf("cannot get CFLAGS.");
+				pclose(rpipe);
+				return(false);
+			}
+			pclose(rpipe);
+
+			pmk_log("%s", pipebuf);
+		} else {
+		}
+	} else {
+	}
+
+	return(true);
+}
