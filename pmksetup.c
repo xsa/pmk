@@ -413,12 +413,12 @@ int get_binaries(htable *ht) {
 	if (find_file(stpath, "cc", fbin, sizeof(fbin)) == 1) {
 		hash_add(ht, "BIN_CC", fbin);
 		if (verbose_flag == 1)
-			debugf("\tFound '%s'\t(%s)", "BIN_CC", fbin);
+			debugf("\tSetting '%s' => '%s'", "BIN_CC", fbin);
 	} else {
 		if (find_file(stpath, "gcc", fbin, sizeof(fbin)) == 1) {
 			hash_add(ht, "BIN_CC", fbin);
 			if (verbose_flag == 1)
-				debugf("\tFound '%s'\t(%s)", "BIN_CC", fbin);
+				debugf("\tSetting '%s' => '%s'", "BIN_CC", fbin);
 		} else {
 			errorf("cannot find a C compiler");
 			return(-1);
@@ -428,7 +428,7 @@ int get_binaries(htable *ht) {
 	for (i = 0; i < MAXBINS; i++) {
 		if (find_file(stpath, binaries[i][0], fbin, MAXPATHLEN) == 1) {
 			if (verbose_flag == 1) 
-				debugf("\tFound '%s'\t(%s)", binaries[i][0], fbin);
+				debugf("\tSetting '%s' => '%s'", binaries[i][1], fbin);
 
 			hash_add(ht, binaries[i][1], fbin);
 		} else
