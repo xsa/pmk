@@ -96,9 +96,9 @@ bool get_line(FILE *fd, char *line, int lsize) {
 int parse_conf_line(char *line, int linenum, cfg_opt *opts) {
 	char	*pkey,
 		*pval;
-	int	sk,
-		sv,
-		found_op = 0;
+	int	 sk,
+		 sv,
+		 found_op = 0;
 
 	sk = sizeof(opts->key);
 	sv = sizeof(opts->val);
@@ -156,9 +156,9 @@ int parse_conf_line(char *line, int linenum, cfg_opt *opts) {
 */
 
 bool env_to_opt(char *env_name, pmkcmdopt *opt) {
-	bool	rval;
+	bool	 rval;
 	char	*env_val;
-	int	s;
+	int	 s;
 
 	env_val = getenv(env_name);
 	if (env_val == NULL) {
@@ -190,10 +190,10 @@ bool env_to_opt(char *env_name, pmkcmdopt *opt) {
 bool get_make_var(char *varname, char *result, int rsize) {
 	FILE	*mfp,
 		*tfp;
-	char	mfn[] = "/tmp/pmk_mkf.XXXXXXXX",
-		varstr[TMP_BUF_LEN];
-	int	mfd = -1;
-	bool	rval;
+	bool	 rval;
+	char	 mfn[] = "/tmp/pmk_mkf.XXXXXXXX",
+		 varstr[TMP_BUF_LEN];
+	int	 mfd = -1;
 
 	mfd = mkstemp(mfn);
 	if (mfd == -1) {
@@ -251,9 +251,9 @@ bool get_make_var(char *varname, char *result, int rsize) {
 */
 
 bool str_to_dynary(char *str, char sep, dynary *da) {
-	char	buf[MAXPATHLEN],
+	char	 buf[MAXPATHLEN],
 		*pbuf;
-	int	s;
+	int	 s;
 
 	s = sizeof(buf);
 	pbuf = buf;
@@ -296,13 +296,13 @@ bool str_to_dynary(char *str, char sep, dynary *da) {
 */
 
 bool find_file(dynary *da, char *fname, char *fpath, int fplen) {
-	DIR		*dp;
 	struct dirent	*de;
-	int		i;
-	size_t		rsize;
+	DIR		*dp;
+	bool		 found,
+			 exit;
 	char		*path;
-	bool		found,
-			exit;
+	int		 i;
+	size_t		 rsize;
 
 	found = false;
 	rsize = sizeof(de->d_name);
@@ -348,8 +348,8 @@ bool find_file(dynary *da, char *fname, char *fpath, int fplen) {
 */
 
 void errorf(const char *fmt, ...) {
-	va_list	plst;
 	char	buf[TMP_BUF_LEN];
+	va_list	plst;
 
 	va_start(plst, fmt);
 	vsnprintf(buf, sizeof(buf), fmt, plst);
@@ -367,8 +367,8 @@ void errorf(const char *fmt, ...) {
 */
 
 void errorf_line(char *filename, int line, const char *fmt, ...) {
-	va_list	plst;
 	char	buf[TMP_BUF_LEN];
+	va_list	plst;
 
 	va_start(plst, fmt);
 	vsnprintf(buf, sizeof(buf), fmt, plst);
@@ -384,8 +384,8 @@ void errorf_line(char *filename, int line, const char *fmt, ...) {
 */
 
 void debugf(const char *fmt, ...) {
-	va_list	plst;
 	char	buf[TMP_BUF_LEN];
+	va_list	plst;
 
 	va_start(plst, fmt);
 	vsnprintf(buf, sizeof(buf), fmt, plst);
@@ -432,8 +432,8 @@ void pmk_log_close(void) {
 */
 
 bool pmk_log(const char *fmt, ...) {
-	va_list	plst;
 	char	buf[TMP_BUF_LEN];
+	va_list	plst;
 
 	va_start(plst, fmt);
 	vsnprintf(buf, sizeof(buf), fmt, plst);
@@ -463,8 +463,8 @@ bool pmk_log(const char *fmt, ...) {
 bool copy_text_file(char *src_file, char *dst_file) {
 	FILE	*fp_src,
 		*fp_dst;
-	bool	rval;
-	char	buf[1024]; /* XXX length ? */
+	bool	 rval;
+	char	 buf[1024]; /* XXX length ? */
 
 	fp_src = fopen(src_file, "r");
 	if (fp_src == NULL) {

@@ -30,6 +30,7 @@
  *
  */
 
+
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -55,14 +56,14 @@
 bool ac_parse_config(htable *ht, char *fpath) {
 	FILE	*fp_in,
 		*fp_out;
-	bool	rval = true;
-	char	line[TMP_BUF_LEN],
-		buf[TMP_BUF_LEN],
-		ftmp[MAXPATHLEN],
+	bool	 rval = true;
+	char	 line[TMP_BUF_LEN],
+		 buf[TMP_BUF_LEN],
+		 ftmp[MAXPATHLEN],
 		*pstr;
-	int	i,
-		s,
-		fe;
+	int	 i,
+		 s,
+		 fe;
 
 	strlcpy(ftmp, "config_tmp", sizeof(ftmp)); /* XXX check ? */
 	fp_out = fopen(ftmp, "w");
@@ -151,10 +152,10 @@ void ac_process_dyn_var(htable *pht, pmkdata *pgd, char *template) {
 	char	*srcdir,
 		*basedir,
 		*pstr,
-		buf[MAXPATHLEN],
-		ac_dir[MAXPATHLEN],
-		abs_bd[MAXPATHLEN],
-		abs_sd[MAXPATHLEN];
+		 buf[MAXPATHLEN],
+		 ac_dir[MAXPATHLEN],
+		 abs_bd[MAXPATHLEN],
+		 abs_sd[MAXPATHLEN];
 
 	/* should process variables like following (if i believe autoconf manual) :
 		- srcdir : the relative path to the directory that contains the source code for that `Makefile'.
