@@ -1,3 +1,7 @@
+05 May 2003 mipsator
+ * make hash use ISO C99 booleans.
+ * added hash_add_array().
+
 05 May 2003 xsa
  * added SYSCONFDIR to predef_vars(), so it's now in the pmk.conf as well.
 

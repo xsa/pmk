@@ -35,7 +35,6 @@
 #include <stdlib.h>
 
 #include "hash.h"
-#include "compat/pmk_string.h"
 
 
 /*
@@ -118,7 +117,7 @@ htable *hash_init(int table_size) {
 	returns 1 on success else 0
 */
 
-int hash_resize(htable *ht, int newsize) {
+bool hash_resize(htable *ht, int newsize) {
 	hcell	*phc,
 		*next;
 	hnode	*newhn;
@@ -129,7 +128,7 @@ int hash_resize(htable *ht, int newsize) {
 	/* allocate new node table */
 	newhn = (hnode *) malloc(sizeof(hnode) * newsize);
 	if (newhn == NULL)
-		return(0); /* XXX */
+		return(false);
 
 	/* init */
 	for (i = 0 ; i < newsize ; i++) {
@@ -142,7 +141,7 @@ int hash_resize(htable *ht, int newsize) {
 		while (phc != NULL) {
 			h = hash_compute(phc->key, newsize);
 			next = phc->next;
-			hash_add_cell(&newhn[h], phc); /* XXX */
+			hash_add_cell(&newhn[h], phc); /* XXX test ? */
 			phc = next;
 			c++;
 		}
@@ -152,7 +151,8 @@ int hash_resize(htable *ht, int newsize) {
 	free(ht->nodetab);
 	ht->nodetab = newhn;
 	ht->size = newsize;
-	return(1); /* XXX */
+
+	return(true);
 }
 
 /*
@@ -319,25 +319,25 @@ int hash_add_cell(hnode *phn, hcell *phc) {
 	returns 1 on succes else 0
 */
 
-int hash_add_array(htable *pht, hpair *php, int size) {
+bool hash_add_array(htable *pht, hpair *php, int size) {
 	htable	*pmht;
-	int	i,
-		error = 0,
-		rval = 0;
+	int	i;
+	bool	error = false,
+		rval = false;
 
 	pmht = hash_init(size);
 	if (pmht == NULL)
 		return(0);
 
-	for (i = 0 ; (i < size) && (error == 0) ; i ++) {
+	for (i = 0 ; (i < size) && (error == false) ; i ++) {
 		if (hash_add(pmht, php[i].key, php[i].value) == HASH_ADD_FAIL)
-			error = 1;
+			error = true;
 	}
 
-	if (error == 0) {
+	if (error == false) {
 		hash_merge(pht, pmht);
 	} else {
-		rval = 1;
+		rval = true;
 	}
 
 	hash_destroy(pmht);
