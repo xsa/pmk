@@ -289,7 +289,8 @@ bool pmk_switches(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 */
 
 bool pmk_check_binary(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
-	bool	 required;
+	bool	 required,
+		 rslt;
 	char	*filename,
 		*varname,
 		*bpath,
@@ -326,21 +327,15 @@ bool pmk_check_binary(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 	pmk_log("\tFound binary '%s' : ", filename);
 	if (get_file_path(filename, bpath, binpath, sizeof(binpath)) == false) {
 		pmk_log("no.\n");
-		if (required == true) {
-			return(false);
-		} else {
-			/* define for template */
-			record_def_data(pgd->htab, filename, NULL);
-
+		rslt = process_required(pgd, cmd, required, filename, NULL);
+		if (rslt == true) {
 			/* set path as empty for the key given by varname */
 			if (hash_update_dup(pgd->htab, varname, "") == HASH_ADD_FAIL) {
 				errorf(HASH_ERR_UPDT_ARG, varname);
 				return(false);
 			}
-
-			label_set(pgd->labl, cmd->label, false);
-			return(true);
 		}
+		return(rslt);
 	} else {
 		pmk_log("yes.\n");
 		/* define for template */
@@ -504,18 +499,13 @@ bool pmk_check_header(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 		rval = true;
 	} else {
 		pmk_log("no.\n");
-		if (required == true) {
-			rval = false;
+		rval = process_required(pgd, cmd, required, target, NULL);
+		if (rval == false) {
 			if (incfunc == NULL) {
 				errorf("failed to find header '%s'.", incfile);
 			} else {
 				errorf("failed to find function '%s'.", incfunc);
 			}
-		} else {
-			/* define for template */
-			record_def_data(pgd->htab, target, NULL);
-			label_set(pgd->labl, cmd->label, false);
-			rval = true;
 		}
 	}
 
@@ -658,18 +648,13 @@ bool pmk_check_lib(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 		rval = true;
 	} else {
 		pmk_log("no.\n");
-		if (required == true) {
-			rval = false;
+		rval = process_required(pgd, cmd, required, target, NULL);
+		if (rval == false) {
 			if (libfunc == NULL) {
 				errorf("failed to find library '%s'.", libname);
 			} else {
 				errorf("failed to find function '%s'.", libfunc);
 			}
-		} else {
-			/* define for template */
-			record_def_data(pgd->htab, target, NULL);
-			label_set(pgd->labl, cmd->label, false);
-			rval = true;
 		}
 	}
 
@@ -781,20 +766,15 @@ bool pmk_check_config(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 	pmk_log("\tFound config tool '%s' : ", cfgtool);
 	if (get_file_path(cfgtool, bpath, cfgpath, sizeof(cfgpath)) == false) {
 		pmk_log("no.\n");
-		if (required == true) {
-			return(false);
-		} else {
-			record_def_data(pgd->htab, cfgtool, NULL);
-
+		rval = process_required(pgd, cmd, required, cfgtool, NULL);
+		if (rval == true) {
 			/* set path as empty for the key given by varname */
 			if (hash_update_dup(pgd->htab, varname, "") == HASH_ADD_FAIL) {
 				errorf(HASH_ERR_UPDT_ARG, varname);
 				return(false);
 			}
-
-			label_set(pgd->labl, cmd->label, false);
-			return(true);
 		}
+		return(rval);
 	} else {
 		pmk_log("yes.\n");
 		/* recording path of config tool under the key given by varname */
@@ -839,14 +819,7 @@ bool pmk_check_config(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 			if (compare_version(libvers, pipebuf) < 0) {
 				/* version does not match */
 				pmk_log("no (%s).\n", pipebuf);
-				if (required == true) {
-					rval = false;
-				} else {
-					record_def_data(pgd->htab, cfgtool, NULL);
-					label_set(pgd->labl, cmd->label, false);
-					rval = true;
-				}
-				return(rval);
+				return(process_required(pgd, cmd, required, cfgtool, NULL));
 			} else {
 				pmk_log("yes (%s).\n", pipebuf);
 			}
@@ -1049,13 +1022,7 @@ bool pmk_check_pkg_config(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 			return(pmk_check_config(cmd, ht, pgd));
 		}
 
-		if (required == true) {
-			return(false);
-		} else {
-			/* record_def(pgd->htab, target, false); XXX how to manage ? */
-			label_set(pgd->labl, cmd->label, false);
-			return(true);
-		}
+		return(process_required(pgd, cmd, required, NULL, NULL));
 	} else {
 		pmk_log("yes.\n");
 	}
@@ -1075,13 +1042,7 @@ bool pmk_check_pkg_config(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 			if (compare_version(libvers, pipebuf) < 0) {
 				/* version does not match */
 				pmk_log("no (%s).\n", pipebuf);
-				if (required == true) {
-					rval = false;
-				} else {
-					/* record_def(pgd->htab, target, false); XXX how to manage ? */
-					label_set(pgd->labl, cmd->label, false);
-					rval = true;
-				}
+				rval = process_required(pgd, cmd, required, NULL, NULL);
 
 				pkgdata_destroy(ppd);
 
@@ -1240,14 +1201,9 @@ bool pmk_check_type(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 		rval = true;
 	} else {
 		pmk_log("no.\n");
-		if (required == true) {
-			rval = false;
+		rval = process_required(pgd, cmd, required, type, NULL);
+		if (rval == false) {
 			errorf("failed to find type '%s'.", type);
-		} else {
-			/* define for template */
-			record_def_data(pgd->htab, type, NULL);
-			label_set(pgd->labl, cmd->label, false);
-			rval = true;
 		}
 	}
 
@@ -1316,27 +1272,17 @@ bool pmk_check_variable(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 				rval = true;
 			} else {
 				pmk_log("no.\n");
-				if (required == true) {
-					rval = false;
+				rval = process_required(pgd, cmd, required, NULL, NULL);
+				if (rval == false) {
 					errorf("variable value does not match ('%s' != '%s').", value, varval);
-				} else {
-					/* define for template */
-					label_set(pgd->labl, cmd->label, false);
-					/* process additional defines */
-					process_def_list(pgd->htab, defs);
-
-					rval = true;
 				}
 			}
 		}
 	} else {
 		pmk_log("no.\n");
-		if (required == true) {
+		rval = process_required(pgd, cmd, required, NULL, NULL);
+		if (rval == false) {
 			errorf("failed to find variable '%s'.", var);
-		} else {
-			/* define for template */
-			label_set(pgd->labl, cmd->label, false);
-			rval = true;
 		}
 	}
 
@@ -1405,9 +1351,6 @@ debugf("value = '%s'", value);
 
 	/* get libname without version */
 	variable = po_get_str(hash_get(ht, KW_SL_VERS_NONE));
-	/* COMPAT old name                                        */
-	/*if (variable == NULL)                                   */
-	/*        variable = po_get_str(hash_get(ht, KW_OPT_VARIABLE));*/
 	if (variable != NULL) {
 		pstr = hash_get(pgd->slht, SL_KW_LIB_VNONE);
 #ifdef SHLIB_DEBUG
@@ -1434,9 +1377,6 @@ debugf("variable not set");
 	}
 
 	versvar = po_get_str(hash_get(ht, KW_SL_VERS_FULL));
-	/*COMPAT  old name                                      */
-	/*if (versvar != NULL)                                  */
-	/*        versvar = po_get_str(hash_get(ht, "VERSVAR"));*/
 	if (versvar != NULL) {
 		pstr = hash_get(pgd->slht, SL_KW_LIB_VFULL);
 #ifdef SHLIB_DEBUG
