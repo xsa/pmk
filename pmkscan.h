@@ -36,7 +36,7 @@
 #include "hash.h"
 
 /* pmkscan specific version */
-#define PREMAKE_SUBVER_PMKSCAN	"2"
+#define PREMAKE_SUBVER_PMKSCAN	"3"
 
 #ifdef USER_TEST
 #define PMK_DATADIR	"./data"
