@@ -1,3 +1,7 @@
+06 May 2003 mipsator
+ * rewritten depend_check().
+ * added require_check().
+
 05 May 2003 mipsator
  * make hash use ISO C99 booleans.
  * added hash_add_array().

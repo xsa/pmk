@@ -329,10 +329,10 @@ bool label_set(htable *ht, char *name, bool status) {
 	name : label name
 */
 
-bool label_check(htable *ht, char *name) {
+bool label_check(htable *lht, char *name) {
 	char	*p;
 
-	p = hash_get(ht, name);
+	p = hash_get(lht, name);
 	if (p == NULL)
 		return(false);
 
@@ -348,10 +348,17 @@ bool label_check(htable *ht, char *name) {
 	returns true if all dependencies are true
 */
 
-bool depend_check(htable *ht, char *deplst) {
-	bool rval = true;
+bool depend_check(pmkdata *gd) {
+	bool	rval = true;
+	char	*deplst;
 	dynary	*da;
 	int	i;
+
+	deplst = hash_get(gd->htab, "DEPEND");
+	if (deplst == NULL) {
+		/* no dependencies, check is true */
+		return(true);
+	}
 
 	da = da_init();
 	if (da == NULL)
@@ -362,9 +369,26 @@ bool depend_check(htable *ht, char *deplst) {
 
 	/* check labels one by one */
 	for (i = 0 ; (i < da_usize(da)) && (rval == true) ; i++) {
-		if (label_check(ht, da_idx(da, i)) == false)
+		if (label_check(gd->labl, da_idx(da, i)) == false)
 			rval = false;
 	}
-	
+
+	da_destroy(da);
+
 	return(rval);
+}
+
+/*
+*/
+
+bool require_check(htable *pht) {
+	char	*req;
+
+	req = hash_get(pht, "REQUIRED");
+	if (req == NULL) {
+		/* by default REQUIRED is true if not specified */
+		return(true);
+	}
+
+	return(check_bool_str(req));
 }
