@@ -156,33 +156,59 @@ char *regex_check(char *pattern, char *line) {
 */
 
 void idtf_check(char *idtf, htable *ht_fam, htable *phtgen) {
-	char	*pval,
+	char	 buf[TMP_BUF_LEN],
+		*pval,
 		*p;
+	dynary	*da;
+	int	 i;
+	pmkobj	*po;
 
 	/* check data for this identifier */
-	pval = (char *)po_get_data(hash_get(ht_fam, idtf));
-	if (pval != NULL) {
-		if ((char *)po_get_data(hash_get(phtgen, idtf)) == NULL) {
-			/* XXX temporary */
-			p = strdup(pval);
-			pval = p;
-			while (*p != CHAR_EOS) {
-				if (*p == ',')
-					*p = '\n';
+	po = hash_get(ht_fam, idtf);
 
-				p++;
+	if (po != NULL) {
+		/* check if it has been already added in phtgen */
+		if (hash_get(phtgen, idtf) == NULL) {
+			switch (po_get_type(po)) {
+				case PO_STRING :
+					/* XXX TODO temporary,  */
+					pval = strdup(po_get_str(po));
+					p = pval;
+					while (*p != CHAR_EOS) {
+						if (*p == ',')
+							*p = '\n';
+		
+						p++;
+					}
+		
+					/* record header data */
+					hash_add(phtgen, idtf, po_mk_str(pval));
+					free(pval);
+					break;
+
+				case PO_LIST :
+					da = po_get_list(po); /* XXX also pval */
+					strlcpy(buf, "", sizeof(buf));
+
+					for (i=0 ; i < da_usize(da) ; i++) {
+						strlcat(buf, da_idx(da, i), sizeof(buf));
+						strlcat(buf, "\n", sizeof(buf));
+					}
+
+					hash_add(phtgen, idtf, po_mk_str(buf));
+					break;
+
+				default :
+					debugf("DOH !!"); /* XXX temporary */
+					break;
 			}
-
-			/* record header data */
-			hash_add(phtgen, idtf, po_mk_str(pval));
-			free(pval);
 		}
 	}
 }
 
 
 /*
-	parse a C language file
+	parse a C or C++ language file
 
 	filename : file to parse
 	scandata : scanning data
@@ -258,7 +284,7 @@ bool output_file(char *ofile, htable *pht) {
 	for(i = 0 ; i < phk->nkey ; i++) {
 		value = (char *)po_get_data(hash_get(pht, phk->keys[i]));
 
-		fprintf(fp, "%s\n\n", value);
+		fprintf(fp, "%s\n", value);
 	}
 
 	fclose(fp);
