@@ -1,3 +1,7 @@
+15 Sep 2003 mipsator
+ * removed useless parse_conf_line() in common.
+ * added function comments that were missing.
+
 14 Sep 2003 mipsator
  * made Makefile more portable.
 

@@ -57,7 +57,6 @@ FILE	*pmk_log_fp;
 
 
 bool	get_line(FILE *, char *, int);
-int	parse_conf_line(char *, int, cfg_opt *);
 
 bool	env_to_opt(char *, pmkcmdopt *);
 bool	get_make_var(char *, char *, int);
