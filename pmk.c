@@ -623,6 +623,9 @@ void clean(pmkdata *gd) {
 	if (gd->tlist != NULL) {
 		da_destroy(gd->tlist);
 	}
+	if (gd->ac_file != NULL) {
+		free(gd->ac_file);
+	}
 }
 
 /*
@@ -776,6 +779,11 @@ int main(int argc, char *argv[]) {
 					rval = 1;
 				}
 			}
+		}
+
+		if (gdata.ac_file != NULL) {
+			pmk_log("\nProcess '%s' for autoconf compatibility.\n", gdata.ac_file);
+			/* parse_ac_config(gdata.htab, gdata.ac_file); */
 		}
 
 		pmk_log("\nEnd of log\n");

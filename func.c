@@ -122,7 +122,7 @@ bool pmk_ac_compat(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 	/* if a file is given then it will be parsed later */
 	acfile= hash_get(ht, "FILENAME");
 	if (acfile != NULL) {
-		gdata->ac_file = acfile;
+		gdata->ac_file = strdup(acfile);
 	}
 
 	/* compatibility tags */
