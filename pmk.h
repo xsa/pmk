@@ -66,8 +66,11 @@
 /* maximal number of templates */
 #define MAX_TEMPLATES		32
 
-/* maximal number of key in datahash */
+/* maximal number of key in data hash */
 #define MAX_DATA_KEY		1024
+
+/* maximal number of key in label hash */
+#define MAX_LABEL_KEY		1024
 
 /* command option type */
 typedef struct {
@@ -83,7 +86,8 @@ typedef struct {
 
 /* pmk data */
 typedef struct {
-	htable	*htab;
+	htable	*htab,
+		*labl;
 	dynary	*tlist;
 } pmkdata;
 
