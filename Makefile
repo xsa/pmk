@@ -49,7 +49,13 @@ SC_OBJS=	$(SCAN).o common.o compat.o dynarray.o parse.o hash.o
 all: $(PREMAKE) $(SETUP) $(SCAN)
 
 config:
-	@CC=$(CC) sh pmkcfg.sh
+	@if (pmk -v >/dev/null); then \
+		echo "Configure using pmk."; \
+		pmk; \
+	else \
+		echo "Configure using pmkcfg.sh"; \
+		CC=$(CC) sh pmkcfg.sh; \
+	fi
 	@echo "OK" > config
 
 $(PREMAKE): config $(P_OBJS)
