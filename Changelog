@@ -1,5 +1,6 @@
 15 Jul 2003 mipsator
  * add parse.c and parse.h with a new shared parsing engine.
+ * add pmkscan.c and pmkscan.h, this is preliminary and unusable code.
 
 05 Jul 2003 mipsator
  * added c++ in the binary list of pmksetup.
