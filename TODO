@@ -11,20 +11,17 @@ pmk :
 	- VPATH ?
 ! cache ? (hash table with binary location, ...)
 - more C++ support
-~ replace po_get_data
 - CHECK_VARIABLE ? (cinepaint)
 - verify in CHECK_BINARY that program has executable right ?
+- convert gdata.labl to pmk objects
 
 pmksetup :
-! pmk.conf(5) (new format with object)
 - missing checks :
 	+ endian type (HW_ENDIAN = BIG_ENDIAN, LITTLE_ENDIAN)
 	- char unsigned (pmk ?)
 	- long double (pmk ?)
 	- better check for install ?
 	- others ?
-+ use main parser
-! use objects in pmk.conf
 	
 pmkscan :
 - add more entries in pmkscan.dat
