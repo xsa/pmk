@@ -1,3 +1,7 @@
+04 Jun 2003 mipsator
+ * makes pmkcfg.sh using the same tags as pmk (@DEF__*).
+ * updates compat/compat.h.in to use DEF__* tags.
+
 03 Jun 2003 mipsator
  * updated makefile sample to use LIBS and CFLAGS.
  * added CFLAGS and LIBS support in pmk_check_config().
