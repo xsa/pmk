@@ -19,6 +19,9 @@
  *      copyright notice, this list of conditions and the following
  *      disclaimer in the documentation and/or other materials provided
  *      with the distribution.
+ *    - Neither the name of the copyright holder(s) nor the names of its
+ *      contributors may be used to endorse or promote products derived
+ *      from this software without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -66,7 +69,8 @@ int		 cur_line = 0;
 */
 
 void init_var(htable *pht) {
-	char	*pstr;
+	char	 buf[TMP_BUF_LEN],
+                *pstr;
 
 	hash_add(pht, "CFLAGS", strdup("")); /* XXX check ? */
 	hash_add(pht, "CPPFLAGS", strdup("")); /* XXX check ? */
@@ -85,8 +89,10 @@ void init_var(htable *pht) {
 		hash_add(pht, "CPP", strdup(pstr));
 
 	pstr = hash_get(pht, PMKCONF_BIN_INSTALL);
+        /* append -c for compat with autoconf*/
+        snprintf(buf, sizeof(buf), "%s -c", pstr);
 	if (pstr != NULL)
-		hash_add(pht, "INSTALL", strdup(pstr));
+		hash_add(pht, "INSTALL", strdup(buf));
 
 	pstr = hash_get(pht, PMKCONF_BIN_RANLIB);
 	if (pstr != NULL)
