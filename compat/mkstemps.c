@@ -39,6 +39,7 @@
 #include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #define MKSTEMPS_REPLACE_CHAR	'X'
 
