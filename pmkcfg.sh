@@ -151,6 +151,33 @@ EOF
 	rm -f $testfile $testobj
 }
 
+check_lib_function() {
+	lib="$1"
+	function="$2"
+	printf "Checking function '%s' in library 'l%s' : " "$function" "$lib"
+
+	cat > $testfile <<EOF
+#include <stdio.h>
+
+int $function();
+
+int main() {
+	printf("%%p", $function);
+	return(0);
+}
+EOF
+
+	if $CC -o $testobj -l$lib $testfile >/dev/null 2>&1; then
+		sed_define "def" "$function"
+		echo "yes"
+	else
+		sed_define "udef" "$function"
+		echo "no"
+	fi
+	rm -f $testfile $testobj
+
+}
+
 check_type() {
 	type="$1"
 	printf "Checking type '%s' : " "$type"
@@ -341,6 +368,12 @@ check_header_function ctype.h isblank
 #
 
 check_header_function unistd.h mkstemps
+
+#
+# dirname check
+#
+
+check_lib_function gen dirname
 
 #
 # end
