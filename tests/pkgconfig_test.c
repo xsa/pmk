@@ -30,7 +30,8 @@ int main(int argc, char *argv[]) {
 		exit(EXIT_FAILURE);
 	}
 
-	scan_dir(PKGCONFIG_DIR, ppd);
+	/*scan_dir(PKGCONFIG_DIR, ppd);*/
+	pkg_collect("/usr/local/lib/pkgconfig", ppd); /* nice hardcode isn't it ? :) */
 
 	if (argc == 2) {
 		mod = argv[1];

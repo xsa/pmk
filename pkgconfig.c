@@ -89,7 +89,7 @@ int	nbkwct = sizeof(kw_pmkcfgtool) / sizeof(prskw);
 
 
 /*
-	XXX
+	initialize pkgcell structure
 */
 
 pkgcell *pkgcell_init(void) {
@@ -114,7 +114,7 @@ pkgcell *pkgcell_init(void) {
 }
 
 /*
-	XXX
+	free pkgcell structure
 */
 
 void pkgcell_destroy(pkgcell *ppc) {
@@ -128,7 +128,7 @@ void pkgcell_destroy(pkgcell *ppc) {
 }
 
 /*
-	XXX
+	initialize pkgdata structure
 */
 
 pkgdata *pkgdata_init(void) {
@@ -167,7 +167,7 @@ pkgdata *pkgdata_init(void) {
 }
 
 /*
-	XXX
+	free pkgcell structure
 */
 
 void pkgdata_destroy(pkgdata *ppd) {
@@ -190,7 +190,83 @@ debugf("clean structure");
 }
 
 /*
+	free cfgtcell structure
+*/
+
+void cfgtcell_destroy(cfgtcell *pcc) {
+#ifdef PKGCFG_DEBUG
+debugf("free cfgtcell '%s'", pcc->name);
+#endif
+	free(pcc->name);
+	free(pcc->binary);
+	if (pcc->version != NULL)
+		free(pcc->version);
+	if (pcc->module != NULL)
+		free(pcc->module);
+	if (pcc->cflags != NULL)
+		free(pcc->cflags);
+	if (pcc->libs != NULL)
+		free(pcc->libs);
+	free(pcc);
+}
+
+/*
+	initialize cfgtdata structure
+*/
+
+cfgtdata *cfgtdata_init(void) {
+	cfgtdata	*pcd;
+
+	/* initialise configt tool data structure */
+	pcd = (cfgtdata *) malloc(sizeof(cfgtdata));
+	if (pcd == NULL) {
+#ifdef PKGCFG_DEBUG
+		debugf("cannot initialize config tool data");
+#endif
+		return(NULL);
+	}
+
+	/* initialize config tool hash table */
+	pcd->by_mod = hash_init_adv(CFGTOOL_HT_SIZE, NULL,
+			(void (*)(void *)) cfgtcell_destroy, NULL);
+	if (pcd->by_mod == NULL) {
+		free(pcd);
+#ifdef PKGCFG_DEBUG
+		debugf("cannot initialize config tool hash table");
+#endif
+		return(NULL);
+	}
+
+	/* initialize config tool hash table */
+	pcd->by_bin = hash_init(CFGTOOL_HT_SIZE);
+	if (pcd->by_bin == NULL) {
+		hash_destroy(pcd->by_mod);
+		free(pcd);
+#ifdef PKGCFG_DEBUG
+		debugf("cannot initialize config tool hash table");
+#endif
+		return(NULL);
+	}
+
+	return(pcd);
+}
+
+/*
+	free cfgtdata structure
+*/
+
+void cfgtdata_destroy(cfgtdata *pcd) {
+	hash_destroy(pcd->by_mod);
+	hash_destroy(pcd->by_bin);
+}
+
+/*
 	scan given directory for pc files
+
+	dir : directory to scan
+	ppd : pkgdata structure
+
+	return : boolean
 */
 
 bool scan_dir(char *dir, pkgdata *ppd) {
@@ -243,7 +319,58 @@ debugf("add module '%s' with file '%s'", buf, pstr);
 }
 
 /*
+	collect packages data
+
+	pkglibdir : default packages data directory
+	ppd : pkgdata structure
+
+	return : boolean
+*/
+
+bool pkg_collect(char *pkglibdir, pkgdata *ppd) {
+	char		*pstr;
+	dynary		*pda;
+	unsigned int	 i;
+
+	pstr = getenv(PMKCFG_ENV_PATH);
+	if (pstr != NULL) {
+		/* also scan path provided in env variable */
+		pda = str_to_dynary(pstr, PKGCFG_CHAR_PATH_SEP);
+		
+		for (i = 0 ; i < da_usize(pda) ; i++) {
+			pstr = da_idx(pda, i);
+			if (scan_dir(pstr, ppd) == false) {
+				da_destroy(pda);
+				return(false);
+			}
+		}
+
+		da_destroy(pda);
+	}
+
+	pstr = getenv(PMKCFG_ENV_LIBDIR);
+	if (pstr == NULL) {
+		/* scan default pkgconfig lib directory */
+		if (scan_dir(pkglibdir, ppd) == false)
+			return(false);
+	} else {
+		/* scan overrided pkgconfig libdir */
+		if (scan_dir(pstr, ppd) == false)
+			return(false);
+	}
+	
+	return(true);
+}
+
+
+/*
 	parse keyword and set data
+
+	ppc : pkgcell structure
+	kword : keyword
+	value : value to assign
+
+	return : boolean
 */
 
 bool parse_keyword(pkgcell *ppc, char *kword, char *value) {
@@ -387,6 +514,10 @@ char *process_variables(char *pstr, htable *pht) {
 
 /*
 	parse pc file
+
+	pcfile : file to parse
+
+	return : pkgcell structure or NULL
 */
 
 pkgcell *parse_pc_file(char *pcfile) {
@@ -465,6 +596,12 @@ debugf("unknown = '%s'", line);
 }
 
 /*
+	insert a package cell and return a pointer on it
+
+	mod : module name to process
+	ppd : packages data structure
+
+	return : pkgcell structure or NULL
 */
 
 pkgcell *pkg_cell_add(pkgdata *ppd, char *mod) {
@@ -500,6 +637,12 @@ debugf("pkgcell requires = '%s'", ppc->requires);
 }
 
 /*
+	recurse packages
+
+	ppd : packages data structure
+	reqs : requires string
+
+	return : boolean
 */
 
 bool pkg_recurse(pkgdata *ppd, char *reqs) {
@@ -533,6 +676,12 @@ debugf("recursing '%s'", reqs);
 }
 
 /*
+	append module name if it does not already exists
+
+	ostr : modules list string
+	astr : module to append
+
+	return : new list of modules or NULL
 */
 
 char *pkg_single_append(char *ostr, char *astr) {
@@ -561,6 +710,8 @@ debugf("single_append '%s', '%s'", ostr, astr);
 		/* 2 is for the separator and the end of file char */
 		s = strlen(ostr) + strlen(astr) + 2;
 		buf = (char *) malloc(s);
+		if (buf == NULL)
+			return(NULL);
 
 		snprintf(buf, s, "%s %s", ostr, astr);
 
@@ -574,6 +725,11 @@ debugf("single_append '%s', '%s'", ostr, astr);
 }
 
 /*
+	get recursed list of cflags
+
+	ppd : packages data structure
+
+	return : cflags string
 */
 
 char *pkg_get_cflags(pkgdata *ppd) {
@@ -599,6 +755,11 @@ char *pkg_get_cflags(pkgdata *ppd) {
 }
 
 /*
+	get recursed list of libs
+
+	ppd : packages data structure
+
+	return : libs string
 */
 
 char *pkg_get_libs(pkgdata *ppd) {
@@ -624,6 +785,11 @@ char *pkg_get_libs(pkgdata *ppd) {
 }
 
 /*
+	check if the given module exists
+
+	mod : module to check
+
+	return : boolean
 */
 
 bool pkg_mod_exists(pkgdata *ppd, char *mod) {
@@ -699,7 +865,7 @@ bool add_cfgtool(cfgtdata *pcd, htable *pht) {
 #ifdef PKGCFG_DEBUG
 debugf("added cfgtcell '%s'", pcell->name);
 #endif
-	hash_update(pcd->by_bin, pcell->binary, pcell->name); /* no need to strdup */ /* XXX check */
+	hash_update_dup(pcd->by_bin, pcell->binary, pcell->name); /* no need to strdup */ /* XXX check */
 #ifdef PKGCFG_DEBUG
 debugf("added cfgtcell '%s'", pcell->binary);
 #endif
@@ -708,30 +874,7 @@ debugf("added cfgtcell '%s'", pcell->binary);
 }
 
 /*
-	free cfgtcell structure
-*/
-
-void cfgtcell_destroy(cfgtcell *pcc) {
-#ifdef PKGCFG_DEBUG
-debugf("free cfgtcell '%s'", pcc->name);
-#endif
-	free(pcc->name);
-	free(pcc->binary);
-	if (pcc->version != NULL)
-		free(pcc->version);
-	if (pcc->module != NULL)
-		free(pcc->module);
-	if (pcc->cflags != NULL)
-		free(pcc->cflags);
-	if (pcc->libs != NULL)
-		free(pcc->libs);
-	free(pcc);
-}
-
-/*
 	parse data from PMKCFG_DATA file
-
-	cdfile : compilers data file
 
 	return : compiler data structure or NULL
 */
@@ -751,29 +894,10 @@ cfgtdata *parse_cfgt_file(void) {
 	}
 
 	/* initialise configt tool data structure */
-	pcd = (cfgtdata *) malloc(sizeof(cfgtdata));
+	pcd = cfgtdata_init();
 	if (pcd == NULL) {
 		prsdata_destroy(pdata);
 		debugf("cannot initialize config tool data");
-		return(NULL);
-	}
-
-	/* initialize config tool hash table */
-	pcd->by_mod = hash_init_adv(32, NULL, (void (*)(void *)) cfgtcell_destroy, NULL); /* XXX 32 => HARDCODE !!! */
-	if (pcd->by_mod == NULL) {
-		free(pcd);
-		prsdata_destroy(pdata);
-		debugf("cannot initialize config tool hash table");
-		return(NULL);
-	}
-
-	/* initialize config tool hash table */
-	pcd->by_bin = hash_init(32); /* XXX 32 => HARDCODE !!! */
-	if (pcd->by_bin == NULL) {
-		hash_destroy(pcd->by_mod);
-		free(pcd);
-		prsdata_destroy(pdata);
-		debugf("cannot initialize config tool hash table");
 		return(NULL);
 	}
 
@@ -827,7 +951,14 @@ cfgtdata *parse_cfgt_file(void) {
 }
 
 /*
-	XXX
+	get binary name from a given module name
+
+	pgd : global data structure
+	mod : module name
+	buf : buffer to store binary name
+	sb : buffer size
+
+	return : boolean
 */
 
 bool cfgtcell_get_binary(pmkdata *pgd, char *mod, char *buf, size_t sb) {
@@ -853,7 +984,12 @@ bool cfgtcell_get_binary(pmkdata *pgd, char *mod, char *buf, size_t sb) {
 }
 
 /*
-	XXX
+	get cell relative to a given config tool filename
+
+	pgd : global data structure
+	binary : binary name
+
+	return : cfgtcell structure or NULL
 */
 
 cfgtcell *cfgtcell_get_cell(pmkdata *pgd, char *binary) {
