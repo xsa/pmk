@@ -34,13 +34,13 @@
  */
 
 
-#include <sys/types.h>
 #include <sys/stat.h>
-#include <ctype.h>
 #include <stdio.h>
 
-#include "compat/pmk_string.h"
+#include "compat/pmk_sys_types.h"
+#include "compat/pmk_ctype.h"
 #include "compat/pmk_libgen.h"
+#include "compat/pmk_string.h"
 #include "compat/pmk_unistd.h"
 #include "autoconf.h"
 #include "common.h"

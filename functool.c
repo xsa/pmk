@@ -34,10 +34,10 @@
  */
 
 
-#include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "compat/pmk_ctype.h"
 #include "compat/pmk_string.h"
 #include "compat/pmk_unistd.h"
 #include "functool.h"

@@ -35,14 +35,13 @@
  */
 
 
-#include <sys/types.h>
-
 #include <errno.h>
 #include <glob.h>
 #include <regex.h>
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "compat/pmk_sys_types.h"
 #include "compat/pmk_string.h"
 #include "compat/pmk_unistd.h"
 #include "common.h"

@@ -39,14 +39,14 @@
  */
 
 
-#include <sys/types.h>
 #include <sys/stat.h>
 
-#include <ctype.h>
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "compat/pmk_sys_types.h"
+#include "compat/pmk_ctype.h"
 #include "compat/pmk_libgen.h" /* basename, dirname */
 #include "compat/pmk_string.h" /* strlcpy */
 #include "compat/pmk_unistd.h"
