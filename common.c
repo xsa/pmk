@@ -7,7 +7,7 @@
 
 /*
  * Copyright (c) 2003-2004 Damien Couderc
- * Copyright (c) 2003-2004 Xavier Santolaria
+ * Copyright (c) 2003-2004 Xavier Santolaria <xavier@santolaria.net>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
