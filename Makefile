@@ -16,7 +16,7 @@ CFLAGS?=
 #CFLAGS+=	-DSYSCONFDIR=\"/etc/\"
 
 # Flag for platform testing checks
-CFLAGS+=	-DUSER_TEST
+#CFLAGS+=	-DUSER_TEST
 
 LDFLAGS?=
 
