@@ -37,5 +37,6 @@
 
 bool	chkpath(char *, char *);
 void	relpath(char *, char *, char *);
+bool	abspath(char *, char *, char *);
 
 #endif /* _PMK_PATHTOOLS_H_ */

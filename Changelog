@@ -1,8 +1,9 @@
 21 Jun 2003 mipsator
  * added pathtools.c and pathtools.h files.
- * moved relpath into pathtools.
- * added chkpath into pathtools.
+ * moved relpath() into pathtools.
+ * added chkpath() into pathtools.
  * added path_test.c in test directory.
+ * added abspath() into pathtools.
 
 18 Jun 2003 mipsator
  * added relpath() to common.
