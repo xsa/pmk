@@ -52,6 +52,7 @@ install: pmk pmksetup
 	$(INSTALL) -m 644 samples/$(CONFIG) $(DATADIR)
 	$(INSTALL) -m 444 $(PREMAKE).1 $(PREFIX)/man/man1/$(PREMAKE).1
 	$(INSTALL) -m 444 $(SETUP).8 $(PREFIX)/man/man8/$(SETUP).8
+	$(INSTALL) -m 444 $(PREMAKE).conf.5 $(PREFIX)/man/man5/$(PREMAKE).conf.5
 
 clean:
 	rm -f $(P_OBJS) $(S_OBJS) $(PREMAKE) $(SETUP) compat/compat.h *.core
@@ -62,6 +63,7 @@ deinstall:
 	rm -rf $(PREFIX)/share/$(PREMAKE)
 	rm -f $(PREFIX)/man/man1/$(PREMAKE).1
 	rm -f $(PREFIX)/man/man8/$(SETUP).8
+	rm -f $(PREFIX)/man/man5/$(PREMAKE).conf.5
 
 test_pmk: pmk
 	@echo ""
