@@ -17,9 +17,9 @@ all: hash dynary path parser mkvar comp
 	$(CC) $(CFLAGS) -c $<
 
 config:
-	@if [ ! -f ../config ]; then \
+	@if [ ! -f ../compat/compat.h ]; then \
 		echo "Not configured, run \
-		'cd ../ && make clean cfgum; make' first."; \
+		'cd ../ && make clean config' first."; \
 		exit 1; \
 	fi
 
