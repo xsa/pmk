@@ -161,11 +161,8 @@ char *regex_check(char *pattern, char *line) {
 
 	if (regexec(&re, line, 2, rm, 0) == 0) {
 		/* copy header name */
-		if (strlcpy_b(idtf, (char *) (line + rm[1].rm_so),
-				(size_t) (rm[1].rm_eo - rm[1].rm_so + 1)) == false) {
-			regfree(&re);
-			return(NULL);
-		}
+		strlcpy(idtf, (char *) (line + rm[1].rm_so),
+			(size_t) (rm[1].rm_eo - rm[1].rm_so + 1)); /* no check ! */
 
 		rval =idtf;
 	} else {
