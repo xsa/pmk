@@ -1,5 +1,6 @@
 26 Nov 2003 mipsator
  * added test_pmkinstall target in makefiles.
+ * improved mode operator support in pmkinstall.
 
 25 Nov 2003 mipsator
  * added support for -o and -g options (owner and group) of pmkinstall.

@@ -61,10 +61,10 @@
 #define FULL_MASK	USR_MASK | GRP_MASK | OTH_MASK	/* all */
 
 /* perm masks */
-#define R_PERM		S_IRUSR | S_IRGRP | S_IROTH
-#define W_PERM		S_IWUSR | S_IWGRP | S_IWOTH
-#define X_PERM		S_IXUSR | S_IXGRP | S_IXOTH
-
+#define R_PERM		S_IRUSR | S_IRGRP | S_IROTH	/* read */
+#define W_PERM		S_IWUSR | S_IWGRP | S_IWOTH	/* write */
+#define X_PERM		S_IXUSR | S_IXGRP | S_IXOTH	/* execute */
+#define FULL_PERM	R_PERM | W_PERM | X_PERM	/* all */
 
 extern char	*optarg;
 extern int	 optind;
@@ -93,12 +93,11 @@ void strip(char *file) {
 	convert symbolic value to octal
 */
 
-mode_t symbolic_to_octal_mode(char *mstr) {
+bool symbolic_to_octal_mode(char *mstr, mode_t *pmode) {
 	bool	 do_loop = true;
 	char	*pstr,
 		 op = CHAR_EOS;
 	mode_t	 mask = 0,
-		 mode = 0,
 		 perm = 0;
 
 	pstr = mstr;
@@ -136,7 +135,7 @@ mode_t symbolic_to_octal_mode(char *mstr) {
 	/* check if operator is valid */
 	if ((op != '+') && (op != '-') && (op != '=')) {
 		errorf("syntax error in symbolic mode '%s'", mstr);
-		return(-1);
+		return(false);
 	}
 
 	/* perm symbols */
@@ -163,7 +162,7 @@ mode_t symbolic_to_octal_mode(char *mstr) {
 			default:
 				/* unknow perm */
 				errorf("unknow permission '%c'.", *pstr);
-				return(-1);
+				return(false);
 				break;
 		}
 		pstr++;
@@ -173,17 +172,33 @@ mode_t symbolic_to_octal_mode(char *mstr) {
 	/* apply operator */
 	switch (op) {
 		case '+':
-			mode = mask & perm;
+			if (perm == 0) {
+				/* no perms given */
+				*pmode = 0;
+			} else {
+				if (mask == 0) {
+					/* mask not set, give perms to all */
+					mask = FULL_MASK;
+				}
+				*pmode = mask & perm;
+			}
 			break;
+
 		case '-':
-			errorf("operator '%c' not implemented.", op);
+			/* no perms */
+			*pmode = 0;
 			break;
+
 		case '=':
-			errorf("operator '%c' not implemented.", op);
+			if (mask == 0) {
+				*pmode = perm;
+			} else {
+				*pmode = 0;
+			}
 			break;
 	}
 
-	return(mode);
+	return(true);
 }
 
 /*
@@ -191,7 +206,8 @@ mode_t symbolic_to_octal_mode(char *mstr) {
 */
 
 mode_t check_mode(char *mstr) {
-	mode_t	mode = 0;
+	mode_t	mode = 0,
+		mask;
 
 	if (mstr == NULL)
 		return(-1);
@@ -201,8 +217,16 @@ mode_t check_mode(char *mstr) {
 		mode = strtol(mstr, NULL, 8); /* XXX check !! */		
 	} else {
 		/* symbolic value */
-		mode = symbolic_to_octal_mode(mstr);
+		symbolic_to_octal_mode(mstr, &mode);
 	}
+
+	/* get umask */
+	mask = umask(0);
+	/* set original umask again */
+	umask(mask);
+
+	/* apply umask */
+	mode = mode & (~mask);
 
 	return(mode);
 }
