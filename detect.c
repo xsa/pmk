@@ -128,7 +128,7 @@ bool add_compiler(comp_data *pcd, htable *pht) {
 		pcell->v_macro = strdup(tstr);
 	}
 
-	pstr = po_get_str(hash_get(pht, "SLFLAGS"));
+	pstr = po_get_str(hash_get(pht, "SLCFLAGS"));
 	if (pstr == NULL) {
 		pcell->slflags = strdup(""); /* XXX need better ? */
 	} else {

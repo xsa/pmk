@@ -169,6 +169,12 @@ pmkdata *pmkdata_init(void) {
 	/* init template list */
 	ppd->tlist = NULL;
 
+	/* XXX */
+	ppd->ac_file = NULL;
+
+	/* XXX */
+	ppd->lang = NULL;
+
 	/* init on demand */
 	ppd->cfgt = NULL;
 
