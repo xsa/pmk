@@ -89,7 +89,7 @@ $(SETUP)-clean:
 	rm -f $(S_OBJS) $(SETUP)
 
 $(SCAN)-clean:
-	rm -f $(SC_OBJS) $(SCAN) pmkfile.scan
+	rm -f $(SC_OBJS) $(SCAN)
 
 clean: $(PREMAKE)-clean $(SETUP)-clean $(SCAN)-clean
 	rm -f compat/compat.h config *.core
@@ -103,7 +103,7 @@ deinstall:
 	rm -f $(PREFIX)/man/man8/$(SETUP).8
 	rm -f $(PREFIX)/man/man5/$(PREMAKE).conf.5
 
-test_pmk: pmk
+test_$(PREMAKE): $(PREMAKE)
 	@echo ""
 	@echo "=> Testing pmk with sample files"
 	@echo ""
@@ -158,7 +158,7 @@ test_pmk: pmk
 	@echo "=> End of test"
 	@echo ""
 
-test_pmksetup: pmksetup
+test_$(SETUP): $(SETUP)
 	@echo ""
 	@echo "=> Testing pmksetup"
 	@echo "Generating local pmk.conf."
@@ -169,14 +169,25 @@ test_pmksetup: pmksetup
 	@echo "=> End of test"
 	@echo ""
 
+test_$(SCAN): $(SCAN)
+	@echo ""
+	@echo "=> Testing pmkscan"
+	./pmkscan
+	@echo ""
+	@echo "Dumping pmkfile.scan"
+	@echo "----------------------------------------"
+	@cat pmkfile.scan
+	@echo "----------------------------------------"
+	@echo ""
+
 test_clean:
 	@echo ""
 	@echo "=> Removing generated files"
 	rm -f pmk.log pmk.conf
 	rm -f samples/Makefile.sample samples/config_sample.h samples/ac_config.h
-	rm -f samples/subdir/Makefile.subdir
+	rm -f samples/subdir/Makefile.subdir pmkfile.scan
 	@echo ""
 	@echo "=> End of cleaning."
 	@echo ""
 
-test_all: test_pmksetup test_pmk test_clean
+test_all: test_$(SETUP) test_$(PREMAKE) test_$(SCAN) test_clean
