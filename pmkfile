@@ -81,3 +81,10 @@ CHECK_INCLUDE(function_isblank) {
 	FUNCTION = "isblank"
 }
 
+# checking mkstemps in unistd.h
+CHECK_INCLUDE(function_mkstemps) {
+	REQUIRED = FALSE
+	NAME = "unistd.h"
+	FUNCTION = "mkstemps"
+}
+
