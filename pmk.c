@@ -53,11 +53,11 @@
 
 
 extern char	*optarg;
-extern int	optind;
-extern cmdkw	functab[];
-extern int	nbfunc;
+extern int	 optind;
+extern cmdkw	 functab[];
+extern int	 nbfunc;
 
-int	cur_line = 0;
+int		 cur_line = 0;
 
 /* keyword data */
 htable		*keyhash;
@@ -67,15 +67,16 @@ htable		*keyhash;
 	read configuration file
 
 	ht : hash table that will contain data
+	filename : file to read
 
-	returns true on success
+	return : boolean
 */
 
 bool read_conf(htable *ht, char *filename) {
 	FILE	*fp;
-	char	buf[MAX_LINE_LEN];
-	int	ln = 0;
-	cfg_opt	co;
+	cfg_opt	 co;
+	char	 buf[MAX_LINE_LEN];
+	int	 ln = 0;
 
 	fp = fopen(filename, "r");
 	if (fp == NULL) {
@@ -124,24 +125,24 @@ bool read_conf(htable *ht, char *filename) {
 	process the target file to replace tags
 
 	target : path of the target file
-	ht : global data
+	pgd : global data structure
 
-	returns true on success
+	return : boolean
 */
 
 bool process_template(char *template, pmkdata *pgd) {
 	FILE	*tfd,
 		*dfd;
-	bool	replace,
-		ac_flag;
+	bool	 replace,
+		 ac_flag;
 	char	*plb,
 		*pbf,
 		*ptbf,
 		*ptmp,
-		lbuf[MAXPATHLEN],
-		buf[MAXPATHLEN],
-		tbuf[MAXPATHLEN],
-		fpath[MAXPATHLEN];
+		 lbuf[MAXPATHLEN],
+		 buf[MAXPATHLEN],
+		 tbuf[MAXPATHLEN],
+		 fpath[MAXPATHLEN];
 	htable	*ht;
 
 	ht = pgd->htab;
@@ -279,7 +280,7 @@ bool process_template(char *template, pmkdata *pgd) {
 	cmdname : command to check
 	pgd : global data structure (for pmkfile name)
 
-	returns true is command is valid
+	return : boolean (true is command is valid)
 */
 
 bool check_cmd(char *cmdname, pmkdata *pgd) {
@@ -292,7 +293,12 @@ bool check_cmd(char *cmdname, pmkdata *pgd) {
 }
 
 /*
-	XXX
+	process the parsed command
+
+	pdata : parsed data
+	pgd : global data structure
+
+	return : boolean
 */
 
 bool process_cmd(prsdata *pdata, pmkdata *pgd) {
@@ -333,9 +339,9 @@ bool process_cmd(prsdata *pdata, pmkdata *pgd) {
 
 	val : array of defines
 	nbval : size of the array
-	ht : storage for parsed values
+	pgd : global data structure
 
-	returns true on success
+	return : boolean (true on success)
 */
 
 bool parse_cmdline(char **val, int nbval, pmkdata *pgd) {
@@ -356,22 +362,26 @@ bool parse_cmdline(char **val, int nbval, pmkdata *pgd) {
 
 /*
 	clean global data
+
+	pgd : global data structure
+
+	return : -
 */
 
-void clean(pmkdata *gd) {
-	if (gd->htab != NULL) {
-		hash_destroy(gd->htab);
+void clean(pmkdata *pgd) {
+	if (pgd->htab != NULL) {
+		hash_destroy(pgd->htab);
 	}
 
-	if (gd->labl != NULL) {
-		hash_destroy(gd->labl);
+	if (pgd->labl != NULL) {
+		hash_destroy(pgd->labl);
 	}
 
-	if (gd->tlist != NULL) {
-		da_destroy(gd->tlist);
+	if (pgd->tlist != NULL) {
+		da_destroy(pgd->tlist);
 	}
-	if (gd->ac_file != NULL) {
-		free(gd->ac_file);
+	if (pgd->ac_file != NULL) {
+		free(pgd->ac_file);
 	}
 }
 
