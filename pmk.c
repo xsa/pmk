@@ -1,6 +1,11 @@
 /* $Id$ */
 
 /*
+ * Credits for patches :
+ *	- Pierre-Yves Ritschard
+ */
+
+/*
  * Copyright (c) 2003 Damien Couderc
  * All rights reserved.
  *

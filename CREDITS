@@ -1,0 +1,16 @@
+Additional credits:
+
+Patches:
+	- Ted Unangst
+		(dynarray rewrite, many fixes)
+
+Bug report:
+	- Jean-Pierre Ritschard
+		(memory fault in pmk)
+	- Marek Habersack
+		(dirname failure with glibc implementation)
+
+Testers:
+	- Saad Khadi
+	- Francois Petitjean
+	- Fiesh
