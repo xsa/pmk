@@ -418,7 +418,6 @@ void dir_explore(htable *pht, scandata *psd, char *path) {
 
 void usage(void) {
 	fprintf(stderr, "usage: pmkscan [-vh] [path]\n");
-	exit(EXIT_FAILURE);
 }
 
 
@@ -452,6 +451,7 @@ int main(int argc, char *argv[]) {
 				case '?' :
 				default :
 					usage();
+					exit(EXIT_FAILURE);
 					/* NOTREACHED */
 			}
 		}
