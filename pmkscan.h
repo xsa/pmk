@@ -38,6 +38,10 @@
 /* pmkscan specific version */
 #define PREMAKE_SUBVER_PMKSCAN	"3"
 
+#ifndef DATADIR
+#define DATADIR		"/usr/local/share/pmk/"
+#endif
+
 #ifdef USER_TEST
 #define PMK_DATADIR	"./data"
 #else
