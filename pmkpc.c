@@ -71,9 +71,9 @@ pcopt	pcoptions[] = {
 		{"cflags-only-I",		false,	PMKPC_OPT_CFLAGS_ONLY_PATH,	NULL},
 		{"cflags-only-other",		false,	PMKPC_OPT_CFLAGS_ONLY_OTHER,	NULL},
 		{"libs",			false,	PMKPC_OPT_LIBS, 		NULL},
-		{"libs_only_l",			false,	PMKPC_OPT_LIBS_ONLY_LIB,	NULL},
-		{"libs_only_L",			false,	PMKPC_OPT_LIBS_ONLY_PATH,	NULL},
-		{"libs_only_other",		false,	PMKPC_OPT_LIBS_ONLY_OTHER,	NULL},
+		{"libs-only-l",			false,	PMKPC_OPT_LIBS_ONLY_LIB,	NULL},
+		{"libs-only-L",			false,	PMKPC_OPT_LIBS_ONLY_PATH,	NULL},
+		{"libs-only-other",		false,	PMKPC_OPT_LIBS_ONLY_OTHER,	NULL},
 		{"variable",			true,	PMKPC_OPT_VAR,			PC_USAGE_VARNAME},
 		{"define-variable",		true,	PMKPC_OPT_VAR_DEF,		PC_USAGE_VARVAL},
 		{"print-errors",		false,	PMKPC_OPT_VAR_PRNT,		NULL},
@@ -336,7 +336,9 @@ int main(int argc, char *argv[]) {
 	optcell		*poc;
 	pcdata		 gdata;
 	pkgcell		*ppc;
-	unsigned int	 i;
+	unsigned int	 i,
+			 cflags_opts = 0,
+			 libs_opts = 0;
 
 	poc = optcell_init();
 	if (poc == NULL) {
@@ -409,7 +411,32 @@ debugf("{main} id = %d", poc->id);
 					opt_cflags = true;
 					break;
 
+				case PMKPC_OPT_CFLAGS_ONLY_PATH	:
+					cflags_opts = cflags_opts | PKGCFG_CFLAGS_I;
+					opt_cflags = true;
+					break;
+
+				case PMKPC_OPT_CFLAGS_ONLY_OTHER :
+					cflags_opts = cflags_opts | PKGCFG_CFLAGS_o;
+					opt_cflags = true;
+					break;
+
 				case PMKPC_OPT_LIBS :
+					opt_libs = true;
+					break;
+
+				case PMKPC_OPT_LIBS_ONLY_PATH :
+					libs_opts = libs_opts | PKGCFG_LIBS_L;
+					opt_libs = true;
+					break;
+
+				case PMKPC_OPT_LIBS_ONLY_LIB :
+					libs_opts = libs_opts | PKGCFG_LIBS_l;
+					opt_libs = true;
+					break;
+
+				case PMKPC_OPT_LIBS_ONLY_OTHER :
+					libs_opts = libs_opts | PKGCFG_LIBS_o;
 					opt_libs = true;
 					break;
 
@@ -433,11 +460,6 @@ debugf("{main} id = %d", poc->id);
 
 				case PMKPC_OPT_UNINST :
 				case PMKPC_OPT_DEBUG :
-				case PMKPC_OPT_CFLAGS_ONLY_PATH	:
-				case PMKPC_OPT_CFLAGS_ONLY_OTHER :
-				case PMKPC_OPT_LIBS_ONLY_LIB :
-				case PMKPC_OPT_LIBS_ONLY_PATH :
-				case PMKPC_OPT_LIBS_ONLY_OTHER :
 				case PMKPC_OPT_VAR :
 				case PMKPC_OPT_VAR_DEF :
 				case PMKPC_OPT_VAR_PRNT :
@@ -553,7 +575,7 @@ debugf("{main} mod = '%s' (i = %d)", mod, i);
 #endif
 		if (pkg_mod_exists(gdata.ppd, mod) == true) {
 #ifdef DEBUG_PMKPC
-debugf("module '%s' found", mod);
+debugf("{main} module '%s' found", mod);
 #endif
 			ppc = pkg_cell_add(gdata.ppd, mod); /* ppc is part of ppd, don't destroy */
 
@@ -615,10 +637,16 @@ debugf("module '%s' found", mod);
 				}
 
 				if (opt_cflags == true) {
-					printf("%s", pkg_get_cflags(gdata.ppd));
+					if (cflags_opts == 0)
+						cflags_opts = PKGCFG_CFLAGS_ALL;
+
+					printf("%s", pkg_get_cflags_adv(gdata.ppd, cflags_opts));
 				}
 				if (opt_libs == true) {
-					printf("%s", pkg_get_libs(gdata.ppd));
+					if (libs_opts == 0)
+						libs_opts = PKGCFG_LIBS_ALL;
+
+					printf("%s", pkg_get_libs_adv(gdata.ppd, libs_opts));
 				}
 				printf("\n");
 			}

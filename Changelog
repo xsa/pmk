@@ -1,4 +1,7 @@
 07 Feb 2004 mipsator
+ * implemented output filtering options in pmkpc.
+
+07 Feb 2004 mipsator
  * fixed building of the pmkscan location in usermode.
  * moved sample tests in samples/Makefile.
  * added document headers that were missing in some files.

@@ -49,6 +49,18 @@
 
 #define VERSION_CHAR_SEP	'.'
 
+
+/* specific flags */
+#define PKGCFG_CFLAGS_I		1
+#define PKGCFG_CFLAGS_o		2
+#define PKGCFG_CFLAGS_ALL	PKGCFG_CFLAGS_I | PKGCFG_CFLAGS_o
+
+#define PKGCFG_LIBS_L		1
+#define PKGCFG_LIBS_l		2
+#define PKGCFG_LIBS_o		4
+#define PKGCFG_LIBS_ALL		PKGCFG_LIBS_L | PKGCFG_LIBS_l | PKGCFG_LIBS_o
+
+
 /* packages strucutres */
 
 typedef struct {
@@ -88,7 +100,9 @@ pkgcell		*parse_pc_file(char *);
 pkgcell		*pkg_cell_add(pkgdata *ppd, char *mod);
 bool		 pkg_recurse(pkgdata *, char *);
 char		*pkg_get_cflags(pkgdata *);
+char		*pkg_get_cflags_adv(pkgdata *, unsigned int);
 char		*pkg_get_libs(pkgdata *);
+char		*pkg_get_libs_adv(pkgdata *, unsigned int);
 bool		 pkg_mod_exists(pkgdata *ppd, char *mod);
 
 int		 compare_version(char *, char *);
