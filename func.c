@@ -113,12 +113,26 @@ bool pmk_target(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 bool pmk_ac_compat(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 	char	*pstr;
 
+/*
+	pstr = hash_get(gdata->htab, "SYSCONFDIR");
+	hash_add(gdata->htab, "sysconfdir", pstr);
+*/
+
 	pstr = hash_get(gdata->htab, "PREFIX");
 	hash_add(gdata->htab, "prefix", pstr);
-	hash_add(gdata->htab, "exec_prefix", pstr);
-
+	
+	hash_add(gdata->htab, "exec_prefix", "${prefix}");
 	hash_add(gdata->htab, "bindir", "${exec_prefix}/bin");
 	hash_add(gdata->htab, "sbindir", "${exec_prefix}/sbin");
+	hash_add(gdata->htab, "libexecdir", "${exec_prefix}/libexec");
+	hash_add(gdata->htab, "libdir", "${exec_prefix}/lib");
+	hash_add(gdata->htab, "datadir", "${prefix}/share");
+	hash_add(gdata->htab, "includedir", "${prefix}/include");
+	hash_add(gdata->htab, "mandir", "${prefix}/man");
+	hash_add(gdata->htab, "infodir", "${prefix}/info");
+
+	pstr = hash_get(gdata->htab, "BIN_INSTALL");
+	hash_add(gdata->htab, "INSTALL", pstr);
 
 	return(true);
 }
