@@ -35,7 +35,10 @@ int main(int argc, char *argv[]) {
 	cdata = parse_comp_file("../data/pmkcomp.dat");
 
 	printf("Detecting compiler ...\n");
-	detect_compiler(cc, "/dev/null", cdata, &cinfo);
+	if (detect_compiler(cc, "/dev/null", cdata, &cinfo) == false) {
+		printf("Failed");
+		exit(EXIT_FAILURE);
+	}
 
 	pcell = comp_get(cdata, cinfo.c_id);
 	if (pcell == NULL) {
