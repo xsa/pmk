@@ -1,3 +1,9 @@
+/* $Id$ */
+
+/* Public Domain */
+
+/* parser engine test */
+
 #include <stdio.h>
 #include "../common.c"
 #include "../dynarray.c"

@@ -1,3 +1,9 @@
+/* $Id$ */
+
+/* Public Domain */
+
+/* make variables test */
+
 #include "../common.c"
 #include "../compat.c"
 #include "../dynarray.c"
