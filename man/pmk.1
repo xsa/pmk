@@ -15,7 +15,8 @@
 .Op Fl b Ar path 
 .Op Fl d Ar switch_disable_list
 .Op Fl e Ar switch_enable_list
-.Op Fl f Ar file 
+.Op Fl f Ar file
+.Op Fl l
 .Op Fl o Ar file 
 .Op Ar options
 .Ek
@@ -37,6 +38,8 @@ Use an alternate file instead of
 .Xr pmkfile 5 .
 .It Fl h
 Display usage.
+.It Fl l
+Enable check build log.
 .It Fl o Ar file
 Override pmk.conf data with the content of the given file.
 .It Fl v
