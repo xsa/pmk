@@ -1,3 +1,5 @@
+# snapshot 0.6.6
+
 07 Oct 2003 mipsator
  * more autoconf compat.
  * added target for pmkinstall in Makefile.pmk.
