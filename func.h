@@ -36,6 +36,7 @@
 #include "premake.h"
 #include "pmk.h"
 #include "hash.h"
+#include "common.h"
 
 
 typedef struct {
@@ -44,6 +45,7 @@ typedef struct {
 } cmdkw;
 
 
+bool check_bool_str(char *);
 bool pmk_define(pmkcmd *, htable *);
 bool pmk_check_binary(pmkcmd *, htable *);
 bool pmk_check_include(pmkcmd *, htable *);

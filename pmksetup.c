@@ -66,7 +66,7 @@ int main(int argc, char *argv[]) {
 #endif	/* PMKSETUP_DEBUG */
 
                 	if ((ht = hash_init(MAX_CONF_OPT)) == NULL) {
-                        	error("cannot create hash table");
+                        	errorf("cannot create hash table");
                         	exit(1);
 			}
 			read_config_file(f, ht);
@@ -121,7 +121,7 @@ int create_tmp_config(void) {
 	debugf("%s has not been deleted!", tf);
 #else
 	if (unlink(tf) == -1) {
-	 	error("cannot remove temporary file");
+	 	errorf("cannot remove temporary file");
 		exit(1);	
 	}
 #endif  /* PMKSETUP_DEBUG */
@@ -136,11 +136,11 @@ int get_env_vars(FILE *f) {
 	struct	utsname	utsname;
 
 	if (uname(&utsname) == -1) {
-		error("uname");
+		errorf("uname");
 		exit(1);
 	}
 	if ((bin_path = getenv("PATH")) == NULL) {
-		error("could not get the PATH environment variable");
+		errorf("could not get the PATH environment variable");
 		exit(1);
 	}
 
