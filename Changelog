@@ -1,3 +1,6 @@
+07 Aug 2003 mipsator
+ * rewritten parse_opt().
+
 01 Aug 2003 mipsator
  * added test_pmkscan target plus some cosmetics in Makefile.
 
