@@ -5,11 +5,12 @@
 /* CPU ID detection test */
 
 #include <sys/utsname.h>
-#include <sys/types.h>
+#include "../compat/pmk_sys_types.h"
 #include <stdio.h>
 #include <stdlib.h>
 
 #include "../common.c"
+#include "../compat.c"
 #include "../detect_cpu.c"
 #include "../detect_cpu_asm.h"
 #include "../dynarray.c"

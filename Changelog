@@ -1,3 +1,7 @@
+26 Nov 2004 mipsator
+ * made cpuid_test using compat.
+
+
 25 Nov 2004 mipsator
  * added missing code that translate arch name into id.
  * improved architecture detection code.
