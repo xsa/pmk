@@ -59,10 +59,13 @@ bool get_line(FILE *fd, char *line, int lsize) {
 	char	*p;
 
 	if (fgets(line, lsize, fd) != NULL) {
-		p = (char *)strchr(line, '\n');
-		if (p != NULL) {
-			/* remove trailing newline */
-			*p= CHAR_EOS;
+		p = line;
+		while (*p != '\0') {
+			if (*p == '\n') {
+				/* remove trailing newline */
+				*p= CHAR_EOS;
+			}
+			p++;
 		}
 		return(true);
 	} else {
