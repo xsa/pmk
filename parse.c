@@ -316,7 +316,7 @@ prsopt *prsopt_init_adv(char *key, char opchar, char *value) {
 		return(NULL);
 	}
 
-	if (strlcpy(ppo->key, key, sizeof(ppo->key)) >= sizeof(ppo->key)) {
+	if (strlcpy_b(ppo->key, key, sizeof(ppo->key)) == false) {
 		free(ppo);
 		return (NULL); /* truncated */
 	}
@@ -425,7 +425,7 @@ bool prs_fill_buf(prseng *peng) {
 		peng->offset = 0;
 	} else {
 #ifdef PRS_DEBUG
-		strlcpy(buf, peng->prscur, sizeof(buf));
+		strlcpy(buf, peng->prscur, sizeof(buf)); /* no check */
 		debugf("prs_fill_buf(): cursor (before) = '%s'.", buf);
 #endif
 		/* compute offset */
@@ -470,7 +470,7 @@ bool prs_fill_buf(prseng *peng) {
 	}
 
 #ifdef PRS_DEBUG
-	strlcpy(buf, peng->prscur, sizeof(buf));
+	strlcpy(buf, peng->prscur, sizeof(buf)); /* no check */
 	debugf("prs_fill_buf(): cursor (after) = '%s'.", buf);
 	debugf("prs_fill_buf(): cursor on line %d", peng->linenum);
 	debugf("prs_fill_buf(): _OUT_.");
@@ -654,7 +654,8 @@ char *parse_bool(char *pstr, pmkobj *po, size_t size) {
 
 	pb = (bool *) malloc(sizeof (bool));
 	if (pb == NULL) {
-		strlcpy(parse_err, PRS_ERR_ALLOC, sizeof(parse_err));
+		strlcpy(parse_err, PRS_ERR_ALLOC,
+				sizeof(parse_err)); /* no check */
 		return(NULL);
 	}
 
@@ -715,13 +716,16 @@ char *parse_quoted(char *pstr, pmkobj *po, size_t size) {
 	}
 
 	pbuf = buffer;
-	while ((*pstr != PMK_CHAR_QUOTE_END) && (*pstr != CHAR_CR) && (*pstr != CHAR_EOS)) {
+	while ((*pstr != PMK_CHAR_QUOTE_END) && (*pstr != CHAR_CR) &&
+						(*pstr != CHAR_EOS)) {
 		/* found escape character */
 		if (*pstr == PMK_CHAR_ESCAPE) {
 			pstr++;
 			if ((*pstr == CHAR_CR) || (*pstr == CHAR_EOS)) {
 				/* misplaced escape character */
-				strlcpy(parse_err, "trailing escape character.", sizeof(parse_err));
+				strlcpy(parse_err,
+						"trailing escape character.",
+						sizeof(parse_err)); /* no check */
 				return(NULL);
 			}
 
@@ -739,7 +743,8 @@ char *parse_quoted(char *pstr, pmkobj *po, size_t size) {
 			size--;
 		} else {
 			free(buffer);
-			strlcpy(parse_err, PRS_ERR_OVERFLOW, sizeof(parse_err));
+			strlcpy(parse_err, PRS_ERR_OVERFLOW,
+					sizeof(parse_err)); /* no check */
 			return(NULL);
 		}
 	}
@@ -757,7 +762,8 @@ char *parse_quoted(char *pstr, pmkobj *po, size_t size) {
 	} else {
 		/* end of quoting not found */
 		free(buffer);
-		strlcpy(parse_err, "ending quote is missing.", sizeof(parse_err));
+		strlcpy(parse_err, "ending quote is missing.",
+				sizeof(parse_err)); /* no check */
 		return(NULL);
 	}
 }
@@ -790,7 +796,8 @@ char *parse_list(char *pstr, pmkobj *po, size_t size) {
 				if (prev_data == true) {
 					/* yes => syntax error */
 					da_destroy(pda);
-					strlcpy(parse_err, PRS_ERR_SYNTAX, sizeof(parse_err));
+					strlcpy(parse_err, PRS_ERR_SYNTAX,
+						sizeof(parse_err)); /* no check */
 					return(NULL);
 				}
 
@@ -799,7 +806,8 @@ char *parse_list(char *pstr, pmkobj *po, size_t size) {
 				pstr = parse_quoted(pstr, &potmp, size);
 				if (pstr == NULL) {
 					da_destroy(pda);
-					strlcpy(parse_err, PRS_ERR_SYNTAX, sizeof(parse_err));
+					strlcpy(parse_err, PRS_ERR_SYNTAX,
+						sizeof(parse_err)); /* no check */
 					return(NULL);
 				}
 
@@ -821,7 +829,8 @@ char *parse_list(char *pstr, pmkobj *po, size_t size) {
 				if (prev_data == false) {
 					/* no => syntax error */
 					da_destroy(pda);
-					strlcpy(parse_err, PRS_ERR_SYNTAX, sizeof(parse_err));
+					strlcpy(parse_err, PRS_ERR_SYNTAX,
+						sizeof(parse_err)); /* no check */
 					return(NULL);
 				}
 
@@ -853,7 +862,8 @@ char *parse_list(char *pstr, pmkobj *po, size_t size) {
 				if (prev_data == true) {
 					/* yes => syntax error */
 					da_destroy(pda);
-					strlcpy(parse_err, PRS_ERR_SYNTAX, sizeof(parse_err));
+					strlcpy(parse_err, PRS_ERR_SYNTAX,
+						sizeof(parse_err)); /* no check */
 					return(NULL);
 				}
 
@@ -867,13 +877,15 @@ char *parse_list(char *pstr, pmkobj *po, size_t size) {
 
 				if (*buffer == CHAR_EOS) {
 					da_destroy(pda);
-					strlcpy(parse_err, PRS_ERR_SYNTAX, sizeof(parse_err));
+					strlcpy(parse_err, PRS_ERR_SYNTAX,
+						sizeof(parse_err)); /* no check */
 					return(NULL);
 				}
 
 				if (pstr == NULL) {
 					da_destroy(pda);
-					strlcpy(parse_err, PRS_ERR_OVERFLOW, sizeof(parse_err));
+					strlcpy(parse_err, PRS_ERR_OVERFLOW,
+						sizeof(parse_err)); /* no check */
 					return(NULL);
 				}
 
@@ -897,7 +909,8 @@ char *parse_list(char *pstr, pmkobj *po, size_t size) {
 		if (prev_data == false) {
 			/* no => syntax error */
 			da_destroy(pda);
-			strlcpy(parse_err, PRS_ERR_SYNTAX, sizeof(parse_err));
+			strlcpy(parse_err, PRS_ERR_SYNTAX,
+				sizeof(parse_err)); /* no check */
 #ifdef PRS_DEBUG
 				debugf("no data before end of list.");
 #endif
@@ -912,7 +925,8 @@ char *parse_list(char *pstr, pmkobj *po, size_t size) {
 	} else {
 		/* end of list not found */
 		da_destroy(pda);
-		strlcpy(parse_err, "end of list not found.", sizeof(parse_err));
+		strlcpy(parse_err, "end of list not found.",
+			sizeof(parse_err)); /* no check */
 		return(NULL);
 	}
 }
@@ -944,7 +958,8 @@ char *parse_key(char *pstr, pmkobj *po, size_t size) {
 			/* identifier */
 			buffer = (char *) malloc(size);
 			if (buffer == NULL) {
-				strlcpy(parse_err, PRS_ERR_ALLOC, sizeof(parse_err));
+				strlcpy(parse_err, PRS_ERR_ALLOC,
+					sizeof(parse_err)); /* no check */
 				return(NULL);
 			}
 
@@ -952,7 +967,8 @@ char *parse_key(char *pstr, pmkobj *po, size_t size) {
 
 			if (pstr == NULL) {
 				free(buffer);
-				strlcpy(parse_err, PRS_ERR_OVERFLOW, sizeof(parse_err));
+				strlcpy(parse_err, PRS_ERR_OVERFLOW,
+					sizeof(parse_err)); /* no check */
 				return(NULL);
 			}
 
@@ -1021,7 +1037,8 @@ prscell *parse_cmd_header(prseng *peng, prsnode *pnode) {
 
 	peng->prscur = parse_identifier(peng->prscur, name, sizeof(name));
 	if (peng->prscur == NULL) {
-		strlcpy(parse_err, "command parsing failed.", sizeof(parse_err));
+		strlcpy(parse_err, "command parsing failed.",
+				sizeof(parse_err)); /* no check */
 		return(NULL);
 	}
 #ifdef PRS_DEBUG
@@ -1034,7 +1051,8 @@ prscell *parse_cmd_header(prseng *peng, prsnode *pnode) {
 		/* command ok, creating cell */
 		pcell = prscell_init(pkw->token, pkw->type, pkw->subtoken);
 		if (pcell == NULL) {
-			strlcpy(parse_err, "pcell init failed.", sizeof(parse_err));
+			strlcpy(parse_err, "pcell init failed.",
+					sizeof(parse_err)); /* no check */
 			return(NULL);
 		}
 #ifdef PRS_DEBUG
@@ -1043,7 +1061,8 @@ prscell *parse_cmd_header(prseng *peng, prsnode *pnode) {
 #endif
 	} else {
 		/* unknown command */
-		strlcpy(parse_err, "unknown command.", sizeof(parse_err));
+		strlcpy(parse_err, "unknown command.",
+				sizeof(parse_err)); /* no check */
 		return(NULL);
 	}
 
@@ -1054,7 +1073,8 @@ prscell *parse_cmd_header(prseng *peng, prsnode *pnode) {
 		/* get label name */
 		peng->prscur = parse_label(peng->prscur, pcell->label, sizeof(pcell->label));
 		if (peng->prscur == NULL) {
-			strlcpy(parse_err, "label parsing failed.", sizeof(parse_err));
+			strlcpy(parse_err, "label parsing failed.",
+					sizeof(parse_err)); /* no check */
 			prscell_destroy(pcell);
 			return(NULL);
 		}
@@ -1065,7 +1085,8 @@ prscell *parse_cmd_header(prseng *peng, prsnode *pnode) {
 		/* check label's ending delimiter */
 		if (*peng->prscur != PMK_CHAR_LABEL_END) {
 			/* label name must be immediately followed by closing delimiter */
-			strlcpy(parse_err, "label parsing failed.", sizeof(parse_err));
+			strlcpy(parse_err, "label parsing failed.",
+					sizeof(parse_err)); /* no check */
 			prscell_destroy(pcell);
 			return(NULL);
 		} else {
@@ -1082,7 +1103,8 @@ prscell *parse_cmd_header(prseng *peng, prsnode *pnode) {
 	/* look for command block starting sequence */
 
 	if (*peng->prscur != ' ') {
-		strlcpy(parse_err, PRS_ERR_UNKNOWN, sizeof(parse_err));
+		strlcpy(parse_err, PRS_ERR_UNKNOWN,
+				sizeof(parse_err)); /* no check */
 		prscell_destroy(pcell);
 		return(NULL);
 	} else {
@@ -1090,7 +1112,8 @@ prscell *parse_cmd_header(prseng *peng, prsnode *pnode) {
 	}
 
 	if (*peng->prscur != PMK_CHAR_COMMAND_START) {
-		strlcpy(parse_err, PRS_ERR_TRAILING, sizeof(parse_err));
+		strlcpy(parse_err, PRS_ERR_TRAILING,
+				sizeof(parse_err)); /* no check */
 		prscell_destroy(pcell);
 		return(NULL);
 	} else {
@@ -1098,7 +1121,8 @@ prscell *parse_cmd_header(prseng *peng, prsnode *pnode) {
 	}
 
 	if (*peng->prscur != CHAR_CR) {
-		strlcpy(parse_err, PRS_ERR_TRAILING, sizeof(parse_err));
+		strlcpy(parse_err, PRS_ERR_TRAILING,
+				sizeof(parse_err)); /* no check */
 		prscell_destroy(pcell);
 		return(NULL);
 	}
@@ -1128,10 +1152,16 @@ bool parse_opt(prseng *peng, prsopt *popt, char *seplst) {
 
 	peng->prscur = parse_key(peng->prscur, &po, sizeof(popt->key));
 	if (peng->prscur == NULL) {
-		strlcpy(parse_err, PRS_ERR_SYNTAX, sizeof(parse_err));
+		strlcpy(parse_err, PRS_ERR_SYNTAX,
+				sizeof(parse_err)); /* no check */
 		return(false);
 	} else {
-		strlcpy(popt->key, po.data, sizeof(popt->key));
+		if (strlcpy_b(popt->key, po.data,
+					sizeof(popt->key)) == false) {
+			free(po.data);
+			return(false);
+		}
+
 		free(po.data);
 	}
 
@@ -1143,7 +1173,8 @@ bool parse_opt(prseng *peng, prsopt *popt, char *seplst) {
 
 	/* check if character is in separator list */
 	if (strchr(seplst, *peng->prscur) == NULL) {
-		strlcpy(parse_err, PRS_ERR_SYNTAX, sizeof(parse_err));
+		strlcpy(parse_err, PRS_ERR_SYNTAX,
+				sizeof(parse_err)); /* no check */
 		return(false);
 	} else {
 		popt->opchar = *peng->prscur;
@@ -1157,14 +1188,16 @@ bool parse_opt(prseng *peng, prsopt *popt, char *seplst) {
 
 	popt->value = (pmkobj *) malloc(sizeof(pmkobj));
 	if (popt->value == NULL) {
-		strlcpy(parse_err, PRS_ERR_ALLOC, sizeof(parse_err));
+		strlcpy(parse_err, PRS_ERR_ALLOC,
+					sizeof(parse_err)); /* no check */
 		return(false);
 	}
 
 	/* parse data */
 	if (parse_data(peng, popt->value, OPT_VALUE_LEN) == false) {
 		po_free(popt->value);
-		strlcpy(parse_err, PRS_ERR_SYNTAX, sizeof(parse_err));
+		strlcpy(parse_err, PRS_ERR_SYNTAX,
+					sizeof(parse_err)); /* no check */
 		return(false);
 	}
 
@@ -1174,7 +1207,8 @@ bool parse_opt(prseng *peng, prsopt *popt, char *seplst) {
 			debugf("parse_opt() : value = *BOOL*");
 			break;
 		case PO_STRING :
-			debugf("parse_opt() : value = '%s'", popt->value->data);
+			debugf("parse_opt() : value = '%s'",
+						popt->value->data);
 			break;
 		case PO_LIST :
 			debugf("parse_opt() : value = (*LIST*)");
@@ -1213,10 +1247,16 @@ bool parse_clopt(char *line, prsopt *popt, char *seplst) {
 
 	pstr = parse_key(line, &po, sizeof(popt->key));
 	if (pstr == NULL) {
-		strlcpy(parse_err, PRS_ERR_SYNTAX, sizeof(parse_err));
+		strlcpy(parse_err, PRS_ERR_SYNTAX,
+					sizeof(parse_err)); /* no check */
 		return(false);
 	} else {
-		strlcpy(popt->key, po.data, sizeof(popt->key));
+		if (strlcpy_b(popt->key, po.data,
+					sizeof(popt->key)) == false) {
+			free(po.data);
+			return(false);
+		}
+
 		free(po.data);
 	}
 
@@ -1226,7 +1266,8 @@ bool parse_clopt(char *line, prsopt *popt, char *seplst) {
 
 	/* check if character is in separator list */
 	if (strchr(seplst, *pstr) == NULL) {
-		strlcpy(parse_err, PRS_ERR_SYNTAX, sizeof(parse_err));
+		strlcpy(parse_err, PRS_ERR_SYNTAX,
+					sizeof(parse_err)); /* no check */
 		return(false);
 	} else {
 		popt->opchar = *pstr;
@@ -1341,7 +1382,7 @@ bool parse_opt_block(prsdata *pdata, prseng *peng, prscell *pcell, bool chk_deli
 								nopt = ncell->data;
 
 								/* duplicate opt content in item */
-								strlcpy(nopt->key, opt.key, sizeof(opt.key));
+								strlcpy(nopt->key, opt.key, sizeof(opt.key)); /* XXX check */
 								nopt->value = opt.value;
 
 								/* add item in cell node */
@@ -1351,7 +1392,7 @@ bool parse_opt_block(prsdata *pdata, prseng *peng, prscell *pcell, bool chk_deli
 							case PRS_KW_CELL :
 								/* process a command */
 								if (hash_update(pcell->data, opt.key, opt.value) == HASH_ADD_FAIL) { /* no need to strdup */
-									strlcpy(parse_err, PRS_ERR_HASH, sizeof(parse_err));
+									strlcpy(parse_err, PRS_ERR_HASH, sizeof(parse_err)); /* no check */
 									return(false);
 								}
 								break;
@@ -1561,7 +1602,7 @@ bool parse_pmkconf(FILE *fp, htable *pht, char *seplst, bool (*func)(htable *, p
 		switch (*peng->prscur) {
 			case CHAR_COMMENT :
 				/* comment */
-				strlcpy(opt.key, "comment", sizeof(opt.key)); /* don't check */
+				strlcpy(opt.key, "comment", sizeof(opt.key)); /* no check */
 				opt.opchar = CHAR_COMMENT;
 
 				/* mark end of line */
@@ -1572,7 +1613,7 @@ bool parse_pmkconf(FILE *fp, htable *pht, char *seplst, bool (*func)(htable *, p
 				/* copy comment */
 				opt.value = po_mk_str(peng->prscur);
 #ifdef PRS_DEBUG
-				strlcpy(buf, po_get_str(opt.value), sizeof(buf));
+				strlcpy(buf, po_get_str(opt.value), sizeof(buf)); /* no check */
 				debugf("parse_pmkconf() : found comment '%s'.", buf);
 #endif
 
@@ -1585,7 +1626,7 @@ bool parse_pmkconf(FILE *fp, htable *pht, char *seplst, bool (*func)(htable *, p
 				}
 
 #ifdef PRS_DEBUG
-				strlcpy(buf, peng->prscur, sizeof(buf));
+				strlcpy(buf, peng->prscur, sizeof(buf)); /* no check */
 				debugf("parse_pmkconf() : cursor after comment '%s'.", buf);
 #endif
 
@@ -1598,11 +1639,11 @@ bool parse_pmkconf(FILE *fp, htable *pht, char *seplst, bool (*func)(htable *, p
 
 			case CHAR_CR :
 				/* empty line */
-				strlcpy(opt.key, "", sizeof(opt.key)); /* don't check */
+				strlcpy(opt.key, "", sizeof(opt.key)); /* no check */
 				opt.opchar = CHAR_EOS;
 				opt.value = po_mk_str("");
 #ifdef PRS_DEBUG
-				strlcpy(buf, po_get_str(opt.value), sizeof(buf));
+				strlcpy(buf, po_get_str(opt.value), sizeof(buf)); /* no check */
 				debugf("parse_pmkconf() : found empty line.");
 #endif
 
@@ -1623,7 +1664,7 @@ bool parse_pmkconf(FILE *fp, htable *pht, char *seplst, bool (*func)(htable *, p
 
 			default :
 #ifdef PRS_DEBUG
-				strlcpy(buf, po_get_str(opt.value), sizeof(buf));
+				strlcpy(buf, po_get_str(opt.value), sizeof(buf)); /* no check */
 				debugf("parse_pmkconf(): opt line to parse = '%s'.", buf);
 #endif
 				if (parse_opt(peng, &opt, seplst) == true) {

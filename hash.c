@@ -313,7 +313,7 @@ unsigned int hash_update(htable *pht, char *key, void *value) {
 		return(rval);
 
 	/* if okay put key & value in a new cell */
-	if (strlcpy(phc->key, key, sizeof(phc->key)) >= sizeof(phc->key)) {
+	if (strlcpy_b(phc->key, key, sizeof(phc->key)) == false) {
 		hash_free_hcell(pht, phc);
 		return(HASH_ADD_FAIL);
 	}
@@ -751,7 +751,7 @@ void *hash_str_append(void *orig, void *value, void *sep) {
 	/* allocate space */
 	pbuf = (char *) malloc(s);
 
-	if (strlcpy(pbuf, orig, s) >= s) {
+	if (strlcpy_b(pbuf, orig, s) == false) {
 		free(value);
 		free(pbuf);
 #ifdef HASH_DEBUG
@@ -763,7 +763,7 @@ void *hash_str_append(void *orig, void *value, void *sep) {
 	if ((sep != NULL) && (pbuf[0] != '\0')) {
 		/* adding separator if provided and if
 			string is not empty */
-		if (strlcat(pbuf, (char *) sep, s) >= s) {
+		if (strlcat_b(pbuf, (char *) sep, s) == false) {
 			free(value);
 			free(pbuf);
 #ifdef HASH_DEBUG
@@ -772,7 +772,7 @@ void *hash_str_append(void *orig, void *value, void *sep) {
 			return(NULL);
 		}
 	}
-	if (strlcat(pbuf, value, s) >= s) {
+	if (strlcat_b(pbuf, value, s) == false) {
 		free(value);
 		free(pbuf);
 #ifdef HASH_DEBUG
