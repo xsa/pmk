@@ -1,3 +1,9 @@
+01 Apr 2004 mipsator
+ * imported skeleton of pmkshgen.
+ * fixed use of parse_clopt's value in pmk and pmksetup.
+ * booleanification of pmksetup.
+ * added handling functions for prsopt structures.
+
 # PMK 0.8.1 release
 
 14 Mar 2004 mipsator
