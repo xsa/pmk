@@ -23,4 +23,4 @@ pmksetup :
 	
 pmkscan :
 + make parsing recursive
-- parse c++ files
++ parse c++ files
