@@ -65,6 +65,7 @@ bool	 label_set(htable *, char *, bool);
 bool	 label_check(htable *, char *);
 bool	 depend_check(htable *, pmkdata *);
 bool	 require_check(htable *);
+lgdata	*check_lang(char *);
 lgdata	*get_lang(htable *, pmkdata *);
 char	*get_comp_path(htable *, char *);
 

@@ -99,15 +99,18 @@ typedef struct {
 
 bool func_wrapper(prscell *, pmkdata *);
 bool process_node(prsnode *, pmkdata *);
-bool pmk_define(pmkcmd *, htable *, pmkdata *);
+bool pmk_define(pmkcmd *, prsnode *, pmkdata *);
 bool pmk_target(pmkcmd *, htable *, pmkdata *);
 bool pmk_ac_compat(pmkcmd *, htable *, pmkdata *);
 bool pmk_switches(pmkcmd *, htable *, pmkdata *);
+bool pmk_settings(pmkcmd *, prsnode *, pmkdata *);
 bool pmk_check_binary(pmkcmd *, htable *, pmkdata *);
 bool pmk_check_include(pmkcmd *, htable *, pmkdata *);
 bool pmk_check_lib(pmkcmd *, htable *, pmkdata *);
 bool pmk_check_config(pmkcmd *, htable *, pmkdata *);
 bool pmk_check_pkg_config(pmkcmd *, htable *, pmkdata *);
 bool pmk_check_type(pmkcmd *, htable *, pmkdata *);
+bool pmk_set_parameter(pmkcmd *, prsopt *, pmkdata *);
+bool pmk_set_variable(pmkcmd *, prsopt *, pmkdata *);
 
 #endif /* _PMK_FUNC_H_ */

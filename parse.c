@@ -149,6 +149,7 @@ prscell *prscell_init(int token, int type, int subtoken) {
 	htable	*pht;
 	prscell	*pcell;
 	prsnode	*pnode;
+	prsopt	*popt;
 
 	pcell = (prscell *) malloc(sizeof(prscell));
 
@@ -162,28 +163,37 @@ prscell *prscell_init(int token, int type, int subtoken) {
 				if (pnode != NULL) {
 					pnode->token = subtoken;
 					pcell->data = pnode;
-					pcell->next = NULL;
 					rval = true;
-				} else {
-					/* cannot init htable */
-					free(pcell);
 				}
 				break;
-			case PRS_KW_ITEM :
+
+			case PRS_KW_CELL :
 				pht = hash_init_adv(MAX_CMD_OPT, (void (*)(void *))po_free,
 					(void *(*)(void *, void *, void *))po_append);
 				if (pht != NULL) {
 					pcell->data = pht;
-					pcell->next = NULL;
 					rval = true;
-				} else {
-					/* cannot init htable */
-					free(pcell);
 				}
 				break;
+
+			case PRS_KW_ITEM :
+				popt = (prsopt *) malloc(sizeof(prsopt));
+				if (popt != NULL) {
+					pcell->data = popt;
+					rval = true;
+				}
+				break;
+
 			default :
 				break;
 		}
+	}
+
+	if (rval == true) {
+		pcell->next = NULL;
+	} else {
+		free(pcell);
+		pcell = NULL;
 	}
 
 	return(pcell);
@@ -201,7 +211,7 @@ void prscell_destroy(prscell *pcell) {
 			case PRS_KW_NODE :
 				prsnode_destroy(pcell->data);
 				break;
-			case PRS_KW_ITEM :
+			case PRS_KW_CELL :
 				hash_destroy(pcell->data);
 				break;
 			default :
@@ -759,9 +769,12 @@ bool parse_pmkfile(FILE *fp, prsdata *pdata, prskw kwtab[], size_t size) {
 	char	 buf[MAX_LINE_LEN];
 	htable	*phkw;
 	int	 cur_line = 0;
-	prscell	*pcell = NULL;
-	prsnode	*tnode;
-	prsopt	 opt;
+	prscell	*pcell = NULL,
+		*ncell;
+	prsnode	*tnode,
+		*pnode;
+	prsopt	 opt,
+		*nopt;
 
 	tnode = prsnode_init();
 	pdata->tree = tnode;
@@ -812,30 +825,33 @@ bool parse_pmkfile(FILE *fp, prsdata *pdata, prskw kwtab[], size_t size) {
 						/* key name and value are ok */
 						switch(pcell->type) {
 							case PRS_KW_NODE :
-								/* XXX  TODO
-									create new cell
-									set type to PRS_KW_UNKW
-									link it in node
-									NOTE : could set token instead of type
+								pnode = pcell->data;
 
-								pcell = prscell_init();
-								if (pcell == NULL) {
+								/* init item's pcell */
+								ncell = prscell_init(pnode->token,
+										PRS_KW_ITEM, PRS_TOK_NULL);
+								if (ncell == NULL) {
 									errorf("prscell init failed");
 									return(false);
 								}
 
-								pcell->token = pkw->token;
-								pcell->type = pkw->type;
+								nopt = ncell->data;
 
-								prsnode_add(tnode, pcell);					
-								*/
+								/* duplicate opt content in item */
+								strlcpy(nopt->key, opt.key, sizeof(opt.key));
+								nopt->value = opt.value;
+
+								/* add item in cell node */
+								prsnode_add(pnode, ncell);
 								break;
-							case PRS_KW_ITEM :
+
+							case PRS_KW_CELL :
 								if (hash_add(pcell->data, opt.key, opt.value) == HASH_ADD_FAIL) {
 									strlcpy(parse_err, PRS_ERR_HASH, sizeof(parse_err));
 									return(false);
 								}
 								break;
+
 							default :
 								strlcpy(parse_err, "unknow type.", sizeof(parse_err));
 								return(false);

@@ -87,6 +87,7 @@ typedef struct {
 		*labl;
 	dynary	*tlist;
 	char	*ac_file,
+		*lang,
 		 basedir[MAXPATHLEN],
 		 srcdir[MAXPATHLEN],
 		 pmkfile[MAXPATHLEN],

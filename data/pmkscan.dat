@@ -2,16 +2,16 @@
 # pmkscan data file
 
 # header list
-.INCLUDES {
-"sys/param.h"=("# checking sys/param.h",".CHECK_INCLUDE(header_sys_param_h) {","REQUIRED=FALSE","LANG=","INCLUDE=\"sys/param.h\"","}")
-"dirent.h"=("# checking dirent.h",".CHECK_INCLUDE(header_dirent_h) {","REQUIRED=FALSE","LANG=","INCLUDE=\"dirent.h\"","}")
-"stdbool.h"=("# checking stdbool.h",".CHECK_INCLUDE(header_stdbool_h) {","REQUIRED=FALSE","LANG=","INCLUDE=\"stdbool.h\"","}")
-"libgen.h"=("# checking libgen.h",".CHECK_INCLUDE(header_libgen_h) {","REQUIRED=FALSE","LANG=","INCLUDE=\"libgen.h\"","}")
+INCLUDES {
+"sys/param.h"=("# checking sys/param.h","CHECK_INCLUDE(header_sys_param_h) {","REQUIRED=FALSE","LANG=","INCLUDE=\"sys/param.h\"","}")
+"dirent.h"=("# checking dirent.h","CHECK_INCLUDE(header_dirent_h) {","REQUIRED=FALSE","LANG=","INCLUDE=\"dirent.h\"","}")
+"stdbool.h"=("# checking stdbool.h","CHECK_INCLUDE(header_stdbool_h) {","REQUIRED=FALSE","LANG=","INCLUDE=\"stdbool.h\"","}")
+"libgen.h"=("# checking libgen.h","CHECK_INCLUDE(header_libgen_h) {","REQUIRED=FALSE","LANG=","INCLUDE=\"libgen.h\"","}")
 }
 
 # functions list
-.FUNCTIONS {
-strlcpy=("# checking strlcpy in string.h",".CHECK_INCLUDE(function_strlcpy) {","REQUIRED=FALSE","LANG=","INCLUDE=\"string.h\"","FUNCTION=strlcpy","}")
-strlcat=("# checking strlcat in string.h",".CHECK_INCLUDE(function_strlcat) {","REQUIRED=FALSE","LANG=","INCLUDE=\"string.h\"","FUNCTION=strlcat","}")
-isblank=("# checking isblank in ctype.h",".CHECK_INCLUDE(function_isblank) {","REQUIRED=FALSE","LANG=","INCLUDE=\"ctype.h\"","FUNCTION=isblank","}")
+FUNCTIONS {
+strlcpy=("# checking strlcpy in string.h","CHECK_INCLUDE(function_strlcpy) {","REQUIRED=FALSE","LANG=","INCLUDE=\"string.h\"","FUNCTION=strlcpy","}")
+strlcat=("# checking strlcat in string.h","CHECK_INCLUDE(function_strlcat) {","REQUIRED=FALSE","LANG=","INCLUDE=\"string.h\"","FUNCTION=strlcat","}")
+isblank=("# checking isblank in ctype.h","CHECK_INCLUDE(function_isblank) {","REQUIRED=FALSE","LANG=","INCLUDE=\"ctype.h\"","FUNCTION=isblank","}")
 }

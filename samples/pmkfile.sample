@@ -1,38 +1,45 @@
 # $Id$
 # pmkfile example
 
+# settings
+SETTINGS {
+ LANG="C"
+ TARGET=("Makefile.sample.pmk","config_sample.h.pmk","subdir/Makefile.subdir.pmk")
+ AC_COMPAT="samples/ac_config.h"
+}
+
 # put some defines
-.DEFINE {
+DEFINE {
 PACKAGE=scandisk
 VERSION="0.0.1b"
 FULL_NAME="$PACKAGE-$VERSION"
 }
 
 # set the target files that will be processed
-.TARGET {
-LIST=("Makefile.sample.pmk","config_sample.h.pmk","subdir/Makefile.subdir.pmk")
-}
+#.TARGET {
+#LIST=("Makefile.sample.pmk","config_sample.h.pmk","subdir/Makefile.subdir.pmk")
+#}
 
 # set autoconf compatibility
-.AC_COMPAT {
-FILENAME="samples/ac_config.h"
-}
+#.AC_COMPAT {
+#FILENAME="samples/ac_config.h"
+#}
 
 # define switches
-.SWITCHES {
+SWITCHES {
 use_curses=TRUE
 use_gtk=FALSE
 }
 
 # check availability of termcap library
-.CHECK_LIB(lib_termcap) {
+CHECK_LIB(lib_termcap) {
 REQUIRED=FALSE
 LIBNAME=termcap
 }
 
 # check function getwin in libcurses
 # this check depends of lib_termcap check for test purposes
-.CHECK_LIB(lib_curses) {
+CHECK_LIB(lib_curses) {
 REQUIRED=FALSE
 DEPEND=(use_curses,lib_termcap)
 LIBNAME=curses
@@ -40,35 +47,35 @@ FUNCTION=getwin
 }
 
 # check availability of sys/param.h header
-.CHECK_INCLUDE(sys_param) {
+CHECK_INCLUDE(sys_param) {
 REQUIRED=FALSE
 INCLUDE="sys/param.h"
 LANG="C++"
 }
 
 # check function strlcpy in string.h
-.CHECK_INCLUDE(string_strcpy) {
+CHECK_INCLUDE(string_strcpy) {
 REQUIRED=FALSE
 INCLUDE="string.h"
 FUNCTION=strlcpy
 }
 
 # try to found gtk-config in path
-.CHECK_BINARY(gtk_config) {
+CHECK_BINARY(gtk_config) {
 REQUIRED=FALSE
 DEPEND=(use_gtk)
 FILENAME="gtk-config"
 }
 
 # get data via libpng-config
-.CHECK_CONFIG(lib_png) {
+CHECK_CONFIG(lib_png) {
 REQUIRED=FALSE
 CFGTOOL="libpng-config"
 VERSION="1.2"
 }
 
 # get data for gtk+ via pkg-config
-.CHECK_PKG_CONFIG(gtk_data) {
+CHECK_PKG_CONFIG(gtk_data) {
 REQUIRED=FALSE
 DEPEND=(use_gtk)
 PACKAGE="gtk+"
@@ -78,13 +85,13 @@ LIBS=GTK_LIBS
 }
 
 # check _Bool type
-.CHECK_TYPE(type_bool_posix) {
+CHECK_TYPE(type_bool_posix) {
 REQUIRED=FALSE
 TYPE=_Bool
 }
 
 # check c++ bool type
-.CHECK_TYPE(type_bool_cxx) {
+CHECK_TYPE(type_bool_cxx) {
 REQUIRED=FALSE
 TYPE=bool
 LANG="C++"

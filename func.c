@@ -45,26 +45,26 @@
 
 prskw	kw_pmkfile[] = {
 /*		XXX for compatibility */
-		{".DEFINE",		PMK_TOK_DEFINE, PRS_KW_ITEM, PRS_TOK_NULL}, /* XXX will be node */
-		{".AC_COMPAT",		PMK_TOK_ACCOMP, PRS_KW_ITEM, PRS_TOK_NULL},
-		{".SWITCHES",		PMK_TOK_SWITCH, PRS_KW_ITEM, PRS_TOK_NULL}, /* XXX will be node */
-		{".TARGET",		PMK_TOK_TARGET, PRS_KW_ITEM, PRS_TOK_NULL},
-		{".CHECK_BINARY",	PMK_TOK_CHKBIN, PRS_KW_ITEM, PRS_TOK_NULL},
-		{".CHECK_INCLUDE",	PMK_TOK_CHKINC, PRS_KW_ITEM, PRS_TOK_NULL},
-		{".CHECK_LIB",		PMK_TOK_CHKLIB, PRS_KW_ITEM, PRS_TOK_NULL},
-		{".CHECK_CONFIG",	PMK_TOK_CHKCFG, PRS_KW_ITEM, PRS_TOK_NULL},
-		{".CHECK_PKG_CONFIG",	PMK_TOK_CHKPKG, PRS_KW_ITEM, PRS_TOK_NULL},
-		{".CHECK_TYPE",		PMK_TOK_CHKTYP, PRS_KW_ITEM, PRS_TOK_NULL},
+		{".DEFINE",		PMK_TOK_DEFINE, PRS_KW_NODE, PMK_TOK_SETVAR},
+		{".AC_COMPAT",		PMK_TOK_ACCOMP, PRS_KW_CELL, PRS_TOK_NULL},
+		{".SWITCHES",		PMK_TOK_SWITCH, PRS_KW_CELL, PRS_TOK_NULL}, /* XXX will be node */
+		{".TARGET",		PMK_TOK_TARGET, PRS_KW_CELL, PRS_TOK_NULL},
+		{".CHECK_BINARY",	PMK_TOK_CHKBIN, PRS_KW_CELL, PRS_TOK_NULL},
+		{".CHECK_INCLUDE",	PMK_TOK_CHKINC, PRS_KW_CELL, PRS_TOK_NULL},
+		{".CHECK_LIB",		PMK_TOK_CHKLIB, PRS_KW_CELL, PRS_TOK_NULL},
+		{".CHECK_CONFIG",	PMK_TOK_CHKCFG, PRS_KW_CELL, PRS_TOK_NULL},
+		{".CHECK_PKG_CONFIG",	PMK_TOK_CHKPKG, PRS_KW_CELL, PRS_TOK_NULL},
+		{".CHECK_TYPE",		PMK_TOK_CHKTYP, PRS_KW_CELL, PRS_TOK_NULL},
 /*		XXX new format */
-		{"DEFINE",		PMK_TOK_DEFINE, PRS_KW_ITEM, PRS_TOK_NULL}, /* XXX will be node */
-		{"SETTINGS",		PMK_TOK_SETNGS, PRS_KW_ITEM, PRS_TOK_NULL}, /* XXX will be node */
-		{"SWITCHES",		PMK_TOK_SWITCH, PRS_KW_ITEM, PRS_TOK_NULL}, /* XXX will be node */
-		{"CHECK_BINARY",	PMK_TOK_CHKBIN, PRS_KW_ITEM, PRS_TOK_NULL},
-		{"CHECK_INCLUDE",	PMK_TOK_CHKINC, PRS_KW_ITEM, PRS_TOK_NULL},
-		{"CHECK_LIB",		PMK_TOK_CHKLIB, PRS_KW_ITEM, PRS_TOK_NULL},
-		{"CHECK_CONFIG",	PMK_TOK_CHKCFG, PRS_KW_ITEM, PRS_TOK_NULL},
-		{"CHECK_PKG_CONFIG",	PMK_TOK_CHKPKG, PRS_KW_ITEM, PRS_TOK_NULL},
-		{"CHECK_TYPE",		PMK_TOK_CHKTYP, PRS_KW_ITEM, PRS_TOK_NULL}
+		{"DEFINE",		PMK_TOK_DEFINE, PRS_KW_NODE, PMK_TOK_SETVAR},
+		{"SETTINGS",		PMK_TOK_SETNGS, PRS_KW_NODE, PMK_TOK_SETPRM},
+		{"SWITCHES",		PMK_TOK_SWITCH, PRS_KW_CELL, PRS_TOK_NULL}, /* XXX will be node */
+		{"CHECK_BINARY",	PMK_TOK_CHKBIN, PRS_KW_CELL, PRS_TOK_NULL},
+		{"CHECK_INCLUDE",	PMK_TOK_CHKINC, PRS_KW_CELL, PRS_TOK_NULL},
+		{"CHECK_LIB",		PMK_TOK_CHKLIB, PRS_KW_CELL, PRS_TOK_NULL},
+		{"CHECK_CONFIG",	PMK_TOK_CHKCFG, PRS_KW_CELL, PRS_TOK_NULL},
+		{"CHECK_PKG_CONFIG",	PMK_TOK_CHKPKG, PRS_KW_CELL, PRS_TOK_NULL},
+		{"CHECK_TYPE",		PMK_TOK_CHKTYP, PRS_KW_CELL, PRS_TOK_NULL}
 };
 
 int	nbkwpf = sizeof(kw_pmkfile) / sizeof(prskw);
@@ -90,7 +90,6 @@ bool func_wrapper(prscell *pcell, pmkdata *pgd) {
 		case PMK_TOK_SWITCH :
 			rval = pmk_switches(&cmd, pcell->data, pgd);
 			break;
-/* XXX TODO
 		case PMK_TOK_SETNGS :
 			rval = pmk_settings(&cmd, pcell->data, pgd);
 			break;
@@ -100,7 +99,6 @@ bool func_wrapper(prscell *pcell, pmkdata *pgd) {
 		case PMK_TOK_SETPRM :
 			rval = pmk_set_parameter(&cmd, pcell->data, pgd);
 			break;
-*/
 		case PMK_TOK_CHKBIN :
 			rval = pmk_check_binary(&cmd, pcell->data, pgd);
 			break;
@@ -158,15 +156,6 @@ bool process_node(prsnode *pnode, pmkdata *pgd) {
 
 */
 
-/*
-	define variables
-
-	XXX TODO process variables in order (and also search in global htable).
-*/
-
-bool pmk_settings(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
-	return(false); /* XXX TODO */
-}
 
 /*
 	define variables
@@ -174,38 +163,10 @@ bool pmk_settings(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 	XXX TODO process variables in order (and also search in global htable).
 */
 
-bool pmk_define(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
-	char	*value;
-	hkeys	*phk;
-	int	 i,
-		 n = 0;
-
+bool pmk_define(pmkcmd *cmd, prsnode *pnode, pmkdata *gdata) {
 	pmk_log("* Parsing define\n");
 
-	phk = hash_keys(ht);
-
-	for(i = 0 ; i < phk->nkey ; i++) {
-		value = po_get_str(hash_get(ht, phk->keys[i]));
-		if (hash_get(gdata->htab, phk->keys[i]) == NULL) {
-			/* process value string */
-			value = process_string(value, ht);
-			if (value != NULL) {
-				hash_add(gdata->htab, phk->keys[i], value);
-				pmk_log("\tAdded '%s'.\n", phk->keys[i]);
-				n++;
-			} else {
-				pmk_log("\tFailed processing of '%s'.\n", phk->keys[i]);
-			}
-		} else {
-			pmk_log("\tSkipped '%s' define (overriden).\n", phk->keys[i]);
-		}
-	}
-
-	pmk_log("\tTotal %d definition(s) added.\n", n);
-
-	hash_free_hkeys(phk);
-
-	return(true);
+	return(process_node(pnode, gdata));
 }
 
 /*
@@ -284,7 +245,17 @@ bool pmk_ac_compat(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 }
 
 /*
-	check binary
+	settings
+*/
+
+bool pmk_settings(pmkcmd *cmd, prsnode *pnode, pmkdata *gdata) {
+	pmk_log("* Parsing settings\n");
+
+	return(process_node(pnode, gdata));
+}
+
+/*
+	switches
 */
 
 bool pmk_switches(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
@@ -1100,3 +1071,120 @@ bool pmk_check_type(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 
 	return(rval);
 }
+
+/*
+	set variable
+*/
+
+bool pmk_set_parameter(pmkcmd *cmd, prsopt *popt, pmkdata *gdata) {
+	bool rval = false;
+	char	*pstr;
+	dynary	*da;
+	int	 i = 0,
+		 n;
+
+	if (strncmp(popt->key, "AC_COMPAT", sizeof(popt->key)) == 0) {
+		pmk_log("\tSetting autoconf compatibility :\n");
+
+		/* XXX must check if valid
+			pstr = (char *) hash_get(gdata->htab, "SYSCONFDIR");
+			hash_add(gdata->htab, "sysconfdir", strdup(pstr));
+		*/
+
+		/* if a file is given then it will be parsed later */
+		pstr = po_get_str(popt->value);
+		if (*pstr != CHAR_EOS) {
+			gdata->ac_file = strdup(pstr);
+			pmk_log("\t\tSet file to '%s'.\n", pstr);
+		}
+
+		/* compatibility tags */
+		pstr = (char *) hash_get(gdata->htab, "PREFIX");
+		hash_add(gdata->htab, "prefix", strdup(pstr));
+	
+		hash_add(gdata->htab, "exec_prefix", strdup("${prefix}"));
+		hash_add(gdata->htab, "bindir", strdup("${exec_prefix}/bin"));
+		hash_add(gdata->htab, "sbindir", strdup("${exec_prefix}/sbin"));
+		hash_add(gdata->htab, "libexecdir", strdup("${exec_prefix}/libexec"));
+		hash_add(gdata->htab, "libdir", strdup("${exec_prefix}/lib"));
+		hash_add(gdata->htab, "datadir", strdup("${prefix}/share"));
+		hash_add(gdata->htab, "includedir", strdup("${prefix}/include"));
+		hash_add(gdata->htab, "mandir", strdup("${prefix}/man"));
+		hash_add(gdata->htab, "infodir", strdup("${prefix}/info"));
+
+		pstr = (char *) hash_get(gdata->htab, "BIN_INSTALL");
+		hash_add(gdata->htab, "INSTALL", strdup(pstr));
+
+		pmk_log("\t\tSet specific variables.\n");
+
+		return(true);
+	}
+
+	if (strncmp(popt->key, "LANG", sizeof(popt->key)) == 0) {
+		pmk_log("\tSetting global language.\n");
+
+		/* set global language */
+		pstr = po_get_str(popt->value);
+
+		if (pstr != NULL) {
+			/* check if provided lang is supported */
+			if (check_lang(pstr) != NULL) {
+				pmk_log("\t\tSet to '%s'.\n", pstr);
+				rval = true;
+			} else {
+				errorf("unknown language.");
+			}
+		} else {
+			errorf("syntax error in LANG.");
+		}
+		return(rval);
+	}
+
+	if (strncmp(popt->key, "TARGET", sizeof(popt->key)) == 0) {
+		pmk_log("\tCollecting targets :\n");
+
+		da = po_get_list(popt->value);
+		if (da == NULL) {
+			errorf("syntax error in TARGET.");
+			return(false);
+		}
+
+		n = da_usize(da);
+		for (i=0 ; i < n ; i++) {
+			pmk_log("\t\tAdded '%s'.\n", da_idx(da, i));
+		}
+
+		gdata->tlist = da;
+
+		pmk_log("\t\tTotal %d target(s) added.\n", n);
+
+		return(true);
+	}
+
+	pmk_log("\tunknown '%s' setting.\n", popt->key);
+	return(false);
+}
+
+/*
+	set parameter
+*/
+
+bool pmk_set_variable(pmkcmd *cmd, prsopt *popt, pmkdata *gdata) {
+	char	*value;
+
+	if (hash_get(gdata->htab, popt->key) == NULL) {
+		/* process value string */
+		value = process_string(po_get_str(popt->value), gdata->htab);
+		if (value != NULL) {
+			hash_add(gdata->htab, popt->key, value);
+			pmk_log("\tAdded '%s' variable.\n", popt->key);
+		} else {
+			pmk_log("\tFailed processing of '%s'.\n", popt->key);
+			return(false);
+		}
+	} else {
+		pmk_log("\tSkipped '%s' define (overriden).\n", popt->key);
+	}
+	return(true);
+}
+
