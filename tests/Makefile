@@ -2,8 +2,7 @@
 
 CC?=		cc
 
-CFLAGS?=
-CFLAGS+=	-Wall
+CFLAGS?=	-Wall
 #CFLAGS+=	-Werror
 #CFLAGS+=	-ansi -pedantic
 
