@@ -28,6 +28,7 @@ mreindl	~.	latex version of tutorial
 	-.	add test target in tests/Makefile
 	+	update README and INSTALL
 	~	new samples
+			- c++ prog (samples/bin_c++)
 
 
 pmk:
