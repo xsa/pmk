@@ -158,11 +158,17 @@ All these commands need a label.
 They all can have the following optional arguments :
 .Bl -tag -width Ds
 .It Cm REQUIRED
-Specify if this test is required to achieve the configuration. Recommended type is 'bool'.
+Specify if this test is required to achieve the configuration. Type is 'bool'.
 If not specified it is TRUE by default.
 .It Cm DEPEND
 Specify check dependencies. Type is 'list'. A dependency is a label or a switch name.
+The value of each dependencie can be negated by adding a leading '!' sign.
 If at least one of the dependencies is false then the check will be disabled.
+.Pp
+Example :
+.Bd -literal -offset -indent
+DEPEND = ("header_gtk","!header_qt")
+.Ed
 .El
 .Pp
 Some of these commands can also have the following arguments :
@@ -243,6 +249,23 @@ Arguments:
 REQUIRED, DEPEND.
 NAME : type is 'quoted', name of the variable to check.
 VALUE : type is 'quoted', value to check with the variable, optional.
+.Ed
+.El
+
+.Sh CONDITIONAL COMMANDS
+.Bl -tag -width Ds
+.It Cm IF(expression)
+It contains other commands that will be executed only if the given expression is true.
+.Pp
+Arguments :
+.Pp
+Example :
+.Bd -literal -offset -indent
+IF(header_gtk) {
+	DEFINE {
+		HAVE_GTK = "1"
+	}
+}
 .Ed
 .El
 
