@@ -95,7 +95,8 @@ unsigned int hash_compute(char *key, size_t table_size) {
 */
 
 htable *hash_init(size_t table_size) {
-	return(hash_init_adv(table_size, (void *(*)(void *))strdup, free, hash_str_append));
+	return(hash_init_adv(table_size, (void *(*)(void *))strdup,
+                                                free, hash_str_append));
 }
 
 /*

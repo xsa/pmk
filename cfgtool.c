@@ -36,12 +36,12 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <errno.h>
 
 #include "compat/pmk_stdbool.h"
 #include "compat/pmk_string.h"
 #include "cfgtool.h"
 #include "common.h"
-#include "errno.h"
 #include "parse.h"
 #include "premake.h"
 

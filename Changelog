@@ -1,3 +1,7 @@
+06 Apr 2005 mipsator
+ * imported new main engine of pmkscan to permit generation of pmkfile
+   and makefile templates. This does not include the new file parser.
+
 05 Apr 2005 mipsator
  * import of prseng sources, a set of functions to manage a parsing
    buffer. It will be used in pmkscan and later by the pmk parser.

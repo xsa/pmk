@@ -37,7 +37,8 @@
 #ifndef _PMKSETUP_H_
 #define _PMKSETUP_H_
 
-#include "sys/stat.h"
+#include <sys/stat.h>
+
 #include "hash.h"
 #include "premake.h"
 

@@ -109,7 +109,7 @@ void prsdata_destroy(prsdata *pdata) {
 
 /**************
  prseng_init()
- 
+
  DESCR
 	initialize parsing engine structure
 
@@ -283,7 +283,9 @@ prscell *prscell_init(int token, int type, int subtoken) {
 				break;
 
 			case PRS_KW_CELL :
-				pht = hash_init_adv(MAX_CMD_OPT, (void *(*)(void *))po_dup, (void (*)(void *))po_free,
+				pht = hash_init_adv(MAX_CMD_OPT,
+					(void *(*)(void *))po_dup,
+					(void (*)(void *))po_free,
 					(void *(*)(void *, void *, void *))po_append);
 				if (pht != NULL) {
 					pcell->data = pht;
