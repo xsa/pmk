@@ -99,6 +99,8 @@ bool pmk_define(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 
 	pmk_log("\tTotal %d definition(s) added.\n", n);
 	
+	hash_free_hkeys(phk);
+
 	return(true);
 }
 

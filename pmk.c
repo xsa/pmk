@@ -564,7 +564,7 @@ int main(int argc, char *argv[]) {
 		do {
 			pstr = da_pop(da);
 			if (pstr != NULL) {
-				hash_add(gdata.labl, pstr, "TRUE"); /* XXX  check */
+				hash_add(gdata.labl, pstr, strdup("TRUE")); /* XXX  check */
 				ovrsw++; /* increment number of overriden switches */
 				free(pstr);
 			}
@@ -579,7 +579,7 @@ int main(int argc, char *argv[]) {
 		do {
 			pstr = da_pop(da);
 			if (pstr != NULL) {
-				hash_add(gdata.labl, pstr, "FALSE"); /* XXX  check */
+				hash_add(gdata.labl, pstr, strdup("FALSE")); /* XXX  check */
 				ovrsw++; /* increment number of overriden switches */
 				free(pstr);
 			}
