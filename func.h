@@ -36,6 +36,7 @@
 #include "premake.h"
 #include "pmk.h"
 #include "hash.h"
+#include "dynarray.h"
 #include "common.h"
 
 
@@ -47,6 +48,8 @@ typedef struct {
 
 bool check_bool_str(char *);
 bool check_version(char *, char *);
+
+bool str_to_dynary(char *, char, dynary *);
 
 bool pmk_define(pmkcmd *, htable *);
 bool pmk_target(pmkcmd *, htable *);

@@ -72,6 +72,7 @@
 #include "func.h"
 #include "common.h"
 
+
 char	pmkfile[MAXPATHLEN];
 int	cur_line = 0;
 
@@ -216,7 +217,7 @@ bool process_template(char *template, htable *ht) {
 	fclose(dfd);
 	fclose(tfd);
 
-	pmk_log("Created %s.\n", final);
+	pmk_log("Created '%s'.\n", final);
 	
 	return(TRUE);
 }
@@ -503,6 +504,13 @@ bool parse(FILE *fd) {
 		return(FALSE);
 	}
 
+	if (feof(fd) == 0) {
+		/* error occuered before EOF */
+		hash_destroy(tabopts);
+		errorf_line(pmkfile, cur_line, "end of file not reached.");
+		return(FALSE);
+	}
+
 	return(TRUE);
 }
 
@@ -529,6 +537,7 @@ int main(int argc, char *argv[]) {
 		chr;
 	bool	go_exit = FALSE,
 		pmkfile_set = FALSE;
+	dynary	*da;
 
 	while (go_exit == FALSE) {
 		chr = getopt(argc, argv, "f:hv");
@@ -602,23 +611,28 @@ int main(int argc, char *argv[]) {
 		/* fill keywords hash */
 		for(i = 0 ; i < s ; i++) {
 			snprintf(idxstr, 4, "%d", i);
-			/* XXX
-			debugf("add '%s' to keyword hash (%s)\n", functab[i].kw, idxstr);
-			*/
 			hash_add(keyhash, functab[i].kw, idxstr);
 		}
 	}
 	/* print number of hashed command */
 	pmk_log("(%d)\n", keyhash->count);
 
-	gdata.htab = hash_init(1024); /* XXX must be replaced by a define */
+	gdata.htab = hash_init(MAX_DATA_KEY);
 
 	if (parse(fd) == FALSE) {
 		/* an error occured while parsing */
 		rval = 1;
 	} else {
 		pmk_log("\n");
-		process_template(gdata.target, gdata.htab); /* XXX should use an array or something else */
+
+		da = gdata.tlist;
+		for (i=0 ; i < da_size(da) ; i++) {
+			process_template(da_idx(da, i), gdata.htab);
+		}
+		
+		da_destroy(da);
+
+		pmk_log("\n");
 		pmk_log("End of log.\n");
 	}
 

@@ -56,7 +56,10 @@
 dynary *da_init(void) {
 	dynary *ptr = NULL;
 
-	ptr = (dynary *) malloc(sizeof(dynary));
+	ptr = (dynary *)malloc(sizeof(dynary));
+	ptr->nbcell = 0;
+	ptr->first = NULL;
+	ptr->last = NULL;
 
 	return(ptr);
 }
@@ -150,11 +153,13 @@ void da_destroy(dynary *da) {
 	da_cell *ptr,
 		*del;
 
-	ptr = da->first;
-	while (ptr != NULL) {
-		del = ptr;
-		ptr = ptr->next;
-		free(del);
+	if (da->nbcell != 0) {
+		ptr = da->first;
+		while (ptr != NULL) {
+			del = ptr;
+			ptr = ptr->next;
+			free(del);
+		}
+		free(da);
 	}
-	free(da);
 }
