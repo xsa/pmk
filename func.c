@@ -616,7 +616,7 @@ bool pmk_check_config(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 		}
 	}
 
-	/* XXX LDFLAGS, CPPFLAGS, LDFLAGS ? */
+	/* XXX LDFLAGS, CPPFLAGS ? */
 
 	return(true);
 }
@@ -781,7 +781,7 @@ bool pmk_check_pkg_config(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 		}
 	}
 
-	/* XXX LDFLAGS, CPPFLAGS, LDFLAGS ? */
+	/* XXX LDFLAGS, CPPFLAGS ? */
 
 	return(true);
 }
