@@ -390,7 +390,7 @@ void clean(pmkdata *pgd) {
 */
 
 void usage(void) {
-	fprintf(stderr, "usage: pmk [-vh] [-f file] [options]\n");
+	fprintf(stderr, "usage: pmk [-vh] [-b path] [-f pmkfile] [-o overridefile] [options]\n");
 }
 
 /*
