@@ -23,7 +23,9 @@ DEBUG?=		-g
 PREMAKE=	pmk
 SETUP=		pmksetup
 
-DATADIR=	$(PREFIX)/share/$(PREMAKE)
+BINDIR=		$(PREFIX)/bin/
+SBINDIR=	$(PREFIX)/sbin/
+DATADIR=	$(PREFIX)/share/$(PREMAKE)/
 SAMPLE=		$(PREMAKE)file.sample
 CONFIG=		$(PREMAKE).conf.sample
 
@@ -44,15 +46,20 @@ $(PREMAKE): $(P_OBJS)
 $(SETUP): $(S_OBJS)
 	$(CC) -o $(SETUP) $(LDFLAGS) $(S_OBJS)
 
-install: pmk pmksetup
-	$(INSTALL) -m 755 $(PREMAKE) $(PREFIX)/bin/$(PREMAKE)
-	$(INSTALL) -m 755 $(SETUP) $(PREFIX)/sbin/$(SETUP)
-	$(INSTALL) -d $(DATADIR)
+install: all
+	$(INSTALL) -d -m 755 $(BINDIR)
+	$(INSTALL) -m 755 $(PREMAKE) $(PREFIX)$(PREMAKE)
+	$(INSTALL) -d -m 755 $(SBINDIR)
+	$(INSTALL) -m 755 $(SETUP) $(SBINDIR)$(SETUP)
+	$(INSTALL) -d -m 755 $(DATADIR)
 	$(INSTALL) -m 644 samples/$(SAMPLE) $(DATADIR)
 	$(INSTALL) -m 644 samples/$(CONFIG) $(DATADIR)
+	$(INSTALL) -d -m 755 $(PREFIX)/man/man1
 	$(INSTALL) -m 444 $(PREMAKE).1 $(PREFIX)/man/man1/$(PREMAKE).1
-	$(INSTALL) -m 444 $(SETUP).8 $(PREFIX)/man/man8/$(SETUP).8
+	$(INSTALL) -d -m 755 $(PREFIX)/man/man5
 	$(INSTALL) -m 444 $(PREMAKE).conf.5 $(PREFIX)/man/man5/$(PREMAKE).conf.5
+	$(INSTALL) -d -m 755 $(PREFIX)/man/man8
+	$(INSTALL) -m 444 $(SETUP).8 $(PREFIX)/man/man8/$(SETUP).8
 
 clean:
 	rm -f $(P_OBJS) $(S_OBJS) $(PREMAKE) $(SETUP) compat/compat.h *.core
