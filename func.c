@@ -64,7 +64,7 @@ bool check_bool_str(char *str) {
 */
 
 bool pmk_define(pmkcmd *cmd, htable *ht) {
-	pmk_log("* parsing define\n");
+	pmk_log("* Parsing define\n");
 	return(TRUE);
 }
 
