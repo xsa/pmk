@@ -1,3 +1,5 @@
+# PMK 0.4 released
+
 26 Apr 2003 mipsator
  * added BIN_CC in get_binaries and use it in pmk_check_include()
    an pmk_check_lib().
