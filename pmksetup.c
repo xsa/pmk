@@ -333,11 +333,21 @@ int get_env_vars(htable *ht) {
 		debugf("\t%s => %s", PREMAKE_KEY_OSNAME, utsname.sysname);
 		debugf("\t%s => %s", PREMAKE_KEY_OSVERS, utsname.release);
 		debugf("\t%s => %s", PREMAKE_KEY_OSARCH, utsname.machine);
+
+		debugf("");
+		debugf("[Librairies and Includes]");
+		debugf("\t%s => %s", PREMAKE_KEY_INCPATH, "/usr/include");
+		debugf("\t%s => %s", PREMAKE_KEY_LIBPATH, "/usr/lib");
 	} 
 	/* XXX should think about a better way to do it though */
 	hash_add(ht, PREMAKE_KEY_OSNAME, utsname.sysname);
 	hash_add(ht, PREMAKE_KEY_OSVERS, utsname.release);
 	hash_add(ht, PREMAKE_KEY_OSARCH, utsname.machine);
+
+	/* XXX temporary fix, this way we can go further with the rest */
+	hash_add(ht, PREMAKE_KEY_INCPATH, "/usr/include");
+	hash_add(ht, PREMAKE_KEY_LIBPATH, "/usr/lib");
+
 	return(0);
 }
 
