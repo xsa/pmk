@@ -1,3 +1,3 @@
-HP systems :
-  - make does not support '+=' operator (eg: CFLAGS+=-DBLAH does not work).
-  - __progname unknown
+HP systems (tru64, hpux) :
+  - default make does not support '+=' operator (eg: CFLAGS+=-DBLAH does
+    not work). Use of GNU/make is recommended to build the package.
