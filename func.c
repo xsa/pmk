@@ -367,24 +367,21 @@ bool pmk_check_binary(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 */
 
 bool pmk_check_header(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
-	FILE	*tfp;
 	bool	 required,
 		 rslt = true,
-		 loop = true,
 		 clean_funcs = false,
-		 check_funcs = false,
 		 rval;
 	char	 inc_path[MAXPATHLEN],
 		 cfgcmd[MAXPATHLEN],
 		 ftmp[MAXPATHLEN],
 		 btmp[MAXPATHLEN],
 		*incfile,
-		*incfunc = NULL,
 		*target = NULL,
 		*ccpath,
 		*cflags,
 		*pstr;
 	dynary	*funcs = NULL,
+		*macros = NULL,
 		*defs;
 	int	 i,
 		 n,
@@ -403,11 +400,12 @@ bool pmk_check_header(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 		return(false);
 	}
 
+	/* any macro(s) to check ? */
+	macros = po_get_list(hash_get(ht, KW_OPT_MACRO));
+
 	/* check if a function or more must be searched */
 	po = hash_get(ht, KW_OPT_FUNCTION);
-	if (po == NULL) {
-		target = incfile;
-	} else {
+	if (po != NULL) {
 		/* KW_OPT_FUNCTION provided */
 		switch (po_get_type(po)) {
 			case PO_STRING:
@@ -437,7 +435,6 @@ bool pmk_check_header(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 				errorf("syntax error for '%s': bad type.", KW_OPT_FUNCTION);
 				return(false);
 		}
-		check_funcs = true;
 	}
 
 	if (depend_check(ht, pgd) == false) {
@@ -505,95 +502,149 @@ bool pmk_check_header(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 		strlcpy(inc_path, "", sizeof(inc_path));
 	}
 
-	/* check loop */
-	while (loop == true) {
 
-		/* fill test file */
-		tfp = tmps_open(TEST_FILE_NAME, "w", ftmp, sizeof(ftmp), strlen(C_FILE_EXT));
-		if (tfp != NULL) {
-			if (check_funcs == false) {
-				/* header test */
-				pmk_log("\tFound header '%s' : ", incfile);
-				fprintf(tfp, INC_TEST_CODE, incfile);
-			} else {
-				/* header function test */
-				incfunc = da_shift(funcs);
-				target = incfunc;
-				pmk_log("\tFound function '%s' in '%s' : ", incfunc, incfile);
-				fprintf(tfp, INC_FUNC_TEST_CODE, incfile, incfunc);
+	/*
+		check header file
+	*/
+	pmk_log("\tFound header '%s' : ", incfile);
+
+	if (c_file_builder(ftmp, sizeof(ftmp),INC_TEST_CODE, incfile) == false) {
+		errorf("cannot build test file.");
+		return(false);
+	}
+
+	snprintf(cfgcmd, sizeof(cfgcmd), HEADER_CC_FORMAT,
+			ccpath, inc_path, BIN_TEST_NAME, ftmp, pgd->buildlog);
+
+	/* get result */
+	r = system(cfgcmd);
+	if (r == 0) {
+		pmk_log("yes.\n");
+		/* define for template */
+		record_def_data(pgd->htab, incfile, DEFINE_DEFAULT);
+	} else {
+		pmk_log("no.\n");
+		record_def_data(pgd->htab, incfile, NULL);
+		rslt = false;
+	}
+
+	if (unlink(ftmp) == -1) {
+		/* cannot remove temporary file */
+		errorf("cannot remove %s", ftmp);
+	}
+
+	/* No need to check return here as binary could not exists */
+	unlink(BIN_TEST_NAME);
+
+
+	/*
+		check macros in header file
+	*/
+	if ((rslt == true) && (macros != NULL)) {
+		while ((target = da_shift(macros)) && (target != NULL)) {
+			pmk_log("\tFound macro '%s' : ", target);
+
+			/* fill test file */
+			if (c_file_builder(ftmp, sizeof(ftmp),
+					INC_MACRO_TEST_CODE, incfile,
+					target) == false) {
+				errorf("cannot build test file.");
+				return(false);
 			}
 
-			fclose(tfp);
-		} else {
-			errorf("cannot open test file.");
-			return(false);
-		}
 
-		/* build compiler command */
-		if (incfunc == NULL) {
 			snprintf(cfgcmd, sizeof(cfgcmd), HEADER_CC_FORMAT,
 				ccpath, inc_path, BIN_TEST_NAME, ftmp, pgd->buildlog);
-		} else {
+
+			/* get result */
+			r = system(cfgcmd);
+			if (r == 0) {
+				pmk_log("yes.\n");
+				/* define for template */
+				record_def_data(pgd->htab, incfile, DEFINE_DEFAULT);
+			} else {
+				pmk_log("no.\n");
+				record_def_data(pgd->htab, incfile, NULL);
+				rslt = false;
+			}
+
+			if (unlink(ftmp) == -1) {
+				/* cannot remove temporary file */
+				errorf("cannot remove %s", ftmp);
+			}
+
+			/* No need to check return here as binary could not exists */
+			unlink(BIN_TEST_NAME);
+		}
+	}
+
+
+	/*
+		check functions in header file
+	*/
+	if ((rslt == true) && (funcs != NULL)) {
+		while ((target = da_shift(funcs)) && (target != NULL)) {
+			pmk_log("\tFound function '%s' : ", target);
+
+			/* fill test file */
+			if (c_file_builder(ftmp, sizeof(ftmp),
+					INC_FUNC_TEST_CODE, incfile,
+					target) == false) {
+				errorf("cannot build test file.");
+				return(false);
+			}
+
 			/* compute object file name */
 			strlcpy(btmp, ftmp, sizeof(btmp));
 			btmp[strlen(btmp) - 1] = 'o';
 
+			/* build compiler command */
 			snprintf(cfgcmd, sizeof(cfgcmd), HEADER_FUNC_CC_FORMAT,
 				ccpath, inc_path, btmp, ftmp, pgd->buildlog);
-		}
 
-		/* get result */
-		r = system(cfgcmd);
-		if (r == 0) {
-			pmk_log("yes.\n");
-			/* define for template */
-			record_def_data(pgd->htab, target, DEFINE_DEFAULT);
-		} else {
-			pmk_log("no.\n");
-			record_def_data(pgd->htab, target, NULL);
-			rslt = false;
-		}
+			/* get result */
+			r = system(cfgcmd);
+			if (r == 0) {
+				pmk_log("yes.\n");
+				/* define for template */
+				record_def_data(pgd->htab, target, DEFINE_DEFAULT);
+			} else {
+				pmk_log("no.\n");
+				record_def_data(pgd->htab, target, NULL);
+				rslt = false;
+			}
 
-		if (unlink(ftmp) == -1) {
-			/* cannot remove temporary file */
-			errorf("cannot remove %s", ftmp);
-		}
+			if (unlink(ftmp) == -1) {
+				/* cannot remove temporary file */
+				errorf("cannot remove %s", ftmp);
+			}
 
-		if (incfunc == NULL) {
-			/* No need to check return here as binary could not exists */
-			unlink(BIN_TEST_NAME);
-			/* exit from loop */
-			loop = false;
-		} else {
 			/* No need to check return here as object file could not exists */
 			unlink(btmp);
-			/* check if list is empty */
-			if (da_usize(funcs) == 0)
-				loop = false;
 		}
 	}
 
 	if (rslt == true) {
-			label_set(pgd->labl, cmd->label, true);
-			/* process additional defines */
-			process_def_list(pgd->htab, defs);
-
-			/* put result in CFLAGS, CXXFLAGS or alternative variable */
-			if (single_append(pgd->htab, cflags, strdup(inc_path)) == false) {
-				errorf("failed to append '%s' in '%s'.", inc_path, cflags);
-				return(false);
-			}
-
-			rval = true;
+		label_set(pgd->labl, cmd->label, true);
+		/* process additional defines */
+		process_def_list(pgd->htab, defs);
+	
+		/* put result in CFLAGS, CXXFLAGS or alternative variable */
+		if (single_append(pgd->htab, cflags, strdup(inc_path)) == false) {
+			errorf("failed to append '%s' in '%s'.", inc_path, cflags);
+			return(false);
+		}
+	
+		rval = true;
 	} else {
-			rval = process_required(pgd, cmd, required, NULL, NULL);
-			if (rval == false) {
-				if (incfunc == NULL) {
-					errorf("failed to find header '%s'.", incfile);
-				} else {
-					errorf("failed to find function '%s'.", incfunc);
-				}
-			}
+		rval = process_required(pgd, cmd, required, NULL, NULL);
+		/*if (rval == false) {                                             */
+		/*        if (incfunc == NULL) {                                   */
+		/*                errorf("failed to find header '%s'.", incfile);  */
+		/*        } else {                                                 */
+		/*                errorf("failed to find function '%s'.", incfunc);*/
+		/*        }                                                        */
+		/*}                                                                */
 	}
 
 	if (clean_funcs == true) {

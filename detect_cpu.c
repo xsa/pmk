@@ -413,6 +413,12 @@ bool x86_get_cpuid_data(x86_cpu_cell *cell) {
 	cell->features = strdup(feat_str);
 
 	x86_exec_cpuid(0x80000000);
+	/*if (x86_cpu_reg_eax >= 0x80000001) {*/
+	/*        |+ get the cpu name +|      */
+	/*        x86_exec_cpuid(0x80000001); */
+	/*                                    */
+	/*        |+ XXX check 3Dnow & co +|  */
+	/*}                                   */
 	if (x86_cpu_reg_eax >= 0x80000002) {
 		/* get the cpu name */
 		x86_exec_cpuid(0x80000002);
