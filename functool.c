@@ -68,8 +68,12 @@ bool check_bool_str(char *str) {
 */
 
 bool check_version(char *vref, char *vers) {
-	/* XXX to do */
-	return(true);
+	/* XXX use strncmp to check both version but not sure it is 100% right */
+	if (strncmp(vref, vers, MAX_VERS_LEN) > 0) {
+		return(false);
+	} else {
+		return(true);
+	}
 }
 
 /*
@@ -109,4 +113,17 @@ bool get_file_path(char *filename, char *path, char *storage, int size) {
 
 	da_destroy(bplst);
 	return(rval);
+}
+
+/*
+*/
+
+char *str_to_def(char *str) {
+	char	*newstr;
+
+	newstr = strdup(str);
+
+	/* XXX parse line */
+
+	return(newstr);
 }
