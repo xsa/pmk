@@ -1,20 +1,15 @@
 Sys name	Sys Version	OS arch.	PMK Version	PMK Status	Reported by		Misc data
 ~~~~~~~~~~~~~~~ ~~~~~~~~~~~~~~~ ~~~~~~~~~~~~~~~ ~~~~~~~~~~~~~~~ ~~~~~~~~~~~~~~~	~~~~~~~~~~~~~~~~~~~~~~~	~~~~~~~~~~~~~~~~~~~~~~~~
-Cygwin		1.3.22		i386		PMK 0.4		Fail (build ok)	Damien Couderc		gcc-3.2, gmake-3.79.1	(see BUGS)
-Debian		3.0		i586		PMK 0.3.4	OK		Xavier Santolaria	gcc-2.95.4, gmake-3.79.1, linux-2.4.20
-Debian		3.0		parisc		PMK 0.4.4	OK		Damien Couderc		gcc-3.0.4, gmake-3.79.1, linux-2.4.17-64
-FreeBSD		4.8		i386		PMK 0.4.4	OK		Damien Couderc		gcc-2.95.4
-FreeBSD		4.8		alpha		PMK 0.4.4	OK		Damien Couderc		gcc-2.95.4
-Gentoo		1.4		i686		PMK 0.3		OK		Xavier Santolaria	gcc-3.2.2, gmake-3.80, linux-2.4.19
-Gentoo		1.4		parisc		PMK 0.3		OK		Xavier Santolaria	gcc-3.2.2, gmake-3.80, linux-2.4.20
-HPUX		B.11.22		ia64		PMK 0.4		OK (gmake)	Damien Couderc		HP ANSI C++/C B3910B A.05.36, gmake-3.79.1
-MacOS		X.2.5		ppc		PMK 0.4		OK		Xavier Santolaria	gcc-3.1, gmake-3.79.1, Darwin 6.5
-Mandrake	9.1		i686		PMK 0.4.4	OK		Damien Couderc		gcc-3.2.2, gmake-3.80, linux-2.4.21
-NetBSD		1.6		i386		PMK 0.4.4	OK		Damien Couderc		gcc-2.95.3
-OpenBSD		3.3		i386		PMK 0.4.6	OK		Damien Couderc		gcc-2.95.3
-OSF1		5.1		alpha		PMK 0.4		OK (gmake)	Damien Couderc		Compaq C 6.5-207, gmake-3.79.1
+Debian		3.0		parisc		PMK 0.4.7	OK		Damien Couderc		gcc-3.0.4, gmake-3.79.1, linux-2.4.17-64
+Debian		3.0		ia64		PMK 0.4.7	OK		Damien Couderc		gcc-3.2.2, gmake-3.79.1, linux-2.4.18-smp
+FreeBSD		4.8		i386		PMK 0.4.7	OK		Damien Couderc		gcc-2.95.4
+FreeBSD		4.8		alpha		PMK 0.4.7	OK		Damien Couderc		gcc-2.95.4
+HPUX		B.11.22		ia64		PMK 0.4.7	OK (gmake)	Damien Couderc		HP ANSI C++/C B3910B A.05.36, gmake-3.79.1
+Mandrake	9.1		i686		PMK 0.4.7	OK		Damien Couderc		gcc-3.2.2, gmake-3.80, linux-2.4.21
+NetBSD		1.6		i386		PMK 0.4.7	OK		Damien Couderc		gcc-2.95.3
+OpenBSD		3.3		i386		PMK 0.4.7	OK		Damien Couderc		gcc-2.95.3
 OSF1 (tru64)	5.1b		alpha		PMK 0.4.4	Fail		Damien Couderc		conflict with stdbool.h
-RedHat		9.0		i686		PMK 0.4.4	OK		Damien Couderc		gcc-3.2.2, gmake-3.79.1, linux-2.4.20-6smp
-Slackware	9.0		i686		PMK 0.4.4	OK		Damien Couderc		gcc-3.2.2, gmake-3.80, linux-2.4.20
+RedHat Ent.	ES2.1		i686		PMK 0.4.7	OK		Damien Couderc		gcc-3.3, gmake-3.79.1, linux-2.4.9-smp
+Slackware	9.0		i686		PMK 0.4.7	OK		Damien Couderc		gcc-3.2.2, gmake-3.80, linux-2.4.20
 SunOS		5.7		sun4u		PMK 0.4		OK		Xavier Santolaria	WorkShop Compilers 5.0, gmake-3.76.1
 SuSE		8.1		i686		PMK 0.4.4	OK		Damien Couderc		gcc-3.2, gmake-3.79.1, linux-2.4.19-smp
