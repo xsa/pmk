@@ -67,10 +67,10 @@ run_$(NAME):
 	@echo ""
 	@echo "-> Running program"
 	@echo ""
-	@echo "LD_LIBRARY_PATH=. ${NAME}"
+	@echo "LD_LIBRARY_PATH=.:${LD_LIBRARY_PATH} ${NAME}"
 	@echo ""
 	@echo "--exec-begin----------------------------"
-	@LD_LIBRARY_PATH=. ./${NAME}
+	@LD_LIBRARY_PATH=.:${LD_LIBRARY_PATH} ./${NAME}
 	@echo "--exec-end------------------------------"
 
 clean:
@@ -82,4 +82,3 @@ clean:
 	rm -f $(NAME)
 	rm -f *.log Makefile
 	@echo "Done."
-
