@@ -3,11 +3,14 @@ common :
 + improve USER_TEST to make USER_MODE (aka non root pmk).
 
 pmk :
-! free bug
 + update pmk.1
-+ update pmkfile.5
+! update pmkfile.5 (VARIABLE in CHECK_CONFIG, CFLAGS in CHECK_HEADER)
+! define CFLAGS, LIBS, LDFLAGS with values from make
+- CHECK_LIB should set LIBS and need a LIBS option
+	(check with a glob da_idx(da, i)+"lib"+libname+".*")
 ~ compatibility with autoconf (progressing) :
 	~ support for DEFS (-D options to pass to the compiler)
+	! missing stuff noticed with dillo conversion
 	- support for LDFLAGS (misc linker options)
 	- support for CPPFLAGS (misc linker options)
 	- VPATH ?
