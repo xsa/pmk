@@ -61,25 +61,24 @@ $(NAME):
 	@echo ""
 	@echo "-> Building binary"
 	@echo ""
-	$(CC) -o $(NAME) -L. -lhello $(NAME).c
+	$(CC) -o $(NAME) -L. -l${NAME} $(NAME).c
 
 run_$(NAME):
 	@echo ""
 	@echo "-> Running program"
 	@echo ""
-	@echo "LD_LIBRARY_PATH=. hello"
+	@echo "LD_LIBRARY_PATH=.:${LD_LIBRARY_PATH} ${NAME}"
 	@echo ""
 	@echo "--exec-begin----------------------------"
-	@LD_LIBRARY_PATH=. hello
+	@LD_LIBRARY_PATH=.:${LD_LIBRARY_PATH} ./${NAME}
 	@echo "--exec-end------------------------------"
 
 clean:
 	@echo ""
 	@echo "-> Cleaning ..."
 	@echo ""
-	rm -f $(B_OBJS) $(L_OBJS) 
+	rm -f $(B_OBJS) $(L_OBJS)
 	rm -f $(LIB_STATIC) $(LIB_SHARED) $(LIB_SHARED_V)
 	rm -f $(NAME)
 	rm -f *.log Makefile
 	@echo "Done."
-

@@ -40,7 +40,7 @@
 
 
 #include <sys/stat.h>
-/* include it first as if it was <sys/types.h> - this will avoid errors */ 
+/* include it first as if it was <sys/types.h> - this will avoid errors */
 #include "compat/pmk_sys_types.h"
 
 #include <errno.h>
@@ -95,6 +95,11 @@ bool process_dyn_var(pmkdata *pgd, char *template) {
 	/* get template path */
 	/* NOTE : we use strdup to avoid problem with linux's dirname */
 	pstr = strdup(template);
+	if (pstr == NULL) {
+		free(pstr);
+		errorf("memory allocation failed.");
+		return(false);
+	}
 	strlcpy(stpath, dirname(pstr), sizeof(stpath));
 	free(pstr);
 
@@ -208,18 +213,18 @@ bool init_var(pmkdata *pgd) {
 	pht = pgd->htab;
 
 	pstr = MK_VAR_CFLAGS;
-	if (get_make_var(pstr, buf, sizeof(buf)) == true) {
-		if (hash_update_dup(pht, pstr, buf) == HASH_ADD_FAIL)
-		return(false);
+	if (get_make_var(pstr, buf, sizeof(buf)) == false) {
+		buf[0] = CHAR_EOS; /* empty string */
 	}
 #ifdef PMK_DEBUG
 debugf("%s = '%s'", pstr, buf);
 #endif
+	if (hash_update_dup(pht, pstr, buf) == HASH_ADD_FAIL)
+		return(false);
 
 	pstr = MK_VAR_CXXFLAGS;
-	if (get_make_var(pstr, buf, sizeof(buf)) == true) {
-		if (hash_update_dup(pht, pstr, buf) == HASH_ADD_FAIL)
-		return(false);
+	if (get_make_var(pstr, buf, sizeof(buf)) == false) {
+		buf[0] = CHAR_EOS; /* empty string */
 	}
 #ifdef PMK_DEBUG
 debugf("%s = '%s'", pstr, buf);
@@ -228,9 +233,8 @@ debugf("%s = '%s'", pstr, buf);
 		return(false);
 
 	pstr = MK_VAR_CPPFLAGS;
-	if (get_make_var(pstr, buf, sizeof(buf)) == true) {
-		if (hash_update_dup(pht, pstr, buf) == HASH_ADD_FAIL)
-			return(false);
+	if (get_make_var(pstr, buf, sizeof(buf)) == false) {
+		buf[0] = CHAR_EOS; /* empty string */
 	}
 #ifdef PMK_DEBUG
 debugf("%s = '%s'", pstr, buf);
@@ -239,9 +243,8 @@ debugf("%s = '%s'", pstr, buf);
 		return(false);
 
 	pstr = MK_VAR_LDFLAGS;
-	if (get_make_var(pstr, buf, sizeof(buf)) == true) {
-		if (hash_update_dup(pht, pstr, buf) == HASH_ADD_FAIL)
-			return(false);
+	if (get_make_var(pstr, buf, sizeof(buf)) == false) {
+		buf[0] = CHAR_EOS; /* empty string */
 	}
 #ifdef PMK_DEBUG
 debugf("%s = '%s'", pstr, buf);
@@ -250,9 +253,8 @@ debugf("%s = '%s'", pstr, buf);
 		return(false);
 
 	pstr = MK_VAR_LIBS;
-	if (get_make_var(pstr, buf, sizeof(buf)) == true) {
-		if (hash_update_dup(pht, pstr, buf) == HASH_ADD_FAIL)
-			return(false);
+	if (get_make_var(pstr, buf, sizeof(buf)) == false) {
+		buf[0] = CHAR_EOS; /* empty string */
 	}
 #ifdef PMK_DEBUG
 debugf("%s = '%s'", pstr, buf);
@@ -261,9 +263,8 @@ debugf("%s = '%s'", pstr, buf);
 		return(false);
 
 	pstr = MK_VAR_DEBUG;
-	if (get_make_var(pstr, buf, sizeof(buf)) == true) {
-		if (hash_update_dup(pht, pstr, buf) == HASH_ADD_FAIL)
-			return(false);
+	if (get_make_var(pstr, buf, sizeof(buf)) == false) {
+		buf[0] = CHAR_EOS; /* empty string */
 	}
 #ifdef PMK_DEBUG
 debugf("%s = '%s'", pstr, buf);
@@ -399,6 +400,11 @@ bool process_template(char *template, pmkdata *pgd) {
 	/* get relative path from srcdir */
 	/* NOTE : we use strdup to avoid problem with linux's dirname */
 	ptmp = strdup(template);
+	if (ptmp == NULL) {
+		free(ptmp);
+		errorf("memory allocation failed.");
+		return(false);
+	}
 	relpath(pgd->srcdir, dirname(ptmp), buf); /* XXX check ? */
 	free(ptmp);
 	/* apply to basedir */
@@ -415,7 +421,7 @@ bool process_template(char *template, pmkdata *pgd) {
 
 	tfd = fopen(template, "r");
 	if (tfd == NULL) {
-		errorf("cannot open '%s' : %s.", 
+		errorf("cannot open '%s' : %s.",
 			template, strerror(errno));
 		return(false);
 	}
@@ -423,7 +429,7 @@ bool process_template(char *template, pmkdata *pgd) {
 	dfd = fopen(fpath, "w");
 	if (dfd == NULL) {
 		fclose(tfd); /* close already opened tfd before leaving */
-		errorf("cannot open '%s' : %s.", 
+		errorf("cannot open '%s' : %s.",
 			fpath, strerror(errno));
 		return(false);
 	}
@@ -858,7 +864,7 @@ int main(int argc, char *argv[]) {
 	fp = fopen(pgd->pmkfile, "r");
 	if (fp == NULL) {
 		clean(pgd);
-		errorf("cannot open '%s' : %s.", 
+		errorf("cannot open '%s' : %s.",
 			pgd->pmkfile, strerror(errno));
 		exit(EXIT_FAILURE);
 	}

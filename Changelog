@@ -1,3 +1,17 @@
+# PMK 0.8.2 release
+
+09 Dec 2004 mipsator
+ * backported fixes from current:
+	- added strdup() checks in pmk.c
+	- fixed init_var() in pmk.c
+	- gone back to posix getopts in pmkcfg.sh
+	- fix dirname for irix and more in pmkcfg.sh
+	- fixed lib samples
+ * backported features from current:
+	- pmk.conf backup
+	- more binaries detected
+	- posix shell detection in pmkcfg.sh
+
 # PMK 0.8.1 release
 
 14 Mar 2004 mipsator

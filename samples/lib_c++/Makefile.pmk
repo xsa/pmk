@@ -4,8 +4,10 @@ CXX=		@BIN_CXX@
 AR=		@BIN_AR@
 RANLIB=		@BIN_RANLIB@
 
+CXXFLAGS=	@CXXFLAGS@
+
 ARFLAGS=	cr
-SLCFLAGS=	@SLCFLAGS@
+SLCXXFLAGS=	@SLCXXFLAGS@
 SLLDFLAGS=	@SLLDFLAGS@
 
 NAME=		hello
@@ -23,10 +25,10 @@ L_OBJS=		$(LIBNAME).o
 
 all: show $(LIB_STATIC) $(LIB_SHARED) $(NAME) run_$(NAME) clean
 
-.c.o:
+.cc.o:
 	@echo ""
 	@echo "-> Building object file"
-	$(CXX) $(CFLAGS) $(SLCFLAGS) -c $<
+	$(CXX) $(CXXFLAGS) $(SLCXXFLAGS) -c $<
 
 show:
 	@echo ""
@@ -61,25 +63,24 @@ $(NAME):
 	@echo ""
 	@echo "-> Building binary"
 	@echo ""
-	$(CXX) -o $(NAME) -L. -lhello++ $(NAME).cc
+	$(CXX) -o $(NAME) -L. -l${NAME}++ $(NAME).cc
 
 run_$(NAME):
 	@echo ""
 	@echo "-> Running program"
 	@echo ""
-	@echo "LD_LIBRARY_PATH=. hello"
+	@echo "LD_LIBRARY_PATH=.:${LD_LIBRARY_PATH} ./${NAME}"
 	@echo ""
 	@echo "--exec-begin----------------------------"
-	@LD_LIBRARY_PATH=. hello
+	@LD_LIBRARY_PATH=.:${LD_LIBRARY_PATH} ./${NAME}
 	@echo "--exec-end------------------------------"
 
 clean:
 	@echo ""
 	@echo "-> Cleaning ..."
 	@echo ""
-	rm -f $(B_OBJS) $(L_OBJS) 
+	rm -f $(B_OBJS) $(L_OBJS)
 	rm -f $(LIB_STATIC) $(LIB_SHARED) $(LIB_SHARED_V)
 	rm -f $(NAME)
 	rm -f *.log Makefile
 	@echo "Done."
-
