@@ -1,3 +1,7 @@
+22 Jun 2003 mipsator
+ * added missing snapshots in Changelog.
+ * fixed a bug in chkpath().
+
 # snapshot 0.4.5
 
 21 Jun 2003 mipsator
@@ -50,6 +54,8 @@
  * cleaned-up and reorganized includes.
  * added autoconf.c and autoconf.h for autoconf compatibility stuff.
 
+# snapshot 0.4.3
+
 05 Jun 2003 mipsator
  * massive changes in func.c to complete check functions.
  	(added missing record_def, record_val and label_set
@@ -71,6 +77,8 @@
 
 01 Jun 2003 mipsator
  * added hash_append().
+
+# snapshot 0.4.2
 
 31 May 2003 mipsator
  * added strlcat.c and strlcat.h in compat directory.
@@ -125,6 +133,8 @@
  * use depend_check() in check functions.
  * rewritten depend_check().
  * added require_check().
+
+# snapshot 0.4.1
 
 05 May 2003 mipsator
  * make hash use ISO C99 booleans.

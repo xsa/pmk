@@ -150,6 +150,7 @@ bool chkpath(char *path, char *buffer) {
 						/* not enough space */
 						return(false);
 					}
+					dot = false;
 				}
 
 				/* copy char */
