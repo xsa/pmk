@@ -3,8 +3,11 @@
 
 # settings
 SETTINGS {
+# set autoconf compatibility
  AC_COMPAT="samples/ac_config.h"
+# set default language
  LANG="C"
+# target files 
  TARGET=("Makefile.sample.pmk","config_sample.h.pmk","subdir/Makefile.subdir.pmk")
 }
 

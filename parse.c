@@ -811,51 +811,53 @@ bool parse_pmkfile(FILE *fp, prsdata *pdata, prskw kwtab[], size_t size) {
 
 			default :
 				if (process == true) {
-					if (parse_opt(buf, &opt) == false) {
-						errorf("line %d : %s", cur_line, parse_err);
+					if (*buf != PMK_CHAR_COMMENT) {
+						if (parse_opt(buf, &opt) == false) {
+							errorf("line %d : %s", cur_line, parse_err);
 #ifdef DEBUG_PRS
-						debugf("parse_opt returned false");
+							debugf("parse_opt returned false");
 #endif
-						prscell_destroy(pcell);
-						return(false);
-					} else {
+							prscell_destroy(pcell);
+							return(false);
+						} else {
 #ifdef DEBUG_PRS
-						debugf("recording '%s' key", opt.key);
+							debugf("recording '%s' key", opt.key);
 #endif
-						/* key name and value are ok */
-						switch(pcell->type) {
-							case PRS_KW_NODE :
-								pnode = pcell->data;
+							/* key name and value are ok */
+							switch(pcell->type) {
+								case PRS_KW_NODE :
+									pnode = pcell->data;
 
-								/* init item's pcell */
-								ncell = prscell_init(pnode->token,
-										PRS_KW_ITEM, PRS_TOK_NULL);
-								if (ncell == NULL) {
-									errorf("prscell init failed");
+									/* init item's pcell */
+									ncell = prscell_init(pnode->token,
+											PRS_KW_ITEM, PRS_TOK_NULL);
+									if (ncell == NULL) {
+										errorf("prscell init failed");
+										return(false);
+									}
+
+									nopt = ncell->data;
+
+									/* duplicate opt content in item */
+									strlcpy(nopt->key, opt.key, sizeof(opt.key));
+									nopt->value = opt.value;
+
+									/* add item in cell node */
+									prsnode_add(pnode, ncell);
+									break;
+
+								case PRS_KW_CELL :
+									if (hash_add(pcell->data, opt.key, opt.value) == HASH_ADD_FAIL) {
+										strlcpy(parse_err, PRS_ERR_HASH, sizeof(parse_err));
+										return(false);
+									}
+									break;
+
+								default :
+									strlcpy(parse_err, "unknow type.", sizeof(parse_err));
 									return(false);
-								}
-
-								nopt = ncell->data;
-
-								/* duplicate opt content in item */
-								strlcpy(nopt->key, opt.key, sizeof(opt.key));
-								nopt->value = opt.value;
-
-								/* add item in cell node */
-								prsnode_add(pnode, ncell);
-								break;
-
-							case PRS_KW_CELL :
-								if (hash_add(pcell->data, opt.key, opt.value) == HASH_ADD_FAIL) {
-									strlcpy(parse_err, PRS_ERR_HASH, sizeof(parse_err));
-									return(false);
-								}
-								break;
-
-							default :
-								strlcpy(parse_err, "unknow type.", sizeof(parse_err));
-								return(false);
-								break;
+									break;
+							}
 						}
 					}
 				} else {

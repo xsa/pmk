@@ -2,44 +2,45 @@
 # pmkfile for pmk
 
 # set target file
-.TARGET {
-	LIST=("compat/compat.h.in")
+SETTINGS {
+	LANG="C"
+	TARGET=("compat/compat.h.in")
 }
 
 # checking strlcpy in string.h
-.CHECK_INCLUDE(function_strlcpy) {
+CHECK_INCLUDE(function_strlcpy) {
 	REQUIRED=FALSE
 	INCLUDE="string.h"
 	FUNCTION=strlcpy
 }
 
 # checking strlcat in string.h
-.CHECK_INCLUDE(function_strlcat) {
+CHECK_INCLUDE(function_strlcat) {
 	REQUIRED=FALSE
 	INCLUDE="string.h"
 	FUNCTION=strlcat
 }
 
 # check _Bool type
-.CHECK_TYPE(bool_type) {
+CHECK_TYPE(bool_type) {
 	REQUIRED=FALSE
 	TYPE=_Bool
 }
 
 # checking stdbool.h
-.CHECK_INCLUDE(header_stdbool_h) {
+CHECK_INCLUDE(header_stdbool_h) {
 	REQUIRED=FALSE
 	INCLUDE="stdbool.h"
 }
 
 # checking libgen.h
-.CHECK_INCLUDE(header_libgen_h) {
+CHECK_INCLUDE(header_libgen_h) {
 	REQUIRED=FALSE
 	INCLUDE="libgen.h"
 }
 
 # checking isblank in ctype.h
-.CHECK_INCLUDE(function_isblank) {
+CHECK_INCLUDE(function_isblank) {
 	REQUIRED=FALSE
 	INCLUDE="ctype.h"
 	FUNCTION=isblank
