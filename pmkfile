@@ -50,13 +50,13 @@ CHECK_INCLUDE(function_strlcat) {
 }
 
 # check _Bool type
-CHECK_TYPE(bool_type) {
+CHECK_TYPE(type__bool) {
 	REQUIRED = FALSE
 	NAME = "_Bool"
 }
 
 # check blkcnt_t type
-CHECK_TYPE(blkcnt_t_type) {
+CHECK_TYPE(type_blkcnt_t) {
 	REQUIRED = FALSE
 	NAME = "blkcnt_t"
 	HEADER = "sys/types.h"
