@@ -51,7 +51,6 @@
 
 /* config tools data file keyword */
 prskw	kw_pmkcpu[] = {
-	{"ADD_CPU_ARCH",	CPU_ARCH_ADD,		PRS_KW_CELL},
 	{"LIST_ARCH_EQUIV",	LIST_ARCH_EQUIV,	PRS_KW_CELL},
 	{"LIST_X86_CPU_VENDOR",	LIST_X86_CPU_VENDOR,	PRS_KW_CELL},
 	{"LIST_X86_CPU_MODEL",	LIST_X86_CPU_MODEL,	PRS_KW_CELL},
