@@ -1,0 +1,16 @@
+# comment
+.DEFINE
+version=0.0
+infile=src/Makefile.in,src/blah.in
+.END
+.CHECK_LIB(lib_gtk)
+TYPE=OPTIONAL
+.END
+.CHECK_INCLUDE(hdr_glib)
+TYPE=REQUIRED
+.END
+#.IF(lib_gtk)
+.CHECK_BINARY(gtk_config)
+TYPE=REQUIRED
+.END
+#.ENDIF
