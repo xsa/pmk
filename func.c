@@ -209,7 +209,8 @@ bool pmk_check_binary(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 		pmk_log("yes.\n");
 		/* define for template */
 		record_def(gdata->htab, filename, true);
-		record_val(gdata->htab, filename, binpath);
+		record_val(gdata->htab, filename, "");
+		hash_add(gdata->htab, str_to_def(filename), binpath); /* XXX check ? */
 		label_set(gdata->labl, cmd->label, true);
 		return(true);
 	}
@@ -480,7 +481,8 @@ bool pmk_check_config(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 		cfgcmd[MAXPATHLEN],
 		*cfgtool,
 		*libvers,
-		*bpath;
+		*bpath,
+		*pstr;
 	bool	required = true,
 		rval = false;
 
@@ -569,7 +571,16 @@ bool pmk_check_config(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 		/* put result in CFLAGS */
 		get_line(rpipe, pipebuf, sizeof(pipebuf)); /* XXX check ? */
 		pclose(rpipe);
-		hash_append(gdata->htab, "CFLAGS", pipebuf, " "); /* XXX check ? */
+
+		/* check for alternative variable for CFLAGS */
+		pstr = hash_get(ht, "CFLAGS");
+		if (pstr != NULL) {
+			/* put result in special CFLAGS variable */
+			hash_add(gdata->htab, pstr, pipebuf); /* XXX check ? */
+		} else {
+			/* put result in CFLAGS */
+			hash_append(gdata->htab, "CFLAGS", pipebuf, " "); /* XXX check ? */
+		}
 	}
 
 	snprintf(cfgcmd, sizeof(cfgcmd), "%s --libs", cfgpath);
@@ -578,7 +589,16 @@ bool pmk_check_config(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 		/* put result in LIBS */
 		get_line(rpipe, pipebuf, sizeof(pipebuf)); /* XXX check ? */
 		pclose(rpipe);
-		hash_append(gdata->htab, "LIBS", pipebuf, " "); /* XXX check ? */
+
+		/* check for alternative variable for LIBS */
+		pstr = hash_get(ht, "LIBS");
+		if (pstr != NULL) {
+			/* put result in special LIBS variable */
+			hash_add(gdata->htab, pstr, pipebuf); /* XXX check ? */
+		} else {
+			/* put result in LIBS */
+			hash_append(gdata->htab, "LIBS", pipebuf, " "); /* XXX check ? */
+		}
 	}
 
 	/* XXX LDFLAGS, CPPFLAGS, LDFLAGS ? */
@@ -588,6 +608,13 @@ bool pmk_check_config(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 
 /*
 	special check with pkg-config utility
+
+	XXX could store pkg-config path to improve speed
+		(avoiding multiple checks for pkg-config path)
+
+	XXX should add a switch to use global LIBS & CFLAGS or local
+	definitions, example :
+		gtk => GTK_LIBS & GTK_CFLAGS
 */
 
 bool pmk_check_pkg_config(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
@@ -597,6 +624,7 @@ bool pmk_check_pkg_config(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 	char	*target,
 		*bpath,
 		*libvers,
+		*pstr,
 		pipebuf[TMP_BUF_LEN],
 		pc_cmd[MAXPATHLEN],
 		pc_path[MAXPATHLEN];
@@ -694,19 +722,35 @@ bool pmk_check_pkg_config(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 	snprintf(pc_cmd, sizeof(pc_cmd), "%s --cflags %s", pc_path, target);
 	rpipe = popen(pc_cmd, "r");
 	if (rpipe != NULL) {
-		/* put result in CFLAGS */
 		get_line(rpipe, pipebuf, sizeof(pipebuf)); /* XXX check ? */
 		pclose(rpipe);
-		hash_append(gdata->htab, "CFLAGS", pipebuf, " "); /* XXX check ? */
+
+		/* check for alternative variable for CFLAGS */
+		pstr = hash_get(ht, "CFLAGS");
+		if (pstr != NULL) {
+			/* put result in special CFLAGS variable */
+			hash_add(gdata->htab, pstr, pipebuf); /* XXX check ? */
+		} else {
+			/* put result in CFLAGS */
+			hash_append(gdata->htab, "CFLAGS", pipebuf, " "); /* XXX check ? */
+		}
 	}
 
 	snprintf(pc_cmd, sizeof(pc_cmd), "%s --libs %s", pc_path, target);
 	rpipe = popen(pc_cmd, "r");
 	if (rpipe != NULL) {
-		/* put result in LIBS */
 		get_line(rpipe, pipebuf, sizeof(pipebuf)); /* XXX check ? */
 		pclose(rpipe);
-		hash_append(gdata->htab, "LIBS", pipebuf, " "); /* XXX check ? */
+
+		/* check for alternative variable for LIBS */
+		pstr = hash_get(ht, "LIBS");
+		if (pstr != NULL) {
+			/* put result in special LIBS variable */
+			hash_add(gdata->htab, pstr, pipebuf); /* XXX check ? */
+		} else {
+			/* put result in LIBS */
+			hash_append(gdata->htab, "LIBS", pipebuf, " "); /* XXX check ? */
+		}
 	}
 
 	/* XXX LDFLAGS, CPPFLAGS, LDFLAGS ? */

@@ -4,10 +4,9 @@ common :
 pmk :
 ~ finish pmk(1)
 ~ pmkfile(5)
-- pkgconfig test
 ~ compatibility with autoconf (progressing)
-	- top_src
-	- src_dir
+	- srcdir stuff
+	- builddir stuff
 
 pmksetup :
 ~ pmk.conf(5)
