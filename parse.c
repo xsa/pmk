@@ -229,24 +229,58 @@ void prscell_destroy(prscell *pcell) {
 }
 
 /*
+	init a prsopt structure
 	XXX
 */
 
-/*prsopt *prsopt_init(void) {                     */
-/*        prsopt	*ppo;                     */
-/*                                                */
-/*        ppo = (prsopt *) malloc(sizeof(prsopt));*/
-/*                                                */
-/*        return(ppo);                            */
-/*}                                               */
+prsopt *prsopt_init(void) {
+	prsopt	*ppo;
+
+	ppo = (prsopt *) malloc(sizeof(prsopt));
+
+	return(ppo);
+}
 
 /*
+	init a prsopt structure with given aguments
 	XXX
 */
 
-/*void prsopt_destroy(prsopt *) {*/
-/*        free(XXX);             */
-/*}                              */
+prsopt *prsopt_init_adv(char *key, char opchar, char *value) {
+	prsopt	*ppo;
+
+	ppo = (prsopt *) malloc(sizeof(prsopt));
+	if (ppo == NULL) {
+		return(NULL);
+	}
+
+	if (strlcpy(ppo->key, key, sizeof(ppo->key)) >= sizeof(ppo->key)) {
+		free(ppo);
+		return (NULL); /* truncated */
+	}
+
+	ppo->opchar = opchar;
+
+	ppo->value = po_mk_str(value); /* XXX check */
+	if (ppo->value == NULL) {
+		free(ppo);
+		return(NULL); /* pmkobject failed */
+	}
+
+	return(ppo);
+}
+
+/*
+	destroy a prsopt structure
+	XXX
+*/
+
+void prsopt_destroy(prsopt *ppo) {
+	if (ppo->value != NULL) {
+		po_free(ppo->value);
+	}
+	free(ppo);
+}
 
 /*
 	get a line from a file and pre-process it
