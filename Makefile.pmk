@@ -152,8 +152,10 @@ $(PKGCFG)-clean:
 clean: $(PREMAKE)-clean $(SETUP)-clean $(SCAN)-clean $(INST)-clean $(PKGCFG)-clean
 	rm -f *.core
 
-fclean: clean
+full-clean: clean
 	rm -f compat/compat.h Makefile
+
+fclean: full-clean
 
 test_$(PREMAKE): $(PREMAKE)
 	@echo ""
