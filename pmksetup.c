@@ -57,6 +57,7 @@ void usage(void) {
 int main(int argc, char *argv[]) {
 	FILE	*cfd,
 		*tfd;
+	int	mtfd = -1;
 	char	cf[MAXPATHLEN],
 		tf[MAXPATHLEN];
 	bool	exists=FALSE;
@@ -70,11 +71,12 @@ int main(int argc, char *argv[]) {
 
 	/* creating temporary file to build new configuration file */
 	snprintf(tf, sizeof(tf), "/tmp/pmk.XXXXXXXXXX");
-	if (mkstemp(tf) == NULL) {
+	mtfd = mkstemp(tf);
+	if (mtfd == -1) {
 		/* name randomize failed */
 		err(1, "%s", tf);
 	}
-	tfd = fopen(tf, "w");
+	tfd = fdopen(mtfd, "w");
 	if (tfd == NULL) {
 		/* cannot open temporary file */
 		err(1, "%s", tf);
