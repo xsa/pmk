@@ -14,6 +14,7 @@ Status flags:
 	~ in progress
 	! high priority
 	. low priority
+	R release goal
 
 Indented lines means subtask.
 -----------------------------------------------------------------------
@@ -21,22 +22,23 @@ Indented lines means subtask.
 
 common:
 -----------------------------------------------------------------------
-	~	tutorial
-	~	improve test_pmkinstall to check more modes (octal values)
+	~R	tutorial
+	~R	improve test_pmkinstall to check more modes (octal values)
 	-.	add test target in tests/Makefile
 	+	update README and INSTALL
 	~	new samples:
-			~ prog c
-			- prog c++
-			~ lib c
-			- lib c++
+			~R	prog c
+			-	prog c++
+			~R	lib c
+			-	lib c++
 	+	move sample tests in samples directory
 
 
 pmk:
 -----------------------------------------------------------------------
 	-.	MODULE support in CHECK_PKG_CONFIG
-mips	~	linking flags for shared libraries
+	~R	linking flags for shared libraries (starting with our
+		supported platforms)
 	~.	compatibility with autoconf (progressing) :
 			~ support for DEFS (-D options to pass to the compiler)
 			- support for LDFLAGS (misc linker options) ?
@@ -50,7 +52,7 @@ mips	~	linking flags for shared libraries
 
 pmksetup:
 -----------------------------------------------------------------------
-	-	options to add, update or remove a variable of pmk.conf
+	-R	options to add, update or remove a variable of pmk.conf
 	!	clean temporary files on error
 	-	missing checks :
 		        . check install binary and use pmkinstall instead if not compatible.
@@ -68,8 +70,8 @@ pmkscan
 
 pmkinstall
 -----------------------------------------------------------------------
-	-	handle multiple sources
-	-	directory ?
+	-R	handle multiple sources
+	-R	directory as destination ?
 	-.	backup option ?
 
 
