@@ -66,7 +66,6 @@ cfgrm:
 	@if ($(PREMAKE) -v >/dev/null 2>&1); then \
 		echo 'Configure using pmk.'; \
 		$(PREMAKE); \
-		echo 'OK' > config; \
 	else \
 		echo 'Configure using pmkcfg.sh'; \
 		CC=$(CC) sh pmkcfg.sh; \
@@ -77,7 +76,6 @@ cfgum:
 	@if ($(PREMAKE) -v >/dev/null 2>&1); then \
 		echo 'Configure using pmk.'; \
 		$(PREMAKE) -e sw_usermode; \
-		echo 'OK' > config; \
 	else \
 		echo 'Configure using pmkcfg.sh'; \
 		CC=$(CC) sh pmkcfg.sh -u; \
@@ -85,6 +83,7 @@ cfgum:
 	@echo 'Done.'
 
 config: cfgrm
+	@echo 'OK' > config
 
 $(PREMAKE): config $(P_OBJS)
 	$(CC) -o $(PREMAKE) $(LDFLAGS) $(P_OBJS)

@@ -310,11 +310,5 @@ check_header_function ctype.h isblank
 check_header_function unistd.h mkstemps
 
 #
-# config finished, creates config
-#
-
-echo 'OK' > config
-
-#
 # end
 #
