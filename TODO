@@ -1,7 +1,7 @@
 common :
 - write specs somewhere in a draft
 - improve parser to parse variables
-~ pmk objects.
++ pmk objects.
 
 pmk :
 ~ compatibility with autoconf (progressing)

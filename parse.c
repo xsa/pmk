@@ -186,15 +186,68 @@ char *parse_quoted(char *pstr, char *buffer, size_t size) {
 */
 
 char *parse_list(char *pstr, char *buffer, size_t size) {
+#ifdef DEBUG_PRS
+	char	*ptmp;
+#endif
+
 	while ((*pstr != PMK_CHAR_LIST_END) && (*pstr != CHAR_EOS)) {
-		if (size > 1) {
-			*buffer = *pstr;
-			pstr++;
-			buffer++;
-			size--;
-		} else {
-			strlcpy(parse_err, PRS_ERR_OVERFLOW, sizeof(parse_err));
-			return(NULL);
+		/*
+		parse_blank(pstr);
+		*/
+
+		switch (*pstr) {
+			case PMK_CHAR_QUOTE_START :
+				pstr++;
+				pstr = parse_quoted(pstr, buffer, size);
+#ifdef DEBUG_PRS
+				debugf("should add '%s' into dynary (quoted)", buffer);
+#endif
+				break;
+
+			case PMK_CHAR_LIST_SEP :
+				pstr++;
+#ifdef DEBUG_PRS
+				debugf("found separator", buffer);
+#endif
+				break;
+
+			default :
+#ifdef DEBUG_PRS
+				ptmp = buffer;
+#endif
+
+				while ((isalnum(*pstr) != 0) || (*pstr == '_')) {
+					if (size > 1) {
+						*buffer = *pstr;
+						pstr++;
+						buffer++;
+						size--;
+					} else {
+						strlcpy(parse_err, PRS_ERR_OVERFLOW, sizeof(parse_err));
+						return(NULL);
+					}
+
+				}
+
+				*buffer = CHAR_EOS;
+#ifdef DEBUG_PRS
+				debugf("should add '%s' into dynary (simple).", ptmp);
+#endif
+
+				switch (*pstr) {
+					case PMK_CHAR_QUOTE_START :
+					case PMK_CHAR_LIST_SEP :
+					case PMK_CHAR_LIST_END :
+					case CHAR_EOS :
+						/* all ok */
+						break;
+
+					default :
+						strlcpy(parse_err, PRS_ERR_SYNTAX, sizeof(parse_err));
+						return(NULL);
+						break;
+				}
+				break;
 		}
 	}
 
@@ -225,13 +278,13 @@ char *parse_word(char *pstr, char *buffer, size_t size) {
 
 	switch (*pstr) {
 		/* found a quoted string */
-		case '"' :
+		case PMK_CHAR_QUOTE_START :
 			pstr++;
 			rptr = parse_quoted(pstr, buffer, size);
 			break;
 
 		/* found a list */
-		case '(' :
+		case PMK_CHAR_LIST_START :
 			pstr++;
 			rptr = parse_list(pstr, buffer, size);
 			break;

@@ -2,6 +2,7 @@
  * renamed pmk objects function in the same style as hash and dynarray.
  * misc renaming into sources.
  * switch dynarray to use pmk objects.
+ * added preliminary support for list in parser.
 
 11 Aug 2003 mipsator
  * added pmk objects.

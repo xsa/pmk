@@ -2,6 +2,7 @@
 #include "../common.c"
 #include "../dynarray.c"
 #include "../hash.c"
+#include "../pmk_obj.c"
 
 #define DEBUG_PRS	1
 #include "../parse.c"

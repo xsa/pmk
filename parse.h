@@ -44,6 +44,7 @@
 #define PMK_CHAR_QUOTE_END	PMK_CHAR_QUOTE_START
 #define PMK_CHAR_LIST_START	'('
 #define PMK_CHAR_LIST_END	')'
+#define PMK_CHAR_LIST_SEP	','
 #define PMK_CHAR_ASSIGN		'='
 #define PMK_CHAR_ESCAPE		'\\'
 
