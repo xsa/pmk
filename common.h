@@ -49,10 +49,11 @@ typedef struct {
 } mpath;
 
 /* struct to store pmk.conf defines */
+/* WARN opchar has been put first else linux binaries gives segfault !!! */
 typedef struct {
-        char    key[MAX_OPT_NAME_LEN],
-                val[MAX_OPT_VALUE_LEN],
-		opchar;
+        char    opchar,
+		key[MAX_OPT_NAME_LEN],
+                val[MAX_OPT_VALUE_LEN];
 } cfg_opt;
 
 
