@@ -44,17 +44,36 @@ int main() {
 	}
 
 	printf("\nRemoving values using da_pop :\n");
-	i = 0;
-	while (i == 0) {
+	do {
 		p = da_pop(da);
-		if (p == NULL) {
-			i = 1;
-		} else {
+		if (p != NULL) {
 			printf("\tPoped '%s' (%d)\n", p, da_size(da));
 			free(p);
 		}
+	} while (p != NULL);
+
+	printf("\nAdding 9 values :\n");
+	for (i = 0 ; i < 10 ; i++) {
+		printf("\tAdd value '%s' ", tval[i]);
+		da_push(da, tval[i]);
+		printf("(%d)\n", da_size(da));
 	}
 
+	printf("\nTesting values :\n");
+	for (i = 9 ; i >= 0 ; i--) {
+		printf("\tda[%d] = %s\n", i, da_idx(da, i));
+	}
+
+	printf("\nRemoving values using da_shift :\n");
+	do {
+		p = da_shift(da);
+		if (p != NULL) {
+			printf("\tShifted '%s' (%d)\n", p, da_size(da));
+			free(p);
+		}
+	} while (p!= NULL);
+
+	printf("\nCleaning.\n");
 	da_destroy(da);
 
 	return(0);

@@ -4,6 +4,7 @@
  * added da_shift() and da_resize() in dynarray.
  * improved da_pop() and da_push() in dynarray.
  * changed return type of da_size() and da_usize() in dynarray.
+ * updated test/da_test.c to use da_shift().
 
 26 Jul 2003 mipsator
  * added dir_recurse() in pmkscan to make it scanning a complete tree.
