@@ -40,6 +40,7 @@ PMKCFLAGS= $(WARN) $(DBGFLAGS) $(CFGFLAGS) $(USERMODE) $(CFLAGS)
 PREMAKE=	pmk
 SETUP=		$(PREMAKE)setup
 SCAN=		$(PREMAKE)scan
+INST=           $(PREMAKE)install
 
 SAMPLE=		$(PREMAKE)file.sample
 CONFIG=		$(PREMAKE).conf.sample
@@ -48,6 +49,7 @@ P_OBJS=		autoconf.o common.o compat.o dynarray.o func.o functool.o \
 		hash.o parse.o pmk_obj.o pathtools.o $(PREMAKE).o
 S_OBJS=		dynarray.o common.o compat.o hash.o parse.o pmk_obj.o $(SETUP).o
 SC_OBJS=	dynarray.o common.o compat.o hash.o parse.o pmk_obj.o $(SCAN).o
+I_OBJS=         $(INST).o
 
 .c.o:
 	$(CC) $(PMKCFLAGS) -c $<
@@ -95,13 +97,17 @@ $(PREMAKE): config $(P_OBJS)
 $(SETUP): config $(S_OBJS)
 	$(CC) -o $(SETUP) $(LDFLAGS) $(S_OBJS)
 
-${SCAN}: config $(SC_OBJS)
+$(SCAN): config $(SC_OBJS)
 	$(CC) -o $(SCAN) $(LDFLAGS) $(SC_OBJS)
+
+$(INST): config $(I_OBJS)
+	$(CC) -o $(INST) $(LDFLAGS) $(I_OBJS)
 
 install: all
 	$(INSTALL) -d -m 755 $(BINDIR)
 	$(INSTALL) -m 755 $(PREMAKE) $(BINDIR)/$(PREMAKE)
 	$(INSTALL) -m 755 $(SCAN) $(BINDIR)/$(SCAN)
+#	$(INSTALL) -m 755 $(INST) $(BINDIR)/$(INST)
 	$(INSTALL) -d -m 755 $(SBINDIR)
 	$(INSTALL) -m 755 $(SETUP) $(SBINDIR)/$(SETUP)
 	$(INSTALL) -d -m 755 $(DATADIR)
@@ -120,6 +126,7 @@ install: all
 deinstall:
 	rm -f $(BINDIR)/$(PREMAKE)
 	rm -f $(BINDIR)/$(SCAN)
+#	rm -f $(BINDIR)/$(INST)
 	rm -f $(SBINDIR)/$(SETUP)
 	rm -rf $(DATADIR)
 	rm -f $(BASE)/man/man1/$(PREMAKE).1
