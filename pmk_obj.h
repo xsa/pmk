@@ -54,6 +54,7 @@ typedef struct {
 pmkobj	*po_mk_str(char *);
 pmkobj	*po_mk_list(dynary *);
 pmkobj	*po_mk_hash(htable *);
+pmkobj	*po_dup(pmkobj *);
 potype	 po_get_type(pmkobj *);
 void	*po_get_data(pmkobj *);
 void	 po_free(pmkobj *);
