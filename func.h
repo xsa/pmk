@@ -44,6 +44,12 @@
 			"#include <%s>\n" \
 			"int main() {return(0);}"
 
+#define INC_FUNC_TEST_CODE	"#include <stdio.h>\n" \
+				"#include <%s>\n" \
+				"int main() {\n" \
+				"printf(\"%%p\", %s);\n" \
+				"return(0);}"
+
 #define INC_TEST_NAME	"test.c"
 #define BIN_TEST_NAME	"test_bin"
 
