@@ -3,6 +3,10 @@
  * changed str_to_dynary() to reuse str_to_dynary_adv() code.
  * rewritten and cleaned pkgconfig stuff.
  * updated pkgconfig_test.c to sync with changes.
+ * added pkgcell_init().
+ * added pkg_single_append() to avoid duplicates.
+ * implemented pkg_get_cflags() and pkg_get_libs().
+ * misc changes in pkgconfig_test.
 
 30 Dec 2003 mipsator
  * imported some code for internal support of pkgconfig.
