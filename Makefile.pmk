@@ -141,6 +141,8 @@ install: all
 		$(DESTDIR)$(MANDIR)/man1/$(PREMAKE).1
 	$(INSTALL) -m 444 man/$(SCAN).1 \
 		$(DESTDIR)$(MANDIR)/man1/$(SCAN).1
+	$(INSTALL) -m 444 man/$(PKGCFG).1 \
+		$(DESTDIR)$(MANDIR)/man1/$(PKGCFG).1
 	$(INSTALL) -m 444 man/$(INST).1 \
 		$(DESTDIR)$(MANDIR)/man1/$(INST).1
 	$(INSTALL) -d -m 755 $(DESTDIR)$(MANDIR)/man5
@@ -172,6 +174,7 @@ deinstall: @MKTARGET@-deinstall
 	rm -f $(DESTDIR)$(MANDIR)/man1/$(PREMAKE).1
 	rm -f $(DESTDIR)$(MANDIR)/man1/$(SCAN).1
 	rm -f $(DESTDIR)$(MANDIR)/man1/$(INST).1
+	rm -f $(DESTDIR)$(MANDIR)/man1/$(PKGCFG).1
 	rm -f $(DESTDIR)$(MANDIR)/man8/$(SETUP).8
 	rm -f $(DESTDIR)$(MANDIR)/man5/$(PREMAKE)file.5
 	rm -f $(DESTDIR)$(MANDIR)/man5/$(PREMAKE).conf.5
