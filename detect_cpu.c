@@ -582,7 +582,7 @@ bool x86_set_cpu_data(prsdata *pdata, x86_cpu_cell *pcell, htable *pht) {
 		return(false);
 	}
 
-	if (pcell->cpuname == NULL) {
+	if (pcell->cpuname != NULL) {
 		if (hash_update_dup(pht, PMKCONF_HW_X86_CPU_NAME,
 				pcell->cpuname) == HASH_ADD_FAIL) {
 			return(false);
