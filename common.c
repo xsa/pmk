@@ -160,7 +160,7 @@ bool get_make_var(char *varname, char *result, int rsize) {
 		return(false);
 	}
 
-	snprintf(varstr, sizeof(varstr), "/usr/bin/make -f %s", mfn);
+	snprintf(varstr, sizeof(varstr), "/usr/bin/make -f %s > /dev/null 2>&1", mfn);
 	if (system(varstr) == 0) {
 		tfp = fopen(MKVAR_FILE, "r");
 		if (tfp != NULL) {
