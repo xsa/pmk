@@ -60,7 +60,6 @@ INST=           $(PREMAKE)install
 PKGCFG=		$(PREMAKE)pc
 
 SAMPLE=		$(PREMAKE)file.sample
-CONFIG=		$(PREMAKE).conf.sample
 
 SELFINST=	self-$(INST)
 
@@ -126,8 +125,6 @@ install: all
 	$(INSTALL) -d -m 755 $(DESTDIR)$(DATADIR)
 	$(INSTALL) -m 644 samples/$(SAMPLE) \
 		$(DESTDIR)$(DATADIR)/$(SAMPLE)
-	$(INSTALL) -m 644 samples/$(CONFIG) \
-		$(DESTDIR)$(DATADIR)/$(CONFIG)
 	$(INSTALL) -m 644 data/pmkcfgtool.dat \
 		$(DESTDIR)$(DATADIR)/pmkcfgtool.dat
 	$(INSTALL) -m 644 data/pmkcomp.dat \
@@ -167,7 +164,6 @@ deinstall: @MKTARGET@-deinstall
 	rm -f $(DESTDIR)$(BINDIR)/$(PKGCFG)
 	rm -f $(DESTDIR)$(SBINDIR)/$(SETUP)
 	rm -f $(DESTDIR)$(DATADIR)/$(SAMPLE)
-	rm -f $(DESTDIR)$(DATADIR)/$(CONFIG)
 	rm -f $(DESTDIR)$(DATADIR)/pmkscan.dat
 	rm -f $(DESTDIR)$(DATADIR)/pmkcomp.dat
 	rm -f $(DESTDIR)$(DATADIR)/pmkcfgtool.dat
