@@ -3,7 +3,7 @@
 
 # misc
 OS_NAME="OpenBSD"
-OS_VERSION="3.4"
+OS_VERSION="3.6"
 OS_ARCH="i386"
 HW_BYTEORDER = "LITTLE_ENDIAN"
 
@@ -20,15 +20,16 @@ BIN_CXX = "/usr/bin/c++"
 BIN_EGREP = "/usr/bin/egrep"
 BIN_GREP = "/usr/bin/grep"
 BIN_INSTALL = "/usr/bin/install"
+BIN_LEX = "/usr/bin/lex"
 BIN_PKGCONFIG = "/usr/local/bin/pkg-config"
 BIN_RANLIB = "/usr/bin/ranlib"
 BIN_SH = "/bin/sh"
 BIN_STRIP = "/usr/bin/strip"
 BIN_TAR = "/bin/tar"
+BIN_YACC = "/usr/bin/yacc"
 BIN_MORE:"/usr/bin/less"
 
 # path variables
 PATH_BIN="/bin,/sbin,/usr/bin,/usr/sbin,/usr/local/bin,/usr/local/sbin"
 PATH_INC = "/usr/include"
 PATH_LIB = "/usr/lib"
-
