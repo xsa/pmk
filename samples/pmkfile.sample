@@ -36,6 +36,7 @@ FUNCTION=getwin
 .CHECK_INCLUDE(sys_param)
 REQUIRED=FALSE
 INCLUDE=sys/param.h
+LANG=C++
 .END
 
 # check function strlcpy in string.h

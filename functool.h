@@ -50,20 +50,20 @@ typedef struct {
 		comp[COMP_NAME_LEN],
 		pre[PRE_NAME_LEN],
 		cflg[CFLG_NAME_LEN];
-} langdata;
+} lgdata;
 
 
-bool		check_bool_str(char *);
-char		*bool_to_str(bool);
-bool		check_version(char *, char *);
-bool		get_file_path(char *, char *, char *, int);
-char		*str_to_def(char *);
-bool		record_def(htable *, char *, bool);
-bool		record_val(htable *, char *, char *);
-bool		label_set(htable *, char *, bool);
-bool		label_check(htable *, char *);
-bool		depend_check(htable *, pmkdata *);
-bool		require_check(htable *);
-langdata	*get_lang(htable *, pmkdata *);
+bool	check_bool_str(char *);
+char	*bool_to_str(bool);
+bool	check_version(char *, char *);
+bool	get_file_path(char *, char *, char *, int);
+char	*str_to_def(char *);
+bool	record_def(htable *, char *, bool);
+bool	record_val(htable *, char *, char *);
+bool	label_set(htable *, char *, bool);
+bool	label_check(htable *, char *);
+bool	depend_check(htable *, pmkdata *);
+bool	require_check(htable *);
+lgdata	*get_lang(htable *, pmkdata *);
 
 #endif /* _PMK_FUNCTOOL_H_ */
