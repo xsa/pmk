@@ -426,15 +426,29 @@ bool depend_check(htable *lht, pmkdata *gd) {
 */
 
 bool require_check(htable *pht) {
-	char	*req;
+	bool	 rval;
+	pmkobj	*req;
 
-	req = (char *)po_get_data(hash_get(pht, "REQUIRED"));
+	req = hash_get(pht, "REQUIRED");
 	if (req == NULL) {
 		/* by default REQUIRED is true if not specified */
 		return(true);
 	}
 
-	return(check_bool_str(req));
+	switch(po_get_type(req)) {
+		case PO_BOOL :
+			rval = po_get_bool(req);
+debugf("require get bool object : '%s'", bool_to_str(rval));
+			break;
+		case PO_STRING :
+			rval = check_bool_str(po_get_str(req));
+			break;
+		default :
+			rval = false;
+			break;
+	}
+
+	return(rval);
 }
 
 /*

@@ -46,17 +46,20 @@ typedef struct {
 
 /* define pmk object types */
 #define PO_NULL		0
-#define PO_STRING	1
-#define PO_LIST		2
-#define PO_HASH		3
+#define PO_BOOL		1
+#define PO_STRING	2
+#define PO_LIST		3
+#define PO_HASH		4
 
 
+pmkobj	*po_mk_bool(bool);
 pmkobj	*po_mk_str(char *);
 pmkobj	*po_mk_list(dynary *);
 pmkobj	*po_mk_hash(htable *);
 pmkobj	*po_dup(pmkobj *);
 potype	 po_get_type(pmkobj *);
 void	*po_get_data(pmkobj *);
+bool	 po_get_bool(pmkobj *);
 char	*po_get_str(pmkobj *);
 dynary	*po_get_list(pmkobj *);
 void	 po_free(pmkobj *);

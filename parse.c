@@ -49,7 +49,7 @@
 */
 
 /* for compatibility with 0.6, will be removed later */
-#define PRS_OBSOLETE
+/* #define PRS_OBSOLETE */
 
 char	parse_err[MAX_ERRMSG_LEN];
 
@@ -289,6 +289,58 @@ char *parse_identifier(char *pstr, char *pbuf, size_t size) {
 }
 
 /*
+*/
+
+char *parse_bool(char *pstr, pmkobj *po, size_t size) {
+	bool	*pb;
+	char	 buffer[6],
+		*pbuf;
+	size_t	 bsize;
+
+	pb = (bool *) malloc(sizeof (bool));
+	if (pb == NULL) {
+		strlcpy(parse_err, PRS_ERR_ALLOC, sizeof(parse_err));
+		return(NULL);
+	}
+
+	bsize = sizeof(buffer);
+	if (bsize < size)
+		size = bsize;
+
+	pbuf = buffer;
+
+	while ((isalnum(*pstr) != 0) && (size > 0)) {
+		*pbuf = *pstr;
+		pbuf++;
+		pstr++;
+		size--;
+	}
+
+	if (size == 0) {
+		free(pb);
+		return(NULL);
+	}
+
+	*pbuf = CHAR_EOS;
+
+	if (strncmp(buffer, PMK_BOOL_TRUE, sizeof(buffer)) == 0) {
+		*pb = true;
+	} else {
+		if (strncmp(buffer, PMK_BOOL_FALSE, sizeof(buffer)) == 0) {
+			*pb = false;
+		} else {
+			free(pb);
+			return(NULL);
+		}
+	}
+
+	po->type = PO_BOOL;
+	po->data = pb;
+
+	return(pstr);
+}
+
+/*
 	get quoted string content
 
 	pstr : current parsing cursor
@@ -498,7 +550,7 @@ char *parse_key(char *pstr, pmkobj *po, size_t size) {
 			/* identifier */
 			buffer = (char *) malloc(size);
 			if (buffer == NULL) {
-				strlcpy(parse_err, "arg", sizeof(parse_err));
+				strlcpy(parse_err, PRS_ERR_ALLOC, sizeof(parse_err));
 				return(NULL);
 			}
 
@@ -555,7 +607,7 @@ char *parse_data(char *pstr, pmkobj *po, size_t size) {
 #ifdef PRS_OBSOLETE
 			buffer = (char *) malloc(size);
 			if (buffer == NULL) {
-				strlcpy(parse_err, "arg", sizeof(parse_err));
+				strlcpy(parse_err, PRS_ERR_ALLOC, sizeof(parse_err));
 				return(NULL);
 			}
 
@@ -572,8 +624,7 @@ char *parse_data(char *pstr, pmkobj *po, size_t size) {
 
 			rptr = pstr;
 #else
-			strlcpy(parse_err, PRS_ERR_SYNTAX, sizeof(parse_err));
-			return(NULL);
+			rptr = parse_bool(pstr, po, size);
 #endif
 			break;
 	}
@@ -741,7 +792,7 @@ bool parse_opt(char *line, prsopt *popt) {
 
 	popt->value = (pmkobj *) malloc(sizeof(pmkobj));
 	if (popt->value == NULL) {
-		strlcpy(parse_err, "memory allocation failed.", sizeof(parse_err));
+		strlcpy(parse_err, PRS_ERR_ALLOC, sizeof(parse_err));
 		return(false);
 	}
 

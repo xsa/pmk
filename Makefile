@@ -57,6 +57,10 @@ all: $(PREMAKE) $(SETUP) $(SCAN)
 $(SCAN).o:
 	$(CC) $(CFLAGS) -DDATADIR=\"$(DATADIR)\" -c $(SCAN).c
 
+# for compatibility with 0.6 pmkfiles, will be removed later
+parse.o:
+	$(CC) $(CFLAGS) -DPRS_OBSOLETE -c parse.c
+
 config:
 	@if ($(PREMAKE) -v >/dev/null 2>&1); then \
 		echo "Configure using pmk."; \
