@@ -49,6 +49,9 @@
 #define CFLG_NAME_LEN	64
 #define SHFLG_NAME_LEN	64
 
+#define CHAR_VERSION_SEPARATOR	'.'
+
+
 typedef struct {
 	char	name[LANG_NAME_LEN],
 		comp[COMP_NAME_LEN],

@@ -675,7 +675,7 @@ int main(int argc, char *argv[]) {
 
 	if (enable_sw != NULL) {
 		/* command line switches to enable */
-		da = str_to_dynary(enable_sw, ',');
+		da = str_to_dynary(enable_sw, CHAR_LIST_SEPARATOR);
 		if (da != NULL) {
 			pstr = da_pop(da);	
 			while (pstr != NULL) {
@@ -690,7 +690,7 @@ int main(int argc, char *argv[]) {
 
 	if (disable_sw != NULL) {
 		/* command line switches to disable */
-		da = str_to_dynary(disable_sw, ',');
+		da = str_to_dynary(disable_sw, CHAR_LIST_SEPARATOR);
 		if (da != NULL) {
 			do {
 				pstr = da_pop(da);

@@ -132,12 +132,12 @@ bool check_version(char *vref, char *vers) {
 		 cmp;
 
 	/* need to check da_* returns */
-	vr = str_to_dynary(vref, '.');
+	vr = str_to_dynary(vref, CHAR_VERSION_SEPARATOR);
 	if (vr == NULL) {
 		errorf("cannot parse reference version '%s'.", vref);
 		return(false);
 	}
-	vc = str_to_dynary(vers, '.');
+	vc = str_to_dynary(vers, CHAR_VERSION_SEPARATOR);
 	if (vc == NULL) {
 		errorf("cannot parse comparison version '%s'.", vers);
 		return(false);
