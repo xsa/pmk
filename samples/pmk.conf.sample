@@ -2,11 +2,17 @@
 # pmk.conf example
 
 # misc
-OSTYPE=OpenBSD
+OS_NAME=OpenBSD
+OS_VERSION=3.3
+OS_ARCH=i386
+
 PREFIX=/usr/local
 SYSCONFDIR=/etc
 
 # binary locations
-GREP=/usr/bin/grep
-INSTALL=/usr/bin/install
-MORE:/usr/bin/less
+BIN_AR=/usr/bin/ar
+BIN_CAT=/bin/cat
+BIN_GREP=/usr/bin/grep
+BIN_INSTALL=/usr/bin/install
+BIN_RANLIB=/usr/bin/ranlib
+BIN_MORE:/usr/bin/less
