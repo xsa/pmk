@@ -288,8 +288,8 @@ bool str_to_dynary(char *str, char sep, dynary *da) {
 bool find_file(dynary *da, char *fname, char *fpath, int fplen) {
 	DIR		*dp;
 	struct dirent	*de;
-	int		i,
-			rsize;
+	int		i;
+	size_t		rsize;
 	char		*path;
 	bool		found,
 			exit;

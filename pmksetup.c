@@ -426,7 +426,7 @@ int get_binaries(htable *ht) {
 	}
 
 	for (i = 0; i < MAXBINS; i++) {
-		if (find_file(stpath, binaries[i][0], fbin, MAXPATHLEN) == 1) {
+		if (find_file(stpath, binaries[i][0], fbin, sizeof(fbin)) == 1) {
 			if (verbose_flag == 1) 
 				debugf("\tSetting '%s' => '%s'", binaries[i][1], fbin);
 
