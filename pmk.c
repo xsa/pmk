@@ -88,6 +88,8 @@ int get_token(char *cmd) {
 	int	token=0;
 
 	/* hum */
+	token = TOK_NULL;
+	
 	return(0);
 }
 
