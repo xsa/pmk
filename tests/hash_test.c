@@ -1,3 +1,7 @@
+/* $Id$ */
+
+/* Public Domain license */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -38,9 +42,15 @@ int main() {
 				case HASH_ADD_COLL:
 					printf("Collision for key %s\n", tstr);
 					break;
+				case HASH_ADD_UPDT:
+					printf("Updated key %s\n", tstr);
+					break;
+				default:
+					printf("Unknown return value %s\n", tstr);
+					break;
 			}
 		} else {
-			printf("probleme\n");
+			printf("Random value failed\n");
 		}
 	}
 
