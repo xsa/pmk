@@ -179,7 +179,7 @@ bool process_template(char *template, htable *ht) {
 
 	/* remove suffix */
 	dotidx = strrchr(destfile, '.');
-	*dotidx = '\0';
+	*dotidx = CHAR_EOS;
 
 	/* build destination file */
 	snprintf(final, sizeof(final), "%s/%s", path, destfile);
@@ -204,7 +204,7 @@ bool process_template(char *template, htable *ht) {
 		j = 0;
 		k = 0;
 		replace = false;
-		while (lbuf[i] != '\0') {
+		while (lbuf[i] != CHAR_EOS) {
 			if (replace == false) {
 				if (lbuf[i] == PMK_TAG_CHAR) {
 					/* found begining of tag */
@@ -218,7 +218,7 @@ bool process_template(char *template, htable *ht) {
 				if (lbuf[i] == PMK_TAG_CHAR) {
 					/* tag identified */
 					replace = false;
-					tbuf[k] = '\0';
+					tbuf[k] = CHAR_EOS;
 
 					value = hash_get(ht, tbuf);
 					if (value == NULL) {
@@ -226,7 +226,7 @@ bool process_template(char *template, htable *ht) {
 						buf[j] = PMK_TAG_CHAR;
 						j++;
 						k = 0;
-						while (tbuf[k] != '\0') {
+						while (tbuf[k] != CHAR_EOS) {
 							buf[j] = tbuf[k];
 							j++;
 							k++;
@@ -236,7 +236,7 @@ bool process_template(char *template, htable *ht) {
 					} else {
 						/* replace with value */
 						k = 0;
-						while (value[k] != '\0') {
+						while (value[k] != CHAR_EOS) {
 							buf[j] = value[k];
 							j++;
 							k++;
@@ -255,15 +255,15 @@ bool process_template(char *template, htable *ht) {
 			/* not a tag, copy tbuf in buf */
 			buf[j] = PMK_TAG_CHAR;
 			j++;
-			tbuf[k] = '\0';
+			tbuf[k] = CHAR_EOS;
 			k = 0;
-			while (tbuf[k] != '\0') {
+			while (tbuf[k] != CHAR_EOS) {
 				buf[j] = tbuf[k];
 				j++;
 				k++;
 			}
 		}
-		buf[j] = '\0';
+		buf[j] = CHAR_EOS;
 		/* saving parsed line */
 		fprintf(dfd, "%s", buf);
 	}
@@ -338,7 +338,7 @@ bool parse_cmd(char *line, pmkcmd *command) {
 
 	i = 1; /* ignore prefix character of the command string */
 	j = 0;
-	while (line[i] != '\0' && i < MAX_CMD_LEN) {
+	while (line[i] != CHAR_EOS && i < MAX_CMD_LEN) {
 		if (cmd_found == false) {
 			if (line[i] != '(') {
 				/* check uppercase */
@@ -353,7 +353,7 @@ bool parse_cmd(char *line, pmkcmd *command) {
 				}
 			} else {
 				/* end of command name */
-				buf[j] = '\0';
+				buf[j] = CHAR_EOS;
 				if (check_cmd(buf) == false) {
 					/* line number and error message already set */
 					return(false);
@@ -375,7 +375,7 @@ bool parse_cmd(char *line, pmkcmd *command) {
 					j++;
 				}
 			} else {
-				buf[j] = '\0';
+				buf[j] = CHAR_EOS;
 				strncpy(command->label, buf, MAX_LABEL_NAME_LEN);
 				label_found = true;
 				j = 0; /* useless :) */
@@ -386,7 +386,7 @@ bool parse_cmd(char *line, pmkcmd *command) {
 
 	if (cmd_found == false) {
 		/* command without label */
-		buf[j] = '\0';
+		buf[j] = CHAR_EOS;
 		if (check_cmd(buf) == false) {
 			/* line number and error message already set */
 			return(false);
@@ -395,7 +395,7 @@ bool parse_cmd(char *line, pmkcmd *command) {
 		strncpy(command->label, "", MAX_LABEL_NAME_LEN);
 	} else {
 		if (label_found == true) {
-			if (line[i] != '\0') {
+			if (line[i] != CHAR_EOS) {
 				/* some data remaining after parenthesis */
 				errorf_line(pmkfile, cur_line, "Trailing garbage after label");
 				return(false);
@@ -428,11 +428,11 @@ bool parse_opt(char *line, htable *ht, bool display) {
 		j = 0;
 	bool	keyfound = false;
 
-	while (line[i] != '\0' && i < MAXPATHLEN) {
+	while (line[i] != CHAR_EOS && i < MAXPATHLEN) {
 		if (keyfound == false) {
 			if (line[i] == PMK_KEY_CHAR) {
 				/* end of key name reached */
-				buf[j] = '\0';
+				buf[j] = CHAR_EOS;
 				if (strlcpy(tkey, buf, MAX_OPT_NAME_LEN) >= MAX_OPT_NAME_LEN) {
 					/* key name is too long */
 					if (display == true)
@@ -460,7 +460,7 @@ bool parse_opt(char *line, htable *ht, bool display) {
 		}
 		i++;
 	}
-	buf[j] = '\0'; /* terminate buf */
+	buf[j] = CHAR_EOS; /* terminate buf */
 
 	
 	if (keyfound == false) {
@@ -545,7 +545,7 @@ bool parse(FILE *fp, pmkdata *gdata) {
 				}
 				break;
 
-			case '\0' :
+			case CHAR_EOS :
 				/* empty line */
 				break;
 
