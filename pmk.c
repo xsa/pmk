@@ -98,6 +98,7 @@
 #include <string.h>
 
 #include "premake.h"
+#include "pmk.h"
 #include "hash.h"
 #include "func.h"
 
@@ -316,7 +317,7 @@ bool parse(FILE *fd) {
 				/* XXX printf("DEBUG COMMENT = %s\n", buf); */
 				break;
 
-			case CHAR_COMMAND :
+			case PMK_CHAR_COMMAND :
 				if (process == FALSE) {
 					/* parse command and label */
 					if (parse_cmd(buf, &cmd) == FALSE) {
@@ -334,7 +335,7 @@ bool parse(FILE *fd) {
 					}
 				} else {
 					/* looking for end of command */
-					if (strcmp(buf, END_COMMAND) == 0) {
+					if (strcmp(buf, PMK_END_COMMAND) == 0) {
 						cmd_line = 0;
 						process = FALSE;
 						/* found */
@@ -348,7 +349,7 @@ bool parse(FILE *fd) {
 						/* found another command before end of previous */
 						hash_destroy(tabopts);
 						err_line = cmd_line;
-						snprintf(err_msg, sizeof(err_msg), "%s not found", END_COMMAND);
+						snprintf(err_msg, sizeof(err_msg), "%s not found", PMK_END_COMMAND);
 						return(FALSE);
 					}
 				}
@@ -378,7 +379,7 @@ bool parse(FILE *fd) {
 		/* found EOF before end of command */
 		hash_destroy(tabopts);
 		err_line = cmd_line;
-		snprintf(err_msg, sizeof(err_msg), "%s not found", END_COMMAND);
+		snprintf(err_msg, sizeof(err_msg), "%s not found", PMK_END_COMMAND);
 		return(FALSE);
 	}
 
