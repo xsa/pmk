@@ -31,7 +31,6 @@
  *
  */
 
-
 #include <sys/param.h>
 #include <sys/types.h>
 #include <sys/utsname.h>
@@ -44,132 +43,257 @@
 #include "common.h"
 #include "pmksetup.h"
 #include "premake.h"
-#include "readconf.h"
 
 
+#define PREMAKE_CONFIG_TMP	"/tmp/pmk.XXXXXXXX"
+char	sfn[MAXPATHLEN];	/* scratch file name */		
+FILE	*sfp;			/* scratch file pointer */
 
-int main(int argc, char *argv[]) {
-	FILE	*f;
-	char	config[MAXPATHLEN];
-	htable	*ht;
 
-	/* try to open configuration file if it exists */
-	snprintf(config, sizeof(config), "%s", PREMAKE_CONFIG_PATH);
+int main(void) {
+	FILE		*config;
+	int		len,
+			linenum = 0,
+			error = 0;
+	char		*v;	
+	char		line[MAX_LINE_LEN],
+			filename[MAXPATHLEN];
+ 	conf_opt	options;	
+	htable		*ht;
 
-	if(config != NULL) {
-		if ((f = fopen(config, "r")) != NULL) {
-			debugf("Reading configuration file: %s", 
-						PREMAKE_CONFIG_PATH); 
-
-                	if ((ht = hash_init(MAX_CONF_OPT)) == NULL) {
-                        	errorf("cannot create hash table");
-                        	exit(1);
-			}
-			read_config_file(f, ht);
+	
+	if (snprintf(filename, sizeof(filename), "%s", PREMAKE_CONFIG_PATH) != -1) { 
+		
+		if ((config = fopen(filename, "r")) != NULL) {
 			
-			/* XXX will need to compare values
-			 * from the configuration file and the ones
-			 * found on the system
-			 */
+			if ((ht = hash_init(MAX_CONF_OPT)) == NULL) {
+				errorf("cannot create hash table");
+				exit(1);
+			} 
+			if ((open_tmp_config() == -1) ||
+					(get_env_vars(ht) == -1) ||
+					(get_binaries(ht) == -1))
+				exit(1);
+
+			while (fgets(line, sizeof(line), config) != NULL) {
+				linenum++;
+				len = strlen(line);
+
+				/* replace the trailing '\n' by a NULL char */
+				line[len -1] = '\0';
+
+				switch (line[0]) {
+					case CHAR_COMMENT :
+						fprintf(sfp, "%s\n", line);
+						break;
+					case '\0' :
+						fprintf(sfp, "%s\n", line);
+						break;
+					case '\t' :
+						errorf_line(PREMAKE_CONFIG_PATH, linenum, "syntax error"); 
+						return(-1);
+						break;
+					default :
+						if (parse_line(line, linenum, &options) == 0) {
+							if ((v = hash_get(ht, options.key)) != NULL) {
+								switch (options.opchar) {
+									case PMKSETUP_ASSIGN_CHAR :
+										if (strncmp(v, options.val, MAX_OPT_VALUE_LEN) == 0)
+											fprintf(sfp, "%s%c%s\n", options.key,
+												PMKSETUP_ASSIGN_CHAR, options.val);
+										break;
+									case PMKSETUP_STATIC_CHAR :
+										fprintf(sfp, "%s%c%s\n", options.key,
+											PMKSETUP_STATIC_CHAR, options.val);
+										break;
+									default :
+										fprintf(sfp, "%s=%s\n", options.key, v);
+										break;
+								}
+							}
+						} else
+							error = 1;
+						break;
+				}
+			}
+			fclose(config);
 			hash_destroy(ht);
 		}
+		if (close_tmp_config() < 0)
+			exit(1);
+
+		if (error == 1)
+			exit(1);
 	}
-
-	/* create simple temp config */
-	create_tmp_config();
-
 	return(0);
 }
 
-/* Create temp configuration file */
 
-int create_tmp_config(void) {
-	FILE	*tfd;
-	int	mtfd = -1;
-	char	tf[MAXPATHLEN];
 
+/* open temporary configuration file */
+int open_tmp_config(void) {
+	int	fd = -1;
 
 	/* creating temporary file to build new configuration file */
-	snprintf(tf, sizeof(tf), "/tmp/pmk.XXXXXXXX");
+	snprintf(sfn, sizeof(sfn), PREMAKE_CONFIG_TMP);
 
-	if ((mtfd = mkstemp(tf)) != -1)
-		tfd = fdopen(mtfd, "w");
-		
-	/* XXX this way it passes -ansi -pedantic ... should be rewritten */
-	if ((mtfd == -1) || (tfd == NULL)) {
-		if (mtfd != -1) {
-			unlink(tf);
-			close(mtfd);
-		}	
-		errorf("%s", tf);
-		exit(1);
-	}	
-
-	fprintf(tfd, "# premake configuration file, read by pmk(1)" 
-		" and created by pmksetup(8)\n#\n");
-	fprintf(tfd, "# See pmk.conf(5) for more details\n\n");
-
-	get_env_vars(tfd);
-
-	fclose(tfd);
-
-#ifdef PMKSETUP_DEBUG
-	debugf("%s has not been deleted!", tf);
-#else
-	if (unlink(tf) == -1) {
-	 	errorf("cannot remove temporary file");
-		exit(1);	
+	if ((fd = mkstemp(sfn)) == -1) {
+		errorf("could not create temporary file: %s", sfn);
+		return(-1);
 	}
-#endif  /* PMKSETUP_DEBUG */
+	if ((sfp = fdopen(fd, "w")) == NULL) {
+		if (fd != -1) {
+			unlink(sfn);
+			close(fd);
+		}	
+		errorf("cannot open temporary file: %s", sfn);
+		return(-1);
+	}
 	return(0);
 }
 
-/* Get the environment variables needed for the configuration file */
 
-int get_env_vars(FILE *f) { 
-	int	j;
-	char	*bin_path, buf[MAXPATHLEN];
+/* close temporary configuration file */
+int close_tmp_config(void) {
+	if (sfp) {
+		if (fclose(sfp) < 0) {
+			errorf("cannot close temporary file: %s", sfp);
+			return(-1);
+		}
+		sfp = NULL;
+        
+#ifdef PMKSETUP_DEBUG
+		debugf("%s has not been deleted!", sfn);
+#else
+		if (unlink(sfn) == -1) {
+			errorf("cannot remove temporary file: %s", sfn);
+			return(-1);
+		}
+#endif  /* PMKSETUP_DEBUG */
+	}
+	return(0);
+}
+
+
+
+/*
+ * Get the environment variables needed for the configuration file
+ *
+ *	ht: hash table where we have to store the values
+ */
+int get_env_vars(htable *ht) { 
 	struct	utsname	utsname;
-	mpath	stpath;
 
 	if (uname(&utsname) == -1) {
 		errorf("uname");
-		exit(1);
+		return(-1);
 	}
+
+	/* XXX should think about a better way to do it though */
+	hash_add(ht, PREMAKE_KEY_OSNAME, utsname.sysname);
+	hash_add(ht, PREMAKE_KEY_OSVERS, utsname.release);
+	hash_add(ht, PREMAKE_KEY_OSARCH, utsname.machine);
+
+	return(0);
+}
+
+
+/* 
+ * Get the _must be_ binaries on the system
+ *
+ *	ht: hash table where we have to store the values
+ */ 
+int get_binaries(htable *ht) {
+	int	i;
+	char	*bin_path,
+		fbin[MAXPATHLEN];	/* full binary path */
+	mpath   stpath;
+
 	if ((bin_path = getenv("PATH")) == NULL) {
 		errorf("could not get the PATH environment variable");
-		exit(1);
+		return(-1);
 	}
 
-	/* 
-	 *splitting the PATH variable and storing in a struct 
-	 * for later use by find_file
-	 */ 
+	hash_add(ht, PREMAKE_KEY_BINPATH, bin_path);
+
+        /*
+         *splitting the PATH variable and storing in a struct
+         * for later use by find_file
+         */
 	if ((strsplit(bin_path, &stpath, STR_DELIMITER)) == -1) {
-		errorf("could not split the PATH correctly");
-		exit(1);
+		errorf("could not split the PATH environment variable correctly");
+		return(-1);
 	}
 
-	/* Temporarily printing the variables */
-	fprintf(f, "OS_NAME=%s\n", utsname.sysname);
-	fprintf(f, "OS_RELEASE=%s\n", utsname.release);
-	fprintf(f, "ARCH=%s\n", utsname.machine);
-	fprintf(f, "BIN_PATH=%s\n", bin_path);
-
-	/* 
-	 * XXX should store the above variables in a hash instead of
-	 * looping here. 
-	 */
 	debugf("Looking for needed binaries...");
-	for (j = 0; j < MAXBINS; j++) {
-		if (find_file(&stpath, binaries[j], buf, MAXPATHLEN) == 0) {
-			fprintf(stderr, "Looking for %s => %s\n", 
-				binaries[j], buf);
-		}
-		else {
-			errorf("%s not found", binaries[j]);
-			exit(1);
+	for (i = 0; i < MAXBINS; i++) {
+		if (find_file(&stpath, binaries[i][0], fbin, MAXPATHLEN) == 0) {
+			fprintf(stderr, "Looking for %s => %s ... found\n", binaries[i][0], fbin);
+			hash_add(ht, binaries[i][1], fbin);
+		} else {
+			errorf("%s not found", binaries[i][0]);
+			return(-1);
 		}
 	}
 	return(0);
+}
+
+/*
+ * Parses a given line.
+ * atm, using samples/pmk.conf.sample -> /etc/pmk.conf
+ *      
+ *	line: line to parse
+ *	linenum: line number
+ *	opts: struct where where we store the key->value data   
+ *
+ *	returns 0 on success else 1
+ */
+int parse_line(char *line, int linenum, conf_opt *opts) {
+	char	key[MAX_OPT_NAME_LEN],
+		value[MAX_OPT_VALUE_LEN],
+		c;
+	int	i = 0, j = 0, k = 0,
+		found_op = 0;
+
+
+	while ((c = line[i]) != '\0') {
+		if (found_op == 0) {
+			if ((c == PMKSETUP_ASSIGN_CHAR) || (c == PMKSETUP_STATIC_CHAR)) {
+				/* operator found, terminate key and copy key name in struct */
+				found_op = 1;
+				key[j] = '\0';
+				strncpy(opts->key, key, MAX_OPT_NAME_LEN);
+
+				/* set operator in struct */
+				opts->opchar = c;
+			} else {
+				key[j] = c;
+				j++;
+				if (j > MAX_OPT_NAME_LEN) {
+					/* too small, cannot store key name */
+					errorf_line(PREMAKE_CONFIG_PATH, linenum, "Key name too long.");
+					return(-1);
+				}
+			}
+		} else {
+			value[k] = c;
+			k++;
+			if (k > MAX_OPT_VALUE_LEN) {
+				/* too small, cannot store key value */
+				errorf_line(PREMAKE_CONFIG_PATH, linenum, "Key value too long.");
+				return(-1);
+			}
+		}
+		i++;
+	}
+	if (found_op == 1) {
+		/* line parsed without any error */
+		value[k] = '\0';
+		strncpy(opts->val, value, MAX_OPT_VALUE_LEN);
+		return(0);			
+	} else {
+		/* missing operator */
+		errorf_line(PREMAKE_CONFIG_PATH, linenum, "Operator not found.");
+		return(-1);
+	}
 }

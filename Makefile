@@ -28,7 +28,7 @@ SAMPLE=		$(PREMAKE)file.sample
 CONFIG=		$(PREMAKE).conf.sample
 
 P_OBJS=		common.o hash.o func.o pmk.o
-S_OBJS=		$(SETUP).o common.o hash.o readconf.o
+S_OBJS=		$(SETUP).o common.o hash.o
 
 all: $(PREMAKE) $(SETUP)
 

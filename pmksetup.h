@@ -33,20 +33,40 @@
 #ifndef _PMKSETUP_H_
 #define _PMKSETUP_H_
 
+#include "hash.h"	 
+#include "premake.h"
 
+#define MAX_CONF_OPT	256	/* XXX temp maximum hash entries */
 #define STR_DELIMITER	":"	/* string delimiter of the $PATH variable */    
 #define MAXBINS		5	/* max slots in the binaries array */
 
+/* special characters for pmk.conf */
+#define PMKSETUP_ASSIGN_CHAR	'='
+#define PMKSETUP_STATIC_CHAR	':'
+
+
+/* configuration file layout: VAR=VALUE */
+typedef struct {
+        char    key[MAX_OPT_NAME_LEN],
+                val[MAX_OPT_VALUE_LEN],
+		opchar;
+} conf_opt;
 
 /* _must be_ binaries to search for */
-static  char *binaries[MAXBINS] = {
-	"ar", "cat", "grep", "install", "ranlib"
+static  char *binaries[MAXBINS][2] = {
+	{"ar",		PREMAKE_KEY_BIN_AR},
+	{"cat",		PREMAKE_KEY_BIN_CAT},
+	{"grep",	PREMAKE_KEY_BIN_GREP},
+	{"install",	PREMAKE_KEY_BIN_INSTALL},
+	{"ranlib",	PREMAKE_KEY_BIN_RANLIB}
 };
 
 
 /* Local functions declaration */
-int	create_tmp_config(void);
-int	get_env_vars(FILE *);
-
+int	open_tmp_config(void);
+int	close_tmp_config(void);
+int	get_env_vars(htable *);
+int	get_binaries(htable *);
+int	parse_line(char *, int, conf_opt *);
 
 #endif	/* _PMKSETUP_H_ */
