@@ -39,19 +39,18 @@
 #endif
 
 typedef struct {
-	int	nbcell,
-		nextidx;
-
+	int	  nbcell,
+		  nextidx;
 	char	**pary;
 } dynary;
 
 
 dynary	*da_init(void);
-int	da_size(dynary *);
-int	da_usize(dynary *);
-int	da_push(dynary *, char *);
+int	 da_size(dynary *);
+int	 da_usize(dynary *);
+int	 da_push(dynary *, char *);
 char	*da_pop(dynary *);
 char	*da_idx(dynary *, int);
-void	da_destroy(dynary *);
+void	 da_destroy(dynary *);
 
 #endif /* _PMK_DYNARRAY_H_ */

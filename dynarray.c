@@ -59,7 +59,7 @@
 */
 
 dynary *da_init(void) {
-	dynary *ptr = NULL;
+	dynary	*ptr = NULL;
 
 	ptr = (dynary *)malloc(sizeof(dynary));
 	if (ptr != NULL) {
@@ -101,9 +101,9 @@ int	da_usize(dynary *da) {
 */
 
 int da_push(dynary *da, char *str) {
-	char	*dup,
+	char	 *dup,
 		**tary;
-	size_t	gsize;
+	size_t	  gsize;
 
 	dup = strdup(str);
 	if (dup == NULL) {
@@ -140,9 +140,9 @@ int da_push(dynary *da, char *str) {
 */
 
 char *da_pop(dynary *da) {
-	char	*p = NULL,
+	char	 *p = NULL,
 		**tary;
-	size_t	gsize;
+	size_t	  gsize;
 
 	da->nextidx--;
 	p = da->pary[da->nextidx];
