@@ -48,6 +48,9 @@
 #include "parse.h"
 #include "pmk.h"
 
+/*
+#define DEBUG_PRS	1
+*/
 
 char	parse_err[MAX_ERRMSG_LEN];
 
@@ -246,67 +249,128 @@ bool parse_cell(char *line, prscell *pcell) {
 */
 
 bool parse_opt(char *line, htable *ht) {
-	bool	 keyfound = false;
-	char	 buf[MAXPATHLEN], /* XXX buf len ? */
-		 tkey[MAX_OPT_NAME_LEN],
-		 tval[MAX_OPT_VALUE_LEN];
-	int	 i = 0,
-		 j = 0;
+	bool	f_key = false,
+		f_oper = false,
+		f_value = false,
+		f_qmark = false;
+	char	buf[MAXPATHLEN], /* XXX buf len ? */
+		tkey[MAX_OPT_NAME_LEN],
+		tval[MAX_OPT_VALUE_LEN];
+	int	j = 0;
 
-	while (line[i] != CHAR_EOS && i < MAXPATHLEN) {
-		if (keyfound == false) {
-			if (line[i] == PMK_KEY_CHAR) {
-				/* end of key name reached */
-				buf[j] = CHAR_EOS;
-				if (strlcpy(tkey, buf, MAX_OPT_NAME_LEN) >= MAX_OPT_NAME_LEN) {
-					/* key name is too long */
-					strlcpy(parse_err, "key name too long.", sizeof(parse_err));
-					return(false);
-				} else {
-					keyfound = true;
-					j = 0;
-				}
-			} else {
-				/* XXX disable check until new new new engine ;)
-				if ((isalpha(line[i]) == 0) && (line[i] != '_')) {
-					*//* invalid character *//*
-					strlcpy(parse_err, "malformed option.", sizeof(parse_err));
-					return(false);
-				} else {
-				*/
-					buf[j] = line[i];
+#ifdef DEBUG_PRS
+	debugf("parsing opt line '%s'", line);
+#endif
+	do {
+#ifdef DEBUG_PRS
+		debugf("chr = '%c'", *line);
+#endif
+		if ((f_qmark == true) || (*line == CHAR_EOS)) {
+#ifdef DEBUG_PRS
+			debugf("qmark or EOS ('%c')", *line);
+#endif
+			switch (*line) {
+				case '"' :
+				case CHAR_EOS :
+					buf[j] = CHAR_EOS;
 					j++;
-				/*
-				}
-				*/
-			}
-		} else {
-			/* grabbing key value */
-			buf[j] = line[i];
-			j++;
-		}
-		i++;
-	}
-	buf[j] = CHAR_EOS; /* terminate buf */
+					f_qmark = false;
 
-	
-	if (keyfound == false) {
-			/* key name undefined */
-			strlcpy(parse_err, "malformed option", sizeof(parse_err));
-			return(false);
-	} else {
-		if (strlcpy(tval, buf, MAX_OPT_VALUE_LEN) >= MAX_OPT_VALUE_LEN) {
-			/* key value is too long */
-			strlcpy(parse_err, "key value too long.", sizeof(parse_err));
-			return(false);
-		} else {
-			/* key name and value are ok */
-			if (hash_add(ht, tkey, strdup(tval)) == HASH_ADD_FAIL) {
-				errorf("hash failure.");
-				return false;
+					if (f_key == false) {
+#ifdef DEBUG_PRS
+						debugf("key is '%s'", buf);
+#endif
+						/* set the key */
+						if (strlcpy(tkey, buf, MAX_OPT_VALUE_LEN) >= MAX_OPT_VALUE_LEN) {
+							/* key value is too long */
+							strlcpy(parse_err, "key value too long.", sizeof(parse_err));
+							return(false);
+						} else {
+							f_key = true;
+							j = 0;
+						}
+					} else {
+						if (f_value == false) {
+#ifdef DEBUG_PRS
+							debugf("value is '%s'", buf);
+#endif
+							/* XXX TODO strdup should be enough here */
+							if (strlcpy(tval, buf, MAX_OPT_VALUE_LEN) >= MAX_OPT_VALUE_LEN) {
+								/* key value is too long */
+								strlcpy(parse_err, "key value too long.", sizeof(parse_err));
+								return(false);
+							} else {
+								f_value = true;
+								j = 0;
+							}
+						}
+					}
+					break;
+
+				default :
+					buf[j] = *line;
+#ifdef DEBUG_PRS
+					debugf("add chr '%c', j = %d", *line, j);
+#endif
+					j++;
+					break;
 			}
-			return(true);
+		} else {
+			/* if not a blank character */
+			if (isblank(*line) == 0) {
+				switch (*line) {
+					case PMK_KEY_CHAR :
+						if (f_key == true) {
+							f_oper = true;
+						} else {
+							if (j != 0) {
+								buf[j] = CHAR_EOS;
+								if (strlcpy(tkey, buf, MAX_OPT_VALUE_LEN) >= MAX_OPT_VALUE_LEN) {
+									/* key value is too long */
+									strlcpy(parse_err, "key value too long.", sizeof(parse_err));
+									return(false);
+								} else {
+									f_key = true;
+									j = 0;
+								}
+							} else {
+								strlcpy(parse_err, "operator without key.", sizeof(parse_err));
+								return(false);
+							}
+						}
+						break;
+
+					case '"' :
+						f_qmark = true;
+						break;
+
+					default :
+						if ((isalpha(*line) != 0) || (*line == '_')) {
+							buf[j] = *line;
+							j++;
+						} else {
+							strlcpy(parse_err, "syntax error.", sizeof(parse_err));
+							return(false);
+						}
+				}
+			}
 		}
+	} while (*line++ != CHAR_EOS);
+
+	if (f_value == true) {
+#ifdef DEBUG_PRS
+		debugf("recording '%s' with '%s'", tkey, tval);
+#endif
+		/* key name and value are ok */
+		if (hash_add(ht, tkey, strdup(tval)) == HASH_ADD_FAIL) {
+			errorf("hash failure.");
+			return false;
+		}
+		return(true);
+	} else {
+		/* value not found */
+		strlcpy(parse_err, "value not found.", sizeof(parse_err));
+		return(false);
 	}
 }
 
@@ -384,6 +448,10 @@ bool parse(FILE *fp, prsdata *pdata) {
 
 				if (parse_opt(buf, pcell->ht) == false) {
 					/* line number and error message already set <= XXX FALSE !! TODO */
+					errorf("%s", parse_err);
+#ifdef DEBUG_PRS
+					debugf("parse_opt returned false");
+#endif
 					prscell_destroy(pcell);
 					return(false);
 				}
