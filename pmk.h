@@ -50,6 +50,8 @@
 #define PREMAKE_CONFIG		"pmk.conf"
 #define PREMAKE_LOG		"pmk.log"
 
+#define PREMAKE_CONFIG_PATH	SYSCONFDIR "/" PREMAKE_CONFIG 
+
 /* prefix character used for comments */
 #define CHAR_COMMENT	'#'
 

@@ -2,6 +2,7 @@
 
 /*
  * Copyright (c) 2003 Damien Couderc
+ * Copyright (c) 2003 Xavier Santolaria
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,11 +31,10 @@
  *
  */
 
-/*
-#define PMKSETUP_DEBUG 1
-*/
 
 #include <sys/param.h>
+#include <sys/utsname.h>
+
 #include <err.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -42,68 +42,87 @@
 
 #include "pmk.h"
 
-/*
-	usage
-*/
 
-void usage(void) {
-	/* nothing yet */
-}
+#define PMKSETUP_DEBUG
 
-/*
-	main
-*/
+
+/* Local functions declaration */
+int	create_tmp_config(void);
+int	get_env_vars(FILE *);
+
 
 int main(int argc, char *argv[]) {
-	FILE	*cfd,
-		*tfd;
-	int	mtfd = -1;
-	char	cf[MAXPATHLEN],
-		tf[MAXPATHLEN];
-	bool	exists=FALSE;
+	char	config[MAXPATHLEN];
 
 	/* try to open configuration file if it exists */
-	snprintf(cf, sizeof(cf), "%s/%s", SYSCONFDIR, PREMAKE_CONFIG);
-	cfd = fopen(cf, "r");
-	if (cfd != NULL) {
-		exists=TRUE;
-	}
+	snprintf(config, sizeof(config), "%s", PREMAKE_CONFIG_PATH);
 
-	/* creating temporary file to build new configuration file */
-	snprintf(tf, sizeof(tf), "/tmp/pmk.XXXXXXXXXX");
-	mtfd = mkstemp(tf);
-	if (mtfd == -1) {
-		/* name randomize failed */
-		err(1, "%s", tf);
-	}
-	tfd = fdopen(mtfd, "w");
-	if (tfd == NULL) {
-		/* cannot open temporary file */
-		err(1, "%s", tf);
-	}
+	/* XXX open configuration file if it does exist */
 
-	fprintf(tfd, "# PREMAKE");
-
-	printf("Hey you know what ? I'm doing nothing :)\n");
-
-
-	fclose(tfd);
-	if (exists == TRUE) {
-		/* configuration file was opened */
-		fclose(cfd);
-	}
-
-	/* finished playing with temporary file */
-	/* XXX code to overwrite old configuration file */
-
-#ifndef PMKSETUP_DEBUG
-	if (unlink(tf) == -1) {
-		/* canot remove temporary file */
-		err(1, "%s", tf);
-	}
-#else
-	printf("[DEBUG] %s has not been deleted !\n", tf);
-#endif
+	/* create simple temp config */
+	create_tmp_config();
 
 	return(0);
+}
+
+/* Create temp configuration file */
+
+int create_tmp_config(void) {
+	FILE	*tfd;
+	int	mtfd = -1;
+	char	tf[MAXPATHLEN];
+
+
+	/* creating temporary file to build new configuration file */
+	snprintf(tf, sizeof(tf), "/tmp/pmk.XXXXXXXX");
+	if ((mtfd = mkstemp(tf)) == -1 ||
+		(tfd = fdopen(mtfd, "w")) == NULL) {
+			if (mtfd != -1) {
+				unlink(tf);
+				close(mtfd);
+			}
+			err(1, "%s", tf);
+	}	
+
+	fprintf(tfd, "# premake configuration file, read by pmk(1)" 
+		" and created by pmksetup(8)\n#\n");
+	fprintf(tfd, "# See pmk.conf(5) for more details\n\n");
+
+	/* phase 1: create simple config */
+	get_env_vars(tfd);
+
+	fclose(tfd);
+
+#ifdef PMKSETUP_DEBUG
+	fprintf(stderr, "[DEBUG] %s has not been deleted !\n", tf);
+#else
+	if (unlink(tf) == -1)
+		/* cannot remove temporary file */
+		err(1, "%s", tf);
+
+#endif  /* PMKSETUP_DEBUG */
+
+	return(0);
+}
+
+/* Get the environment variables needed for the configuration file */
+
+int get_env_vars(FILE *tfd) { 
+
+	char	*bin_path;
+	struct	utsname	utsname;
+
+	if (uname(&utsname) == -1)
+		err(1, "uname");	
+
+	if ((bin_path = getenv("PATH")) == NULL) 
+		err(1, "getenv");
+
+	/* Temporarily printing the variables */
+	fprintf(tfd, "OS_NAME=%s\n", utsname.sysname);
+	fprintf(tfd, "OS_RELEASE=%s\n", utsname.release);
+	fprintf(tfd, "ARCH=%s\n", utsname.machine);
+	fprintf(tfd, "BIN_PATH=%s\n", bin_path);		
+
+        return (0);
 }
