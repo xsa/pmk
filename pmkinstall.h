@@ -39,13 +39,5 @@
 #define STRIP_ENV_NAME	"STRIP"
 
 
-#ifndef blkcnt_t
-typedef int64_t		blkcnt_t;	/* file block counts */
-#endif
-
-#ifndef blksize_t
-typedef u_int32_t	blksize_t;	/* block sizes */
-#endif
-
 #endif /* _PMKINSTALL_H_ */
 
