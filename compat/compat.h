@@ -43,6 +43,7 @@
 		NetBSD		since 1.5
 		SCO OpenServer	since 5.0.6
 		SunOs		since 5.8
+		MacOSX
 
 	Systems without strlcpy in string.h :
 		AIX		(4.3)
