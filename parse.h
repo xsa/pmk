@@ -91,6 +91,10 @@
 /* null token */
 #define PRS_TOK_NULL	0
 
+/* maximal number of options per command */
+#define MAX_CMD_OPT		32
+
+
 /* keyword structure */
 typedef struct {
 	char	*kw;		/* keyword string */

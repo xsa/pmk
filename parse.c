@@ -43,7 +43,6 @@
 #include "common.h"
 #include "hash.h"
 #include "parse.h"
-#include "pmk.h"
 
 
 /*
