@@ -1,5 +1,5 @@
-This package contain some files that are designed to permit their use in
-other projects :
+This package contains some files that are designed to permit their use in
+other projects:
 
 - String hash-coding : hash.c, hash.h
 
@@ -8,11 +8,13 @@ other projects :
 - Path manipulation tools : pathtools.c pathtools.h
 
 
-These files are under BSD license and are almost ready to use.
-Some issues exists due to portability as it uses ISO99 booleans and
+These files are released under the BSD license and are almost ready to 
+be used.
+Some issues do exist due to portability as this package uses ISO99 booleans and
 string functions like strlcpy and strlcat.
 You are free to use some components of this package to assume compatibility
-on all the system targets until you respect the BSD license.
+on all the system targets as long as you do respect the BSD license.
 
-NOTE : Some functions are maybe missing as i have not the use in this present
-package but i can add them on request (yes you can also send patches ;).
+NOTE : Some functions are maybe missing as we do not have the use in this 
+current package but we could add them on request (yes, you can also send
+patches ;) ). 
