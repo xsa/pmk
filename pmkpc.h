@@ -69,14 +69,23 @@
 #define PMKPC_OPT_VAR_SILC		43
 #define PMKPC_OPT_VAR_STDO		44
 
-
 #define PMKPC_COMPAT_VERSION	"0.15.0"
 
+#define PMKPC_USAGE_STR		"Usage: pmkpc"
+#define PMKPC_USAGE_OPEN_OPT	" [--"
+#define PMKPC_USAGE_CLOSE_OPT	"]"
+#define PMKPC_USAGE_ALIGN	"        "
+
+/* string to append to options in the usage() that need it */
+#define PC_USAGE_VERSION	"VERSION"
+#define PC_USAGE_VARNAME	"VARIABLENAME"
+#define PC_USAGE_VARVAL		"VARIABLENAME=VARIABLEVALUE"
 
 typedef struct {
 	char		*name;
 	bool		 arg;
 	unsigned int	 id;
+	char		*usagearg;
 } pcopt;
 
 typedef struct {
