@@ -496,6 +496,7 @@ char *process_string(char *pstr, htable *pht) {
 	char	 buf[OPT_VALUE_LEN],
 		 var[OPT_NAME_LEN],
 		*pvar,
+		*pval,
 		*pbuf;
 	size_t	 size;
 
@@ -521,13 +522,20 @@ char *process_string(char *pstr, htable *pht) {
 						/* check if identifier exists */
 						pvar = hash_get(pht, var);
 						if (pvar != NULL) {
-							/* identifier found, append value */
+							/* process identifer value */
+							pval = process_string(pvar, pht);
+							pvar = pval;
+
+							/* append value */
 							while ((*pvar != CHAR_EOS) && (size > 0)) {
 								*pbuf = *pvar;
 								pbuf++;
 								pvar++;
 								size--;
 							}
+
+							/* clean processed value */
+							free(pval);
 						}
 					}
 				} else {
