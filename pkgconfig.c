@@ -533,6 +533,8 @@ pkgcell *pkg_cell_add(pkgdata *ppd, char *mod) {
 
 	/* parse pc file */
 	ppc = parse_pc_file(pcf);
+	if (ppc == NULL)
+		return(NULL);
 
 	/* store pkgcell in hash */
 	if (hash_update(ppd->cells, mod, ppc) == HASH_ADD_FAIL) {
@@ -546,7 +548,7 @@ debugf("adding pkgcell for '%s'", mod);
 	/* add module in list */
 	da_push(ppd->mods, strdup(mod));
 
-	if (ppc->requires != NULL) {
+	if ((ppc->requires != NULL) && (ppc->requires != CHAR_EOS)) {
 #ifdef PKGCFG_DEBUG
 debugf("pkgcell requires = '%s'", ppc->requires);
 #endif

@@ -1,5 +1,7 @@
 25 Feb 2004 mipsator
  * moved tests for pmkscan and pmkinstall.
+ * fixed pmkc against segfault when .pc doesn't exists or empty
+   requires field, based on a patch from Marek Habersack.
 
 21 Feb 2004 mipsator
  * fixed pmkscan bug that happens when no sources files exist, noticed
