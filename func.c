@@ -675,7 +675,6 @@ bool pmk_check_lib(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 /*
 	check with *-config utility
 
-	XXX add MODULE option ?
 */
 
 bool pmk_check_config(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
@@ -685,6 +684,7 @@ bool pmk_check_config(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 			 cfgpath[MAXPATHLEN],
 			*cfgtool,
 			*varname,
+			*modname,
 			*libvers,
 			*bpath,
 			*cflags,
@@ -701,6 +701,9 @@ bool pmk_check_config(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 		errorf("NAME not assigned in label '%s'.", cmd->label);
 		return(false);
 	}
+
+	/* check if a module name is given */
+	modname = po_get_str(hash_get(ht, "MODULE"));
 
 	/* check if a variable name is given */
 	varname = po_get_str(hash_get(ht, "VARIABLE"));
@@ -852,7 +855,7 @@ bool pmk_check_config(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 		opt = CFGTOOL_OPT_CFLAGS;
 	}
 
-	if (ct_get_data(cfgpath, opt, "", pipebuf, sizeof(pipebuf)) == false) {
+	if (ct_get_data(cfgpath, opt, modname, pipebuf, sizeof(pipebuf)) == false) {
 		errorf("cannot get CFLAGS.");
 		return(false);
 	} else {
@@ -1072,7 +1075,7 @@ bool pmk_check_pkg_config(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 	/* gather data */
 	if (pkg_recurse(ppd, target) == false) {
 		pkgdata_destroy(ppd);
-		errorf("failed on recurse !"); /* XXX TODO better message :) */
+		errorf("failed to recurse packages !"); /* XXX TODO better message :) */
 		return(false);
 	}
 

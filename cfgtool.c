@@ -357,7 +357,12 @@ cfgtcell *cfgtcell_get_cell(cfgtdata *pcd, char *binary) {
 }
 
 /*
-	XXX
+	use config tool to get the version
+
+	ctpath : config tool path
+	vstr : option string to get version
+	buffer : storage buffer for the result
+	sbuf : size of buffer
 */
 
 bool ct_get_version(char *ctpath, char *vstr, char *buffer, size_t sbuf) {
@@ -382,7 +387,12 @@ bool ct_get_version(char *ctpath, char *vstr, char *buffer, size_t sbuf) {
 }
 
 /*
-	XXX
+	use config tool to get data
+
+	ctpath : config tool path
+	vstr : option string to get version
+	buffer : storage buffer for the result
+	sbuf : size of buffer
 */
 
 bool ct_get_data(char *ctpath, char *ostr, char *mod, char *buffer, size_t sbuf) {
@@ -390,8 +400,13 @@ bool ct_get_data(char *ctpath, char *ostr, char *mod, char *buffer, size_t sbuf)
 	bool	 rval = false;
 	char	 cfgcmd[MAXPATHLEN];
 
-
-	snprintf(cfgcmd, sizeof(cfgcmd), CT_FORMAT_DATA, ctpath, ostr, mod);
+	if (mod == NULL) {
+		/* no module */
+		snprintf(cfgcmd, sizeof(cfgcmd), CT_FORMAT_DATA, ctpath, ostr);
+	} else {
+		/* use module */
+		snprintf(cfgcmd, sizeof(cfgcmd), CT_FORMAT_DATA_MOD, ctpath, ostr, mod);
+	}
 
 	rpipe = popen(cfgcmd, "r");
 	if (rpipe != NULL) {
