@@ -42,7 +42,7 @@
 #define DATADIR		"/usr/local/share/pmk/"
 #endif
 
-#ifdef USERMODE
+#ifdef PMK_USERMODE
 #define PMK_DATADIR	"./data/"
 #else
 #define PMK_DATADIR	DATADIR

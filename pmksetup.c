@@ -79,7 +79,7 @@ int main(int argc, char *argv[]) {
 			 errno;
 
 
-#ifndef USERMODE
+#ifndef PMK_USERMODE
 	uid_t		 uid;
 
 	/* pmksetup(8) must be run as root */

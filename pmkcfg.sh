@@ -156,7 +156,7 @@ cp $maketmpl $makefile
 if [ "$1" = 'usermode' ]; then
 	echo 'USERMODE ON.'
 
-	mkf_sed 'USERMODE' '-DUSERMODE'
+	mkf_sed 'USERMODE' '-DPMK_USERMODE'
 	mkf_sed 'BASE' "$um_prfx"
 	mkf_sed 'CONFDIR' '$(BASE)/.pmk'
 	mkf_sed 'BINDIR' '$(BASE)/bin'

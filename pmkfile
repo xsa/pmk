@@ -13,7 +13,7 @@ SWITCHES {
 
 IF(sw_usermode) {
 	DEFINE {
-		USERMODE = "-DUSERMODE"
+		USERMODE = "-DPMK_USERMODE"
 		BASE = "\$(HOME)"
 		CONFDIR = "\$(BASE)/.pmk"
 		BINDIR = "\$(BASE)/bin"
