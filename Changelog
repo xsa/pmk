@@ -1,3 +1,11 @@
+19 Sep 2003 mipsator
+ * made syntax more simple, now all the checks use NAME for the main
+	target (example in CHECK_TYPE, NAME contain the type to check).
+ * added CHECK_HEADER which does the same thing as CHECK_INCLUDE which
+	is obsolete but kept for compatibility.
+ * added pmk_check_variable() tu support CHECK_VARIABLE.
+ * updated pmkfile.5 man page to sync with previous changes.
+
 18 Sep 2003 mipsator
  * improved str_to_dynary() to init and return dynary structure.
  * updated use of str_to_dynary in func, funtool, pmk and pmksetup.

@@ -84,6 +84,7 @@
 #define PMK_TOK_CHKCFG	20
 #define PMK_TOK_CHKPKG	21
 #define PMK_TOK_CHKTYP	22
+#define PMK_TOK_CHKVAR	23
 
 /*
 #define KW_SETNGS_GLANG		"LANG"
@@ -97,20 +98,21 @@ typedef struct {
 	bool	(*fnp)(pmkcmd *, htable *, pmkdata *);
 } cmdkw;
 
-bool func_wrapper(prscell *, pmkdata *);
-bool process_node(prsnode *, pmkdata *);
-bool pmk_define(pmkcmd *, prsnode *, pmkdata *);
-bool pmk_target(pmkcmd *, htable *, pmkdata *);
-bool pmk_ac_compat(pmkcmd *, htable *, pmkdata *);
-bool pmk_switches(pmkcmd *, htable *, pmkdata *);
-bool pmk_settings(pmkcmd *, prsnode *, pmkdata *);
-bool pmk_check_binary(pmkcmd *, htable *, pmkdata *);
-bool pmk_check_include(pmkcmd *, htable *, pmkdata *);
-bool pmk_check_lib(pmkcmd *, htable *, pmkdata *);
-bool pmk_check_config(pmkcmd *, htable *, pmkdata *);
-bool pmk_check_pkg_config(pmkcmd *, htable *, pmkdata *);
-bool pmk_check_type(pmkcmd *, htable *, pmkdata *);
-bool pmk_set_parameter(pmkcmd *, prsopt *, pmkdata *);
-bool pmk_set_variable(pmkcmd *, prsopt *, pmkdata *);
+bool	func_wrapper(prscell *, pmkdata *);
+bool	process_node(prsnode *, pmkdata *);
+bool	pmk_define(pmkcmd *, prsnode *, pmkdata *);
+bool	pmk_target(pmkcmd *, htable *, pmkdata *);
+bool	pmk_ac_compat(pmkcmd *, htable *, pmkdata *);
+bool	pmk_switches(pmkcmd *, htable *, pmkdata *);
+bool	pmk_settings(pmkcmd *, prsnode *, pmkdata *);
+bool	pmk_check_binary(pmkcmd *, htable *, pmkdata *);
+bool	pmk_check_include(pmkcmd *, htable *, pmkdata *);
+bool	pmk_check_lib(pmkcmd *, htable *, pmkdata *);
+bool	pmk_check_config(pmkcmd *, htable *, pmkdata *);
+bool	pmk_check_pkg_config(pmkcmd *, htable *, pmkdata *);
+bool	pmk_check_type(pmkcmd *, htable *, pmkdata *);
+bool	pmk_check_variable(pmkcmd *, htable *, pmkdata *);
+bool	pmk_set_parameter(pmkcmd *, prsopt *, pmkdata *);
+bool	pmk_set_variable(pmkcmd *, prsopt *, pmkdata *);
 
 #endif /* _PMK_FUNC_H_ */

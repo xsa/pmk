@@ -1,9 +1,10 @@
 common :
-- tutorial 
+- tutorial
+- improve USER_TEST to make USER_MODE (aka non root pmk).
 
 pmk :
 + update pmk.1
-+ update pmkfile.5 (VARNAME in CHECK_BINARY)
++ update pmkfile.5
 ~ compatibility with autoconf (progressing) :
 	- support for DEFS (-D options to pass to the compiler)
 	- support for LDFLAGS (misc linker options)
@@ -11,7 +12,7 @@ pmk :
 	- VPATH ?
 ! cache ? (hash table with binary location, ...)
 - more C++ support
-- CHECK_VARIABLE ? (cinepaint)
++ CHECK_VARIABLE
 - verify in CHECK_BINARY that program has executable right ?
 - convert gdata.labl to pmk objects
 

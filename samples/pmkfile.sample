@@ -35,21 +35,21 @@ LIBNAME="termcap"
 CHECK_LIB(lib_curses) {
 REQUIRED=FALSE
 DEPEND=("use_curses","lib_termcap")
-LIBNAME="curses"
+NAME="curses"
 FUNCTION="getwin"
 }
 
 # check availability of sys/param.h header
-CHECK_INCLUDE(sys_param) {
+CHECK_HEADER(sys_param) {
 REQUIRED=FALSE
-INCLUDE="sys/param.h"
+NAME="sys/param.h"
 LANG="C++"
 }
 
 # check function strlcpy in string.h
-CHECK_INCLUDE(string_strcpy) {
+CHECK_HEADER(string_strcpy) {
 REQUIRED=FALSE
-INCLUDE="string.h"
+NAME="string.h"
 FUNCTION="strlcpy"
 }
 
@@ -57,13 +57,13 @@ FUNCTION="strlcpy"
 CHECK_BINARY(gtk_config) {
 REQUIRED=FALSE
 DEPEND=("use_gtk")
-FILENAME="gtk-config"
+NAME="gtk-config"
 }
 
 # get data via libpng-config
 CHECK_CONFIG(lib_png) {
 REQUIRED=FALSE
-CFGTOOL="libpng-config"
+NAME="libpng-config"
 VERSION="1.2"
 }
 
@@ -71,7 +71,7 @@ VERSION="1.2"
 CHECK_PKG_CONFIG(gtk_data) {
 REQUIRED=FALSE
 DEPEND=("use_gtk")
-PACKAGE="gtk+"
+NAME="gtk+"
 VERSION="1.2"
 CFLAGS="GTK_CFLAGS"
 LIBS="GTK_LIBS"
@@ -80,12 +80,19 @@ LIBS="GTK_LIBS"
 # check _Bool type
 CHECK_TYPE(type_bool_posix) {
 REQUIRED=FALSE
-TYPE="_Bool"
+NAME="_Bool"
 }
 
 # check c++ bool type
 CHECK_TYPE(type_bool_cxx) {
 REQUIRED=FALSE
-TYPE="bool"
+NAME="bool"
 LANG="C++"
+}
+
+# check byte order (useless, test purpose)
+CHECK_VARIABLE(var_endian) {
+REQUIRED=FALSE
+NAME = "HW_BYTEORDER"
+VALUE = "LITTLE_ENDIAN"
 }
