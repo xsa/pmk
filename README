@@ -51,8 +51,13 @@ script, see INSTALL for further information.
 
 3) Supported Platforms
 
-- Any POSIX compliant plaftorm should be supported. Actually we try to test
-  our suite on the most different platforms we can.
-  A summary of these tests can be found in the STATUS file. Be sure to also 
-  read the BUGS file.
+- Any POSIX compliant plaftorm should be supported. Actually we try to
+  test our suite on the most different platforms we can.
+  A summary of these tests can be found in the STATUS file. Be sure to
+  also read the BUGS file.
 
+- It seems that Debian/KNetBSD is returning the 'NetBSD' string when
+  using uname to know the operating system name. We didn't took any
+  decision yet about how to deal with this. But as this system is not
+  able to identify itself correctly we do not support it until futher
+  decision.
