@@ -31,11 +31,6 @@
  */
 
 
-/*
-	XXX TODO :
-		- error messages
-*/
-
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -243,100 +238,64 @@ char *skip_blank(char *pstr) {
 */
 
 bool parse_cell(char *line, prscell *pcell) {
-	bool	 cmd_found = false,
-		 label_found = false;
-	char	 buf[MAX_LABEL_NAME_LEN], /* should be big enough to contain command/label name */
-		*pbf;
-	int	 s,
-		 so;
+	char	*pstr;
 
-	s = MAX_CMD_LEN - 1;
-	line++; /* ignore prefix character of the command string */
-	pbf = buf;
+	line++; /* skip leading dot */
 
-	while (*line != CHAR_EOS && s != 0) {
-		if (cmd_found == false) {
-			if (*line != '(') {
-				/* check uppercase */
-				if (isalpha(*line) && islower(*line)) {
-					/* my god, found a lowercase in command name ! */
-					strlcpy(parse_err, "command should be in uppercase.", sizeof(parse_err));
-					return(false);
-				} else {
-					/* good boy */
-					*pbf = *line;
-					pbf++;
-				}
-			} else {
-				/* end of command name */
-				*pbf = CHAR_EOS;
-
-				so = sizeof(pcell->name);
-				if (strlcpy(pcell->name, buf, so) >= so) {
-					strlcpy(parse_err, "command too long.", sizeof(parse_err));
-					return(false);
-				}
-				cmd_found = true;
-				pbf = buf;
-			}
-		} else {
-			if (*line != ')') {
-				if (isalpha(*line) == 0 && *line != '_') {
-					/* invalid character */
-					strlcpy(parse_err, "invalid label name.", sizeof(parse_err));
-					return(false);
-					
-				} else {
-					/* needed to take care of quotation marks ? */
-					*pbf = *line;
-					pbf++;
-				}
-			} else {
-				*pbf = CHAR_EOS;
-				so = sizeof(pcell->label);
-				if (strlcpy(pcell->label, buf, so) >= so) {
-					strlcpy(parse_err, "label too long", sizeof(parse_err));
-					return(false);
-				}
-				label_found = true;
-				pbf = buf; /* useless :) */
-			}
-		}
-		line++;
-		s--;
+	pstr = parse_word(line, pcell->name, sizeof(pcell->name));
+	if (pstr == NULL) {
+		strlcpy(parse_err, "command parsing failed.", sizeof(parse_err));
+		return(false);
 	}
+#ifdef DEBUG_PRS
+	debugf("command = '%s'", pcell->name);
+#endif
 
-	if (cmd_found == false) {
-		if (s != 0) {
+	switch (*pstr) {
+		case CHAR_EOS :
+#ifdef DEBUG_PRS
+			debugf("command '%s' with no label", pcell->name);
+#endif
 			/* command without label */
-			*pbf = CHAR_EOS;
+			return(true);
+			break; /* yes i know */
 
-			so = sizeof(pcell->name);
-			if (strlcpy(pcell->name, buf, so) >= so) {
-				strlcpy(parse_err, "command too long.", sizeof(parse_err));
-				return(false);
-			}
+		case PMK_CHAR_LABEL_START :
+			/* found label starting delimiter */
+			pstr++;
+			break;
 
-			/* the following should not need a check (label size > 3) */
-			strlcpy(pcell->label, "", sizeof(pcell->label));
-		} else {
-			strlcpy(parse_err, "command too long.", sizeof(parse_err));
+		default :
+			/* command must be immediately followed by starting label delimiter */
+			strlcpy(parse_err, "starting label delimiter not found.", sizeof(parse_err));
 			return(false);
-		}
-	} else {
-		if (label_found == true) {
-			if (*line != CHAR_EOS) {
-				/* some data remaining after parenthesis */
-				strlcpy(parse_err, "trailing garbage after label.", sizeof(parse_err));
-				return(false);
-			}
-		} else {
-			/* ending parenthesis missing */
-			strlcpy(parse_err, "label not terminated.", sizeof(parse_err));
-			return(false);
-		}
 	}
 
+	pstr = parse_word(pstr, pcell->label, sizeof(pcell->label));
+	if (pstr == NULL) {
+		strlcpy(parse_err, "label parsing failed.", sizeof(parse_err));
+		return(NULL);
+	}
+#ifdef DEBUG_PRS
+	debugf("label = '%s'", pcell->label);
+#endif
+
+	if (*pstr != PMK_CHAR_LABEL_END) {
+		/* label name must be immediately followed by closing delimiter */
+		return(false);
+	} else {
+		pstr ++;
+	}
+
+	if (*pstr != CHAR_EOS) {
+		strlcpy(parse_err, PRS_ERR_TRAILING, sizeof(parse_err));
+		return(false);
+	}
+
+#ifdef DEBUG_PRS
+			debugf("command '%s' with label '%s'", pcell->name, pcell->label);
+#endif
+	/* everything is ok */
 	return(true);
 }
 
@@ -359,6 +318,15 @@ bool parse_opt(char *line, htable *ht) {
 #ifdef DEBUG_PRS
 	debugf("line = '%s'", line);
 #endif
+
+	if (*line == PMK_CHAR_COMMENT) {
+#ifdef DEBUG_PRS
+		debugf("comment : '%s'", line);
+#endif
+		 /* comment is ok */
+		return(true);
+	}
+
 	pstr = skip_blank(line);
 	if (pstr == NULL) {
 		strlcpy(parse_err, PRS_ERR_UNKNOWN, sizeof(parse_err));
@@ -455,7 +423,10 @@ bool parse(FILE *fp, prsdata *pdata) {
 
 					/* parse command and label */
 					if (parse_cell(buf, pcell) == false) { /* XXX TODO should use prsdata */
-						/* line number and error message already set */
+						errorf("%s", parse_err);
+#ifdef DEBUG_PRS
+						debugf("parse_cell returned false");
+#endif
 						return(false);
 					}
 

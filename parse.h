@@ -35,6 +35,9 @@
 #define _PMK_PARSE_H_
 
 #define PMK_CHAR_COMMAND	'.'
+#define PMK_CHAR_COMMENT	'#'
+#define PMK_CHAR_LABEL_START	'('
+#define PMK_CHAR_LABEL_END	')'
 #define PMK_CHAR_QUOTE_START	'"'
 #define PMK_CHAR_QUOTE_END	PMK_CHAR_QUOTE_START
 #define PMK_CHAR_LIST_START	'('
@@ -64,6 +67,10 @@ prsdata	*prsdata_init(void);
 void	 prsdata_destroy(prsdata *);
 prscell	*prscell_init(void);
 void	 prscell_destroy(prscell *);
+char	*parse_quoted(char *, char *, size_t);
+char	*parse_list(char *, char *, size_t);
+char	*parse_word(char *, char *, size_t);
+char	*skip_blank(char *pstr);
 bool	 parse_cell(char *, prscell *);
 bool	 parse(FILE *, prsdata *);
 bool	 parse_opt(char *, htable *);

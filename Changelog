@@ -1,3 +1,6 @@
+08 Aug 2003 mipsator
+ * rewritten parse_cell() in the same spirit as parse_opt().
+
 07 Aug 2003 mipsator
  * rewritten parse_opt().
  * updated sample files to work with the new parser.
