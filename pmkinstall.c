@@ -73,6 +73,10 @@ extern int	 optind;
 /*
 	strip
 
+	file : file to strip
+
+	return : nothing at the moment :)
+
 	NOTE: could use BIN_STRIP from pmk.conf
 */
 
@@ -91,6 +95,12 @@ void strip(char *file) {
 
 /*
 	convert symbolic value to octal
+
+	mstr : symbolic value string
+	pmode : resulting mode
+
+	return : boolean
+
 */
 
 bool symbolic_to_octal_mode(char *mstr, mode_t *pmode) {
@@ -203,21 +213,29 @@ bool symbolic_to_octal_mode(char *mstr, mode_t *pmode) {
 
 /*
 	check_mode
+
+	mstr : mode string
+	pmode : resulting mode
+
+	return : boolean 
+
 */
 
-mode_t check_mode(char *mstr) {
+bool check_mode(char *mstr, mode_t *pmode) {
 	mode_t	mode = 0,
 		mask;
 
 	if (mstr == NULL)
-		return(-1);
+		return(false);
 
 	if (isdigit(*mstr) != 0) {
 		/* octal value */
 		mode = strtol(mstr, NULL, 8); /* XXX check !! */		
 	} else {
 		/* symbolic value */
-		symbolic_to_octal_mode(mstr, &mode);
+		if (symbolic_to_octal_mode(mstr, &mode) == false) {
+			return(false);
+		};
 	}
 
 	/* get umask */
@@ -226,13 +244,19 @@ mode_t check_mode(char *mstr) {
 	umask(mask);
 
 	/* apply umask */
-	mode = mode & (~mask);
+	*pmode = mode & (~mask);
 
-	return(mode);
+	return(true);
 }
 
 /*
 	copy file
+
+	src : file to copy
+	dst : destination file
+	mode : destination perms
+
+	return : boolean
 */
 
 bool fcopy(char *src, char *dst, mode_t mode) {
@@ -352,8 +376,7 @@ int main(int argc, char *argv[]) {
 
 				case 'm' :
 					/* specify mode */
-					mode = check_mode(optarg);
-					if (mode == (mode_t) -1)
+					if (check_mode(optarg, &mode) == false)
 						exit(1);
 /*debugf("mode = %o", mode);*/
 					break;
