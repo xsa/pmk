@@ -84,6 +84,7 @@
 
 static  char *binaries[][2] = {
 	{"ar",		PMKCONF_BIN_AR},
+	{"as",		PMKCONF_BIN_AS},
 	{"awk",		PMKCONF_BIN_AWK},
 	{"c++",		PMKCONF_BIN_CXX},
 	{"cat",		PMKCONF_BIN_CAT},

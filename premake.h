@@ -130,6 +130,7 @@
 
 /* key names (see also pmksetup.h) */
 #define PMKCONF_BIN_AR		"BIN_AR"
+#define PMKCONF_BIN_AS		"BIN_AS"
 #define PMKCONF_BIN_AWK		"BIN_AWK"
 #define PMKCONF_BIN_CAT		"BIN_CAT"
 #define PMKCONF_BIN_CC		"BIN_CC"
