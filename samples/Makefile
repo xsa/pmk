@@ -9,46 +9,21 @@ PKGCFG=		$(PREMAKE)pc
 SAMPLE=		$(PREMAKE)file.sample
 CONFIG=		$(PREMAKE).conf.sample
 
-SELFINST=	self-$(INST)
+#SELFINST=	self-$(INST)
 
 TEST_SAMPLE=	test_samples
-TEST_INST=	test_pmkinstall
-TEST_TARGET=	$(TEST_INST)/$(INST).test
+
+all: test_all
 
 test_lib_c:
 	@echo ""
 	@echo "=> Testing C library building"
 	@echo ""
-	@echo "-> Dumping target files"
-	@echo ""
-	@echo "lib_c/Makefile.pmk:"
-	@echo "--dump-begin----------------------------"
-	@cat lib_c/Makefile.pmk
-	@echo "--dump-end------------------------------"
-	@echo ""
 	@echo "-> Runing pmk"
 	@echo ""
 	@cd lib_c && pmk
-	@echo "-> Dumping generated files"
-	@echo ""
-	@echo "lib_c/Makefile:"
-	@echo "--dump-begin----------------------------"
-	@cat lib_c/Makefile
-	@echo "--dump-end------------------------------"
-	@echo ""
-	@echo "-> Running make"
 	@echo ""
 	@cd lib_c && make
-	@echo ""
-	@echo "-> Running program"
-	@echo ""
-	@echo "--exec-begin----------------------------"
-	@cd lib_c; LD_LIBRARY_PATH=. hello
-	@echo "--exec-end------------------------------"
-	@echo ""
-	@echo "-> cleaning"
-	@echo ""
-	@cd lib_c && make clean
 	@echo ""
 	@echo "=> End of test"
 	@echo ""
@@ -117,15 +92,10 @@ test_$(SETUP):
 	$(SETUP) -V
 	@echo ""
 
-test_$(SCAN):
+test_scan_c:
 	@echo ""
 	@echo "=> Testing $(SCAN)"
-	$(SCAN)
-	@echo ""
-	@echo "Dumping pmkfile.scan"
-	@echo "----------------------------------------"
-	@cat pmkfile.scan
-	@echo "----------------------------------------"
+	@cd scan_c && make
 	@echo ""
 	@echo "=> End of test"
 	@echo ""
@@ -133,73 +103,34 @@ test_$(SCAN):
 test_$(INST):
 	@echo ""
 	@echo "=> Testing $(INST)"
-	@echo ""
-	@echo "-> Creating test directory"
-	@echo ""
-	$(INST) -d -m 770 $(TEST_INST)
-	@echo ""
-	@echo "-> Checking test directory"
-	@if (test -d "$(TEST_INST)"); then \
-		echo ""; \
-		echo "- - - - - - - - - - - - - - - - - - -" \
-			"- - - - - - - - - - - - - - - - - -"; \
-		echo ""; \
-		ls -ld $(TEST_INST); \
-		echo ""; \
-		echo "- - - - - - - - - - - - - - - - - - -" \
-			"- - - - - - - - - - - - - - - - - -"; \
-		echo ""; \
-		echo "Directory OK."; \
-	else \
-		echo ""; \
-		echo "Failed."; \
-		exit 1; \
-	fi
-	@echo ""
-	@echo "-> Installing test data"
-	@echo ""
-	$(INST) -m u+rw README.samples $(TEST_TARGET)1
-	$(INST) -m ug+r README.samples $(TEST_TARGET)2
-	@echo ""
-	@echo "-> Checking test file"
-	@echo "";
-	@echo "- - - - - - - - - - - - - - - - - - -" \
-		"- - - - - - - - - - - - - - - - - -";
-	@echo "";
-	@for i in 1 2; do \
-		if (test -f "$(TEST_TARGET)$$i"); then \
-			ls -l $(TEST_TARGET)$$i; \
-		else \
-			echo "$(TEST_TARGET)$$i failed."; \
-			exit 1; \
-		fi \
-	done
-	@echo "";
-	@echo "- - - - - - - - - - - - - - - - - - -" \
-		"- - - - - - - - - - - - - - - - - -";
-	@echo "";
+	@cd install && make
 	@echo ""
 	@echo "=> End of test"
 	@echo ""
-
 
 test_clean:
 	@echo ""
 	@echo "=> Removing generated files"
 	rm -rf $(TEST_SAMPLE)
-	rm -rf $(TEST_TARGET)*
-	rm -rf $(TEST_INST)
 	rm -f ac_config.h pmkfile.scan pmk*.log
 
 	@echo ""
 	@echo "=> End of cleaning."
 	@echo ""
 
-test_old_all: test_$(SETUP) test_$(PREMAKE) test_$(SCAN) test_$(INST) test_clean
-
 test_pmk_only: test_$(SETUP) test_$(PREMAKE) test_clean
 
-test_all: test_lib_c
+test_old_all: test_pmk_only
 
-test: test_old_all test_all
+# all scan tests
+test_scans: test_scan_c
+
+# all library tests
+test_libs: test_lib_c
+
+# all tests
+test_all: test_libs test_scans test_$(INST)
+
+# test target => alias to all target 
+test: all
 
