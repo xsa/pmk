@@ -7,6 +7,7 @@
  * updated pmkcfg.sh and pmkfile to sync with Makefile changes.
  * synced pmkscan, pmksetup and premake.h with usermode changes.
  * updated README and INSTALL.
+ * fixed pmk_switches() and missing escape in pmkfile.
 
 26 Sep 2003 mipsator
  * added support to negate labels in conditions like DEPEND or IF.

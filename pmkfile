@@ -27,7 +27,7 @@ IF(!sw_usermode) {
 	DEFINE {
 		USERMODE = ""
 		BASE = "$PREFIX"
-		CONFDIR = "$(SYSCONFDIR)/pmk"
+		CONFDIR = "\$(SYSCONFDIR)/pmk"
 		BINDIR = "\$(BASE)/bin"
 		SBINDIR = "\$(BASE)/sbin"
 		DATADIR = "\$(BASE)/share/\$(PREMAKE)"

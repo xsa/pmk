@@ -287,7 +287,7 @@ bool pmk_switches(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 					break;
 			}
 
-			if (hash_add(gdata->labl, phk->keys[i], value) != HASH_ADD_FAIL) {
+			if (hash_add(gdata->labl, phk->keys[i], strdup(value)) != HASH_ADD_FAIL) {
 				pmk_log("\tAdded '%s' switch.\n", phk->keys[i]);
 				n++;
 			} else {
