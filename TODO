@@ -28,6 +28,7 @@ common:
 	-.	add test target in tests/Makefile
 	+	update README and INSTALL
 	-	new samples : prog c & c++, lib c & c++
+	-	move sample tests in samples directory
 
 
 pmk:
@@ -79,4 +80,5 @@ pmkpc
 mips	+	main loop
 			+ make the argument parser working without order
 	-	missing options
+	-	man page
 
