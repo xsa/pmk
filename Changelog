@@ -1,3 +1,8 @@
+19 Dec 2003 mipsator
+ * added mkstemps.c, mkstemps.h and pmk_unistd.h in compat directory.
+ * added detection of mkstemps() in pmkcfg.sh and pmkfile.
+ * fixed pmkcfg.sh for function detection in an header.
+
 18 Dec 2003 mipsator
  * fixed detect.c and func.c to use correctly tmps_open().
 
