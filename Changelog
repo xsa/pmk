@@ -2,8 +2,8 @@
  * updated pmkinstall man page.
 
 27 Nov 2003 xsa
- * added ECHO_N, ECHO_C, ECHO_T variables to pmk.conf 
-   for autoconf compat. 
+ * added ECHO_N, ECHO_C, ECHO_T variables to pmk.conf for autoconf compat.
+ * sync pmk.conf(5) man page with the ECHO_* variables addition.
 
 26 Nov 2003 mipsator
  * added test_pmkinstall target in makefiles.
