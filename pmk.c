@@ -72,6 +72,9 @@
 #include "common.h"
 
 
+extern char	*optarg;
+extern int	optind;
+
 char	pmkfile[MAXPATHLEN];
 int	cur_line = 0;
 
