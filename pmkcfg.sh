@@ -68,7 +68,7 @@ int main() {
 }
 EOF
 
-$CC -o $testbin $testfile 2>&1
+$CC -o $testbin $testfile >/dev/null 2>&1
 
 cp $compat $temporary
 
@@ -100,7 +100,7 @@ int main() {
 }
 EOF
 
-$CC -o $testbin $testfile 2>&1
+$CC -o $testbin $testfile >/dev/null 2>&1
 
 cp $compat $temporary
 
