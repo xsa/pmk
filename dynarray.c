@@ -57,9 +57,11 @@ dynary *da_init(void) {
 	dynary *ptr = NULL;
 
 	ptr = (dynary *)malloc(sizeof(dynary));
-	ptr->nbcell = 0;
-	ptr->first = NULL;
-	ptr->last = NULL;
+	if (ptr != NULL) {
+		ptr->nbcell = 0;
+		ptr->first = NULL;
+		ptr->last = NULL;
+	}
 
 	return(ptr);
 }
