@@ -43,5 +43,9 @@ bool get_make_var(char *, char *, int);
 
 void error(char *);
 void error_line(char *, int, char *);
+void errorf(const char *, ...);
+void errorf_line(char *, int, const char *, ...);
+
+void debugf(const char *, ...);
 
 #endif /* _PMK_COMMON_H_ */
