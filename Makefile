@@ -46,7 +46,7 @@ SC_OBJS=	$(SCAN).o common.o compat.o dynarray.o parse.o hash.o
 .c.o:
 	$(CC) $(CFLAGS) -c $<
 
-all: $(PREMAKE) $(SETUP)
+all: $(PREMAKE) $(SETUP) $(SCAN)
 
 config:
 	@CC=$(CC) sh pmkcfg.sh
@@ -69,6 +69,7 @@ install: all
 	$(INSTALL) -d -m 755 $(DATADIR)
 	$(INSTALL) -m 644 samples/$(SAMPLE) $(DATADIR)
 	$(INSTALL) -m 644 samples/$(CONFIG) $(DATADIR)
+	$(INSTALL) -m 644 data/pmkscan.dat $(DATADIR)
 	$(INSTALL) -d -m 755 $(MANDIR)/man1
 	$(INSTALL) -m 444 man/$(PREMAKE).1 $(MANDIR)/man1/$(PREMAKE).1
 	$(INSTALL) -d -m 755 $(MANDIR)/man5

@@ -46,12 +46,17 @@
 	XXX
 */
 
-void parse_data(prsdata *pdata) {
+bool parse_data(prsdata *pdata) {
 	FILE	*fd;
+	bool	 rval;
 
 	fd = fopen("data/pmkscan.dat", "r"); /* XXX ARG !! HARDCODE !! */
-	parse(fd, pdata); /* XXX check ? */
+	if (fd == NULL)
+		return(false);
+	rval = parse(fd, pdata); /* XXX check ? */
 	fclose(fd);
+
+	return(rval);
 }
 
 /*
@@ -127,7 +132,12 @@ int main(int argc, char *argv[]) {
 		errorf("\ncannot intialize prsdata.");
 		exit(1);
 	}
-	parse_data(pdata);
+	
+	if (parse_data(pdata) == false) {
+		/* XXX TODO error message */
+		exit(1);
+	}
+
 	printf("Ok\n\n");
 
 	printf("Parsing C related files :\n");
