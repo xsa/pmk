@@ -21,8 +21,7 @@
 #include "../premake.h"
 
 int main(int argc, char *argv[]) {
-	char	*mod,
-		*pstr;
+	char	*mod;
 	pkgcell	*ppc;
 	pkgdata	*ppd;
 
