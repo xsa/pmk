@@ -35,6 +35,7 @@
 #define _PMK_COMMON_H_
 
 #include "premake.h"
+#include "compat/pmk_string.h"
 #include "pmk.h"
 #include "dynarray.h"
 

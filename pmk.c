@@ -361,7 +361,7 @@ bool parse_cmd(char *line, pmkcmd *command) {
 					/* line number and error message already set */
 					return(false);
 				}
-				strncpy(command->name, buf, MAX_CMD_NAME_LEN);
+				strlcpy(command->name, buf, MAX_CMD_NAME_LEN);
 				cmd_found = true;
 				j = 0;
 			}
@@ -379,7 +379,7 @@ bool parse_cmd(char *line, pmkcmd *command) {
 				}
 			} else {
 				buf[j] = CHAR_EOS;
-				strncpy(command->label, buf, MAX_LABEL_NAME_LEN);
+				strlcpy(command->label, buf, MAX_LABEL_NAME_LEN);
 				label_found = true;
 				j = 0; /* useless :) */
 			}
@@ -394,8 +394,8 @@ bool parse_cmd(char *line, pmkcmd *command) {
 			/* line number and error message already set */
 			return(false);
 		}
-		strncpy(command->name, buf, MAX_CMD_NAME_LEN);
-		strncpy(command->label, "", MAX_LABEL_NAME_LEN);
+		strlcpy(command->name, buf, MAX_CMD_NAME_LEN);
+		strlcpy(command->label, "", MAX_LABEL_NAME_LEN);
 	} else {
 		if (label_found == true) {
 			if (line[i] != CHAR_EOS) {
@@ -536,8 +536,8 @@ bool parse(FILE *fp, pmkdata *gdata) {
 						}
 
 						/* cmd processed, clean up */
-						strncpy(cmd.name, "", MAX_CMD_NAME_LEN);
-						strncpy(cmd.label, "", MAX_LABEL_NAME_LEN);
+						strlcpy(cmd.name, "", MAX_CMD_NAME_LEN);
+						strlcpy(cmd.label, "", MAX_LABEL_NAME_LEN);
 						hash_destroy(tabopts);
 					} else {
 						/* found another command before end of previous */

@@ -33,9 +33,9 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 
 #include "hash.h"
+#include "compat/pmk_string.h"
 
 
 /*
@@ -179,8 +179,8 @@ int hash_add(htable *pht, char *key, char *value) {
 	
 	/* if okay put key & value in a new cell */
 	phc = (hcell *) malloc(sizeof(hcell));
-	strncpy(phc->key, key, MAX_HASH_KEY_LEN);
-	strncpy(phc->value, value, MAX_HASH_VALUE_LEN);
+	strlcpy(phc->key, key, MAX_HASH_KEY_LEN);
+	strlcpy(phc->value, value, MAX_HASH_VALUE_LEN);
 	phc->next = NULL;
 
 	phn = pht->nodetab;
@@ -200,7 +200,7 @@ int hash_add(htable *pht, char *key, char *value) {
 		while (exit == 0) {
 			if (strncmp(key, np->key, MAX_HASH_KEY_LEN) == 0) {
 				/* key already exists */
-				strncpy(np->value, value, MAX_HASH_VALUE_LEN);
+				strlcpy(np->value, value, MAX_HASH_VALUE_LEN);
 				rval = HASH_ADD_UPDT;
 				exit = 1;
 				/* new cell no longer needed */
