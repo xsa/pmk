@@ -4,14 +4,14 @@ common :
 
 pmk :
 + update pmk.1
-- update pmkfile.5 (VARNAME in CHECK_BINARY)
++ update pmkfile.5 (VARNAME in CHECK_BINARY)
 ~ compatibility with autoconf (progressing)
 - set CPPFLAGS
 - set LDFLAGS ?
-- cache ? (binary location, etc...)
+- cache ? (hash table with binary location, ...)
 - more C++ support
 - global LANG
-- replace po_get_data in func.c
+~ replace po_get_data
 
 pmksetup :
 ~ pmk.conf(5)

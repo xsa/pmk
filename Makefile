@@ -43,10 +43,10 @@ MANDIR=		$(PREFIX)/man/
 SAMPLE=		$(PREMAKE)file.sample
 CONFIG=		$(PREMAKE).conf.sample
 
-P_OBJS=		${PREMAKE}.o compat.o common.o hash.o func.o functool.o \
-		dynarray.o autoconf.o pathtools.o parse.o pmk_obj.o
-S_OBJS=		$(SETUP).o common.o hash.o dynarray.o compat.o pmk_obj.o
-SC_OBJS=	$(SCAN).o common.o compat.o dynarray.o parse.o hash.o pmk_obj.o
+P_OBJS=		compat.o common.o hash.o func.o functool.o dynarray.o \
+		autoconf.o pathtools.o parse.o pmk_obj.o ${PREMAKE}.o
+S_OBJS=		common.o hash.o dynarray.o compat.o pmk_obj.o $(SETUP).o
+SC_OBJS=	common.o compat.o dynarray.o parse.o hash.o pmk_obj.o $(SCAN).o
 
 .c.o:
 	$(CC) $(CFLAGS) -c $<

@@ -66,6 +66,14 @@ char *cxx_file_ext[NB_CXX_FILE_EXT] = {
 	"h++"
 };
 
+prskw	kw_pmkscan[] = {
+		{".INCLUDES",	PSC_TOK_INCL, PRS_KW_ITEM},
+		{".FUNCTIONS",	PSC_TOK_FUNC, PRS_KW_ITEM},
+		{"INCLUDES",	PSC_TOK_INCL, PRS_KW_ITEM},
+		{"FUNCTIONS",	PSC_TOK_FUNC, PRS_KW_ITEM}
+};
+
+int	nbkwps = sizeof(kw_pmkscan) / sizeof(prskw);
 
 extern char	*optarg;
 extern int	 optind;
@@ -91,21 +99,26 @@ bool parse_data(prsdata *pdata, scandata *sdata) {
 		return(false);
 	}
 
-	rval = parse(fd, pdata);
+	rval = parse_pmkfile(fd, pdata, kw_pmkscan, nbkwps);
 	fclose(fd);
 
 	if (rval == true) {
-		pcell = pdata->first;
+		pcell = pdata->tree->first;
 		while (pcell != NULL) {
-			if (strncmp(pcell->name, "INCLUDES", sizeof(pcell->name)) == 0) {
-				sdata->includes = pcell->ht;
-			}
+			switch(pcell->token) {
+				case PSC_TOK_INCL :
+					sdata->includes = pcell->ht;
+					break;
+			
+				case PSC_TOK_FUNC :
+					sdata->functions = pcell->ht;
+					break;
 
-			if (strncmp(pcell->name, "FUNCTIONS", sizeof(pcell->name)) == 0) {
-				sdata->functions = pcell->ht;
+				default :
+					errorf("parsing of data file failed.");
+					return(false);
+					break;
 			}
-
-			/* XXX TODO missing other data */
 
 			pcell = pcell->next;
 		}

@@ -40,24 +40,92 @@
 #include "func.h"
 #include "functool.h"
 #include "hash.h"
-#include "pmk.h"
 #include "premake.h"
 
 
-cmdkw	functab[] = {
-		{"DEFINE", pmk_define},
-		{"TARGET", pmk_target},
-		{"AC_COMPAT", pmk_ac_compat},
-		{"SWITCHES", pmk_switches},
-		{"CHECK_BINARY", pmk_check_binary},
-		{"CHECK_INCLUDE", pmk_check_include},
-		{"CHECK_LIB", pmk_check_lib},
-		{"CHECK_CONFIG", pmk_check_config},
-		{"CHECK_PKG_CONFIG", pmk_check_pkg_config},
-		{"CHECK_TYPE", pmk_check_type}
+prskw	kw_pmkfile[] = {
+/*		XXX for compatibility */
+		{".DEFINE",		PMK_TOK_DEFINE, PRS_KW_ITEM}, /* XXX will be node */
+		{".AC_COMPAT",		PMK_TOK_ACCOMP, PRS_KW_ITEM},
+		{".SWITCHES",		PMK_TOK_SWITCH, PRS_KW_ITEM}, /* XXX will be node */
+		{".TARGET",		PMK_TOK_TARGET, PRS_KW_ITEM},
+		{".CHECK_BINARY",	PMK_TOK_CHKBIN, PRS_KW_ITEM},
+		{".CHECK_INCLUDE",	PMK_TOK_CHKINC, PRS_KW_ITEM},
+		{".CHECK_LIB",		PMK_TOK_CHKLIB, PRS_KW_ITEM},
+		{".CHECK_CONFIG",	PMK_TOK_CHKCFG, PRS_KW_ITEM},
+		{".CHECK_PKG_CONFIG",	PMK_TOK_CHKPKG, PRS_KW_ITEM},
+		{".CHECK_TYPE",		PMK_TOK_CHKTYP, PRS_KW_ITEM},
+/*		XXX new format */
+		{"DEFINE",		PMK_TOK_DEFINE, PRS_KW_ITEM}, /* XXX will be node */
+		{"SETTINGS",		PMK_TOK_SETNGS, PRS_KW_ITEM}, /* XXX will be node */
+		{"SWITCHES",		PMK_TOK_SWITCH, PRS_KW_ITEM}, /* XXX will be node */
+		{"CHECK_BINARY",	PMK_TOK_CHKBIN, PRS_KW_ITEM},
+		{"CHECK_INCLUDE",	PMK_TOK_CHKINC, PRS_KW_ITEM},
+		{"CHECK_LIB",		PMK_TOK_CHKLIB, PRS_KW_ITEM},
+		{"CHECK_CONFIG",	PMK_TOK_CHKCFG, PRS_KW_ITEM},
+		{"CHECK_PKG_CONFIG",	PMK_TOK_CHKPKG, PRS_KW_ITEM},
+		{"CHECK_TYPE",		PMK_TOK_CHKTYP, PRS_KW_ITEM},
 };
 
-int	nbfunc = sizeof(functab) / sizeof(cmdkw);
+int	nbkwpf = sizeof(kw_pmkfile) / sizeof(prskw);
+
+
+bool func_wrapper(prscell *pcell, pmkdata *pgd) {
+	bool	rval;
+	pmkcmd	cmd;
+
+	cmd.token = pcell->token;
+	cmd.label = pcell->label;
+
+	switch (cmd.token) {
+		case PMK_TOK_DEFINE :
+			rval = pmk_define(&cmd, pcell->ht, pgd);
+			break;
+		case PMK_TOK_TARGET :
+			rval = pmk_target(&cmd, pcell->ht, pgd);
+			break;
+		case PMK_TOK_ACCOMP :
+			rval = pmk_ac_compat(&cmd, pcell->ht, pgd);
+			break;
+		case PMK_TOK_SWITCH :
+			rval = pmk_switches(&cmd, pcell->ht, pgd);
+			break;
+/* XXX TODO
+		case PMK_TOK_SETNGS :
+			rval = pmk_(&cmd, pcell->ht, pgd);
+			break;
+		case PMK_TOK_SETVAR :
+			rval = pmk_(&cmd, pcell->ht, pgd);
+			break;
+		case PMK_TOK_SETPRM :
+			rval = pmk_(&cmd, pcell->ht, pgd);
+			break;
+*/
+		case PMK_TOK_CHKBIN :
+			rval = pmk_check_binary(&cmd, pcell->ht, pgd);
+			break;
+		case PMK_TOK_CHKINC :
+			rval = pmk_check_include(&cmd, pcell->ht, pgd);
+			break;
+		case PMK_TOK_CHKLIB :
+			rval = pmk_check_lib(&cmd, pcell->ht, pgd);
+			break;
+		case PMK_TOK_CHKCFG :
+			rval = pmk_check_config(&cmd, pcell->ht, pgd);
+			break;
+		case PMK_TOK_CHKPKG :
+			rval = pmk_check_pkg_config(&cmd, pcell->ht, pgd);
+			break;
+		case PMK_TOK_CHKTYP :
+			rval = pmk_check_type(&cmd, pcell->ht, pgd);
+			break;
+		default :
+			errorf("Unknow token %d", cmd.token);
+			rval = false;
+	}
+
+	return(rval);
+}
 
 
 /*
@@ -88,6 +156,11 @@ bool pmk_define(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 	for(i = 0 ; i < phk->nkey ; i++) {
 		value = po_get_str(hash_get(ht, phk->keys[i]));
 		if (hash_get(gdata->htab, phk->keys[i]) == NULL) {
+
+/*
+			value = process_string(value);
+			debugf("PROCESSED : '%s'", value);
+*/
 			hash_add(gdata->htab, phk->keys[i], value);
 			pmk_log("\tAdded '%s' define.\n", phk->keys[i]);
 			n++;
