@@ -37,11 +37,57 @@
 #ifndef _PMK_CFGTOOL_H_
 #define _PMK_CFGTOOL_H_
 
+#include "hash.h"
+
+
+#ifndef DATADIR
+/* for lint */
+#define DATADIR	"./data"
+#endif
+
+#define PMKCFG_DATA		DATADIR "/pmkcfgtool.dat"
+
 #define CT_FORMAT_VERSION	"%s %s 2>/dev/null"
 #define CT_FORMAT_DATA		"%s %s %s 2>/dev/null"
 
-bool ct_get_version(char *, char *, char *, size_t);
-bool ct_get_data(char *, char *, char *, char *, size_t);
+#define CFGTOOL_HT_SIZE	32
+
+#define CFGTOOL_OPT_VERSION	"--version"
+#define CFGTOOL_OPT_CFLAGS	"--cflags"
+#define CFGTOOL_OPT_LIBS	"--libs"
+
+
+/* config tool structures */
+
+typedef struct {
+	char	*name,
+		*binary,
+		*version,
+		*module,
+		*cflags,
+		*libs;
+} cfgtcell;
+
+
+typedef struct {
+	htable	*by_mod,
+		*by_bin;
+} cfgtdata;
+
+
+/* functions protos */
+
+void		 cfgtcell_destroy(cfgtcell *);
+cfgtdata	*cfgtdata_init();
+void		 cfgtdata_destroy(cfgtdata *);
+
+bool		 add_cfgtool(cfgtdata *, htable *);
+cfgtdata	*parse_cfgt_file();
+bool		 cfgtcell_get_binary(cfgtdata *, char *, char *, size_t);
+cfgtcell	*cfgtcell_get_cell(cfgtdata *, char *);
+
+bool		 ct_get_version(char *, char *, char *, size_t);
+bool		 ct_get_data(char *, char *, char *, char *, size_t);
 
 #endif /* _PMK_CFGTOOL_H_ */
 

@@ -40,7 +40,8 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
-#include "pmk.h"
+#include "dynarray.h"
+#include "premake.h"
 
 
 #ifndef S_BLKSIZE
@@ -71,9 +72,22 @@ typedef struct {
 		val[OPT_VALUE_LEN];
 } cfg_opt;
 
+/* command option type */
+typedef struct {
+	char	name[OPT_NAME_LEN],
+		value[OPT_VALUE_LEN];
+} pmkcmdopt;
+
+/* command type */
+typedef struct {
+	int	 token;
+	char	*label;
+} pmkcmd;
+
+
+/* function protos */
 
 FILE	*pmk_log_fp;
-
 
 bool	 get_line(FILE *, char *, int);
 
