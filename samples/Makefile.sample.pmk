@@ -1,0 +1,7 @@
+# Makefile example
+
+PREFIX=@PREFIX@
+BINPROG=@PREFIX@/bin/@PROGNAME@
+
+test:
+	@$(BINPROG) $(PREFIX)/pwet

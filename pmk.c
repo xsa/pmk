@@ -60,6 +60,7 @@
 #endif
 
 #include <ctype.h>
+#include <libgen.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -85,6 +86,136 @@ cmdkw		functab[] = {
 	{"CHECK_CONFIG", pmk_check_config}
 };
 
+
+
+/*
+	process the target file to replace tags
+
+	target : path of the target file
+
+	returns TRUE on success
+*/
+
+bool process_template(char *template) {
+	FILE	*tfd,
+		*dfd;
+	char	*path,
+		*destfile,
+		*dotidx,
+		*value,
+		final[MAXPATHLEN],
+		lbuf[MAXPATHLEN],
+		buf[MAXPATHLEN],
+		tbuf[MAXPATHLEN];
+	int	i,
+		j,
+		k;
+	bool	replace;
+
+	path = strdup(dirname(template));
+	if (path == NULL) {
+		errorf("Not enough memory !!");
+		return(FALSE);
+	}
+	destfile = strdup(basename(template));
+	if (destfile == NULL) {
+		errorf("Not enough memory !!");
+		return(FALSE);
+	}
+
+	/* remove suffix */
+	dotidx = strrchr(destfile, '.');
+	*dotidx = '\0';
+
+	/* build destination file */
+	snprintf(final, sizeof(final), "%s/%s", path, destfile);
+	free(path);
+	free(destfile);
+
+	tfd = fopen(template, "r");
+	if (tfd == NULL) {
+		errorf("Cannot open %s.", template);
+		return(FALSE);
+	}
+
+	dfd = fopen(final, "w");
+	if (dfd == NULL) {
+		fclose(tfd);
+		errorf("Cannot open %s.", final);
+		return(FALSE);
+	}
+
+	while (fgets(lbuf, sizeof(lbuf), tfd) != NULL) {
+		i = 0;
+		j = 0;
+		k = 0;
+		replace = FALSE;
+		while (lbuf[i] != '\0') {
+			if (replace == FALSE) {
+				if (lbuf[i] == PMK_TAG_CHAR) {
+					/* found begining of tag */
+					replace = TRUE;
+				} else {
+					/* copy normal text */
+					buf[j] = lbuf[i];
+					j++;
+				}
+			} else {
+				if (lbuf[i] == PMK_TAG_CHAR) {
+					/* tag identified */
+					replace = FALSE;
+					tbuf[k] = '\0';
+
+					value = hash_get(datahash, tbuf);
+					if (value == NULL) {
+						/* not a valid tag */
+						buf[j] = PMK_TAG_CHAR;
+						j++;
+						k = 0;
+						while (tbuf[k] != '\0') {
+							buf[j] = tbuf[k];
+							j++;
+							k++;
+						}
+					} else {
+						/* replace with value */
+						k = 0;
+						while (value[k] != '\0') {
+							buf[j] = value[k];
+							j++;
+							k++;
+						}
+					}
+					k = 0;
+				} else {
+					/* continue getting tag name */
+					tbuf[k] = lbuf[i];
+					k++;
+				}
+			}
+			i++;
+		}
+		if (replace == TRUE) {
+			/* not a tag, copy tbuf in buf */
+			buf[j] = PMK_TAG_CHAR;
+			j++;
+			tbuf[k] = '\0';
+			k = 0;
+			while (tbuf[k] != '\0') {
+				buf[j] = tbuf[k];
+				j++;
+				k++;
+			}
+		}
+		buf[j] = '\0';
+		/* saving parsed line */
+		fprintf(dfd, "%s", buf);
+	}
+
+	fclose(dfd);
+	fclose(tfd);
+	return(TRUE);
+}
 
 /*
 	process a command
@@ -476,10 +607,21 @@ int main(int argc, char *argv[]) {
 	/* print number of hashed command */
 	pmk_log("(%d)\n", keyhash->count);
 
+/*
+	ugly code to test processing of template file
+*/
+	datahash = hash_init(1024);
+	hash_add(datahash, "PREFIX", "/usr/local");
+	hash_add(datahash, "PROGNAME", "scandisk"); /* uhuhuhuhuh */
+/*
+	end of ugly code
+*/
+
 	if (parse(fd) == FALSE) {
 		/* an error occured while parsing */
 		rval = 1;
 	} else {
+		process_template("samples/Makefile.sample.pmk");
 		pmk_log("End of log.\n");
 	}
 

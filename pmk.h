@@ -47,6 +47,9 @@
 /* character to assign a value to a key */
 #define PMK_KEY_CHAR		'='
 
+/* character used as delimiter for template tags */
+#define PMK_TAG_CHAR		'@'
+
 /* maximal size of a command */
 #define MAX_CMD_NAME_LEN	64
 
