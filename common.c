@@ -307,12 +307,11 @@ dynary *str_to_dynary_adv(char *str, char *seplst) {
 
 bool find_file_dir(dynary *da, char *fname, char *fpath, size_t fplen) {
 	FILE		*fp;
-	bool		 found = false;
 	char		 tstr[MAXPATHLEN],
 			*path;
 	unsigned int	 i;
 
-	for (i = 0 ; (i < da_usize(da)) && (found == false) ; i++) {
+	for (i = 0 ; i < da_usize(da) ; i++) {
 		path = da_idx(da, i);
 
 		strlcpy(tstr, path, sizeof(tstr));
@@ -323,14 +322,18 @@ bool find_file_dir(dynary *da, char *fname, char *fpath, size_t fplen) {
 				fclose(fp);
 				if (strlcpy(fpath, path, fplen) < fplen) {
 					/* fpath correctly set */
-					found = true; /* XXX OPTIM return(true) ? */
+					return(true);
+				} else {
+					errorf("strlcpy failed in find_file_dir().");
+					return(false);
 				}
 			}
 		}
 
 	}
 
-	return(found); /* XXX OPTIM return(false); ? */
+	/* not found */
+	return(false);
 }
 
 /*

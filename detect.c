@@ -128,7 +128,7 @@ void compcell_destroy(comp_cell *pcc) {
 bool add_compiler(comp_data *pcd, htable *pht) {
 	comp_cell	*pcell;
 	char		*pstr,
-			 tstr[255]; /* XXX need define ? */
+			 tstr[TMP_BUF_LEN];
 
 	pcell = (comp_cell *) malloc(sizeof(comp_cell));
 	if (pcell == NULL)
@@ -168,14 +168,14 @@ bool add_compiler(comp_data *pcd, htable *pht) {
 
 	pstr = po_get_str(hash_get(pht, "SLCFLAGS"));
 	if (pstr == NULL) {
-		pcell->slcflags = strdup(""); /* XXX need better ? */
+		pcell->slcflags = strdup(""); /* default to empty string */
 	} else {
 		pcell->slcflags = strdup(pstr);
 	}
 
 	pstr = po_get_str(hash_get(pht, "SLLDFLAGS"));
 	if (pstr == NULL) {
-		pcell->slldflags = strdup(""); /* XXX need better ? */
+		pcell->slldflags = strdup(""); /* default to empty string */
 	} else {
 		pcell->slldflags = strdup(pstr);
 	}
@@ -253,7 +253,7 @@ char *comp_get_descr(comp_data *pcd, char *c_id) {
 	parse data from PMKCOMP_DATA file
 
 	cdfile : compilers data file
-	pht: XXX
+	pht: config hash table 
 
 	return : compiler data structure or NULL
 */
@@ -303,13 +303,23 @@ comp_data *parse_comp_file_adv(char *cdfile, htable *pht) {
 			switch(pcell->token) {
 				case PCC_TOK_ADDC :
 /*debugf("calling add_compiler()");*/
-					add_compiler(cdata, pcell->data); /* XXX check */
+					if (add_compiler(cdata, pcell->data) == false) {
+						errorf("add_compiler() failed in parse_comp_file_adv().");
+						compdata_destroy(cdata);
+						prsdata_destroy(pdata);
+						return(NULL);
+					}
 					break;
 
 				case PCC_TOK_ADDS :
 /*debugf("calling add_system()");*/
 					if (osname != NULL) {
-						add_system(cdata, pcell->data, osname); /* XXX check */
+						if (add_system(cdata, pcell->data, osname) == false) {
+							errorf("add_system() failed in parse_comp_file_adv().");
+							compdata_destroy(cdata);
+							prsdata_destroy(pdata);
+							return(NULL);
+						}
 					}
 					break;
 			

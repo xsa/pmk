@@ -1018,7 +1018,10 @@ bool pmk_check_pkg_config(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 
 		/* set config tool filename */
 		if (cfgtcell_get_binary(pgd->cfgt, target, pc_cmd, sizeof(pc_cmd)) == false) {
-			snprintf(pc_cmd, sizeof(pc_cmd), "%s-config", target); /* XXX check */
+			if (snprintf(pc_cmd, sizeof(pc_cmd), "%s-config", target) >= sizeof(pc_cmd)) {
+				errorf("overflow in snprintf().");
+				return(false);
+			}
 		}
 
 		/* looking for it in the path */
@@ -1081,7 +1084,7 @@ bool pmk_check_pkg_config(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 	/* gather data */
 	if (pkg_recurse(ppd, target) == false) {
 		pkgdata_destroy(ppd);
-		errorf("failed to recurse packages !"); /* XXX TODO better message :) */
+		errorf("failed to gather packages data (pkg_recurse() function call)");
 		return(false);
 	}
 
@@ -1614,7 +1617,7 @@ bool pmk_setparam_detect(pmkcmd *cmd, prsopt *popt, pmkdata *pgd) {
 	char		*pstr,
 			*ostr,
 			*ccpath,
-			 buf[255]; /* XXX need define ? good size ? */
+			 buf[TMP_BUF_LEN];
 	comp_cell	*pcell;
 	comp_data	*cdata;
 	comp_info	 cinfo;
