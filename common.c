@@ -244,8 +244,8 @@ dynary *str_to_dynary_adv(char *str, char *seplst) {
 
 	s = sizeof(buf);
 	pbuf = buf;
-	while (*str != CHAR_EOS) {
 
+	while (*str != CHAR_EOS) {
 		/* check if character is in separator list */
 		if (strchr(seplst, *str) != NULL) {
 			*pbuf = CHAR_EOS;
