@@ -1,3 +1,5 @@
+# $Id$ 
+
 PREMAKE=	pmk
 SETUP=		$(PREMAKE)setup
 SCAN=		$(PREMAKE)scan
