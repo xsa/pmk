@@ -1,3 +1,10 @@
+18 Oct 2003 mipsator
+ * fixed computing of top_srcdir.
+ * added processing of dynamic variables in pmk.
+ * added creation of directories in template processing.
+ * changed init_var() arguments.
+ * updated pmkfile.
+
 14 Oct 2003 mipsator
  * removed obsolete stuff (mostly compat with 0.6 syntax).
 

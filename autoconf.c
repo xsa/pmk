@@ -203,7 +203,7 @@ void ac_process_dyn_var(htable *pht, pmkdata *pgd, char *template) {
 	hash_add(pht, "abs_top_srcdir", strdup(srcdir));
 
 	/* compute top_srcdir */
-	relpath(abs_ad, srcdir, buf);
+	relpath(abs_bd, srcdir, buf);
 	hash_add(pht, "top_srcdir", strdup(buf));
 
 	/* absolute path of template */

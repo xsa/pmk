@@ -39,6 +39,8 @@
  */
 
 
+#include <sys/types.h>
+#include <sys/stat.h>
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -65,12 +67,74 @@ int		 cur_line = 0;
 /*
 	init variables
 
-	pht :
+	pht : XXX
 */
 
-void init_var(htable *pht) {
+void process_dyn_var(htable *pht, pmkdata *pgd, char *template) {
+	char	*srcdir,
+		*basedir,
+		*pstr,
+		 buf[MAXPATHLEN],
+		 rpath[MAXPATHLEN],
+		 stpath[MAXPATHLEN],
+		 btpath[MAXPATHLEN];
+
+	srcdir = pgd->srcdir;
+	basedir = pgd->basedir;
+
+	/* get template path */
+	pstr = strdup(template);
+	strlcpy(stpath, dirname(pstr), sizeof(stpath));
+	free(pstr);
+
+	/* compute relative path */
+	relpath(srcdir, stpath, rpath);
+
+	/* compute builddir_abs with relative path */
+	abspath(basedir, rpath, btpath); 
+	hash_add(pht, "builddir_abs", strdup(btpath));
+/*debugf("builddir_abs : '%s'", btpath);*/
+
+	/* compute relative path to builddir root */
+	relpath(btpath, basedir, buf);
+	hash_add(pht, "builddir_root_rel", strdup(buf));
+/*debugf("builddir_root_rel : '%s'", buf);*/
+
+	/* set buildir_rel to '.', useful ? */
+	hash_add(pht, "builddir_rel", strdup("."));
+/*debugf("builddir_rel : '.'");*/
+
+	/* compute and set relative path from basedir to srcdir */
+	relpath(btpath, srcdir, buf);
+	hash_add(pht, "srcdir_root_rel", strdup(buf));
+/*debugf("srcdir_root_rel : '%s'", buf);*/
+
+	/* set absolute path of template */
+	hash_add(pht, "srcdir_abs", strdup(stpath));
+/*debugf("srcdir_abs : '%s'", stpath);*/
+
+	/* compute and set relative path from template to builddir */
+	relpath(btpath, stpath, buf);
+	hash_add(pht, "srcdir_rel", strdup(buf));
+/*debugf("srcdir_rel : '%s'", buf);*/
+}
+
+/*
+	init variables
+
+	pht : global data hash table
+
+        return : -
+
+        NOTE : XXX check hash_add ?
+*/
+
+void init_var(pmkdata *pgd) {
 	char	 buf[TMP_BUF_LEN],
                 *pstr;
+	htable	*pht;
+
+	pht = pgd->htab;
 
 	hash_add(pht, "CFLAGS", strdup("")); /* XXX check ? */
 	hash_add(pht, "CPPFLAGS", strdup("")); /* XXX check ? */
@@ -113,6 +177,12 @@ void init_var(htable *pht) {
 	pstr = hash_get(pht, PMKCONF_BIN_EGREP);
 	if (pstr != NULL)
 		hash_add(pht, "EGREP", strdup(pstr));
+
+	/* set absolute paths */
+	hash_add(pht, "srcdir_root_abs", strdup(pgd->srcdir));
+/*debugf("srcdir_root_abs : '%s'", pgd->srcdir);*/
+	hash_add(pht, "builddir_root_abs", strdup(pgd->basedir));
+/*debugf("builddir_root_abs : '%s'", pgd->basedir);*/
 }
 
 /*
@@ -156,6 +226,7 @@ bool process_template(char *template, pmkdata *pgd) {
 		 lbuf[MAXPATHLEN],
 		 buf[MAXPATHLEN],
 		 tbuf[MAXPATHLEN],
+		 tpath[MAXPATHLEN],
 		 fpath[MAXPATHLEN],
 		 cibuf[TMP_BUF_LEN];
 	htable	*ht;
@@ -189,12 +260,13 @@ bool process_template(char *template, pmkdata *pgd) {
 	relpath(pgd->srcdir, dirname(ptmp), buf); /* XXX check ? */
 	free(ptmp);
 	/* apply to basedir */
-	abspath(pgd->basedir, buf, tbuf); /* XXX check ? */
+	abspath(pgd->basedir, buf, tpath); /* XXX check ? */
 
-	/* XXX TODO should create directories of the path ? */
+	/* XXX need to do a makepath function ? */
+	mkdir(tpath, S_IRWXU); /* XXX check ? */
 	
 	/* append filename */
-	abspath(tbuf, lbuf, fpath);
+	abspath(tpath, lbuf, fpath);
 
 	tfd = fopen(template, "r");
 	if (tfd == NULL) {
@@ -209,11 +281,13 @@ bool process_template(char *template, pmkdata *pgd) {
 		return(false);
 	}
 
+	process_dyn_var(ht, pgd, template); /* XXX should use directly path ? */
+
 	if (pgd->ac_file == NULL) {
 		ac_flag = false;
 	} else {
 		ac_flag = true;
-		ac_process_dyn_var(ht, pgd, template); /* XXX should use directly path */
+		ac_process_dyn_var(ht, pgd, template); /* XXX should use directly path ? */
 	}
 
 	snprintf(cibuf, sizeof(cibuf), "%s, generated from %s by PMK.", pfn, ptn);
@@ -522,7 +596,7 @@ int main(int argc, char *argv[]) {
 	}
 
 	/* initialize some variables */
-	init_var(gdata.htab);
+	init_var(&gdata);
 
 	if (enable_sw != NULL) {
 		/* command line switches to enable */
