@@ -51,7 +51,7 @@ bool	record_def(htable *, char *, bool);
 bool	record_val(htable *, char *, char *);
 bool	label_set(htable *, char *, bool);
 bool	label_check(htable *, char *);
-bool	depend_check(pmkdata *);
+bool	depend_check(htable *, pmkdata *);
 bool	require_check(htable *);
 
 #endif /* _PMK_FUNCTOOL_H_ */

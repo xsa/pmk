@@ -128,4 +128,4 @@ test_pmksetup: pmksetup
 	@echo "Done."
 	@echo ""
 
-test_all: test_pmksetup test_pmk clean
+test_all: test_pmksetup test_pmk

@@ -107,6 +107,15 @@ bool pmk_check_binary(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 
 	required = require_check(ht);
 
+	if (depend_check(ht, gdata) == false) {
+		pmk_log("\t%s\n", gdata->errmsg);
+		if (required == true) {
+			return(false);
+		} else {
+			return(true);
+		}
+	}
+
 	filename = hash_get(ht, "FILENAME");
 	if (filename == NULL) {
 		errorf("FILENAME not assigned in label '%s'", cmd->label);
@@ -158,6 +167,15 @@ bool pmk_check_include(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 	pmk_log("* Checking include [%s]\n", cmd->label);
 
 	required = require_check(ht);
+
+	if (depend_check(ht, gdata) == false) {
+		pmk_log("\t%s\n", gdata->errmsg);
+		if (required == true) {
+			return(false);
+		} else {
+			return(true);
+		}
+	}
 
 	/* get include filename */
 	incfile = hash_get(ht, "INCLUDE");
@@ -251,6 +269,15 @@ bool pmk_check_lib(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 
 	required = require_check(ht);
 
+	if (depend_check(ht, gdata) == false) {
+		pmk_log("\t%s\n", gdata->errmsg);
+		if (required == true) {
+			return(false);
+		} else {
+			return(true);
+		}
+	}
+
 	libname = hash_get(ht, "LIBNAME");
 	if (libname == NULL) {
 		errorf("LIBNAME not assigned in label '%s'.", cmd->label);
@@ -340,6 +367,15 @@ bool pmk_check_config(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 	pmk_log("* Checking with config tool [%s]\n", cmd->label);
 
 	required = require_check(ht);
+
+	if (depend_check(ht, gdata) == false) {
+		pmk_log("\t%s\n", gdata->errmsg);
+		if (required == true) {
+			return(false);
+		} else {
+			return(true);
+		}
+	}
 
 	cfgtool = hash_get(ht, "CFGTOOL");
 	if (cfgtool == NULL) {

@@ -348,13 +348,14 @@ bool label_check(htable *lht, char *name) {
 	returns true if all dependencies are true
 */
 
-bool depend_check(pmkdata *gd) {
+bool depend_check(htable *lht, pmkdata *gd) {
 	bool	rval = true;
-	char	*deplst;
+	char	*deplst,
+		*fdep;
 	dynary	*da;
 	int	i;
 
-	deplst = hash_get(gd->htab, "DEPEND");
+	deplst = hash_get(lht, "DEPEND");
 	if (deplst == NULL) {
 		/* no dependencies, check is true */
 		return(true);
@@ -369,8 +370,11 @@ bool depend_check(pmkdata *gd) {
 
 	/* check labels one by one */
 	for (i = 0 ; (i < da_usize(da)) && (rval == true) ; i++) {
-		if (label_check(gd->labl, da_idx(da, i)) == false)
+		fdep = da_idx(da, i);
+		if (label_check(gd->labl, fdep) == false) {
 			rval = false;
+			snprintf(gd->errmsg, sizeof(gd->errmsg), "Dependency '%s' failed.", fdep);
+		}
 	}
 
 	da_destroy(da);
@@ -379,6 +383,11 @@ bool depend_check(pmkdata *gd) {
 }
 
 /*
+	check the required flag
+
+	ht : hash table of the command options
+
+	returns a boolean
 */
 
 bool require_check(htable *pht) {

@@ -72,6 +72,9 @@
 /* maximal number of key in label hash */
 #define MAX_LABEL_KEY		1024
 
+/* maximal size of error message */
+#define MAX_ERRMSG_LEN		256
+
 /* command option type */
 typedef struct {
 	char	name[MAX_OPT_NAME_LEN],
@@ -89,6 +92,7 @@ typedef struct {
 	htable	*htab,
 		*labl;
 	dynary	*tlist;
+	char	errmsg[MAX_ERRMSG_LEN];
 } pmkdata;
 
 
