@@ -102,8 +102,13 @@ int main(int argc, char *argv[]) {
 		exit(1);
 	}
 
-	
-	fprintf(stdout, "==> Looking for default parameters...\n");
+	printf("PMKSETUP version %s", PREMAKE_VERSION);
+#ifdef DEBUG
+	printf(" [SUB #%s] [SNAP #%s]", PREMAKE_SUBVER_PMKSETUP, PREMAKE_SNAP);
+#endif
+	printf("\n\n");
+
+	printf("==> Looking for default parameters...\n");
 	if ((get_env_vars(ht) == -1) || (get_binaries(ht) == -1))
 		exit(1);
 
@@ -116,18 +121,18 @@ int main(int argc, char *argv[]) {
 		exit(1);
 
 	if ((config = fopen(PREMAKE_CONFIG_PATH, "r")) != NULL) {
-		fprintf(stdout, "==> Configuration file found: %s\n", PREMAKE_CONFIG_PATH);
+		printf("==> Configuration file found: %s\n", PREMAKE_CONFIG_PATH);
 
 		/* parse configuration file */
 		error = parse_conf(config, ht);
 
 		fclose(config);
 	} else {
-		fprintf(stdout, "==> Configuration file not found, generating one...\n");
+		printf("==> Configuration file not found, generating one...\n");
 		config = NULL;
 	}
 
-	fprintf(stdout, "==> Merging remaining data...\n");	
+	printf("==> Merging remaining data...\n");	
 	/* writing the remaining data stored in the hash */
 	write_new_data(ht);
 	/* destroying the hash once we'r done with it */	
@@ -543,7 +548,7 @@ void verbosef(const char *fmt, ...) {
 		vsnprintf(buf, sizeof(buf), fmt, plst);
 		va_end(plst);
 
-		fprintf(stdout, "%s\n", buf);
+		printf("%s\n", buf);
 	}
 }
 

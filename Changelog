@@ -1,3 +1,9 @@
+16 Jul 2003 mipsator
+ * misc changes in pmkscan.c to use regex.
+ * added sub versions for all tools.
+ * added display of subversion and snapversion in debug mode.
+ * misc replacements in pmksetup.
+
 15 Jul 2003 mipsator
  * add parse.c and parse.h with a new shared parsing engine.
  * add pmkscan.c and pmkscan.h, this is preliminary and unusable code.
