@@ -7,6 +7,8 @@
  * fixed makefile to use correct path (DATADIR, BINDIR).
  * fixed check_header() to also clean object files.
  * fixed prsdata_destroy() to avoid segfault when NULL is provided.
+ * added missing comments, cleaned-up code.
+ * added better handling of the version when unknown.
 
 15 Dec 2003  mipsator
  * added gen_test_file() to automate test file generation in detect. 

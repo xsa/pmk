@@ -51,11 +51,17 @@ int	nbkwpc = sizeof(kw_pmkcomp) / sizeof(prskw);
 
 /*
 	add a new compiler cell
+
+	pcd : compiler data structure
+	pht : parsed data
+
+	return : boolean
 */
 
 bool add_compiler(comp_data *pcd, htable *pht) {
 	comp_cell	*pcell;
-	char	*pstr;
+	char	*pstr,
+		 tstr[255]; /* XXX need define ? */
 	htable	*pcht;
 
 	pcht = pcd->cht;
@@ -90,9 +96,10 @@ bool add_compiler(comp_data *pcd, htable *pht) {
 
 	pstr = po_get_str(hash_get(pht, "VERSION"));
 	if (pstr == NULL) {
-		pcell->v_macro = strdup("0");
+		pcell->v_macro = strdup(DEF_NOVERSION);
 	} else {
-		pcell->v_macro = strdup(pstr);
+		snprintf(tstr, sizeof(tstr), DEF_VERSION, pstr);
+		pcell->v_macro = strdup(tstr);
 	}
 
 	hash_add(pcd->cht, pcell->c_id, pcell);
@@ -102,10 +109,15 @@ bool add_compiler(comp_data *pcd, htable *pht) {
 
 /*
 	get compiler data
+
+	pcd : compiler data structure
+	c_id : compiler id
+
+	return : compiler cell structure
 */
 
-comp_cell *comp_get(comp_data *cdata, char *c_id) {
-	return(hash_get(cdata->cht, c_id));
+comp_cell *comp_get(comp_data *pcd, char *c_id) {
+	return(hash_get(pcd->cht, c_id));
 }
 
 /*
@@ -124,9 +136,8 @@ char *comp_get_descr(comp_data *cdata, char *c_id) {
 	parse data from PMKCOMP_DATA file
 
 	cdfile : compilers data file
-	cdata : compilers data structure
 
-	return : boolean (true on success)
+	return : compiler data structure or NULL
 */
 
 comp_data *parse_comp_file(char *cdfile) {
@@ -136,29 +147,37 @@ comp_data *parse_comp_file(char *cdfile) {
 	prscell		*pcell;
 	prsdata		*pdata;
 
-	cdata = (comp_data *) malloc(sizeof(comp_data)); /* XXX check */
+	/* allocate compiler data structure */
+	cdata = (comp_data *) malloc(sizeof(comp_data));
+	if (cdata == NULL)
+		return(NULL);
 
+	/* initialize parsing structure */
 	pdata = prsdata_init();
 	if (pdata == NULL) {
+		free(cdata);
 		errorf("cannot intialize prsdata.");
 		return(NULL);
 	}
 
+	/* init compilers hash table */
 	cdata->cht = hash_init(MAX_COMP);
 	if (cdata->cht == NULL) {
+		free(cdata);
 		prsdata_destroy(pdata);
 		debugf("cannot initialize comp_data");
 		return(NULL);
 	}
 
-debugf("cdfile = '%s'", cdfile);
 	fd = fopen(cdfile, "r");
 	if (fd == NULL) {
+		free(cdata);
 		prsdata_destroy(pdata);
 		errorf("cannot open '%s'", cdfile);
 		return(NULL);
 	}
 
+	/* parse data file and fill prsdata strucutre */
 	rval = parse_pmkfile(fd, pdata, kw_pmkcomp, nbkwpc);
 	fclose(fd);
 
@@ -172,6 +191,7 @@ debugf("cdfile = '%s'", cdfile);
 			
 				default :
 					errorf("parsing of data file failed.");
+					free(cdata);
 					prsdata_destroy(pdata);
 					return(NULL);
 					break;
@@ -181,40 +201,45 @@ debugf("cdfile = '%s'", cdfile);
 		}
 	} else {
 		errorf("parsing of data file failed.");
+		free(cdata);
 		prsdata_destroy(pdata);
 		return(NULL);
 	}
+
+	/* parsing data no longer needed */
+	prsdata_destroy(pdata);
 
 	return(cdata);
 }
 
 /*
 	detect compiler
+
+	fp : target file
+	pcd : compiler data structure
+
+	return : boolean
 */
 
-bool gen_test_file(FILE *fp, comp_data *cdata) {
+bool gen_test_file(FILE *fp, comp_data *pcd) {
 	comp_cell	*pcell;
 	hkeys		*phk;
 	htable		*pht;
 	int		 i;
 
-	pht = cdata->cht;
+	pht = pcd->cht;
 
 	phk = hash_keys(pht);
 	if (phk == NULL) {
-		debugf("arg");
+		debugf("cannot get hash keys.");
 	}
 
 	fprintf(fp, COMP_TEST_HEADER);
 
 	for(i = 0 ; i < phk->nkey ; i++) {
 		pcell = hash_get(pht, phk->keys[i]);
-		fprintf(fp, COMP_TEST_FORMAT,
-			pcell->descr,
-			pcell->c_macro,
-			pcell->c_id,
-			pcell->v_macro
-			);
+		fprintf(fp, COMP_TEST_FORMAT, pcell->descr,
+			pcell->c_macro, pcell->c_id, pcell->v_macro);
 	}
 
 	fprintf(fp, COMP_TEST_FOOTER);
@@ -224,9 +249,16 @@ bool gen_test_file(FILE *fp, comp_data *cdata) {
 
 /*
 	detect compiler
+
+	cpath : compiler path
+	blog : buildlog file or /dev/null
+	pcd : compiler data structure
+	cinfo : compiler info structure
+
+	return : boolean
 */
 
-bool detect_compiler(char *cpath, char *blog, comp_data *cdata, comp_info *cinfo) {
+bool detect_compiler(char *cpath, char *blog, comp_data *pcd, comp_info *cinfo) {
 	FILE		*tfp,
 			*rpipe;
 	bool		 failed = false;
@@ -238,7 +270,7 @@ bool detect_compiler(char *cpath, char *blog, comp_data *cdata, comp_info *cinfo
 	tfp = tmps_open(CC_TEST_FILE, "w", ftmp, sizeof(ftmp), sizeof(CC_TFILE_EXT));
 	if (tfp != NULL) {
 		/* fill test file */
-		gen_test_file(tfp, cdata);
+		gen_test_file(tfp, pcd);
 		fclose(tfp);
 	} else {
 		errorf("cannot open test file ('%s').", ftmp);
