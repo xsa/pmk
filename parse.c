@@ -1108,6 +1108,26 @@ bool parse_pmkfile(FILE *fp, prsdata *pdata, prskw kwtab[], size_t size) {
 }
 
 /*
+	process option line of configuration file
+
+	pht : storage hash table
+	popt : option structure to record
+
+	return : boolean
+*/
+
+bool process_opt(htable *pht, prsopt *popt) {
+	if ((popt->opchar != CHAR_COMMENT) && (popt->opchar != CHAR_EOS)) {
+		/* add options that are not comment neither blank lines */
+		if (hash_update_dup(pht, popt->key, po_get_str(popt->value)) == HASH_ADD_FAIL) {
+			errorf("hash failure.");
+			return(false);
+		}
+	}
+	return(true);
+}
+
+/*
 	parse configuration file
 
 	fp : file to parse 

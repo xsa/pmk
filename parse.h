@@ -147,6 +147,7 @@ bool	 parse_node(FILE *, prsdata *, htable *, prscell *);
 bool	 parse_command(FILE *, prsdata *, prscell *);
 bool	 parse_line(FILE *, prsdata *, htable *, prsnode *);
 bool	 parse_pmkfile(FILE *, prsdata *, prskw [], size_t);
+bool	 process_opt(htable *, prsopt *);
 bool	 parse_pmkconf(FILE *, htable *, char *, bool (*)(htable *, prsopt *));
 
 #endif /* _PMK_PARSE_H_ */
