@@ -108,4 +108,3 @@ bool		 pkg_mod_exists(pkgdata *ppd, char *mod);
 int		 compare_version(char *, char *);
 
 #endif /* _PMK_PKGCONFIG_H_ */
-

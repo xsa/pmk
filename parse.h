@@ -178,4 +178,3 @@ bool	 process_opt(htable *, prsopt *);
 bool	 parse_pmkconf(FILE *, htable *, char *, bool (*)(htable *, prsopt *));
 
 #endif /* _PMK_PARSE_H_ */
-

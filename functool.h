@@ -83,4 +83,3 @@ char	*get_comp_path(htable *, char *);
 bool	 check_cfgt_data(pmkdata *pgd);
 
 #endif /* _PMK_FUNCTOOL_H_ */
-
