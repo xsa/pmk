@@ -65,7 +65,7 @@ int main(void) {
 	char		*v;	
 	char		line[MAX_LINE_LEN],
 			filename[MAXPATHLEN];
- 	conf_opt	options;	
+ 	cfg_opt		options;	
 	htable		*ht;
 
 
@@ -109,7 +109,7 @@ int main(void) {
 						return(-1);
 						break;
 					default :
-						if (parse_line(line, linenum, &options) == 0) {
+						if (parse_conf_line(line, linenum, &options) == 0) {
 							if ((v = hash_get(ht, options.key)) != NULL) {
 								/* checking the VAR<->VALUE separator */
 								switch (options.opchar) {
@@ -282,66 +282,6 @@ int get_binaries(htable *ht) {
 	return(0);
 }
 
-/*
- * Parses a given line.
- * atm, using samples/pmk.conf.sample -> /etc/pmk.conf
- *      
- *	line: line to parse
- *	linenum: line number
- *	opts: struct where where we store the key->value data   
- *
- *	returns:  0 on success
- *		 -1 on failure
- */
-int parse_line(char *line, int linenum, conf_opt *opts) {
-	char	key[MAX_OPT_NAME_LEN],
-		value[MAX_OPT_VALUE_LEN],
-		c;
-	int	i = 0, j = 0, k = 0,
-		found_op = 0;
-
-
-	while ((c = line[i]) != '\0') {
-		if (found_op == 0) {
-			if ((c == PMKSETUP_ASSIGN_CHAR) || (c == PMKSETUP_STATIC_CHAR)) {
-				/* operator found, terminate key and copy key name in struct */
-				found_op = 1;
-				key[j] = '\0';
-				strncpy(opts->key, key, MAX_OPT_NAME_LEN);
-
-				/* set operator in struct */
-				opts->opchar = c;
-			} else {
-				key[j] = c;
-				j++;
-				if (j > MAX_OPT_NAME_LEN) {
-					/* too small, cannot store key name */
-					errorf_line(PREMAKE_CONFIG_PATH, linenum, "key name too long.");
-					return(-1);
-				}
-			}
-		} else {
-			value[k] = c;
-			k++;
-			if (k > MAX_OPT_VALUE_LEN) {
-				/* too small, cannot store key value */
-				errorf_line(PREMAKE_CONFIG_PATH, linenum, "key value too long.");
-				return(-1);
-			}
-		}
-		i++;
-	}
-	if (found_op == 1) {
-		/* line parsed without any error */
-		value[k] = '\0';
-		strncpy(opts->val, value, MAX_OPT_VALUE_LEN);
-		return(0);			
-	} else {
-		/* missing operator */
-		errorf_line(PREMAKE_CONFIG_PATH, linenum, "operator not found.");
-		return(-1);
-	}
-}
 
 /*
  * Copy the temporary configuration file to the system one
