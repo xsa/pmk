@@ -1,6 +1,8 @@
 05 Jan 2004 mipsator
  * improved check_mode() in pmkinstall.c, patch provided by
 						Pedro Martelletto.
+ * improved a bit pmkcfg.sh to use a list of templates.
+ * set INSTALL back to install and added a special comment for HPUX.
 
 03 Jan 2004 mipsator
  * fixed get_make_var() by replacing misused mkstemp() by tmps_open().
