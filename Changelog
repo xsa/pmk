@@ -1,3 +1,9 @@
+10 Sep 2003 mipsator
+ * added parse_key() and parse_data() to enforce syntax checking.
+ * removed parse_word which became useless.
+ * added warning for AC_COMPAT and TARGET to mark them as obsolete.
+ * misc cosmetics in pmkfile sample.
+
 # snapshot 0.6.2
 
 06 Sep 2003 mipsator

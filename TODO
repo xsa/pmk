@@ -1,6 +1,8 @@
 common :
 - tutorial 
 + improve parser to parse variables
+! force types in parser
+! missing function headers
 
 pmk :
 + update pmk.1
@@ -8,10 +10,12 @@ pmk :
 ~ compatibility with autoconf (progressing)
 - set CPPFLAGS
 - set LDFLAGS ?
-- cache ? (hash table with binary location, ...)
+! cache ? (hash table with binary location, ...)
 - more C++ support
 ~ global LANG
 ~ replace po_get_data
+- CHECK_VAR ?
+- verify in CHECK_BINARY that program has executable right ?
 
 pmksetup :
 ~ pmk.conf(5)
@@ -21,6 +25,7 @@ pmksetup :
 	- long double (pmk ?)
 	- better check for install ?
 	- others ?
+! use main parser
 	
 pmkscan :
 - add more entries in pmkscan.dat
