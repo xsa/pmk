@@ -3,6 +3,7 @@
  * updated func.c to use cfgtool new functions.
  * moved config tool stuff from pkgconfig to cfgtool.
  * moved pmkcmd an pmkcmdopt typedefs to common.
+ * improved pmkpc to fall back on config tool if module is not found.
 
 13 Jan 2004 mipsator
  * improved pmkpc to not care about argument order (like pkg-config).
