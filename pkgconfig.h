@@ -37,16 +37,21 @@
 #ifndef _PMK_PKGCONFIG_H_
 #define _PMK_PKGCONFIG_H_
 
-#define PKGCONFIG_DIR		"/usr/local/lib/pkgconfig" /* XXX XXX XXX hardcode !!!!! should use prefix */
+#include "pmk.h"
 
 #ifndef DATADIR
 /* for lint */
 #define DATADIR	"./data"
 #endif
 
-#define PMKCFG_DATA	DATADIR "/pmkcfgtool.dat"
+#define PMKCFG_DATA		DATADIR "/pmkcfgtool.dat"
+#define PMKCFG_ENV_PATH		"PKG_CONFIG_PATH"
+#define PMKCFG_ENV_LIBDIR	"PKG_CONFIG_LIBDIR"
+
+#define PKGCFG_CHAR_PATH_SEP	':'
 
 #define PKGCFG_HT_SIZE	512
+#define CFGTOOL_HT_SIZE	32
 
 #define CFGTOOL_OPT_VERSION	"--version"
 #define CFGTOOL_OPT_CFLAGS	"--cflags"
@@ -54,7 +59,7 @@
 
 /* packages strucutres */
 
-typedef struct s_pkgcell {
+typedef struct {
 	char	*name,
 		*descr,
 		*version,
@@ -64,13 +69,13 @@ typedef struct s_pkgcell {
 	htable	*variables;
 } pkgcell;
 
-typedef struct s_pkgdata {
+typedef struct {
 	htable	*files,
 		*cells;
 	dynary	*mods;
 } pkgdata;
 
-typedef struct s_pkgkw {
+typedef struct {
 	char		*kw_name;
 	unsigned int	 kw_id;
 } pkgkw;
@@ -78,7 +83,7 @@ typedef struct s_pkgkw {
 
 /* config tool structures */
 
-typedef struct s_cfgtcell {
+typedef struct {
 	char	*name,
 		*binary,
 		*version,
@@ -88,7 +93,7 @@ typedef struct s_cfgtcell {
 } cfgtcell;
 
 
-typedef struct s_cfgtdata {
+typedef struct {
 	htable	*by_mod,
 		*by_bin;
 } cfgtdata;
@@ -98,7 +103,13 @@ pkgcell		*pkgcell_init();
 void		 pkgcell_destroy(pkgcell *);
 pkgdata		*pkgdata_init();
 void		 pkgdata_destroy(pkgdata *);
+
+void		 cfgtcell_destroy(cfgtcell *);
+cfgtdata	*cfgtdata_init();
+void		 cfgtdata_destroy(cfgtdata *);
+
 bool		 scan_dir(char *, pkgdata *);
+bool		 pkg_collect(char *, pkgdata *);
 bool		 parse_keyword(pkgcell *, char *, char *);
 char		*process_variables(char *, htable *);
 pkgcell		*parse_pc_file(char *);
@@ -109,7 +120,6 @@ char		*pkg_get_libs(pkgdata *);
 bool		 pkg_mod_exists(pkgdata *ppd, char *mod);
 
 bool		 add_cfgtool(cfgtdata *, htable *);
-void		 cfgtcell_destroy(cfgtcell *);
 cfgtdata	*parse_cfgt_file();
 bool		 cfgtcell_get_binary(pmkdata *, char *, char *, size_t);
 cfgtcell	*cfgtcell_get_cell(pmkdata *, char *);

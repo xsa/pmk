@@ -925,13 +925,13 @@ bool pmk_check_pkg_config(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 	char	*target,
 #ifndef EXPERIMENTAL_PKGCONFIG
 		 pipebuf[TMP_BUF_LEN],
-		*pc_path = NULL,
 #else
 		*pipebuf,
 #endif
 		 pc_cmd[MAXPATHLEN],
 		 pc_buf[MAXPATHLEN],
 		*bpath,
+		*pc_path,
 		*libvers,
 		*cflags,
 		*libs;
@@ -955,7 +955,7 @@ bool pmk_check_pkg_config(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 
 #ifndef EXPERIMENTAL_PKGCONFIG
 	/* try to get pkg-config path from pmk.conf setting */
-	pc_path = (char *) hash_get(pgd->htab, PMKCONF_BIN_PKGCONFIG);
+	pc_path = hash_get(pgd->htab, PMKCONF_BIN_PKGCONFIG);
 
 	/* nothing in pmk.conf, hope it is obsolete
 		and look for it in the binary path */
@@ -971,6 +971,14 @@ bool pmk_check_pkg_config(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 		if (get_file_path(PMKVAL_BIN_PKGCONFIG, bpath, pc_buf, sizeof(pc_buf)) == true) {
 			pc_path = pc_buf;
 		}
+	}
+#else
+	/* try to get pkg-config lib path from pmk.conf */
+	pc_path = hash_get(pgd->htab, PMKCONF_PC_PATH_LIB);
+	if (pc_path == NULL) {
+		errorf("unable to find pkg-config libdir");
+		errorf("pkg-config may not be installed or update pmk.conf");
+		return(false);
 	}
 #endif
 
@@ -1031,7 +1039,12 @@ bool pmk_check_pkg_config(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 		return(false);
 	}
 
-	scan_dir(PKGCONFIG_DIR, ppd); /* XXX check */
+	/* collect packages data */
+	if (pkg_collect(pc_path, ppd) == false) {
+		pkgdata_destroy(ppd);
+		errorf("cannot collect packages data");
+		return(false);
+	}
 #endif
 
 	/* check if package exists */

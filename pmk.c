@@ -52,6 +52,7 @@
 #include "common.h"
 #include "func.h"
 #include "pathtools.h"
+#include "pkgconfig.h"
 #include "pmk.h"
 #include "parse.h"
 
@@ -489,11 +490,9 @@ void clean(pmkdata *pgd) {
 	if (pgd->labl != NULL) {
 		hash_destroy(pgd->labl);
 	}
-/* XXX should destroy
 	if (pgd->cfgt != NULL) {
-		hash_destroy(pgd->cfgt);
+		cfgtdata_destroy(pgd->cfgt);
 	}
-*/
 	if (pgd->tlist != NULL) {
 		da_destroy(pgd->tlist);
 	}
