@@ -1,3 +1,5 @@
+# PMK 0.7 released
+
 12 Oct 2003 mipsator
  * removed stuff not related to autoconf into ac_set_variables().
  * added some more stuff in ac_set_variables().
