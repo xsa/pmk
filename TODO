@@ -36,7 +36,7 @@ mreindl	~.	latex version of tutorial
 
 pmk:
 -----------------------------------------------------------------------
-	-.	MODULE support in CHECK_PKG_CONFIG
+	+	MODULE support in CHECK_CONFIG
 	+	linking flags for shared libraries (starting with our
 		supported platforms)
 	+	test of shared lib support

@@ -49,8 +49,12 @@
 
 #define PMKCFG_DATA		DATADIR "/pmkcfgtool.dat"
 
+/* version format line: tool_path version_option */
 #define CT_FORMAT_VERSION	"%s %s 2>/dev/null"
-#define CT_FORMAT_DATA		"%s %s %s 2>/dev/null"
+/* data gathering format line: tool_path data_option */
+#define CT_FORMAT_DATA		"%s %s 2>/dev/null"
+/* module gathering format line: tool_path data_option module */
+#define CT_FORMAT_DATA_MOD	"%s %s %s 2>/dev/null"
 
 #define CFGTOOL_HT_SIZE	32
 

@@ -3,6 +3,7 @@
    Marek Habersack.
  * fixed pkgcell_destroy() to call free() only when needed, based on a
    patch from Marek Habersack.
+ * added MODULE option to CHECK_CONFIG command.
 
 25 Feb 2004 mipsator
  * moved tests for pmkscan and pmkinstall.
