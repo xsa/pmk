@@ -157,6 +157,10 @@ bool	pmk_check_variable(pmkcmd *, htable *, pmkdata *);
 bool	pmk_build_shlib_name(pmkcmd *, htable *, pmkdata *);
 
 bool	pmk_set_parameter(pmkcmd *, prsopt *, pmkdata *);
+bool	pmk_setparam_accompat(pmkcmd *, prsopt *, pmkdata *);
+bool	pmk_setparam_glang(pmkcmd *, prsopt *, pmkdata *);
+bool	pmk_setparam_target(pmkcmd *, prsopt *, pmkdata *);
+bool	pmk_setparam_detect(pmkcmd *, prsopt *, pmkdata *);
 bool	pmk_set_variable(pmkcmd *, prsopt *, pmkdata *);
 
 #endif /* _PMK_FUNC_H_ */

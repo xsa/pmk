@@ -1449,157 +1449,24 @@ debugf("versvar not set");
 */
 
 bool pmk_set_parameter(pmkcmd *cmd, prsopt *popt, pmkdata *pgd) {
-	bool		 rval = false;
-	char		*pstr,
-			/**osname,*/
-			*ccpath;
-	comp_cell	*pcell;
-	comp_data	*cdata;
-	comp_info	 cinfo;
-	/*|+comp_sys	*csys,+|*/
-	/*                *tsys;*/
-	dynary		*da;
-	int		 i = 0,
-			 n;
-	lgdata		*pld;
-
 	/* gnu autoconf compatibility */
 	if (strncmp(popt->key, KW_SETNGS_ACCOMP, sizeof(popt->key)) == 0) {
-		pmk_log("\tSetting autoconf compatibility :\n");
-
-		/* XXX must check if valid
-			pstr = (char *) hash_get(pgd->htab, "SYSCONFDIR");
-			hash_update_dup(pgd->htab, "sysconfdir", pstr);
-		*/
-
-		/* if a file is given then it will be parsed later */
-		pstr = po_get_str(popt->value);
-		if (*pstr != CHAR_EOS) {
-			pgd->ac_file = strdup(pstr);
-			pmk_log("\t\tSet file to '%s'.\n", pstr);
-			if (hash_update_dup(pgd->htab, AC_VAR_DEF, AC_VALUE_DEF) == HASH_ADD_FAIL) {
-				errorf("failed to add value for '%s' in hash table.", AC_VAR_DEF);
-				return(false);
-			}
-			pmk_log("\t\tSet '%s' value to '%s'.\n", AC_VAR_DEF, AC_VALUE_DEF);
-		}
-
-		/* compatibility tags */
-		if (ac_set_variables(pgd->htab) == false)
-			return(false); /* XXX error message ? */
-		pmk_log("\t\tSet specific variables.\n");
-
-		return(true);
+		return(pmk_setparam_accompat(cmd, popt, pgd));
 	}
 
 	/* global language */
 	if (strncmp(popt->key, KW_SETNGS_GLANG, sizeof(popt->key)) == 0) {
-		pmk_log("\tSetting global language :\n");
-
-		/* set global language */
-		pstr = po_get_str(popt->value);
-
-		if (pstr != NULL) {
-			/* check if provided lang is supported */
-			if (check_lang(pstr) != NULL) {
-				pgd->lang = strdup(pstr);
-				pmk_log("\t\tSet to '%s'.\n", pstr);
-				rval = true;
-			} else {
-				errorf("unknown language.");
-			}
-		} else {
-			errorf("syntax error in LANG.");
-		}
-		return(rval);
+		return(pmk_setparam_glang(cmd, popt, pgd));
 	}
 
 	/* set target files */
 	if (strncmp(popt->key, KW_SETNGS_TARGET, sizeof(popt->key)) == 0) {
-		pmk_log("\tCollecting targets :\n");
-
-		da = po_get_list(popt->value);
-		if (da == NULL) {
-			errorf("syntax error in TARGET.");
-			return(false);
-		}
-
-		n = da_usize(da);
-		for (i=0 ; i < n ; i++) {
-			pmk_log("\t\tAdded '%s'.\n", da_idx(da, i));
-		}
-
-		pgd->tlist = da;
-
-		pmk_log("\t\tTotal %d target(s) added.\n", n);
-
-		return(true);
+		return(pmk_setparam_target(cmd, popt, pgd));
 	}
 
 	/* set target files */
 	if (strncmp(popt->key, KW_SETNGS_CCDTCT, sizeof(popt->key)) == 0) {
-		pmk_log("\tDetecting compilers :\n");
-
-		da = po_get_list(popt->value);
-		if (da == NULL) {
-			errorf("syntax error in DETECT.");
-			return(false);
-		}
-
-		pmk_log("\t\tGathering data for compiler detection.\n");
-		cdata = parse_comp_file_adv(PMKCOMP_DATA, pgd->htab);
-		if (cdata == NULL) {
-			return(false);
-		}
-
-		n = da_usize(da);
-		for (i=0 ; i < n ; i++) {
-			pstr = da_idx(da, i);
-			pmk_log("\t\tDetecting '%s' : ", pstr);
-			/* get the appropriate compiler */
-			ccpath = get_comp_path(pgd->htab, pstr);
-			if (ccpath == NULL) {
-				errorf("\ncannot get compiler path ('%s').\n", pstr);
-				return(false);
-			} else {
-				if (detect_compiler(ccpath, pgd->buildlog, cdata, &cinfo) == true) {
-
-					pmk_log("%s (version %s).\n",
-						comp_get_descr(cdata, cinfo.c_id), cinfo.version);
-
-					/* set shared lib flags */
-					pld = check_lang_comp(pstr);
-					if (pld != NULL) {
-						/* set shared lib compiler flags */
-						pcell = comp_get(cdata, cinfo.c_id);
-						pmk_log("\t\tSetting %s to '%s'\n", pld->slflg, pcell->slcflags);
-						if (hash_update_dup(pgd->htab, pld->slflg, pcell->slcflags) == HASH_ADD_FAIL)
-							return(false);
-
-						/* set shared lib linking flags */
-						pmk_log("\t\tSetting %s to '%s'\n", SL_LDFLAG_VARNAME, pcell->slldflags);
-						if (hash_update_dup(pgd->htab, SL_LDFLAG_VARNAME, pcell->slldflags) == HASH_ADD_FAIL)
-							return(false);
-					} else {
-						errorf("unable to set shared library compiler flags (%s).\n", pld->slflg);
-						return(false);
-					}
-				} else {
-					pmk_log("failed.\n");
-					return(false);
-				}
-
-			}
-		}
-
-		/* move shared lib hash table into global structure */
-		pgd->slht = cdata->sht;
-		cdata->sht = NULL;
-
-		/* clean cdata */
-		compdata_destroy(cdata);
-
-		return(true);
+		return(pmk_setparam_detect(cmd, popt, pgd));
 	}
 
 	/* found unknown setting */
@@ -1608,7 +1475,212 @@ bool pmk_set_parameter(pmkcmd *cmd, prsopt *popt, pmkdata *pgd) {
 }
 
 /*
-	set parameter
+	set accompat parameter
+*/
+
+bool pmk_setparam_accompat(pmkcmd *cmd, prsopt *popt, pmkdata *pgd) {
+	char	*pstr;
+
+	pmk_log("\tSetting autoconf compatibility :\n");
+
+	/* XXX must check if valid
+		pstr = (char *) hash_get(pgd->htab, "SYSCONFDIR");
+		hash_update_dup(pgd->htab, "sysconfdir", pstr);
+	*/
+
+	/* if a file is given then it will be parsed later */
+	pstr = po_get_str(popt->value);
+	if (*pstr != CHAR_EOS) {
+		pgd->ac_file = strdup(pstr);
+		pmk_log("\t\tSet file to '%s'.\n", pstr);
+		if (hash_update_dup(pgd->htab, AC_VAR_DEF, AC_VALUE_DEF) == HASH_ADD_FAIL) {
+			errorf("failed to add value for '%s' in hash table.", AC_VAR_DEF);
+			return(false);
+		}
+		pmk_log("\t\tSet '%s' value to '%s'.\n", AC_VAR_DEF, AC_VALUE_DEF);
+	}
+
+	/* compatibility tags */
+	if (ac_set_variables(pgd->htab) == false)
+		return(false); /* XXX error message ? */
+	pmk_log("\t\tSet specific variables.\n");
+
+	return(true);
+}
+
+/*
+	set global lang parameter
+*/
+
+bool pmk_setparam_glang(pmkcmd *cmd, prsopt *popt, pmkdata *pgd) {
+	bool		 rval = false;
+	char		*pstr;
+
+	pmk_log("\tSetting global language :\n");
+
+	/* set global language */
+	pstr = po_get_str(popt->value);
+
+	if (pstr != NULL) {
+		/* check if provided lang is supported */
+		if (check_lang(pstr) != NULL) {
+			pgd->lang = strdup(pstr);
+			pmk_log("\t\tSet to '%s'.\n", pstr);
+			rval = true;
+		} else {
+			errorf("unknown language.");
+		}
+	} else {
+		errorf("syntax error in LANG.");
+	}
+
+	return(rval);
+}
+
+/*
+	set accompat parameter
+*/
+
+bool pmk_setparam_target(pmkcmd *cmd, prsopt *popt, pmkdata *pgd) {
+	dynary		*da;
+	int		 i = 0,
+			 n;
+
+	pmk_log("\tCollecting targets :\n");
+
+	da = po_get_list(popt->value);
+	if (da == NULL) {
+		errorf("syntax error in TARGET.");
+		return(false);
+	}
+
+	n = da_usize(da);
+	for (i=0 ; i < n ; i++) {
+		pmk_log("\t\tAdded '%s'.\n", da_idx(da, i));
+	}
+
+	pgd->tlist = da;
+
+	pmk_log("\t\tTotal %d target(s) added.\n", n);
+
+	return(true);
+}
+
+/*
+	set accompat parameter
+*/
+
+bool pmk_setparam_detect(pmkcmd *cmd, prsopt *popt, pmkdata *pgd) {
+	char		*pstr,
+			*ostr,
+			*ccpath,
+			 buf[255]; /* XXX need define ? good size ? */
+	comp_cell	*pcell;
+	comp_data	*cdata;
+	comp_info	 cinfo;
+	dynary		*da;
+	int		 i = 0,
+			 n;
+	lgdata		*pld;
+
+	pmk_log("\tDetecting compilers :\n");
+
+	da = po_get_list(popt->value);
+	if (da == NULL) {
+		errorf("syntax error in DETECT.");
+		return(false);
+	}
+
+	pmk_log("\t\tGathering data for compiler detection.\n");
+	cdata = parse_comp_file_adv(PMKCOMP_DATA, pgd->htab);
+	if (cdata == NULL) {
+		return(false);
+	}
+
+	n = da_usize(da);
+	for (i=0 ; i < n ; i++) {
+		pstr = da_idx(da, i);
+		pmk_log("\t\tDetecting '%s' : ", pstr);
+		/* get the appropriate compiler */
+		ccpath = get_comp_path(pgd->htab, pstr);
+		if (ccpath == NULL) {
+			errorf("\ncannot get compiler path ('%s').\n", pstr);
+			return(false);
+		} else {
+			if (detect_compiler(ccpath, pgd->buildlog, cdata, &cinfo) == true) {
+				pmk_log("%s (version %s).\n",
+					comp_get_descr(cdata, cinfo.c_id), cinfo.version);
+
+				/* set shared lib flags */
+				pld = check_lang_comp(pstr);
+				if (pld != NULL) {
+					/* check if an override exists for compiler flags */
+					if (snprintf(buf, sizeof(buf), "%s_%s", pld->slflg, cinfo.c_id) >= sizeof(buf)) {
+						errorf("overflow.\n");
+						return(false);
+					}
+
+					if (cdata->sht != NULL) { /* XXX need to skip if system has not data ? */
+						ostr = hash_get(cdata->sht, buf);
+					}
+
+					/* set shared lib compiler flags */
+					if (ostr != NULL) {
+						pmk_log("\tFound system specific %s.\n", pld->slflg);
+					} else {
+						pcell = comp_get(cdata, cinfo.c_id);
+						ostr = pcell->slcflags;
+					}
+
+					pmk_log("\t\tSetting %s to '%s'\n", pld->slflg, ostr);
+					if (hash_update_dup(pgd->htab, pld->slflg, ostr) == HASH_ADD_FAIL)
+						return(false);
+
+					/* check if an override exists for linking flags */
+					if (snprintf(buf, sizeof(buf), "%s_%s", SL_LDFLAG_VARNAME, cinfo.c_id) >= sizeof(buf)) {
+						errorf("overflow.\n");
+						return(false);
+					}
+
+					if (cdata->sht != NULL) { /* XXX need to skip if system has not data ? */
+						ostr = hash_get(cdata->sht, buf);
+					}
+
+					/* set shared lib compiler flags */
+					if (ostr != NULL) {
+						pmk_log("\tFound system specific %s.\n", SL_LDFLAG_VARNAME);
+					} else {
+						pcell = comp_get(cdata, cinfo.c_id);
+						ostr = pcell->slldflags;
+					}
+
+					/* set shared lib linking flags */
+					pmk_log("\t\tSetting %s to '%s'\n", SL_LDFLAG_VARNAME, ostr);
+					if (hash_update_dup(pgd->htab, SL_LDFLAG_VARNAME, ostr) == HASH_ADD_FAIL)
+						return(false);
+				} else {
+					errorf("unable to set shared library compiler flags (%s).\n", pld->slflg);
+					return(false);
+				}
+			} else {
+				pmk_log("failed.\n");
+				return(false);
+			}
+		}
+	}
+
+	/* move shared lib hash table into global structure */
+	pgd->slht = cdata->sht;
+	cdata->sht = NULL; /* avoid data destruction */
+
+	/* clean cdata */
+	compdata_destroy(cdata);
+
+	return(true);
+}
+
+/*
+	set variable
 */
 
 bool pmk_set_variable(pmkcmd *cmd, prsopt *popt, pmkdata *pgd) {

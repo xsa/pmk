@@ -1,3 +1,8 @@
+05 Feb 2004 mipsator
+ * converted pmk_set_parameter() to a wrapper.
+ * added sub-functions for pmk_set_paremeter().
+ * added system specific overriding support of compiler flags.
+
 05 Feb 2004 mreindl
  * replaced getopts with getopt in pmkcfg.sh
  * added pkgsrc stuff for stable and snapshot
