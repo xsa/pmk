@@ -1,5 +1,6 @@
 /* $Id$ */
 
+
 /*
  * Copyright (c) 2003 Damien Couderc
  * All rights reserved.
@@ -31,49 +32,10 @@
  */
 
 
-#ifndef _PMK_COMMON_H_
-#define _PMK_COMMON_H_
+#ifndef _PMK_PATHTOOLS_H_
+#define _PMK_PATHTOOLS_H_
 
-#include "pmk.h"
+bool	chkpath(char *, char *);
+void	relpath(char *, char *, char *);
 
-#define MAXTOKENS	128	/* max slots in the paths array */
-
-/* structure to store multiple path */
-typedef struct {
-	int	pathnum;
-	char	*pathlst[MAXTOKENS];
-} mpath;
-
-/* struct to store pmk.conf defines */
-/* WARN opchar has been put first else linux binaries gives segfault !!! */
-typedef struct {
-        char    opchar,
-		key[MAX_OPT_NAME_LEN],
-                val[MAX_OPT_VALUE_LEN];
-} cfg_opt;
-
-
-FILE	*pmk_log_fp;
-
-
-bool	get_line(FILE *, char *, int);
-int	parse_conf_line(char *, int, cfg_opt *);
-
-bool	env_to_opt(char *, pmkcmdopt *);
-bool	get_make_var(char *, char *, int);
-
-bool	str_to_dynary(char *, char, dynary *);
-bool	find_file(dynary *, char *, char *, int);
-
-void	errorf(const char *, ...);
-void	errorf_line(char *, int, const char *, ...);
-
-void	debugf(const char *, ...);
-
-bool	pmk_log_open(char *);
-void	pmk_log_close(void);
-bool	pmk_log(const char *, ...);
-
-bool	copy_text_file(char *, char *);
-
-#endif /* _PMK_COMMON_H_ */
+#endif /* _PMK_PATHTOOLS_H_ */
