@@ -247,7 +247,6 @@ debugf("perm = %o", perm);
 
 bool check_mode(char *mstr, mode_t *pmode) {
 	unsigned long	 mode = 0;
-	mode_t		 mask;
 
 	if (mstr == NULL)
 		return(false);
@@ -264,13 +263,8 @@ bool check_mode(char *mstr, mode_t *pmode) {
 		};
 	}
 
-	/* get umask */
-	mask = umask(0);
-	/* set original umask again */
-	umask(mask);
-
-	/* apply umask */
-	*pmode = ((mode_t)mode) & (~mask);
+	/* set mode */
+	*pmode = (mode_t) mode;
 
 	return(true);
 }
@@ -449,10 +443,10 @@ debugf("gid = %d", gid);
 
 	/* directory creation */
 	if (create_dir == true) {
+		src = argv[0];
 #ifdef DEBUG_INST
 debugf("create dir '%s'", src);
 #endif
-		src = argv[src_idx];
 
 		/* create path */
 		if (*src == CHAR_SEP) {

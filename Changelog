@@ -2,9 +2,10 @@
  * implemented output filtering options in pmkpc.
  * updated pmkpc(1) to sync with actual state.
  * added support for multiple sources in pmkinstall.
- * added support for case when destination is a directory.
+ * added support for case when destination is a directory in pmkinstall.
  * fixed str_to_ulong() to use an unsigned long like said by the name.
- * replaced use of strtoul() by str_to_ulong().
+ * replaced use of strtoul() by str_to_ulong() in pmkinstall.
+ * fixed check_mode() in pmkinstall to behave as BSD install.
 
 07 Feb 2004 mipsator
  * fixed building of the pmkscan location in usermode.
