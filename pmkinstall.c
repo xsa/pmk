@@ -302,7 +302,7 @@ int main(int argc, char *argv[]) {
 	mode_t		 mode = DEFAULT_MODE,
 			 tmode;
 	uid_t		 uid = (uid_t) -1;
-	unsigned int	 src_idx,
+	unsigned int	 src_idx = 0,
 			 dst_idx;
 	unsigned long	 ul;
 	
