@@ -1,3 +1,7 @@
+04 Nov 2003 mipsator
+ * added makepath() in pathtools.
+ * modified process_template() to use makepath().
+
 27 Oct 2003 mipsator
  * updated Makefile.pmk to build in a test directory.
  * rewritten ac_parse_config() and fixed AC_COMPAT to be relative to

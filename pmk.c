@@ -282,8 +282,11 @@ bool process_template(char *template, pmkdata *pgd) {
 	/* apply to basedir */
 	abspath(pgd->basedir, buf, tpath); /* XXX check ? */
 
-	/* XXX need to do a makepath function ? */
-	mkdir(tpath, S_IRWXU); /* XXX check, recursive ? */
+	/* create path if it does not exists */
+	if (makepath(tpath) == false) {
+		errorf("cannot build template path '%s'.", tpath);
+		return(false);
+	}
 	
 	/* append filename */
 	abspath(tpath, lbuf, fpath);

@@ -42,5 +42,6 @@ bool	chkpath(char *, char *);
 bool	relpath(char *, char *, char *);
 bool	abspath(char *, char *, char *);
 bool	uabspath(char *, char *, char *);
+bool	makepath(char *);
 
 #endif /* _PMK_PATHTOOLS_H_ */
