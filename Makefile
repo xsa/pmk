@@ -47,7 +47,8 @@ install: pmk pmksetup
 	$(INSTALL) -d $(DATADIR)
 	$(INSTALL) -m 644 samples/$(SAMPLE) $(DATADIR)
 	$(INSTALL) -m 644 samples/$(CONFIG) $(DATADIR)
-	$(INSTALL) -m 444 ${PREMAKE}.1 ${PREFIX}/man/man1/
+	$(INSTALL) -m 444 $(PREMAKE).1 $(PREFIX)/man/man1/
+	$(INSTALL) -m 444 $(SETUP).8 $(PREFIX)/man/man8/
 
 clean:
 	rm -f $(P_OBJS) $(S_OBJS) $(PREMAKE) $(SETUP) *.core
@@ -56,7 +57,8 @@ deinstall:
 	rm -f $(PREFIX)/bin/$(PREMAKE)
 	rm -f $(PREFIX)/sbin/$(SETUP)
 	rm -rf $(PREFIX)/share/$(PREMAKE)
-	rm -f ${PREFIX}/man/man1/${PREMAKE}.1
+	rm -f $(PREFIX)/man/man1/$(PREMAKE).1
+	rm -f $(PREFIX)/man/man8/$(SETUP).8
 
 test_pmk: pmk
 	@echo "Testing pmk with sample file"
