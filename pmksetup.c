@@ -103,7 +103,7 @@ int main(int argc, char *argv[]) {
 	}
 
 	
-	fprintf(stderr, "==> Looking for default parameters...\n");
+	fprintf(stdout, "==> Looking for default parameters...\n");
 	if ((get_env_vars(ht) == -1) || (get_binaries(ht) == -1))
 		exit(1);
 
@@ -111,18 +111,18 @@ int main(int argc, char *argv[]) {
 		exit(1);
 
 	if ((config = fopen(PREMAKE_CONFIG_PATH, "r")) != NULL) {
-		fprintf(stderr, "==> Configuration file found: %s\n", PREMAKE_CONFIG_PATH);
+		fprintf(stdout, "==> Configuration file found: %s\n", PREMAKE_CONFIG_PATH);
 
 		/* parse configuration file */
 		error = parse_conf(config, ht);
 
 		fclose(config);
 	} else {
-		fprintf(stderr, "==> Configuration file not found, generating one...\n");
+		fprintf(stdout, "==> Configuration file not found, generating one...\n");
 		config = NULL;
 	}
 
-	fprintf(stderr, "==> Merging remaining data...\n");	
+	fprintf(stdout, "==> Merging remaining data...\n");	
 	/* writing the remaining data stored in the hash */
 	write_new_data(ht);
 	/* destroying the hash once we'r done with it */	
