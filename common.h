@@ -36,6 +36,8 @@
 
 #include "premake.h"
 #include "pmk.h"
+#include "dynarray.h"
+
 
 #define MAXTOKENS	128	/* max slots in the paths array */
 
@@ -61,6 +63,8 @@ int parse_conf_line(char *, int, cfg_opt *);
 
 bool env_to_opt(char *, pmkcmdopt *);
 bool get_make_var(char *, char *, int);
+
+bool str_to_dynary(char *, char, dynary *);
 
 int strsplit(char *, mpath *, char *);
 int find_file(mpath *, char *, char *, int);

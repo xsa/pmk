@@ -223,7 +223,6 @@ bool get_make_var(char *varname, char *result, int rsize) {
 	return(rval);
 }
 
-
 /*              
  * split strings using 'delimiter'
  * 
