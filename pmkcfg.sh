@@ -170,7 +170,7 @@ check_lib_function() {
 int $function();
 
 int main() {
-	printf("%%p", $function);
+	printf("%p", $function);
 	return(0);
 }
 EOF
