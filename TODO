@@ -33,5 +33,5 @@ pmkscan :
 - add more entries in pmkscan.dat
 
 pmkinstall :
-- finish to remove err.h functions (warn & warnx);
++ finish to remove err.h functions (warn & warnx);
 
