@@ -15,6 +15,7 @@ pmk :
 + CHECK_VARIABLE
 - verify in CHECK_BINARY that program has executable right ?
 - convert gdata.labl to pmk objects
+- make checks on hash_add() in autoconf.c (void func => bool func)
 
 pmksetup :
 - missing checks :

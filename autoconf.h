@@ -40,5 +40,6 @@
 bool	ac_parse_config(htable *, char *);
 void	ac_process_dyn_var(htable *, pmkdata *, char *);
 void	ac_clean_dyn_var(htable *);
+void	ac_set_variables(htable *);
 
 #endif /* _PMK_AUTOCONF_H_ */

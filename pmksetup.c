@@ -478,13 +478,13 @@ bool byte_order_check(htable *pht) {
 
 	if (((((char *)&num)[0]) == 0x41) && ((((char *)&num)[1]) == 0x42) &&
 	    ((((char *)&num)[2]) == 0x43) && ((((char *)&num)[3]) == 0x44)) {
-		strlcpy(bo_type, "BIG_ENDIAN", sizeof(bo_type));
+		strlcpy(bo_type, HW_ENDIAN_BIG, sizeof(bo_type));
 	} else {
 		if ( ((((char *)&num)[3]) == 0x41) && ((((char *)&num)[2]) == 0x42) && 
 		    ((((char *)&num)[1]) == 0x43) && ((((char *)&num)[0]) == 0x44) ) {
-			strlcpy(bo_type, "LITTLE_ENDIAN", sizeof(bo_type));
+			strlcpy(bo_type, HW_ENDIAN_LITTLE, sizeof(bo_type));
 		} else {
-			strlcpy(bo_type, "UNKNOW", sizeof(bo_type));
+			strlcpy(bo_type, HW_ENDIAN_UNKNOW, sizeof(bo_type));
 		}
 	}
 

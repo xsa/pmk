@@ -36,6 +36,7 @@
 #include <unistd.h>
 
 #include "compat/pmk_string.h"
+#include "autoconf.h"
 #include "common.h"
 #include "func.h"
 #include "functool.h"
@@ -1228,22 +1229,7 @@ bool pmk_set_parameter(pmkcmd *cmd, prsopt *popt, pmkdata *gdata) {
 		}
 
 		/* compatibility tags */
-		pstr = (char *) hash_get(gdata->htab, "PREFIX");
-		hash_add(gdata->htab, "prefix", strdup(pstr));
-	
-		hash_add(gdata->htab, "exec_prefix", strdup("${prefix}"));
-		hash_add(gdata->htab, "bindir", strdup("${exec_prefix}/bin"));
-		hash_add(gdata->htab, "sbindir", strdup("${exec_prefix}/sbin"));
-		hash_add(gdata->htab, "libexecdir", strdup("${exec_prefix}/libexec"));
-		hash_add(gdata->htab, "libdir", strdup("${exec_prefix}/lib"));
-		hash_add(gdata->htab, "datadir", strdup("${prefix}/share"));
-		hash_add(gdata->htab, "includedir", strdup("${prefix}/include"));
-		hash_add(gdata->htab, "mandir", strdup("${prefix}/man"));
-		hash_add(gdata->htab, "infodir", strdup("${prefix}/info"));
-
-		pstr = (char *) hash_get(gdata->htab, "BIN_INSTALL");
-		hash_add(gdata->htab, "INSTALL", strdup(pstr));
-
+		ac_set_variables(gdata->htab);
 		pmk_log("\t\tSet specific variables.\n");
 
 		return(true);
