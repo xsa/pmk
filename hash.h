@@ -75,20 +75,27 @@ typedef struct {
 		value[MAX_HASH_VALUE_LEN];
 } hpair;
 
+typedef struct {
+	int	nkey;
+	char	**keys;
+} hkeys;
 
-int	hash_compute(char *, int);
+
+int	 hash_compute(char *, int);
 htable	*hash_init(int);
-bool	hash_resize(htable *, int);
-void	hash_set_grow(htable *);
-int	hash_destroy(htable *);
-int	hash_add(htable *, char *, void *);
-int	hash_add_cell(hnode *, hcell *);
-bool	hash_add_array(htable *, hpair *, int);
-int	hash_append(htable *, char *, char *, char *);
-void	hash_delete(htable *, char *);
+bool	 hash_resize(htable *, int);
+void	 hash_set_grow(htable *);
+int	 hash_destroy(htable *);
+int	 hash_add(htable *, char *, void *);
+int	 hash_add_cell(hnode *, hcell *);
+bool	 hash_add_array(htable *, hpair *, int);
+int	 hash_append(htable *, char *, char *, char *);
+void	 hash_delete(htable *, char *);
 void	*hash_get(htable *, char *);
-int	hash_merge(htable *, htable *);
-int	hash_nbkey(htable *);
-char	**hash_keys(htable *);
+int	 hash_merge(htable *, htable *);
+int	 hash_nbkey(htable *);
+hkeys	*hash_keys(htable *);
+void	 hash_free_hcell(hcell *);
+void	 hash_free_hkeys(hkeys *);
 
 #endif /* _PMK_HASH_H_ */

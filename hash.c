@@ -82,7 +82,7 @@ int hash_compute(char *key, int table_size) {
 */
 
 htable *hash_init(int table_size) {
-	int	i;
+	int	 i;
 	htable	*pht;
 	hnode	*phn;
 
@@ -129,9 +129,9 @@ bool hash_resize(htable *ht, int newsize) {
 	hcell	*phc,
 		*next;
 	hnode	*newhn;
-	int	c = 0,
-		h,
-		i;
+	int	 c = 0,
+		 h,
+		 i;
 
 	/* allocate new node table */
 	newhn = (hnode *) malloc(sizeof(hnode) * newsize);
@@ -182,9 +182,9 @@ void hash_set_grow(htable *ht) {
 */
 
 int hash_destroy(htable *pht) {
-	int	i,
-		s,
-		c = 0;
+	int	 i,
+		 s,
+		 c = 0;
 	hcell	*p,
 		*t;
 
@@ -226,9 +226,9 @@ int hash_destroy(htable *pht) {
 */
 
 int hash_add(htable *pht, char *key, void *value) {
-	int	rval,
-		hash,
-		size;
+	int	 rval,
+		 hash,
+		 size;
 	hnode	*phn;
 	hcell	*phc = NULL;
 
@@ -342,9 +342,9 @@ int hash_add_cell(hnode *phn, hcell *phc) {
 
 bool hash_add_array(htable *pht, hpair *php, int size) {
 	htable	*pmht;
-	int	i;
-	bool	error = false,
-		rval = false;
+	int	 i;
+	bool	 error = false,
+		 rval = false;
 
 	pmht = hash_init(size);
 	if (pmht == NULL)
@@ -382,9 +382,9 @@ bool hash_add_array(htable *pht, hpair *php, int size) {
 
 int hash_append(htable *pht, char *key, char *value, char *sep) {
 	char	*pstr,
-		buf[MAX_HASH_VALUE_LEN] = "";
-	int	rval,
-		s;
+		 buf[MAX_HASH_VALUE_LEN] = "";
+	int	 rval,
+		 s;
 
 	pstr = (char *)hash_get(pht, key);
 	if (pstr == NULL) {
@@ -418,7 +418,7 @@ int hash_append(htable *pht, char *key, char *value, char *sep) {
 */
 
 void hash_delete(htable *pht, char *key) {
-	int	hash;
+	int	 hash;
 	hcell	*phc,
 		*last;
 
@@ -471,7 +471,7 @@ void hash_delete(htable *pht, char *key) {
 */
 
 void *hash_get(htable *pht, char *key) {
-	int	hash;
+	int	 hash;
 	hcell	*phc;
 
 	/* compute hash code */
@@ -503,9 +503,9 @@ void *hash_get(htable *pht, char *key) {
 */
 
 int hash_merge(htable *dst_ht, htable *src_ht) {
-	int	i,
-		s,
-		c = 0;
+	int	 i,
+		 s,
+		 c = 0;
 	hcell	*p;
 
 	/* get table size */
@@ -542,33 +542,63 @@ int hash_nbkey(htable *pht) {
 
 	pht : hash table
 
-	returns an array of keys
+	returns an hkeys structure
 
 	NOTE: don't forget to free the array after use.
 */
 
-char **hash_keys(htable *pht) {
-	char	**key_ary;
-	int	nbk,
-		i,
-		j = 0;
-	hcell	*p;
+hkeys *hash_keys(htable *pht) {
+	int	  i,
+		  j = 0;
+	hcell	 *p;
+	hkeys	 *phk;
 
-	nbk = pht->count;
+	/* init hkeys struct to be returned */
+	phk = (hkeys *)malloc(sizeof(hkeys));
+	if (phk != NULL) {
 
-	/* create an array with a size of the number of keys */
-	key_ary = (char **)malloc(sizeof(char *) * nbk);
-	if (key_ary != NULL) {
-		for(i = 0 ; i < pht->size ; i++) {
-			p = pht->nodetab[i].first;
-			while (p != NULL) {
-				/* add the key in key_ary */
-				key_ary[j] = p->key;
-				j++;
-				p = p->next;
+		phk->nkey = pht->count;
+
+		/* create an array with a size of the number of keys */
+		phk->keys = (char **)malloc(sizeof(char *) * phk->nkey);
+		if (phk->keys != NULL) {
+			for(i = 0 ; i < pht->size ; i++) {
+				p = pht->nodetab[i].first;
+				while (p != NULL) {
+					/* add the key in key_ary */
+					phk->keys[j] = p->key;
+					j++;
+					p = p->next;
+				}
 			}
+	
+			return(phk);
+		} else {
+			free(phk);
 		}
 	}
 
-	return(key_ary);
+	return(NULL);
+}
+
+/*
+	free memory allocated to the hcell structure
+
+	phc : structure to free
+*/
+
+void hash_free_hcell(hcell *phc) {
+	free(phc->value);
+	free(phc);
+}
+
+/*
+	free memory allocated to the hkeys structure
+
+	phk : structure to free
+*/
+
+void hash_free_hkeys(hkeys *phk) {
+	free(phk->keys);
+	free(phk);
 }
