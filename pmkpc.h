@@ -111,4 +111,3 @@ typedef struct {
 } pcdata;
 
 #endif /* _PMKPKGCFG_H_ */
-
