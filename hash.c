@@ -351,7 +351,7 @@ bool hash_add_array(htable *pht, hpair *php, int size) {
 		return(false);
 
 	for (i = 0 ; (i < size) && (error == false) ; i ++) {
-		if (hash_add(pmht, php[i].key, php[i].value) == HASH_ADD_FAIL)
+		if (hash_add(pmht, php[i].key, strdup(php[i].value)) == HASH_ADD_FAIL)
 			error = true;
 	}
 
@@ -515,8 +515,13 @@ int hash_merge(htable *dst_ht, htable *src_ht) {
 		p = src_ht->nodetab[i].first;
 		while (p != NULL) {
 			/* add the key in dst_ht */
-			if (hash_add(dst_ht, p->key, p->value) != HASH_ADD_FAIL)
-				c++; /* merged one more key */
+			if (hash_add(dst_ht, p->key, p->value) != HASH_ADD_FAIL) {
+				/* merged one more key */
+				c++;
+
+				/* unset p->value to prevent deletion */
+				p->value = NULL;
+			}
 			p = p->next;
 		}
 	}

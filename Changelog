@@ -4,6 +4,7 @@
  * misc in pmkscan.
  * fixed ac_process_dyn_var().
  * another misc changes in pmkscan.
+ * two other fixes in hash.
 
 22 Jul 2003 mipsator
  * rewritten hash_keys() to return a new structure (hkeys).
