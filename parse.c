@@ -34,7 +34,6 @@
 /*
 	XXX TODO :
 		- error messages
-		- clean prsdata structure
 */
 
 #include <ctype.h>
@@ -54,7 +53,9 @@ char	parse_err[MAX_ERRMSG_LEN];
 
 
 /*
-	XXX
+	initialize parsing data structure
+
+	return : prsdata structure
 */
 
 prsdata *prsdata_init(void) {
@@ -69,9 +70,29 @@ prsdata *prsdata_init(void) {
 	return(pdata);
 }
 
+/*
+	free space allocated by parsing structure
+
+	pdata : structure to clean
+*/
+
+void prsdata_destroy(prsdata *pdata) {
+	prscell	*p,
+		*n;
+
+	p = pdata->first;
+	while (p != NULL) {
+		n = p;
+		p = n->next;
+		free(n);
+	}
+	free(pdata);
+}
 
 /*
-	XXX
+	initialize parsing cell structure
+
+	return : parsing cell structure
 */
 
 prscell *prscell_init(void) {
@@ -95,7 +116,9 @@ prscell *prscell_init(void) {
 }
 
 /*
-	XXX
+	free space allocated for parsing cell structure
+
+	pcell : structure to clean
 */
 
 void	prscell_destroy(prscell *pcell) {
@@ -104,7 +127,7 @@ void	prscell_destroy(prscell *pcell) {
 }
 
 /*
-	parse a command XXX
+	parse a command
 
 	line : line to parse
 	command : pmkcmd structure where to store the command and label
@@ -141,12 +164,6 @@ bool parse_cell(char *line, prscell *pcell) {
 			} else {
 				/* end of command name */
 				*pbf = CHAR_EOS;
-
-				/* XXX don't check !! Will do later
-				if (check_cmd(buf, pgd) == false) {
-					return(false);
-				}
-				*/
 
 				so = sizeof(pcell->name);
 				if (strlcpy(pcell->name, buf, so) >= so) {
@@ -187,11 +204,7 @@ bool parse_cell(char *line, prscell *pcell) {
 		if (s != 0) {
 			/* command without label */
 			*pbf = CHAR_EOS;
-			/* XXX TODO remove ?
-			if (check_cmd(buf, pgd) == false) {
-				return(false);
-			}
-			*/
+
 			so = sizeof(pcell->name);
 			if (strlcpy(pcell->name, buf, so) >= so) {
 				strlcpy(parse_err, "command too long.", sizeof(parse_err));
@@ -222,7 +235,7 @@ bool parse_cell(char *line, prscell *pcell) {
 }
 
 /*
-	parse an option line XXX
+	parse an option line
 
 	line : option line
 	ht : hash table to store option
@@ -326,6 +339,10 @@ bool parse(FILE *fp, prsdata *pdata) {
 			case PMK_CHAR_COMMAND :
 				if (process == false) {
 					pcell = prscell_init(); /* XXX TODO check if null */
+					if (pcell == NULL) {
+						/* XXX error */
+						return(false);
+					}
 
 					/* parse command and label */
 					if (parse_cell(buf, pcell) == false) { /* XXX TODO should use prsdata */
@@ -346,11 +363,10 @@ bool parse(FILE *fp, prsdata *pdata) {
 						}
 						pdata->last = pcell;
 
-						/* XXX TODO add the cell in prsdata */
 					} else {
 						/* found another command before end of previous */
 						prscell_destroy(pcell);
-/* XXX						errorf_line(pgd->pmkfile, cur_line, "%s not found", PMK_END_COMMAND); */
+						errorf("line %d : %s not found", cur_line, PMK_END_COMMAND);
 						return(false);
 					}
 				}
@@ -362,7 +378,7 @@ bool parse(FILE *fp, prsdata *pdata) {
 
 			default :
 				if (process == false) {
-/* XXX					errorf_line(pgd->pmkfile, cur_line, "Syntax error"); */
+					errorf("line %d : syntax error.", cur_line);
 					return(false);
 				}
 
@@ -378,14 +394,14 @@ bool parse(FILE *fp, prsdata *pdata) {
 	if (process == true) {
 		/* found EOF before end of command */
 		prscell_destroy(pcell);
-/* XXX		errorf_line(pgd->pmkfile, cur_line, "%s not found", PMK_END_COMMAND); */
+		errorf("line %d : %s not found", cur_line, PMK_END_COMMAND);
 		return(false);
 	}
 
 	if (feof(fp) == 0) {
 		/* error occured before EOF */
 		prscell_destroy(pcell);
-/* XXX		errorf_line(pgd->pmkfile, cur_line, "end of file not reached."); */
+		errorf("end of file not reached.");
 		return(false);
 	}
 
