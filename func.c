@@ -404,9 +404,7 @@ bool pmk_check_include(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 		*ccpath,
 		*cflags,
 		*pstr;
-	dynary	*da;
-	int	 r,
-		 i;
+	int	 r;
 	lgdata	*pld;
 
 	pmk_log("\n* Checking header [%s]\n", cmd->label);
@@ -574,11 +572,8 @@ bool pmk_check_lib(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 		*libname,
 		*libfunc,
 		*target,
-		*libs,
-		*pstr;
-	dynary	*da;
-	int	 r,
-		 i;
+		*libs;
+	int	 r;
 	lgdata	*pld;
 
 	pmk_log("\n* Checking library [%s]\n", cmd->label);
