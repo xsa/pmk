@@ -33,16 +33,28 @@ A commented line start with a '#' character like the following :
 A definition line has the following format :
 .Bd -literal -offset -indent
 <?blank><key name><?blank>=<?blank><key value>
-
-With 'blank' being one or more blank characters.
-Both 'key name' and 'key value' can be quoted for non alphanumerical characters. 
 .Ed
+.Pp
+At this point data types must be introduced :
+.Bd -literal -offset -indent
+word : this is a string of alphanumerical characters and underscores only.
+quoted : string of characters delimited by quoted marks that can contain escaped quotes.
+list : a list is a set of one or more word and quoted separated by comma and delimited by parenthesis.
+A blank is one or more space and tab characters.
+.Ed
+.Pp
+A key name will have the word type (quote type is accepted but not recommended).
+The key value could be word, quoted and list relatively to the type needed for the key. 
 .Pp
 Example :
 .Bd -literal -offset -indent
  .CHECK_INCLUDE(header_sys_param) {
- # this checks sys/param.h header
+ # following options use different uses of blank characters
+ # key value is word type
  REQUIRED = TRUE
+ # key value is list type
+ DEPEND=	("dep_one", dep_two,"dep_three")
+ # key value is quoted type
  INCLUDE = "sys/param.h"
  }
 .Ed
