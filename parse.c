@@ -367,6 +367,27 @@ char *parse_identifier(char *pstr, char *pbuf, size_t size) {
 }
 
 /*
+	get label
+
+	pstr : current parsing cursor
+	pbuf : storage buffer
+	size : size of buffer
+
+	return : new parsing cursor or NULL
+*/
+
+char *parse_label(char *pstr, char *pbuf, size_t size) {
+	if (*pstr == '!') {
+		*pbuf = *pstr;
+		pbuf++;
+		pstr++;
+		size--;
+	}
+
+	return(parse_identifier(pstr, pbuf, size));
+}
+
+/*
 	get bool value
 
 	pstr : current parsing cursor
@@ -782,7 +803,7 @@ prscell *parse_cell(char *line, htable *phkw) {
 
 	if (*pstr == PMK_CHAR_LABEL_START) {
 		pstr++;
-		pstr = parse_identifier(pstr, pcell->label, sizeof(pcell->label));
+		pstr = parse_label(pstr, pcell->label, sizeof(pcell->label));
 		if (pstr == NULL) {
 			strlcpy(parse_err, "label parsing failed.", sizeof(parse_err));
 			return(NULL);
@@ -800,7 +821,7 @@ prscell *parse_cell(char *line, htable *phkw) {
 		}
 #ifdef DEBUG_PRS
 	} else {
-		strlcpy(pcell->label, "none", sizeof(pcell->label));
+		strlcpy(pcell->label, "", sizeof(pcell->label));
 #endif
 	}
 

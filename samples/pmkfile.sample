@@ -3,68 +3,68 @@
 
 # settings
 SETTINGS {
-# set autoconf compatibility
- AC_COMPAT="samples/ac_config.h"
-# set default language
- LANG="C"
-# target files 
- TARGET=("Makefile.sample.pmk","config_sample.h.pmk","subdir/Makefile.subdir.pmk")
+	# set autoconf compatibility
+	AC_COMPAT = "samples/ac_config.h"
+	# set default language
+	LANG = "C"
+	# target files 
+	TARGET = ("Makefile.sample.pmk","config_sample.h.pmk","subdir/Makefile.subdir.pmk")
 }
 
 # put some defines
 DEFINE {
-PACKAGE="scandisk"
-VERSION="0.0.1b"
-FULL_NAME="$PACKAGE-$VERSION"
+	PACKAGE = "scandisk"
+	VERSION = "0.0.1b"
+	FULL_NAME = "$PACKAGE-$VERSION"
 }
 
 # define switches
 SWITCHES {
-use_curses=TRUE
-use_gtk=FALSE
+	use_curses = TRUE
+	use_gtk = FALSE
 }
 
 # check availability of termcap library
 CHECK_LIB(lib_termcap) {
-REQUIRED=FALSE
-LIBNAME="termcap"
+	REQUIRED = FALSE
+	LIBNAME = "termcap"
 }
 
 # check function getwin in libcurses
 # this check depends of lib_termcap check for test purposes
 CHECK_LIB(lib_curses) {
-REQUIRED=FALSE
-DEPEND=("use_curses","lib_termcap")
-NAME="curses"
-FUNCTION="getwin"
+	REQUIRED = FALSE
+	DEPEND = ("use_curses","lib_termcap")
+	NAME = "curses"
+	FUNCTION = "getwin"
 }
 
 # check availability of sys/param.h header
 CHECK_HEADER(sys_param) {
-REQUIRED=FALSE
-NAME="sys/param.h"
-LANG="C++"
+	REQUIRED = FALSE
+	NAME = "sys/param.h"
+	LANG = "C++"
 }
 
 # check function strlcpy in string.h
 CHECK_HEADER(string_strcpy) {
-REQUIRED=FALSE
-NAME="string.h"
-FUNCTION="strlcpy"
+	REQUIRED = FALSE
+	NAME = "string.h"
+	FUNCTION = "strlcpy"
 }
 
 # try to found gtk-config in path
 CHECK_BINARY(bin_gtk_config) {
-REQUIRED=FALSE
-DEPEND=("use_gtk")
-NAME="gtk-config"
+	REQUIRED = FALSE
+	DEPEND = ("use_gtk")
+	NAME = "gtk-config"
 }
 
 # get data via libpng-config
 CHECK_CONFIG(lib_png) {
-REQUIRED=FALSE
-NAME="libpng-config"
-VERSION="1.2"
+	REQUIRED = FALSE
+	NAME = "libpng-config"
+	VERSION = "1.2"
 }
 
 IF(bin_gtk_config) {
@@ -84,20 +84,25 @@ IF(bin_gtk_config) {
 
 # check _Bool type
 CHECK_TYPE(type_bool_posix) {
-REQUIRED=FALSE
-NAME="_Bool"
+	REQUIRED = FALSE
+	NAME = "_Bool"
 }
 
-# check c++ bool type
-CHECK_TYPE(type_bool_cxx) {
-REQUIRED=FALSE
-NAME="bool"
-LANG="C++"
+IF(!type_bool_posix) {
+
+	# check c++ bool type
+	CHECK_TYPE(type_bool_cxx) {
+		REQUIRED = FALSE
+		NAME = "bool"
+		LANG = "C++"
+	}
+
 }
 
 # check byte order (useless, test purpose)
 CHECK_VARIABLE(var_endian) {
-REQUIRED=FALSE
-NAME = "HW_BYTEORDER"
-VALUE = "LITTLE_ENDIAN"
+	REQUIRED=FALSE
+	NAME = "HW_BYTEORDER"
+	VALUE = "LITTLE_ENDIAN"
 }
+

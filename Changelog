@@ -1,3 +1,6 @@
+26 Sep 2003 mipsator
+ * added support to negate labels in conditions like DEPEND or IF.
+
 25 Sep 2003 mipsator
  * added prs_get_line(), parse_node(), parse_command() and parse_line() to
 	allow use of real nodes (aka commands into another command).

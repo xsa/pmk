@@ -350,13 +350,26 @@ bool label_set(htable *lht, char *name, bool status) {
 */
 
 bool label_check(htable *lht, char *name) {
+	bool	 neg = false,
+		 rval;
 	char	*p;
+
+	if (*name == '!') {
+		name++;
+		neg = true;
+	}
 
 	p = (char *)hash_get(lht, name);
 	if (p == NULL)
 		return(false);
 
-	return(check_bool_str(p));
+	rval = check_bool_str(p);
+
+	if (neg == true) {
+		rval = invert_bool(rval);
+	}
+
+	return(rval);
 }
 
 /*
