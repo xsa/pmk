@@ -436,15 +436,19 @@ bool x86_get_cpuid_data(x86_cpu_cell *cell) {
 	/* processing feature register 1 */
 	for (i = 0 ; i < nb_feat_reg1 ; i++) {
 		if ((x86_cpu_reg_edx & x86_cpu_feat_reg1[i].mask) != 0) {
-			strlcat(feat_str, x86_cpu_feat_reg1[i].descr, sizeof(feat_str));
-			strlcat(feat_str, " ", sizeof(feat_str)); /* XXX check ? */
+			strlcat(feat_str, x86_cpu_feat_reg1[i].descr,
+					sizeof(feat_str)); /* no check */
+			if (strlcat_b(feat_str, " ", sizeof(feat_str)) == false)
+				return(false);
 		}
 	}
 	/* processing feature register 2 */
 	for (i = 0 ; i < nb_feat_reg2 ; i++) {
 		if ((x86_cpu_reg_edx & x86_cpu_feat_reg2[i].mask) != 0) {
-			strlcat(feat_str, x86_cpu_feat_reg2[i].descr, sizeof(feat_str));
-			strlcat(feat_str, " ", sizeof(feat_str)); /* XXX check ? */
+			strlcat(feat_str, x86_cpu_feat_reg2[i].descr,
+					sizeof(feat_str)); /* no check */
+			if (strlcat_b(feat_str, " ", sizeof(feat_str)) == false)
+				return(false);
 		}
 	}
 	cell->features = strdup(feat_str);
@@ -461,8 +465,11 @@ bool x86_get_cpuid_data(x86_cpu_cell *cell) {
 		/* processing extended feature register */
 		for (i = 0 ; i < nb_feat_extreg ; i++) {
 			if ((x86_cpu_reg_edx & x86_cpu_feat_extreg[i].mask) != 0) {
-				strlcat(feat_str, x86_cpu_feat_extreg[i].descr, sizeof(feat_str));
-				strlcat(feat_str, " ", sizeof(feat_str)); /* XXX check ? */
+				strlcat(feat_str,
+						x86_cpu_feat_extreg[i].descr,
+						sizeof(feat_str)); /* no check */
+				if (strlcat_b(feat_str, " ", sizeof(feat_str)) == false)
+					return(false);
 			}
 		}
 	}
@@ -488,7 +495,9 @@ bool x86_get_cpuid_data(x86_cpu_cell *cell) {
 		buffer[11] = x86_cpu_reg_edx;
 
 		buffer[12] = 0;	/* terminate string */
-		cell->cpuname = strdup((char *) buffer); /* XXX check */
+		cell->cpuname = strdup((char *) buffer);
+		if (cell->cpuname == NULL)
+			return(false);
 	} else {
 		cell->cpuname = NULL;
 	}
@@ -497,7 +506,13 @@ bool x86_get_cpuid_data(x86_cpu_cell *cell) {
 }
 
 /*
-	XXX
+	record cpu data in hash table
+
+	pdata : parsing data
+	pcell : x86 cpu data cell
+	pht : storage hash table
+
+	returns : true on succes else false
 */
 
 bool x86_set_cpu_data(prsdata *pdata, x86_cpu_cell *pcell, htable *pht) {

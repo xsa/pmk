@@ -320,8 +320,8 @@ bool find_file_dir(dynary *da, char *fname, char *fpath, size_t fplen) {
 	for (i = 0 ; i < da_usize(da) ; i++) {
 		path = da_idx(da, i);
 
-		strlcpy(tstr, path, sizeof(tstr));
-		strlcat(tstr, "/", sizeof(tstr));
+		strlcpy(tstr, path, sizeof(tstr)); /* no check */
+		strlcat(tstr, "/", sizeof(tstr)); /* no check */
 		if (strlcat_b(tstr, fname, sizeof(tstr)) == true) {
 			fp = fopen(tstr, "r");
 			if (fp != NULL) {
@@ -357,7 +357,7 @@ bool find_file(dynary *da, char *fname, char *fpath, size_t fplen) {
 	bool	rval = false;
 
 	if (find_file_dir(da, fname, fpath, fplen) == true) {
-		strlcat(fpath, "/", fplen); /* no need to check here */
+		strlcat(fpath, "/", fplen); /* no check */
 		if (strlcat_b(fpath, fname, fplen) == true) {
 			/* fpath set correctly */
 			rval = true;
