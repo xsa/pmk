@@ -56,12 +56,9 @@ testbin="./cfgtest"
 testfile="$testbin.c"
 testobj="$testbin.o"
 
-template="compat/compat.h.in"
-compat="compat/compat.h"
-maketmpl="./Makefile.pmk"
-makefile="./Makefile"
 temporary="./pmkcfg.tmp"
 
+tmpl_list="Makefile.pmk compat/compat.h.in"
 
 #
 # functions
@@ -78,6 +75,28 @@ usage: $0 [-hup]
 "
 }
 
+# remove template suffix
+# result in filename variable
+get_file_name() {
+	basedir=`dirname $1`
+	case $1 in
+		*.in) sfx=".in";;
+		*.pmk) sfx=".pmk";;
+	esac
+	basename=`basename $1 $sfx`
+	filename="$basedir/$basename"
+}
+
+# create new files from templates 
+process_tmpl_list () {
+	newlist=""
+	for f in $*; do
+		get_file_name $f
+		newlist="$newlist $filename"
+		cp $f $filename
+	done
+}
+
 check_header() {
 	header="$1"
 	printf "Checking header '%s' : " "$header"
@@ -92,10 +111,10 @@ int main() {
 EOF
 
 	if $CC -o $testbin $testfile >/dev/null 2>&1; then
-		templ_sed "def" "$header"
+		sed_define "def" "$header"
 		echo "yes"
 	else
-		templ_sed "udef" "$header"
+		sed_define "udef" "$header"
 		echo "no"
 	fi
 	rm -f $testfile $testbin
@@ -118,10 +137,10 @@ int main() {
 EOF
 
 	if $CC -o $testobj -c $testfile >/dev/null 2>&1; then
-		templ_sed "def" "$function"
+		sed_define "def" "$function"
 		echo "yes"
 	else
-		templ_sed "udef" "$function"
+		sed_define "udef" "$function"
 		echo "no"
 	fi
 	rm -f $testfile $testobj
@@ -144,10 +163,10 @@ int main() {
 EOF
 
 	if $CC -o $testbin $testfile >/dev/null 2>&1; then
-		templ_sed "def" "$type"
+		sed_define "def" "$type"
 		echo "yes"
 	else
-		templ_sed "udef" "$type"
+		sed_define "udef" "$type"
 		echo "no"
 	fi
 	rm -f $testfile $testbin
@@ -172,16 +191,16 @@ int main() {
 EOF
 
 	if $CC -o $testbin $testfile >/dev/null 2>&1; then
-		templ_sed "def" "$type"
+		sed_define "def" "$type"
 		echo "yes"
 	else
-		templ_sed "udef" "$type"
+		sed_define "udef" "$type"
 		echo "no"
 	fi
 	rm -f $testfile $testbin
 }
 
-templ_sed() {
+sed_define() {
 	sed_uc=`echo "$2" | tr [a-z] [A-Z] | tr . _`
 	case $1 in
 		def)	sed_str="#define HAVE_$sed_uc 1";;
@@ -189,19 +208,24 @@ templ_sed() {
 	esac
 	sed_tag="@DEF__$sed_uc@"
 
-	cp $compat $temporary
-	cat $temporary | sed "s/$sed_tag/$sed_str/" > $compat
-	rm -f $temporary
+	for f in $file_list; do
+		cp $f $temporary
+		cat $temporary | sed "s/$sed_tag/$sed_str/" > $f
+		rm -f $temporary
+	done
 }
 
 mkf_sed() {
 	sed_var="$1"
 	sed_val="$2"
 
-	cp $makefile $temporary
-	cat $temporary | sed "s,@$sed_var@,$sed_val," > $makefile
-	rm -f $temporary
+	for f in $file_list; do
+		cp $f $temporary
+		cat $temporary | sed "s,@$sed_var@,$sed_val," > $f
+		rm -f $temporary
+	done
 }
+
 
 #
 # init
@@ -221,8 +245,9 @@ while getopts "hp:u" arg; do
 	esac
 done
 
-cp $template $compat
-cp $maketmpl $makefile
+# init templates
+process_tmpl_list "$tmpl_list"
+file_list=$newlist
 
 if [ $usermode = 1 ]; then
 	echo 'USERMODE ON.'

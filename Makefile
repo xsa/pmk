@@ -3,8 +3,11 @@
 CC?=		cc
 DEBUG?=		-g
 
-# on some platforms install is not BSD compatible, so we use our own.
-INSTALL=	./pmkinstall
+# On some platforms install is not BSD compatible
+# so you can use pmkinstall instead of install.
+# For example HP-UX's install is not compatible.
+INSTALL=	install
+#INSTALL=	pmkinstall
 
 SYSCONFDIR=	/etc
 
@@ -47,6 +50,8 @@ INST=           $(PREMAKE)install
 
 SAMPLE=		$(PREMAKE)file.sample
 CONFIG=		$(PREMAKE).conf.sample
+
+SELFINST=	self-$(INST)
 
 TEST_SAMPLE=	test_samples
 TEST_INST=	test_pmkinstall
