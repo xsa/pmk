@@ -38,41 +38,22 @@
 #define _DETECT_H_
 
 #include "compat/pmk_string.h"
+#include "parse.h"
 #include "pmk.h"
 #include "premake.h"
+
+
+#define PMKCOMP_DATA	DATADIR "/pmkcomp.dat"
+
+#define PCC_TOK_ADDC	1
+
+/* max number of compilers hash table */
+#define MAX_COMP	32
 
 #define CC_TFILE_EXT	".c"
 #define CC_TEST_FILE	TMPDIR "/cc_testXXXXXXXX" CC_TFILE_EXT
 #define CC_TEST_BIN	TMPDIR "/cc_test_bin"
 #define CC_TEST_FORMAT	"%s -o %s %s >%s 2>&1"
-
-/* compiler ids */
-#define CI_UNKNOWN	0
-#define CI_TENDRA	1
-#define CI_GNUC		2
-#define CI_SUNPRO_C	3
-#define CI_SUNPRO_CXX	4
-#define CI_COMPAQ_C	5
-#define CI_COMPAQ_CXX	6
-#define CI_HP_ANSI_C	7
-#define CI_HP_ANSI_CXX	8
-#define CI_IBM_XLC	9
-#define CI_INTEL	10
-#define CI_SGI_MPRO	11
-
-/* compiler descr strings */
-#define CD_UNKNOWN	"Unknown"
-#define CD_TENDRA	"TenDRA"
-#define CD_GNUC		"GNU gcc"
-#define CD_SUNPRO_C	"Sun Workshop C"
-#define CD_SUNPRO_CXX	"Sun Workshop C++"
-#define CD_COMPAQ_C	"Compaq C"
-#define CD_COMPAQ_CXX	"Compaq C++"
-#define CD_HP_ANSI_C	"HP Ansi C"
-#define CD_HP_ANSI_CXX	"HP Ansi C++"
-#define CD_IBM_XLC	"IBM xlC"
-#define CD_INTEL	"Intel"
-#define CD_SGI_MPRO	"SGI MIPSpro"
 
 /* shared libs compiler flags */
 
@@ -89,7 +70,7 @@
 #define COMP_TEST_FORMAT \
 	"/* %s */\n" \
 	"#ifdef %s\n" \
-	"#define CC_ID\t%d\n" \
+	"#define CC_ID\t\"%s\"\n" \
 	"#define CC_V\t%s\n" \
 	"#endif\n" \
 	"\n"
@@ -108,7 +89,7 @@
 	"\n" \
 	"int main() {\n" \
 	"/* compiler id */\n" \
-	"\tprintf(\"%%d\\n\", CC_ID);\n" \
+	"\tprintf(\"%%s\\n\", CC_ID);\n" \
 	"/* compiler version */\n" \
 	"\tprintf(\"%%d\\n\", CC_V);\n" \
 	"\treturn(0);\n" \
@@ -116,21 +97,27 @@
 
 
 typedef struct {
-	unsigned int	 c_id;
-	char		*descr,
-			*c_macro,
-			*v_macro;
+	char	*c_id,
+		*descr,
+		*c_macro,
+		*v_macro;
 } comp_cell;
 
 typedef struct {
-	char	descr[255],
-		version[255];
-	int	index;
+	char	*c_id,
+		*version;
+} comp_info;
+
+typedef struct {
+	htable	*cht;
 } comp_data;
 
 
-void	gen_test_file(FILE *);
-int	cid_to_idx(unsigned int);
-bool	detect_compiler(char *, char *, comp_data *);
+bool		 add_compiler(comp_data *, htable *);
+comp_cell	*comp_get(comp_data *, char *c_id);
+char		*comp_get_descr(comp_data *, char *);
+comp_data	*parse_comp_file(char *);
+bool		 gen_test_file(FILE *, comp_data *);
+bool		 detect_compiler(char *, char *, comp_data *, comp_info *);
 
 #endif /* _DETECT_H_ */

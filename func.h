@@ -89,14 +89,14 @@
 				        "return(0);}"
 
 /* compiler command format string */
+				/* compiler cflags binary source log */
 #define HEADER_CC_FORMAT	"%s %s -o %s %s >>%s 2>&1"
-				/* compiler cflags binary source log */
-#define HEADER_FUNC_CC_FORMAT	"%s %s -c %s >>%s 2>&1"
-				/* compiler cflags binary source log */
-#define LIB_CC_FORMAT		"%s %s -o %s -l%s %s >>%s 2>&1"
+				/* compiler cflags objfile source log */
+#define HEADER_FUNC_CC_FORMAT	"%s %s -o %s -c %s >>%s 2>&1"
 				/* compiler libflags binary testlib source log */
-#define TYPE_CC_FORMAT		"%s -o %s %s >>%s 2>&1"
+#define LIB_CC_FORMAT		"%s %s -o %s -l%s %s >>%s 2>&1"
 				/* compiler binary source log */
+#define TYPE_CC_FORMAT		"%s -o %s %s >>%s 2>&1"
 
 /* file names */
 #define C_FILE_EXT	".c"

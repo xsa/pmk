@@ -339,6 +339,7 @@ bool pmk_check_header(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 	char	 inc_path[MAXPATHLEN],
 		 cfgcmd[MAXPATHLEN],
 		 ftmp[MAXPATHLEN],
+		 btmp[MAXPATHLEN],
 		*incfile,
 		*incfunc,
 		*target,
@@ -446,8 +447,12 @@ bool pmk_check_header(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 		snprintf(cfgcmd, sizeof(cfgcmd), HEADER_CC_FORMAT,
 			ccpath, inc_path, BIN_TEST_NAME, ftmp, pgd->buildlog);
 	} else {
+		/* compute objet file name */
+		strlcpy(btmp, ftmp, sizeof(btmp));
+		btmp[strlen(btmp) - 1] = 'o';
+
 		snprintf(cfgcmd, sizeof(cfgcmd), HEADER_FUNC_CC_FORMAT,
-			ccpath, inc_path, ftmp, pgd->buildlog);
+			ccpath, inc_path, btmp, ftmp, pgd->buildlog);
 	}
 
 	/* get result */
@@ -494,11 +499,16 @@ bool pmk_check_header(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 
 	if (unlink(ftmp) == -1) {
 		/* cannot remove temporary file */
-		errorf("Can not remove %s\n", ftmp);
+		errorf("Can not remove %s", ftmp);
 	}
 
-	/* No need to check return here as binary could not exists */
-	unlink(BIN_TEST_NAME);
+	if (incfunc == NULL) {
+		/* No need to check return here as binary could not exists */
+		unlink(BIN_TEST_NAME);
+	} else {
+		/* No need to check return here as objet file could not exists */
+		unlink(btmp);
+	}
 
 	return(rval);
 }
@@ -649,7 +659,7 @@ bool pmk_check_lib(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 
 	if (unlink(ftmp) == -1) {
 		/* cannot remove temporary file */
-		errorf("Can not remove %s\n", ftmp);
+		errorf("Can not remove %s", ftmp);
 	}
 
 	/* No need to check return here as binary could not exists */
@@ -1175,7 +1185,7 @@ bool pmk_check_type(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 
 	if (unlink(ftmp) == -1) {
 		/* cannot remove temporary file */
-		errorf("Can not remove %s\n", ftmp);
+		errorf("Can not remove %s", ftmp);
 	}
 
 	/* No need to check return here as binary could not exists */
