@@ -541,7 +541,10 @@ int main(int argc, char *argv[]) {
 	prsdata		*pdata;
 
 	/* get current path */
-	getcwd(buf, sizeof(buf));
+	if (getcwd(buf, sizeof(buf)) == NULL) {
+		errorf("Unable to get current directory");
+		exit(EXIT_FAILURE);
+	}
 
 	while (go_exit == false) {
 		chr = getopt(argc, argv, "b:d:e:f:hlo:v");
