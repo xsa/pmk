@@ -157,6 +157,7 @@ void ac_process_dyn_var(htable *pht, pmkdata *pgd, char *template) {
 		*pstr,
 		 buf[MAXPATHLEN],
 		 ac_dir[MAXPATHLEN],
+		 abs_ad[MAXPATHLEN],
 		 abs_bd[MAXPATHLEN],
 		 abs_sd[MAXPATHLEN];
 
@@ -180,8 +181,9 @@ void ac_process_dyn_var(htable *pht, pmkdata *pgd, char *template) {
 		NOTE : ac_dir is relative */
 	/* NOTE : we use strdup to avoid problem with linux's dirname */
 	pstr = strdup(template);
-	relpath(srcdir, dirname(pstr), ac_dir);
+	strlcpy(abs_ad, dirname(pstr), sizeof(abs_ad));
 	free(pstr);
+	relpath(srcdir, abs_ad, ac_dir);
 
 	/* init builddir */
 	hash_add(pht, "abs_top_builddir", strdup(basedir));
@@ -201,7 +203,7 @@ void ac_process_dyn_var(htable *pht, pmkdata *pgd, char *template) {
 	hash_add(pht, "abs_top_srcdir", strdup(srcdir));
 
 	/* compute top_srcdir */
-	relpath(basedir, srcdir, buf);
+	relpath(abs_ad, srcdir, buf);
 	hash_add(pht, "top_srcdir", strdup(buf));
 
 	/* absolute path of template */
@@ -309,6 +311,7 @@ void ac_set_variables(htable *pht) {
 	hash_add(pht, "SET_MAKE", strdup(""));
 	hash_add(pht, "AMDEP_TRUE", strdup(""));
 	hash_add(pht, "AMDEP_FALSE", strdup("#"));
+	hash_add(pht, "AMDEPBACKSLASH", strdup("\\"));
 	hash_add(pht, "AMTAR", strdup("echo 'ARG!'"));
 	hash_add(pht, "ACLOCAL", strdup("echo 'ARG!'"));
 	hash_add(pht, "AUTOCONF", strdup("echo 'ARG!'"));
@@ -336,9 +339,9 @@ void ac_set_variables(htable *pht) {
 	hash_add(pht, "ac_ct_RANLIB", strdup("")); /* XXX shit ? */
 	hash_add(pht, "ac_ct_STRIP", strdup("")); /* XXX shit ? */
 	hash_add(pht, "am__fastdepCC_FALSE", strdup("")); /* XXX shit ? */
-	hash_add(pht, "am__fastdepCC_TRUE", strdup("")); /* XXX shit ? */
-	hash_add(pht, "am__include", strdup("")); /* XXX shit ? */
-	hash_add(pht, "am__leading_dot", strdup("")); /* XXX shit ? */
+	hash_add(pht, "am__fastdepCC_TRUE", strdup("#")); /* XXX shit ? */
+	hash_add(pht, "am__include", strdup("include")); /* XXX shit ? */
+	hash_add(pht, "am__leading_dot", strdup(".")); /* XXX shit ? */
 	hash_add(pht, "am__quote", strdup("")); /* XXX shit ? */
 	hash_add(pht, "oldincludedir", strdup(""));
 	hash_add(pht, "install_sh", strdup("")); /* provide our own ? */
