@@ -79,20 +79,20 @@ mips	~.	make specs, this tool should handle install and
 pmkpc
 -----------------------------------------------------------------------
 	~	missing options
-			+ PMKPC_OPT_ATLPKGVERS :
-			+ PMKPC_OPT_LISTALL :
-			- PMKPC_OPT_UNINST :
-			- PMKPC_OPT_DEBUG :
-			- PMKPC_OPT_CFLAGS_ONLY_PATH	:
-			- PMKPC_OPT_CFLAGS_ONLY_OTHER :
-			- PMKPC_OPT_LIBS_ONLY_LIB :
-			- PMKPC_OPT_LIBS_ONLY_PATH :
-			- PMKPC_OPT_LIBS_ONLY_OTHER :
-			- PMKPC_OPT_VAR :
-			- PMKPC_OPT_VAR_DEF :
-			- PMKPC_OPT_VAR_PRNT :
-			- PMKPC_OPT_VAR_SILC :
-			- PMKPC_OPT_VAR_STDO :
+			+ PMKPC_OPT_ATLPKGVERS
+			+ PMKPC_OPT_LISTALL
+			- PMKPC_OPT_UNINST
+			- PMKPC_OPT_DEBUG
+			- PMKPC_OPT_CFLAGS_ONLY_PATH
+			- PMKPC_OPT_CFLAGS_ONLY_OTHER
+			- PMKPC_OPT_LIBS_ONLY_LIB
+			- PMKPC_OPT_LIBS_ONLY_PATH
+			- PMKPC_OPT_LIBS_ONLY_OTHER
+			- PMKPC_OPT_VAR
+			- PMKPC_OPT_VAR_DEF
+			- PMKPC_OPT_VAR_PRNT
+			- PMKPC_OPT_VAR_SILC
+			- PMKPC_OPT_VAR_STDO
 	~	man page
 	-	special expression ('' quoted)
 
