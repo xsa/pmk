@@ -58,13 +58,25 @@ configuration file
 .El
 
 .Sh EXAMPLES
-Few examples of pmk command line arguments :
-.Bd -literal -offset -indent
- pmk -v
-
- pmk -b src -d use_gtk,use_qt
-
- pmk -f pmk/pmkfile -e use_curses -o pmk/pmkovr
+To print pmk version number:
+.Pp
+.Dl $ pmk -v
+.Pp
+To use
+.Em src
+as the basedir and disable the use of the GTK and Qt libraries:
+.Pp
+.Dl $ pmk -b src -d use_gtk,use_qt
+.Pp
+To specify an alternate
+.Xr pmkfile 5 ,
+enabling the use of the curses library and overriding
+.Pa /etc/pmk/pmk.conf
+with the content of a given file (
+.Pa pmk/pmkovr
+in this case):
+.Pp
+.Dl $ pmk -f pmk/pmkfile -e use_curses -o pmk/pmkovr
 .Ed
 
 .Sh SEE ALSO
@@ -74,12 +86,12 @@ Few examples of pmk command line arguments :
 .Xr pmk.conf 5 ,
 .Xr pmksetup 8
 
-.Sh AUTHOR
-.An Damien Couderc .
-
 .Sh HISTORY
 The idea to replace configure script was existing since a long time.
 But the projet was initiated in the begining of March 2003.
+
+.Sh AUTHOR
+.An Damien Couderc.
 
 .Sh BUGS
 You have to find them.

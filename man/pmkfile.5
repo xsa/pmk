@@ -63,7 +63,7 @@ For example:
 can contain comments, blank lines and commands.
 .Pp
 A command has the following format (? character means optional field):
-.Bd -literal -offset -indent
+.Bd -literal -offset indent
  <command><?(label)> {
  <body>
  }
@@ -76,12 +76,12 @@ above.
 .Pp
 The body can contain comment(s) and definition line(s).
 A commented line start with a '#' character like the following:
-.Bd -literal -offset -indent
+.Bd -literal -offset indent
 # this is a comment line
 .Ed
 .Pp
 A definition line has the following format:
-.Bd -literal -offset -indent
+.Bd -literal -offset indent
 <?blank><key name><?blank>=<?blank><key value>
 .Ed
 .Pp
@@ -91,7 +91,7 @@ The key value type can be 'bool', 'quoted' or 'list'.
 The right type will depend on the key name (see further).
 .Pp
 For example:
-.Bd -literal -offset -indent
+.Bd -literal -offset indent
 CHECK_INCLUDE(header_sys_param) {
  # following options use different uses of blank characters
  # key value is word type
@@ -111,7 +111,7 @@ The following commands have no label.
 This command sets pmk parameters.
 .Pp
 Arguments:
-.Bd -literal -offset -indent
+.Bd -literal -offset indent
 AC_COMPAT : type is 'quoted', enable autoconf compatibility (empty string or filename).
 LANG : type is 'quoted', global default language.
 TARGET : type is 'list', list of target's filenames.
@@ -119,7 +119,7 @@ DETECT : type is 'list', list of compilers to detect (CC and/or CXX).
 .Ed
 .Pp
 For example:
-.Bd -literal -offset -indent
+.Bd -literal -offset indent
 SETTINGS {
  AC_COMPAT="config.h"
  LANG="C"
@@ -137,7 +137,7 @@ Those are the variables to be defined (quote data type only).
 .Ed
 .Pp
 For example:
-.Bd -literal -offset -indent
+.Bd -literal -offset indent
 DEFINE {
  PACKAGE="my_prog"
  VERSION="0.1"
@@ -150,7 +150,7 @@ This command is setting dependency switches (see further DEPEND definition).
 Arguments:
 .Pp
 For example:
-.Bd -literal -offset -indent
+.Bd -literal -offset indent
 SWITCHES {
  use_curses=TRUE
  use_gtk=FALSE
@@ -176,7 +176,7 @@ The value of each dependencie can be negated by adding a leading '!' sign.
 If at least one of the dependencies is false then the check will be disabled.
 .Pp
 For example:
-.Bd -literal -offset -indent
+.Bd -literal -offset indent
 DEPEND = ("header_gtk","!header_qt")
 .Ed
 .El
@@ -185,7 +185,7 @@ Some of these commands can also have the following arguments:
 .Bl -tag -width Ds
 .It Cm LANG
 Specify the language used in the following list:
-.Bd -literal -offset -indent
+.Bd -literal -offset indent
 C
 C++
 .Ed
@@ -198,7 +198,7 @@ Here the list of commands:
 Check if a binary is in the path.
 .Pp
 Arguments:
-.Bd -literal -offset -indent
+.Bd -literal -offset indent
 REQUIRED, DEPEND.
 NAME : type is 'quoted', name of the binary.
 VARIABLE : type is 'quoted', variable name to store the path.
@@ -207,7 +207,7 @@ VARIABLE : type is 'quoted', variable name to store the path.
 Check language header and optionally a function.
 .Pp
 Arguments:
-.Bd -literal -offset -indent
+.Bd -literal -offset indent
 REQUIRED, DEPEND, LANG.
 NAME : type is 'quoted', name of the header.
 FUNCTION : type is 'quoted', function to check, optional.
@@ -217,7 +217,7 @@ CFLAGS : type is 'quoted', variable name to store CFLAGS values, optional.
 Check a library and optionally a function.
 .Pp
 Arguments:
-.Bd -literal -offset -indent
+.Bd -literal -offset indent
 REQUIRED, DEPEND, LANG.
 NAME : type is 'quoted', name of the library to check.
 FUNCTION : type is 'quoted', function to check, optional.
@@ -227,7 +227,7 @@ LIBS : type is 'quoted', variable name to store LIBS values, optional.
 Check using a *-config tool.
 .Pp
 Arguments:
-.Bd -literal -offset -indent
+.Bd -literal -offset indent
 REQUIRED, DEPEND.
 NAME : type is 'quoted', config tool name.
 VERSION : type is 'quoted', minimal version needed, optional.
@@ -239,7 +239,7 @@ VARIABLE : type is 'quoted', variable name to store the path of the config tool,
 Check a package using pkg-config.
 .Pp
 Arguments:
-.Bd -literal -offset -indent
+.Bd -literal -offset indent
 REQUIRED, DEPEND.
 NAME : type is 'quoted', package name.
 VERSION : type is 'quoted', minimal version needed, optional.
@@ -250,7 +250,7 @@ LIBS : type is 'quoted', variable name to store LIBS values, optional.
 Check if the given type exists.
 .Pp
 Arguments:
-.Bd -literal -offset -indent
+.Bd -literal -offset indent
 REQUIRED, DEPEND, LANG.
 NAME : type is 'quoted', name of the type to check.
 HEADER : type is quoted, name of the header where to find the given type.
@@ -260,7 +260,7 @@ MEMBER : type is quoted, name of a member of the structure given in NAME to be c
 Check if the given variable does exist and optionally its value.
 .Pp
 Arguments:
-.Bd -literal -offset -indent
+.Bd -literal -offset indent
 REQUIRED, DEPEND.
 NAME : type is 'quoted', name of the variable to check.
 VALUE : type is 'quoted', value to check with the variable, optional.
@@ -276,7 +276,7 @@ expression is true.
 Arguments:
 .Pp
 For example:
-.Bd -literal -offset -indent
+.Bd -literal -offset indent
 IF(header_gtk) {
 	DEFINE {
 		HAVE_GTK = "1"
@@ -290,7 +290,7 @@ expression is false.
 Arguments:
 .Pp
 For example:
-.Bd -literal -offset -indent
+.Bd -literal -offset indent
 ELSE(header_glib) {
 	DEFINE {
 		HAVE_GLIB = "0"
@@ -305,7 +305,7 @@ ELSE(header_glib) {
 This command helps you to build the name of a shared library.
 .Pp
 Arguments:
-.Bd -literal -offset -indent
+.Bd -literal -offset indent
 NAME : type is 'quoted', name of the library (without leading 'lib').
 MAJOR : type is 'quoted', major number for the version.
 MINOR : type is 'quoted', minor number for the version.
@@ -315,7 +315,7 @@ VERSION_FULL : type is 'quoted', variable name to store library name with full v
 .Ed
 .Pp
 For example,
-.Bd -literal -offset -indent
+.Bd -literal -offset indent
 BUILD_SHLIB_NAME {
 	NAME = "test"
 	MAJOR = "0"
