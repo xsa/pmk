@@ -1,3 +1,5 @@
+# snapshot 0.4.7
+
 27 Jun 2003 mipsator
  * fixed hash_destroy() to support null pointer as argument
 	(noticed by Marek Habersack).
