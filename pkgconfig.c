@@ -46,7 +46,7 @@
 #include "hash.h"
 #include "parse.h"
 #include "pkgconfig.h"
-#include "pmk.h"
+/*#include "pmk.h"*/
 #include "premake.h"
 
 
@@ -983,16 +983,13 @@ cfgtdata *parse_cfgt_file(void) {
 	return : boolean
 */
 
-bool cfgtcell_get_binary(pmkdata *pgd, char *mod, char *buf, size_t sb) {
+bool cfgtcell_get_binary(cfgtdata *pcd, char *mod, char *buf, size_t sb) {
 	cfgtcell	*pcc;
-	cfgtdata	*pcd;
 
-	/* init config tool data if it does not exist */
-	if (pgd->cfgt == NULL) {
-		pgd->cfgt = parse_cfgt_file();
+	if (pcd == NULL) {
+		/* not found */
+		return(false);
 	}
-
-	pcd = pgd->cfgt;
 
 	pcc = hash_get(pcd->by_mod, mod);
 	if (pcc == NULL) {
@@ -1014,16 +1011,13 @@ bool cfgtcell_get_binary(pmkdata *pgd, char *mod, char *buf, size_t sb) {
 	return : cfgtcell structure or NULL
 */
 
-cfgtcell *cfgtcell_get_cell(pmkdata *pgd, char *binary) {
-	cfgtdata	*pcd;
+cfgtcell *cfgtcell_get_cell(cfgtdata *pcd, char *binary) {
 	char		*mod;
 
-	/* init config tool data if it does not exist */
-	if (pgd->cfgt == NULL) {
-		pgd->cfgt = parse_cfgt_file();
+	if (pcd == NULL) {
+		/* not found */
+		return(false);
 	}
-
-	pcd = pgd->cfgt;
 
 	mod = hash_get(pcd->by_bin, binary);
 	if (mod == NULL) {
