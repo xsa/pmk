@@ -210,15 +210,12 @@ mkf_sed() {
 # parse options
 while getopts "hp:u" arg; do
 	case $arg in
-		p)
-			echo "overriding prefix with '$OPTARG'"
+		p)	echo "overriding prefix with '$OPTARG'"
 			base=$OPTARG
 			;;
-		u)
-			usermode=1
+		u)	usermode=1
 			;;
-		h)
-			usage
+		h)	usage
 			exit 1
 			;;
 	esac
