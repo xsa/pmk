@@ -37,9 +37,20 @@
 #include "premake.h"
 #include "pmk.h"
 
+#define MAXTOKENS	128	/* max slots in the paths array */
+
+typedef struct {
+	int	pathnum;
+	char	*pathlst[MAXTOKENS];
+} mpath;
+
+
 bool get_line(FILE *, char *, int);
 bool env_to_opt(char *, pmkcmdopt *);
 bool get_make_var(char *, char *, int);
+
+int strsplit(char *, mpath *, char *);
+int find_file(mpath *, char *, char *, int);
 
 void errorf(const char *, ...);
 void errorf_line(char *, int, const char *, ...);
