@@ -1622,6 +1622,8 @@ bool pmk_setparam_detect(pmkcmd *cmd, prsopt *popt, pmkdata *pgd) {
 
 					if (cdata->sht != NULL) { /* XXX need to skip if system has not data ? */
 						ostr = hash_get(cdata->sht, buf);
+					} else {
+						ostr = NULL;
 					}
 
 					/* set shared lib compiler flags */
@@ -1644,6 +1646,8 @@ bool pmk_setparam_detect(pmkcmd *cmd, prsopt *popt, pmkdata *pgd) {
 
 					if (cdata->sht != NULL) { /* XXX need to skip if system has not data ? */
 						ostr = hash_get(cdata->sht, buf);
+					} else {
+						ostr = NULL;
 					}
 
 					/* set shared lib compiler flags */
