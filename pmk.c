@@ -66,6 +66,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "compat/compat.h"
 #include "pmk.h"
 #include "func.h"
 #include "common.h"
@@ -235,12 +236,17 @@ bool parse_opt(char *line, htable *ht) {
 	while (line[i] != '\0' && i < MAXPATHLEN) {
 		if (keyfound == FALSE) {
 			if (line[i] == PMK_KEY_CHAR) {
+				/* end of key name reached */
 				buf[j] = '\0';
-				strncpy(tkey, buf, MAX_OPT_NAME_LEN);
-				/* XXX check if lenght is ok
-					strlcpy ?*/
-				keyfound = TRUE;
-				j = 0;
+				if (strlcpy(tkey, buf, MAX_OPT_NAME_LEN) >= MAX_OPT_NAME_LEN) {
+					/* key name is too long */
+					err_line = cur_line;
+					snprintf(err_msg, sizeof(err_msg), "Key name is too long");
+					return(FALSE);
+				} else {
+					keyfound = TRUE;
+					j = 0;
+				}
 			} else {
 				if (isalpha(line[i]) == 0) {
 					/* invalid character */
@@ -253,6 +259,7 @@ bool parse_opt(char *line, htable *ht) {
 				}
 			}
 		} else {
+			/* grabbing key value */
 			buf[j] = line[i];
 			j++;
 		}
@@ -260,15 +267,20 @@ bool parse_opt(char *line, htable *ht) {
 	}
 	
 	if (keyfound == FALSE) {
+			/* key name undefined */
 			err_line = cur_line;
 			snprintf(err_msg, sizeof(err_msg), "Malformed option");
 			return(FALSE);
 	} else {
-		strncmp(tval, buf, MAX_OPT_VALUE_LEN);
-		/* XXX check length ? */
-		hash_add(ht, tkey, tval);
-
-		return(TRUE);
+		if (strlcpy(tval, buf, MAX_OPT_VALUE_LEN) >= MAX_OPT_VALUE_LEN) {
+			/* key value is too long */
+			err_line = cur_line;
+			snprintf(err_msg, sizeof(err_msg), "Key value is too long");
+		} else {
+			/* key name and value are ok */
+			hash_add(ht, tkey, tval);
+			return(TRUE);
+		}
 	}
 }
 
@@ -398,6 +410,7 @@ int main(int argc, char *argv[]) {
 	/* open pmk file */
 	fd = fopen(PREMAKE_FILENAME, "r");
 	if (fd == NULL) {
+		/* XXX error formating */
 		warn("%s", PREMAKE_FILENAME);
 		exit(1);
 	}
@@ -405,6 +418,7 @@ int main(int argc, char *argv[]) {
 	/* open log file */
 	lfd = fopen(PREMAKE_LOG, "w");
 	if (lfd == NULL) {
+		/* XXX error formating */
 		warn("%s", PREMAKE_LOG);
 		exit(1);
 	}
