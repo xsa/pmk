@@ -127,6 +127,8 @@
 #define PMK_TOK_BLDSLN	30
 
 
+/* option keywords */
+/* common */
 #define KW_OPT_NAME		"NAME"
 #define KW_OPT_DEFS		"DEFS"
 #define KW_OPT_FUNCTION		"FUNCTION"
@@ -139,17 +141,19 @@
 #define KW_OPT_VERSION		"VERSION"
 #define KW_OPT_VALUE		"VALUE"
 #define KW_OPT_VARIABLE		"VARIABLE"
-
+/* SETTINGS */
 #define KW_SETNGS_GLANG		"LANG"
 #define KW_SETNGS_TARGET	"TARGET"
 #define KW_SETNGS_ACCOMP	"AC_COMPAT"
 #define KW_SETNGS_ACCOMP	"AC_COMPAT"
 #define KW_SETNGS_CCDTCT	"DETECT"
-
+/* shared lib */
 #define KW_SL_VERS_NONE		"VERSION_NONE"
 #define KW_SL_VERS_MAJ		"VERSION_MAJ"
 #define KW_SL_VERS_FULL		"VERSION_FULL"
 
+
+#define DEFINE_DEFAULT		"1"
 
 /* structures */
 typedef struct {
