@@ -1,3 +1,8 @@
+01 Sep 2003 mipsator
+ * added invert_bool() and get_comp_path() in functool.
+ * improved language checking and compiler path setting in func.
+ * small improvement of pmk_target().
+
 30 Aug 2003 mipsator
  * added VARNAME in CHECK_BINARY to specify alternate storage variable.
  * fixed deinstall target in Makefile.

@@ -237,7 +237,7 @@ void po_free(pmkobj *po) {
 
 pmkobj *po_append(void *orig, void *value, void *misc) {
 	char	*pbuf;
-	dynary	*da;
+/*	dynary	*da; XXX TODO */
 	pmkobj	*po_orig,
 		*po_value,
 		*po;

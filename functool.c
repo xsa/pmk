@@ -74,6 +74,22 @@ bool check_bool_str(char *str) {
 }
 
 /*
+	invert bool value
+
+	value : input boolean value
+
+	return : negation of value
+*/
+
+bool invert_bool(bool value) {
+		if (value == true) {
+			return(false);
+		} else {
+			return(true);
+		}
+}
+
+/*
 	convert boolean into string
 
 	value : boolean value to convert to string
@@ -427,7 +443,7 @@ bool require_check(htable *pht) {
 	pht : hash table that should contain LANG 
 	pgd : XXX TODO to get global LANG 
 
-	return : lgdata structure
+	return : lgdata structure or NULL for unknow language
 */
 
 lgdata *get_lang(htable *pht, pmkdata *pgd) {
@@ -450,4 +466,20 @@ lgdata *get_lang(htable *pht, pmkdata *pgd) {
 	}
 
 	return(NULL);
+}
+
+/*
+	provide compiler path
+
+	pht : main hash table
+	compname : compiler name from lgdata structure
+
+	return : compiler's path
+*/
+
+char *get_comp_path(htable *pht, char *compname) {
+	char	key[MAX_OPT_NAME_LEN];
+
+	snprintf(key, sizeof(key), "BIN_%s", compname);
+	return((char *) hash_get(pht, key));
 }

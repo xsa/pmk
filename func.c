@@ -97,7 +97,7 @@ bool pmk_define(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 	}
 
 	pmk_log("\tTotal %d definition(s) added.\n", n);
-	
+
 	hash_free_hkeys(phk);
 
 	return(true);
@@ -109,7 +109,8 @@ bool pmk_define(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 
 bool pmk_target(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 	dynary	*da;
-	int	 i = 0;
+	int	 i = 0,
+		 n;
 	pmkobj	*po;
 
 	pmk_log("* Collecting targets\n");
@@ -125,12 +126,15 @@ bool pmk_target(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 		errorf("syntax error in LIST.");
 		return(false);
 	}
-	
-	for (i=0 ; i < da_usize(da) ; i++) {
+
+	n = da_usize(da);
+	for (i=0 ; i < n ; i++) {
 		pmk_log("\tAdded '%s'.\n", da_idx(da, i));
 	}
 
 	gdata->tlist = da;
+
+	pmk_log("\tTotal %d target(s) added.\n", n);
 
 	return(true);
 }
@@ -333,13 +337,16 @@ bool pmk_check_include(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 
 	/* get the language used */
 	pld = get_lang(ht, gdata);
+	if (pld == NULL) {
+		pmk_log("\tSKIPPED, unknow language.\n");
+		return(invert_bool(required));
+	}
 
 	/* get the appropriate compiler */
-	snprintf(cfgcmd, sizeof(cfgcmd), "BIN_%s", pld->comp);
-	ccpath = (char *) hash_get(gdata->htab, cfgcmd);
+	ccpath = get_comp_path(gdata->htab, pld->comp);
 	if (ccpath == NULL) {
-		errorf("cannot get compiler path.");
-		return(false);
+		pmk_log("\tSKIPPED, cannot get compiler path ('%s').\n", pld->comp);
+		return(invert_bool(required));
 	} else {
 		pmk_log("\tUse %s language with %s compiler.\n", pld->name, pld->comp);
 	}
@@ -468,13 +475,16 @@ bool pmk_check_lib(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 
 	/* get the language used */
 	pld = get_lang(ht, gdata);
+	if (pld == NULL) {
+		pmk_log("\tSKIPPED, unknow language.\n");
+		return(invert_bool(required));
+	}
 
 	/* get the appropriate compiler */
-	snprintf(cfgcmd, sizeof(cfgcmd), "BIN_%s", pld->comp);
-	ccpath = (char *) hash_get(gdata->htab, cfgcmd);
+	ccpath = get_comp_path(gdata->htab, pld->comp);
 	if (ccpath == NULL) {
-		errorf("cannot get compiler path.");
-		return(false);
+		pmk_log("\tSKIPPED, cannot get compiler path ('%s').\n", pld->comp);
+		return(invert_bool(required));
 	} else {
 		pmk_log("\tUse %s language with %s compiler.\n", pld->name, pld->comp);
 	}
@@ -928,13 +938,16 @@ bool pmk_check_type(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 
 	/* get the language used */
 	pld = get_lang(ht, gdata);
+	if (pld == NULL) {
+		pmk_log("\tSKIPPED, unknow language.\n");
+		return(invert_bool(required));
+	}
 
 	/* get the appropriate compiler */
-	snprintf(cfgcmd, sizeof(cfgcmd), "BIN_%s", pld->comp);
-	ccpath = (char *) hash_get(gdata->htab, cfgcmd);
+	ccpath = get_comp_path(gdata->htab, pld->comp);
 	if (ccpath == NULL) {
-		errorf("cannot get compiler path.");
-		return(false);
+		pmk_log("\tSKIPPED, cannot get compiler path ('%s').\n", pld->comp);
+		return(invert_bool(required));
 	} else {
 		pmk_log("\tUse %s language with %s compiler.\n", pld->name, pld->comp);
 	}
