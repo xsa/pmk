@@ -30,10 +30,15 @@
  *
  */
 
+/*
+#define PMKSETUP_DEBUG 1
+*/
+
 #include <sys/param.h>
 #include <err.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 
 #include "pmk.h"
 
@@ -56,30 +61,47 @@ int main(int argc, char *argv[]) {
 		tf[MAXPATHLEN];
 	bool	exists=FALSE;
 
-	/* try to open configuration file iif it exists */
+	/* try to open configuration file if it exists */
 	snprintf(cf, sizeof(cf), "%s/%s", SYSCONFDIR, PREMAKE_CONFIG);
 	cfd = fopen(cf, "r");
 	if (cfd != NULL) {
 		exists=TRUE;
 	}
 
-	/* bad bad bad, yes it will be changed to something appropriate */
-	/* mkstemp powah */
-	snprintf(tf, sizeof(tf), "/tmp/pmktmp");
-	
-	if ((tfd = fopen(tf, "w")) == NULL)
+	/* creating temporary file to build new configuration file */
+	snprintf(tf, sizeof(tf), "/tmp/pmkXXXXXXXXXX");
+	if (mkstemp(tf) == NULL) {
+		/* name randomize failed */
 		err(1, "%s", tf);
+	}
+	tfd = fopen(tf, "w");
+	if (tfd == NULL) {
+		/* cannot open temporary file */
+		err(1, "%s", tf);
+	}
+
+	fprintf(tfd, "# PREMAKE");
 
 	printf("Hey you know what ? I'm doing nothing :)\n");
 
 
 	fclose(tfd);
 	if (exists == TRUE) {
+		/* configuration file was opened */
 		fclose(cfd);
 	}
 
 	/* finished playing with temporary file */
-	/* code to overwrite old configuration file */
+	/* XXX code to overwrite old configuration file */
+
+#ifndef PMKSETUP_DEBUG
+	if (unlink(tf) == -1) {
+		/* canot remove temporary file */
+		err(1, "%s", tf);
+	}
+#else
+	printf("[DEBUG] %s has not been deleted !\n", tf);
+#endif
 
 	return(0);
 }
