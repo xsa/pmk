@@ -33,7 +33,7 @@
 #ifndef _PREMAKE_H_
 #define _PREMAKE_H_
 
-#include "compat/stdbool.h"
+#include "compat/pmk_stdbool.h"
 
 #ifndef SYSCONFDIR
 #	define SYSCONFDIR	"/etc"
