@@ -1,3 +1,9 @@
+02 Aug 2004 mipsator
+ * fixed pmk_set_variable() to check type of value to prevent coredump
+   on syntax error (noticed by Han Boetes).
+ * removed redundant (and confusing dependency in samples/pmkfile.sample
+   (noticed by Han Boetes).
+
 # snapshot 0.8.1-s3
 
 28 Jul 2004 mipsator
