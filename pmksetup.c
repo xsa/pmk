@@ -62,20 +62,22 @@ int main(int argc, char *argv[]) {
 	FILE		*config;
 	int		ch,
 			error = 0;
-	uid_t		uid;
 	htable		*ht;
 	
 	extern int	optind;
 
-	__progname = argv[0];
 
 #ifndef USER_TEST
+	uid_t	uid;
+
 	/* pmksetup(8) must be run as root */
 	if ((uid = getuid()) != 0) {
 		errorf("you must be root.");
 		exit(1);
 	} 
 #endif
+
+	__progname = argv[0];
 	
 	while ((ch = getopt(argc, argv, "hvV")) != -1)
 		switch(ch) {
@@ -216,7 +218,8 @@ int parse_conf(FILE *config, htable *ht) {
 		len = strlen(line);
 
 		/* replace the trailing '\n' by a NULL char */
-		line[len -1] = '\0';
+		if (line[len - 1] == '\n')
+			line[len - 1] = CHAR_EOS; 
 
 		/* checking first character of the line */
 		switch (line[0]) {
@@ -320,7 +323,8 @@ int close_tmp_config(void) {
  *	returns:  0 on success
  *		 -1 on failure
  */
-int get_env_vars(htable *ht) { 
+int get_env_vars(htable *ht) {
+	char	*bin_path;
 	struct	utsname	utsname;
 
 	if (uname(&utsname) == -1) {
@@ -348,24 +352,7 @@ int get_env_vars(htable *ht) {
 	hash_add(ht, PREMAKE_KEY_INCPATH, "/usr/include");
 	hash_add(ht, PREMAKE_KEY_LIBPATH, "/usr/lib");
 
-	return(0);
-}
-
-
-/* 
- * Get the _must be_ binaries on the system
- *
- *	ht: hash table where we have to store the values
- *
- *	returns:  0 on success
- *		 -1 on failure
- */ 
-int get_binaries(htable *ht) {
-	int	i, rval = 0;
-	char	*bin_path,
-		fbin[MAXPATHLEN];	/* full binary path */
-	dynary	*stpath;
-
+	/* getting the environment variable PATH */
 	if ((bin_path = getenv("PATH")) == NULL) {
 		errorf("could not get the PATH environment variable");
 		return(-1);
@@ -375,15 +362,31 @@ int get_binaries(htable *ht) {
 	 * replace the string separator in the PATH 
 	 * to fit to our standards
 	 */
-	char_replace(bin_path, PATH_STR_DELIMITER, CHAR_LIST_SEPARATOR); 
+	char_replace(bin_path, PATH_STR_DELIMITER, CHAR_LIST_SEPARATOR);
 
 	if (verbose_flag == 1) {
 		debugf("");
 		debugf("[Environment Variables]");
 		debugf("\t%s => %s", PREMAKE_KEY_BINPATH, bin_path);
 	}
-
 	hash_add(ht, PREMAKE_KEY_BINPATH, bin_path);
+
+	return(0);
+}
+
+
+/* 
+ * Look for location of some predefined binaries
+ *
+ *	ht: hash table where we have to store the values
+ *
+ *	returns:  0 on success
+ *		 -1 on failure
+ */ 
+int get_binaries(htable *ht) {
+	int	i;
+	char	fbin[MAXPATHLEN];	/* full binary path */
+	dynary	*stpath;
 
         /*
          * splitting the PATH variable and storing in a 
@@ -393,7 +396,9 @@ int get_binaries(htable *ht) {
 		errorf("cannot initalize the dynamic array"); 
 		return(-1);	
 	}
-	if (str_to_dynary(bin_path, CHAR_LIST_SEPARATOR, stpath) == 0) {
+
+	if (str_to_dynary(hash_get(ht, PREMAKE_KEY_BINPATH), 
+			CHAR_LIST_SEPARATOR, stpath) == 0) {
 		errorf("could not split the PATH environment variable correctly");
 		da_destroy(stpath);
 		return(-1);	
@@ -410,14 +415,12 @@ int get_binaries(htable *ht) {
 				debugf("\tFound '%s'\t(%s)", binaries[i][0], fbin);
 
 			hash_add(ht, binaries[i][1], fbin);
-		} else {
-			errorf("%s not found", binaries[i][0]);
-			rval = -1;	
-		}
+		} else
+			if (verbose_flag == 1)
+				debugf("\t**warning: '%s' Not Found", binaries[i][0]);
 	}
 	da_destroy(stpath);
-
-	return(rval);
+	return(0);
 }
 
 

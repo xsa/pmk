@@ -47,7 +47,7 @@
 #define MAXBINS			5	/* max slots in the binaries array */
 
 
-/* _must be_ binaries to search for */
+/* Look for location of some predefined binaries */
 static  char *binaries[MAXBINS][2] = {
 	{"ar",		PREMAKE_KEY_BIN_AR},
 	{"cat",		PREMAKE_KEY_BIN_CAT},
