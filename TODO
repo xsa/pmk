@@ -32,6 +32,9 @@ common:
 
 pmk:
 -----------------------------------------------------------------------
+	-	add destroy function for cfgtdata
+	-	should move from DETECT to SHARED in SETTINGS command
+			- use language as argument instead of the compiler
 	-	handle PKG_CONFIG_PATH (env)
 	!	set SCFLAGS (cc flags for Position Independant Code)
 			gcc => -fPIC
