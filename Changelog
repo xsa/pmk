@@ -1,5 +1,6 @@
 16 Jan 2004 mipsator
  * fixed parse_pc_file() to use pkgcell_init().
+ * improved init of pmk's global data.
 
 14 Jan 2004 mipsator
  * imported cfgtool.c and cfgtool.h to store config tool related code.

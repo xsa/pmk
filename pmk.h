@@ -76,10 +76,7 @@
 
 /* pmk data */
 typedef struct {
-	htable		*htab,
-			*labl;
 	cfgtdata	*cfgt;
-	dynary		*tlist;
 	char		*ac_file,
 			*lang,
 			 basedir[MAXPATHLEN],
@@ -88,6 +85,10 @@ typedef struct {
 			 ovrfile[MAXPATHLEN],
 			 buildlog[MAXPATHLEN],
 			 errmsg[MAX_ERR_MSG_LEN];
+	dynary		*tlist;
+	htable		*htab,
+			*labl;
+
 } pmkdata;
 
 
