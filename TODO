@@ -48,7 +48,6 @@ pmk:
 
 pmksetup:
 -----------------------------------------------------------------------
-	-	create .bak or .old of pmk.conf
 	-	option to append to variable of pmk.conf
 	!	clean temporary files on error
 	-	missing checks :

@@ -1,3 +1,6 @@
+19 Aug 2004 mreindl
+* backup pmk.conf in pmksetup if it already exists
+
 # snapshot 0.8.1-s4
 
 15 Aug 2004 mipsator

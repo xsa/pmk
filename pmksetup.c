@@ -204,6 +204,12 @@ int main(int argc, char *argv[]) {
 	config = fopen(PREMAKE_CONFIG_PATH, "r");
 	if (config != NULL) {
 		printf("==> Configuration file found: %s\n", PREMAKE_CONFIG_PATH);
+		printf("==> Backing up configuration file: %s\n", PREMAKE_CONFIG_PATH_BAK);
+		if (rename(PREMAKE_CONFIG_PATH,PREMAKE_CONFIG_PATH_BAK) != 0) {
+			errorf("configuration file backup failed: %s.", strerror(errno));
+			exit(EXIT_FAILURE);
+		}
+				
 		if (parse_pmkconf(config, ht, PRS_PMKCONF_SEP, check_opt) == false) {
 			fclose(config);
 			errorf("parsing failed.");
