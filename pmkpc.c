@@ -39,6 +39,7 @@
 
 #include "compat/pmk_string.h"
 #include "common.h"
+#include "dynarray.h"
 #include "pkgconfig.h"
 #include "pmkpc.h"
 #include "premake.h"
@@ -112,6 +113,7 @@ debugf("{pcgetopt} ac = %d", ac);
 debugf("{pcgetopt} full opt = '%s'", opt);
 #endif
 		/* not an option */
+		poc->arg = opt;
 		return(false);
 	} else {
 		/* skip leading "--" */
@@ -155,15 +157,17 @@ debugf("{pcgetopt} idx = %d", idx);
 */
 
 int main(int argc, char *argv[]) {
-	bool	 opt_version = false,
-		 opt_modvers = false,
-		 opt_exists = false,
-		 opt_cflags = false,
-		 opt_libs = false;
-	char	*mod;
-	optcell	*poc;
-	pkgcell	*ppc;
-	pkgdata	*ppd;
+	bool		 opt_version = false,
+			 opt_modvers = false,
+			 opt_exists = false,
+			 opt_cflags = false,
+			 opt_libs = false;
+	char		*mod;
+	dynary		*pda;
+	optcell		*poc;
+	pkgcell		*ppc;
+	pkgdata		*ppd;
+	unsigned int	 i;
 
 	poc = optcell_init();
 	if (poc == NULL) {
@@ -171,49 +175,64 @@ int main(int argc, char *argv[]) {
 		exit(EXIT_FAILURE);
 	}
 
+	pda = da_init();
+	if (pda == NULL) {
+		optcell_destroy(poc);
+		errorf("cannot init dynary.");
+		exit(EXIT_FAILURE);
+	}
+
 	ppd = pkgdata_init();
 	if (ppd == NULL) {
 		optcell_destroy(poc);
+		da_destroy(pda);
 		errorf("cannot init pkgdata.");
 		exit(EXIT_FAILURE);
 	}
 
-	while (pcgetopt(argc, argv, poc) == true) {
-#ifdef DEBUG_PC
+	while (poc->idx != argc) {
+		if (pcgetopt(argc, argv, poc) == true) {
+#ifdef DEBUG_PMKPC
 debugf("{main} id = %d", poc->id);
 #endif
-		switch (poc->id) {
-			case PMKPC_OPT_VERSION :
-				opt_version = true;
-				break;
+			/* found an option */
+			switch (poc->id) {
+				case PMKPC_OPT_VERSION :
+					opt_version = true;
+					break;
 
-			case PMKPC_OPT_MODVERS :
-				opt_modvers = true;
-				break;
+				case PMKPC_OPT_MODVERS :
+					opt_modvers = true;
+					break;
 
-			case PMKPC_OPT_CFLAGS :
-				opt_cflags = true;
-				break;
+				case PMKPC_OPT_CFLAGS :
+					opt_cflags = true;
+					break;
 
-			case PMKPC_OPT_LIBS :
-				opt_libs = true;
-				break;
+				case PMKPC_OPT_LIBS :
+					opt_libs = true;
+					break;
 
-			case PMKPC_OPT_EXISTS :
-				opt_exists = true;
-				break;
+				case PMKPC_OPT_EXISTS :
+					opt_exists = true;
+					break;
 
-			case PMKPC_OPT_UNKNOWN :
-			default :
-				optcell_destroy(poc);
-				errorf("unknown option '%s'.", poc->arg);
-				exit(EXIT_FAILURE);
-				break;
+				case PMKPC_OPT_UNKNOWN :
+				default :
+					optcell_destroy(poc);
+					errorf("unknown option '%s'.", poc->arg);
+					exit(EXIT_FAILURE);
+					break;
+			}
+		} else {
+#ifdef DEBUG_PMKPC
+debugf("{main} new mod = '%s'", argv[poc->idx]);
+#endif
+			/* add new module */
+			da_push(pda, strdup(argv[poc->idx])); /* XXX check */
+			poc->idx++;
 		}
 	}
-
-	argc = argc - poc->idx;
-	argv = argv + poc->idx;
 
 	optcell_destroy(poc);
 
@@ -225,13 +244,18 @@ debugf("{main} id = %d", poc->id);
 	/*scan_dir(PKGCONFIG_DIR, ppd);*/
 	pkg_collect("/usr/local/lib/pkgconfig", ppd); /* nice hardcode isn't it ? :) */
 
-	if (argc == 1) {
-		mod = argv[0];
 #ifdef DEBUG_PMKPC
-debugf("{main} mod = '%s'", mod);
+debugf("{main} usize = '%d'", da_usize(pda));
+#endif
+	for (i = 0 ; i < da_usize(pda) ; i++) {
+		mod = da_idx(pda, i);
+#ifdef DEBUG_PMKPC
+debugf("{main} mod = '%s' (i = %d)", mod, i);
 #endif
 		if (pkg_mod_exists(ppd, mod) == true) {
-			/*printf("module '%s' found\n", mod);*/
+#ifdef DEBUG_PMKPC
+debugf("module '%s' found", mod);
+#endif
 			ppc = pkg_cell_add(ppd, mod);
 
 			if (opt_modvers == true) {
@@ -243,24 +267,32 @@ debugf("{main} mod = '%s'", mod);
 				/* get cflags and/or libs */
 				if (pkg_recurse(ppd, mod) == false) {
 					errorf("failed on recurse !");
-				} else {
-					if (opt_cflags == true) {
-						printf("%s", pkg_get_cflags(ppd));
-					}
-					if (opt_libs == true) {
-						printf("%s", pkg_get_libs(ppd));
-					}
-					printf("\n");
+					da_destroy(pda);
+					pkgdata_destroy(ppd);
+					exit(EXIT_FAILURE);
 				}
 			}
+
+
 		} else {
 			printf("module not found\n");
 		}
 	}
 
+	if ((opt_cflags == true) || (opt_libs == true)) {
+		if (opt_cflags == true) {
+			printf("%s", pkg_get_cflags(ppd));
+		}
+		if (opt_libs == true) {
+			printf("%s", pkg_get_libs(ppd));
+		}
+		printf("\n");
+	}
+
 #ifdef DEBUG_PMKPC
-debugf("{main} destroy pkgdata");
+debugf("{main} destroy data");
 #endif
+	da_destroy(pda);
 	pkgdata_destroy(ppd);
 
 #ifdef DEBUG_PMKPC
