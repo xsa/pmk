@@ -301,7 +301,8 @@ bool scan_dir(char *dir, pkgdata *ppd) {
 	/* open directory */
 	pdir = opendir(dir);
 	if (pdir == NULL) {
-		errorf("cannot open '%s' directory : %s", dir, strerror(errno));
+		errorf("cannot open '%s' directory : %s.", 
+			dir, strerror(errno));
 		return(false);
 	}
 
@@ -929,7 +930,7 @@ cfgtdata *parse_cfgt_file(void) {
 		hash_destroy(pcd->by_bin);
 		free(pcd);
 		prsdata_destroy(pdata);
-		errorf("cannot open '%s'", PMKCFG_DATA);
+		errorf("cannot open '%s' : %s.", PMKCFG_DATA, strerror(errno));
 		return(NULL);
 	}
 
