@@ -81,7 +81,7 @@ PC_OBJS=	cfgtool.o common.o compat.o dynarray.o hash.o parse.o \
 
 
 .c.o:
-	$(CC) $(PMKCFLAGS) -c $<
+	$(CC) $(PMKCFLAGS) -o $@ -c $<
 
 .s.o:
 	$(CPP) $< | $(AS) -o $@

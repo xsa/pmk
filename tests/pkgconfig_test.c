@@ -8,14 +8,16 @@
 /*#define HASH_DEBUG	1*/
 
 #include <stdio.h>
+#include <stdlib.h>
 
+#include "../compat/compat.h"
 #include "../compat/pmk_stdbool.h"
-#include "../common.c"
-#include "../dynarray.c"
-#include "../hash.c"
-#include "../parse.c"
-#include "../pkgconfig.c"
-#include "../pmk_obj.c"
+#include "../common.h"
+#include "../dynarray.h"
+#include "../hash.h"
+#include "../parse.h"
+#include "../pkgconfig.h"
+#include "../pmk_obj.h"
 #include "../premake.h"
 
 int main(int argc, char *argv[]) {

@@ -4,9 +4,11 @@
 
 /* make variables test */
 
-#include "../common.c"
-#include "../compat.c"
-#include "../dynarray.c"
+#include <stdio.h>
+
+#include "../common.h"
+#include "../compat/compat.h"
+#include "../dynarray.h"
 
 int main() {
 	char	tmp[256];

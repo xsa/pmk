@@ -7,7 +7,9 @@
 
 #include <stdio.h>
 
-#include "../dynarray.c"
+#include "../compat/compat.h"
+#include "../compat/pmk_string.h"
+#include "../dynarray.h"
 
 
 char	*tval[10] = {
