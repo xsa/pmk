@@ -94,6 +94,8 @@
 /* maximal number of options per command */
 #define MAX_CMD_OPT		32
 
+/* parsing buffer size */
+#define PRS_BUF_LEN            512
 
 /* keyword structure */
 typedef struct {
@@ -124,13 +126,25 @@ typedef struct {
 } prsnode;
 
 typedef struct {
-	int	 linenum;
-	prsnode	*tree;
+	int	 linenum;		/* current line */
+	prsnode	*tree;			/* parser tree */
 } prsdata;
 
+typedef struct {
+        FILE	*fp;			/* file structure pointer */
+	bool	 eof;			/* end of file flag */
+	char	 prsbuf[PRS_BUF_LEN],	/* buffer window */
+		*prscur;		/* parsing cursor */
+	htable	*phtkw;			/* command keywords */
+	int	 linenum;		/* current line */
+	long	 offset;		/* offset of the buffer window */
+	prsnode	*curnode;		/* current prsnode */
+} prseng;
 
 prsdata	*prsdata_init(void);
 void	 prsdata_destroy(prsdata *);
+prseng	*prseng_init(void);
+void	 prseng_destroy(prseng *);
 prsnode	*prsnode_init(void);
 void	 prsnode_destroy(prsnode *);
 prscell	*prscell_init(int, int, int);
@@ -139,8 +153,10 @@ prsopt	*prsopt_init(void);
 prsopt	*prsopt_init_adv(char *, char, char *);
 void	 prsopt_destroy(prsopt *);
 bool	 prs_get_line(FILE *, char *, size_t);
+bool	 prs_fill_buf(prseng *);
 htable	*keyword_hash(prskw [], int);
 char	*skip_blank(char *pstr);
+void	 skip_useless(prseng *);
 char	*parse_identifier(char *, char *, size_t);
 char	*parse_obsolete(char *, char *, size_t);
 char	*parse_bool(char *, pmkobj *, size_t);
@@ -149,11 +165,14 @@ char	*parse_list(char *, pmkobj *, size_t);
 char	*parse_key(char *, pmkobj *, size_t);
 char	*parse_data(char *, pmkobj *, size_t);
 prscell	*parse_cell(char *, htable *);
+prscell	*parse_cmd_header(prseng *peng, prsnode *pnode);
 bool	 parse_opt(char *, prsopt *, char *);
+bool	 parse_opt_new(prseng *, prsopt *, char *);
 bool	 parse_clopt(char *, prsopt *, char *);
-bool	 parse_node(FILE *, prsdata *, htable *, prscell *);
-bool	 parse_command(FILE *, prsdata *, prscell *);
-bool	 parse_line(FILE *, prsdata *, htable *, prsnode *);
+bool	 parse_node(prsdata *, prseng *peng, prscell *);
+bool	 parse_command(prsdata *, prseng *peng, prscell *);
+bool	 parse_opt_block(prsdata *, prseng *, prscell *, bool);
+bool	 parse_cmd_block(prsdata *, prseng *, prsnode *, bool);
 bool	 parse_pmkfile(FILE *, prsdata *, prskw [], size_t);
 bool	 process_opt(htable *, prsopt *);
 bool	 parse_pmkconf(FILE *, htable *, char *, bool (*)(htable *, prsopt *));

@@ -229,7 +229,7 @@ debugf("added cfgtcell '%s'", pcell->binary);
 */
 
 cfgtdata *parse_cfgt_file(void) {
-	FILE		*fd;
+	FILE		*fp;
 	bool		 rval;
 	cfgtdata	*pcd;
 	prscell		*pcell;
@@ -250,8 +250,8 @@ cfgtdata *parse_cfgt_file(void) {
 		return(NULL);
 	}
 
-	fd = fopen(PMKCFG_DATA, "r");
-	if (fd == NULL) {
+	fp = fopen(PMKCFG_DATA, "r");
+	if (fp == NULL) {
 		hash_destroy(pcd->by_mod);
 		hash_destroy(pcd->by_bin);
 		free(pcd);
@@ -261,8 +261,8 @@ cfgtdata *parse_cfgt_file(void) {
 	}
 
 	/* parse data file and fill prsdata strucutre */
-	rval = parse_pmkfile(fd, pdata, kw_pmkcfgtool, nbkwct);
-	fclose(fd);
+	rval = parse_pmkfile(fp, pdata, kw_pmkcfgtool, nbkwct);
+	fclose(fp);
 
 	if (rval == true) {
 		pcell = pdata->tree->first;

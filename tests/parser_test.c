@@ -7,11 +7,13 @@
 #include <stdio.h>
 #include "../autoconf.c"
 #include "../common.c"
+#include "../cfgtool.c"
 #include "../detect.c"
 #include "../dynarray.c"
 #include "../func.c"
 #include "../functool.c"
 #include "../hash.c"
+#include "../hash_tools.c"
 #include "../pathtools.c"
 #include "../pmk_obj.c"
 #include "../pkgconfig.c"
@@ -40,7 +42,13 @@ int main(int argc, char *argv[]) {
 	rval = parse_pmkfile(fd, pdata, kw_pmkfile, nbkwpf);
 	fclose(fd);
 
-	printf("cleaning ...\n");
+	if (rval == true) {
+		printf("Parsing succeeded.\n");
+	} else {
+		printf("Parsing failed.\n");
+	}
+
+	printf("cleaning parsing tree ... ");
 	prsdata_destroy(pdata);
 	printf("ok\n");
 
