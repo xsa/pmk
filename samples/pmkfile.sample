@@ -15,16 +15,6 @@ VERSION="0.0.1b"
 FULL_NAME="$PACKAGE-$VERSION"
 }
 
-# set the target files that will be processed
-#.TARGET {
-#LIST=("Makefile.sample.pmk","config_sample.h.pmk","subdir/Makefile.subdir.pmk")
-#}
-
-# set autoconf compatibility
-#.AC_COMPAT {
-#FILENAME="samples/ac_config.h"
-#}
-
 # define switches
 SWITCHES {
 use_curses=TRUE
