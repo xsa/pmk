@@ -1,3 +1,6 @@
+12 Aug 2003 mipsator
+ * renamed pmk objects function in the same style as hash and dynarray.
+
 11 Aug 2003 mipsator
  * added pmk objects.
  * added pmk object support in hash.
