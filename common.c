@@ -107,21 +107,12 @@ bool get_make_var(char *varname, char *result, int rsize) {
 		*tfp;
 	/* XXX 256 => berk berk berk ! */
 	char	mfn[256] = "/tmp/pmk_mkf.XXXXXXXX",
-		tfn[256] = "/tmp/pmk_tst.XXXXXXXX",
 		varstr[256];
-	int	mfd = -1,
-		tfd = -1;
+	int	mfd = -1;
 	bool	rval;
 
 	mfd = mkstemp(mfn);
 	if (mfd == -1) {
-		/* name randomize failed */
-		fprintf(stderr, "Failed to randomize filename\n");
-		return(FALSE);
-	}
-
-	tfd = mkstemp(tfn);
-	if (tfd == -1) {
 		/* name randomize failed */
 		fprintf(stderr, "Failed to randomize filename\n");
 		return(FALSE);
@@ -134,37 +125,31 @@ bool get_make_var(char *varname, char *result, int rsize) {
 				@echo ${VARNAME}
 
 		   /!\ should check content of VARNAME, could result
-		   in a security breach. XXX
+		   	in a security breach. XXX
 		*/
 		fprintf(mfp, "test:\n\t@echo ${%s}", varname);
 		fclose(mfp);
 	} else {
-		fprintf(stderr, "Failed to open %s\n", tfn);
+		fprintf(stderr, "Failed to open %s\n", mfn);
 		return(FALSE);
 	}
 
-	tfp = fdopen(tfd, "r");
+	snprintf(varstr, 256, "/usr/bin/make -f %s", mfn);
+	tfp = popen(varstr, "r");
 	if (tfp != NULL) {
 		/* catch output of make */
-		snprintf(varstr, 256, "/usr/bin/make -f %s > %s", mfn, tfn);
-		system(varstr);
-
 		get_line(tfp, result, rsize);
 		fclose(tfp);
 
 		rval = TRUE;
 	} else {
-		fprintf(stderr, "Failed to open %s\n", tfn);
+		fprintf(stderr, "Failed to exec %s\n", varstr);
 		rval = FALSE;
 	}
 
 	if (unlink(mfn) == -1) {
 		/* cannot remove temporary file */
 		fprintf(stderr, "Can not remove %s\n", mfn);
-	}
-	if (unlink(tfn) == -1) {
-		/* cannot remove temporary file */
-		fprintf(stderr, "Can not remove %s\n", tfn);
 	}
 
 	return(rval);
