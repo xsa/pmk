@@ -423,7 +423,7 @@ int main(int argc, char *argv[]) {
 	do {
 		p = da_pop(pda);
 		dir_explore(pfdata, &sd, p);
-		free(pda); /* XXX will be obj_free later */
+		free(p); /* XXX will be obj_free later */
 	} while (p != NULL);
 	printf("Parsing Ok.\n\n");
 

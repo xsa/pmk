@@ -1,3 +1,6 @@
+01 Aug 2003 mipsator
+ * fixed a bad free() in pmkscan.
+
 31 Jul 2003 mipsator
  * improved dynarrays to store void* instead of char*.
  * fixed use of new dynarrays.
