@@ -45,7 +45,7 @@
 #include "parse.h"
 
 
-/*#define DEBUG_PRS	1*/
+#define DEBUG_PRS	1
 
 char	parse_err[MAX_ERR_MSG_LEN];
 
@@ -819,10 +819,6 @@ bool parse_opt(char *line, prsopt *popt, char *seplst) {
 
 	pstr = skip_blank(pstr);
 
-#ifdef DEBUG_PRS
-	debugf("assign = '%c'", *pstr);
-#endif
-
 	/* check if character is in separator list */
 	if (strchr(seplst, *pstr) == NULL) {
 		strlcpy(parse_err, PRS_ERR_SYNTAX, sizeof(parse_err));
@@ -831,6 +827,9 @@ bool parse_opt(char *line, prsopt *popt, char *seplst) {
 		popt->opchar = *pstr;
 		pstr++;
 	}
+#ifdef DEBUG_PRS
+	debugf("assign = '%c'", popt->opchar);
+#endif
 
 	pstr = skip_blank(pstr);
 
@@ -867,6 +866,58 @@ bool parse_opt(char *line, prsopt *popt, char *seplst) {
 		strlcpy(parse_err, PRS_ERR_TRAILING, sizeof(parse_err));
 		return(false);
 	}
+
+	return(true);
+}
+
+/*
+	parse a command line option
+
+	line : option line
+	popt : storage structure 
+	seplst : string that contain all separator characters
+
+	return : boolean
+*/
+
+bool parse_clopt(char *line, prsopt *popt, char *seplst) {
+	char	*pstr;
+	pmkobj	 po;
+
+#ifdef DEBUG_PRS
+	debugf("line = '%s'", line);
+#endif
+
+	pstr = parse_key(line, &po, sizeof(popt->key));
+	if (pstr == NULL) {
+		strlcpy(parse_err, PRS_ERR_SYNTAX, sizeof(parse_err));
+		return(false);
+	} else {
+		strlcpy(popt->key, po.data, sizeof(popt->key));
+		free(po.data);
+	}
+
+#ifdef DEBUG_PRS
+	debugf("key = '%s'", popt->key);
+#endif
+
+	/* check if character is in separator list */
+	if (strchr(seplst, *pstr) == NULL) {
+		strlcpy(parse_err, PRS_ERR_SYNTAX, sizeof(parse_err));
+		return(false);
+	} else {
+		popt->opchar = *pstr;
+		pstr++;
+	}
+#ifdef DEBUG_PRS
+	debugf("assign = '%c'", popt->opchar);
+#endif
+
+
+	popt->value = (void *) strdup(pstr);
+#ifdef DEBUG_PRS
+	debugf("value = '%s'", popt->value);
+#endif
 
 	return(true);
 }

@@ -1,3 +1,8 @@
+12 Feb 2004 mipsator
+ * added parse_clopt() to handle line command options.
+ * added support for addition and removal of variable in pmksetup.
+ * fixed command line option support in pmk.
+
 10 Feb 2004 mipsator
  * added 2 sections to the tutorial.
  * updated pmkfile.5 with shared library name building.
