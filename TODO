@@ -1,8 +1,10 @@
 common :
 - write specs somewhere in a draft
-- improve parser to parse variables, quotation marks and spaces near operator.
+- improve parser to parse variables
++ improve parser quotation marks and spaces near operator.
 + improve dynarrays to store void* instead of char*.
 - pmk objects.
+- update pmkfile sample and pmkscan.dat to new format.
 
 pmk :
 + finish pmk(1)
