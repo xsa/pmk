@@ -1,3 +1,7 @@
+28 Jul 2004 mipsator
+ * added lex and yacc detection in pmksetup (request from chandlerc).
+ * processed some XXXs.
+
 25 Jul 2004 mipsator
  * improved configuration header processing in autoconf support.
 
