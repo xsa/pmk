@@ -65,10 +65,7 @@ bool env_to_opt(char *, pmkcmdopt *);
 bool get_make_var(char *, char *, int);
 
 bool str_to_dynary(char *, char, dynary *);
-bool find_file_bis(dynary *, char *, char *, int);
-
-int strsplit(char *, mpath *, char *);
-int find_file(mpath *, char *, char *, int);
+bool find_file(dynary *, char *, char *, int);
 
 void errorf(const char *, ...);
 void errorf_line(char *, int, const char *, ...);
