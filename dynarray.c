@@ -96,8 +96,9 @@ int da_push(dynary *da, char *str) {
 	}
 
 	pdac->val = strdup(str);
-	if (pdac == NULL) {
+	if (pdac->val == NULL) {
 		/* strdup failed */
+		free(pdac);
 		return(0);
 	}
 
