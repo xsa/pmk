@@ -73,26 +73,24 @@ BIN_INSTALL:"/usr/local/bin/install"
 
 .Sh FAMILY CLASSES
 Assignements can be classed in different families.
-.Bl -tag -width Ds
-.It Cm BIN_*
+.Bl -tag -width PATH_*
+.It Ev BIN_*
 This class is used for binary paths.
-.It Cm HW_*
+.It Ev HW_*
 Hardware related data like for example byte order.
-.It Cm PATH_*
+.It Ev PATH_*
 Specific paths family.
-.It Cm OS_*
+.It Ev OS_*
 System specific data.
-.It Cm misc
+.It Ev misc
 Some other data (such as PREFIX) cannot fit into previous families.
 .El
 
 .Sh EXAMPLES
-A typical pmk.conf will look something like this:
-.Bd -literal -offset -indent
-# pmk.conf example
-
+A typical pmk.conf might appear as follows:
+.Bd -literal
 OS_NAME="OpenBSD"
-OS_VERSION="3.4"
+OS_VERSION="3.6"
 OS_ARCH="i386"
 HW_BYTEORDER = "LITTLE_ENDIAN"
 
@@ -121,10 +119,9 @@ PATH_LIB = "/usr/lib"
 
 PC_PATH_LIB = "/usr/local/lib/pkgconfig"
 
-AC_ECHO_C = "\c"
+AC_ECHO_C = "\ec"
 AC_ECHO_N = ""
 AC_ECHO_T = ""
-
 .Ed
 .Pp
 .Sh FILES
