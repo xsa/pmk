@@ -22,11 +22,11 @@ $HOME/bin/ and data in $HOME/.pmk/ of the user doing the installation.
 
  Configuring with root mode:
 
-  sh pmkcfg.sh
+  ./pmkcfg.sh
 
  Else in user mode:
 
-  sh pmkcfg.sh -u
+  ./pmkcfg.sh -u
 
  After configuring you can build the package with:
 
@@ -43,7 +43,7 @@ $HOME/bin/ and data in $HOME/.pmk/ of the user doing the installation.
 - Now if you feel like testing the whole suite, follow these steps:
 
   (make clean)
-  sh pmkcfg.sh -u
+  ./pmkcfg.sh -u
   make install
   make test
   make deinstall

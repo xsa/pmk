@@ -11,7 +11,7 @@ To build and install pmk on your system use one of the two following
 methods:
 
 1) The pmkcfg.sh configuration script:
-  sh pmkcfg.sh
+  ./pmkcfg.sh
   make
   make install
 
@@ -37,7 +37,7 @@ The default prefixes are:
 Example:
 
 If you want a global use with /opt as prefix you will use the following:
-  sh pmkcfg.sh -p /opt
+  ./pmkcfg.sh -p /opt
 
 
 More about the pmkfile
