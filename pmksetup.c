@@ -2,7 +2,7 @@
 
 /*
  * Copyright (c) 2003 Damien Couderc
- * Copyright (c) 2003 Xavier Santolaria
+ * Copyright (c) 2003-2004 Xavier Santolaria
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -144,6 +144,8 @@ int main(int argc, char *argv[]) {
 		errorf("predefined variables."); 
 		exit(EXIT_FAILURE);
 	}
+
+	check_libpath(ht);
 
 	if (byte_order_check(ht) == false) {
 		errorf("failure in byte order check.");
@@ -555,6 +557,56 @@ int check_echo(htable *pht) {
 	return(0);
 }
 
+
+/*
+ *	pht: hash table where we have to store the values
+ *
+ *	returns:  0 on success
+ *		 -1 on failure
+ */
+
+int check_libpath(htable *pht) {
+	char	libpath[MAXPATHLEN];
+
+	strlcpy(libpath, hash_get(pht, PMKCONF_MISC_PREFIX), sizeof(libpath));
+	strlcat(libpath, PMKVAL_LIB_PKGCONFIG, sizeof(libpath));
+
+	if (hash_get(pht, PMKCONF_BIN_PKGCONFIG) != NULL) {
+		if (dir_exists(libpath) == 0) {
+			if (hash_update_dup(pht, PMKCONF_PC_PATH_LIB, libpath) == HASH_ADD_FAIL)
+				return(-1);
+			verbosef("Setting '%s' => '%s'", PMKCONF_PC_PATH_LIB, libpath);
+		} else {
+			errorf("%s does not exist.", libpath);
+		}
+	}
+	return(0);
+}
+
+/*
+ *	check if a directory does exist 
+ *
+ *	fdir : directory to search
+ *
+ *	returns:  0 on success
+ *		 -1 on failure 
+ */
+
+int dir_exists(const char *fdir) {
+        DIR     *dirp;
+        size_t  len;
+        
+	len = strlen(fdir);
+
+	if (len < MAXPATHLEN) {
+		dirp = opendir(fdir);
+		if (dirp != NULL) {
+			closedir(dirp);
+			return(0);
+		}
+	}
+	return(-1);
+}
 
 /*
 	byte order check

@@ -58,7 +58,7 @@ pmk:
 
 pmksetup:
 -----------------------------------------------------------------------
-	!	adding PC_LIB_PATH (look if PREFIX/lib/pkgconfig exists and then set the variable).
+xsa	+	adding PC_PATH_LIB (look if PREFIX/lib/pkgconfig exists and then set the variable).
 	!	clean temporary files on error
 	-	missing checks :
 xsa			+ ECHO_N, ECHO_C, ECHO_T in a specific proc for autoconf variables.

@@ -1,7 +1,7 @@
 /* $Id$ */
 
 /*
- * Copyright (c) 2003 Xavier Santolaria 
+ * Copyright (c) 2003-2004 Xavier Santolaria 
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -91,6 +91,8 @@ int	get_env_vars(htable *);
 int	get_binaries(htable *);
 int	predef_vars(htable *);
 int	check_echo(htable *);
+int	check_libpath(htable *);
+int	check_dir(const char *);
 bool	byte_order_check(htable *pht);
 int	copy_config(const char *, const char *);
 int	keycomp(const void *, const void *);
