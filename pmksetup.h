@@ -68,6 +68,7 @@ int	close_tmp_config(void);
 int	get_env_vars(htable *);
 int	get_binaries(htable *);
 int	predef_vars(htable *);
+bool	byte_order_check(htable *pht);
 int	copy_config(const char *, const char *);
 int	keycomp(const void *, const void *);
 void	char_replace(char *, const char, const char);
