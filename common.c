@@ -202,10 +202,10 @@ debugf(MKVAR_FMT_MK, varname, MKVAR_FILE);
 }
 
 /*
-	split a string into a dynamic array (one separator)
+	convert a string into an unsigned long
 */
 
-bool str_to_ulong(char *str, int base, long *value) {
+bool str_to_ulong(char *str, int base, unsigned long *value) {
 	char	*ep;
 
 	*value = strtoul(str, &ep, base);
@@ -216,7 +216,6 @@ bool str_to_ulong(char *str, int base, long *value) {
 	
 	return(true);
 }
-
 
 /*
 	split a string into a dynamic array (one separator)

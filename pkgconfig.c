@@ -805,16 +805,16 @@ bool pkg_mod_exists(pkgdata *ppd, char *mod) {
 */
 
 int compare_version(char *vref, char *vcomp) {
-	bool	 exit = false;
-	char	*sr,
-		*sc;
-	dynary	*vr,
-		*vc;
-	int	 i = 0,
-		 ref,
-		 cmp,
-		 delta;
-	long	 tl;
+	bool		 exit = false;
+	char		*sr,
+			*sc;
+	dynary		*vr,
+			*vc;
+	int		 delta,
+			 ref,
+			 cmp;
+	unsigned int	 i = 0;
+	unsigned long	 tl;
 
 	/* need to check da_* returns */
 	vr = str_to_dynary(vref, VERSION_CHAR_SEP);

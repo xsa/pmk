@@ -94,7 +94,7 @@ bool	 get_line(FILE *, char *, size_t);
 bool	 env_to_opt(char *, pmkcmdopt *);
 bool	 get_make_var(char *, char *, size_t);
 
-bool	 str_to_ulong(char *, int, long *);
+bool	 str_to_ulong(char *, int, unsigned long *);
 
 dynary	*str_to_dynary(char *, char);
 dynary	*str_to_dynary_adv(char *, char *);

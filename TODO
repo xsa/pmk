@@ -70,8 +70,9 @@ pmkscan
 
 pmkinstall
 -----------------------------------------------------------------------
-	-R	handle multiple sources
-	-R	directory as destination ?
+	+	handle multiple sources
+	+	directory as destination ?
+	-R	finish usage()
 	-.	backup option ?
 
 

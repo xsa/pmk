@@ -246,8 +246,8 @@ debugf("perm = %o", perm);
 */
 
 bool check_mode(char *mstr, mode_t *pmode) {
-	long	 mode = 0;
-	mode_t	 mask;
+	unsigned long	 mode = 0;
+	mode_t		 mask;
 
 	if (mstr == NULL)
 		return(false);
@@ -310,6 +310,7 @@ int main(int argc, char *argv[]) {
 	uid_t		 uid = (uid_t) -1;
 	unsigned int	 src_idx,
 			 dst_idx;
+	unsigned long	 ul;
 	
 	while (go_exit == false) {
 		chr = getopt(argc, argv, "bcdg:hm:o:stv");
@@ -405,8 +406,11 @@ debugf("uid = %d", uid);
 			}
 		} else {
 			/* uid */
-			uid = (uid_t) strtoul(ostr, NULL, 10);
-			/* XXX check for ERANGE ? */
+			if (str_to_ulong(ostr, 10, &ul) == false) {
+				errorf("cannot get numerical value of '%s'.", ostr);
+				exit(EXIT_FAILURE);
+			}
+			uid = (uid_t) ul;
 #ifdef DEBUG_INST
 debugf("uid = %d", uid);
 #endif
@@ -430,7 +434,11 @@ debugf("gid = %d", gid);
 			}
 		} else {
 			/* gid */
-			gid = (gid_t) strtoul(gstr, NULL, 10);
+			if (str_to_ulong(gstr, 10, &ul) == false) {
+				errorf("cannot get numerical value of '%s'.", gstr);
+				exit(EXIT_FAILURE);
+			}
+			gid = (gid_t) ul;
 			/* XXX check for ERANGE ? */
 #ifdef DEBUG_INST
 debugf("gid = %d", gid);
@@ -439,6 +447,62 @@ debugf("gid = %d", gid);
 		do_chown = true;
 	}
 
+	/* directory creation */
+	if (create_dir == true) {
+#ifdef DEBUG_INST
+debugf("create dir '%s'", src);
+#endif
+		src = argv[src_idx];
+
+		/* create path */
+		if (*src == CHAR_SEP) {
+			/* absolute path, copy */
+			strlcpy(dir, src, sizeof(dir)); /* XXX check */
+		} else {
+			/* relative, getting current directory */
+			if (getcwd(dir, sizeof(dir)) == NULL) {
+				errorf("unable to get current directory");
+				exit(EXIT_FAILURE);
+			}
+			/* appending path */
+			strlcat(dir, STR_SEP, sizeof(dir));
+			strlcat(dir, src, sizeof(dir)); /* XXX check */
+		}
+#ifdef DEBUG_INST
+debugf("dir = '%s'", dir);
+#endif
+
+		if (makepath(dir, S_IRWXU | S_IRWXG | S_IRWXO) == false) {
+			errorf("cannot create directory.");
+			exit(EXIT_FAILURE);
+		}
+
+		/* set dst for further operations */
+		dst = dir;
+
+		/* change owner and group */
+		if (do_chown == true) {
+#ifdef DEBUG_INST
+debugf("doing chown('%s', %d, %d)", dst, uid, gid);
+#endif
+			if (chown(dst, uid, gid) != 0) {
+				errorf("chown failed : %s.", strerror(errno));
+				exit(EXIT_FAILURE);
+			}
+		}
+
+		/* change perms (must follow chown that can change perms) */
+		if (chmod(dst, mode) == -1) {
+#ifdef DEBUG_INST
+debugf("chmod('%s', %o)", dst, mode);
+#endif
+			errorf("chmod failed : %s.", strerror(errno));
+			exit(EXIT_FAILURE);
+		}
+
+		/* finished, exit ok */
+		return(0);
+	}
 
 	/* process each source */
 	for (src_idx = 0 ; src_idx < dst_idx ; src_idx++) {
@@ -449,8 +513,7 @@ debugf("gid = %d", gid);
 debugf("process '%s'", src);
 #endif
 
-		/* check if destination is a directory,
-		   XXX can be improved to be out of the loop */
+		/* check if destination is a directory */
 		if (stat(dst, &sb) == 0) {
 			/* XXX many checks to do (is a directory, etc ...) */
 			tmode = sb.st_mode & S_IFDIR;
