@@ -25,12 +25,12 @@ It aims to be an alternative to the pkg-config tool.
 The options are as follows:
 .Bl -tag -width Ds
 .It --version
-Print compatibility version relative to pkgconfig.
+Display compatibility version relative to pkgconfig.
 .It --atleast-pkgconfig-version
 Check if compatibility version is at least equal or greater than the
 version provided as an argument.
 .It --modversion
-Print the version of the given library modules using one line for
+Display the version of the given library modules using one line for
 each version.
 .It --atleast-version
 Check if each module version is at least equal or greater than the
@@ -44,7 +44,7 @@ version provided as an argument.
 .It --exists
 Check if given library modules exists.
 .It --cflags
-Print pre-processor and compiler flags for given library modules.
+Display pre-processor and compiler flags for given library modules.
 Duplicates values are automatically removed.
 .It --cflags-only-I
 Enable output filtering of compiler flags and keep include path. See
@@ -54,7 +54,7 @@ Enable output filtering of compiler flags and keep other flags than
 include path.
 See output filtering section.
 .It --libs
-Print linker flags for given library modules.
+Display linker flags for given library modules.
 Duplicate values are automatically removed.
 .It --libs_only_l
 Enable output filtering of linker flags and keep library linking flags.
@@ -68,9 +68,9 @@ library linking and path flags. See output filtering section.
 .It --help
 Only for compatibility with pkg-config. Refers to this man page.
 .It --usage
-Print usage.
+Display usage.
 .It --list-all
-Print all module names and descriptions.
+Display all module names and descriptions.
 .El
 
 .Pp
