@@ -337,7 +337,7 @@ bool gather_data(htable *pht) {
 
 	/* try to detect cpu family and specific data */
 	if (get_cpu_data(pht) == false) {
-		errorf("failure in cpu detection.");
+		/*errorf("failure in cpu detection."); XXX*/
 		return(false);
 	}
 
@@ -842,27 +842,35 @@ bool get_cpu_data(htable *pht) {
 	prsopt		*ppo;
 	unsigned int	 i;
 
-
 	ppo = hash_get(pht, PMKCONF_OS_ARCH);
-	if (ppo == NULL)
+	if (ppo == NULL) {
+		errorf("failed to get value for %s", PMKCONF_OS_ARCH);
 		return(false);
+	}
 
 	po = ppo->value;
-	if (po == NULL)
+	if (po == NULL) {
+		errorf("unexpected data for %s", PMKCONF_OS_ARCH);
 		return(false);
+	}
 
 	uname_m = po_get_str(po);
-	if (uname_m == NULL)
+	if (uname_m == NULL) {
+		errorf("unexpected value for %s", PMKCONF_OS_ARCH);
 		return(false);
+	}
 
 	pdata = parse_cpu_data(PMKCPU_DATA);
 	if (pdata == NULL) {
+		/* error message already done */
 		return(false);
 	}
 
 	pstr = check_cpu_arch(uname_m, pdata); /* no check, never NULL */
-	if (record_data(pht, PMKCONF_HW_CPU_ARCH, 'u', pstr) == false)
+	if (record_data(pht, PMKCONF_HW_CPU_ARCH, 'u', pstr) == false) {
+		errorf("failed to record value for %s", PMKCONF_HW_CPU_ARCH);
 		return(false);
+	}
 	verbosef("Setting '%s' => '%s'", PMKCONF_HW_CPU_ARCH, pstr);
 
 	spht = arch_wrapper(pdata, pstr);

@@ -1,3 +1,6 @@
+06 Jan 2005 mipsator
+ * made pmksetup more verbose on cpu detection failure.
+
 02 Jan 2005 mipsator
  * added alpha cpu identification.
 
