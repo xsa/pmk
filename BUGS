@@ -8,6 +8,7 @@ CYGWIN :
 
 HP-UX :
  - S_BLKSIZE doesn't exist.
+ - install is not bsd compatible.
 
 Tru64 :
  - int64_t doesn't exist.
