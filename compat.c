@@ -52,3 +52,7 @@
 #ifndef HAVE_ISBLANK
 #include "compat/isblank.c"
 #endif
+
+void empty_func_to_make_ansi_compiler_happy(void) {
+}
+
