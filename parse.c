@@ -467,7 +467,7 @@ bool parse_opt(char *line, htable *ht) {
 	debugf("recording '%s' with '%s'", key, value);
 #endif
 	/* key name and value are ok */
-	if (hash_add(ht, key, strdup(value)) == HASH_ADD_FAIL) {
+	if (hash_add(ht, key, mk_obj_str(value)) == HASH_ADD_FAIL) {
 		strlcpy(parse_err, PRS_ERR_HASH, sizeof(parse_err));
 		return(false);
 	}

@@ -35,6 +35,7 @@
 #define _PREMAKE_H_
 
 #include "compat/pmk_stdbool.h"
+#include "pmk_obj.h"
 
 /* We include sys/param.h to get MAXPATHLEN.
    This is known to work under following operanding systems :

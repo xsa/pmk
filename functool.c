@@ -287,7 +287,7 @@ bool record_def(htable *ht, char *name, bool status) {
 			return(false);
 	}
 	
-	if (hash_add(ht, def_str, strdup(def_val)) == HASH_ADD_FAIL)
+	if (hash_add(ht, def_str, mk_obj_str(def_val)) == HASH_ADD_FAIL)
 		return(false);
 
 	/* debugf("record_def '%s=%s'", def_str, def_val); XXX DEBUGF */
@@ -321,7 +321,7 @@ bool record_val(htable *ht, char *name, char*value) {
 
 	/* XXX debugf("record_val '%s'", have_str); */
 
-	if (hash_add(ht, have_str, strdup(value)) == HASH_ADD_FAIL)
+	if (hash_add(ht, have_str, mk_obj_str(value)) == HASH_ADD_FAIL)
 		return(false);
 
 	free(semidef);
@@ -339,7 +339,7 @@ bool record_val(htable *ht, char *name, char*value) {
 */
 
 bool label_set(htable *ht, char *name, bool status) {
-	if (hash_add(ht, name, strdup(bool_to_str(status))) == HASH_ADD_FAIL)
+if (hash_add(ht, name, mk_obj_str(bool_to_str(status))) == HASH_ADD_FAIL)
 		return(false);
 
 	return(true);
@@ -355,7 +355,7 @@ bool label_set(htable *ht, char *name, bool status) {
 bool label_check(htable *lht, char *name) {
 	char	*p;
 
-	p = (char *)hash_get(lht, name);
+	p = (char *)get_obj_data(hash_get(lht, name));
 	if (p == NULL)
 		return(false);
 
@@ -378,7 +378,7 @@ bool depend_check(htable *lht, pmkdata *gd) {
 	dynary	*da;
 	int	 i;
 
-	deplst = (char *)hash_get(lht, "DEPEND");
+	deplst = (char *)get_obj_data(hash_get(lht, "DEPEND"));
 	if (deplst == NULL) {
 		/* no dependencies, check is true */
 		return(true);
@@ -416,7 +416,7 @@ bool depend_check(htable *lht, pmkdata *gd) {
 bool require_check(htable *pht) {
 	char	*req;
 
-	req = (char *)hash_get(pht, "REQUIRED");
+	req = (char *)get_obj_data(hash_get(pht, "REQUIRED"));
 	if (req == NULL) {
 		/* by default REQUIRED is true if not specified */
 		return(true);
@@ -439,7 +439,7 @@ lgdata *get_lang(htable *pht, pmkdata *pgd) {
 	int	 i;
 
 	/* check first if language has been provided locally */
-	lang = (char *)hash_get(pht, "LANG");
+	lang = (char *)get_obj_data(hash_get(pht, "LANG"));
 	if (lang == NULL) {
 		/* XXX TODO should check global lang when available */
 
