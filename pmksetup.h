@@ -109,7 +109,6 @@ static  char *binaries[][2] = {
 #define MAXBINS	sizeof(binaries) / sizeof(char *) / 2
 
 
-/* Local functions declaration */
 bool	record_data(htable *, char *, char, char *);
 bool	gather_data(htable *);
 bool	check_opt(htable *, prsopt *);
