@@ -7,14 +7,16 @@ common :
 pmk :
 + update pmk.1
 + update pmkfile.5 (VARNAME in CHECK_BINARY)
-~ compatibility with autoconf (progressing)
-- set CPPFLAGS
-- set LDFLAGS ?
+~ compatibility with autoconf (progressing) :
+	- support for DEFS (-D options to pass to the compiler)
+	- support for LDFLAGS (misc linker options)
+	- support for CPPFLAGS (misc linker options)
+	- VPATH ?
 ! cache ? (hash table with binary location, ...)
 - more C++ support
 ~ global LANG
 ~ replace po_get_data
-- CHECK_VAR ?
+- CHECK_VAR ? (cinepaint)
 - verify in CHECK_BINARY that program has executable right ?
 
 pmksetup :
