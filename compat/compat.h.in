@@ -46,4 +46,7 @@
 /* availability of stdbool.h (ISO C99) */
 @DEF_STDBOOL_H@	HAVE_STDBOOL_H
 
+/* availability of libgen.h (dirname and filename) */
+@DEF_LIBGEN_H@ HAVE_LIBGEN_H
+
 #endif /* _PMK_COMPAT_H_ */
