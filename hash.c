@@ -327,7 +327,7 @@ bool hash_add_array(htable *pht, hpair *php, int size) {
 
 	pmht = hash_init(size);
 	if (pmht == NULL)
-		return(0);
+		return(false);
 
 	for (i = 0 ; (i < size) && (error == false) ; i ++) {
 		if (hash_add(pmht, php[i].key, php[i].value) == HASH_ADD_FAIL)
