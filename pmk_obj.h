@@ -57,5 +57,6 @@ pmkobj	*po_mk_hash(htable *);
 potype	 po_get_type(pmkobj *);
 void	*po_get_data(pmkobj *);
 void	 po_free(pmkobj *);
+pmkobj	*po_append(void *, void *, void *);
 
 #endif /* _PMK_OBJECT_H_ */
