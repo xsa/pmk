@@ -53,7 +53,8 @@
 
 #define PMKCPU_DATA		DATADIR "/pmkcpu.dat"
 
-#define CPU_FAM_ADD	1
+#define CPU_ARCH_ADD		1
+#define CPU_X86_VENDOR_ADD	2
 
 /* define printf format in pmk.conf */
 #define PMKSTP_WRITE_FORMAT	"%s %c \"%s\"\n"

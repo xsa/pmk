@@ -1,69 +1,84 @@
 # $Id$
 # pmk cpu identification data
 
-#ADD_CPU_FAMILY {
+#ADD_CPU_ARCH {
 #	NAME = ""
 #	LIST = ()
 #}
 
-ADD_CPU_FAMILY {
+ADD_CPU_ARCH {
 	NAME = "x86_32"
 	LIST = ("i386","i486","i586","i686")
 }
 
-ADD_CPU_FAMILY {
+ADD_CPU_ARCH {
 	NAME = "x86_64"
 	LIST = ("amd64","x86_64")
 }
 
-ADD_CPU_FAMILY {
+ADD_CPU_ARCH {
 	NAME = "ia_64"
 	LIST = ("ia_64")
 }
 
-ADD_CPU_FAMILY {
+ADD_CPU_ARCH {
 	NAME = "alpha"
 	LIST = ("alpha")
 }
 
-ADD_CPU_FAMILY {
+ADD_CPU_ARCH {
 	NAME = "ppc"
 	LIST = ("ppc","powerpc","Power Macintosh","macppc")
 }
 
-ADD_CPU_FAMILY {
+ADD_CPU_ARCH {
 	NAME = "sparc_32"
 	LIST = ("sparc","sun4c","sun4d","sun4m")
 }
 
-ADD_CPU_FAMILY {
+ADD_CPU_ARCH {
 	NAME = "sparc_64"
 	LIST = ("sparc64","sun4u")
 }
 
-#ADD_CPU_FAMILY {
+#ADD_CPU_ARCH {
 #	NAME = "mips_64"
 #	LIST = ("sgi")
 #}
 
-ADD_CPU_FAMILY {
+ADD_CPU_ARCH {
 	NAME = "mips"
 	LIST = ("mips")
 }
 
-ADD_CPU_FAMILY {
+ADD_CPU_ARCH {
 	NAME = "parisc_64"
 	LIST = ("parisc64")
 }
 
-ADD_CPU_FAMILY {
+ADD_CPU_ARCH {
 	NAME = "m68k"
 	LIST = ("hp300","mac68k","mvme68k")
 }
 
-ADD_CPU_FAMILY {
+ADD_CPU_ARCH {
 	NAME = "vax"
 	LIST = ("vax")
+}
+
+
+#
+# X86 arch specific
+#
+
+ADD_X86_CPU_VENDOR {
+	NAME = "INTEL"
+	LIST = ("GenuineIntel")
+}
+
+ADD_X86_CPU_VENDOR {
+	NAME = "AMD"
+	LIST = ("AuthenticAMD","AMD ISBETTER")
 }
 
 
