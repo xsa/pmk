@@ -48,12 +48,7 @@
 #include "premake.h"
 
 
-#ifdef __SVR4	/* SunOS, Solaris */
-char	*__progname;
-#else
-extern char	*__progname;
-#endif	/* __SVR4 */
-
+char	*__progname;		/* program name from argv[0] */
 
 #define PREMAKE_CONFIG_TMP	"/tmp/pmk.XXXXXXXX"
 
@@ -77,6 +72,8 @@ int main(int argc, char *argv[]) {
 	htable		*ht;
 	
 	extern int	optind;
+
+	__progname = argv[0];
 
 #ifndef USER_TEST
 	/* pmksetup(8) must be run as root */
