@@ -94,6 +94,59 @@ htable	*arch_wrapper(prsdata *, char *);
 #define X86_CPU_MASK_FAMILY	0x00000f00
 #define X86_CPU_MASK_MODEL	0x000000f0
 
+
+/* feature register 1 (edx) */
+#define X86_CPU_MASK_FEAT_FPU	0x00000001	/* bit  0 */
+#define X86_CPU_MASK_FEAT_VME	0x00000002	/* bit  1 */
+#define X86_CPU_MASK_FEAT_DE	0x00000004	/* bit  2 */
+#define X86_CPU_MASK_FEAT_PSE	0x00000008	/* bit  3 */
+#define X86_CPU_MASK_FEAT_TSC	0x00000010	/* bit  4 */
+#define X86_CPU_MASK_FEAT_MSR	0x00000020	/* bit  5 */
+#define X86_CPU_MASK_FEAT_PAE	0x00000040	/* bit  6 */
+#define X86_CPU_MASK_FEAT_MCE	0x00000080	/* bit  7 */
+#define X86_CPU_MASK_FEAT_CX8	0x00000100	/* bit  8 */
+#define X86_CPU_MASK_FEAT_APIC	0x00000200	/* bit  9 */
+/*		RESERVED			   bit 10 */
+#define X86_CPU_MASK_FEAT_SEP	0x00000800	/* bit 11 */
+#define X86_CPU_MASK_FEAT_MTRR	0x00001000	/* bit 12 */
+#define X86_CPU_MASK_FEAT_PGE	0x00002000	/* bit 13 */
+#define X86_CPU_MASK_FEAT_MCA	0x00004000	/* bit 14 */
+#define X86_CPU_MASK_FEAT_CMOV	0x00008000	/* bit 15 */
+#define X86_CPU_MASK_FEAT_PAT	0x00010000	/* bit 16 */
+#define X86_CPU_MASK_FEAT_PSE36	0x00020000	/* bit 17 */
+#define X86_CPU_MASK_FEAT_PSN	0x00040000	/* bit 18 */
+#define X86_CPU_MASK_FEAT_CLFL	0x00080000	/* bit 19 */
+/*		RESERVED			   bit 20 */
+#define X86_CPU_MASK_FEAT_DTES	0x00200000	/* bit 21 */
+#define X86_CPU_MASK_FEAT_ACPI	0x00400000	/* bit 22 */
+#define X86_CPU_MASK_FEAT_MMX	0x00800000	/* bit 23 */
+#define X86_CPU_MASK_FEAT_FXR	0x01000000	/* bit 24 */
+#define X86_CPU_MASK_FEAT_SSE	0x02000000	/* bit 25 */
+#define X86_CPU_MASK_FEAT_SSE2	0x04000000	/* bit 26 */
+#define X86_CPU_MASK_FEAT_SS	0x00000000	/* bit 27 */
+#define X86_CPU_MASK_FEAT_HTT	0x10000000	/* bit 28 */
+#define X86_CPU_MASK_FEAT_TM1	0x20000000	/* bit 29 */
+#define X86_CPU_MASK_FEAT_IA64	0x40000000	/* bit 30 */
+#define X86_CPU_MASK_FEAT_PBE	0x80000000	/* bit 31 */
+
+/* feature register 2 (ecx) */
+#define X86_CPU_MASK_FEAT_FPU	0x00000001	/* bit  0 */
+/*		RESERVED			   bit  1 */
+/*		RESERVED			   bit  2 */
+#define X86_CPU_MASK_FEAT_MON	0x00000008	/* bit  3 */
+#define X86_CPU_MASK_FEAT_DSCPL	0x00000010	/* bit  4 */
+/*		RESERVED			   bit  5 */
+/*		RESERVED			   bit  6 */
+#define X86_CPU_MASK_FEAT_EST	0x00000080	/* bit  7 */
+#define X86_CPU_MASK_FEAT_TM2	0x00000100	/* bit  8 */
+/*		RESERVED			   bit  9 */
+#define X86_CPU_MASK_FEAT_CID	0x00000400	/* bit 10 */
+/*		RESERVED			   bit 11 */
+/*		RESERVED			   bit 12 */
+#define X86_CPU_MASK_FEAT_CX16	0x00002000	/* bit 13 */
+#define X86_CPU_MASK_FEAT_ETPRD	0x00004000	/* bit 14 */
+
+
 #define PMKCONF_HW_X86_CPU_FAMILY	"HW_X86_CPU_FAMILY"	/* family */
 #define PMKCONF_HW_X86_CPU_MODEL	"HW_X86_CPU_MODEL"	/* model */
 #define PMKCONF_HW_X86_CPU_EXTFAM	"HW_X86_CPU_EXTFAM"	/* extended family */
@@ -112,13 +165,19 @@ typedef struct {
 	bool		 cpuid;
 	char		*vendor,
 			*cpuname,
-			*stdvendor;
+			*stdvendor,
+			*features;
 	unsigned char	 family,
 			 model,
 			 extfam,
 			 extmod;
 	uint32_t	 level;
 } x86_cpu_cell;
+
+typedef struct {
+	uint32_t	 mask;
+	char		*descr;
+} x86_cpu_feature;
 
 x86_cpu_cell	*x86_cpu_cell_init(void);
 void		 x86_cpu_cell_destroy(x86_cpu_cell *);

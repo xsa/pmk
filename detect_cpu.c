@@ -233,6 +233,52 @@ htable *arch_wrapper(prsdata *pdata, char *arch_name) {
  ****************/
 
 #ifdef ARCH_X86
+x86_cpu_feature	x86_cpu_feat_reg1[] = {
+	{X86_CPU_MASK_FEAT_FPU,		"FPU"},
+	{X86_CPU_MASK_FEAT_VME,		"VME"},
+	{X86_CPU_MASK_FEAT_DE,		"DE"},
+	{X86_CPU_MASK_FEAT_PSE,		"PSE"},
+	{X86_CPU_MASK_FEAT_TSC,		"TSC"},
+	{X86_CPU_MASK_FEAT_MSR,		"MSR"},
+	{X86_CPU_MASK_FEAT_PAE,		"PAE"},
+	{X86_CPU_MASK_FEAT_MCE,		"MCE"},
+	{X86_CPU_MASK_FEAT_CX8,		"CX8"},
+	{X86_CPU_MASK_FEAT_APIC,	"APIC"},
+	{X86_CPU_MASK_FEAT_SEP,		"SEP"},
+	{X86_CPU_MASK_FEAT_MTRR,	"MTRR"},
+	{X86_CPU_MASK_FEAT_PGE,		"PGE"},
+	{X86_CPU_MASK_FEAT_MCA,		"MCA"},
+	{X86_CPU_MASK_FEAT_CMOV,	"CMOV"},
+	{X86_CPU_MASK_FEAT_PAT,		"PAT"},
+	{X86_CPU_MASK_FEAT_PSE36,	"PSE36"},
+	{X86_CPU_MASK_FEAT_PSN,		"PSN"},
+	{X86_CPU_MASK_FEAT_CLFL,	"CLFL"},
+	{X86_CPU_MASK_FEAT_DTES,	"DTES"},
+	{X86_CPU_MASK_FEAT_ACPI,	"ACPI"},
+	{X86_CPU_MASK_FEAT_MMX,		"MMX"},
+	{X86_CPU_MASK_FEAT_FXR,		"FXR"},
+	{X86_CPU_MASK_FEAT_SSE,		"SSE"},
+	{X86_CPU_MASK_FEAT_SSE2,	"SSE2"},
+	{X86_CPU_MASK_FEAT_SS,		"SS"},
+	{X86_CPU_MASK_FEAT_HTT,		"HTT"},
+	{X86_CPU_MASK_FEAT_TM1,		"TM1"},
+	{X86_CPU_MASK_FEAT_IA64,	"IA64"},
+	{X86_CPU_MASK_FEAT_PBE,		"PBE"}
+};
+int nb_feat_reg1 = sizeof(x86_cpu_feat_reg1) / sizeof(x86_cpu_feature);
+
+x86_cpu_feature	x86_cpu_feat_reg2[] = {
+	{X86_CPU_MASK_FEAT_FPU,		"FPU"},
+	{X86_CPU_MASK_FEAT_MON,		"MON"},
+	{X86_CPU_MASK_FEAT_DSCPL,	"DSCPL"},
+	{X86_CPU_MASK_FEAT_EST,		"EST"},
+	{X86_CPU_MASK_FEAT_TM2,		"TM2"},
+	{X86_CPU_MASK_FEAT_CID,		"CID"},
+	{X86_CPU_MASK_FEAT_CX16,	"CX16"},
+	{X86_CPU_MASK_FEAT_ETPRD,	"ETPRD"}
+};
+int nb_feat_reg2 = sizeof(x86_cpu_feat_reg2) / sizeof(x86_cpu_feature);
+
 
 /****
  functions
@@ -252,6 +298,7 @@ x86_cpu_cell *x86_cpu_cell_init(void) {
 	pcell->vendor = NULL;
 	pcell->stdvendor = NULL;
 	pcell->cpuname = NULL;
+	pcell->features = NULL;
 	pcell->family = 0;
 	pcell->model = 0;
 	pcell->extfam = 0;
@@ -312,6 +359,8 @@ char *x86_get_std_cpu_vendor(prsdata *pdata, char *civendor) {
 */
 
 bool x86_get_cpuid_data(x86_cpu_cell *cell) {
+	char		 feat_str[512] = ""; /* XXX */
+	int		 i;
 	uint32_t	 buffer[13];
 
 	if (x86_check_cpuid_flag() == 0) {
@@ -345,6 +394,23 @@ bool x86_get_cpuid_data(x86_cpu_cell *cell) {
 
 	cell->model = (unsigned int) ((x86_cpu_reg_eax & X86_CPU_MASK_MODEL) >> 4);
 
+	for (i = 0 ; i < nb_feat_reg1 ; i++) {
+	/* XXX */
+		if ((x86_cpu_reg_edx & x86_cpu_feat_reg1[i].mask) != 0) {
+			strlcat(feat_str, x86_cpu_feat_reg1[i].descr, sizeof(feat_str)); /* XXX check ? */
+			strlcat(feat_str, " ", sizeof(feat_str));
+		}
+	/* XXX */
+	}
+	for (i = 0 ; i < nb_feat_reg2 ; i++) {
+	/* XXX */
+		if ((x86_cpu_reg_edx & x86_cpu_feat_reg2[i].mask) != 0) {
+			strlcat(feat_str, x86_cpu_feat_reg2[i].descr, sizeof(feat_str)); /* XXX check ? */
+			strlcat(feat_str, " ", sizeof(feat_str));
+		}
+	/* XXX */
+	}
+	cell->features = strdup(feat_str);
 
 	x86_exec_cpuid(0x80000000);
 	if (x86_cpu_reg_eax >= 0x80000002) {
@@ -425,6 +491,13 @@ bool x86_set_cpu_data(prsdata *pdata, x86_cpu_cell *pcell, htable *pht) {
 			return(false);
 		}
 	} /* else put unknown ? */
+
+	if (pcell->features != NULL) {
+		if (hash_update_dup(pht, PMKCONF_HW_X86_CPU_FEATURES,
+				pcell->features) == HASH_ADD_FAIL) {
+			return(false);
+		}
+	} /* else put empty string ? */
 
 	phtbis = (htable *) seek_key(pdata, LIST_X86_CPU_CLASS);
 	if (phtbis != NULL) {
