@@ -563,15 +563,16 @@ debugf("{main} parsed '%s'", PREMAKE_CONFIG_PATH);
 		fclose(fp);
 	} else {
 		clean(&gdata);
-		errorf("cannot open '%s' : %s.", PREMAKE_CONFIG_PATH, strerror(errno));
+		errorf("cannot open '%s' : %s.",
+			PREMAKE_CONFIG_PATH, strerror(errno));
 		exit(EXIT_FAILURE);
 	}
 
 	/* try to get pkg-config lib path from pmk.conf */
 	pc_path = hash_get(gdata.pht, PMKCONF_PC_PATH_LIB);
 	if (pc_path == NULL) {
-		printf("Unable to find pkg-config libdir.\n");
 		clean(&gdata);
+		errorf("unable to find pkg-config libdir.");
 		exit(EXIT_FAILURE);
 	}
 
