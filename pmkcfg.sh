@@ -42,8 +42,57 @@ def="#define"
 udef="#undef"
 
 #
+# functions
+#
+
+check_include() {
+	include="$1"
+	echo $ECHO_N "Checking $include : $ECHO_C"
+
+	cat > $testfile <<EOF
+#include <stdio.h>
+#include <$include>
+
+int main() {
+	return(0);
+}
+EOF
+
+	$CC -o $testbin $testfile >/dev/null 2>&1
+
+	rm -f $testfile
+	if [ -x "$testbin" ]; then
+		rm -f $testbin
+		do_sed "$def" "$include"
+		echo "yes"
+	else
+		do_sed "$udef" "$include"
+		echo "no"
+	fi
+}
+
+do_sed() {
+	sed_str="$1"
+	sed_uc=`echo "$2" | tr [a-z] [A-Z] | tr . _`
+	sed_tag="@DEF_$sed_uc@"
+
+	cp $compat $temporary
+	cat $temporary | sed -e s/$sed_tag/$sed_str/ > $compat
+	rm -f $temporary
+}
+
+
+#
 # init
 #
+
+if [ `echo -n`="-n" ]; then
+	ECHO_N=""
+	ECHO_C="\c"
+else
+	ECHO_N="-n"
+	ECHO_C=""
+fi
 
 cp $template $compat
 
@@ -89,32 +138,14 @@ rm -f $temporary $testfile $testbin
 # stdbool.h check
 #
 
-echo "Checking stdbool.h : \c"
+check_include stdbool.h
 
-cat > $testfile <<EOF
-#include <stdbool.h>
-#include <stdio.h>
+#
+# libgen.h check
+#
 
-int main() {
-	return(0);
-}
-EOF
+check_include libgen.h
 
-$CC -o $testbin $testfile >/dev/null 2>&1
-
-cp $compat $temporary
-
-if [ -x "$testbin" ]; then
-	sedstr="$def"
-	msg="yes"
-else
-	sedstr="$udef"
-	msg="no"
-fi
-
-cat $temporary | sed -e s/@DEF_STDBOOL_H@/$sedstr/ > $compat
-echo "$msg"
-rm -f $temporary $testfile $testbin
 
 #
 # end
