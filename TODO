@@ -6,7 +6,6 @@ common :
 pmk :
 ~ compatibility with autoconf (progressing)
 - set CPPFLAGS
-+ add CHECK_TYPE aka pmk_check_type()
 - set LDFLAGS ?
 - cache ?
 
