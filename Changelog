@@ -1,6 +1,7 @@
 11 Aug 2003 mipsator
  * added pmk objects.
  * added pmk object support in hash.
+ * added pmk object support in dynarray.
 
 # snapshot 0.5.4
 
