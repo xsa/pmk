@@ -232,7 +232,7 @@ bool list_all(pkgdata *ppd) {
 	}
 
 	/* build format string to align descriptions */
-	snprintf(fmt, sizeof(fmt), "%%-%ds %%s\n", maxs);
+	snprintf(fmt, sizeof(fmt), "%%-%us %%s\n", maxs);
 
 	for(i = 0 ; i < phk->nkey ; i++) {
 		if (rval == true) {
@@ -443,9 +443,9 @@ debugf("{main} id = %d", poc->id);
 				case PMKPC_OPT_VAR_PRNT :
 				case PMKPC_OPT_VAR_SILC :
 				case PMKPC_OPT_VAR_STDO :
+					errorf("option '--%s' is not yet implemented.", poc->err);
 					optcell_destroy(poc);
 					clean(&gdata);
-					errorf("option '--%s' is not yet implemented.", poc->err);
 					exit(EXIT_FAILURE);
 					break;
 
