@@ -10,7 +10,7 @@ Debian		3.0		sparc		PMK.0.7.0	OK		Martin Reindl		gcc-3.3.2, gmake-3.80, linux-2.
 FreeBSD		4.8		alpha		PMK 0.7.10	OK		Damien Couderc		gcc-2.95.4
 FreeBSD		4.8		i386		PMK 0.7.10	OK		Damien Couderc		gcc-2.95.4
 HP-UX		B.11.22		ia64		PMK 0.7.10	OK		Damien Couderc		HP ANSI C++/C B3910B A.05.36 
-Mac OS X	10.2.8		ppc		PMK 0.7.10	Fail (???)	Xavier Santolaria	gcc-3.3, gmake-3.79.1
+Mac OS X	10.3.2		ppc		PMK 0.7.10	Fail (???)	Xavier Santolaria	gcc-3.3, gmake-3.79.1
 Mandrake	9.2		i686		PMK 0.7.10	OK		Damien Couderc		gcc-3.3.1, gmake-3.80, linux-2.4.21
 NetBSD		1.6		i386		PMK 0.7.10	OK		Damien Couderc		gcc-2.95.3
 NetBSD		1.6		sparc		PMK 0.6		OK		Martin Reindl		gcc-2.95.3
