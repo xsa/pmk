@@ -49,8 +49,8 @@
 
 #define NBLANG	2
 lgdata	ldata[NBLANG] = {
-	{"C",	"CC",	"CPPFLAGS",	"CFLAGS"},
-	{"C++",	"CXX",	"CPPFLAGS",	"CXXFLAGS"}
+	{"C",	"CC",	"CPPFLAGS",	"CFLAGS",	"SLCFLAGS"},
+	{"C++",	"CXX",	"CPPFLAGS",	"CXXFLAGS",	"SLCXXFLAGS"}
 };
 
 
@@ -486,6 +486,10 @@ bool require_check(htable *pht) {
 
 /*
 	check language
+
+	lang : language to check
+
+	return : language structure or NULL
 */
 
 lgdata *check_lang(char *lang) {
@@ -501,10 +505,30 @@ lgdata *check_lang(char *lang) {
 }
 
 /*
+	check language with it's compiler (symbolic) name
+
+	comp : compiler (symbolic) name
+
+	return : language structure or NULL
+*/
+
+lgdata *check_lang_comp(char *comp) {
+	int	 i;
+
+	for (i = 0 ; i < NBLANG ; i++) {
+		if (strncmp(ldata[i].comp, comp, LANG_NAME_LEN) == 0) {
+			return(&ldata[i]);
+		}
+	}
+
+	return(NULL);
+}
+
+/*
 	provide data on language used
 
 	pht : hash table that should contain LANG 
-	pgd : XXX TODO to get global LANG 
+	pgd : global data structure 
 
 	return : lgdata structure or NULL for unknow language
 */
