@@ -49,6 +49,8 @@
 #include "hash.h"
 #include "compat/pmk_string.h"
 
+/*#define HASH_DEBUG 1*/
+
 
 /*
 	compute hash (perfect hashing)
@@ -600,6 +602,10 @@ hkeys *hash_keys(htable *pht) {
 	phk = (hkeys *)malloc(sizeof(hkeys));
 	if (phk != NULL) {
 
+		if (pht->count == 0)
+			return(NULL);
+		}
+
 		phk->nkey = pht->count;
 
 		/* create an array with a size of the number of keys */
@@ -617,9 +623,16 @@ hkeys *hash_keys(htable *pht) {
 	
 			return(phk);
 		} else {
+#ifdef HASH_DEBUG
+                        debugf("keys alloc failed");
+#endif
 			/* free allocated space only */
 			free(phk);
 		}
+#ifdef HASH_DEBUG
+        } else {
+                debugf("hkeys struct alloc failed");
+#endif
 	}
 
 	return(NULL);
