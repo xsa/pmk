@@ -1,3 +1,6 @@
+01 Nov 2004 mipsator
+ * misc changes before cpu detection.
+
 27 Oct 2004 mipsator
  * added 'as' (assembler) detection in pmksetup.
 

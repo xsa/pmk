@@ -74,7 +74,8 @@ int	nbpredef = sizeof(predef) / sizeof(hpair);
 
 /* config tools data file keyword */
 prskw	kw_pmkcpu[] = {
-	{"ADD_CPU_FAMILY", CPU_FAM_ADD, PRS_KW_CELL}
+	{"ADD_CPU_ARCH",	CPU_ARCH_ADD,		PRS_KW_CELL},
+	{"ADD_X86_CPU_VENDOR",	CPU_X86_VENDOR_ADD,	PRS_KW_CELL}
 };
 int	nbkwc = sizeof(kw_pmkcpu) / sizeof(prskw);
 
@@ -861,7 +862,7 @@ char *check_cpu_family(char *uname_m) {
 	if (rval == true) {
 		pcell = pdata->tree->first;
 		while ((pcell != NULL) && (pstr == NULL)) {
-			if (pcell->token == CPU_FAM_ADD) {
+			if (pcell->token == CPU_ARCH_ADD) {
 				pht = pcell->data;
 
 				da = po_get_list(hash_get(pht, "LIST")); /* XXX check */
