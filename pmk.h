@@ -69,10 +69,10 @@
 #define MAX_CMD_NAME_LEN	64
 
 /* maximal size of a command label */
-#define MAX_LABEL_LEN		64
+#define MAX_LABEL_NAME_LEN	64
 
 /* maximal size of a command string : <prefix><command>(<label>) */
-#define MAX_CMD_LEN		MAX_CMD_NAME_LEN + MAX_LABEL_LEN + 2
+#define MAX_CMD_LEN		MAX_CMD_NAME_LEN + MAX_LABEL_NAME_LEN + 2
 
 /* maximal sizes for command pair of option (name and value) */
 #define MAX_OPT_NAME_LEN	64
@@ -102,9 +102,7 @@ typedef struct {
 } pmkcmdopt;
 /* command type */
 typedef struct {
-	int		type; /* command token */
-	char		name[MAX_CMD_LEN],
-			label[MAX_LABEL_LEN];
-	pmkcmdopt	opt[MAX_CMD_OPT];
+	char		name[MAX_CMD_NAME_LEN],
+			label[MAX_LABEL_NAME_LEN];
 } pmkcmd;
 
