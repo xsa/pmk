@@ -64,10 +64,9 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include <unistd.h>
 
-#include "compat/compat.h"
+#include "compat/pmk_string.h" /* needed to use strlcpy */
 #include "pmk.h"
 #include "func.h"
 #include "common.h"
