@@ -39,6 +39,12 @@
 #include "compat.h"
 
 #ifndef HAVE_BLKCNT_T
+
+#ifdef __osf__
+/* Tru64 defines int64_t in the following header */
+#include <sys/bitypes.h>
+#endif
+
 typedef int64_t	blkcnt_t;	/* file block counts */
 #endif
 

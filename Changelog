@@ -5,6 +5,7 @@
  * fixed compiler detection failure.
  * fixed makefiles for HPUX.
  * fixed pmkcomp.dat to use unique id for each compiler definition.
+ * fixed use of int64_t on the Tru64 platform.
 
 # snapshot 0.7.9
 
