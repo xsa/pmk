@@ -86,7 +86,7 @@ int main(int argc, char *argv[]) {
 	
 	extern int	 optind;
 #ifndef errno
-	extern int	 errno
+	extern int	 errno;
 #endif
 
 
