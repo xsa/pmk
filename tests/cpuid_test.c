@@ -33,6 +33,9 @@ int main(void) {
 			 cputype;
 	struct utsname	 utsname;
 	uint32_t	 buffer[13];
+#ifdef ARCH_X86
+	x86_cpu_cell	x86cc;
+#endif
 
 	if (uname(&utsname) == -1) {
 		printf("uname failed.\n");
@@ -49,7 +52,6 @@ int main(void) {
 	printf("arch = '%s'\n", pstr);
 
 #ifdef ARCH_X86
-	x86_cpu_cell	x86cc;
 	printf("ARCH_X86 is defined.\n");
 
 	cpuidflag = x86_check_cpuid_flag();
