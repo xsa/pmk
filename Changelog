@@ -4,6 +4,7 @@
  * updated usage() of pmkinstall.
  * fixed Darwin entry in pmkcomp.dat file.
  * imported the beginning of a tutorial.
+ * rewritten a bit shared lib support and pmkcomp.dat format.
 
 08 Feb 2004 mipsator
  * implemented output filtering options in pmkpc.
