@@ -256,8 +256,29 @@ cfgtdata *cfgtdata_init(void) {
 */
 
 void cfgtdata_destroy(cfgtdata *pcd) {
-	hash_destroy(pcd->by_mod);
-	hash_destroy(pcd->by_bin);
+#ifdef PKGCFG_DEBUG
+debugf("destroying module hash table.");
+#endif
+	if (pcd->by_mod != NULL) {
+		hash_destroy(pcd->by_mod);
+#ifdef PKGCFG_DEBUG
+debugf("destroyed module hash table.");
+	} else {
+debugf("WARNING : by_mod doesn't exists !!!");
+#endif
+	}
+
+#ifdef PKGCFG_DEBUG
+debugf("destroying binary links hash table.");
+#endif
+	if (pcd->by_mod != NULL) {
+		hash_destroy(pcd->by_bin);
+#ifdef PKGCFG_DEBUG
+debugf("destroyed binary links hash table.");
+	} else {
+debugf("WARNING : by_bin doesn't exists !!!");
+#endif
+	}
 }
 
 /*
