@@ -85,6 +85,7 @@ dynary	*str_to_dynary_adv(char *, char *);
 
 bool	 find_file(dynary *, char *, char *, int);
 bool	 find_file_dir(dynary *, char *, char *, int);
+bool	 get_file_path(char *, char *, char *, int);
 
 void	 errorf(const char *, ...);
 void	 errorf_line(char *, int, const char *, ...);

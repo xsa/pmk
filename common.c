@@ -342,6 +342,38 @@ bool find_file(dynary *da, char *fname, char *fpath, int fplen) {
 	return(rval);
 }
 
+/*
+	get path of given filename in given path list
+
+	filename : name of the file to look for
+	path : string of the list of path
+	storage : storage for resulting path
+	size : size of storage
+
+	returns true if filename is found in one of the list's path
+*/
+
+bool get_file_path(char *filename, char *path, char *storage, int size) {
+	bool	 rval = false;
+	dynary	*bplst;
+
+	/* fill dynary with path */
+	bplst= str_to_dynary(path, CHAR_LIST_SEPARATOR);
+	if (bplst == NULL) {
+		errorf("failed to put a path into a dynamic array.");
+		return(false);
+	}
+
+	/* try to locate cfgtool */
+	if (find_file(bplst, filename, storage, size) == true) {
+		rval = true;
+	} else {
+		rval = false;
+	}
+
+	da_destroy(bplst);
+	return(rval);
+}
 
 /*
 	formated simple error
