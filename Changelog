@@ -1,6 +1,7 @@
 25 Dec 2004 mipsator
  * fixed respect of CC in pmkcfg.sh script.
  * added DEFS usage in pmkfile.5.
+ * update pmkfile.
 
 23 Dec 2004 mipsator
  * fixed use of the assembler to comply with SunOS.
