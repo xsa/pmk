@@ -1,3 +1,8 @@
+05 Jun 2003 mipsator
+ * massive changes in func.c to complete check functions.
+ 	(added missing record_def, record_val and label_set
+		and moved some portions of code)
+
 04 Jun 2003 mipsator
  * makes pmkcfg.sh using the same tags as pmk (@DEF__*).
  * updates compat/compat.h.in to use DEF__* tags.
