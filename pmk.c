@@ -42,6 +42,7 @@
 #include "autoconf.h"
 #include "common.h"
 #include "func.h"
+#include "pathtools.h"
 #include "pmk.h"
 
 
@@ -123,9 +124,11 @@ bool read_conf(htable *ht) {
 	returns true on success
 */
 
-bool process_template(char *template, htable *ht) {
+bool process_template(char *template, pmkdata *pgd) {
 	FILE	*tfd,
 		*dfd;
+	bool	replace,
+		ac_flag;
 	char	*path,
 		*plb,
 		*pbf,
@@ -135,7 +138,9 @@ bool process_template(char *template, htable *ht) {
 		lbuf[MAXPATHLEN],
 		buf[MAXPATHLEN],
 		tbuf[MAXPATHLEN];
-	bool	replace;
+	htable	*ht;
+
+	ht = pgd->htab;
 
 	pbf = strdup(template);
 	if (pbf == NULL) {
@@ -184,6 +189,13 @@ bool process_template(char *template, htable *ht) {
 		fclose(tfd);
 		errorf("cannot open %s.", final);
 		return(false);
+	}
+
+	if (pgd->ac_file == NULL) {
+		ac_flag = false;
+	} else {
+		ac_flag = true;
+		ac_process_dyn_var(ht, pgd, template); /* XXX should use directly path */
 	}
 
 	while (fgets(lbuf, sizeof(lbuf), tfd) != NULL) {
@@ -259,6 +271,11 @@ bool process_template(char *template, htable *ht) {
 	fclose(tfd);
 
 	pmk_log("Created '%s'.\n", final);
+
+	if (ac_flag == true) {
+		/* clean dyn_var */
+		ac_clean_dyn_var(ht);
+	}
 	
 	return(true);
 }
@@ -754,8 +771,8 @@ int main(int argc, char *argv[]) {
 	}
 
 	/* init srcdir and basedir */
-	strlcpy(gdata.srcdir, dirname(pmkfile), sizeof(gdata.srcdir)); /* XXX check ? */
 	getcwd(gdata.basedir, sizeof(gdata.basedir)); /* XXX check ? */
+	abspath(gdata.basedir, dirname(pmkfile), gdata.srcdir); /* XXX check ? */
 
 	/* open log file */
 	if (pmk_log_open(PREMAKE_LOG) == false) {
@@ -783,7 +800,7 @@ int main(int argc, char *argv[]) {
 		for (i = 0 ; (i < da_usize(da)) && (rval == 0) ; i++) {
 			pstr = da_idx(da, i);
 			if (pstr != NULL) {
-				if (process_template(pstr, gdata.htab) == false) {
+				if (process_template(pstr, &gdata) == false) {
 					/* failure while processing template */
 					rval = 1;
 				}
