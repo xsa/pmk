@@ -37,6 +37,7 @@
 #include <sys/utsname.h>
 
 #include <errno.h>
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -106,6 +107,11 @@ int main(int argc, char *argv[]) {
 	fprintf(stdout, "==> Looking for default parameters...\n");
 	if ((get_env_vars(ht) == -1) || (get_binaries(ht) == -1))
 		exit(1);
+
+	if (predef_vars(ht) == -1) {
+		errorf("predefined variables."); 
+		exit(1);
+	}
 
 	if ((open_tmp_config() == -1))
 		exit(1);
@@ -329,29 +335,22 @@ int get_env_vars(htable *ht) {
 	struct	utsname	utsname;
 
 	if (uname(&utsname) == -1) {
-		errorf("uname");
+		errorf("uname.");
 		return(-1);
 	}
 
-	if (verbose_flag == 1) {
-		debugf("[System Variables]");
-		debugf("\t%s => %s", PREMAKE_KEY_OSNAME, utsname.sysname);
-		debugf("\t%s => %s", PREMAKE_KEY_OSVERS, utsname.release);
-		debugf("\t%s => %s", PREMAKE_KEY_OSARCH, utsname.machine);
+	if (hash_add(ht, PREMAKE_KEY_OSNAME, utsname.sysname) == HASH_ADD_FAIL)
+		return(-1);
+		verbosef("Setting '%s' => '%s'", PREMAKE_KEY_OSNAME, utsname.sysname);
 
-		debugf("");
-		debugf("[Librairies and Includes]");
-		debugf("\t%s => %s", PREMAKE_KEY_INCPATH, "/usr/include");
-		debugf("\t%s => %s", PREMAKE_KEY_LIBPATH, "/usr/lib");
-	} 
-	/* XXX should think about a better way to do it though */
-	hash_add(ht, PREMAKE_KEY_OSNAME, utsname.sysname);
-	hash_add(ht, PREMAKE_KEY_OSVERS, utsname.release);
-	hash_add(ht, PREMAKE_KEY_OSARCH, utsname.machine);
+	if (hash_add(ht, PREMAKE_KEY_OSVERS, utsname.release) == HASH_ADD_FAIL)
+		return(-1);
+		verbosef("Setting '%s' => '%s'", PREMAKE_KEY_OSVERS, utsname.release);	
+	
+	if (hash_add(ht, PREMAKE_KEY_OSARCH, utsname.machine) == HASH_ADD_FAIL)
+		return(-1);
+		verbosef("Setting '%s' => '%s'", PREMAKE_KEY_OSARCH, utsname.machine);
 
-	/* XXX temporary fix, this way we can go further with the rest */
-	hash_add(ht, PREMAKE_KEY_INCPATH, "/usr/include");
-	hash_add(ht, PREMAKE_KEY_LIBPATH, "/usr/lib");
 
 	/* getting the environment variable PATH */
 	if ((bin_path = getenv("PATH")) == NULL) {
@@ -365,12 +364,9 @@ int get_env_vars(htable *ht) {
 	 */
 	char_replace(bin_path, PATH_STR_DELIMITER, CHAR_LIST_SEPARATOR);
 
-	if (verbose_flag == 1) {
-		debugf("");
-		debugf("[Environment Variables]");
-		debugf("\t%s => %s", PREMAKE_KEY_BINPATH, bin_path);
-	}
-	hash_add(ht, PREMAKE_KEY_BINPATH, bin_path);
+	if (hash_add(ht, PREMAKE_KEY_BINPATH, bin_path) == HASH_ADD_FAIL)
+		return(-1);
+	verbosef("Setting '%s' => '%s'", PREMAKE_KEY_BINPATH, bin_path);
 
 	return(0);
 }
@@ -405,37 +401,63 @@ int get_binaries(htable *ht) {
 		return(-1);	
 	}
 
-	if(verbose_flag == 1) {
-		debugf("");
-		debugf("[Binaries Paths]"); 
-	}
-
 	if (find_file(stpath, "cc", fbin, sizeof(fbin)) == 1) {
-		hash_add(ht, "BIN_CC", fbin);
-		if (verbose_flag == 1)
-			debugf("\tSetting '%s' => '%s'", "BIN_CC", fbin);
+		if (hash_add(ht, "BIN_CC", fbin) == HASH_ADD_FAIL) {
+			da_destroy(stpath);
+			return(-1);
+		}
+		verbosef("Setting '%s' => '%s'", "BIN_CC", fbin);
 	} else {
 		if (find_file(stpath, "gcc", fbin, sizeof(fbin)) == 1) {
-			hash_add(ht, "BIN_CC", fbin);
-			if (verbose_flag == 1)
-				debugf("\tSetting '%s' => '%s'", "BIN_CC", fbin);
+			if (hash_add(ht, "BIN_CC", fbin) == HASH_ADD_FAIL) {
+				da_destroy(stpath);
+				return(-1);
+			}
+			verbosef("Setting '%s' => '%s'", "BIN_CC", fbin);
 		} else {
-			errorf("cannot find a C compiler");
+			errorf("cannot find a C compiler.");
+			da_destroy(stpath);
 			return(-1);
 		}
 	}
 
 	for (i = 0; i < MAXBINS; i++) {
 		if (find_file(stpath, binaries[i][0], fbin, sizeof(fbin)) == 1) {
-			if (verbose_flag == 1) 
-				debugf("\tSetting '%s' => '%s'", binaries[i][1], fbin);
-
-			hash_add(ht, binaries[i][1], fbin);
+			if (hash_add(ht, binaries[i][1], fbin) == HASH_ADD_FAIL) {
+				da_destroy(stpath);
+				return(-1);
+			}
+			verbosef("Setting '%s' => '%s'", binaries[i][1], fbin);
 		} else
-			if (verbose_flag == 1)
-				debugf("\t**warning: '%s' Not Found", binaries[i][0]);
+			verbosef("**warning: '%s' Not Found", binaries[i][0]);
 	}
 	da_destroy(stpath);
+	return(0);
+}
+
+
+/*
+ * Add to the hash table the predefined variables we
+ * cannot get automagically
+ *
+ *	ht: hash table where we have to store the values
+ *
+ *	returns:  0 on success
+ *		 -1 on failure
+ */ 
+int predef_vars(htable *ht) {
+	if (hash_add(ht, PREMAKE_KEY_PREFIX, "/usr/local") == HASH_ADD_FAIL)
+		return(-1);
+	verbosef("Setting '%s' =>'%s'", PREMAKE_KEY_PREFIX, "/usr/local");
+
+	if (hash_add(ht, PREMAKE_KEY_INCPATH, "/usr/include") == HASH_ADD_FAIL)
+		return(-1);
+	verbosef("Setting '%s' => '%s'", PREMAKE_KEY_INCPATH, "/usr/include");
+
+	if (hash_add(ht, PREMAKE_KEY_LIBPATH, "/usr/lib") == HASH_ADD_FAIL)
+		return(-1);
+	verbosef("Setting '%s' => '%s'", PREMAKE_KEY_LIBPATH, "/usr/lib");
+
 	return(0);
 }
 
@@ -503,6 +525,23 @@ void char_replace(char *buf, const char search, const char replace) {
 			c = replace;
 		buf[i] = c;
 		i++;
+	}
+}
+
+
+/*
+ * Simple formated verbose function
+ */
+void verbosef(const char *fmt, ...) {
+	va_list	plst;
+	char	buf[256];
+
+	if (verbose_flag == 1) {
+		va_start(plst, fmt);
+		vsnprintf(buf, sizeof(buf), fmt, plst);
+		va_end(plst);
+
+		fprintf(stderr, "%s\n", buf);
 	}
 }
 
