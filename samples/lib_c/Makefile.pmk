@@ -32,13 +32,14 @@ $(LIB_STATIC): $(L_OBJS)
 
 $(LIB_SHARED): $(L_OBJS)
 	$(CC) $(SLLDFLAGS) -o $@ $(L_OBJS)
+	cp $(LIB_SHARED) $(LIB_SHARED_V)
 
 $(NAME):
 	$(CC) -o $(NAME) -L. -lhello $(NAME).c
 
 clean:
 	rm -f $(B_OBJS) $(L_OBJS) 
-	rm -f $(LIB_STATIC) $(LIB_SHARED)
+	rm -f $(LIB_STATIC) $(LIB_SHARED) $(LIB_SHARED_V)
 	rm -f $(NAME)
 	rm -f *.log Makefile
 
