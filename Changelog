@@ -1,3 +1,9 @@
+17 Jan 2005 mipsator
+ * merged PRIVSEP branch.
+
+13 Jan 2005 mipsator
+ * more stuff for ia64 cpu detection.
+
 12 Jan 2005 mipsator
  * added basic ia64 cpu identification.
 

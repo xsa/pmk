@@ -41,6 +41,7 @@ LIST_ARCH_EQUIV {
 	"mvme68k" = "m68k"
 
 	# parisc
+	"9000/800" = "parisc_64"
 	"parisc64" = "parisc_64"
 
 	# vax
