@@ -43,12 +43,12 @@
 #endif
 
 #ifdef USER_TEST
-#define PMK_DATADIR	"./data"
+#define PMK_DATADIR	"./data/"
 #else
 #define PMK_DATADIR	DATADIR
 #endif
 
-#define PMKSCAN_DATA	PMK_DATADIR "/pmkscan.dat"
+#define PMKSCAN_DATA	PMK_DATADIR "pmkscan.dat"
 #define PMKSCAN_OUTPUT	"pmkfile.scan"
 
 
