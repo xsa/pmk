@@ -58,6 +58,7 @@ bool	 invert_bool(bool);
 char	*bool_to_str(bool);
 bool	 check_version(char *, char *);
 bool	 get_file_path(char *, char *, char *, int);
+bool	 get_file_dir_path(char *, char *, char *, int);
 char	*str_to_def(char *);
 bool	 record_def(htable *, char *, bool);
 bool	 record_val(htable *, char *, char *);
@@ -68,9 +69,8 @@ bool	 require_check(htable *);
 lgdata	*check_lang(char *);
 lgdata	*get_lang(htable *, pmkdata *);
 char	*get_comp_path(htable *, char *);
-
-char *process_string(char *, htable *);
-char *parse_idtf(char *, char *, size_t);
-
+char	*process_string(char *, htable *);
+char	*parse_idtf(char *, char *, size_t);
+bool	 single_append(htable *, char *, char *);
 
 #endif /* _PMK_FUNCTOOL_H_ */
