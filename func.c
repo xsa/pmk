@@ -97,7 +97,9 @@ bool pmk_target(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 */
 
 bool pmk_check_binary(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
-	char	*filename;
+	char	*filename,
+		*bpath,
+		binpath[MAXPATHLEN];
 	bool	required;
 
 	pmk_log("* Checking binary [%s]\n", cmd->label);
@@ -106,13 +108,31 @@ bool pmk_check_binary(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 
 	filename = hash_get(ht, "FILENAME");
 
+	bpath = hash_get(gdata->htab, "BIN_PATH");
+	if (bpath == NULL) {
+		errorf("BIN_PATH not available.");
+		return(false);
+	}
+
+	/* try to locate binary */
 	pmk_log("\tFound binary '%s' : ", filename);
-	pmk_log("XXX.\n");
-	return(true);
+	if (get_file_path(filename, bpath, binpath, sizeof(binpath)) == false) {
+		pmk_log("no.\n");
+		if (required == true) {
+			return(false);
+		} else {
+			/* XXX DEF_XXX */
+			return(true);
+		}
+	} else {
+		pmk_log("yes.\n");
+		return(true);
+	}
 }
 
 /*
 	check include file
+	XXX should be able to look for a function
 */
 
 bool pmk_check_include(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
