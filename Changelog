@@ -1,3 +1,5 @@
+# PMK 0.9.1 release
+
 26 Jan 2005 mipsator
  * fixed segfault in x86 cpu detection.
  * added __ALPHA in alpha architecture macro.
@@ -32,6 +34,8 @@
 
 02 Jan 2005 mipsator
  * added alpha cpu identification.
+
+# PMK 0.9.0 release
 
 27 Dec 2004 mipsator
  * improved handling of CFLAGS and LDFLAGS with pmkcfg.sh
