@@ -45,8 +45,10 @@
 #define PMK_CHAR_LIST_START	'('
 #define PMK_CHAR_LIST_END	')'
 #define PMK_CHAR_ASSIGN		'='
+#define PMK_CHAR_ESCAPE		'\\'
 
 #define PRS_ERR_HASH		"hash add failure."
+#define PRS_ERR_OVERFLOW	"line too long."
 #define PRS_ERR_SYNTAX		"syntax error."
 #define PRS_ERR_TRAILING	"trailing garbage after value."
 #define PRS_ERR_UNKNOWN		"unknown error."

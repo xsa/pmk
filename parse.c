@@ -47,6 +47,9 @@
 #define DEBUG_PRS	1
 */
 
+/* XXX TODO function header comments */
+
+
 char	parse_err[MAX_ERRMSG_LEN];
 
 
@@ -130,12 +133,24 @@ void	prscell_destroy(prscell *pcell) {
 
 char *parse_quoted(char *pstr, char *buffer, size_t size) {
 	while ((*pstr != PMK_CHAR_QUOTE_END) && (*pstr != CHAR_EOS)) {
+		/* found escape character */
+		if (*pstr == PMK_CHAR_ESCAPE) {
+			pstr++;
+			if (*pstr == CHAR_EOS) {
+				/* misplaced escape character */
+				strlcpy(parse_err, "trailing escape character.", sizeof(parse_err));
+				return(NULL);
+			}
+			size--;
+		}
+
 		if (size > 1) {
 			*buffer = *pstr;
 			pstr++;
 			buffer++;
 			size--;
 		} else {
+			strlcpy(parse_err, PRS_ERR_OVERFLOW, sizeof(parse_err));
 			return(NULL);
 		}
 	}
@@ -147,6 +162,7 @@ char *parse_quoted(char *pstr, char *buffer, size_t size) {
 		return(pstr);
 	} else {
 		/* end of quoting not found */
+		strlcpy(parse_err, "ending quote is missing.", sizeof(parse_err));
 		return(NULL);
 	}
 }
@@ -165,6 +181,7 @@ char *parse_list(char *pstr, char *buffer, size_t size) {
 			buffer++;
 			size--;
 		} else {
+			strlcpy(parse_err, PRS_ERR_OVERFLOW, sizeof(parse_err));
 			return(NULL);
 		}
 	}
@@ -176,6 +193,7 @@ char *parse_list(char *pstr, char *buffer, size_t size) {
 		return(pstr);
 	} else {
 		/* end of list not found */
+		strlcpy(parse_err, "end of list not found.", sizeof(parse_err));
 		return(NULL);
 	}
 }
@@ -206,6 +224,7 @@ char *parse_word(char *pstr, char *buffer, size_t size) {
 					buffer++;
 					size--;
 				} else {
+					strlcpy(parse_err, PRS_ERR_OVERFLOW, sizeof(parse_err));
 					return(NULL);
 				}
 			}
@@ -518,7 +537,7 @@ bool parse(FILE *fp, prsdata *pdata) {
 				}
 
 				if (parse_opt(buf, pcell->ht) == false) {
-					errorf("%s", parse_err);
+					errorf("line %d : %s", cur_line, parse_err);
 #ifdef DEBUG_PRS
 					debugf("parse_opt returned false");
 #endif

@@ -27,7 +27,7 @@ LIBNAME=termcap
 # this check depends of lib_termcap check for test purposes
 .CHECK_LIB(lib_curses) {
 REQUIRED=FALSE
-DE}=lib_termcap
+DEPEND=lib_termcap
 LIBNAME=curses
 FUNCTION=getwin
 }

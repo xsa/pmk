@@ -4,6 +4,9 @@
  * updated pmkfile.5 with new format syntax.
  * update pmkfile sample to new format.
  * modified Makefile to configure with pmk if previous version is already installed.
+ * added support of escape character in quoted string.
+ * added missing error messages in parse_quoted(), parse_list() and parse_word().
+ * update pmkscan.dat to new parser format.
 
 07 Aug 2003 mipsator
  * rewritten parse_opt().
