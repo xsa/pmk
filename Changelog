@@ -2,6 +2,7 @@
  * added missing variables for autoconf compatibility.
  * added third license clause to almost all the files.
  * imported pmkinstall tools for further use.
+ * added more third license clause to into compat directory.
 
 02 Oct 2003 mipsator
  * renamed pmk_check_include() by pmk_check_header().
