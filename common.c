@@ -151,7 +151,9 @@ bool get_make_var(char *varname, char *result, int rsize) {
 debugf(MKVAR_FMT_MK, varname, MKVAR_FILE);
 #endif
 	} else {
-		errorf("Failed to open %s\n", mfn);
+#ifdef MKVAR_DEBUG
+		errorf("Failed to open %s : %s.", mfn, strerror(errno));
+#endif
 		return(false);
 	}
 
@@ -161,18 +163,24 @@ debugf(MKVAR_FMT_MK, varname, MKVAR_FILE);
 		if (tfp != NULL) {
 			/* catch output of make */
 			if (get_line(tfp, result, rsize) == false) {
-				errorf("failed to get result from %s", varstr);
+#ifdef MKVAR_DEBUG
+				errorf("failed to get result from %s : %s.", varstr, strerror(errno));
+#endif
 				rval = false;
 			}
 			fclose(tfp);
 
 			rval = true;
 		} else {
-			errorf("failed to get result from %s", varstr);
+#ifdef MKVAR_DEBUG
+			errorf("failed to open %s : %s.", varstr, strerror(errno));
+#endif
 			rval = false;
 		}
 	} else {
-		errorf("failed to execute %s", varstr);
+#ifdef MKVAR_DEBUG
+		errorf("failed to execute %s : %s.", varstr, strerror(errno));
+#endif
 		rval = false;
 	}
 
