@@ -1,15 +1,13 @@
 common :
 - write specs somewhere in a draft
-- moving man page in a directory
 
 pmk :
 ~ finish existing checks
 ~ finish pmk(1)
 ~ pmkfile(5)
 - pkgconfig test
-~ fill gdata with checks results
-~ compatibility with autoconf
+~ fill gdata with checks results (progressing)
+~ compatibility with autoconf (progressing)
 
 pmksetup :
 ~ pmk.conf(5)
-~ get INC_PATH and LIB_PATH

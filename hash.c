@@ -224,8 +224,6 @@ int hash_add(htable *pht, char *key, char *value) {
 	rval = HASH_ADD_FAIL;
 
 	size = pht->size;
-	/* compute hash code */
-	hash = hash_compute(key, size);
 
 	/* test remaing free cells */
 	if (pht->count >= size) {
@@ -256,6 +254,9 @@ int hash_add(htable *pht, char *key, char *value) {
 		free(phc);
 		return(HASH_ADD_FAIL);
 	}
+
+	/* compute hash code */
+	hash = hash_compute(key, size);
 
 	phn = &pht->nodetab[hash];
 	rval = hash_add_cell(phn, phc);
@@ -354,7 +355,30 @@ bool hash_add_array(htable *pht, hpair *php, int size) {
 }
 
 /*
+	append a value to the existing
 
+	pht : hash structure
+	key : key string
+	value : value string
+
+	XXX need more work
+*/
+
+void hash_append(htable *pht, char *key, char *value) {
+	char	*pstr,
+		buf[MAX_HASH_VALUE_LEN];
+
+	pstr = hash_get(pht, key);
+	if (pstr == NULL) {
+		hash_add(pht, key, value); /* XXX */
+	} else {
+		strlcat(buf, pstr, sizeof(buf));
+		strlcat(buf, value, sizeof(buf)); /* XXX should add a comma ? */
+		hash_add(pht, key, buf);
+	}
+}
+
+/*
 	remove a key from the hash table
 
 	pht : hash table
