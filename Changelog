@@ -3,6 +3,7 @@
  * modified parse_cell() and parse() to parse new and old format of pmkfile.
  * updated pmkfile.5 with new format syntax.
  * update pmkfile sample to new format.
+ * modified Makefile to configure with pmk if previous version is already installed.
 
 07 Aug 2003 mipsator
  * rewritten parse_opt().
