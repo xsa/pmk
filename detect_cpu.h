@@ -37,20 +37,37 @@
 #ifndef _DETECT_CPU_H_
 #define _DETECT_CPU_H_
 
+#include <inttypes.h>
 #include "cpu_arch_def.h"
 #include "parse.h"
 
 #define CPU_ARCH_ADD		1
-#define CPU_X86_VENDOR_ADD	2
-#define LIST_X86_CPU_VENDOR	3
+#define LIST_X86_CPU_VENDOR	2
+#define LIST_X86_CPU_MODEL	3
+
+
+/* x86 specific */
+#ifdef ARCH_X86
+#define MASK_X86_CPU_EXTFAM	0x0ff00000
+#define MASK_X86_CPU_EXTMOD	0x000f0000
+#define MASK_X86_CPU_TYPE	0x0000f000
+#define MASK_X86_CPU_FAMILY	0x00000f00
+#define MASK_X86_CPU_MODEL	0x000000f0
+#endif /* ARCH_X86 */
 
 
 #ifdef ARCH_X86
 typedef struct {
-	unsigned char	family,
+	bool		cpuid;
+	char		vendor[13],
+			cpuname[49];
+	unsigned char	pmkfam,
+			pmkmod,
+			family,
 			model,
 			extfam,
 			extmod;
+	uint32_t	level;
 } x86_cpu_cell;
 #endif
 
@@ -58,8 +75,10 @@ typedef struct {
 prsdata	*parse_cpu_data(char *);
 char	*check_cpu_arch(char *, prsdata *);
 
-
-char	*get_x86_std_cpu_vendor(prsdata *);
+#ifdef ARCH_X86
+char	*x86_get_std_cpu_vendor(prsdata *, char *);
+bool	 x86_get_cpuid_data(x86_cpu_cell *);
+#endif /* ARCH_X86 */
 
 #endif /* _DETECT_CPU_H_ */
 

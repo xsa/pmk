@@ -1,5 +1,6 @@
 #include <sys/types.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 #include "../common.c"
 #include "../detect_cpu.c"
@@ -22,14 +23,11 @@ int main(void) {
 	char		*pstr;
 	int		 ui;
 	prsdata		*pdata;
-	uint32_t	 cputype;
+	uint32_t	 cpuidflag,
+			 cputype;
 	struct utsname	 utsname;
-
-#ifdef ARCH_X86
-	printf("ARCH_X86 is defined\n");
-#else
-	printf("ARCH_X86 is NOT defined\n");
-#endif
+	uint32_t	 buffer[13];
+	x86_cpu_cell	 x86cc;
 
 	if (uname(&utsname) == -1) {
 		printf("uname failed.\n");
@@ -45,27 +43,39 @@ int main(void) {
 	pstr = check_cpu_arch(utsname.machine, pdata); /* check */
 	printf("arch = '%s'\n", pstr);
 
+#ifdef ARCH_X86
+	printf("ARCH_X86 is defined.\n");
 
-	pstr = get_x86_std_cpu_vendor(pdata);
-	printf("cpu vendor = '%s'\n", pstr);
+	cpuidflag = x86_check_cpuid_flag();
+	printf("cpuid flag = %x\n", cpuidflag);
+	if (cpuidflag == 0)
+		exit(EXIT_SUCCESS);
 
-	pstr = get_x86_cpu_name();
-	printf("cpu name = '%s'\n", pstr);
+	x86_get_cpuid_data(&x86cc);
 
-	cputype = get_x86_cpu_type();
+	printf("cpu vendor = '%s'\n", x86cc.vendor);
 
-	ui = (unsigned int) ((cputype & MASK_X86_CPU_FAMILY) >> 8);
-	printf("family = %d\n", ui);
 
-	if (ui == 15) {
-		ui = (unsigned int) ((cputype & MASK_X86_CPU_EXTFAM) >> 20);
-		printf("extended family = %d\n", ui);
+	pstr = x86_get_std_cpu_vendor(pdata, x86cc.vendor);
+	printf("standard cpu vendor = '%s'\n", pstr);
+
+
+	if (x86cc.cpuname != NULL)
+		printf("cpu name = '%s'\n", x86cc.cpuname);
+
+
+	if (x86cc.family != 15) {
+		printf("family = %d\n", x86cc.family);
+	} else {
+		printf("extended family = %d\n", x86cc.extfam);
 	}
 
-	ui = (unsigned int) ((cputype & MASK_X86_CPU_MODEL) >> 4);
-	printf("model = %d\n", ui);
+	printf("model = %d\n", x86cc.model);
 
 
+#else
+	printf("Arch not supported.\n");
+#endif
 	prsdata_destroy(pdata);
 
 

@@ -37,15 +37,24 @@
 #ifndef _DETECT_CPU_ASM_H_
 #define _DETECT_CPU_ASM_H_
 
+#include <inttypes.h>
 #include "cpu_arch_def.h"
 
 
 #ifdef ARCH_X86
+
 /* declare X86 assembly functions */
-extern char	*get_x86_cpu_vendor(void);
-extern int	 get_x86_cpu_type(void);
-extern char	*get_x86_cpu_name(void);
-#endif
+extern uint32_t	 x86_check_cpuid_flag(void);
+extern void	 x86_exec_cpuid(uint32_t);
+
+/* declare X86 assembly variables */
+extern uint32_t	x86_cpu_reg_eax;
+extern uint32_t	x86_cpu_reg_ebx;
+extern uint32_t	x86_cpu_reg_ecx;
+extern uint32_t	x86_cpu_reg_edx;
+
+
+#endif /* ARCH_X86 */
 
 #endif /* _DETECT_CPU_ASM_H_ */
 

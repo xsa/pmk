@@ -27,7 +27,7 @@ config:
 comp: config comp_test.o
 	$(CC) -o comp_test $(LDFLAGS) comp_test.o
 
-cpuid:
+cpuid: ../detect_cpu_asm.o
 	$(AS) -o detect_cpu_asm.o ../detect_cpu_asm.s
 	$(CC) $(CFLAGS) -c cpuid_test.c
 	$(CC) -o cpuid_test detect_cpu_asm.o cpuid_test.o
