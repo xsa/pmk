@@ -61,4 +61,9 @@ ADD_CPU_FAMILY {
 	LIST = ("hp300","mac68k","mvme68k")
 }
 
+ADD_CPU_FAMILY {
+	NAME = "vax"
+	LIST = ("vax")
+}
+
 
