@@ -4,7 +4,7 @@
 # set target file
 SETTINGS {
 	LANG="C"
-	TARGET=("compat/compat.h.in","Makefile.pmk")
+	TARGET=("compat/compat.h.in","Makefile.pmk","tests/Makefile.pmk")
 }
 
 SWITCHES {
@@ -37,18 +37,27 @@ IF(!sw_usermode) {
 	}
 }
 
-# checking strlcpy in string.h
-CHECK_HEADER(function_strlcpy) {
-	REQUIRED = FALSE
-	NAME = "string.h"
-	FUNCTION = "strlcpy"
+CHECK_BINARY(binary_cc) {
+	NAME = "cc"
+	VARIABLE = "CC"
 }
 
-# checking strlcat in string.h
-CHECK_HEADER(function_strlcat) {
+CHECK_BINARY(binary_cpp) {
+	NAME = "cpp"
+	VARIABLE = "CPP"
+}
+
+CHECK_BINARY(binary_as) {
+	NAME = "as"
+	VARIABLE = "AS"
+}
+
+
+# checking strlcpy() and strlcat() in string.h
+CHECK_HEADER(header_string_h) {
 	REQUIRED = FALSE
 	NAME = "string.h"
-	FUNCTION = "strlcat"
+	FUNCTION = ("strlcpy","strlcat")
 }
 
 # check _Bool type
@@ -88,5 +97,12 @@ CHECK_HEADER(function_mkstemps) {
 	REQUIRED = FALSE
 	NAME = "unistd.h"
 	FUNCTION = "mkstemps"
+}
+
+CHECK_LIB(library_gen) {
+	REQUIRED = FALSE
+	NAME = "lgen"
+	FUNCTION = "dirname"
+	LIBS = "LGEN_FLAGS"
 }
 
