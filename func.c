@@ -1447,9 +1447,14 @@ bool pmk_set_parameter(pmkcmd *cmd, prsopt *popt, pmkdata *pgd) {
 					/* set shared lib flags */
 					pld = check_lang_comp(pstr);
 					if (pld != NULL) {
+						/* set shared lib compiler flags */
 						pcell = comp_get(cdata, cinfo.c_id);
-						pmk_log("\t\tSetting %s to '%s'\n", pld->slflg, pcell->slflags);
-						hash_update_dup(pgd->htab, pld->slflg, pcell->slflags); /* XXX check */
+						pmk_log("\t\tSetting %s to '%s'\n", pld->slflg, pcell->slcflags);
+						hash_update_dup(pgd->htab, pld->slflg, pcell->slcflags); /* XXX check */
+
+						/* set shared lib linking flags */
+						pmk_log("\t\tSetting %s to '%s'\n", SL_LDFLAG_VARNAME, pcell->slldflags);
+						hash_update_dup(pgd->htab, SL_LDFLAG_VARNAME, pcell->slldflags); /* XXX check */
 					} else {
 						errorf("unable to set shared library compiler flags (%s).\n", pld->slflg);
 						return(false);

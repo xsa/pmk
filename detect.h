@@ -61,13 +61,6 @@
 #define DEF_VERSION	"#define CC_V\t%s"
 #define DEF_NOVERSION	"#undef CC_V"
 
-/* shared libs compiler flags */
-
-#define SCF_GNU		"-fPIC"
-#define SCF_SYSV	"-Kpic"
-#define SCF_HP		"+Z"
-
-
 /* header of test code */
 #define COMP_TEST_HEADER \
 	"#include <stdio.h>\n\n"
@@ -107,7 +100,8 @@ typedef struct {
 		*descr,
 		*c_macro,
 		*v_macro,
-		*slflags;
+		*slcflags,
+		*slldflags;
 } comp_cell;
 
 typedef struct {
