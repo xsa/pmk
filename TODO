@@ -34,15 +34,21 @@ pmk:
 			- support for LDFLAGS (misc linker options) ?
 			- support for CPPFLAGS (misc linker options) ?
 			- VPATH ?
-	-	cache ? (hash table with binary location, ...)
-	-	more C++ support !
-	-	verify in CHECK_BINARY that program has executable right ?
-	-	convert gdata.labl to pmk objects ?
-	-	checks hash_add() in autoconf.c (void func => bool func)
+	-.	cache ? (hash table with binary location, ...)
+	-.	more C++ support !
+	-.	verify in CHECK_BINARY that program has executable right ?
+	-.	convert gdata.labl to pmk objects ?
+	-.	checks hash_add() in autoconf.c (void func => bool func)
 
 
 pmksetup:
 -----------------------------------------------------------------------
+	!	set SCFLAGS (cc flags for Position Independant Code)
+			gcc => -fPIC
+			solaris cc & intel cc => -KPIC
+			SCO => -Kpic
+			sunos => -PIC
+			hpux => +Z
 	!	clean temporary files on error
 	-	missing checks :
 xsa			+ ECHO_N, ECHO_C, ECHO_T in a specific proc for autoconf variables.
