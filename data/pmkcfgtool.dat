@@ -20,9 +20,6 @@
 ADD_CFGTOOL {
 	NAME = "gtk+"
 	BINARY = "gtk-config"
-#	VERSION = ""
-#	CFLAGS = ""
-#	LIBS = ""
 }
 
 ADD_CFGTOOL {
@@ -47,5 +44,11 @@ ADD_CFGTOOL {
 	NAME = "orbit-server"
 	BINARY = "orbit-config"
 	MODULE = "server"
+}
+
+ADD_CFGTOOL {
+	NAME = "php"
+	BINARY = "php-config"
+	CFLAGS = "--includes"
 }
 
