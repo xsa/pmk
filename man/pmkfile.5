@@ -13,7 +13,8 @@
 
 .Sh DESCRIPTION
 .Nm
-is a file containing specifications that help configuring a package build on a given platform.
+is a file containing specifications that help configuring a package build
+on a given platform.
 
 .Sh DATA TYPES
 .Nm
@@ -39,7 +40,8 @@ Examples :
 .Ed
 
 .It Cm quoted
-This means quoted string which can contain a set of characters delimited by quotation marks.
+This means quoted string which can contain a set of characters delimited
+by quotation marks.
 .Pp
 Examples :
 .Bd -literal -offset -indent
@@ -49,8 +51,10 @@ Examples :
 .Ed
 
 .It Cm list
-It is one or more of the previous types between brackets. Multiple objects are separated with a comma.
-Blanks are currently not allowed beside commas, this means that you can find them only in a quoted string of the list.
+It is one or more of the previous types between brackets.
+Multiple objects are separated with a comma.
+Blanks are currently not allowed beside commas, this means that you can
+find them only in a quoted string of the list.
 .Pp
 Examples :
 .Bd -literal -offset -indent
@@ -71,7 +75,8 @@ A command has the following format (? character means optional field) :
  }
 .Ed
 .Pp
-The command and label names can be assimilated to the 'word' type (see data types).
+The command and label names can be assimilated to the 'word' type (see
+data types).
 .Pp
 The body can contain comment(s) and definition line(s).
 A commented line start with a '#' character like the following :
@@ -86,7 +91,8 @@ A definition line has the following format :
 .Pp
 The key name is of identifier type.
 .Pp
-The key value type can be 'bool', 'quoted' or 'list'. The right type will depend on the key name (see further).
+The key value type can be 'bool', 'quoted' or 'list'.
+The right type will depend on the key name (see further).
 .Pp
 Example :
 .Bd -literal -offset -indent
@@ -163,10 +169,12 @@ All these commands need a label.
 They all can have the following optional arguments :
 .Bl -tag -width Ds
 .It Cm REQUIRED
-Specify if this test is required to achieve the configuration. Type is 'bool'.
+Specify if this test is required to achieve the configuration.
+Type is 'bool'.
 If not specified it is TRUE by default.
 .It Cm DEPEND
-Specify check dependencies. Type is 'list'. A dependency is a label or a switch name.
+Specify check dependencies. Type is 'list'.
+A dependency is a label or a switch name.
 The value of each dependencie can be negated by adding a leading '!' sign.
 If at least one of the dependencies is false then the check will be disabled.
 .Pp
@@ -265,7 +273,8 @@ VALUE : type is 'quoted', value to check with the variable, optional.
 .Sh CONDITIONAL COMMANDS
 .Bl -tag -width Ds
 .It Cm IF(expression)
-It contains other commands that will be executed only if the given expression is true.
+It contains other commands that will be executed only if the given
+expression is true.
 .Pp
 Arguments :
 .Pp
@@ -278,7 +287,8 @@ IF(header_gtk) {
 }
 .Ed
 .It Cm ELSE(expression)
-It contains other commands that will be executed only if the given expression is false.
+It contains other commands that will be executed only if the given
+expression is false.
 .Pp
 Arguments :
 .Pp
