@@ -3,6 +3,7 @@
  * added DEFS usage in pmkfile.5.
  * updated pmkfile.
  * improved pmkcfg.sh to provide full path in check_binary().
+ * updated pmk.conf.5 to reflect latest changes.
 
 23 Dec 2004 mipsator
  * fixed use of the assembler to comply with SunOS.
