@@ -265,17 +265,35 @@ bool pmk_switches(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 	hkeys	*phk;
 	int	 i,
 		 n = 0;
+	pmkobj	*po;
 
 	pmk_log("\n* Parsing switches\n");
 
 	phk = hash_keys(ht);
 
 	for(i = 0 ; i < phk->nkey ; i++) {
-		value = po_get_str(hash_get(ht, phk->keys[i]));
 		if (hash_get(gdata->labl, phk->keys[i]) == NULL) {
-			hash_add(gdata->labl, phk->keys[i], value);
-			pmk_log("\tAdded '%s' switch.\n", phk->keys[i]);
-			n++;
+			po = hash_get(ht, phk->keys[i]);
+			switch(po_get_type(po)) {
+				case PO_BOOL :
+					value = bool_to_str(po_get_bool(po));
+					break;
+				case PO_STRING :
+					value = po_get_str(po);
+					break;
+				default :
+					errorf("bad type for switch '%s'.", phk->keys[i]);
+					return(false);
+					break;
+			}
+
+			if (hash_add(gdata->labl, phk->keys[i], value) != HASH_ADD_FAIL) {
+				pmk_log("\tAdded '%s' switch.\n", phk->keys[i]);
+				n++;
+			} else {
+				errorf("hash add failed.");
+				return(false);
+			}
 		} else {
 			pmk_log("\tSkipped '%s' switch (overriden).\n", phk->keys[i]);
 		}

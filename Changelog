@@ -1,6 +1,7 @@
 26 Sep 2003 mipsator
  * added support to negate labels in conditions like DEPEND or IF.
  * updated pmkfile.5 to sync with latest changes.
+ * fixed pmk_switches() for use of bool type.
 
 25 Sep 2003 mipsator
  * added prs_get_line(), parse_node(), parse_command() and parse_line() to
