@@ -1366,7 +1366,7 @@ bool pmk_set_variable(pmkcmd *cmd, prsopt *popt, pmkdata *pgd) {
 					pmk_log("\tdefined");
 					break;
 
-				case HASH_ADD_:
+				case HASH_ADD_UPDT:
 					pmk_log("\tredefined");
 					break;
 
