@@ -3,7 +3,6 @@
 CC=		@CC@
 CPP=		@CPP@
 AS=		@AS@
-DEBUG?=		-g
 
 # On some platforms install is not BSD compatible
 # so we use our own install program.
@@ -43,9 +42,14 @@ USERMODE=	@USERMODE@
 #DBGFLAGS=	-DPMKSCAN_DEBUG
 #DBGFLAGS=	-DPMKSETUP_DEBUG
 #DBGFLAGS=	-DPMK_DEBUG -DPMKSCAN_DEBUG -DPMKSETUP_DEBUG
+#DEBUG=		-g
 
-PMKCFLAGS= $(WARN) $(DBGFLAGS) $(CFGFLAGS) $(USERMODE) $(CFLAGS) \
+
+CFLAGS=		@CFLAGS@ $(WARN) $(DBGFLAGS) $(CFGFLAGS) \
+		$(USERMODE) $(ENV_CFLAGS) \
 		-DDATADIR=\"$(DATADIR)\"
+
+LDFLAGS=	@LDFLAGS@
 
 MKTARGET=	@MKTARGET@
 
@@ -81,7 +85,7 @@ PC_OBJS=	cfgtool.o common.o compat.o dynarray.o hash.o parse.o \
 
 
 .c.o:
-	$(CC) $(PMKCFLAGS) -o $@ -c $<
+	$(CC) $(CFLAGS) -o $@ -c $<
 
 .s.o:
 	$(CPP) $< | sed '/^#/d' > tmp_asm.s
@@ -191,8 +195,9 @@ clean: $(PREMAKE)-clean $(SETUP)-clean $(SCAN)-clean $(INST)-clean \
 		$(PKGCFG)-clean
 	rm -f *.core
 
-full-clean: clean
+dist-clean: clean
 	rm -f compat/compat.h Makefile
 
+full-clean: dist-clean
 fclean: full-clean
 
