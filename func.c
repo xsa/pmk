@@ -277,8 +277,10 @@ bool pmk_check_binary(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 		return(false);
 	}
 
+	/* check if a variable name is given */
 	varname = po_get_str(hash_get(ht, "VARIABLE"));
 	if (varname == NULL) {
+		/* if not then use default naming scheme */
 		varname = str_to_def(filename);
 	}
 
@@ -309,10 +311,13 @@ bool pmk_check_binary(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 		} else {
 			/* define for template */
 			record_def(pgd->htab, filename, false);
+
+			/* set path as empty for the key given by varname */
 			if (hash_update_dup(pgd->htab, varname, "") == HASH_ADD_FAIL) {
 				errorf("hash error.");
 				return(false);
 			}
+
 			label_set(pgd->labl, cmd->label, false);
 			return(true);
 		}
@@ -321,6 +326,8 @@ bool pmk_check_binary(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 		/* define for template */
 		record_def(pgd->htab, filename, true);
 		record_val(pgd->htab, filename, "");
+
+		/* recording path of config tool under the key given by varname */
 		if (hash_update_dup(pgd->htab, varname, binpath) == HASH_ADD_FAIL) {
 			errorf("hash error.");
 			return(false);
@@ -407,7 +414,11 @@ bool pmk_check_header(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
         			return(false);
                         }
 		}
+	} else {
+		/* use default variable of the used language */
+		cflags = pld->cflg;
 	}
+	pmk_log("\tStore compiler flags in '%s'.\n", cflags);
 
 	/* use each element of INC_PATH with -I */
 	pstr = (char *) hash_get(pgd->htab, PMKCONF_PATH_INC);
@@ -466,19 +477,10 @@ bool pmk_check_header(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 		record_val(pgd->htab, target, "");
 		label_set(pgd->labl, cmd->label, true);
 
-		/* check for alternative variable for CFLAGS */
-		if (cflags != NULL) {
-			/* put result in special CFLAGS variable */
-			if (single_append(pgd->htab, cflags, strdup(inc_path)) == false) {
-				errorf("failed to append '%s' in '%s'.", inc_path, cflags);
-				return(false);
-			}
-		} else {
-			/* put result in CFLAGS */
-			if (single_append(pgd->htab, "CFLAGS", strdup(inc_path)) == false) {
-				errorf("failed to append '%s' in CFLAGS.", inc_path);
-				return(false);
-			}
+		/* put result in CFLAGS, CXXFLAGS or alternative variable */
+		if (single_append(pgd->htab, cflags, strdup(inc_path)) == false) {
+			errorf("failed to append '%s' in '%s'.", inc_path, cflags);
+			return(false);
 		}
 
 		rval = true;
@@ -563,18 +565,6 @@ bool pmk_check_lib(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 		}
 	}
 
-	/* check for alternative variable for LIBS */
-	libs = po_get_str(hash_get(ht, "LIBS"));
-	if (libs != NULL) {
-		/* init alternative variable */
-                if (hash_get(pgd->htab, libs) == NULL) {
-                        if (hash_update_dup(pgd->htab, libs, "") == HASH_ADD_FAIL) {
-        			errorf("hash error.");
-        			return(false);
-                        }
-		}
-	}
-
 	/* get the language used */
 	pld = get_lang(ht, pgd);
 	if (pld == NULL) {
@@ -591,8 +581,24 @@ bool pmk_check_lib(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 		pmk_log("\tUse %s language with %s compiler.\n", pld->name, pld->comp);
 	}
 
+	/* check for alternative variable for LIBS */
+	libs = po_get_str(hash_get(ht, "LIBS"));
+	if (libs != NULL) {
+		/* init alternative variable */
+                if (hash_get(pgd->htab, libs) == NULL) {
+                        if (hash_update_dup(pgd->htab, libs, "") == HASH_ADD_FAIL) {
+        			errorf("hash error.");
+        			return(false);
+                        }
+		}
+	} else {
+		/* use default library variable */
+		libs = "LIBS"; /* XXX TODO use a define */
+	}
+	pmk_log("\tStore library flags in '%s'.\n", libs);
+
 	/* get actual content of LIBS, no need to check as it is initialised */
-	main_libs = hash_get(pgd->htab, "LIBS");
+	main_libs = hash_get(pgd->htab, "LIBS"); /* XXX TODO use a define */
 
 	tfp = tmps_open(TEST_FILE_NAME, "w", ftmp, sizeof(ftmp), strlen(C_FILE_EXT));
 	if (tfp != NULL) {
@@ -626,19 +632,10 @@ bool pmk_check_lib(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 
 		snprintf(lib_buf, sizeof(lib_buf), "-l%s", libname);
 
-		/* check for alternative variable for LIBS */
-		if (libs != NULL) {
-			/* put result in special LIBS variable */
-			if (single_append(pgd->htab, libs, strdup(lib_buf)) == false) {
-				errorf("failed to append '%s' in '%s'.", lib_buf, libs);
-				return(false);
-			}
-		} else {
-			/* put result in LIBS */
-			if (single_append(pgd->htab, "LIBS", strdup(lib_buf)) == false) {
-				errorf("failed to append '%s' in LIBS.", lib_buf);
-				return(false);
-			}
+		/* put result in LIBS or alternative variable */
+		if (single_append(pgd->htab, libs, strdup(lib_buf)) == false) {
+			errorf("failed to append '%s' in '%s'.", lib_buf, libs);
+			return(false);
 		}
 
 		rval = true;
@@ -691,6 +688,7 @@ bool pmk_check_config(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 			*libs,
 			*opt;
 	cfgtcell	*pcc = NULL;
+	lgdata		*pld;
 
 	pmk_log("\n* Checking with config tool [%s]\n", cmd->label);
 	required = require_check(ht);
@@ -701,8 +699,10 @@ bool pmk_check_config(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 		return(false);
 	}
 
+	/* check if a variable name is given */
 	varname = po_get_str(hash_get(ht, "VARIABLE"));
 	if (varname == NULL) {
+		/* if not then use default naming scheme */
 		varname = str_to_def(cfgtool);
 	}
 
@@ -710,6 +710,13 @@ bool pmk_check_config(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 	if (bpath == NULL) {
 		errorf("%s not available.", PMKCONF_PATH_BIN);
 		return(false);
+	}
+
+	/* get the language used */
+	pld = get_lang(ht, pgd);
+	if (pld == NULL) {
+		pmk_log("\tSKIPPED, unknown language.\n");
+		return(invert_bool(required));
 	}
 
 	/* check for alternative variable for CFLAGS */
@@ -722,7 +729,11 @@ bool pmk_check_config(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
         			return(false);
                         }
 		}
+	} else {
+		/* use default variable of the used language */
+		cflags = pld->cflg;
 	}
+	pmk_log("\tStore compiler flags in '%s'.\n", cflags);
 
 	/* check for alternative variable for LIBS */
 	libs = po_get_str(hash_get(ht, "LIBS"));
@@ -734,7 +745,11 @@ bool pmk_check_config(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
         			return(false);
                         }
 		}
+	} else {
+		/* use default library variable */
+		libs = "LIBS"; /* XXX TODO use a define */
 	}
+	pmk_log("\tStore library flags in '%s'.\n", libs);
 
 	if (depend_check(ht, pgd) == false) {
 		pmk_log("\t%s\n", pgd->errmsg);
@@ -755,20 +770,27 @@ bool pmk_check_config(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 			return(false);
 		} else {
 			record_def(pgd->htab, cfgtool, false);
+
+			/* set path as empty for the key given by varname */
+			if (hash_update_dup(pgd->htab, varname, "") == HASH_ADD_FAIL) {
+				errorf("hash error.");
+				return(false);
+			}
+
 			label_set(pgd->labl, cmd->label, false);
 			return(true);
 		}
 	} else {
 		pmk_log("yes.\n");
-		/* recording path of config tool */
-		if (hash_update_dup(pgd->htab, cfgtool, cfgpath) == HASH_ADD_FAIL) {
+		/* recording path of config tool under the key given by varname */
+		if (hash_update_dup(pgd->htab, varname, cfgpath) == HASH_ADD_FAIL) {
 			errorf("hash error.");
 			return(false);
 		}
 	}
 
 	/* check if specific tool option exists */
-	pmk_log("\tUsing specific options : ");
+	pmk_log("\tUse specific options : ");
 	pcc = cfgtcell_get_cell(pgd->cfgt, cfgtool);
 	if (pcc != NULL) {
 		pmk_log("yes\n");
@@ -843,19 +865,10 @@ bool pmk_check_config(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 		}
 		pclose(rpipe);
 
-		/* check for alternative variable for CFLAGS */
-		if (cflags != NULL) {
-			/* put result in special CFLAGS variable */
-			if (single_append(pgd->htab, cflags, strdup(pipebuf)) == false) {
-				errorf("failed to append '%s' in '%s'.", pipebuf, cflags);
-				return(false);
-			}
-		} else {
-			/* put result in CFLAGS */
-			if (single_append(pgd->htab, "CFLAGS", strdup(pipebuf)) == false) {
-				errorf("failed to append '%s' in CFLAGS.", pipebuf);
-				return(false);
-			}
+		/* put result in CFLAGS, CXXFLAGS or alternative variable */
+		if (single_append(pgd->htab, cflags, strdup(pipebuf)) == false) {
+			errorf("failed to append '%s' in '%s'.", pipebuf, cflags);
+			return(false);
 		}
 	}
 
@@ -878,56 +891,25 @@ bool pmk_check_config(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 		}
 		pclose(rpipe);
 
-		/* check for alternative variable for LIBS */
-		if (libs != NULL) {
-			/* put result in special LIBS variable */
-			if (single_append(pgd->htab, libs, strdup(pipebuf)) == false) {
-				errorf("failed to append '%s' in '%s'.", pipebuf, libs);
-				return(false);
-			}
-		} else {
-			/* put result in LIBS */
-			if (single_append(pgd->htab, "LIBS", strdup(pipebuf)) == false) {
-				errorf("failed to append '%s' in LIBS.", pipebuf);
-				return(false);
-			}
+		/* put result in LIBS or alternative variable */
+		if (single_append(pgd->htab, libs, strdup(pipebuf)) == false) {
+			errorf("failed to append '%s' in '%s'.", pipebuf, libs);
+			return(false);
 		}
 	}
-
-	/* XXX LDFLAGS, CPPFLAGS ? */
 
 	return(true);
 }
 
-/* comment the following define to disable experimental pkgconfig support */
-#define EXPERIMENTAL_PKGCONFIG	1
-
-#ifndef EXPERIMENTAL_PKGCONFIG
-/*
-	special check with pkg-config utility
-
-	XXX could store pkg-config path to improve speed
-		(avoiding multiple checks for pkg-config path)
-
-*/
-#else
 /*
 	check pkg-config module using internal support
 */
-#endif
 
 bool pmk_check_pkg_config(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
-#ifndef EXPERIMENTAL_PKGCONFIG
-	FILE	*rpipe;
-#endif
 	bool	 required = true,
 		 rval;
 	char	*target,
-#ifndef EXPERIMENTAL_PKGCONFIG
-		 pipebuf[TMP_BUF_LEN],
-#else
 		*pipebuf,
-#endif
 		 pc_cmd[MAXPATHLEN],
 		 pc_buf[MAXPATHLEN],
 		*bpath,
@@ -935,16 +917,12 @@ bool pmk_check_pkg_config(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 		*libvers,
 		*cflags,
 		*libs;
-#ifdef EXPERIMENTAL_PKGCONFIG
+	lgdata	*pld;
 	pkgcell	*ppc;
 	pkgdata	*ppd;
-#endif
 
-#ifndef EXPERIMENTAL_PKGCONFIG
-	pmk_log("\n* Checking with pkg-config [%s]\n", cmd->label);
-#else
 	pmk_log("\n* Checking pkg-config module [%s]\n", cmd->label);
-#endif
+
 	required = require_check(ht);
 
 	target = po_get_str(hash_get(ht, "NAME"));
@@ -953,26 +931,6 @@ bool pmk_check_pkg_config(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 		return(false);
 	}
 
-#ifndef EXPERIMENTAL_PKGCONFIG
-	/* try to get pkg-config path from pmk.conf setting */
-	pc_path = hash_get(pgd->htab, PMKCONF_BIN_PKGCONFIG);
-
-	/* nothing in pmk.conf, hope it is obsolete
-		and look for it in the binary path */
-	if (pc_path == NULL) {
-		/* get binary path */
-		bpath = hash_get(pgd->htab, PMKCONF_PATH_BIN);
-		if (bpath == NULL) {
-		        errorf("%s not available.", PMKCONF_PATH_BIN);
-			return(false);
-		}
-
-		/* looking for it in the path */
-		if (get_file_path(PMKVAL_BIN_PKGCONFIG, bpath, pc_buf, sizeof(pc_buf)) == true) {
-			pc_path = pc_buf;
-		}
-	}
-#else
 	/* try to get pkg-config lib path from pmk.conf */
 	pc_path = hash_get(pgd->htab, PMKCONF_PC_PATH_LIB);
 	if (pc_path == NULL) {
@@ -981,7 +939,13 @@ bool pmk_check_pkg_config(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 		pmk_log("\t or pmk.conf need to be updated.\n");
 		return(false);
 	}
-#endif
+
+	/* get the language used */
+	pld = get_lang(ht, pgd);
+	if (pld == NULL) {
+		pmk_log("\tSKIPPED, unknown language.\n");
+		return(invert_bool(required));
+	}
 
 	/* check for alternative variable for CFLAGS */
 	cflags = po_get_str(hash_get(ht, "CFLAGS"));
@@ -993,7 +957,11 @@ bool pmk_check_pkg_config(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
         			return(false);
                         }
 		}
+	} else {
+		/* use default variable of the used language */
+		cflags = pld->cflg;
 	}
+	pmk_log("\tStore compiler flags in '%s'.\n", cflags);
 
 	/* check for alternative variable for LIBS */
 	libs = po_get_str(hash_get(ht, "LIBS"));
@@ -1005,7 +973,12 @@ bool pmk_check_pkg_config(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
         			return(false);
                         }
 		}
+	} else {
+		/* use default library variable */
+		libs = "LIBS"; /* XXX TODO use a define */
 	}
+	pmk_log("\tStore library flags in '%s'.\n", libs);
+
 
 	if (depend_check(ht, pgd) == false) {
 		pmk_log("\t%s\n", pgd->errmsg);
@@ -1018,22 +991,6 @@ bool pmk_check_pkg_config(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 		}
 	}
 
-#ifndef EXPERIMENTAL_PKGCONFIG
-	/* check availability of pkg-config */
-	pmk_log("\tFound pkg-config : ");
-	if (pc_path == NULL) {
-		pmk_log("no.\n");
-		if (required == true) {
-			return(false);
-		} else {
-			/* record_def(pgd->htab, target, false); XXX how to manage ? */
-			label_set(pgd->labl, cmd->label, false);
-			return(true);
-		}
-	} else {
-		pmk_log("yes.\n");
-	}
-#else
 	ppd = pkgdata_init();
 	if (ppd == NULL) {
 		errorf("cannot init pkgdata.");
@@ -1046,20 +1003,13 @@ bool pmk_check_pkg_config(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 		errorf("cannot collect packages data");
 		return(false);
 	}
-#endif
 
 	/* check if package exists */
 	pmk_log("\tFound package '%s' : ", target);
-#ifndef EXPERIMENTAL_PKGCONFIG
-	snprintf(pc_cmd, sizeof(pc_cmd), "%s --exists %s 2>/dev/null", pc_path, target);
-	if (system(pc_cmd) != 0) {
-#else
 	if (pkg_mod_exists(ppd, target) == false) { 
 		pkgdata_destroy(ppd);
-#endif
 		pmk_log("no.\n");
 
-#ifdef EXPERIMENTAL_PKGCONFIG
 		/* get binary path */
 		bpath = hash_get(pgd->htab, PMKCONF_PATH_BIN);
 		if (bpath == NULL) {
@@ -1085,7 +1035,7 @@ bool pmk_check_pkg_config(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 			/* call pmk_check_config with the config tool */
 			return(pmk_check_config(cmd, ht, pgd));
 		}
-#endif
+
 		if (required == true) {
 			return(false);
 		} else {
@@ -1100,31 +1050,15 @@ bool pmk_check_pkg_config(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 	libvers = po_get_str(hash_get(ht, "VERSION"));
 	if (libvers != NULL) {
 		/* if VERSION is provided then check it */
-#ifndef EXPERIMENTAL_PKGCONFIG
-		snprintf(pc_cmd, sizeof(pc_cmd), "%s --modversion %s 2>/dev/null", pc_path, target);
-
-		rpipe = popen(pc_cmd, "r");
-		if (rpipe == NULL) {
-#else
 		ppc = pkg_cell_add(ppd, target);
 		if (ppc == NULL) {
 			pkgdata_destroy(ppd);
-#endif
 			errorf("cannot get version.");
 			return(false);
 		} else {
 			pmk_log("\tFound version >= %s : ", libvers);
 	
-#ifndef EXPERIMENTAL_PKGCONFIG
-			if (get_line(rpipe, pipebuf, sizeof(pipebuf)) == false) {
-				errorf("cannot get version from '%s'.", pc_cmd);
-				pclose(rpipe);
-				return(false);
-			}
-			pclose(rpipe);
-#else
 			pipebuf = ppc->version;
-#endif
 			if (check_version(libvers, pipebuf) != true) {
 				/* version does not match */
 				pmk_log("no (%s).\n", pipebuf);
@@ -1135,9 +1069,9 @@ bool pmk_check_pkg_config(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 					label_set(pgd->labl, cmd->label, false);
 					rval = true;
 				}
-#ifdef EXPERIMENTAL_PKGCONFIG
+
 				pkgdata_destroy(ppd);
-#endif
+
 				return(rval);
 			} else {
 				pmk_log("yes (%s).\n", pipebuf);
@@ -1146,17 +1080,6 @@ bool pmk_check_pkg_config(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 	}
 
 	/* gather data */
-#ifndef EXPERIMENTAL_PKGCONFIG
-	snprintf(pc_cmd, sizeof(pc_cmd), "%s --cflags %s", pc_path, target);
-	rpipe = popen(pc_cmd, "r");
-	if (rpipe != NULL) {
-		if (get_line(rpipe, pipebuf, sizeof(pipebuf)) == false) {
-			errorf("cannot get CFLAGS.");
-			pclose(rpipe);
-			return(false);
-		}
-		pclose(rpipe);
-#else
 	if (pkg_recurse(ppd, target) == false) {
 		pkgdata_destroy(ppd);
 		errorf("failed on recurse !"); /* XXX TODO better message :) */
@@ -1170,84 +1093,28 @@ bool pmk_check_pkg_config(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 		errorf("cannot get CFLAGS.");
 		return(false);
 	} else {
-#endif
-
-		/* check for alternative variable for CFLAGS */
-		if (cflags != NULL) {
-			/* put result in special CFLAGS variable */
-#ifndef EXPERIMENTAL_PKGCONFIG
-			if (single_append(pgd->htab, cflags, strdup(pipebuf)) == false) {
-#else
-			if (single_append(pgd->htab, cflags, pipebuf) == false) {
-				pkgdata_destroy(ppd);
-#endif
-				errorf("failed to append '%s' in '%s'.", pipebuf, cflags);
-				return(false);
-			}
-		} else {
-			/* put result in CFLAGS */
-#ifndef EXPERIMENTAL_PKGCONFIG
-			if (single_append(pgd->htab, "CFLAGS", strdup(pipebuf)) == false) {
-#else
-			if (single_append(pgd->htab, "CFLAGS", pipebuf) == false) {
-				pkgdata_destroy(ppd);
-#endif
-				errorf("failed to append '%s' in CFLAGS.", pipebuf);
-				return(false);
-			}
-		}
-	}
-#ifndef EXPERIMENTAL_PKGCONFIG
-#else
-#endif
-
-#ifndef EXPERIMENTAL_PKGCONFIG
-	snprintf(pc_cmd, sizeof(pc_cmd), "%s --libs %s", pc_path, target);
-	rpipe = popen(pc_cmd, "r");
-	if (rpipe != NULL) {
-		if (get_line(rpipe, pipebuf, sizeof(pipebuf)) == false) {
-			errorf("cannot get LIBS.");
-			pclose(rpipe);
+		/* put result in CFLAGS, CXXFLAGS or alternative variable */
+		if (single_append(pgd->htab, cflags, pipebuf) == false) {
+			pkgdata_destroy(ppd);
+			errorf("failed to append '%s' in '%s'.", pipebuf, cflags);
 			return(false);
 		}
-		pclose(rpipe);
-#else
-	/* get cflags recursively */
+	}
+
+	/* get libs recursively */
 	pipebuf = pkg_get_libs(ppd);
 	if (pipebuf == NULL) {
 		pkgdata_destroy(ppd);
 		errorf("cannot get LIBS.");
 		return(false);
 	} else {
-#endif
-
-		/* check for alternative variable for LIBS */
-		if (libs != NULL) {
-			/* put result in special LIBS variable */
-#ifndef EXPERIMENTAL_PKGCONFIG
-			if (single_append(pgd->htab, libs, strdup(pipebuf)) == false) {
-#else
-			if (single_append(pgd->htab, libs, pipebuf) == false) {
-				pkgdata_destroy(ppd);
-#endif
-				errorf("failed to append '%s' in '%s'.", pipebuf, libs);
-				return(false);
-			}
-		} else {
-			/* put result in LIBS */
-#ifndef EXPERIMENTAL_PKGCONFIG
-			if (single_append(pgd->htab, "LIBS", strdup(pipebuf)) == false) {
-#else
-			if (single_append(pgd->htab, "LIBS", pipebuf) == false) {
-				pkgdata_destroy(ppd);
-#endif
-				errorf("failed to append '%s' in LIBS.", pipebuf);
-				return(false);
-			}
+		/* put result in LIBS or alternative variable */
+		if (single_append(pgd->htab, libs, pipebuf) == false) {
+			pkgdata_destroy(ppd);
+			errorf("failed to append '%s' in '%s'.", pipebuf, libs);
+			return(false);
 		}
 	}
-
-	/* XXX LDFLAGS, CPPFLAGS ? */
 
 	return(true);
 }

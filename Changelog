@@ -1,3 +1,8 @@
+11 Jan 2004 mipsator
+ * added more C++ support in some checks (handle CXXFLAGS when needed).
+ * improved some checks to be more verbose on used variables.
+ * removed a fix into check_config() that was wrong.
+
 # snapshot 0.7.10
 
 08 Jan 2004 mipsator
