@@ -33,13 +33,14 @@
  *
  */
 
+/* include it first as if it was <sys/types.h> - this will avoid errors */ 
+#include "compat/pmk_sys_types.h"
 
 #include <dirent.h>
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "compat/pmk_sys_types.h"
 #include "compat/pmk_stdbool.h"
 #include "compat/pmk_string.h"
 #include "common.h"

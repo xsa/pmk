@@ -35,6 +35,8 @@
  */
 
 #include <sys/stat.h>
+/* include it first as if it was <sys/types.h> - this will avoid errors */ 
+#include "compat/pmk_sys_types.h"
 #include <sys/utsname.h>
 
 #include <dirent.h>
@@ -43,7 +45,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "compat/pmk_sys_types.h"
 #include "compat/pmk_string.h"
 #include "compat/pmk_unistd.h"
 #include "common.h"
