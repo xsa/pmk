@@ -34,6 +34,10 @@
 #ifndef _PMK_PARSE_H_
 #define _PMK_PARSE_H_
 
+/*
+#define LIST_SUPPORT	1
+*/
+
 #define PMK_CHAR_COMMENT	'#'
 #define PMK_CHAR_COMMAND	'.'
 #define PMK_CHAR_COMMAND_START	'{'
@@ -72,9 +76,15 @@ prsdata	*prsdata_init(void);
 void	 prsdata_destroy(prsdata *);
 prscell	*prscell_init(void);
 void	 prscell_destroy(prscell *);
+#ifdef LIST_SUPPORT
+char	*parse_quoted(char *, pmkobj *, size_t);
+char	*parse_list(char *, pmkobj *, size_t);
+char	*parse_word(char *, pmkobj *, size_t);
+#else
 char	*parse_quoted(char *, char *, size_t);
 char	*parse_list(char *, char *, size_t);
 char	*parse_word(char *, char *, size_t);
+#endif
 char	*skip_blank(char *pstr);
 bool	 parse_cell(char *, prscell *);
 bool	 parse(FILE *, prsdata *);

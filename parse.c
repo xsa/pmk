@@ -137,7 +137,19 @@ void	prscell_destroy(prscell *pcell) {
 	return : new parsing cursor
 */
 
-char *parse_quoted(char *pstr, char *buffer, size_t size) {
+#ifdef LIST_SUPPORT
+char *parse_quoted(char *pstr, pmkobj *po, size_t size) {
+	char	*buffer,
+		*pbuf;
+
+	buffer = (char *) malloc(size);
+	if (buffer == NULL)
+		return(NULL);
+
+	pbuf = buffer;
+#else
+char *parse_quoted(char *pstr, char *pbuf, size_t size) {
+#endif
 	while ((*pstr != PMK_CHAR_QUOTE_END) && (*pstr != CHAR_EOS)) {
 		/* found escape character */
 		if (*pstr == PMK_CHAR_ESCAPE) {
@@ -151,11 +163,14 @@ char *parse_quoted(char *pstr, char *buffer, size_t size) {
 		}
 
 		if (size > 1) {
-			*buffer = *pstr;
+			*pbuf = *pstr;
 			pstr++;
-			buffer++;
+			pbuf++;
 			size--;
 		} else {
+#ifdef LIST_SUPPORT
+			free(buffer);
+#endif
 			strlcpy(parse_err, PRS_ERR_OVERFLOW, sizeof(parse_err));
 			return(NULL);
 		}
@@ -163,11 +178,19 @@ char *parse_quoted(char *pstr, char *buffer, size_t size) {
 
 	if (*pstr == PMK_CHAR_QUOTE_END) {
 		/* found end of quoted string */
-		*buffer = CHAR_EOS;
+		*pbuf = CHAR_EOS;
+#ifdef LIST_SUPPORT
+		/* XXX use strdup to gain memory ? */
+		po->type = PO_STRING;
+		po->data = buffer;
+#endif
 		pstr++;
 		return(pstr);
 	} else {
 		/* end of quoting not found */
+#ifdef LIST_SUPPORT
+		free(buffer);
+#endif
 		strlcpy(parse_err, "ending quote is missing.", sizeof(parse_err));
 		return(NULL);
 	}
@@ -185,57 +208,56 @@ char *parse_quoted(char *pstr, char *buffer, size_t size) {
 	NOTE: code is especially redundant as it will create pmk object later.
 */
 
+#ifdef LIST_SUPPORT
+char *parse_list(char *pstr, pmkobj *po, size_t size) {
+	char	*buffer,
+		*pbuf;
+	dynary	*pda;
+	pmkobj	*po;
+#else
 char *parse_list(char *pstr, char *buffer, size_t size) {
+#endif
+
 #ifdef DEBUG_PRS
 	char	*ptmp;
 #endif
 
+#ifdef LIST_SUPPORT
+	pda = da_init();
+#endif
+
 	while ((*pstr != PMK_CHAR_LIST_END) && (*pstr != CHAR_EOS)) {
 		/*
-		parse_blank(pstr);
+		pstr = skip_blank(pstr);
 		*/
 
 		switch (*pstr) {
 			case PMK_CHAR_QUOTE_START :
 				pstr++;
+#ifdef LIST_SUPPORT
+				po = (pmkobj *) malloc(sizeof(pmkobj));
+				pstr = parse_quoted(pstr, po, size);
+				if (pstr == NULL) {
+					da_destroy(pda);
+					/* XXX TODO err msg */
+					return(NULL);
+				}
+#else
 				pstr = parse_quoted(pstr, buffer, size);
+#endif
+
 #ifdef DEBUG_PRS
 				debugf("should add '%s' into dynary (quoted)", buffer);
 #endif
-				break;
 
-			case PMK_CHAR_LIST_SEP :
-				pstr++;
-#ifdef DEBUG_PRS
-				debugf("found separator", buffer);
-#endif
-				break;
-
-			default :
-#ifdef DEBUG_PRS
-				ptmp = buffer;
-#endif
-
-				while ((isalnum(*pstr) != 0) || (*pstr == '_')) {
-					if (size > 1) {
-						*buffer = *pstr;
-						pstr++;
-						buffer++;
-						size--;
-					} else {
-						strlcpy(parse_err, PRS_ERR_OVERFLOW, sizeof(parse_err));
-						return(NULL);
-					}
-
+#ifdef LIST_SUPPORT
+				if (da_push(pda, po) == false) {
+					po_free(po);
+					da_destroy(pda);
+					return(NULL);
 				}
-
-				*buffer = CHAR_EOS;
-#ifdef DEBUG_PRS
-				debugf("should add '%s' into dynary (simple).", ptmp);
 #endif
-
 				switch (*pstr) {
-					case PMK_CHAR_QUOTE_START :
 					case PMK_CHAR_LIST_SEP :
 					case PMK_CHAR_LIST_END :
 					case CHAR_EOS :
@@ -243,6 +265,93 @@ char *parse_list(char *pstr, char *buffer, size_t size) {
 						break;
 
 					default :
+#ifdef LIST_SUPPORT
+						da_destroy(pda);
+#endif
+						strlcpy(parse_err, PRS_ERR_SYNTAX, sizeof(parse_err));
+						return(NULL);
+						break;
+				}
+				break;
+
+			case PMK_CHAR_LIST_SEP :
+				pstr++;
+#ifdef DEBUG_PRS
+				debugf("found separator");
+#endif
+				break;
+
+			default :
+#ifdef LIST_SUPPORT
+				buffer = (char *) malloc(size);
+				if (buffer == NULL) {
+					return(NULL);
+				} else {
+					pbuf = buffer;
+				}
+#endif
+
+#ifdef DEBUG_PRS
+				ptmp = buffer;
+#endif
+
+				while ((isalnum(*pstr) != 0) || (*pstr == '_')) {
+					if (size > 1) {
+#ifdef LIST_SUPPORT
+						*pbuf = *pstr;
+						pbuf++;
+#else
+						*buffer = *pstr;
+						buffer++;
+#endif
+						pstr++;
+						size--;
+					} else {
+#ifdef LIST_SUPPORT
+						da_destroy(pda);
+						free(buffer);
+#endif
+						strlcpy(parse_err, PRS_ERR_OVERFLOW, sizeof(parse_err));
+						return(NULL);
+					}
+
+				}
+
+#ifdef LIST_SUPPORT
+				*pbuf = CHAR_EOS;
+#else
+				*buffer = CHAR_EOS;
+#endif
+
+#ifdef DEBUG_PRS
+				debugf("should add '%s' into dynary (simple).", ptmp);
+#endif
+#ifdef LIST_SUPPORT
+
+				/* XXX check if pbuf == buffer
+					like for example when having ",)"
+				*/
+
+				po = po_mk_string(buffer);
+				free(buffer);
+
+				if (da_push(pda, po) == false) {
+					da_destroy(pda);
+					return(NULL);
+				}
+#endif
+
+				switch (*pstr) {
+					case PMK_CHAR_LIST_SEP :
+					case PMK_CHAR_LIST_END :
+					case CHAR_EOS :
+						/* all ok */
+						break;
+
+					default :
+#ifdef LIST_SUPPORT
+						da_destroy(pda);
+#endif
 						strlcpy(parse_err, PRS_ERR_SYNTAX, sizeof(parse_err));
 						return(NULL);
 						break;
@@ -251,13 +360,24 @@ char *parse_list(char *pstr, char *buffer, size_t size) {
 		}
 	}
 
+#ifdef LIST_SUPPORT
+	/* XXX this test should be useless */
+#endif
 	if (*pstr == PMK_CHAR_LIST_END) {
 		/* found end of list */
+#ifdef LIST_SUPPORT
+		po->type = PO_LIST;
+		po->data = pda;
+#else
 		*buffer = CHAR_EOS;
 		pstr++;
+#endif
 		return(pstr);
 	} else {
 		/* end of list not found */
+#ifdef LIST_SUPPORT
+		da_destroy(pda);
+#endif
 		strlcpy(parse_err, "end of list not found.", sizeof(parse_err));
 		return(NULL);
 	}
@@ -273,20 +393,37 @@ char *parse_list(char *pstr, char *buffer, size_t size) {
 	return : new parsing cursor
 */
 
+#ifdef LIST_SUPPORT
+char *parse_word(char *pstr, pmkobj *po, size_t size) {
+	char	*buffer;
+#else
 char *parse_word(char *pstr, char *buffer, size_t size) {
+#endif
 	char	*rptr;
+
+#ifdef LIST_SUPPORT
+	po->type = PO_NULL;
+#endif
 
 	switch (*pstr) {
 		/* found a quoted string */
 		case PMK_CHAR_QUOTE_START :
 			pstr++;
+#ifdef LIST_SUPPORT
+			rptr = parse_quoted(pstr, po, size);
+#else
 			rptr = parse_quoted(pstr, buffer, size);
+#endif
 			break;
 
 		/* found a list */
 		case PMK_CHAR_LIST_START :
 			pstr++;
+#ifdef LIST_SUPPORT
+			rptr = parse_list(pstr, po, size);
+#else
 			rptr = parse_list(pstr, buffer, size);
+#endif
 			break;
 
 /* XXX for future support of variables
@@ -295,6 +432,14 @@ char *parse_word(char *pstr, char *buffer, size_t size) {
 			break;
 */
 		default :
+#ifdef LIST_SUPPORT
+			buffer = (char *) malloc(size);
+			if (buffer == NULL)
+				return(NULL);
+
+			po->type = PO_STRING;
+			po->data = buffer;
+#endif
 			while ((isalnum(*pstr) != 0) || (*pstr == '_')) {
 				if (size > 1) {
 					*buffer = *pstr;
@@ -302,10 +447,14 @@ char *parse_word(char *pstr, char *buffer, size_t size) {
 					buffer++;
 					size--;
 				} else {
+#ifdef LIST_SUPPORT
+					free(buffer);
+#endif
 					strlcpy(parse_err, PRS_ERR_OVERFLOW, sizeof(parse_err));
 					return(NULL);
 				}
 			}
+
 			*buffer = CHAR_EOS;
 			rptr = pstr;
 			break;
