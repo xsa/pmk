@@ -234,7 +234,7 @@ void install(char *from_name, char *to_name, u_long fset, u_int flags) {
 			 to_sb;
 	struct utimbuf	 utb;
 	int		 devnull,
-			 from_fd,
+			 from_fd = 0,
 			 to_fd,
 			 serrno,
 			 files_match = 0;
