@@ -358,7 +358,7 @@ int get_env_vars(htable *ht) {
 	char		*bin_path;
 
 	if (uname(&utsname) == -1) {
-		errorf("uname.");
+		errorf("uname : %s.", strerror(errno));
 		return(-1);
 	}
 
