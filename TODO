@@ -29,15 +29,13 @@ mreindl	~.	latex version of tutorial
 	+	update README and INSTALL
 	~	new samples:
 			-	prog c++
-			+	lib c++
 
 
 pmk:
 -----------------------------------------------------------------------
+	-	DEFS support for CHECK_CONFIG and CHECK_PKG_CONFIG
+	-	improve and fix redundancy of record_def() and record_val()
 	-	check if ~/.pmk.conf is available
-	+	linking flags for shared libraries (starting with our
-		supported platforms)
-	+	test of shared lib support
 	~.	compatibility with autoconf (progressing) :
 			~ support for DEFS (-D options to pass to the compiler)
 			- support for LDFLAGS (misc linker options) ?
@@ -50,9 +48,7 @@ pmk:
 
 pmksetup:
 -----------------------------------------------------------------------
-mips	+	rewrite engine for better flexibility.
 	-	create .bak or .old of pmk.conf
-	+	options to update or remove a variable of pmk.conf
 	-	option to append to variable of pmk.conf
 	!	clean temporary files on error
 	-	missing checks :

@@ -380,7 +380,10 @@ bool pmk_check_header(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 		*ccpath,
 		*cflags,
 		*pstr;
-	int	 r;
+	dynary	*da;
+	int	 i,
+		 n,
+		 r;
 	lgdata	*pld;
 
 	pmk_log("\n* Checking header [%s]\n", cmd->label);
@@ -526,6 +529,18 @@ bool pmk_check_header(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 		}
 	}
 
+	/* process additional defines */
+	da = po_get_list(hash_get(ht, "DEFS"));
+	if (da != NULL) {
+		n = da_usize(da);
+		for (i = 0 ; i < n ; i++) {
+			pstr = da_idx(da, i);
+			pmk_log("\tProcessing additional define '%s': ", pstr);
+			record_def(pgd->htab, pstr, rval);
+			pmk_log("ok.\n");
+		}
+	}
+
 	if (unlink(ftmp) == -1) {
 		/* cannot remove temporary file */
 		errorf("Can not remove %s", ftmp);
@@ -558,8 +573,12 @@ bool pmk_check_lib(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 		*libname,
 		*libfunc,
 		*target,
-		*libs;
-	int	 r;
+		*libs,
+		*pstr;
+	dynary	*da;
+	int	 i,
+		 n,
+		 r;
 	lgdata	*pld;
 
 	pmk_log("\n* Checking library [%s]\n", cmd->label);
@@ -678,6 +697,18 @@ bool pmk_check_lib(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 			record_def(pgd->htab, target, false);
 			label_set(pgd->labl, cmd->label, false);
 			rval = true;
+		}
+	}
+
+	/* process additional defines */
+	da = po_get_list(hash_get(ht, "DEFS"));
+	if (da != NULL) {
+		n = da_usize(da);
+		for (i = 0 ; i < n ; i++) {
+			pstr = da_idx(da, i);
+			pmk_log("\tProcessing additional define '%s': ", pstr);
+			record_def(pgd->htab, pstr, rval);
+			pmk_log("ok.\n");
 		}
 	}
 
@@ -1158,8 +1189,12 @@ bool pmk_check_type(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 		*type,
 		*header,
 		*member,
-		*ccpath;
-	int	 r;
+		*ccpath,
+		*pstr;
+	dynary	*da;
+	int	 i,
+		 n,
+		 r;
 	lgdata	*pld;
 
 	pmk_log("\n* Checking type [%s]\n", cmd->label);
@@ -1257,6 +1292,18 @@ bool pmk_check_type(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 		}
 	}
 
+	/* process additional defines */
+	da = po_get_list(hash_get(ht, "DEFS"));
+	if (da != NULL) {
+		n = da_usize(da);
+		for (i = 0 ; i < n ; i++) {
+			pstr = da_idx(da, i);
+			pmk_log("\tProcessing additional define '%s': ", pstr);
+			record_def(pgd->htab, pstr, rval);
+			pmk_log("ok.\n");
+		}
+	}
+
 	if (unlink(ftmp) == -1) {
 		/* cannot remove temporary file */
 		errorf("Can not remove %s", ftmp);
@@ -1277,7 +1324,11 @@ bool pmk_check_variable(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 		 rval = false;
 	char	*var,
 		*value,
-		*varval;
+		*varval,
+		*pstr;
+	dynary	*da;
+	int	 i,
+		 n;
 
 	pmk_log("\n* Checking variable [%s]\n", cmd->label);
 
@@ -1340,6 +1391,18 @@ bool pmk_check_variable(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 			/* define for template */
 			label_set(pgd->labl, cmd->label, false);
 			rval = true;
+		}
+	}
+
+	/* process additional defines */
+	da = po_get_list(hash_get(ht, "DEFS"));
+	if (da != NULL) {
+		n = da_usize(da);
+		for (i = 0 ; i < n ; i++) {
+			pstr = da_idx(da, i);
+			pmk_log("\tProcessing additional define '%s': ", pstr);
+			record_def(pgd->htab, pstr, rval);
+			pmk_log("ok.\n");
 		}
 	}
 
