@@ -522,7 +522,7 @@ SETTINGS {
 
 In this example we detect the C compiler but we could have detected
 the C++ compiler by using DETECT=("CXX"). You can also detect both
-compilers with DETECT=("CC","CXX"). 
+compilers with DETECT=("CC","CXX").
 
 The output should look almost like the following:
 

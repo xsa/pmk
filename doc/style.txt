@@ -83,7 +83,7 @@ arguments and open brace as the following :
 
 int first_proc(char *arg_one, int arg_two) {
 
-Variables declared in functions respect the same rules defined in 
+Variables declared in functions respect the same rules defined in
 the fifth section.
 
 8) Error messages
