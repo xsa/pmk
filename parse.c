@@ -415,7 +415,7 @@ bool prs_fill_buf(prseng *peng) {
 	}
 
 #ifdef DEBUG_PRS
-		debugf("prs_fill_buf(): offset = %d.", peng->offset);
+		debugf("prs_fill_buf(): offset = %u.", peng->offset);
 #endif
 
 	/* set the reading pointer at desired offset */
@@ -427,6 +427,14 @@ bool prs_fill_buf(prseng *peng) {
 	debugf("prs_fill_buf(): read %d chars", s);
 #endif
 
+	/* ferror ? */
+	if (ferror(peng->fp) != 0) {
+#ifdef DEBUG_PRS
+		debugf("prs_fill_buf(): ferror !"); /* XXX */
+#endif
+		return(false);
+	}
+
 	/* put EOS right after the last read char */
 	peng->prsbuf[s] = CHAR_EOS;
 #ifdef DEBUG_PRS
@@ -435,14 +443,6 @@ bool prs_fill_buf(prseng *peng) {
 
 	/* rewind cursor to the beginning of the buffer */
 	peng->prscur = (char *)peng->prsbuf;
-
-	/* ferror ? */
-	if (ferror(peng->fp) != 0) {
-#ifdef DEBUG_PRS
-		debugf("prs_fill_buf(): ferror !"); /* XXX */
-#endif
-		return(false);
-	}
 
 	if (feof(peng->fp) != 0) {
 		peng->eof = true;
@@ -457,6 +457,38 @@ bool prs_fill_buf(prseng *peng) {
 	/* buffer filled, return pointer to the first character */
 	return(true);
 }
+
+/*
+        fill parsing engine's buffer
+
+        peng: parsing engine structure
+
+        return:
+                - true: buffer filled
+                - false: end of file or error
+*/
+
+bool prs_fill_buf_by_line(prseng *peng) {
+	peng->offset = 0;
+
+	if (fgets(peng->prsbuf, sizeof(peng->prsbuf), peng->fp) == NULL) {
+		/* XXX error */
+		return(false);
+	}
+
+	/* rewind cursor to the beginning of the buffer */
+	peng->prscur = (char *)peng->prsbuf;
+
+	if (feof(peng->fp) != 0) {
+		peng->eof = true;
+#ifdef DEBUG_PRS
+		debugf("prs_fill_buf_by_line(): set end of file flag");
+#endif
+	}
+
+	return(true);
+}
+
 
 /*
 	create hash table with keyword structures
@@ -932,6 +964,34 @@ char *parse_data(char *pstr, pmkobj *po, size_t size) {
 	return(rptr);
 }
 
+char *parse_data_new(prseng *peng, pmkobj *po, size_t size) {
+	char	*rptr;
+
+	po->type = PO_NULL;
+
+	switch (*peng->prscur) {
+		/* found a quoted string */
+		case PMK_CHAR_QUOTE_START :
+			peng->prscur++;
+			rptr = parse_quoted(peng->prscur, po, size);
+			break;
+
+		/* found a list */
+		case PMK_CHAR_LIST_START :
+			peng->prscur++;
+			rptr = parse_list(peng->prscur, po, size);
+			break;
+
+		default :
+			rptr = parse_bool(peng->prscur, po, size);
+			break;
+	}
+
+	peng->prscur = rptr; /* XXX */
+
+	return(rptr);
+}
+
 /*
         parse command header
 
@@ -1034,90 +1094,16 @@ prscell *parse_cmd_header(prseng *peng, prsnode *pnode) {
 }
 
 /*
-	parse an option line
+	parse an option
 
-	line : option line
-	popt : storage structure 
+	peng : parsing engine structure
+	popt : option storage structure
 	seplst : string that contain all separator characters
 
 	return : boolean
 */
 
-bool parse_opt(char *line, prsopt *popt, char *seplst) {
-	char	*pstr;
-	pmkobj	 po;
-
-#ifdef DEBUG_PRS
-	debugf("parse_opt() : line = '%s'", line);
-#endif
-
-	pstr = parse_key(line, &po, sizeof(popt->key));
-	if (pstr == NULL) {
-		strlcpy(parse_err, PRS_ERR_SYNTAX, sizeof(parse_err));
-		return(false);
-	} else {
-		strlcpy(popt->key, po.data, sizeof(popt->key));
-		free(po.data);
-	}
-
-#ifdef DEBUG_PRS
-	debugf("parse_opt() : key = '%s'", popt->key);
-#endif
-
-	pstr = skip_blank(pstr);
-
-	/* check if character is in separator list */
-	if (strchr(seplst, *pstr) == NULL) {
-		strlcpy(parse_err, PRS_ERR_SYNTAX, sizeof(parse_err));
-		return(false);
-	} else {
-		popt->opchar = *pstr;
-		pstr++;
-	}
-#ifdef DEBUG_PRS
-	debugf("parse_opt() : assign = '%c'", popt->opchar);
-#endif
-
-	pstr = skip_blank(pstr);
-
-	popt->value = (pmkobj *) malloc(sizeof(pmkobj));
-	if (popt->value == NULL) {
-		strlcpy(parse_err, PRS_ERR_ALLOC, sizeof(parse_err));
-		return(false);
-	}
-
-	pstr = parse_data(pstr, popt->value, OPT_VALUE_LEN);
-	if (pstr == NULL) {
-		strlcpy(parse_err, PRS_ERR_SYNTAX, sizeof(parse_err));
-		return(false);
-	}
-
-#ifdef DEBUG_PRS
-	switch (popt->value->type) {
-		case PO_BOOL :
-			debugf("parse_opt() : value = *BOOL*");
-			break;
-		case PO_STRING :
-			debugf("parse_opt() : value = '%s'", popt->value->data);
-			break;
-		case PO_LIST :
-			debugf("parse_opt() : value = (*LIST*)");
-			break;
-		default :
-			debugf("parse_opt() : value = !unknown type!");
-			break;
-	}
-#endif
-
-	if (*pstr != CHAR_EOS) {
-		strlcpy(parse_err, PRS_ERR_TRAILING, sizeof(parse_err));
-		return(false);
-	}
-
-	return(true);
-}
-
-bool parse_opt_new(prseng *peng, prsopt *popt, char *seplst) {
+bool parse_opt(prseng *peng, prsopt *popt, char *seplst) {
 	pmkobj	 po;
 
 #ifdef DEBUG_PRS
@@ -1306,7 +1292,7 @@ bool parse_opt_block(prsdata *pdata, prseng *peng, prscell *pcell, bool chk_deli
 					debugf("parse_opt_block() : calling parse_opt_new()");
 #endif
 					/* parse option */
-					if (parse_opt_new(peng, &opt, PRS_PMKFILE_SEP) == false) {
+					if (parse_opt(peng, &opt, PRS_PMKFILE_SEP) == false) {
 						errorf("line %d : %s", pdata->linenum, parse_err);
 #ifdef DEBUG_PRS
 						debugf("parse_opt_block() : parse_opt_new() returned false");
@@ -1503,7 +1489,6 @@ bool parse_pmkfile(FILE *fp, prsdata *pdata, prskw kwtab[], size_t size) {
 		return(false);
 	}
 
-	/*if (parse_line(fp, pdata, phkw, tnode) != true) {*/
 	if (parse_cmd_block(pdata, peng, pdata->tree, false) != true) {
 		/* display error message */
 		errorf("line %d : %s", peng->linenum, parse_err);
@@ -1554,48 +1539,99 @@ bool process_opt(htable *pht, prsopt *popt) {
 */
 
 bool parse_pmkconf(FILE *fp, htable *pht, char *seplst, bool (*func)(htable *, prsopt *)) {
-	char	 buf[MAX_LINE_LEN];
-	int	 ln = 0;
+	bool	 loop = true;
+	char	*pstr = NULL;
+	prseng	*peng;
 	prsopt	 opt;
 
-	while (get_line(fp, buf, sizeof(buf)) == true) {
-		switch (buf[0]) {
+	peng = prseng_init();
+	if (peng == NULL) {
+		/* cannot init engine structure */
+		errorf("init of parsing engine structure failed.");
+		return(false);
+	} else {
+		/* set file pointer */
+		peng->fp = fp;
+	}
+
+	while (loop == true) {
+		/* update buffer window */
+		loop = prs_fill_buf(peng);
+
+		switch (*peng->prscur) {
 			case CHAR_COMMENT :
 				/* comment */
 				strlcpy(opt.key, "comment", sizeof(opt.key)); /* don't check */
 				opt.opchar = CHAR_COMMENT;
-				opt.value = po_mk_str(buf);
+
+				/* mark end of line */
+				pstr = strchr(peng->prscur, CHAR_CR);
+				*pstr = CHAR_EOS;
+
+				/* copy comment */
+				opt.value = po_mk_str(peng->prscur);
+
+				/* unmark and update cursor */
+				*pstr = CHAR_CR;
+				peng->prscur = pstr++;
+
+				/* process option */
+				func(pht, &opt);
+				break;
+
+			case CHAR_CR :
+				/* empty line */
+				strlcpy(opt.key, "", sizeof(opt.key)); /* don't check */
+				opt.opchar = CHAR_EOS;
+				opt.value = po_mk_str("");
+
+				/* update cursor */
+				peng->prscur = pstr++;
+
+				/* process option */
 				func(pht, &opt);
 				break;
 
 			case CHAR_EOS :
-				/* empty line */
-				strlcpy(opt.key, "", sizeof(opt.key)); /* don't check */
-				opt.opchar = CHAR_EOS;
-				opt.value = po_mk_str(buf);
-				func(pht, &opt);
+				/* end of file reached */
+				loop = false;
 				break;
 
 			default :
-				if (parse_opt(buf, &opt, seplst) == true) {
+#ifdef DEBUG_PRS
+				/*debugf("parse_pmkconf(): opt line to parse = '%s'.", peng->prscur);*/
+#endif
+				if (parse_opt(peng, &opt, seplst) == true) {
 					/* parse ok */
 					if (func(pht, &opt) == false) {
-						errorf("line %d : processing failed", ln);
+						errorf("line %d : processing failed", peng->linenum);
 						return(false);
 					}
 				} else {
 					/* incorrect line */
-					errorf("line %d : %s", ln, parse_err);
+#ifdef DEBUG_PRS
+					/*debugf("parse_pmkconf(): incorrect line = '%s'.", peng->prscur);*/
+#endif
+					errorf("line %d : %s", peng->linenum, parse_err);
 					return(false);
 				}
+
+				/* skip end of line */
+				if (*peng->prscur == CHAR_CR)
+					peng->prscur++;
+
+#ifdef DEBUG_PRS
+				/*debugf("parse_pmkconf(): line after opt parse = '%s'.", peng->prscur);*/
+#endif
+
 				break;
 		}
-		ln++; /* increment line number */
+		peng->linenum++; /* increment line number */
 	}
 
-	if (feof(fp) == 0) {
+	if (peng->eof == false) {
 		/* error occured before EOF */
-		errorf("line %d : %s", ln, "end of file not reached.");
+		errorf("line %d : %s", peng->linenum, "end of file not reached.");
 		return(false);
 	}
 
