@@ -248,6 +248,12 @@ check_include_function string.h strlcat
 check_type _Bool
 
 #
+# blkcnt_t type check
+#
+
+check_type blkcnt_t
+
+#
 # stdbool.h check
 #
 

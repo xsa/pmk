@@ -55,6 +55,12 @@ CHECK_TYPE(bool_type) {
 	NAME = "_Bool"
 }
 
+# check blkcnt_t type
+CHECK_TYPE(blkcnt_t_type) {
+	REQUIRED = FALSE
+	NAME = "blkcnt_t"
+}
+
 # checking stdbool.h
 CHECK_INCLUDE(header_stdbool_h) {
 	REQUIRED = FALSE

@@ -34,34 +34,11 @@
  */
 
 
-#ifndef _PMK_COMPAT_H_
-#define _PMK_COMPAT_H_
+#include <sys/types.h>
 
-/*	! WARNING !
+#include "compat.h"
 
-	The following data is automatically set,
-	you should not have to modify it.
-*/
+#ifndef HAVE_BLKCNT_T
+typedef int64_t	blkcnt_t;	/* file block counts */
+#endif
 
-/* strlcpy */
-@DEF__STRLCPY@
-
-/* strlcat */
-@DEF__STRLCAT@
-
-/* _Bool type (ISO C99) */
-@DEF___BOOL@
-
-/* blkcnt_t type (POSIX 1003.1-2003) */
-@DEF__BLKCNT_T@
-
-/* stdbool.h (ISO C99) */
-@DEF__STDBOOL_H@
-
-/* libgen.h (dirname and filename) */
-@DEF__LIBGEN_H@
-
-/* isblank */
-@DEF__ISBLANK@
-
-#endif /* _PMK_COMPAT_H_ */

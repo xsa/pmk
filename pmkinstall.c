@@ -46,6 +46,7 @@
 
 #include "compat/pmk_stdbool.h"
 #include "compat/pmk_string.h"
+#include "compat/pmk_sys_types.h"
 #include "common.h"
 #include "pathtools.h"
 #include "pmkinstall.h"
