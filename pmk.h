@@ -30,55 +30,39 @@
  *
  */
 
-#ifndef _PREMAKE_H_
-#define _PREMAKE_H_
 
-#ifndef SYSCONFDIR
-#	define SYSCONFDIR	"/etc"
-#endif
+#ifndef _PMK_H_
+#define _PMK_H_
 
-#ifndef TRUE
-#	define TRUE	1
-#	define FALSE	0
-#endif
+/* prefix character used for commands */
+#define PMK_CHAR_COMMAND	'.'
 
-#ifndef MAXPATHLEN
-#	define MAXPATHLEN 512
-#endif
+/* keyword to mark end of command */
+#define PMK_END_COMMAND	".END"
 
+/* maximal size of a command */
+#define MAX_CMD_NAME_LEN	64
 
-#define PREMAKE_VERSION		"0.1"
+/* maximal size of a command label */
+#define MAX_LABEL_NAME_LEN	64
 
-#define PREMAKE_FILENAME	"pmkfile"
-#define PREMAKE_CONFIG		"pmk.conf"
-#define PREMAKE_LOG		"pmk.log"
+/* maximal size of a command string : <prefix><command>(<label>) */
+#define MAX_CMD_LEN		MAX_CMD_NAME_LEN + MAX_LABEL_NAME_LEN + 2
 
-#define PREMAKE_CONFIG_PATH	SYSCONFDIR "/" PREMAKE_CONFIG 
-
-/* prefix character used for comments */
-#define CHAR_COMMENT	'#'
+/* maximal number of options per command */
+#define MAX_CMD_OPT	32
 
 
-/* maximal size of an error message */
-#define MAX_ERR_MSG_LEN		256
-
-/* maximal sizes for command pair of option (name and value) */
-#define MAX_OPT_NAME_LEN	64
-#define MAX_OPT_VALUE_LEN	MAXPATHLEN /* can contain a path */
-
-/* maximal size of a line */
-#define MAX_LINE_LEN		MAXPATHLEN + MAX_OPT_NAME_LEN
-
-
-/* command tokens */
-#define	TOK_NULL	 0
-#define	TOK_DEFINE	 1
-#define TOK_CHK_BIN	 2
-#define TOK_CHK_INC	 3
-#define TOK_CHK_LIB	 4
+/* command option type */
+typedef struct {
+	char	name[MAX_OPT_NAME_LEN],
+		value[MAX_OPT_VALUE_LEN];
+} pmkcmdopt;
+/* command type */
+typedef struct {
+	char		name[MAX_CMD_NAME_LEN],
+			label[MAX_LABEL_NAME_LEN];
+} pmkcmd;
 
 
-/* boolean type */
-typedef unsigned char bool;
-
-#endif /* _PREMAKE_H_ */
+#endif /* _PMK_H_ */

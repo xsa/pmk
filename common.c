@@ -39,6 +39,7 @@
 #include <unistd.h>
 
 #include "premake.h"
+#include "pmk.h"
 
 /*
 	put env variable in an option
