@@ -84,7 +84,9 @@ PC_OBJS=	cfgtool.o common.o compat.o dynarray.o hash.o parse.o \
 	$(CC) $(PMKCFLAGS) -o $@ -c $<
 
 .s.o:
-	$(CPP) $< | $(AS) -o $@
+	$(CPP) $< | sed '/^#/d' > tmp_asm.s
+	$(AS) -o $@ tmp_asm.s
+	rm tmp_asm.s
 
 # main target
 all: $(PREMAKE) $(SETUP) $(SCAN) $(INST) $(PKGCFG)

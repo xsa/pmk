@@ -1,3 +1,6 @@
+23 Dec 2004 mipsator
+ * fixed use of the assembler to comply with SunOS.
+
 22 Dec 2004 mipsator
  * fixed a lot of compiler warnings (almost all about comparison between
    signed and unsigned) that were revealed with 'aggressive' options.
