@@ -61,5 +61,11 @@ typedef struct {
 	char		*arg;
 } optcell;
 
+typedef struct {
+	dynary	*pda;
+	htable	*pht;
+	pkgdata	*ppd;
+} pcdata;
+
 #endif /* _PMKPKGCFG_H_ */
 
