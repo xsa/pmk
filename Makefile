@@ -55,7 +55,7 @@ $(SCAN).o:
 config:
 	@if ($(PREMAKE) -v >/dev/null 2>&1); then \
 		echo "Configure using pmk."; \
-		pmk; \
+		$(PREMAKE); \
 	else \
 		echo "Configure using pmkcfg.sh"; \
 		CC=$(CC) sh pmkcfg.sh; \
@@ -138,7 +138,7 @@ test_$(PREMAKE): $(PREMAKE)
 	@echo "----------------------------------------"
 	@echo ""
 	@echo "-> Running pmk"
-	./pmk -b samples -f samples/pmkfile.sample -o samples/ovrfile.sample
+	./$(PREMAKE) -b samples -f samples/pmkfile.sample -o samples/ovrfile.sample
 	@echo ""
 	@echo "-> Dumping generated files"
 	@echo ""
@@ -171,7 +171,7 @@ test_$(SETUP): $(SETUP)
 	@echo "Generating local pmk.conf."
 	@echo "(need USER_TEST enabled)"
 	@echo ""
-	./pmksetup -V
+	./$(SETUP) -V
 	@echo ""
 	@echo "=> End of test"
 	@echo ""
@@ -179,7 +179,7 @@ test_$(SETUP): $(SETUP)
 test_$(SCAN): $(SCAN)
 	@echo ""
 	@echo "=> Testing pmkscan"
-	./pmkscan
+	./$(SCAN)
 	@echo ""
 	@echo "Dumping pmkfile.scan"
 	@echo "----------------------------------------"
