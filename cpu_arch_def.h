@@ -53,6 +53,11 @@
 #define ARCH_ALPHA	1
 #endif
 
+/* check ia64 architecture */
+#if defined(__ia64__) || defined(__IA64__) || \
+	defined(_IA64) || defined(_M_IA64)
+#define ARCH_IA64	1
+#endif
 
 #endif /* _CPU_ARCH_DEF_ */
 
