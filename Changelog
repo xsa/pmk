@@ -1,5 +1,6 @@
 21 Aug 2003 mipsator
  * changed type of DEPEND, it must be a list now.
+ * LIST in TARGET command is now of the list type.
 
 20 Aug 2003 mipsator
  * added hash_add_array_adv() in hash.
