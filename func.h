@@ -61,16 +61,31 @@
 
 #define TYPE_TEST_CODE	"#include <stdio.h>\n" \
 			"int main() {\n" \
-			"if ((%s *) 0) {return(0);}\n" \
-			"if (sizeof(%s)) {return(0);}\n" \
+			"%s test_type;\n" \
+			"if (sizeof(test_type)) {return(0);}\n" \
 		        "return(0);}"
 
 #define TYPE_INC_TEST_CODE	"#include <stdio.h>\n" \
 				"#include <%s>\n" \
 				"int main() {\n" \
-				"if ((%s *) 0) {return(0);}\n" \
-				"if (sizeof(%s)) {return(0);}\n" \
+				"%s test_type;\n" \
+				"if (sizeof(test_type)) {return(0);}\n" \
 			        "return(0);}"
+
+/* args: struct_name struct_name member_name*/
+#define TYPE_MEMBER_TEST_CODE	"#include <stdio.h>\n" \
+				"int main() {\n" \
+				"%s test_struct;\n" \
+				"if (sizeof(test_struct.%s)) {return(0);}\n" \
+			        "return(0);}"
+
+/* args: header struct_name struct_name member_name*/
+#define TYPE_INC_MEMBER_TEST_CODE	"#include <stdio.h>\n" \
+					"#include <%s>\n" \
+					"int main() {\n" \
+					"%s test_struct;\n" \
+					"if (sizeof(test_struct.%s)) {return(0);}\n" \
+				        "return(0);}"
 
 
 #define TEST_FILE_NAME	"test.c"
@@ -81,8 +96,6 @@
 #define PMK_TOK_DEFINE	2
 #define PMK_TOK_SWITCH	3
 #define PMK_TOK_IFCOND	4
-#define PMK_TOK_TARGET	5 /* will be obsolete by SETTINGS */
-#define PMK_TOK_ACCOMP	6 /* will be obsolete by SETTINGS */
 
 /* special setting tokens */
 #define PMK_TOK_SETVAR	9 /* set variable */

@@ -1065,6 +1065,7 @@ bool pmk_check_type(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 	char	 cfgcmd[MAXPATHLEN],
 		*type,
 		*header,
+		*member,
 		*ccpath;
 	int	 r;
 	lgdata	*pld;
@@ -1081,6 +1082,9 @@ bool pmk_check_type(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 
 	/* check if an header must be used */
 	header = po_get_str(hash_get(ht, "HEADER"));
+
+	/* check if a structure member is given */
+	member = po_get_str(hash_get(ht, "MEMBER"));
 
 	if (depend_check(ht, pgd) == false) {
 		pmk_log("\t%s\n", pgd->errmsg);
@@ -1112,12 +1116,26 @@ bool pmk_check_type(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 	tfp = fopen(TEST_FILE_NAME, "w");
 	if (tfp != NULL) {
 		if (header == NULL) {
-			fprintf(tfp, TYPE_TEST_CODE, type, type);
+			/* header provided */
+			if (member == NULL) {
+				fprintf(tfp, TYPE_TEST_CODE, type);
+			} else {
+				fprintf(tfp, TYPE_MEMBER_TEST_CODE, type, member);
+			}
 		} else {
 			pmk_log("\tUse header '%s'.\n", header);
-			fprintf(tfp, TYPE_INC_TEST_CODE, header, type, type);
+			if (member == NULL) {
+				fprintf(tfp, TYPE_INC_TEST_CODE, header, type);
+			} else {
+				fprintf(tfp, TYPE_INC_MEMBER_TEST_CODE, header, type, member);
+			}
 		}
-		pmk_log("\tFound type '%s' : ", type);
+
+		if (member == NULL) {
+			pmk_log("\tFound type '%s' : ", type);
+		} else {
+			pmk_log("\tFound member '%s' in '%s' : ", member, type);
+		}
 		fclose(tfp);
 	}
 
