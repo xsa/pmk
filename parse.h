@@ -38,6 +38,7 @@
 #define LIST_SUPPORT	1
 */
 
+
 #define PMK_CHAR_COMMENT	'#'
 #define PMK_CHAR_COMMAND	'.'
 #define PMK_CHAR_COMMAND_START	'{'
@@ -58,30 +59,55 @@
 #define PRS_ERR_TRAILING	"trailing garbage after value."
 #define PRS_ERR_UNKNOWN		"unknown error."
 
+/* keyword types */
+#define PRS_KW_NODE
+#define PRS_KW_ITEM
 
-typedef struct sprscell {
-	char		 name[MAX_OPT_NAME_LEN],
-			 label[MAX_LABEL_NAME_LEN];
-	htable		*ht;
-	struct sprscell	*next;
+/* keyword structure */
+typedef struct {
+	char	*kw;	/* keyword string */
+	int	 token,	/* associated token */
+		 type;	/* type */
+} prskw;
+
+typedef struct {
+	char	 key[OPT_NAME_LEN];
+	pmkobj	*value;
+} prsopt;
+
+typedef struct s_prscell {
+	int			 token;			/* item token id */
+	char			 label[LABEL_LEN];	/* command label */
+	htable			*ht;			/* misc data */
+	struct s_prscell	*next;			/* next item */
 } prscell;
 
 typedef struct {
+	int	 token;	/* node token id */
+	prscell	*first,	/* first item of this node */
+		*last;	/* last item of this node */
+} prsnode;
+
+typedef struct {
 	int	 linenum;
-	prscell	*first,
-		*last;
+	prsnode	*tree;
 } prsdata;
+
 
 prsdata	*prsdata_init(void);
 void	 prsdata_destroy(prsdata *);
+prsnode	*prsnode_init(void);
+void	 prsnode_destroy(prsnode *);
 prscell	*prscell_init(void);
 void	 prscell_destroy(prscell *);
+htable	*keyword_hash(prskw [], int);
 char	*parse_quoted(char *, pmkobj *, size_t);
 char	*parse_list(char *, pmkobj *, size_t);
 char	*parse_word(char *, pmkobj *, size_t);
+char	*parse_identifier(char *, char *, size_t);
 char	*skip_blank(char *pstr);
-bool	 parse_cell(char *, prscell *);
-bool	 parse(FILE *, prsdata *);
-bool	 parse_opt(char *, htable *);
+bool	 parse_cell(char *, prscell *, htable *);
+bool	 parse_pmkfile(FILE *, prsdata *, prskw [], size_t);
+bool	 parse_opt(char *, prsopt *);
 
 #endif /* _PMK_PARSE_H_ */

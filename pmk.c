@@ -53,8 +53,8 @@
 
 extern char	*optarg;
 extern int	 optind;
-extern cmdkw	 functab[];
-extern int	 nbfunc;
+extern prskw	 kw_pmkfile[];
+extern int	 nbkwpf;
 
 int		 cur_line = 0;
 
@@ -277,24 +277,6 @@ bool process_template(char *template, pmkdata *pgd) {
 }
 
 /*
-	check if the given string is a valid command
-
-	cmdname : command to check
-	pgd : global data structure (for pmkfile name)
-
-	return : boolean (true is command is valid)
-*/
-
-bool check_cmd(char *cmdname, pmkdata *pgd) {
-	if ((char *) hash_get(keyhash, cmdname) == NULL) {
-		errorf("unknown command %s.", cmdname);
-		return(false);
-	} else {
-		return(true);
-	}
-}
-
-/*
 	process the parsed command
 
 	pdata : parsed data
@@ -304,29 +286,13 @@ bool check_cmd(char *cmdname, pmkdata *pgd) {
 */
 
 bool process_cmd(prsdata *pdata, pmkdata *pgd) {
-	char	*aidx;
-	int	 idx;
-	pmkcmd	 cmd;
 	prscell	*pcell;
 
 	/* init pcell with the first cell of pdata */
-	pcell = pdata->first;
+	pcell = pdata->tree->first;
 
 	while (pcell != NULL) {
-		if (check_cmd(pcell->name, pgd) == false)
-			return(false);
-
-		cmd.name = pcell->name;
-		cmd.label = pcell->label;
-
-		aidx = (char *) hash_get(keyhash, cmd.name);
-		if (aidx == NULL)
-			return(false);
-
-		/* getting index of function in functab */
-		idx = atoi(aidx);
-		/* launching cmd function */
-		if ((*functab[idx].fnp)(&cmd, pcell->ht, pgd) == false)
+		if (func_wrapper(pcell, pgd) == false)
 			return(false);
 
 		pcell = pcell->next;
@@ -349,13 +315,20 @@ bool parse_cmdline(char **val, int nbval, pmkdata *pgd) {
 	bool	 rval = true;
 	htable	*ht;
 	int	 i;
+	prsopt	 opt;
 
 	/* don't init pscell */
 	ht = pgd->htab;
 
 	for (i = 0 ; (i < nbval) && (rval == true) ; i++) {
 		/* parse option */
-		rval = parse_opt(val[i], ht);
+		rval = parse_opt(val[i], &opt);
+		if (rval == true) {
+			if (hash_add(ht, opt.key, opt.value) == HASH_ADD_FAIL) {
+				errorf("%s", PRS_ERR_HASH);
+				rval = false;
+			}
+		}
 	}
 
 	return(rval);
@@ -409,8 +382,7 @@ int main(int argc, char *argv[]) {
 	char	*pstr,
 		*enable_sw = NULL,
 		*disable_sw = NULL,
-		 buf[MAXPATHLEN],
-		 idxstr[4]; /* max 999 cmds, should be enough :) */
+		 buf[MAXPATHLEN];
 	dynary	*da;
 	int	 rval = 0,
 		 nbpd,
@@ -506,21 +478,6 @@ int main(int argc, char *argv[]) {
 	if (pmkfile_set == false) {
 		strlcpy(gdata.srcdir, buf, sizeof(gdata.srcdir));
 		abspath(gdata.srcdir, PREMAKE_FILENAME, gdata.pmkfile); /* should not fail */
-	}
-
-	keyhash = hash_init(nbfunc);
-	if (keyhash != NULL) {
-		/* fill keywords hash */
-		for(i = 0 ; i < nbfunc ; i++) {
-			snprintf(idxstr, 4, "%d", i);
-			if (hash_add(keyhash, functab[i].kw, strdup(idxstr)) == HASH_ADD_FAIL) {
-				errorf("hash failure");
-				exit(1);
-			}
-		}
-	} else {
-		errorf("cannot initialize keyword table");
-		exit(1);
 	}
 
 	/* initialise global data hash table */
@@ -630,7 +587,7 @@ int main(int argc, char *argv[]) {
 
 
 	/* print number of hashed command */
-	pmk_log("Hashed %d pmk keywords.\n", keyhash->count);
+/*	pmk_log("Hashed %d pmk keywords.\n", keyhash->count);*/
 
 	pmk_log("Loaded %d predefinined variables.\n", nbpd);
 	pmk_log("Loaded %d overridden switches.\n", ovrsw);
@@ -647,7 +604,7 @@ int main(int argc, char *argv[]) {
 		exit(1);
 	}
 
-	if (parse(fd, pdata) == false) {
+	if (parse_pmkfile(fd, pdata, kw_pmkfile, nbkwpf) == false) {
 		/* XXX too much things here */
 		clean(&gdata);
 		fflush(fd);

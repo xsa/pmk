@@ -48,8 +48,8 @@ typedef struct {
 /* WARN opchar has been put first else linux binaries gives segfault !!! */
 typedef struct {
         char    opchar,
-		key[MAX_OPT_NAME_LEN],
-                val[MAX_OPT_VALUE_LEN];
+		key[OPT_NAME_LEN],
+		val[OPT_VALUE_LEN];
 } cfg_opt;
 
 

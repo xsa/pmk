@@ -427,6 +427,9 @@ int hash_append(htable *pht, char *key, void *value, void *misc) {
 	if (value == NULL)
 		return(HASH_ADD_FAIL);
 
+	if (pht->appdobj == NULL)
+		return(HASH_ADD_FAIL);
+
 	pobj = hash_get(pht, key);
 	if (pobj == NULL) {
 		/* no previous value, adding given data */
@@ -631,7 +634,8 @@ hkeys *hash_keys(htable *pht) {
 void hash_free_hcell(htable *pht, hcell *phc) {
 	if (phc != NULL) {
 		if (phc->value != NULL) {
-			pht->freeobj(phc->value);
+			if (pht->freeobj != NULL)
+				pht->freeobj(phc->value);
 		}
 		free(phc);
 	}

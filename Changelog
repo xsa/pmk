@@ -1,3 +1,12 @@
+05 Sep 2003 mipsator
+ * improved parser engine again (first part).
+ * new pmk language style (no longer need leading dot) but keep
+	compat with 0.6 release.
+ * adapted pmk to new engine.
+ * adapted pmkscan to new engine.
+ * added stuff to parse variables in strings (deactived).
+ * misc related stuff.
+
 # snapshot 0.6.1
 
 02 Sep 2003 mipsator

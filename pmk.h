@@ -54,15 +54,6 @@
 /* character used as delimiter for template tags */
 #define PMK_TAG_CHAR		'@'
 
-/* maximal size of a command */
-#define MAX_CMD_NAME_LEN	64
-
-/* maximal size of a command label */
-#define MAX_LABEL_NAME_LEN	64
-
-/* maximal size of a command string : <prefix><command>(<label>) */
-#define MAX_CMD_LEN		MAX_CMD_NAME_LEN + MAX_LABEL_NAME_LEN + 2
-
 /* maximal number of options per command */
 #define MAX_CMD_OPT		32
 
@@ -80,14 +71,14 @@
 
 /* command option type */
 typedef struct {
-	char	name[MAX_OPT_NAME_LEN],
-		value[MAX_OPT_VALUE_LEN];
+	char	name[OPT_NAME_LEN],
+		value[OPT_VALUE_LEN];
 } pmkcmdopt;
 
 /* command type */
 typedef struct {
-	char	*name,
-		*label;
+	int	 token;
+	char	*label;
 } pmkcmd;
 
 /* pmk data */

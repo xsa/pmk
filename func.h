@@ -34,6 +34,7 @@
 #define _PMK_FUNC_H_
 
 #include "pmk.h"
+#include "parse.h"
 
 /* format string for include check */
 #define INC_TEST_CODE	"#include <stdio.h>\n" \
@@ -65,12 +66,38 @@
 #define TEST_FILE_NAME	"test.c"
 #define BIN_TEST_NAME	"test_bin"
 
+/* node tokens */
+#define PMK_TOK_DEFINE	1
+#define PMK_TOK_SETNGS	2
+#define PMK_TOK_SWITCH	3
+#define PMK_TOK_TARGET	4 /* will be obsolete by SETTINGS */
+#define PMK_TOK_ACCOMP	5 /* will be obsolete by SETTINGS */
+
+/* special setting tokens */
+#define PMK_TOK_SETVAR	17 /* set variable */
+#define PMK_TOK_SETPRM	18 /* set parameter */
+
+/* item command tokens */
+#define PMK_TOK_CHKBIN	33
+#define PMK_TOK_CHKINC	34
+#define PMK_TOK_CHKLIB	35
+#define PMK_TOK_CHKCFG	36
+#define PMK_TOK_CHKPKG	37
+#define PMK_TOK_CHKTYP	38
+
+/*
+#define KW_SETNGS_GLANG		"LANG"
+#define KW_SETNGS_TARGET	"TARGET"
+#define KW_SETNGS_ACCOMP	"ACCOMP"
+*/
+
+
 typedef struct {
-	char	kw[MAX_CMD_NAME_LEN];
+	char	kw[CMD_LEN];
 	bool	(*fnp)(pmkcmd *, htable *, pmkdata *);
 } cmdkw;
 
-
+bool func_wrapper(prscell *, pmkdata *);
 bool pmk_define(pmkcmd *, htable *, pmkdata *);
 bool pmk_target(pmkcmd *, htable *, pmkdata *);
 bool pmk_ac_compat(pmkcmd *, htable *, pmkdata *);

@@ -130,12 +130,18 @@
 /* maximal size of an error message */
 #define MAX_ERR_MSG_LEN		256
 
+/* maximal size of a command name */
+#define CMD_LEN		32
+
+/* maximal size of a command label */
+#define LABEL_LEN	64
+
 /* maximal sizes for command pair of option (name and value) */
-#define MAX_OPT_NAME_LEN	64
-#define MAX_OPT_VALUE_LEN	MAXPATHLEN /* can contain a path */
+#define OPT_NAME_LEN	64
+#define OPT_VALUE_LEN	MAXPATHLEN /* can contain a path */
 
 /* maximal size of a line */
-#define MAX_LINE_LEN		MAXPATHLEN + MAX_OPT_NAME_LEN
+#define MAX_LINE_LEN		MAXPATHLEN + OPT_NAME_LEN
 
 /* size for temporary buffers */
 #define TMP_BUF_LEN		512

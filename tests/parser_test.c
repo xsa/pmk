@@ -3,6 +3,7 @@
 #include "../dynarray.c"
 #include "../hash.c"
 #include "../pmk_obj.c"
+#include "../func.c"
 
 #define DEBUG_PRS	1
 #include "../parse.c"
@@ -25,10 +26,12 @@ int main(int argc, char *argv[]) {
 		return(false);
 	}
 
-	rval = parse(fd, pdata);
+	rval = parse_pmkfile(fd, pdata, kw_pmkfile, nbkwpf);
 	fclose(fd);
 
+	printf("cleaning ...\n");
 	prsdata_destroy(pdata);
+	printf("ok\n");
 
 	return(0);
 }

@@ -478,8 +478,63 @@ lgdata *get_lang(htable *pht, pmkdata *pgd) {
 */
 
 char *get_comp_path(htable *pht, char *compname) {
-	char	key[MAX_OPT_NAME_LEN];
+	char	key[OPT_NAME_LEN];
 
 	snprintf(key, sizeof(key), "BIN_%s", compname);
 	return((char *) hash_get(pht, key));
+}
+
+/*
+	blah
+*/
+
+char *parse_idtf(char *pstr, char *pbuf, size_t size) {
+	while (((isalnum(*pstr) != 0) || (*pstr == '_')) && (size > 0)) {
+		*pbuf = *pstr;
+		pbuf++;
+		pstr++;
+		size--;
+	}
+
+	if (size == 0)
+		return(NULL);
+
+	*pbuf = CHAR_EOS;
+	
+	return(pstr);
+}
+
+/*
+	blah
+*/
+
+char *process_string(char *pstr) {
+	char	 buf[OPT_VALUE_LEN],
+		*pbuf;
+	size_t	 size;
+
+	size = sizeof(buf);
+	pbuf = buf;
+
+	while ((pstr != CHAR_EOS) && (size > 0)) {
+		if (*pstr == '$') {
+			pstr++;
+			pstr = parse_idtf(pstr, pbuf, size);
+			if (pstr == NULL)
+				debugf("parse_idtf returned null.");
+				return(NULL);
+		} else {
+			*pbuf = *pstr;
+			pbuf++;
+			pstr++;
+			size--;
+		}
+	}
+
+	if (size == 0)
+		return(NULL);
+
+	*pbuf = CHAR_EOS;
+
+	return(strdup(buf));
 }

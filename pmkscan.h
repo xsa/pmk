@@ -51,6 +51,9 @@
 #define PMKSCAN_DATA	PMK_DATADIR "pmkscan.dat"
 #define PMKSCAN_OUTPUT	"pmkfile.scan"
 
+#define PSC_TOK_INCL	1
+#define PSC_TOK_FUNC	2
+
 
 typedef struct {
 	htable	*functions,
