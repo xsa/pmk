@@ -150,15 +150,18 @@ bool getline(FILE *fd, char *line, int lsize) {
 
 bool process_cmd(pmkcmd *cmd, htable *ht) {
 	char	*aidx;
-
-	printf("[DEBUG] processing command : %s\n", cmd->name); /* XXX */
+	int	idx;
+	bool	rval = FALSE;
+	
 	aidx = hash_get(khash, cmd->name);
 	if (aidx != NULL) {
-		/* XXX */
-		printf("[DEBUG] kw index = %d\n", atoi(aidx));
+		/* getting index of function in functab */
+		idx = atoi(aidx);
+		/* launching cmd function */
+		rval = (*functab[idx].fnp)(cmd, ht);
 	}
 
-	return(TRUE);
+	return(rval);
 }
 
 /*

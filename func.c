@@ -36,21 +36,21 @@
 
 
 bool pmk_define(pmkcmd *cmd, htable *ht) {
-	printf("Processing define\n");
+	printf("[%s] Processing define\n", cmd->name);
 	return(TRUE);
 }
 
 bool pmk_check_binary(pmkcmd *cmd, htable *ht) {
-	printf("Processing label %s\n", cmd->label);
+	printf("[%s] Processing label : %s\n", cmd->name, cmd->label);
 	return(TRUE);
 }
 
 bool pmk_check_include(pmkcmd *cmd, htable *ht) {
-	printf("Processing label %s\n", cmd->label);
+	printf("[%s] Processing label : %s\n", cmd->name, cmd->label);
 	return(TRUE);
 }
 
 bool pmk_check_lib(pmkcmd *cmd, htable *ht) {
-	printf("Processing label %s\n", cmd->label);
+	printf("[%s] Processing label : %s\n", cmd->name, cmd->label);
 	return(TRUE);
 }
