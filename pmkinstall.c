@@ -95,7 +95,7 @@ void strip(char *file) {
 
 	s_path = getenv(STRIP_ENV_NAME);
 	if (s_path == NULL) {
-		errorf("STRIP env variable not set, skipping.");
+		errorf("%s env variable not set, skipping.", STRIP_ENV_NAME);
 	} else {
 		/* build the command */
 		snprintf(cmd, sizeof(cmd), "%s %s", s_path, file);
