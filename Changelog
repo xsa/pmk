@@ -1,4 +1,5 @@
 04 May 2003 mipsator
+ * implemented depend_check().
  * added checks in str_to_def().
  * more checks in record_def().
  * added checks in label_set() and label_check().

@@ -306,6 +306,12 @@ bool record_val(htable *ht, char *name, char*value) {
 
 /*
 	set label
+
+	ht : label has htable
+	name : label name
+	status : label status
+
+	returns true on success
 */
 
 bool label_set(htable *ht, char *name, bool status) {
@@ -318,6 +324,9 @@ bool label_set(htable *ht, char *name, bool status) {
 
 /*
 	check label
+
+	ht : label hash table
+	name : label name
 */
 
 bool label_check(htable *ht, char *name) {
@@ -327,14 +336,35 @@ bool label_check(htable *ht, char *name) {
 	if (p == NULL)
 		return(false);
 
-	return(check_bool_str(p)); /* XXX test ?*/
+	return(check_bool_str(p));
 }
 
 /*
 	check depends
+
+	ht : label hash table
+	deplst : string that contain the list of label dependencies
+
+	returns true if all dependencies are true
 */
 
 bool depend_check(htable *ht, char *deplst) {
-	/* code to parse list of depends name */
-	return(true); /* XXX */
+	bool rval = true;
+	dynary	*da;
+	int	i;
+
+	da = da_init();
+	if (da == NULL)
+		return(false);
+
+	/* get the label dependencies in a dynary */
+	str_to_dynary(deplst, CHAR_LIST_SEPARATOR, da);
+
+	/* check labels one by one */
+	for (i = 0 ; (i < da_usize(da)) && (rval == true) ; i++) {
+		if (label_check(ht, da_idx(da, i)) == false)
+			rval == false;
+	}
+	
+	return(rval);
 }
