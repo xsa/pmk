@@ -168,6 +168,11 @@ bool add_cfgtool(cfgtdata *pcd, htable *pht) {
 		return(false);
 	} else {
 		pcell->name = strdup(pstr);
+		if (pcell->name == NULL) {
+			free(pcell);
+			errorf(ERRMSG_MEM);
+			return(false);
+		}
 	}
 
 	pstr = po_get_str(hash_get(pht, "BINARY"));
@@ -177,11 +182,21 @@ bool add_cfgtool(cfgtdata *pcd, htable *pht) {
 		return(false);
 	} else {
 		pcell->binary = strdup(pstr);
+		if (pcell->binary == NULL) {
+			free(pcell);
+			errorf(ERRMSG_MEM);
+			return(false);
+		}
 	}
 
 	pstr = po_get_str(hash_get(pht, "VERSION"));
 	if (pstr != NULL) {
 		pcell->version = strdup(pstr);
+		if (pcell->version == NULL) {
+			free(pcell);
+			errorf(ERRMSG_MEM);
+			return(false);
+		}
 	} else {
 		pcell->version = NULL;
 	}
@@ -189,6 +204,11 @@ bool add_cfgtool(cfgtdata *pcd, htable *pht) {
 	pstr = po_get_str(hash_get(pht, "MODULE"));
 	if (pstr != NULL) {
 		pcell->module = strdup(pstr);
+		if (pcell->module  == NULL) {
+			free(pcell);
+			errorf(ERRMSG_MEM);
+			return(false);
+		}
 	} else {
 		pcell->module = NULL;
 	}
@@ -196,6 +216,11 @@ bool add_cfgtool(cfgtdata *pcd, htable *pht) {
 	pstr = po_get_str(hash_get(pht, "CFLAGS"));
 	if (pstr != NULL) {
 		pcell->cflags = strdup(pstr);
+		if (pcell->cflags == NULL) {
+			free(pcell);
+			errorf(ERRMSG_MEM);
+			return(false);
+		}
 	} else {
 		pcell->cflags = NULL;
 	}
@@ -203,6 +228,11 @@ bool add_cfgtool(cfgtdata *pcd, htable *pht) {
 	pstr = po_get_str(hash_get(pht, "LIBS"));
 	if (pstr != NULL) {
 		pcell->libs = strdup(pstr);
+		if (pcell->libs == NULL) {
+			free(pcell);
+			errorf(ERRMSG_MEM);
+			return(false);
+		}
 	} else {
 		pcell->libs = NULL;
 	}
@@ -420,4 +450,3 @@ bool ct_get_data(char *ctpath, char *ostr, char *mod, char *buffer, size_t sbuf)
 
 	return(rval);
 }
-
