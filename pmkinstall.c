@@ -244,7 +244,7 @@ bool check_mode(char *mstr, mode_t *pmode) {
 
 	if (isdigit(*mstr) != 0) {
 		/* octal value */
-		mode = strtol(mstr, NULL, 8);
+		mode = strtol(mstr, &ep, 8);
 		if (*mstr == '\0' || *ep != '\0')
 			return(false); /* not a number */
 		if (errno == ERANGE && (mode == LONG_MIN || mode == LONG_MAX))
