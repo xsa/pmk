@@ -1,3 +1,7 @@
+18 oct 2004 mipsator
+ * improved pmkcfg.sh to try to detect posix shells before using /bin/sh
+   (this fix the Tru64 and SunOS lack of default posix shell problem).
+
 11 oct 2004 mipsator
  * imported experimental cpu family detection.
 

@@ -32,6 +32,30 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+
+#
+# automatically detect and use posix shell
+#
+
+if test "$1" != "autodetected"; then
+	printf "Autodetecting POSIX shell\n"
+
+	posix_sh="/usr/bin/posix/sh"
+	if test ! -x $posix_sh; then
+		posix_sh="/usr/xpg4/bin/sh"
+		if test ! -x "$posix_sh"; then
+			posix_sh="/bin/sh"
+		fi
+	fi
+	printf "Using $posix_sh $0 $@\n\n"
+	$posix_sh $0 "autodetected" "$@"
+	exit $?
+else
+	# skip "autodetected"
+	shift
+fi
+
+
 #
 # defines
 #
