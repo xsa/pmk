@@ -318,7 +318,8 @@ bool parse_keyword(pkgcell *ppc, char *kword, char *value) {
 					break;
 
 				case PKGCFG_KW_REQS :
-					ppc->requires = strdup(value);
+					if (*value != CHAR_EOS)
+						ppc->requires = strdup(value);
 					break;
 
 				case PKGCFG_KW_CFLGS :
@@ -548,11 +549,14 @@ debugf("adding pkgcell for '%s'", mod);
 	/* add module in list */
 	da_push(ppd->mods, strdup(mod));
 
-	if ((ppc->requires != NULL) && (ppc->requires != CHAR_EOS)) {
+	if (ppc->requires != NULL) {
 #ifdef PKGCFG_DEBUG
 debugf("pkgcell requires = '%s'", ppc->requires);
 #endif
-		pkg_recurse(ppd, ppc->requires); /* XXX check */
+		if (pkg_recurse(ppd, ppc->requires) == false) {
+			pkgcell_destroy(ppc);
+			return(NULL);
+		}
 	}
 
 	return(ppc);
