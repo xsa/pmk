@@ -1,3 +1,6 @@
+20 Dec 2004 mipsator
+ * reworked CHECK_LIB in the same spirit as CHECK_HEADER.
+
 19 Dec 2004 mipsator
  * added c_file_builder() to reduce redundant code.
  * added MACRO option in CHECK_HEADER to detect compiler macros in headers.
