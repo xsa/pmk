@@ -65,6 +65,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
 #include "compat/compat.h"
 #include "pmk.h"
@@ -309,7 +310,6 @@ bool parse_opt(char *line, htable *ht) {
 
 bool parse(FILE *fd) {
 	char		buf[MAX_LINE_LEN];
-	int		cmd_line = 0;
 	bool		process = FALSE;
 	pmkcmd		cmd;
 	htable		*tabopts = NULL;
@@ -333,7 +333,6 @@ bool parse(FILE *fd) {
 						return(FALSE);
 					}
 
-					cmd_line = cur_line;
 					process = TRUE;
 					tabopts = hash_init(MAX_CMD_OPT);
 					if (tabopts == NULL) {
@@ -343,7 +342,6 @@ bool parse(FILE *fd) {
 				} else {
 					if (strcmp(buf, PMK_END_COMMAND) == 0) {
 						/* found end of command */
-						cmd_line = 0;
 						process = FALSE;
 						if (process_cmd(&cmd, tabopts) == FALSE) {
 							/* command processing failed */
