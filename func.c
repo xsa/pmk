@@ -311,8 +311,8 @@ bool pmk_check_binary(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 	if (varname == NULL) {
 		vtmp = str_to_def(filename);
 		if (vtmp == NULL) {
-			errorf("VARIABLE not assigned in label '%s'",
-				cmd->label);
+			errorf("failed to generate definition name for "
+				"'%s' in label '%s'", filename, cmd->label);
 			return(false);
 		}
 		/* if not then use default naming scheme */
