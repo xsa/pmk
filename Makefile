@@ -6,6 +6,7 @@ INSTALL?=	install
 CFLAGS?=
 CFLAGS+=	-Wall
 #CFLAGS+=	-Werror
+#CFLAGS+=	-ansi -pedantic
 
 # Debug stuff
 #CFLAGS+=	-DPMK_DEBUG
@@ -27,7 +28,7 @@ SAMPLE=		$(PREMAKE)file.sample
 CONFIG=		$(PREMAKE).conf.sample
 
 P_OBJS=		common.o hash.o func.o pmk.o
-S_OBJS=		$(SETUP).o
+S_OBJS=		$(SETUP).o common.o hash.o readconf.o
 
 all: $(PREMAKE) $(SETUP)
 
@@ -54,4 +55,3 @@ deinstall:
 	rm -f $(PREFIX)/bin/$(PREMAKE)
 	rm -f $(PREFIX)/sbin/$(SETUP)
 	rm -rf $(PREFIX)/share/$(PREMAKE)
-
