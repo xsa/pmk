@@ -288,11 +288,13 @@ bool str_to_dynary(char *str, char sep, dynary *da) {
 bool find_file(dynary *da, char *fname, char *fpath, int fplen) {
 	DIR		*dp;
 	struct dirent	*de;
-	int		i;
+	int		i,
+			rsize;
 	char		*path;
 	bool		found,
 			exit;
 
+	rsize = strlen(fname);
 	found = false;
 	for (i = 0 ; (i < da_size(da)) && (found == false) ; i++) {
 		path = da_idx(da, i);
@@ -303,11 +305,14 @@ bool find_file(dynary *da, char *fname, char *fpath, int fplen) {
 			while (exit == false) {
 				de = readdir(dp);
 				if (de != NULL) {
-					if (strncmp(de->d_name, fname, strlen(fname)) == 0) {
-						if (snprintf(fpath, fplen, "%s/%s", path, fname) < fplen)
-							/* fpath set */
-							found = true;
-						exit = true;
+					if (strlen(de->d_name) == rsize) {
+						if (strncmp(de->d_name, fname, rsize) == 0) {
+							if (snprintf(fpath, fplen, "%s/%s", path, fname) < fplen) {
+								/* fpath set */
+								found = true;
+							}
+							exit = true;
+						}
 					}
 				} else
 					/* no more entry */
