@@ -37,13 +37,13 @@ Provide a list of switches to enable.
 Use an alternate file instead of
 .Xr pmkfile 5 .
 .It Fl h
-Print usage.
+Display usage.
 .It Fl l
 Enable check build log.
 .It Fl o Ar file
 Override pmk.conf data with the content of the given file.
 .It Fl v
-Print the version number.
+Display the version number.
 .El
 
 .Sh FILES
@@ -58,13 +58,25 @@ configuration file
 .El
 
 .Sh EXAMPLES
-Few examples of pmk command line arguments :
-.Bd -literal -offset indent
- pmk -v
-
- pmk -b src -d use_gtk,use_qt
-
- pmk -f pmk/pmkfile -e use_curses -o pmk/pmkovr
+To display pmk version number:
+.Pp
+.Dl $ pmk -v
+.Pp
+To use
+.Em src
+as the basedir and disable two switches:
+.Pp
+.Dl $ pmk -b src -d use_gtk,use_qt
+.Pp
+To specify an alternate
+.Xr pmkfile 5 ,
+enabling one switch and overriding
+.Pa /etc/pmk/pmk.conf
+with the content of a given file (
+.Pa pmk/pmkovr
+in this case):
+.Pp
+.Dl $ pmk -f pmk/pmkfile -e use_curses -o pmk/pmkovr
 .Ed
 
 .Sh SEE ALSO
