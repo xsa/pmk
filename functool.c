@@ -45,7 +45,7 @@
 #include "dynarray.h"
 #include "common.h"
 
-#define DEBUG_FC	1
+/*#define DEBUG_FC	1*/
 
 #define NBLANG	2
 lgdata	ldata[NBLANG] = {
