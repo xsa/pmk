@@ -443,7 +443,7 @@ void char_replace(char *buf, const char search, const char replace) {
 void usage(void) {
 	fprintf(stderr, "Usage: %s [options]\n", __progname);
 	fprintf(stderr, "Options:\n");
-	fprintf(stderr, "  -h	Displays this help menu\n"); 
+	fprintf(stderr, "  -h	Display this help menu\n"); 
 	fprintf(stderr, "  -v	Display version number\n");
 	fprintf(stderr, "  -V	Verbose, display debugging messages\n");
 	exit(1);
