@@ -149,6 +149,8 @@ int hash_destroy(htable *pht) {
 	pht : hash structure
 	key : key string
 	value : value string
+
+	returns 1 on succes
 */
 
 int hash_add(htable *pht, char *key, char *value) {

@@ -57,26 +57,83 @@ bool check_bool_str(char *str) {
 	} else {
 		return(FALSE);
 	}
-
 }
 
+/*
+	define variables
+*/
 
 bool pmk_define(pmkcmd *cmd, htable *ht) {
-	printf("[%s] Processing define\n", cmd->name);
+	pmk_log("* parsing define\n");
 	return(TRUE);
 }
+
+/*
+	check binary
+*/
 
 bool pmk_check_binary(pmkcmd *cmd, htable *ht) {
-	printf("[%s] Processing label : %s\n", cmd->name, cmd->label);
+	pmk_log("* Checking binary [%s]\n", cmd->label);
 	return(TRUE);
 }
+
+/*
+	check include file
+*/
 
 bool pmk_check_include(pmkcmd *cmd, htable *ht) {
-	printf("[%s] Processing label : %s\n", cmd->name, cmd->label);
-	return(TRUE);
+	char	*incfile,
+		*incfunc,
+		incpath[MAXPATHLEN],
+		strbuf[512];
+	FILE	*ifp;
+	bool	required = TRUE;
+
+	pmk_log("* Checking include [%s]\n", cmd->label);
+
+	required = check_bool_str(hash_get(ht, "REQUIRED"));
+
+	/* get include filename */
+	incfile = hash_get(ht, "INCLUDE");
+	if (incfile == NULL) {
+		errorf("INCLUDE not assigned in label %s", cmd->label);
+		return(FALSE);
+	}
+
+	/* check if a function must be searched */
+	incfunc = hash_get(ht, "FUNCTION");
+
+	/* XXX should look in INC_PATH */
+	snprintf(incpath, MAXPATHLEN, "/usr/include/%s", incfile);
+
+	ifp = fopen(incpath, "r");
+
+	pmk_log("\tFound header %s : ", incfile);
+	if (ifp != NULL) {
+		pmk_log("yes.\n");
+		if (incfunc != NULL) {
+			pmk_log("\tFound function %s : ", incfunc);
+			while (get_line(ifp, strbuf, sizeof(strbuf))) {
+				/* XXX should check in a better way ? */
+				if (strstr(strbuf, incfunc) != NULL) {
+					pmk_log("yes.\n");
+					return(TRUE);
+				}
+			}
+			pmk_log("no.\n");
+			return(FALSE);
+		}
+	} else {
+		pmk_log("no.\n");
+		return(FALSE);
+	}
 }
 
+/*
+	check library
+*/
+
 bool pmk_check_lib(pmkcmd *cmd, htable *ht) {
-	printf("[%s] Processing label : %s\n", cmd->name, cmd->label);
+	pmk_log("* Checking library [%s]\n", cmd->label);
 	return(TRUE);
 }

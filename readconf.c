@@ -57,7 +57,7 @@ int read_config_file(FILE *f, htable *ht) {
 			len = strlen(line);
 
 	 		if (line[len - 1] != '\n' && !feof(f)) {
-				error_line(PREMAKE_CONFIG_PATH, 
+				errorf_line(PREMAKE_CONFIG_PATH, 
 						linenum, "line too long");
 				exit(1);
 			}
@@ -104,7 +104,7 @@ int parse_line(char *line, int linenum, conf_opt *opts) {
 			break;
 		case '\t' :
 			/* return a syntax error if line starts with a TAB */ 
-			error_line(PREMAKE_CONFIG_PATH, linenum,
+			errorf_line(PREMAKE_CONFIG_PATH, linenum,
 				"syntax error");
 			exit(1);
 			break;

@@ -71,4 +71,8 @@ typedef struct {
 			label[MAX_LABEL_NAME_LEN];
 } pmkcmd;
 
+
+void pmk_log(const char *, ...);
+
+
 #endif /* _PMK_H_ */

@@ -61,6 +61,7 @@
 
 
 #include <ctype.h>
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -73,16 +74,36 @@
 int	cur_line = 0,
 	err_line = 0;
 char	err_msg[MAX_ERR_MSG_LEN] = "";
+FILE	*logfile;
 
 /* keyword data */
 htable		*khash;
-cmdkw	functab[] = {
+cmdkw		functab[] = {
 	{"DEFINE", pmk_define},
 	{"CHECK_BINARY", pmk_check_binary},
 	{"CHECK_INCLUDE", pmk_check_include},
 	{"CHECK_LIB", pmk_check_lib}
 };
 
+
+/*
+*/
+
+void pmk_log(const char *fmt, ...) {
+	va_list	plst;
+	char	buf[256];
+
+	va_start(plst, fmt);
+	vsnprintf(buf, sizeof(buf), fmt, plst);
+	va_end(plst);
+
+	if (logfile != NULL) {
+		fprintf(logfile, buf);
+		fprintf(stdout, buf);
+	} else {
+		errorf("Unable to log.");
+	}
+}
 
 /*
 	process a command
@@ -395,8 +416,7 @@ void usage(void) {
 
 int main(int argc, char *argv[]) {
 	FILE	*fd,
-		*cfd,
-		*lfd;
+		*cfd;
 	char	cf[MAXPATHLEN];
 	char	idxstr[4]; /* max 999 cmds, should be enough :) */
 	int	rval = 0,
@@ -429,14 +449,14 @@ int main(int argc, char *argv[]) {
 	}
 
 	/* open log file */
-	lfd = fopen(PREMAKE_LOG, "w");
-	if (lfd == NULL) {
+	logfile = fopen(PREMAKE_LOG, "w");
+	if (logfile == NULL) {
 		errorf("while opening %s.", PREMAKE_LOG);
 		exit(1);
 	}
-	fprintf(lfd, "pmk version %s\n", PREMAKE_VERSION);
+	pmk_log("pmk version %s\n", PREMAKE_VERSION);
 
-	fprintf(lfd, "Hashing pmk keywords ");
+	pmk_log("Hashing pmk keywords ");
 	s = sizeof(functab) / sizeof(cmdkw); /* compute number of keywords */
 	khash = hash_init(s);
 	if (khash != NULL) {
@@ -444,24 +464,24 @@ int main(int argc, char *argv[]) {
 		for(i = 0 ; i < s ; i++) {
 			snprintf(idxstr, 4, "%d", i);
 			/* XXX
-			printf("[DEBUG] add '%s' to keyword hash (%s)\n", functab[i].kw, idxstr);
+			debugf("add '%s' to keyword hash (%s)\n", functab[i].kw, idxstr);
 			*/
 			hash_add(khash, functab[i].kw, idxstr);
 		}
 	}
 	/* print number of hashed command */
-	fprintf(lfd, "(%d)\n", khash->count);
+	pmk_log("(%d)\n", khash->count);
 
 	if (parse(fd) == FALSE) {
 		errorf_line(PREMAKE_FILENAME, err_line, err_msg);
 		rval = -1;
 	}
 
-	fprintf(lfd, "End of log.\n");
+	pmk_log("End of log.\n");
 
 	/* flush and close files */
-	fflush(lfd);
-	fclose(lfd);
+	fflush(logfile);
+	fclose(logfile);
 
 	fflush(fd);
 	fclose(fd);
