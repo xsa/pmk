@@ -1,4 +1,5 @@
-# pmkfile for pmk 
+# $Id$
+# pmkfile for pmk
 
 .TARGET {
 LIST="compat/compat.h.in"
