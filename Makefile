@@ -4,6 +4,8 @@ CC?=		cc
 DEBUG?=		-g
 INSTALL=	install
 
+SYSCONFDIR=	/etc
+
 # base path for install
 BASE=		/usr/local
 
@@ -14,8 +16,6 @@ BINDIR=		$(BASE)/bin
 SBINDIR=	$(BASE)/sbin
 DATADIR=	$(BASE)/share/$(PREMAKE)
 MANDIR=		$(BASE)/man
-
-SYSCONFDIR=	/etc
 
 CFGFLAGS=	-DSYSCONFDIR=\"$(SYSCONFDIR)\" -DCONFDIR=\"$(CONFDIR)\"
 
