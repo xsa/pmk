@@ -55,7 +55,14 @@
 				"printf(\"%%p\", %s);\n" \
 				"return(0);}"
 
-#define INC_TEST_NAME	"test.c"
+#define TYPE_TEST_CODE	"#include <stdio.h>\n" \
+			"int main() {\n" \
+			"if ((%s *) 0) {return(0);}\n" \
+			"if (sizeof(%s)) {return(0);}\n" \
+		        "return(0);}"
+
+
+#define TEST_FILE_NAME	"test.c"
 #define BIN_TEST_NAME	"test_bin"
 
 typedef struct {
@@ -72,5 +79,6 @@ bool pmk_check_include(pmkcmd *, htable *, pmkdata *);
 bool pmk_check_lib(pmkcmd *, htable *, pmkdata *);
 bool pmk_check_config(pmkcmd *, htable *, pmkdata *);
 bool pmk_check_pkg_config(pmkcmd *, htable *, pmkdata *);
+bool pmk_check_type(pmkcmd *, htable *, pmkdata *);
 
 #endif /* _PMK_FUNC_H_ */
