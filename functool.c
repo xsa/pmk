@@ -45,6 +45,7 @@
 #include "dynarray.h"
 #include "common.h"
 
+#define DEBUG_FC	1
 
 #define NBLANG	2
 lgdata	ldata[NBLANG] = {
@@ -181,6 +182,26 @@ char *str_to_def(char *str) {
 }
 
 /*
+	build_def
+*/
+
+char *build_def_name(char *name) {
+	static char	 def_str[MAX_HASH_KEY_LEN];
+	char		*semidef;
+
+	semidef = str_to_def(name);
+	if (semidef == NULL)
+		return(NULL);
+
+	if (snprintf(def_str, sizeof(def_str), "DEF__%s", semidef) >= sizeof(def_str))
+		return(NULL);
+
+	free(semidef);
+
+	return(def_str);
+}
+
+/*
 	record data definition tag (DEF__*)
 
 	ht : hast table to store the definition
@@ -195,31 +216,35 @@ bool record_def(htable *ht, char *name, bool status) {
 		 def_str[MAX_HASH_KEY_LEN],
 		 have_str[MAX_HASH_VALUE_LEN],
 		 def_val[MAX_HASH_VALUE_LEN];
-	int	 s;
 
 	semidef = str_to_def(name);
 	if (semidef == NULL)
 		return(false);
 
-	s = sizeof(def_str);
-	if (snprintf(def_str, s, "DEF__%s", semidef) >= s)
+	if (snprintf(def_str, sizeof(def_str), "DEF__%s", semidef) >= sizeof(def_str))
 		return(false);
 
-	s = sizeof(have_str);
-	if (snprintf(have_str, s, "HAVE_%s", semidef) >= s)
+	if (snprintf(have_str, sizeof(def_str), "HAVE_%s", semidef) >= sizeof(def_str))
 		return(false);
 
-	s = sizeof(def_val);
 	if (status == true) {
-		if (snprintf(def_val, s, "#define %s 1", have_str) >= s) 
+		if (snprintf(def_val, sizeof(def_str), "#define %s 1", have_str) >= sizeof(def_str)) 
 			return(false);
 	} else {
-		if (snprintf(def_val, s, "#undef %s", have_str) >= s)
+		if (snprintf(def_val, sizeof(def_str), "#undef %s", have_str) >= sizeof(def_str))
 			return(false);
 	}
 	
+#ifdef DEBUG_FC
+	debugf("record_def() : def_val = '%s'", def_val);
+#endif
+
+	/* pmk style define ID (DEF__*) */
 	if (hash_update_dup(ht, def_str, def_val) == HASH_ADD_FAIL)
 		return(false);
+#ifdef DEBUG_FC
+	debugf("record_def() : recorded '%s' with '%s'", def_str, def_val);
+#endif
 
 	free(semidef);
 	return(true);
@@ -235,7 +260,7 @@ bool record_def(htable *ht, char *name, bool status) {
 	returns true on success
 */
 
-bool record_val(htable *ht, char *name, char*value) {
+bool record_val(htable *ht, char *name, char *value) {
 	char	*semidef,
 		 have_str[MAX_HASH_VALUE_LEN];
 	int	 s;
@@ -250,6 +275,9 @@ bool record_val(htable *ht, char *name, char*value) {
 
 	if (hash_update_dup(ht, have_str, value) == HASH_ADD_FAIL)
 		return(false);
+#ifdef DEBUG_FC
+	debugf("record_val() : recorded '%s' with '%s'", have_str, value);
+#endif
 
 	free(semidef);
 	return(true);

@@ -44,8 +44,12 @@
 #include "compat/pmk_unistd.h"
 #include "autoconf.h"
 #include "common.h"
+#include "functool.h"
 #include "pathtools.h"
 #include "premake.h"
+
+
+#define DEBUG_AC	1
 
 
 /*
@@ -67,7 +71,8 @@ bool ac_parse_config(pmkdata *pgd) {
 		 fname[MAXPATHLEN],
 		 ftmp[MAXPATHLEN],
 		*fpath,
-		*pstr;
+		*pstr,
+		*defname;
 	htable	*ht;
 	int	 i,
 		 s,
@@ -131,13 +136,36 @@ bool ac_parse_config(pmkdata *pgd) {
 			}
 			buf[i] = CHAR_EOS;
 
-			/* check the defined value */
-			pstr = (char *) hash_get(ht, buf);
-			/* XXX could use value of DEF__ */
+			/* generate define name (DEF__*) */
+			defname = build_def_name(buf);
+			if (defname == NULL) {
+				errorf("unable to build define name for '%s'", buf);
+				return(false);
+			}
+#ifdef DEBUG_AC
+			debugf("built define name = '%s'", defname);
+#endif
+
+			/* get the defined value */
+			pstr = (char *) hash_get(ht, defname);
 			if (pstr != NULL) {
-				fprintf(fp_out, "#define %s 1\t/* pmk parsed */\n", buf);
+				fprintf(fp_out, "%s /* pmk parsed */\n", pstr);
+#ifdef DEBUG_AC
+				debugf("define value for %s = '%s'", buf, pstr);
+#endif
 			} else {
-				fprintf(fp_out, "#undef %s\t/* pmk parsed */\n", buf);
+				pstr = (char *) hash_get(ht, buf);
+				if (pstr != NULL) {
+					fprintf(fp_out, "#define %s %s /* pmk parsed */\n", buf, pstr);
+#ifdef DEBUG_AC
+					debugf("define value for %s = '%s'", buf, pstr);
+#endif
+				} else {
+					fprintf(fp_out, "#undef %s\t/* pmk parsed */\n", buf);
+#ifdef DEBUG_AC
+					debugf("unset define for '%s'", buf);
+#endif
+				}
 			}
 		} else {
 			/* write line as is */

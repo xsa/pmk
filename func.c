@@ -329,7 +329,7 @@ bool pmk_check_binary(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 		pmk_log("yes.\n");
 		/* define for template */
 		record_def(pgd->htab, filename, true);
-		record_val(pgd->htab, filename, "");
+		record_val(pgd->htab, filename, "1");
 
 		/* recording path of config tool under the key given by varname */
 		if (hash_update_dup(pgd->htab, varname, binpath) == HASH_ADD_FAIL) {
@@ -478,7 +478,7 @@ bool pmk_check_header(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 		pmk_log("yes.\n");
 		/* define for template */
 		record_def(pgd->htab, target, true);
-		record_val(pgd->htab, target, "");
+		record_val(pgd->htab, target, "1");
 		label_set(pgd->labl, cmd->label, true);
 
 		/* put result in CFLAGS, CXXFLAGS or alternative variable */
@@ -631,7 +631,7 @@ bool pmk_check_lib(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 		pmk_log("yes.\n");
 		/* define for template */
 		record_def(pgd->htab, target, true);
-		record_val(pgd->htab, target, "");
+		record_val(pgd->htab, target, "1");
 		label_set(pgd->labl, cmd->label, true);
 
 		snprintf(lib_buf, sizeof(lib_buf), "-l%s", libname);
@@ -844,7 +844,7 @@ bool pmk_check_config(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 	/* gather data */
 	/* XXX do we keep cfgtool for the tag ? */
 	record_def(pgd->htab, cfgtool, true);
-	record_val(pgd->htab, cfgtool, "");
+	record_val(pgd->htab, cfgtool, "1");
 	label_set(pgd->labl, cmd->label, true);
 
 	/* check if specific option exists */
@@ -1221,7 +1221,7 @@ bool pmk_check_type(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 		pmk_log("yes.\n");
 		/* define for template */
 		record_def(pgd->htab, type, true);
-		record_val(pgd->htab, type, "");
+		record_val(pgd->htab, type, "1");
 		label_set(pgd->labl, cmd->label, true);
 		rval = true;
 	} else {
@@ -1731,7 +1731,9 @@ bool pmk_setparam_detect(pmkcmd *cmd, prsopt *popt, pmkdata *pgd) {
 */
 
 bool pmk_set_variable(pmkcmd *cmd, prsopt *popt, pmkdata *pgd) {
-	char	*value;
+	char	 buffer[TMP_BUF_LEN], /* XXX */
+		*value,
+		*defname;
 	int	 hval;
 
 /* XXX better way to do (specific hash for override)
@@ -1760,6 +1762,22 @@ bool pmk_set_variable(pmkcmd *cmd, prsopt *popt, pmkdata *pgd) {
 			}
 			/* remaining part of the message */
 			pmk_log(" '%s' variable.\n", popt->key);
+
+			/* store definition for autoconf compatibility */
+			defname = build_def_name(popt->key);
+			if (defname == NULL) {
+				errorf("unable to build define name for '%s'.", popt->key);
+				return(false);
+			}
+			if (snprintf(buffer, sizeof(buffer), "#define %s \"%s\"", popt->key, value) >= sizeof(buffer)) {
+				errorf("buffer overflow for define value of '%s'.", popt->key);
+				return(false);
+			}
+			if (hash_update_dup(pgd->htab, defname, buffer) == HASH_ADD_FAIL) {
+				errorf(HASH_ERR_UPDT_ARG, defname);
+				return(false);
+			}
+
 		} else {
 			pmk_log("\tFailed processing of '%s'.\n", popt->key);
 			return(false);
