@@ -95,6 +95,7 @@ int main() {
 
 	for(i = 0 ; i < NBKEYS ; i++) {
 		snprintf(tstr, sizeof(tstr), "XXXXXXXXXX");
+		/* mktemp() is only used to generate random values */
 		if (mktemp(tstr) != NULL) {
 			snprintf(ttstr, sizeof(ttstr), "value.%s", tstr);
 
