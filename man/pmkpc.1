@@ -96,15 +96,13 @@ The default behavior is like if all filtering options were enabled.
 .It Pa pmkcfgtool.dat
 config tool specific data.
 .El
-
 .Sh SEE ALSO
 .Xr pkg-config 1
-
-.Sh AUTHOR
-.An Damien Couderc .
 .Sh HISTORY
 Initialy pmk was using pkg-config in a sub shell.
 Further, internal support was developed to improve the speed of data gathering.
 While studying the code of pkg-config we discovered some chunks of code that
 were unsafe (malloc return unchecked, use of strcpy without any check, ...).
 Knowing that, we decided to try to do a safer implementation and pmkpc was born.
+.Sh AUTHOR
+.An Damien Couderc .
