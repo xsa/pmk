@@ -82,3 +82,10 @@ ADD_X86_CPU_VENDOR {
 }
 
 
+LIST_X86_CPU_VENDOR {
+	"GenuineIntel" = "INTEL"
+	"AuthenticAMD" = "AMD"
+	"AMD ISBETTER" = "AMD"
+}
+
+

@@ -1,3 +1,7 @@
+05 Nov 2004 mipsator
+ * improved cpu arch detection in pmksetup.
+ * added some x86 cpu detection stuff used by tests/cpuid_test.
+
 01 Nov 2004 mipsator
  * misc changes before cpu detection.
 
