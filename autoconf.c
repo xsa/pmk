@@ -313,12 +313,12 @@ void ac_set_variables(htable *pht) {
 	hash_add(pht, "AMDEP_TRUE", strdup(""));
 	hash_add(pht, "AMDEP_FALSE", strdup("#"));
 	hash_add(pht, "AMDEPBACKSLASH", strdup("\\"));
-	hash_add(pht, "AMTAR", strdup("echo 'ARG!'"));
-	hash_add(pht, "ACLOCAL", strdup("echo 'ARG!'"));
-	hash_add(pht, "AUTOCONF", strdup("echo 'ARG!'"));
-	hash_add(pht, "AUTOHEADER", strdup("echo 'ARG!'"));
-	hash_add(pht, "AUTOMAKE", strdup("echo 'ARG!'"));
-	hash_add(pht, "MAKEINFO", strdup("echo 'ARG!'"));
+	hash_add(pht, "AMTAR", strdup("echo 'PMK: set as useless'"));
+	hash_add(pht, "ACLOCAL", strdup("echo 'PMK: set as useless'"));
+	hash_add(pht, "AUTOCONF", strdup("echo 'PMK: set as useless'"));
+	hash_add(pht, "AUTOHEADER", strdup("echo 'PMK: set as useless'"));
+	hash_add(pht, "AUTOMAKE", strdup("echo 'PMK: set as useless'"));
+	hash_add(pht, "MAKEINFO", strdup("echo 'PMK: set as useless'"));
 	hash_add(pht, "ECHO_C", strdup("\\c"));
 	hash_add(pht, "ECHO_N", strdup(""));
 	hash_add(pht, "ECHO_T", strdup(""));
@@ -338,12 +338,15 @@ void ac_set_variables(htable *pht) {
 	hash_add(pht, "PATH_SEPARATOR", strdup(":")); /* default shell is sh */
 
         /* XXX AC_CHECK_PROG stuff, should be moved somewhere */
-	hash_add(pht, "ac_ct_CC", strdup("")); /* XXX shit ? */
-	hash_add(pht, "ac_ct_RANLIB", strdup("")); /* XXX shit ? */
-	hash_add(pht, "ac_ct_STRIP", strdup("")); /* XXX shit ? */
+        pstr = (char *) hash_get(pht, "CC");
+	hash_add(pht, "ac_ct_CC", strdup(pstr)); /* XXX shit ? */
+        pstr = (char *) hash_get(pht, "RANLIB");
+	hash_add(pht, "ac_ct_RANLIB", strdup(pstr)); /* XXX shit ? */
+        pstr = (char *) hash_get(pht, "STRIP");
+	hash_add(pht, "ac_ct_STRIP", strdup(pstr)); /* XXX shit ? */
 
-	hash_add(pht, "install_sh", strdup("")); /* provide our own ? */
-	hash_add(pht, "program_transform_name", strdup(""));
+	hash_add(pht, "install_sh", strdup("PMK: set as useless")); /* provide our own ? */
+	hash_add(pht, "program_transform_name", strdup("s,x,x,"));
 
 
 	/* byte order */
