@@ -64,9 +64,11 @@ typedef struct {
 } hnode;
 
 typedef struct {
-	int	size,
-		count,
-		autogrow;
+	int	 size,
+		 count,
+		 autogrow;
+	void	 (*freeobj)(void *),
+		*(*appdobj)(void *, void *, void *);
 	hnode	*nodetab; /* array of hnode */
 } htable;
 
@@ -76,26 +78,28 @@ typedef struct {
 } hpair;
 
 typedef struct {
-	int	nkey;
+	int	  nkey;
 	char	**keys;
 } hkeys;
 
 
 int	 hash_compute(char *, int);
 htable	*hash_init(int);
+htable	*hash_init_adv(int, void (*)(void *), void *(*)(void *, void *, void *));
 bool	 hash_resize(htable *, int);
 void	 hash_set_grow(htable *);
 int	 hash_destroy(htable *);
 int	 hash_add(htable *, char *, void *);
 int	 hash_add_cell(hnode *, hcell *);
 bool	 hash_add_array(htable *, hpair *, int);
-int	 hash_append(htable *, char *, char *, char *);
+int	 hash_append(htable *, char *, void *, void *);
 void	 hash_delete(htable *, char *);
 void	*hash_get(htable *, char *);
 int	 hash_merge(htable *, htable *);
 int	 hash_nbkey(htable *);
 hkeys	*hash_keys(htable *);
-void	 hash_free_hcell(hcell *);
+void	 hash_free_hcell(htable *, hcell *);
 void	 hash_free_hkeys(hkeys *);
+void	*hash_str_append(void *, void *, void *);
 
 #endif /* _PMK_HASH_H_ */

@@ -25,8 +25,8 @@ int main() {
 		n;
 	char	tstr[256],
 		ttstr[256],
-		*val,
-		**keys = NULL;
+		*val;
+	hkeys	*phk = NULL;
 	htable	*hp;
 
 	printf("Testing init\n");
@@ -34,7 +34,7 @@ int main() {
 	hash_set_grow(hp);
 
 	printf("Adding test key\n");
-	hash_add(hp, "prefix", "/usr/local");
+	hash_add(hp, "prefix", strdup("/usr/local"));
 
 	printf("Testing key : ");
 	val = hash_get(hp, "prefix");
@@ -45,7 +45,7 @@ int main() {
 	}
 
 	printf("Appending to the test key value\n");
-	hash_append(hp, "prefix", "lll", NULL);
+	hash_append(hp, "prefix", strdup("lll"), NULL);
 
 	printf("Testing key : ");
 	val = hash_get(hp, "prefix");
@@ -56,7 +56,7 @@ int main() {
 	}
 
 	printf("Appending to the test key value with a separator\n");
-	hash_append(hp, "prefix", "/opt", ",");
+	hash_append(hp, "prefix", strdup("/opt"), ",");
 
 	printf("Testing key : ");
 	val = hash_get(hp, "prefix");
@@ -80,11 +80,10 @@ int main() {
 	printf("Adding %d test keys\n", n);
 	hash_add_array(hp, testab, n);
 
-	keys = hash_keys(hp);
-	n = hash_nbkey(hp);
+	phk = hash_keys(hp);
 	printf("Displaying %d keys :\n", n);
-	for(i = 0 ; i < n ; i++) {
-		printf("\t%s => %s\n", keys[i], hash_get(hp, keys[i]));
+	for(i = 0 ; i < phk->nkey ; i++) {
+		printf("\t%s => %s\n", (char *) phk->keys[i], (char *) hash_get(hp, phk->keys[i]));
 	}
 
 	printf("Removing 3 test keys\n");
@@ -99,8 +98,8 @@ int main() {
 		if (mktemp(tstr) != NULL) {
 			snprintf(ttstr, sizeof(ttstr), "value.%s", tstr);
 
-			n = hash_add(hp, tstr, ttstr);
-printf("(%3d) ", i);
+			n = hash_add(hp, tstr, strdup(ttstr));
+			printf("(%3d) ", i);
 			switch (n) {
 				case HASH_ADD_FAIL:
 					printf("Failed add for key %s\n", tstr);
