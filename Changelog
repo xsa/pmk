@@ -1,5 +1,6 @@
 03 Jan 2004 mipsator
  * fixed get_make_var() by replacing misused mkstemp() by tmps_open().
+ * simplified mkstemps() to remove warnings about the cast.
 
 # snapshot 0.7.9
 
