@@ -40,25 +40,8 @@ $HOME/bin/ and data in $HOME/.pmk/ of the user doing the installation.
 2) Testing
 ----------
 
-- Now if you feel like testing the whole suite, follow these steps:
-
-  (make clean)
-  ./pmkcfg.sh -u
-  make install
-  make test
-  make deinstall
-  make clean
-
-You can send us feedback to the following email :
-
-  pmk-users@lists.sourceforge.net
-
-Or if you have a sourceforge account on this forum :
-
-  http://sourceforge.net/forum/forum.php?forum_id=326673
-
-For more experienced users it is possible to directly use the pmkcfg.sh
-script, see INSTALL for further information.
+- Now if you feel like testing the whole suite, look in the sample
+  directory and check the README.sample file.
 
 3) Supported Platforms
 ----------------------

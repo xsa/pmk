@@ -42,16 +42,11 @@
 #define PREMAKE_SUBVER_PMKSCAN	"5"
 
 #ifndef DATADIR
-#define DATADIR		"/usr/local/share/pmk/"
+/* for lint */
+#define DATADIR	"/DATADIR_not_defined"
 #endif
 
-#ifdef PMK_USERMODE
-#define PMK_DATADIR	"./data/"
-#else
-#define PMK_DATADIR	DATADIR
-#endif
-
-#define PMKSCAN_DATA	PMK_DATADIR "/pmkscan.dat"
+#define PMKSCAN_DATA	DATADIR "/pmkscan.dat"
 #define PMKSCAN_OUTPUT	"pmkfile.scan"
 
 #define PSC_TOK_INCL	1
