@@ -49,6 +49,10 @@
 #define PMKSCAN_DATA	DATADIR "/pmkscan.dat"
 #define PMKSCAN_OUTPUT	"pmkfile.scan"
 
+/* languages, should use lgdata later */
+#define PMKSCAN_LANG_C          "C"
+#define PMKSCAN_LANG_CXX        "C++"
+
 #define PSC_TOK_INCL	1
 #define PSC_TOK_FUNC	2
 

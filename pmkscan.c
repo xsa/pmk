@@ -34,6 +34,9 @@
  *
  */
 
+/*#define PMKSCAN_DEBUG	1*/
+
+
 /* include it first as if it was <sys/types.h> - this will avoid errors */ 
 #include "compat/pmk_sys_types.h"
 
@@ -48,6 +51,7 @@
 #include "common.h"
 #include "dirent.h"
 #include "dynarray.h"
+#include "hash_tools.h"
 #include "parse.h"
 #include "pmkscan.h"
 #include "premake.h"
@@ -175,11 +179,12 @@ char *regex_check(char *pattern, char *line) {
 	idtf : identifier string
 	ht_fam : identifier family hash table
 	phtgen : datagen hash table
+	pht_md : misc data (ex. LANG)
 
-	return : -
+	return : boolean
 */
 
-void idtf_check(char *idtf, htable *ht_fam, htable *phtgen, char *langstr) {
+bool idtf_check(char *idtf, htable *ht_fam, htable *phtgen, htable *pht_md) {
 	char	 buf[TMP_BUF_LEN],
 		*pval,
 		*p;
@@ -202,11 +207,12 @@ void idtf_check(char *idtf, htable *ht_fam, htable *phtgen, char *langstr) {
 			switch (pot) {
 				case PO_STRING :
 					/* process a string */
-					pval = strdup(po_get_str(po));
-					p = pval;
+					p = po_get_str(po); /* XXX check */
+					pval = process_string(p, pht_md); /* XXX grmbl \n does not work */
+#ifdef PMKSCAN_DEBUG
+					debugf("Processed string '%s'", pval);
+#endif
 
-					/* XXX TODO insert code to support variables */ 
-		
 					/* record header data */
 					hash_update(phtgen, idtf, po_mk_str(pval));
 					free(pval);
@@ -217,12 +223,19 @@ void idtf_check(char *idtf, htable *ht_fam, htable *phtgen, char *langstr) {
 					da = po_get_list(po); /* XXX also pval */
 					strlcpy(buf, "", sizeof(buf));
 
+					p = hash_get(pht_md, "LANG"); /* XXX check */
+
 					for (i=0 ; i < da_usize(da) ; i++) {
 						p = da_idx(da, i);
-						strlcat(buf, p, sizeof(buf));
-						if (strncmp(p, "LANG=", 6) == 0) {
-							strlcat(buf, langstr, sizeof(buf));
-						}
+						pval = process_string(p, pht_md);
+#ifdef PMKSCAN_DEBUG
+						debugf("Processed string '%s'", pval);
+#endif
+						/*strlcat(buf, p, sizeof(buf));*/
+						/*if (strncmp(p, "LANG=", 6) == 0) {   */
+						/*        strlcat(buf, p, sizeof(buf));*/
+						/*}                                    */
+						strlcat(buf, pval, sizeof(buf));
 						strlcat(buf, "\n", sizeof(buf));
 					}
 
@@ -231,10 +244,12 @@ void idtf_check(char *idtf, htable *ht_fam, htable *phtgen, char *langstr) {
 
 				default :
 					errorf("type %u (key '%s') is not supported in idtf_check()", pot, idtf);
+                                        return(false);
 					break;
 			}
 		}
 	}
+        return(true);
 }
 
 
@@ -248,7 +263,7 @@ void idtf_check(char *idtf, htable *ht_fam, htable *phtgen, char *langstr) {
 	return : boolean
 */
 
-bool parse_c_file(char *filename, scandata *sdata, htable *phtgen, char *langstr) {
+bool parse_c_file(char *filename, scandata *sdata, htable *phtgen, htable *pht_md) {
 	FILE		*fp;
 	char		 line[TMP_BUF_LEN], /* XXX better size of buffer ? */
 			*p;
@@ -264,21 +279,21 @@ bool parse_c_file(char *filename, scandata *sdata, htable *phtgen, char *langstr
 		/* check for include */
 		p = regex_check("^#include[[:blank:]]+<([^>]+)>", line);
 		if (p != NULL) {
-#ifdef DEBUG
-			printf("Found header '%s'\n", p);
+#ifdef PMKSCAN_DEBUG
+			debugf("Found header '%s'", p);
 #endif
 
-			idtf_check(p, sdata->includes, phtgen, langstr);
+			idtf_check(p, sdata->includes, phtgen, pht_md);
 		}
 
 		/* check for function */
 		p = regex_check("([[:alnum:]_]+)[[:blank:]]*\\(", line);
 		if (p != NULL) {
-#ifdef DEBUG
-			printf("Found function '%s'\n", p);
+#ifdef PMKSCAN_DEBUG
+			debugf("Found function '%s'", p);
 #endif
 
-			idtf_check(p, sdata->functions, phtgen, langstr);
+			idtf_check(p, sdata->functions, phtgen, pht_md);
 		}
 	}
 
@@ -346,7 +361,7 @@ void dir_recurse(dynary *pda, char *path) {
 	pd = opendir(path);
 	if (pd != NULL) {
 		/* this is a directory, save it */
-#ifdef DEBUG
+#ifdef PMKSCAN_DEBUG
 		debugf("Add directory '%s' into list.", path);
 #endif
 		da_push(pda, strdup(path));
@@ -377,11 +392,17 @@ void dir_recurse(dynary *pda, char *path) {
 	return : -
 */
 
-void dir_explore(htable *pht, scandata *psd, char *path) {
-	char	buf[MAXPATHLEN];
-	int	i,
-		r;
-	glob_t	g;
+bool dir_explore(htable *pht, scandata *psd, char *path) {
+	char	 buf[MAXPATHLEN];
+	int	 i,
+		 r;
+	glob_t	 g;
+	htable	*pht_misc;
+
+        pht_misc = hash_init(256);
+        if (pht_misc == NULL) {
+                return(false);
+        }
 
 	/* globbing c files */
 	for (i = 0 ; i < NB_C_FILE_EXT ; i++) {
@@ -391,12 +412,16 @@ void dir_explore(htable *pht, scandata *psd, char *path) {
 		} else {
 			r = glob(buf, GLOB_NOSORT | GLOB_APPEND, NULL, &g);
 		}
+		/* XXX check result (r) */
 	}
+
+        /* set current language */
+        hash_update_dup(pht_misc, "LANG", PMKSCAN_LANG_C); /* XXX check */
 
 	/* parse selected files */
 	for (i = 0 ; i < g.gl_pathc ; i++) {
 		printf("\t'%s'\n", g.gl_pathv[i]);
-		parse_c_file(g.gl_pathv[i], psd, pht, "\"C\"");
+		parse_c_file(g.gl_pathv[i], psd, pht, pht_misc);
 	}
 
 	globfree(&g);
@@ -409,15 +434,26 @@ void dir_explore(htable *pht, scandata *psd, char *path) {
 		} else {
 			r = glob(buf, GLOB_NOSORT | GLOB_APPEND, NULL, &g);
 		}
+		/* XXX check result (r) */
 	}
+
+        /* set current language */
+        hash_update_dup(pht_misc, "LANG", PMKSCAN_LANG_CXX); /* XXX check */
+
 
 	/* parse selected files */
 	for (i = 0 ; i < g.gl_pathc ; i++) {
 		printf("\t'%s'\n", g.gl_pathv[i]);
-		parse_c_file(g.gl_pathv[i], psd, pht, "\"C++\"");
+		parse_c_file(g.gl_pathv[i], psd, pht, pht_misc);
 	}
 
 	globfree(&g);
+
+#ifdef PMKSCAN_DEBUG
+	debugf("destroying pht_misc");
+#endif
+	hash_destroy(pht_misc);
+	return(true);
 }
 
 /*
@@ -468,11 +504,7 @@ int main(int argc, char *argv[]) {
 	argc = argc - optind;
 	argv = argv + optind;
 
-	printf("PMKSCAN version %s", PREMAKE_VERSION);
-#ifdef DEBUG
-	printf(" [SUB #%s] [SNAP #%s]", PREMAKE_SUBVER_PMKSCAN, PREMAKE_SNAP);
-#endif
-	printf("\n\n");
+	printf("PMKSCAN version %s\n\n", PREMAKE_VERSION);
 
 
 	printf("Initializing data ... \n");
@@ -480,6 +512,12 @@ int main(int argc, char *argv[]) {
 	if (pdata == NULL) {
 		errorf("\ncannot intialize prsdata.");
 		exit(EXIT_FAILURE);
+	} else {
+        	if (parse_data_file(pdata, &sd) == false) {
+        		/* error message dysplayed by parse_data_file */
+        		prsdata_destroy(pdata);
+        		exit(EXIT_FAILURE);
+        	}
 	}
 	
 	pda = da_init();
@@ -497,11 +535,6 @@ int main(int argc, char *argv[]) {
 		exit(EXIT_FAILURE);
 	}
 
-	if (parse_data_file(pdata, &sd) == false) {
-		/* XXX TODO error message */
-		exit(EXIT_FAILURE);
-	}
-
 	if (argc != 0) {
 		/* use optional path */
 		strlcpy(buf, argv[0], sizeof(buf));
@@ -512,8 +545,8 @@ int main(int argc, char *argv[]) {
 	printf("Ok\n\n");
 
 	dir_recurse(pda, buf);
-#ifdef DEBUG
-	printf("dir_recurse finished.\n");
+#ifdef PMKSCAN_DEBUG
+	debugf("dir_recurse finished.");
 #endif
 
 	printf("Start parsing files :\n");
