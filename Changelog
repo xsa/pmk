@@ -1,3 +1,6 @@
+12 Oct 2003 mipsator
+ * removed stuff not related to autoconf into ac_set_variables().
+
 10 Oct 2003 mipsator
  * improved process_template().
  * fixed computing of top_srcdir in ac_process_dyn_var().

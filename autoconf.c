@@ -259,6 +259,7 @@ void ac_set_variables(htable *pht) {
 	hash_add(pht, "infodir", strdup("${prefix}/info"));
 	hash_add(pht, "sharedstatedir", strdup("${prefix}/com"));
 	hash_add(pht, "localstatedir", strdup("${prefix}/var"));
+	hash_add(pht, "oldincludedir", strdup("/usr/include"));
 
 	hash_add(pht, "INSTALL_DATA", strdup("${INSTALL} -m 644"));
 	hash_add(pht, "INSTALL_PROGRAM", strdup("${INSTALL}"));
@@ -335,15 +336,12 @@ void ac_set_variables(htable *pht) {
 	hash_add(pht, "LIBOBJS", strdup(""));
 	hash_add(pht, "LTLIBOBJS", strdup(""));
 	hash_add(pht, "PATH_SEPARATOR", strdup(":")); /* default shell is sh */
+
+        /* XXX AC_CHECK_PROG stuff, should be moved somewhere */
 	hash_add(pht, "ac_ct_CC", strdup("")); /* XXX shit ? */
 	hash_add(pht, "ac_ct_RANLIB", strdup("")); /* XXX shit ? */
 	hash_add(pht, "ac_ct_STRIP", strdup("")); /* XXX shit ? */
-	hash_add(pht, "am__fastdepCC_FALSE", strdup("")); /* XXX shit ? */
-	hash_add(pht, "am__fastdepCC_TRUE", strdup("#")); /* XXX shit ? */
-	hash_add(pht, "am__include", strdup("include")); /* XXX shit ? */
-	hash_add(pht, "am__leading_dot", strdup(".")); /* XXX shit ? */
-	hash_add(pht, "am__quote", strdup("")); /* XXX shit ? */
-	hash_add(pht, "oldincludedir", strdup(""));
+
 	hash_add(pht, "install_sh", strdup("")); /* provide our own ? */
 	hash_add(pht, "program_transform_name", strdup(""));
 
