@@ -1,3 +1,9 @@
+05 Feb 2004 mreindl
+ * replaced getopts with getopt in pmkcfg.sh
+ * added pkgsrc stuff for stable and snapshot
+ * big STATUS updates, pmk tested on nearly every Unix out there with C-only
+	support
+
 04 Feb 2004 mipsator
  * improved process_string() to be recursive.
  * imported experimental shared lib support.
