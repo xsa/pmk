@@ -61,13 +61,13 @@
 */
 
 bool chkpath(char *path, char *buffer) {
-	bool	exit = false,
-		dot = false,
-		dotdot = false,
-		sep = false;
+	bool	 exit = false,
+		 dot = false,
+		 dotdot = false,
+		 sep = false;
 	char	*pstr,
 		*pbuf;
-	int	s = MAXPATHLEN;
+	int	 s = MAXPATHLEN;
 
 	pstr = path;
 	pbuf = buffer;

@@ -96,11 +96,11 @@ typedef struct {
 		*labl;
 	dynary	*tlist;
 	char	*ac_file,
-		basedir[MAXPATHLEN],
-		srcdir[MAXPATHLEN],
-		pmkfile[MAXPATHLEN],
-		ovrfile[MAXPATHLEN],
-		errmsg[MAX_ERRMSG_LEN];
+		 basedir[MAXPATHLEN],
+		 srcdir[MAXPATHLEN],
+		 pmkfile[MAXPATHLEN],
+		 ovrfile[MAXPATHLEN],
+		 errmsg[MAX_ERRMSG_LEN];
 } pmkdata;
 
 

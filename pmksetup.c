@@ -50,8 +50,8 @@
 
 char	*__progname;		/* program name from argv[0] */
 
-int	verbose_flag = 0;	/* -V option at the cmd-line */ 
-char	sfn[MAXPATHLEN];	/* scratch file name */		
+int	 verbose_flag = 0;	/* -V option at the cmd-line */ 
+char	 sfn[MAXPATHLEN];	/* scratch file name */		
 FILE	*sfp;			/* scratch file pointer */
 
 
@@ -60,15 +60,15 @@ FILE	*sfp;			/* scratch file pointer */
  */
 int main(int argc, char *argv[]) {
 	FILE		*config;
-	int		ch,
-			error = 0;
+	int		 ch,
+			 error = 0;
 	htable		*ht;
 	
-	extern int	optind;
+	extern int	 optind;
 
 
 #ifndef USER_TEST
-	uid_t	uid;
+	uid_t		 uid;
 
 	/* pmksetup(8) must be run as root */
 	if ((uid = getuid()) != 0) {
@@ -216,12 +216,12 @@ int keycomp(const void *a, const void *b) {
  *	returns error code
  */
 int parse_conf(FILE *config, htable *ht) {
-	char	line[MAX_LINE_LEN],
+ 	cfg_opt	 options;
+	char	 line[MAX_LINE_LEN],
 		*v;	
-	int	linenum = 0,
-		error = 0;
-	size_t	len;	
- 	cfg_opt	options;
+	int	 linenum = 0,
+		 error = 0;
+	size_t	 len;	
 
 	/* parsing the configuration file */
 	while (fgets(line, sizeof(line), config) != NULL) {
@@ -335,8 +335,8 @@ int close_tmp_config(void) {
  *		 -1 on failure
  */
 int get_env_vars(htable *ht) {
-	char	*bin_path;
-	struct	utsname	utsname;
+	struct utsname	 utsname;
+	char		*bin_path;
 
 	if (uname(&utsname) == -1) {
 		errorf("uname.");
@@ -385,9 +385,9 @@ int get_env_vars(htable *ht) {
  *		 -1 on failure
  */ 
 int get_binaries(htable *ht) {
-	int	i;
-	char	fbin[MAXPATHLEN];	/* full binary path */
+	char	 fbin[MAXPATHLEN];	/* full binary path */
 	dynary	*stpath;
+	int	 i;
 
         /*
          * splitting the PATH variable and storing in a 
@@ -479,9 +479,10 @@ int predef_vars(htable *ht) {
  *		 -1 on failure  	
  */
 int copy_config(const char *tmp_config, const char *config) {
-	FILE	*fp_t, *fp_c;
-	int	rval;
-	char	buf[MAX_LINE_BUF];
+	FILE	*fp_t,
+		*fp_c;
+	int	 rval;
+	char	 buf[MAX_LINE_BUF];
 
 
 	if ((fp_t = fopen(tmp_config, "r")) == NULL) {
@@ -524,8 +525,8 @@ int copy_config(const char *tmp_config, const char *config) {
  *	replace: the new char which will replace 'search'
  */ 
 void char_replace(char *buf, const char search, const char replace) {
-	int	i = 0;
 	char	c;
+	int	i = 0;
 
 	while ((c = buf[i]) != CHAR_EOS) {
 		if (c == search)
@@ -540,8 +541,8 @@ void char_replace(char *buf, const char search, const char replace) {
  * Simple formated verbose function
  */
 void verbosef(const char *fmt, ...) {
-	va_list	plst;
 	char	buf[256];
+	va_list	plst;
 
 	if (verbose_flag == 1) {
 		va_start(plst, fmt);

@@ -345,9 +345,9 @@ bool process_cmd(prsdata *pdata, pmkdata *pgd) {
 */
 
 bool parse_cmdline(char **val, int nbval, pmkdata *pgd) {
-	int	 i;
 	bool	 rval = true;
 	htable	*ht;
+	int	 i;
 
 	/* don't init pscell */
 	ht = pgd->htab;
@@ -406,6 +406,7 @@ int main(int argc, char *argv[]) {
 	char	*pstr,
 		 buf[MAXPATHLEN],
 		 idxstr[4]; /* max 999 cmds, should be enough :) */
+	dynary	*da;
 	int	 rval = 0,
 		 nbpd,
 		 nbcd,
@@ -413,7 +414,6 @@ int main(int argc, char *argv[]) {
 		 chr;
 	pmkdata	 gdata;
 	prsdata	*pdata;
-	dynary	*da;
 
 	/* get current path */
 	getcwd(buf, sizeof(buf));

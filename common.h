@@ -40,7 +40,7 @@
 
 /* structure to store multiple path */
 typedef struct {
-	int	pathnum;
+	int	 pathnum;
 	char	*pathlst[MAXTOKENS];
 } mpath;
 

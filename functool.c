@@ -102,15 +102,15 @@ char *bool_to_str(bool value) {
 */
 
 bool check_version(char *vref, char *vers) {
-	int	i = 0,
-		ref,
-		cmp;
+	bool	 exit = false,
+		 rval = true;
 	char	*sr,
 		*sc;
 	dynary	*vr,
 		*vc;
-	bool	exit = false,
-		rval = true;
+	int	 i = 0,
+		 ref,
+		 cmp;
 
 	/* need to check da_* returns */
 	vr = da_init();
@@ -187,7 +187,7 @@ bool check_version(char *vref, char *vers) {
 */
 
 bool get_file_path(char *filename, char *path, char *storage, int size) {
-	bool	rval = false;
+	bool	 rval = false;
 	dynary	*bplst;
 
 	/* init dynary */
@@ -261,10 +261,10 @@ char *str_to_def(char *str) {
 
 bool record_def(htable *ht, char *name, bool status) {
 	char	*semidef,
-		def_str[MAX_HASH_KEY_LEN],
-		have_str[MAX_HASH_VALUE_LEN],
-		def_val[MAX_HASH_VALUE_LEN];
-	int	s;
+		 def_str[MAX_HASH_KEY_LEN],
+		 have_str[MAX_HASH_VALUE_LEN],
+		 def_val[MAX_HASH_VALUE_LEN];
+	int	 s;
 
 	semidef = str_to_def(name);
 	if (semidef == NULL)
@@ -308,8 +308,8 @@ bool record_def(htable *ht, char *name, bool status) {
 
 bool record_val(htable *ht, char *name, char*value) {
 	char	*semidef,
-		have_str[MAX_HASH_VALUE_LEN];
-	int	s;
+		 have_str[MAX_HASH_VALUE_LEN];
+	int	 s;
 
 	semidef = str_to_def(name);
 	if (semidef == NULL)
@@ -372,11 +372,11 @@ bool label_check(htable *lht, char *name) {
 */
 
 bool depend_check(htable *lht, pmkdata *gd) {
-	bool	rval = true;
+	bool	 rval = true;
 	char	*deplst,
 		*fdep;
 	dynary	*da;
-	int	i;
+	int	 i;
 
 	deplst = (char *)hash_get(lht, "DEPEND");
 	if (deplst == NULL) {
@@ -426,12 +426,17 @@ bool require_check(htable *pht) {
 }
 
 /*
-	XXX BLAH BLAH
+	provide data on language used
+
+	pht : XXX
+	pgd : XXX
+
+	return : lgdata structure
 */
 
 lgdata *get_lang(htable *pht, pmkdata *pgd) {
 	char	*lang;
-	int	i;
+	int	 i;
 
 	/* check first if language has been provided locally */
 	lang = (char *)hash_get(pht, "LANG");

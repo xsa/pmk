@@ -164,8 +164,8 @@ bool pmk_ac_compat(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 bool pmk_check_binary(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 	char	*filename,
 		*bpath,
-		binpath[MAXPATHLEN];
-	bool	required;
+		 binpath[MAXPATHLEN];
+	bool	 required;
 
 	pmk_log("* Checking binary [%s]\n", cmd->label);
 

@@ -2,6 +2,7 @@ common :
 - write specs somewhere in a draft
 - improve parser to parse variables, quotation marks and spaces near operator.
 - improve dynarrays to store void* instead of char*.
+- pmk objects.
 
 pmk :
 ~ finish pmk(1)
