@@ -77,13 +77,14 @@ int main(int argc, char *argv[]) {
 	htable		*ht;
 	
 	extern int	optind;
-	
+
+#ifndef USER_TEST
 	/* pmksetup(8) must be run as root */
 	if ((uid = getuid()) != 0) {
 		errorf("you must be root.");
 		exit(1);
 	} 
-
+#endif
 	
 	while ((ch = getopt(argc, argv, "hvV")) != -1)
 		switch(ch) {

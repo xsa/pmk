@@ -35,6 +35,10 @@
 
 #include "compat/pmk_stdbool.h"
 
+#ifdef USER_TEST
+#	define SYSCONFDIR	"./"
+#endif
+
 #ifndef SYSCONFDIR
 #	define SYSCONFDIR	"/etc"
 #endif
@@ -48,8 +52,10 @@
 #	define MAXPATHLEN 512
 #endif
 
-
-#define PREMAKE_VERSION		"0.2"
+#define PREMAKE_MAJOR		"0"
+#define PREMAKE_MINOR		"2"
+#define PREMAKE_SUB		"2"
+#define PREMAKE_VERSION		PREMAKE_MAJOR "." PREMAKE_MINOR
 
 #define PREMAKE_FILENAME	"pmkfile"
 #define PREMAKE_CONFIG		"pmk.conf"
