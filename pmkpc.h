@@ -110,4 +110,12 @@ typedef struct {
 	pkgdata	*ppd;
 } pcdata;
 
+/* Local functions declaration */
+bool	list_all(pkgdata *);
+bool	pcgetopt(unsigned int, char **, optcell *);
+optcell	*optcell_init(void);
+void	clean(pcdata *);
+void	optcell_destroy(optcell *);
+void	usage(void);
+
 #endif /* _PMKPKGCFG_H_ */
