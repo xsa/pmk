@@ -45,6 +45,12 @@ char	err_msg[MAX_ERR_MSG_LEN] = "";
 
 /*
 	get a line from a file
+
+	fd : file descriptor
+	line : buffer that will contain the line
+	lsize : size of the buffer
+
+	returns a boolean
 */
 
 bool getline(FILE *fd, char *line, int lsize) {
@@ -68,6 +74,11 @@ bool getline(FILE *fd, char *line, int lsize) {
 
 /*
 	parse a command
+
+	line : line to parse
+	command : pmkcmd structure where to store the command and label
+
+	returns a boolean
 */
 
 bool parse_cmd(char *line, pmkcmd *command) {
@@ -83,10 +94,19 @@ bool parse_cmd(char *line, pmkcmd *command) {
 	while (line[i] != '\0' && i < MAX_CMD_LEN) {
 		if (cmd_found == FALSE) {
 			if (line[i] != '(') {
-				/* XXX should check uppercase */
-				buf[j] = line[i];
-				j++;
+				/* check uppercase */
+				if (isalpha(line[i]) && islower(line[i])) {
+					/* my god, found a lowercase in command name ! */
+					err_line = cur_line;
+					snprintf(err_msg, sizeof(err_msg), "Command should be in uppercase");
+					return(FALSE);
+				} else {
+					/* good boy */
+					buf[j] = line[i];
+					j++;
+				}
 			} else {
+				/* end of command name */
 				buf[j] = '\0';
 				strncpy(command->name, buf, MAX_CMD_NAME_LEN);
 				cmd_found = TRUE;
@@ -132,15 +152,40 @@ bool parse_cmd(char *line, pmkcmd *command) {
 }
 
 /*
+	parse an option line
+
+	line : option line
+
+	returns a boolean
+*/
+
+bool parse_opt(char *line, pmkcmdopt *pair) {
+	char	buf[16];
+
+	snprintf(buf, sizeof(buf), "%%%i[^=]=%%%i[^$]", MAX_OPT_NAME_LEN, MAX_OPT_VALUE_LEN);
+	if (sscanf(line, buf, pair->name, pair->value) != 2) {
+			err_line = cur_line;
+			snprintf(err_msg, sizeof(err_msg), "Malformed option");
+			return(FALSE);
+	}
+
+	return(TRUE);
+}
+
+/*
 	parse the configuration file
+
 	fd : file descriptor
+
+	returns a boolean
 */
 
 bool parse(FILE *fd) {
-	char	buf[MAX_LINE_LEN];
-	int	cmd_line = 0;
-	bool	process = FALSE;
-	pmkcmd	cmd;
+	char		buf[MAX_LINE_LEN];
+	int		cmd_line = 0;
+	bool		process = FALSE;
+	pmkcmd		cmd;
+	pmkcmdopt	opt;
 
 	while (getline(fd, buf, sizeof(buf)) == TRUE) {
 		/* check first character */
@@ -169,7 +214,7 @@ bool parse(FILE *fd) {
 					} else {
 						/* found another command before end of previous */
 						err_line = cmd_line;
-						snprintf(err_msg, sizeof(err_msg), "%s not found.", END_COMMAND);
+						snprintf(err_msg, sizeof(err_msg), "%s not found", END_COMMAND);
 						return(FALSE);
 					}
 				}
@@ -178,17 +223,22 @@ bool parse(FILE *fd) {
 			default :
 				if (process == FALSE) {
 					err_line = cur_line;
-					snprintf(err_msg, sizeof(err_msg), "syntax error");
+					snprintf(err_msg, sizeof(err_msg), "Syntax error");
 					return(FALSE);
 				}
-				printf("COMMAND OPTION=%s\n", buf);
+
+				/* XXX actually just parse option without adding it to cmd */
+				if (parse_opt(buf, &opt) == FALSE) {
+					/* line number and error message already set */
+					return(FALSE);
+				}
 				break;
 		}
 	}
 
 	if (process == TRUE) {
 		err_line = cmd_line;
-		snprintf(err_msg, sizeof(err_msg), "%s not found.", END_COMMAND);
+		snprintf(err_msg, sizeof(err_msg), "%s not found", END_COMMAND);
 		return(FALSE);
 	}
 
@@ -225,16 +275,18 @@ int main(int argc, char *argv[]) {
 	snprintf(cf, sizeof(cf), "%s/%s", SYSCONFDIR, PREMAKE_CONFIG);
 	cfd = fopen(cf, "r");
 	if (cfd == NULL) {
-		printf("Error : %s not found in %s\n", PREMAKE_CONFIG, SYSCONFDIR);
+		printf("Error : %s not found in %s.\n", PREMAKE_CONFIG, SYSCONFDIR);
+		/* no pmksetup available so we ignore this error temporary ...
+		return(-1);
+		*/
 	} else {
 		fclose(cfd);
 	}
 
 	if (parse(fd) == FALSE) {
-		printf("Error line %d : %s\n", err_line, err_msg);
+		printf("Error line %d : %s.\n", err_line, err_msg);
 		return(-1);
 	}
-
 
 	fprintf(lfd, "End of log.\n");
 
