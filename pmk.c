@@ -783,7 +783,7 @@ int main(int argc, char *argv[]) {
 
 		if (gdata.ac_file != NULL) {
 			pmk_log("\nProcess '%s' for autoconf compatibility.\n", gdata.ac_file);
-			/* parse_ac_config(gdata.htab, gdata.ac_file); */
+			parse_ac_config(gdata.htab, gdata.ac_file);
 		}
 
 		pmk_log("\nEnd of log\n");

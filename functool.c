@@ -277,7 +277,6 @@ bool record_def(htable *ht, char *name, bool status) {
 	
 	if (hash_add(ht, def_str, def_val) == HASH_ADD_FAIL)
 		return(false);
-	/*debugf("%s => %s", def_str, def_val);*/
 
 	free(semidef);
 	return(true);
@@ -294,15 +293,22 @@ bool record_def(htable *ht, char *name, bool status) {
 */
 
 bool record_val(htable *ht, char *name, char*value) {
-	char	*semidef;
+	char	*semidef,
+		have_str[MAX_HASH_VALUE_LEN];
+	int	s;
 
 	semidef = str_to_def(name);
 	if (semidef == NULL)
 		return(false);
 
-	if (hash_add(ht, semidef, value) == HASH_ADD_FAIL)
+	s = sizeof(have_str);
+	if (snprintf(have_str, s, "HAVE_%s", semidef) >= s)
 		return(false);
-	/*debugf("%s => %s", semidef, value);*/
+
+	/* XXX debugf("record_val '%s'", have_str); */
+
+	if (hash_add(ht, have_str, value) == HASH_ADD_FAIL)
+		return(false);
 
 	free(semidef);
 	return(true);
@@ -321,7 +327,6 @@ bool record_val(htable *ht, char *name, char*value) {
 bool label_set(htable *ht, char *name, bool status) {
 	if (hash_add(ht, name, bool_to_str(status)) == HASH_ADD_FAIL)
 		return(false);
-	/*debugf("%s => %s", name, hash_get(ht, name));*/
 
 	return(true);
 }
@@ -441,20 +446,23 @@ bool parse_ac_config(htable *ht, char *fpath) {
 		if (pstr == NULL) {
 			/* else try to find '#undef' */
 			pstr = strstr(line, "#undef");
+			if (pstr != NULL) {
+				/* jump after "#undef" */
+				pstr = pstr + sizeof("#undef");
+			}
+		} else {
+			/* jump after "#define" */
+			pstr = pstr + sizeof("#define");
 		}
 
 		if (pstr != NULL) {
 			/* look for the definition name */
-			while (*pstr != CHAR_EOS && isspace(*pstr) != 0) {
-				pstr++;
-			}
-			if (*pstr == CHAR_EOS) {
-				return(false);
-			} else {
+			while (isspace(*pstr) != 0) {
+				/* ignore spaces */
 				pstr++;
 			}
 			s = sizeof(line);
-			while ((*pstr != '_') && (isalpha(*pstr) != 0) && (i < s)) {
+			while (((*pstr == '_') || (isalpha(*pstr) != 0)) && (i < s)) {
 				buf[i] = *pstr;
 				pstr++;
 				i++;
@@ -464,16 +472,15 @@ bool parse_ac_config(htable *ht, char *fpath) {
 			/* check the defined value */
 			pstr = hash_get(ht, buf);
 			if (pstr != NULL) {
-				/* XXX to finish */
-				debugf("found '%s' = '%s'", buf, pstr);
+				/* debugf("defining '%s'", buf); XXX */
+				fprintf(fp_out, "#define %s 1\t/* pmk parsed */\n", buf);
 			} else {
-				/* XXX to finish */
-				debugf("unknow '%s'", buf);
+				/* debugf("undefining '%s'", buf); XXX */
+				fprintf(fp_out, "#undef %s\t/* pmk parsed */\n", buf);
 			}
-			fprintf(fp_out, line); /* XXX temporary */
 		} else {
 			/* write line as is */
-			fprintf(fp_out, line);
+			fprintf(fp_out, "%s\n", line);
 		}
 	}
 

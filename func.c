@@ -188,7 +188,6 @@ bool pmk_check_binary(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 			return(false);
 		} else {
 			/* define for template */
-			record_val(gdata->htab, filename, ""); /* XXX */
 			label_set(gdata->labl, cmd->label, false);
 			return(true);
 		}
@@ -272,6 +271,7 @@ bool pmk_check_include(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 		pmk_log("yes.\n");
 		/* define for template */
 		record_def(gdata->htab, target, true); /* XXX */
+		record_val(gdata->htab, target, ""); /* XXX */
 		label_set(gdata->labl, cmd->label, true);
 		rval = true;
 	} else {
@@ -371,6 +371,7 @@ bool pmk_check_lib(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 		pmk_log("yes.\n");
 		/* define for template */
 		record_def(gdata->htab, target, true); /* XXX */
+		record_val(gdata->htab, target, ""); /* XXX */
 		label_set(gdata->labl, cmd->label, true);
 		rval = true;
 	} else {

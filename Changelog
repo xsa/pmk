@@ -1,3 +1,9 @@
+27 May 2003 mipsator
+ * record_val() is now functional.
+ * use record_val() for almost all tests.
+ * fixed/improved parse_ac_config().
+ * enabled parse_ac_config() in pmk.
+
 25 May 2003 mipsator
  * few changes related to autoconf compatibility.
 
