@@ -299,6 +299,6 @@ test_clean:
 	@echo "=> End of cleaning."
 	@echo ""
 
-test_all: install test_$(SETUP) test_$(PREMAKE) test_$(SCAN) test_$(INST) test_clean
+test_all: test_$(SETUP) test_$(PREMAKE) test_$(SCAN) test_$(INST) test_clean
 
 test: test_all
