@@ -341,7 +341,10 @@ bool record_val(htable *ht, char *name, char *value) {
 /*
 	process list of defines
 
-	XXX
+	ht : storage hash table
+	da : list of defines
+
+	returns : true on success else false
 */
 
 bool process_def_list(htable *ht, dynary *da) {
@@ -619,7 +622,13 @@ bool process_required(pmkdata *pgd, pmkcmd *pcmd, bool required,
 }
 
 /*
-	XXX
+	build c style test file
+
+	fnbuf : file name buffer
+	fbsz : file name buffer size
+	tmpl : content template
+
+	returns : true on success else false
 */
 
 bool c_file_builder(char *fnbuf, size_t fbsz, char *tmpl, ...) {
