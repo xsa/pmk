@@ -435,7 +435,6 @@ debugf("gid = %d", gid);
 				exit(EXIT_FAILURE);
 			}
 			gid = (gid_t) ul;
-			/* XXX check for ERANGE ? */
 #ifdef DEBUG_INST
 debugf("gid = %d", gid);
 #endif
@@ -466,7 +465,10 @@ debugf("create dir '%s'", src);
 			/* create path */
 			if (*src == CHAR_SEP) {
 			/* absolute path, copy */
-				strlcpy(dir, src, sizeof(dir)); /* XXX check */
+				if (strlcpy(dir, src, sizeof(dir)) >= sizeof(dir)) {
+					errorf("overflow detected in directory creation (abs. path).");
+					exit(EXIT_FAILURE);
+				}
 			} else {
 				/* relative, getting current directory */
 				if (getcwd(dir, sizeof(dir)) == NULL) {
@@ -475,7 +477,10 @@ debugf("create dir '%s'", src);
 				}
 				/* appending path */
 				strlcat(dir, STR_SEP, sizeof(dir));
-				strlcat(dir, src, sizeof(dir)); /* XXX check */
+				if (strlcat(dir, src, sizeof(dir)) >= sizeof(dir)) {
+					errorf("overflow detected in directory creation (rel. path).");
+					exit(EXIT_FAILURE);
+				}
 			}
 #ifdef DEBUG_INST
 debugf("dir = '%s'", dir);
@@ -506,7 +511,7 @@ debugf("initial dst = '%s'", dst);
 
 			/* check if destination is a directory */
 			if (stat(dst, &sb) == 0) {
-				/* XXX many checks to do (is a directory, etc ...) */
+				/* many checks to do (is a directory, etc ...) */
 				tmode = sb.st_mode & S_IFDIR;
 				if (tmode == 0) {
 					/* not a directory, XXX backup ? */
@@ -521,7 +526,10 @@ debugf("initial dst = '%s'", dst);
 						exit(EXIT_FAILURE);
 					}
 
-					strlcat(dir, pstr, sizeof(dir)); /* XXX check */
+					if (strlcat(dir, pstr, sizeof(dir)) >= sizeof(dir)) {
+						errorf("overflow detected in destination.");
+						exit(EXIT_FAILURE);
+					}
 					dst = dir;
 				}
 			}
