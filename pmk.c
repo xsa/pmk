@@ -97,7 +97,7 @@
 #include <string.h>
 
 #include "pmk.h"
-
+#include "hash.c"
 
 int	cur_line = 0,
 	err_line = 0;
@@ -134,20 +134,14 @@ bool getline(FILE *fd, char *line, int lsize) {
 }
 
 /*
-	return token of a command
-
-	cmd : commande
-
-	returns the token or TOK_NULL is the command is unknow
+	process a command
 */
 
-int get_token(char *cmd) {
-	int	token=0;
+bool process_cmd(pmkcmd *cmd, htable *ht) {
+	/* XXX */
+	printf("[DEBUG] processing command : %s\n", cmd->name);
 
-	/* hum */
-	token = TOK_NULL;
-	
-	return(0);
+	return(TRUE);
 }
 
 /*
@@ -162,7 +156,7 @@ int get_token(char *cmd) {
 bool parse_cmd(char *line, pmkcmd *command) {
 	int	i,
 		j;
-	char	buf[MAX_LABEL_LEN];
+	char	buf[MAX_LABEL_NAME_LEN];
 		/* should be big enough to contain command/label name */
 	bool	cmd_found = FALSE,
 		label_found = FALSE;
@@ -197,7 +191,7 @@ bool parse_cmd(char *line, pmkcmd *command) {
 				j++;
 			} else {
 				buf[j] = '\0';
-				strncpy(command->label, buf, MAX_CMD_NAME_LEN);
+				strncpy(command->label, buf, MAX_LABEL_NAME_LEN);
 				label_found = TRUE;
 				j = 0; /* useless :) */
 			}
@@ -209,7 +203,7 @@ bool parse_cmd(char *line, pmkcmd *command) {
 		/* command without label */
 		buf[j] = '\0';
 		strncpy(command->name, buf, MAX_CMD_NAME_LEN);
-		strncpy(command->label, "", MAX_LABEL_LEN);
+		strncpy(command->label, "", MAX_LABEL_NAME_LEN);
 	} else {
 		if (label_found == TRUE) {
 			if (line[i] != '\0') {
@@ -237,17 +231,21 @@ bool parse_cmd(char *line, pmkcmd *command) {
 	returns a boolean
 */
 
-bool parse_opt(char *line, pmkcmdopt *pair) {
-	char	buf[16];
+bool parse_opt(char *line, htable *ht) {
+	char	buf[16],
+		tkey[MAX_OPT_NAME_LEN],
+		tval[MAX_OPT_VALUE_LEN];
 
 	snprintf(buf, sizeof(buf), "%%%i[^=]=%%%i[^$]", MAX_OPT_NAME_LEN, MAX_OPT_VALUE_LEN);
-	if (sscanf(line, buf, pair->name, pair->value) != 2) {
+	if (sscanf(line, buf, tkey, tval) != 2) {
 			err_line = cur_line;
 			snprintf(err_msg, sizeof(err_msg), "Malformed option");
 			return(FALSE);
-	}
+	} else {
+		hash_add(ht, tkey, tval);
 
-	return(TRUE);
+		return(TRUE);
+	}
 }
 
 /*
@@ -263,7 +261,7 @@ bool parse(FILE *fd) {
 	int		cmd_line = 0;
 	bool		process = FALSE;
 	pmkcmd		cmd;
-	pmkcmdopt	opt;
+	htable		*tabopts = NULL;
 
 	while (getline(fd, buf, sizeof(buf)) == TRUE) {
 		/* check first character */
@@ -283,19 +281,36 @@ bool parse(FILE *fd) {
 
 					cmd_line = cur_line;
 					process = TRUE;
+					tabopts = hash_init(MAX_CMD_OPT); /* XXX is NULL ? */
+					if (tabopts == NULL) {
+						err_line = cmd_line;
+						snprintf(err_msg, sizeof(err_msg), "Cannot create hash table");
+						return(FALSE);
+					}
 				} else {
 					/* looking for end of command */
 					if (strcmp(buf, END_COMMAND) == 0) {
 						cmd_line = 0;
 						process = FALSE;
 						/* found */
+						process_cmd(&cmd, tabopts);
+
+						/* cmd processed, clean up */
+						strncpy(cmd.name, "", MAX_CMD_NAME_LEN);
+						strncpy(cmd.label, "", MAX_LABEL_NAME_LEN);
+						hash_destroy(tabopts);
 					} else {
 						/* found another command before end of previous */
+						hash_destroy(tabopts);
 						err_line = cmd_line;
 						snprintf(err_msg, sizeof(err_msg), "%s not found", END_COMMAND);
 						return(FALSE);
 					}
 				}
+				break;
+
+			case '\0' :
+				/* empty line */
 				break;
 
 			default :
@@ -306,15 +321,19 @@ bool parse(FILE *fd) {
 				}
 
 				/* XXX actually just parse option without adding it to cmd */
-				if (parse_opt(buf, &opt) == FALSE) {
+				if (parse_opt(buf, tabopts) == FALSE) {
 					/* line number and error message already set */
+					hash_destroy(tabopts);
 					return(FALSE);
+				} else {
 				}
 				break;
 		}
 	}
 
 	if (process == TRUE) {
+		/* found EOF before end of command */
+		hash_destroy(tabopts);
 		err_line = cmd_line;
 		snprintf(err_msg, sizeof(err_msg), "%s not found", END_COMMAND);
 		return(FALSE);
@@ -328,8 +347,7 @@ bool parse(FILE *fd) {
 */
 
 void usage(void) {
-	/* does nothing yet ... */
-	/* ... or maybe just makes xsa happy ;) */
+	fprintf(stderr, "usage: pmk\n");
 }
 
 /*
@@ -341,6 +359,12 @@ int main(int argc, char *argv[]) {
 		*cfd,
 		*lfd;
 	char	cf[MAXPATHLEN];
+
+
+	if (argc != 1) {
+		usage();
+		exit(1);
+	}
 
 	/* open pmk file */
 	fd = fopen(PREMAKE_FILENAME, "r");

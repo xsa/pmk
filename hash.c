@@ -138,6 +138,7 @@ int hash_destroy(htable *pht) {
 
 	free(pht->nodetab);
 	free(pht);
+	pht = NULL;
 
 	return(c);
 }
