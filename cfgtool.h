@@ -44,7 +44,7 @@
 
 #ifndef DATADIR
 /* for lint */
-#define DATADIR	"./data"
+#define DATADIR	"/DATADIR_not_defined"
 #endif
 
 #define PMKCFG_DATA		DATADIR "/pmkcfgtool.dat"

@@ -1,7 +1,11 @@
+07 Feb 2004 mreindl
+ * fixed building of the pmkscan location in usermode.
+ * moved sample tests in samples/Makefile.
+
 # snapshot 0.7.12a
 
 07 Feb 2004 mreindl
-* fix braino that got introduced with the bcopy -> memmove switch in parse.c
+ * fix braino that got introduced with the bcopy -> memmove switch in parse.c
 
 # snapshot 0.7.12
 

@@ -43,7 +43,7 @@
 
 #ifndef DATADIR
 /* for lint */
-#define DATADIR	"./data"
+#define DATADIR	"/DATADIR_not_defined"
 #endif
 
 #define PMKCOMP_DATA	DATADIR "/pmkcomp.dat"
