@@ -45,6 +45,26 @@
 #include "premake.h"
 
 
+#define NB_C_FILE_EXT 2
+char *c_file_ext[NB_C_FILE_EXT] = {
+	"c",
+	"h"
+};
+
+#define NB_CXX_FILE_EXT 10
+char *cxx_file_ext[NB_CXX_FILE_EXT] = {
+	"C",
+	"cxx",
+	"cpp",
+	"cc",
+	"c++",
+	"H",
+	"hxx",
+	"hpp",
+	"hh",
+	"h++"
+};
+
 /*
 	parse data from PMKSCAN_DATA file
 
@@ -103,10 +123,12 @@ char *regex_check(char *pattern, char *line) {
 	static char	 idtf[TMP_BUF_LEN];
 	char		*rval;
 	regex_t		 re;
-	regmatch_t	 rm[1];
+	regmatch_t	 rm[2];
 
-	if (regcomp(&re, pattern, REG_EXTENDED) != 0)
+	if (regcomp(&re, pattern, REG_EXTENDED) != 0) {
+		regfree(&re);
 		return(NULL);
+	}
 
 	if (regexec(&re, line, 2, rm, 0) == 0) {
 		/* copy header name */
@@ -293,29 +315,42 @@ void dir_recurse(dynary *pda, char *path) {
 
 void dir_explore(htable *pht, scandata *psd, char *path) {
 	char	buf[MAXPATHLEN];
-	int	i;
+	int	i,
+		r;
 	glob_t	g;
 
-	snprintf(buf, sizeof(buf), "%s/*.c", path);
-	i = glob(buf, GLOB_NOSORT, NULL, &g);
-#ifdef DEBUG
-	if (i == 0) {
-		printf("Globbing of *.c files successful.\n");
+	/* globbing c files */
+	for (i = 0 ; i < NB_C_FILE_EXT ; i++) {
+		snprintf(buf, sizeof(buf), "%s/*.%s", path, c_file_ext[i]);
+		if (i == 0) {
+			r = glob(buf, GLOB_NOSORT, NULL, &g);
+		} else {
+			r = glob(buf, GLOB_NOSORT | GLOB_APPEND, NULL, &g);
+		}
 	}
-#endif
 
-	snprintf(buf, sizeof(buf), "%s/*.h", path);
-	i = glob(buf, GLOB_NOSORT | GLOB_APPEND, NULL, &g);
-#ifdef DEBUG
-	if (i == 0) {
-		printf("Globbing of *.h files successful.\n");
-	}
-#endif
-
+	/* parse selected files */
 	for (i = 0 ; i < g.gl_pathc ; i++) {
-		printf("\t'%s'", g.gl_pathv[i]);
+		printf("\t'%s'\n", g.gl_pathv[i]);
 		parse_c_file(g.gl_pathv[i], psd, pht);
-		printf(" done.\n");
+	}
+
+	globfree(&g);
+
+	/* globbing c++ files */
+	for (i = 0 ; i < NB_CXX_FILE_EXT ; i++) {
+		snprintf(buf, sizeof(buf), "%s/*.%s", path, cxx_file_ext[i]);
+		if (i == 0) {
+			r = glob(buf, GLOB_NOSORT, NULL, &g);
+		} else {
+			r = glob(buf, GLOB_NOSORT | GLOB_APPEND, NULL, &g);
+		}
+	}
+
+	/* parse selected files */
+	for (i = 0 ; i < g.gl_pathc ; i++) {
+		printf("\t'%s'\n", g.gl_pathv[i]);
+		parse_c_file(g.gl_pathv[i], psd, pht);
 	}
 
 	globfree(&g);
