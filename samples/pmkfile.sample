@@ -54,7 +54,7 @@ FUNCTION="strlcpy"
 }
 
 # try to found gtk-config in path
-CHECK_BINARY(gtk_config) {
+CHECK_BINARY(bin_gtk_config) {
 REQUIRED=FALSE
 DEPEND=("use_gtk")
 NAME="gtk-config"
@@ -67,14 +67,19 @@ NAME="libpng-config"
 VERSION="1.2"
 }
 
-# get data for gtk+ via pkg-config
-CHECK_PKG_CONFIG(gtk_data) {
-REQUIRED=FALSE
-DEPEND=("use_gtk")
-NAME="gtk+"
-VERSION="1.2"
-CFLAGS="GTK_CFLAGS"
-LIBS="GTK_LIBS"
+IF(bin_gtk_config) {
+# enter only if 'bin_gtk_config' has been found
+
+	# get data for gtk+ via pkg-config
+	CHECK_PKG_CONFIG(gtk_data) {
+		REQUIRED = FALSE
+		DEPEND = ("use_gtk")
+		NAME = "gtk+"
+		VERSION = "1.2"
+		CFLAGS = "GTK_CFLAGS"
+		LIBS = "GTK_LIBS"
+	}
+
 }
 
 # check _Bool type

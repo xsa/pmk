@@ -119,6 +119,7 @@ prsnode	*prsnode_init(void);
 void	 prsnode_destroy(prsnode *);
 prscell	*prscell_init(int, int, int);
 void	 prscell_destroy(prscell *);
+bool	 prs_get_line(FILE *, char *, size_t);
 htable	*keyword_hash(prskw [], int);
 char	*skip_blank(char *pstr);
 char	*parse_identifier(char *, char *, size_t);
@@ -130,6 +131,9 @@ char	*parse_key(char *, pmkobj *, size_t);
 char	*parse_data(char *, pmkobj *, size_t);
 prscell	*parse_cell(char *, htable *);
 bool	 parse_opt(char *, prsopt *, char *);
+bool	 parse_node(FILE *, prsdata *, htable *, prscell *);
+bool	 parse_command(FILE *, prsdata *, prscell *);
+bool	 parse_line(FILE *, prsdata *, htable *, prsnode *);
 bool	 parse_pmkfile(FILE *, prsdata *, prskw [], size_t);
 bool	 parse_pmkconf(FILE *, htable *, char *, bool (*)(htable *, prsopt *));
 

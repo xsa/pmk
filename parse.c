@@ -226,6 +226,54 @@ void prscell_destroy(prscell *pcell) {
 }
 
 /*
+	get a line from a file and pre-process it
+
+	fp : file pointer
+	line : buffer that will contain the line
+	lsize : size of the buffer
+
+	returns a boolean :
+		- true when a line is available
+		- false when error or eof occured
+*/
+
+bool prs_get_line(FILE *fp, char *line, size_t lsize) {
+	char	*buf,
+		*p,
+		*rp;
+
+	buf = (char *) malloc(lsize);
+	if (buf == NULL)
+		return(false);
+
+	if (fgets(buf, lsize, fp) != NULL) {
+		p = buf;
+
+		/* skip blank characters */
+		while (isblank(*p) != 0) {
+			p++;
+		}
+		rp = p; /* save start of data */
+
+		while (*p != CHAR_EOS) {
+			if (*p == '\n') {
+				/* remove trailing newline */
+				*p= CHAR_EOS;
+			}
+			p++;
+		}
+
+		strlcpy(line, rp, lsize); /* no check needed */
+		free(buf);
+
+		return(true);
+	} else {
+		/* reached eof or error */
+		return(false);
+	}
+}
+
+/*
 	create hash table with keyword structures
 
 	kwtab : keyword table
@@ -844,6 +892,9 @@ bool parse_opt(char *line, prsopt *popt, char *seplst) {
 
 #ifdef DEBUG_PRS
 	switch (popt->value->type) {
+		case PO_BOOL :
+			debugf("value = *BOOL*");
+			break;
 		case PO_STRING :
 			debugf("value = '%s'", popt->value->data);
 			break;
@@ -865,6 +916,207 @@ bool parse_opt(char *line, prsopt *popt, char *seplst) {
 }
 
 /*
+	parse node
+
+	fp : file structure
+	pdata : parsing data structure
+	phkw : keyword hash table
+	pcell : parsing cell structure
+
+	return : boolean
+*/
+
+bool parse_node(FILE *fp, prsdata *pdata, htable *phkw, prscell *pcell) {
+	bool	 loop = true;
+	char	 buf[MAX_LINE_LEN],
+		*pbuf;
+	prscell	*ncell;
+	prsnode *pnode;
+	prsopt	 opt,
+		*nopt;
+
+	pnode = pcell->data;
+
+	if (pnode->token == PRS_TOK_NULL) {
+		/* XXX BLAH BLAH */
+		return(parse_line(fp, pdata, phkw, pnode));
+	} else {
+		while ((loop == true) && (prs_get_line(fp, buf, sizeof(buf)) == true)) {
+			pbuf = buf;
+
+			/* update current line number */
+			pdata->linenum++;
+
+			/* check first character */
+			switch (*pbuf) {
+				case CHAR_COMMENT :
+				case CHAR_EOS :
+					/* empty line */
+					break;
+
+				case PMK_CHAR_COMMAND_END :
+					loop = false;
+					break;
+
+				default :
+					if (parse_opt(pbuf, &opt, PRS_PMKFILE_SEP) == false) {
+						errorf("line %d : %s", pdata->linenum, parse_err);
+#ifdef DEBUG_PRS
+						debugf("parse_opt returned false");
+#endif
+						prscell_destroy(pcell);
+						return(false);
+					} else {
+#ifdef DEBUG_PRS
+						debugf("recording '%s' key", opt.key);
+#endif
+						/* init item's pcell */
+						ncell = prscell_init(pnode->token,
+								PRS_KW_ITEM, PRS_TOK_NULL);
+						if (ncell == NULL) {
+							errorf("prscell init failed");
+							return(false);
+						}
+
+						nopt = ncell->data;
+
+						/* duplicate opt content in item */
+						strlcpy(nopt->key, opt.key, sizeof(opt.key));
+						nopt->value = opt.value;
+
+						/* add item in cell node */
+						prsnode_add(pnode, ncell);
+					}
+					break;
+			}
+		}
+	}
+	return(true);
+}
+
+/*
+	parse command
+
+	fp : file structure
+	pdata : parsing data structure
+	pcell : parsing cell structure 
+
+	return : boolean
+*/
+
+bool parse_command(FILE *fp, prsdata *pdata, prscell *pcell) {
+	bool	 loop = true;
+	char	 buf[MAX_LINE_LEN],
+		*pbuf;
+	prsopt	 opt;
+
+	while ((loop == true) && (prs_get_line(fp, buf, sizeof(buf)) == true)) {
+		pbuf = buf;
+
+		/* update current line number */
+		pdata->linenum++;
+
+		/* check first character */
+		switch (*pbuf) {
+			case CHAR_COMMENT :
+			case CHAR_EOS :
+				/* empty line */
+				break;
+
+			case PMK_CHAR_COMMAND_END :
+				loop = false;
+				break;
+
+			default :
+				if (parse_opt(pbuf, &opt, PRS_PMKFILE_SEP) == false) {
+					errorf("line %d : %s", pdata->linenum, parse_err);
+#ifdef DEBUG_PRS
+					debugf("parse_opt returned false");
+#endif
+					prscell_destroy(pcell);
+					return(false);
+				} else {
+#ifdef DEBUG_PRS
+					debugf("recording '%s' key", opt.key);
+#endif
+					if (hash_add(pcell->data, opt.key, opt.value) == HASH_ADD_FAIL) {
+						strlcpy(parse_err, PRS_ERR_HASH, sizeof(parse_err));
+						return(false);
+					}
+				}
+				break;
+		}
+	}
+	return(true);
+}
+
+/*
+	parse line 
+
+	fp : file structure
+	pdata : parsing data structure
+	phkw : keyword hash table
+	pnode : parent node 
+
+	return : boolean
+*/
+
+bool parse_line(FILE *fp, prsdata *pdata, htable *phkw, prsnode *pnode) {
+	bool	 loop = true;
+	char	 buf[MAX_LINE_LEN],
+		*pbuf;
+	prscell	*pcell = NULL;
+
+	while ((loop == true) && (prs_get_line(fp, buf, sizeof(buf)) == true)) {
+
+		/* update current line number */
+		pdata->linenum++;
+
+		pbuf = buf;
+
+		switch(*pbuf) {
+			case PMK_CHAR_COMMAND_END :
+				loop = false;
+				break;
+
+		/* check first character, skip comment or empty line */
+			case CHAR_COMMENT :
+			case CHAR_EOS :
+				break;
+
+			default :
+				/* parse command and label */
+				pcell = parse_cell(pbuf, phkw);
+				if (pcell == NULL) {
+					errorf("line %d : %s", pdata->linenum, parse_err);
+#ifdef DEBUG_PRS
+					debugf("parse_cell returned NULL");
+#endif
+					return(false);
+				}
+
+#ifdef DEBUG_PRS
+				debugf("type = %d", pcell->type);
+#endif
+			
+				prsnode_add(pnode, pcell);
+
+				switch (pcell->type) {
+					case PRS_KW_NODE :
+						parse_node(fp, pdata, phkw, pcell); /* XXX */
+						break;
+					case PRS_KW_CELL :
+						parse_command(fp, pdata, pcell); /* XXX */
+						break;
+				}
+		}
+
+	}
+
+	return(true);
+}
+
+/*
 	parse pmkfile
 
 	fd : file descriptor
@@ -876,132 +1128,20 @@ bool parse_opt(char *line, prsopt *popt, char *seplst) {
 */
 
 bool parse_pmkfile(FILE *fp, prsdata *pdata, prskw kwtab[], size_t size) {
-	bool	 process = false;
-	char	 buf[MAX_LINE_LEN],
-		*pbuf;
 	htable	*phkw;
-	int	 cur_line = 0;
-	prscell	*pcell = NULL,
-		*ncell;
-	prsnode	*tnode,
-		*pnode;
-	prsopt	 opt,
-		*nopt;
+	prsnode	*tnode;
 
 	tnode = prsnode_init();
 	pdata->tree = tnode;
 
 	phkw = keyword_hash(kwtab, size);
 
-	while (get_line(fp, buf, sizeof(buf)) == true) {
-		/* update current line number */
-		cur_line++;
-
-		pbuf = skip_blank(buf);
-
-		/* check first character */
-		switch (*pbuf) {
-			case CHAR_COMMENT :
-				/* ignore comments */
-				/* printf("DEBUG COMMENT = %s\n", buf); */
-				break;
-
-			case PMK_CHAR_COMMAND_END :
-				if (process == true) {
-					process = false;
-					prsnode_add(tnode, pcell);					
-#ifdef DEBUG_PRS
-					debugf("end of command");
-#endif
-				} else {
-					errorf("line %d : %s not found", cur_line, PMK_END_COMMAND);
-					return(false);
-				}
-				break;
-
-			case CHAR_EOS :
-				/* empty line */
-				break;
-
-			default :
-				if (process == true) {
-					if (parse_opt(pbuf, &opt, PRS_PMKFILE_SEP) == false) {
-						errorf("line %d : %s", cur_line, parse_err);
-#ifdef DEBUG_PRS
-						debugf("parse_opt returned false");
-#endif
-						prscell_destroy(pcell);
-						return(false);
-					} else {
-#ifdef DEBUG_PRS
-						debugf("recording '%s' key", opt.key);
-#endif
-						/* key name and value are ok */
-						switch(pcell->type) {
-							case PRS_KW_NODE :
-								pnode = pcell->data;
-
-								/* init item's pcell */
-								ncell = prscell_init(pnode->token,
-										PRS_KW_ITEM, PRS_TOK_NULL);
-								if (ncell == NULL) {
-									errorf("prscell init failed");
-									return(false);
-								}
-
-								nopt = ncell->data;
-
-								/* duplicate opt content in item */
-								strlcpy(nopt->key, opt.key, sizeof(opt.key));
-								nopt->value = opt.value;
-
-								/* add item in cell node */
-								prsnode_add(pnode, ncell);
-								break;
-
-							case PRS_KW_CELL :
-								if (hash_add(pcell->data, opt.key, opt.value) == HASH_ADD_FAIL) {
-									strlcpy(parse_err, PRS_ERR_HASH, sizeof(parse_err));
-									return(false);
-								}
-								break;
-
-							default :
-								strlcpy(parse_err, "unknow type.", sizeof(parse_err));
-								return(false);
-								break;
-						}
-					}
-				} else {
-					/* parse command and label */
-					pcell = parse_cell(pbuf, phkw);
-					if (pcell == NULL) {
-						errorf("line %d : %s", cur_line, parse_err);
-#ifdef DEBUG_PRS
-						debugf("parse_cell returned NULL");
-#endif
-						return(false);
-					}
-
-/*					debugf("type = %d", pcell->type); / XXX */
-
-					process = true;
-				}
-
-				break;
-		}
-	}
-
-	if (process == true) {
-		/* found EOF before end of command */
-		prscell_destroy(pcell);
-		errorf("line %d : %s not found", cur_line, PMK_END_COMMAND);
+	if (parse_line(fp, pdata, phkw, tnode) != true) {
 		return(false);
 	}
 
 	if (feof(fp) == 0) {
 		/* error occured before EOF */
-		prscell_destroy(pcell);
 		errorf("end of file not reached.");
 		return(false);
 	}

@@ -70,8 +70,9 @@
 #define PMK_TOK_SETNGS	1
 #define PMK_TOK_DEFINE	2
 #define PMK_TOK_SWITCH	3
-#define PMK_TOK_TARGET	4 /* will be obsolete by SETTINGS */
-#define PMK_TOK_ACCOMP	5 /* will be obsolete by SETTINGS */
+#define PMK_TOK_IFCOND	4
+#define PMK_TOK_TARGET	5 /* will be obsolete by SETTINGS */
+#define PMK_TOK_ACCOMP	6 /* will be obsolete by SETTINGS */
 
 /* special setting tokens */
 #define PMK_TOK_SETVAR	9 /* set variable */
@@ -103,8 +104,9 @@ bool	process_node(prsnode *, pmkdata *);
 bool	pmk_define(pmkcmd *, prsnode *, pmkdata *);
 bool	pmk_target(pmkcmd *, htable *, pmkdata *);
 bool	pmk_ac_compat(pmkcmd *, htable *, pmkdata *);
-bool	pmk_switches(pmkcmd *, htable *, pmkdata *);
 bool	pmk_settings(pmkcmd *, prsnode *, pmkdata *);
+bool	pmk_ifcond(pmkcmd *, prsnode *, pmkdata *);
+bool	pmk_switches(pmkcmd *, htable *, pmkdata *);
 bool	pmk_check_binary(pmkcmd *, htable *, pmkdata *);
 bool	pmk_check_include(pmkcmd *, htable *, pmkdata *);
 bool	pmk_check_lib(pmkcmd *, htable *, pmkdata *);
