@@ -2,6 +2,8 @@
 
 /* Public Domain license */
 
+/* hash table test */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>

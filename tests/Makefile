@@ -4,9 +4,12 @@ CC?=		cc
 
 CFLAGS?=
 CFLAGS+=	-Wall
+#CFLAGS+=	-Werror
+#CFLAGS+=	-ansi -pedantic
 
 LDFLAGS?=
 
+#LINT_TARGET=	da_test.c
 
 all: hash dynary
 
@@ -23,4 +26,8 @@ clean:
 	rm -f *.o *_test *.core
 
 lint:
-	lint hash_test.c
+.ifdef LINT_TARGET
+	lint $(LINT_TARGET)
+.else
+	@echo "LINT_TARGET not set."
+.endif
