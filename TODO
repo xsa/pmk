@@ -8,7 +8,7 @@ pmk :
 ~ pmkfile(5)
 ~ compatibility with autoconf (progressing)
 - set CPPFLAGS
-- add CHECK_TYPE aka pmk_check_type()
++ add CHECK_TYPE aka pmk_check_type()
 - set LDFLAGS ?
 - cache ?
 
