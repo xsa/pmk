@@ -38,6 +38,7 @@
 #define _PREMAKE_H_
 
 #include "compat/pmk_stdbool.h"
+#include "errmsg.h"
 #include "pmk_obj.h"
 
 /* We include sys/param.h to get MAXPATHLEN.

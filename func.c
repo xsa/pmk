@@ -293,6 +293,7 @@ bool pmk_check_binary(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 		 rslt;
 	char	*filename,
 		*varname,
+		*vtmp,
 		*bpath,
 		 binpath[MAXPATHLEN];
 
@@ -308,8 +309,18 @@ bool pmk_check_binary(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 	/* check if a variable name is given */
 	varname = po_get_str(hash_get(ht, KW_OPT_VARIABLE));
 	if (varname == NULL) {
+		vtmp = str_to_def(filename);
+		if (vtmp == NULL) {
+			errorf("VARIABLE not assigned in label '%s'",
+				cmd->label);
+			return(false);
+		}
 		/* if not then use default naming scheme */
-		varname = strdup(str_to_def(filename)); /* XXX check */
+		varname = strdup(vtmp);
+		if (varname == NULL) {
+			errorf(ERRMSG_MEM);
+			return(false);
+		}
 	}
 
 	bpath = hash_get(pgd->htab, PMKCONF_PATH_BIN);
@@ -441,6 +452,10 @@ bool pmk_check_header(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 
 	if (get_file_dir_path(incfile, pstr, inc_path, sizeof(inc_path)) == true) {
 		pstr = strdup(inc_path);
+		if (pstr == NULL) {
+			errorf(ERRMSG_MEM);
+			return(false);
+		}
 		strlcpy(inc_path, "-I", sizeof(inc_path));
 		strlcat(inc_path, pstr, sizeof(inc_path));
 	} else {
@@ -681,6 +696,7 @@ bool pmk_check_config(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 			 cfgpath[MAXPATHLEN],
 			*cfgtool,
 			*varname,
+			*vtmp,
 			*modname,
 			*libvers,
 			*bpath,
@@ -712,8 +728,18 @@ bool pmk_check_config(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 	/* check if a variable name is given */
 	varname = po_get_str(hash_get(ht, KW_OPT_VARIABLE));
 	if (varname == NULL) {
+		vtmp = str_to_def(cfgtool);
+		if (vtmp == NULL) {
+			errorf("VARIABLE not assigned in label '%s'.",
+				cmd->label);
+			return(false);
+		}
 		/* if not then use default naming scheme */
-		varname = strdup(str_to_def(cfgtool)); /* XXX check */
+		varname = strdup(vtmp);
+		if (varname == NULL) {
+			errorf(ERRMSG_MEM);
+			return(false);
+		}
 	}
 
 	bpath = hash_get(pgd->htab, PMKCONF_PATH_BIN);
@@ -1491,6 +1517,10 @@ bool pmk_setparam_accompat(pmkcmd *cmd, prsopt *popt, pmkdata *pgd) {
 	pstr = po_get_str(popt->value);
 	if (*pstr != CHAR_EOS) {
 		pgd->ac_file = strdup(pstr);
+		if (pgd->ac_file == NULL) {
+			errorf(ERRMSG_MEM);
+			return(false);
+		}
 		pmk_log("\t\tSet file to '%s'.\n", pstr);
 		if (hash_update_dup(pgd->htab, AC_VAR_DEF, AC_VALUE_DEF) == HASH_ADD_FAIL) {
 			errorf(HASH_ERR_UPDT_ARG, AC_VAR_DEF);
@@ -1524,6 +1554,10 @@ bool pmk_setparam_glang(pmkcmd *cmd, prsopt *popt, pmkdata *pgd) {
 		/* check if provided lang is supported */
 		if (check_lang(pstr) != NULL) {
 			pgd->lang = strdup(pstr);
+			if (pgd->lang == NULL) {
+				errorf(ERRMSG_MEM);
+				return(false);
+			}
 			pmk_log("\t\tSet to '%s'.\n", pstr);
 			rval = true;
 		} else {
@@ -1751,4 +1785,3 @@ bool pmk_set_variable(pmkcmd *cmd, prsopt *popt, pmkdata *pgd) {
 */
 	return(true);
 }
-
