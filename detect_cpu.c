@@ -204,6 +204,7 @@ unsigned char arch_name_to_id(char *arch_name) {
 htable *arch_wrapper(prsdata *pdata, char *arch_name) {
 	htable		*pht;
 	unsigned char	 arch_id;
+
 #if defined(ARCH_X86_32) || defined(ARCH_X86_64)
 	x86_cpu_cell	*pcell;
 #endif /* ARCH_X86_32 || ARCH_X86_64 */
@@ -218,6 +219,7 @@ htable *arch_wrapper(prsdata *pdata, char *arch_name) {
 
 	switch (arch_id) {
 		case PMK_ARCH_X86_32 :
+		case PMK_ARCH_X86_64 :
 #if defined(ARCH_X86_32) || defined(ARCH_X86_64)
 		pcell = x86_cpu_cell_init();
 		if (pcell == NULL)
@@ -250,7 +252,7 @@ htable *arch_wrapper(prsdata *pdata, char *arch_name) {
  * x86 specific *
  ****************/
 
-#ifdef ARCH_X86_32
+#if defined(ARCH_X86_32) || defined(ARCH_X86_64)
 x86_cpu_feature	x86_cpu_feat_reg1[] = {
 	{X86_CPU_MASK_FEAT_FPU,		"FPU"},
 	{X86_CPU_MASK_FEAT_VME,		"VME"},
@@ -606,5 +608,5 @@ bool x86_set_cpu_data(prsdata *pdata, x86_cpu_cell *pcell, htable *pht) {
 	return(true);
 }
 
-#endif /* ARCH_X86_32 */
+#endif /* ARCH_X86_32 || ARCH_X86_64 */
 

@@ -41,7 +41,7 @@
 #include "cpu_arch_def.h"
 
 
-#ifdef ARCH_X86_32
+#if defined(ARCH_X86_32) || defined(ARCH_X86_64)
 
 /* declare X86 assembly functions */
 extern uint32_t	 x86_check_cpuid_flag(void);
@@ -54,7 +54,7 @@ extern uint32_t	x86_cpu_reg_ecx;
 extern uint32_t	x86_cpu_reg_edx;
 
 
-#endif /* ARCH_X86_32 */
+#endif /* ARCH_X86_32 || ARCH_X86_64 */
 
 #endif /* _DETECT_CPU_ASM_H_ */
 
