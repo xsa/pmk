@@ -17,24 +17,24 @@ is file containing specifications that help configuring a package build on a giv
 .Nm
 can contain comments, blank lines and commands.
 .Pp
-A command has the following format :
+A command has the following format (? character means optional) :
 .Bd -literal -offset -indent
- .<command>[(<label>)]
- [list of definition lines]
- .END
+ .<command>(<?label>) {
+ [definition line(s)]
+ }
 .Ed
 .Pp
 A definition line has the following format :
 .Bd -literal -offset -indent
-<key name>=<key value>
+<?blank><key name><?blank>=<?blank><key value>
 .Ed
 .Pp
 Example :
 .Bd -literal -offset -indent
- .CHECK_INCLUDE(string)
+ .CHECK_INCLUDE(string) {
  REQUIRED=TRUE
  INCLUDE=string.h
- .END
+ }
 .Ed
 
 .Sh SPECIFIC COMMANDS
@@ -48,10 +48,10 @@ Arguments :
 .Pp
 Example :
 .Bd -literal -offset -indent
- .DEFINE
+ .DEFINE {
  PACKAGE=myprog
  VERSION=0.1
- .END
+ }
 .Ed
 
 .It Cm TARGET
@@ -64,9 +64,9 @@ LIST : list of filename separated by a comma.
 .Pp
 Example :
 .Bd -literal -offset -indent
- .TARGET
+ .TARGET {
  LIST=Makefile.in,common.pmk
- .END
+ }
 .Ed
 
 .It Cm AC_COMPAT
@@ -79,9 +79,9 @@ FILENAME : autoconf config file.
 .Pp
 Example :
 .Bd -literal -offset -indent
- .AC_COMPAT
+ .AC_COMPAT {
  FILENAME=config.h
- .END
+ }
 .Ed
 .El
 
