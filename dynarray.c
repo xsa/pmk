@@ -59,21 +59,31 @@ dynary *da_init(void) {
 	ptr = (dynary *)malloc(sizeof(dynary));
 	if (ptr != NULL) {
 		ptr->nbcell = 0;
-		ptr->first = NULL;
-		ptr->last = NULL;
+		ptr->nextidx = 0;
+		ptr->pary = malloc(DYNARY_AUTO_GROW * sizeof(char *));
 	}
 
 	return(ptr);
 }
 
 /*
-	Get number size of the array
+	Get the size of the array
 
 	returns number of cell of the array
 */
 
 int	da_size(dynary *da) {
 	return(da->nbcell);
+}
+
+/*
+	Get the 'used' size of the array
+
+	returns the number of 'used' cells
+*/
+
+int	da_usize(dynary *da) {
+	return(da->nextidx);
 }
 
 /*
@@ -86,37 +96,33 @@ int	da_size(dynary *da) {
 */
 
 int da_push(dynary *da, char *str) {
-	da_cell	*pdac,
-		*last;
+	char	*dup,
+		**tary;
+	size_t	gsize;
 
-	pdac = (da_cell *)malloc(sizeof(da_cell));
-	if (pdac == NULL) {
-		/* malloc failed */
-		return(0);
-	}
-
-	pdac->val = strdup(str);
-	if (pdac->val == NULL) {
+	dup = strdup(str);
+	if (dup == NULL) {
 		/* strdup failed */
-		free(pdac);
 		return(0);
 	}
 
-	pdac->next = NULL;
+	if (da->nbcell == da->nextidx) {
+		/* compute growing size */
+		gsize = (da->nbcell + DYNARY_AUTO_GROW);
 
-	last = da->last;
-	if (last != NULL) {
-		/* chain in last place */
-		last->next = pdac;
-	} else {
-		/* first cell */
-		da->first = pdac;
-		da->last = pdac;
+		tary = realloc(da->pary, gsize * sizeof(char *));
+		if (tary == NULL) {
+			/* beware, da->pary is still allocated */
+			return (0);
+		}
+		da->pary = tary;
+		da->nbcell = gsize;
 	}
-	da->last = pdac;
-	da->nbcell++;
+
+	/* insert in last place */
+	da->pary[da->nextidx] = dup;
+	da->nextidx++;
 	
-	/* added */
 	return(1);
 }
 
@@ -130,20 +136,11 @@ int da_push(dynary *da, char *str) {
 */
 
 char *da_idx(dynary *da, int idx) {
-	int	i = 0;
-	da_cell	*ptr;
-
-	if (idx >= da->nbcell) {
+	if (idx >= da->nextidx) {
 		return(NULL);
 	}
 
-	ptr = da->first;
-	while (i < idx) {
-		ptr = ptr->next;
-		i++;
-	}
-
-	return(ptr->val);
+	return(da->pary[idx]);
 }
 
 /*
@@ -153,16 +150,11 @@ char *da_idx(dynary *da, int idx) {
 */
 
 void da_destroy(dynary *da) {
-	da_cell *ptr,
-		*del;
+	int	i;
 
-	if (da->nbcell != 0) {
-		ptr = da->first;
-		while (ptr != NULL) {
-			del = ptr;
-			ptr = ptr->next;
-			free(del);
-		}
-		free(da);
+	for (i = 0; i < da->nextidx; i++) {
+		free(da->pary[i]);
 	}
+	free(da->pary);
+	free(da);
 }

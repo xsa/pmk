@@ -83,7 +83,8 @@ bool pmk_target(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 	da = da_init();
 	str_to_dynary(list, ',', da);
 	
-	for (i=0 ; i < da_size(da) ; i++) {
+	for (i=0 ; i < da_usize(da) ; i++) {
+		/* da_idx should not returns null so no check */
 		pmk_log("\tAdded '%s'.\n", da_idx(da, i));
 	}
 
