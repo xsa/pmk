@@ -1,6 +1,7 @@
 # $Id$
 
 CC?=		cc
+AS?=		as
 
 CFLAGS?=	-Wall
 #CFLAGS+=	-Werror
@@ -25,6 +26,11 @@ config:
 
 comp: config comp_test.o
 	$(CC) -o comp_test $(LDFLAGS) comp_test.o
+
+cpuid:
+	$(AS) -o detect_cpu_asm.o ../detect_cpu_asm.s
+	$(CC) $(CFLAGS) -c cpuid_test.c
+	$(CC) -o cpuid_test detect_cpu_asm.o cpuid_test.o
 
 dynary: config da_test.o
 	$(CC) -o da_test $(LDFLAGS) da_test.o

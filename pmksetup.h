@@ -103,24 +103,24 @@ static  char *binaries[][2] = {
 
 
 /* Local functions declaration */
-bool	 record_data(htable *, char *, char, char *);
-bool	 gather_data(htable *);
-bool	 check_opt(htable *, prsopt *);
-bool	 open_tmp_config(void);
-bool	 close_tmp_config(void);
-bool	 get_env_vars(htable *);
-bool	 get_binaries(htable *);
-bool	 predef_vars(htable *);
-bool	 check_echo(htable *);
-bool	 check_libpath(htable *);
-char	*check_cpu_data(char *);
-bool	 dir_exists(const char *);
-bool	 byte_order_check(htable *pht);
-bool	 copy_config(const char *, const char *);
-int	 keycomp(const void *, const void *);
-void	 char_replace(char *, const char, const char);
-void	 write_new_data(htable *);
-void	 verbosef(const char *fmt, ...);
-void	 usage(void);
+bool	record_data(htable *, char *, char, char *);
+bool	gather_data(htable *);
+bool	check_opt(htable *, prsopt *);
+bool	open_tmp_config(void);
+bool	close_tmp_config(void);
+bool	get_env_vars(htable *);
+bool	get_binaries(htable *);
+bool	predef_vars(htable *);
+bool	check_echo(htable *);
+bool	check_libpath(htable *);
+bool	get_cpu_data(htable *);
+bool	dir_exists(const char *);
+bool	byte_order_check(htable *pht);
+bool	copy_config(const char *, const char *);
+int	keycomp(const void *, const void *);
+void	char_replace(char *, const char, const char);
+void	write_new_data(htable *);
+void	verbosef(const char *fmt, ...);
+void	usage(void);
 
 #endif	/* _PMKSETUP_H_ */

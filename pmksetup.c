@@ -320,7 +320,7 @@ bool gather_data(htable *pht) {
 
 	/* gather env variables and look for specific binaries */
 	if ((get_env_vars(pht) == false) || (get_binaries(pht) == false))
-		return(false);
+		return(false);	/* XXX error messages ? */
 
 	/* set predifined variables */
 	if (predef_vars(pht) == false) {
@@ -330,8 +330,15 @@ bool gather_data(htable *pht) {
 
 	check_libpath(pht);
 
+	/* check byte order */
 	if (byte_order_check(pht) == false) {
 		errorf("failure in byte order check.");
+		return(false);
+	}
+
+	/* try to detect cpu family and specific data */
+	if (get_cpu_data(pht) == false) {
+		errorf("failure in cpu detection.");
 		return(false);
 	}
 
@@ -564,8 +571,7 @@ bool close_tmp_config(void) {
  */
 bool get_env_vars(htable *pht) {
 	struct utsname	 utsname;
-	char		*bin_path,
-			*cpu_arch;
+	char		*bin_path;
 
 	if (uname(&utsname) == -1) {
 		errorf("uname : %s.", strerror(errno));
@@ -583,14 +589,6 @@ bool get_env_vars(htable *pht) {
 	if (record_data(pht, PMKCONF_OS_ARCH, 'u', utsname.machine) == false)
 		return(false);
 	verbosef("Setting '%s' => '%s'", PMKCONF_OS_ARCH, utsname.machine);
-
-	/* try to detect cpu family */
-	cpu_arch = check_cpu_data(utsname.machine);
-	if (record_data(pht, PMKCONF_HW_CPU_ARCH, 'u', cpu_arch) == false)
-		return(false);
-	verbosef("Setting '%s' => '%s'", PMKCONF_HW_CPU_ARCH, cpu_arch);
-	free(cpu_arch);
-
 
 	/* getting the environment variable PATH */
 	if ((bin_path = getenv("PATH")) == NULL) {
@@ -823,17 +821,39 @@ bool check_libpath(htable *pht) {
  *	returns:  cpu family string or NULL
  */
 
-char *check_cpu_data(char *uname_m) {
+bool get_cpu_data(htable *pht) {
+	char	*uname_m;
 	char	*pstr;
+	pmkobj	*po;
 	prsdata	*pdata;
+	prsopt	*ppo;
+
+
+	ppo = hash_get(pht, PMKCONF_OS_ARCH);
+	if (ppo == NULL)
+		return(false);
+
+	po = ppo->value;
+	if (po == NULL)
+		return(false);
+
+	uname_m = po_get_str(po);
+	if (uname_m == NULL)
+		return(false);
 
 	pdata = parse_cpu_data(PMKCPU_DATA);
+	if (pdata == NULL) {
+		return(false);
+	}
 
-	pstr = check_cpu_arch(uname_m, pdata); /* check */
+	pstr = check_cpu_arch(uname_m, pdata); /* XXX check ? */
+	if (record_data(pht, PMKCONF_HW_CPU_ARCH, 'u', pstr) == false)
+		return(false);
+	verbosef("Setting '%s' => '%s'", PMKCONF_HW_CPU_ARCH, pstr);
 
 	prsdata_destroy(pdata);
 
-	return(pstr);
+	return(true);
 }
 
 /*
