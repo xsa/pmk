@@ -51,7 +51,7 @@
 
 #ifdef USE_PMK_OBJ
 #include "pmk_obj.h"
-#define free_obj(obj) obj_free(obj)
+#define free_obj(obj) po_free(obj)
 #else
 #define free_obj(obj) free(obj)
 #endif
@@ -398,14 +398,14 @@ int hash_append(htable *pht, char *key, char *value, char *sep) {
 		 s;
 
 #ifdef USE_PMK_OBJ
-	pstr = (char *)get_obj_data(hash_get(pht, key));
+	pstr = (char *)po_get_data(hash_get(pht, key));
 #else
 	pstr = (char *)hash_get(pht, key);
 #endif
 	if (pstr == NULL) {
 		/* no previous value, adding given data */
 #ifdef USE_PMK_OBJ
-		rval = hash_add(pht, key, mk_obj_str(value));
+		rval = hash_add(pht, key, po_mk_str(value));
 #else
 		rval = hash_add(pht, key, strdup(value));
 #endif
@@ -427,7 +427,7 @@ int hash_append(htable *pht, char *key, char *value, char *sep) {
 			return(HASH_ADD_FAIL);
 
 #ifdef USE_PMK_OBJ
-		rval = hash_add(pht, key, mk_obj_str(pbuf));
+		rval = hash_add(pht, key, po_mk_str(pbuf));
 		free(pbuf);
 #else
 		rval = hash_add(pht, key, pbuf);

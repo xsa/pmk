@@ -97,7 +97,7 @@ bool read_conf(htable *ht, char *filename) {
 			default :
 				if (parse_conf_line(buf, ln, &co) == 0) {
 					/* parse ok */
-					if (hash_add(ht, co.key, mk_obj_str(co.val)) == HASH_ADD_FAIL) {
+					if (hash_add(ht, co.key, po_mk_str(co.val)) == HASH_ADD_FAIL) {
 						errorf("hash failure.");
 						return(false);
 					}
@@ -213,7 +213,7 @@ bool process_template(char *template, pmkdata *pgd) {
 					replace = false;
 					*ptbf = CHAR_EOS;
 
-					ptmp = (char *)get_obj_data(hash_get(ht, tbuf));
+					ptmp = (char *)po_get_data(hash_get(ht, tbuf));
 					if (ptmp == NULL) {
 						/* not a valid tag, put it back */
 						*pbf = PMK_TAG_CHAR;
@@ -284,7 +284,7 @@ bool process_template(char *template, pmkdata *pgd) {
 */
 
 bool check_cmd(char *cmdname, pmkdata *pgd) {
-	if ((char *)get_obj_data(hash_get(keyhash, cmdname)) == NULL) {
+	if ((char *)po_get_data(hash_get(keyhash, cmdname)) == NULL) {
 		errorf("unknown command %s.", cmdname);
 		return(false);
 	} else {
@@ -318,7 +318,7 @@ bool process_cmd(prsdata *pdata, pmkdata *pgd) {
 		cmd.name = pcell->name;
 		cmd.label = pcell->label;
 
-		aidx = (char *)get_obj_data(hash_get(keyhash, cmd.name));
+		aidx = (char *)po_get_data(hash_get(keyhash, cmd.name));
 		if (aidx == NULL)
 			return(false);
 
@@ -497,7 +497,7 @@ int main(int argc, char *argv[]) {
 		/* fill keywords hash */
 		for(i = 0 ; i < nbfunc ; i++) {
 			snprintf(idxstr, 4, "%d", i);
-			if (hash_add(keyhash, functab[i].kw, mk_obj_str(idxstr)) == HASH_ADD_FAIL) {
+			if (hash_add(keyhash, functab[i].kw, po_mk_str(idxstr)) == HASH_ADD_FAIL) {
 				errorf("hash failure");
 				exit(1);
 			}
@@ -515,9 +515,9 @@ int main(int argc, char *argv[]) {
 		exit(1);
 	} else {
 		/* initialize some variables */
-		hash_add(gdata.htab, "CFLAGS", mk_obj_str("")); /* XXX check ? */
-		hash_add(gdata.htab, "CPPFLAGS", mk_obj_str("")); /* XXX check ? */
-		hash_add(gdata.htab, "LIBS", mk_obj_str("")); /* XXX check ? */
+		hash_add(gdata.htab, "CFLAGS", po_mk_str("")); /* XXX check ? */
+		hash_add(gdata.htab, "CPPFLAGS", po_mk_str("")); /* XXX check ? */
+		hash_add(gdata.htab, "LIBS", po_mk_str("")); /* XXX check ? */
 	}
 
 	gdata.labl = hash_init(MAX_LABEL_KEY);
@@ -626,7 +626,7 @@ int main(int argc, char *argv[]) {
 			exit(1);
 		}
 		for (i = 0 ; (i < da_usize(da)) && (rval == 0) ; i++) {
-			pstr = da_idx(da, i);
+			pstr = po_get_data(da_idx(da, i));
 			if (pstr != NULL) {
 				abspath(gdata.srcdir, pstr, buf); /* XXX check ??? */
 				if (process_template(buf, &gdata) == false) {

@@ -256,11 +256,15 @@ bool str_to_dynary(char *str, char sep, dynary *da) {
 	int	 s;
 
 	s = sizeof(buf);
+/*
+	s = sizeof(str);
+	buf = (char *) malloc(strlen(str + 1));
+*/
 	pbuf = buf;
 	while (*str != CHAR_EOS) {
 		if (*str == sep) {
 			*pbuf = CHAR_EOS;
-			if (da_push(da, strdup(buf)) == false) {
+			if (da_push(da, po_mk_str(buf)) == false) {
 				return(false);
 			}
 			pbuf = buf;
@@ -277,7 +281,7 @@ bool str_to_dynary(char *str, char sep, dynary *da) {
 		str++;
 	}
 	*pbuf = CHAR_EOS;
-	if (da_push(da, strdup(buf)) == false) {
+	if (da_push(da, po_mk_str(buf)) == false) {
 		return(false);
 	}
 
@@ -308,7 +312,7 @@ bool find_file(dynary *da, char *fname, char *fpath, int fplen) {
 	rsize = sizeof(de->d_name);
 
 	for (i = 0 ; (i < da_usize(da)) && (found == false) ; i++) {
-		path = da_idx(da, i);
+		path = po_get_data(da_idx(da, i));
 		if (path == NULL) {
 			/* skipping */
 			dp = NULL;

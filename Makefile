@@ -54,9 +54,9 @@ $(SCAN).o:
 hash.o:
 	$(CC) $(CFLAGS) -DUSE_PMK_OBJ -c hash.c
 
-#dynarray.o:
-#	$(CC) $(CFLAGS) -DUSE_PMK_OBJ -c dynarray.c
-#
+dynarray.o:
+	$(CC) $(CFLAGS) -DUSE_PMK_OBJ -c dynarray.c
+
 
 all: $(PREMAKE) $(SETUP) $(SCAN)
 
