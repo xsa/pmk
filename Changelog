@@ -1,5 +1,6 @@
 09 Dec 2003  mipsator
  * added MEMBER in CHECK_TYPE to check structure member.
+ * updated pmkfile man page.
 
 06 Dec 2003  mipsator
  * moved fcopy() from pmkinstall to common.
