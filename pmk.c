@@ -87,6 +87,7 @@ void process_dyn_var(pmkdata *pgd, char *template) {
 	basedir = pgd->basedir;
 
 	/* get template path */
+	/* NOTE : we use strdup to avoid problem with linux's dirname */
 	pstr = strdup(template);
 	strlcpy(stpath, dirname(pstr), sizeof(stpath));
 	free(pstr);
@@ -542,7 +543,7 @@ int main(int argc, char *argv[]) {
 
 					if (uabspath(buf, optarg, gdata.basedir) == false) {
 						errorf("Cannot use basedir argument");
-						exit(1);
+						exit(EXIT_FAILURE);
 					}
 					basedir_set = true;
 					break;
@@ -562,7 +563,7 @@ int main(int argc, char *argv[]) {
 					/* XXX check if path is valid */
 					if (uabspath(buf, optarg, gdata.pmkfile) == false) {
 						errorf("Cannot use file argument");
-						exit(1);
+						exit(EXIT_FAILURE);
 					}
 
 					/* path of pmkfile is also the srcdir base */
@@ -579,7 +580,7 @@ int main(int argc, char *argv[]) {
 					/* XXX check if path is valid */
 					if (uabspath(buf, optarg, gdata.ovrfile) == false) {
 						errorf("Cannot use file argument");
-						exit(1);
+						exit(EXIT_FAILURE);
 					}
 
 					ovrfile_set = true;
@@ -588,14 +589,14 @@ int main(int argc, char *argv[]) {
 				case 'v' :
 					/* display version */
 					fprintf(stdout, "%s\n", PREMAKE_VERSION);
-					exit(0);
+					exit(EXIT_SUCCESS);
 					break;
 
 				case 'h' :
 				case '?' :
 				default :
 					usage();
-					exit(1);
+					exit(EXIT_FAILURE);
 					break;
 			}
 		}
@@ -620,21 +621,21 @@ int main(int argc, char *argv[]) {
 	if (gdata.htab == NULL) {
 		clean(&gdata);
 		errorf("cannot initialize hash table for data.");
-		exit(1);
+		exit(EXIT_FAILURE);
 	}
 
 	gdata.labl = hash_init(MAX_LABEL_KEY);
 	if (gdata.labl == NULL) {
 		clean(&gdata);
 		errorf("cannot initialize hash table for labels.");
-		exit(1);
+		exit(EXIT_FAILURE);
 	}
 
 	/* init prsdata structure */
 	pdata = prsdata_init();
 	if (pdata == NULL) {
 		errorf("cannot intialize prsdata.");
-		exit(1);
+		exit(EXIT_FAILURE);
 	}
 
 	fp = fopen(PREMAKE_CONFIG_PATH, "r");
@@ -643,7 +644,7 @@ int main(int argc, char *argv[]) {
 			/* parsing failed */
 			clean(&gdata);
 			errorf("failed to parse '%s'", PREMAKE_CONFIG_PATH);
-			exit(1);
+			exit(EXIT_FAILURE);
 		}
 		fclose(fp);
 		nbpd = hash_nbkey(gdata.htab);
@@ -651,7 +652,7 @@ int main(int argc, char *argv[]) {
 		/* configuration file not found */
 		clean(&gdata);
 		errorf("cannot parse '%s', run pmksetup", PREMAKE_CONFIG_PATH);
-		exit(1);
+		exit(EXIT_FAILURE);
 	}
 
 	/* initialize some variables */
@@ -696,7 +697,7 @@ int main(int argc, char *argv[]) {
 				/* parsing failed */
 				clean(&gdata);
 				errorf("failed to parse '%s'", gdata.ovrfile);
-				exit(1);
+				exit(EXIT_FAILURE);
 			}
 			fclose(fp);
 			nbpd = hash_nbkey(gdata.htab);
@@ -704,7 +705,7 @@ int main(int argc, char *argv[]) {
 			/* configuration file not found */
 			clean(&gdata);
 			errorf("cannot parse '%s'");
-			exit(1);
+			exit(EXIT_FAILURE);
 		}
 	}
 
@@ -715,7 +716,7 @@ int main(int argc, char *argv[]) {
 		} else {
 			clean(&gdata);
 			errorf("incorrect optional arguments");
-			exit(1);
+			exit(EXIT_FAILURE);
 		}
 	} else {
 		nbcd = 0;
@@ -725,7 +726,7 @@ int main(int argc, char *argv[]) {
 	if (pmk_log_open(PREMAKE_LOG) == false) {
 		clean(&gdata);
 		errorf("while opening %s.", PREMAKE_LOG);
-		exit(1);
+		exit(EXIT_FAILURE);
 	}
 
 	pmk_log("PMK version %s", PREMAKE_VERSION);
@@ -746,7 +747,7 @@ int main(int argc, char *argv[]) {
 	if (fp == NULL) {
 		clean(&gdata);
 		errorf("while opening %s.", gdata.pmkfile);
-		exit(1);
+		exit(EXIT_FAILURE);
 	}
 
 	if (parse_pmkfile(fp, pdata, kw_pmkfile, nbkwpf) == false) {
@@ -756,7 +757,7 @@ int main(int argc, char *argv[]) {
 		fclose(fp);
 		pmk_log_close();
 		errorf("while opening %s.", gdata.pmkfile);
-		exit(1);
+		exit(EXIT_FAILURE);
 	}
 
 	fflush(fp);
@@ -773,7 +774,7 @@ int main(int argc, char *argv[]) {
 
 		if (da == NULL) {
 			errorf("no target given.");
-			exit(1);
+			exit(EXIT_FAILURE);
 		}
 		for (i = 0 ; (i < da_usize(da)) && (rval == 0) ; i++) {
 			pstr = da_idx(da, i);

@@ -296,7 +296,7 @@ htable *keyword_hash(prskw kwtab[], int nbkw) {
 			if (hash_add(phkw, kwtab[i].kw, pkw) == HASH_ADD_FAIL) { /* no need to strdup */
 				free(pkw);
 				errorf("hash failure");
-				exit(1);
+				exit(EXIT_FAILURE);
 			}
 		}
 	}

@@ -440,14 +440,14 @@ int main(int argc, char *argv[]) {
 				case 'v' :
 					/* display version */
 					fprintf(stdout, "%s\n", PREMAKE_VERSION);
-					exit(0);
+					exit(EXIT_SUCCESS);
 					break;
 
 				case 'h' :
 				case '?' :
 				default :
 					usage();
-					exit(1);
+					exit(EXIT_FAILURE);
 					break;
 			}
 		}
@@ -467,14 +467,14 @@ int main(int argc, char *argv[]) {
 	pdata = prsdata_init();
 	if (pdata == NULL) {
 		errorf("\ncannot intialize prsdata.");
-		exit(1);
+		exit(EXIT_FAILURE);
 	}
 	
 	pda = da_init();
 	if (pda == NULL) {
 		prsdata_destroy(pdata);
 		errorf("init failed.");
-		exit(1);
+		exit(EXIT_FAILURE);
 	}
 
 	pfdata = hash_init(256); /* XXX can do better :) */
@@ -482,12 +482,12 @@ int main(int argc, char *argv[]) {
 		prsdata_destroy(pdata);
 		da_destroy(pda);
 		errorf("init failed.");
-		exit(1);
+		exit(EXIT_FAILURE);
 	}
 
 	if (parse_data_file(pdata, &sd) == false) {
 		/* XXX TODO error message */
-		exit(1);
+		exit(EXIT_FAILURE);
 	}
 
 	if (argc != 0) {
