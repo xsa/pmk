@@ -429,7 +429,7 @@ bool parse_ac_config(htable *ht, char *fpath) {
 		s,
 		fe;
 
-	strlcpy(ftmp, "config_tmp", sizeof(ftmp)); /* XXX make it better */
+	strlcpy(ftmp, "config_tmp", sizeof(ftmp)); /* XXX check ? */
 	fp_out = fopen(ftmp, "w");
 	if (fp_out == NULL)
 		return(false);
