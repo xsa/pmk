@@ -33,6 +33,7 @@
 #define EMPTY_OPT_VALUE ""
 
 #include <sys/param.h>
+#include <stdarg.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -188,4 +189,57 @@ void error(char *errmsg) {
 
 void error_line(char *filename, int line, char *errmsg) {
 	fprintf(stderr, "Error in '%s' line %d : %s\n", filename, line, errmsg);
+}
+
+/*
+	formated simple error
+
+	fmt : format string followed by arguments
+*/
+
+void errorf(const char *fmt, ...) {
+	va_list	plst;
+	char	buf[256];
+
+	va_start(plst, fmt);
+	vsnprintf(buf, sizeof(buf), fmt, plst);
+	va_end(plst);
+
+	fprintf(stderr, "Error : %s\n", buf);
+}
+
+/*
+	formated parse error
+
+	filename : parsed file name
+	line : line of error
+	fmt : format string followed by arguments
+*/
+
+void errorf_line(char *filename, int line, const char *fmt, ...) {
+	va_list	plst;
+	char	buf[256];
+
+	va_start(plst, fmt);
+	vsnprintf(buf, sizeof(buf), fmt, plst);
+	va_end(plst);
+
+	fprintf(stderr, "Error in '%s' line %d : %s\n", filename, line, buf);
+}
+
+/*
+	formated debug message
+
+	fmt : format string followed by arguments
+*/
+
+void debugf(const char *fmt, ...) {
+	va_list	plst;
+	char	buf[256];
+
+	va_start(plst, fmt);
+	vsnprintf(buf, sizeof(buf), fmt, plst);
+	va_end(plst);
+
+	fprintf(stdout, "!DEBUG! %s\n", buf);
 }

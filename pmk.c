@@ -412,8 +412,7 @@ int main(int argc, char *argv[]) {
 	snprintf(cf, sizeof(cf), "%s/%s", SYSCONFDIR, PREMAKE_CONFIG);
 	cfd = fopen(cf, "r");
 	if (cfd == NULL) {
-		snprintf(err_msg, sizeof(err_msg), "%s not found in %s.", PREMAKE_CONFIG, SYSCONFDIR);
-		error(err_msg);
+		errorf("%s not found in %s.", PREMAKE_CONFIG, SYSCONFDIR);
 		/* no pmksetup available so we ignore this error temporary ...
 		return(-1);
 		*/
@@ -424,16 +423,14 @@ int main(int argc, char *argv[]) {
 	/* open pmk file */
 	fd = fopen(PREMAKE_FILENAME, "r");
 	if (fd == NULL) {
-		snprintf(err_msg, sizeof(err_msg), "while opening %s.", PREMAKE_FILENAME);
-		error(err_msg);
+		errorf("while opening %s.", PREMAKE_FILENAME);
 		exit(1);
 	}
 
 	/* open log file */
 	lfd = fopen(PREMAKE_LOG, "w");
 	if (lfd == NULL) {
-		snprintf(err_msg, sizeof(err_msg), "while opening %s.", PREMAKE_LOG);
-		error(err_msg);
+		errorf("while opening %s.", PREMAKE_LOG);
 		exit(1);
 	}
 	fprintf(lfd, "pmk version %s\n", PREMAKE_VERSION);
