@@ -97,11 +97,6 @@
 	pmk.conf keys
 */
 
-/* OBSOLETE */
-#define PREMAKE_KEY_BINPATH	"BIN_PATH"
-#define PREMAKE_KEY_INCPATH	"INC_PATH"
-#define PREMAKE_KEY_LIBPATH	"LIB_PATH"
-
 /* new key names (see also pmksetup.h) */
 #define PMKCONF_BIN_AR		"BIN_AR"
 #define PMKCONF_BIN_AWK		"BIN_AWK"

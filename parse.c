@@ -50,9 +50,6 @@
 #define DEBUG_PRS	1
 */
 
-/* for compatibility with 0.6, will be removed later */
-/* #define PRS_OBSOLETE */
-
 char	parse_err[MAX_ERRMSG_LEN];
 
 
@@ -693,12 +690,7 @@ char *parse_key(char *pstr, pmkobj *po, size_t size) {
 */
 
 char *parse_data(char *pstr, pmkobj *po, size_t size) {
-#ifdef PRS_OBSOLETE
-	char	*buffer,
-		*rptr;
-#else
 	char	*rptr;
-#endif
 
 	po->type = PO_NULL;
 
@@ -716,33 +708,7 @@ char *parse_data(char *pstr, pmkobj *po, size_t size) {
 			break;
 
 		default :
-#ifdef PRS_OBSOLETE
-			buffer = (char *) malloc(size);
-			if (buffer == NULL) {
-				strlcpy(parse_err, PRS_ERR_ALLOC, sizeof(parse_err));
-				return(NULL);
-			}
-
 			rptr = parse_bool(pstr, po, size);
-			if (rptr != NULL) {
-				return(rptr);
-			}
-
-			pstr = parse_obsolete(pstr, buffer, size);
-
-			if (pstr == NULL) {
-				free(buffer);
-				strlcpy(parse_err, PRS_ERR_OVERFLOW, sizeof(parse_err));
-				return(NULL);
-			}
-
-			po->type = PO_STRING;
-			po->data = buffer;
-
-			rptr = pstr;
-#else
-			rptr = parse_bool(pstr, po, size);
-#endif
 			break;
 	}
 	return(rptr);
@@ -759,32 +725,11 @@ char *parse_data(char *pstr, pmkobj *po, size_t size) {
 
 prscell *parse_cell(char *line, htable *phkw) {
 	char	 name[CMD_LEN],
-#ifdef PRS_OBSOLETE
-		*pname, /* temporary to skip leading dot */
-#endif
 		*pstr;
-#ifdef PRS_OBSOLETE
-	int	 s;
-#endif
 	prscell	*pcell;
 	prskw	*pkw;
 
-#ifdef PRS_OBSOLETE
-	pname = name;
-	s = sizeof(name);
-
-	if (*line == PMK_CHAR_COMMAND) {
-		/* skip leading dot */
-		*pname = *line;
-		pname++;
-		line++;
-		s--;
-	}
-
-	pstr = parse_identifier(line, pname, s);
-#else
 	pstr = parse_identifier(line, name, sizeof(name));
-#endif
 	if (pstr == NULL) {
 		strlcpy(parse_err, "command parsing failed.", sizeof(parse_err));
 		return(NULL);

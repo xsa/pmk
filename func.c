@@ -48,18 +48,6 @@
 
 
 prskw	kw_pmkfile[] = {
-/*		XXX for compatibility */
-		{".DEFINE",		PMK_TOK_DEFINE, PRS_KW_NODE, PMK_TOK_SETVAR},
-		{".AC_COMPAT",		PMK_TOK_ACCOMP, PRS_KW_CELL, PRS_TOK_NULL},
-		{".SWITCHES",		PMK_TOK_SWITCH, PRS_KW_CELL, PRS_TOK_NULL}, /* XXX will be node */
-		{".TARGET",		PMK_TOK_TARGET, PRS_KW_CELL, PRS_TOK_NULL},
-		{".CHECK_BINARY",	PMK_TOK_CHKBIN, PRS_KW_CELL, PRS_TOK_NULL},
-		{".CHECK_INCLUDE",	PMK_TOK_CHKINC, PRS_KW_CELL, PRS_TOK_NULL},
-		{".CHECK_LIB",		PMK_TOK_CHKLIB, PRS_KW_CELL, PRS_TOK_NULL},
-		{".CHECK_CONFIG",	PMK_TOK_CHKCFG, PRS_KW_CELL, PRS_TOK_NULL},
-		{".CHECK_PKG_CONFIG",	PMK_TOK_CHKPKG, PRS_KW_CELL, PRS_TOK_NULL},
-		{".CHECK_TYPE",		PMK_TOK_CHKTYP, PRS_KW_CELL, PRS_TOK_NULL},
-/*		XXX new format */
 		{"DEFINE",		PMK_TOK_DEFINE, PRS_KW_NODE, PMK_TOK_SETVAR},
 		{"SETTINGS",		PMK_TOK_SETNGS, PRS_KW_NODE, PMK_TOK_SETPRM},
 		{"IF",			PMK_TOK_IFCOND,	PRS_KW_NODE, PRS_TOK_NULL},
@@ -87,12 +75,6 @@ bool func_wrapper(prscell *pcell, pmkdata *pgd) {
 	switch (cmd.token) {
 		case PMK_TOK_DEFINE :
 			rval = pmk_define(&cmd, pcell->data, pgd);
-			break;
-		case PMK_TOK_TARGET :
-			rval = pmk_target(&cmd, pcell->data, pgd); /* OBSOLETE */
-			break;
-		case PMK_TOK_ACCOMP :
-			rval = pmk_ac_compat(&cmd, pcell->data, pgd); /* OBSOLETE */
 			break;
 		case PMK_TOK_SWITCH :
 			rval = pmk_switches(&cmd, pcell->data, pgd);
@@ -179,57 +161,6 @@ bool pmk_define(pmkcmd *cmd, prsnode *pnode, pmkdata *pgd) {
 	pmk_log("\n* Parsing define\n");
 
 	return(process_node(pnode, pgd));
-}
-
-/*
-	set target files (templates) to process
-	NOTE : now OBSOLETE with new format, kept for compatibility
-*/
-
-bool pmk_target(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
-	pmkobj	*po;
-	prsopt	 opt;
-
-	pmk_log("\n* Parsing target\n");
-	pmk_log("\tWARNING : TARGET command is obsolete, consider using SETTINGS.\n");
-
-	strlcpy(opt.key, "TARGET", sizeof(opt.key));
-
-	/* check if TARGET has been provided */
-	po = hash_get(ht, "LIST");
-	if (po != NULL) {
-		opt.value = po;
-	} else {
-		errorf("syntax error in LIST.");
-		return(false);
-	}
-
-	return(pmk_set_parameter(cmd, &opt, pgd));
-}
-
-/*
-	gnu autoconf compatibility
-	NOTE : now OBSOLETE with new format, kept for compatibility
-*/
-
-bool pmk_ac_compat(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
-	char	*acfile;
-	prsopt	 opt;
-
-	pmk_log("\n* Parsing ac_compat\n");
-	pmk_log("\tWARNING : AC_COMPAT command is obsolete, consider using SETTINGS.\n");
-
-	strlcpy(opt.key, "AC_COMPAT", sizeof(opt.key));
-
-	/* check if FILENAME has been provided */
-	acfile= po_get_str(hash_get(ht, "FILENAME"));
-	if (acfile != NULL) {
-		opt.value = po_mk_str(acfile);
-	} else {
-		opt.value = po_mk_str("");
-	}
-
-	return(pmk_set_parameter(cmd, &opt, pgd));
 }
 
 /*
@@ -323,30 +254,19 @@ bool pmk_check_binary(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 
 	filename = po_get_str(hash_get(ht, "NAME"));
 	if (filename == NULL) {
-		filename = po_get_str(hash_get(ht, "FILENAME")); /* OBSOLETE */
-		if (filename == NULL) {
-			errorf("NAME not assigned in label '%s'", cmd->label);
-			return(false);
-		}
+		errorf("NAME not assigned in label '%s'", cmd->label);
+		return(false);
 	}
 
 	varname = po_get_str(hash_get(ht, "VARIABLE"));
 	if (varname == NULL) {
-		varname = po_get_str(hash_get(ht, "VARNAME")); /* OBSOLETE */
-		if (varname == NULL) {
-			varname = str_to_def(filename);
-		}
+		varname = str_to_def(filename);
 	}
 
 	bpath = hash_get(pgd->htab, PMKCONF_PATH_BIN);
 	if (bpath == NULL) {
-		/* OBSOLETE, check for BIN_PATH for compatibility with 6.0 */
-		bpath = hash_get(pgd->htab, PREMAKE_KEY_BINPATH);
-		if (bpath == NULL) {
-			errorf("%s not available.", PMKCONF_PATH_BIN);
-			return(false);
-		}
-		pmk_log("\tWARNING : BIN_PATH is obsolete, update pmk.conf with pmksetup.\n");
+		errorf("%s not available.", PMKCONF_PATH_BIN);
+		return(false);
 	}
 
 	if (depend_check(ht, pgd) == false) {
@@ -417,11 +337,8 @@ bool pmk_check_header(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 	/* get include filename */
 	incfile = po_get_str(hash_get(ht, "NAME"));
 	if (incfile == NULL) {
-		incfile = po_get_str(hash_get(ht, "INCLUDE")); /* OBSOLETE */
-		if (incfile == NULL) {
-			errorf("NAME not assigned in label '%s'", cmd->label);
-			return(false);
-		}
+		errorf("NAME not assigned in label '%s'", cmd->label);
+		return(false);
 	}
 
 	/* check if a function must be searched */
@@ -474,13 +391,8 @@ bool pmk_check_header(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 	/* use each element of INC_PATH with -I */
 	pstr = (char *) hash_get(pgd->htab, PMKCONF_PATH_INC);
 	if (pstr == NULL) {
-		/* OBSOLETE, check for BIN_PATH for compatibility with 6.0 */
-		pstr = (char *) hash_get(pgd->htab, PREMAKE_KEY_INCPATH);
-		if (pstr == NULL) {
-			errorf("%s not available.", PMKCONF_PATH_INC);
-			return(false);
-		}
-		pmk_log("\tWARNING : INC_PATH is obsolete, update pmk.conf with pmksetup.\n");
+		errorf("%s not available.", PMKCONF_PATH_INC);
+		return(false);
 	}
 
 	if (get_file_dir_path(incfile, pstr, inc_path, sizeof(inc_path)) == true) {
@@ -587,11 +499,8 @@ bool pmk_check_lib(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 
 	libname = po_get_str(hash_get(ht, "NAME"));
 	if (libname == NULL) {
-		libname = po_get_str(hash_get(ht, "LIBNAME")); /* OBSOLETE */
-		if (libname == NULL) {
-			errorf("NAME not assigned in label '%s'.", cmd->label);
-			return(false);
-		}
+		errorf("NAME not assigned in label '%s'.", cmd->label);
+		return(false);
 	}
 
 	libfunc = po_get_str(hash_get(ht, "FUNCTION"));
@@ -740,30 +649,19 @@ bool pmk_check_config(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 
 	cfgtool = po_get_str(hash_get(ht, "NAME"));
 	if (cfgtool == NULL) {
-		cfgtool = po_get_str(hash_get(ht, "CFGTOOL")); /* OBSOLETE */
-		if (cfgtool == NULL) {
-			errorf("NAME not assigned in label '%s'.", cmd->label);
-			return(false);
-		}
+		errorf("NAME not assigned in label '%s'.", cmd->label);
+		return(false);
 	}
 
 	varname = po_get_str(hash_get(ht, "VARIABLE"));
 	if (varname == NULL) {
-		varname = po_get_str(hash_get(ht, "VARNAME")); /* OBSOLETE */
-		if (varname == NULL) {
-			varname = str_to_def(cfgtool);
-		}
+		varname = str_to_def(cfgtool);
 	}
 
 	bpath = hash_get(pgd->htab, PMKCONF_PATH_BIN);
 	if (bpath == NULL) {
-		/* OBSOLETE, check for BIN_PATH for compatibility with 6.0 */
-		bpath = hash_get(pgd->htab, PREMAKE_KEY_BINPATH);
-		if (bpath == NULL) {
-			errorf("BIN_PATH not available.");
-			return(false);
-		}
-		pmk_log("\tWARNING : BIN_PATH is obsolete, update pmk.conf with pmksetup.\n");
+		errorf("%s not available.", PMKCONF_PATH_BIN);
+		return(false);
 	}
 
 	/* check for alternative variable for CFLAGS */
@@ -936,11 +834,8 @@ bool pmk_check_pkg_config(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 
 	target = po_get_str(hash_get(ht, "NAME"));
 	if (target == NULL) {
-		target = po_get_str(hash_get(ht, "PACKAGE")); /* OBSOLETE */
-		if (target == NULL) {
-			errorf("NAME not assigned in label '%s'.", cmd->label);
-			return(false);
-		}
+		errorf("NAME not assigned in label '%s'.", cmd->label);
+		return(false);
 	}
 
 	/* try to get pkg-config path from pmk.conf setting */
@@ -950,13 +845,8 @@ bool pmk_check_pkg_config(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 			and check in the path */
 		bpath = hash_get(pgd->htab, PMKCONF_PATH_BIN);
 		if (bpath == NULL) {
-			/* OBSOLETE, check for BIN_PATH for compatibility with 6.0 */
-			bpath = hash_get(pgd->htab, PREMAKE_KEY_BINPATH);
-			if (bpath == NULL) {
-				errorf("BIN_PATH not available.");
-				return(false);
-			}
-			pmk_log("\tWARNING : BIN_PATH is obsolete, update pmk.conf with pmksetup.\n");
+		        errorf("%s not available.", PMKCONF_PATH_BIN);
+			return(false);
 		}
 		/* XXX ugly here, should clean ... */
 		if (get_file_path("pkg-config", bpath, pc_buf, sizeof(pc_buf)) == true) {
@@ -1131,11 +1021,8 @@ bool pmk_check_type(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 
 	type = po_get_str(hash_get(ht, "NAME"));
 	if (type == NULL) {
-		type = po_get_str(hash_get(ht, "TYPE")); /* OBSOLETE */
-		if (type == NULL) {
-			errorf("NAME not assigned in label '%s'", cmd->label);
-			return(false);
-		}
+		errorf("NAME not assigned in label '%s'", cmd->label);
+		return(false);
 	}
 
 	if (depend_check(ht, pgd) == false) {
