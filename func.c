@@ -40,6 +40,7 @@
 #include "compat/pmk_string.h"
 #include "compat/pmk_unistd.h"
 #include "autoconf.h"
+#include "cfgtool.h"
 #include "common.h"
 #include "detect.h"
 #include "func.h"
@@ -674,12 +675,10 @@ bool pmk_check_lib(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 */
 
 bool pmk_check_config(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
-	FILE		*rpipe;
 	bool		 required = true,
 			 rval = false;
 	char		 pipebuf[TMP_BUF_LEN],
 			 cfgpath[MAXPATHLEN],
-			 cfgcmd[MAXPATHLEN],
 			*cfgtool,
 			*varname,
 			*libvers,
@@ -733,7 +732,6 @@ bool pmk_check_config(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 		/* use default variable of the used language */
 		cflags = pld->cflg;
 	}
-	pmk_log("\tStore compiler flags in '%s'.\n", cflags);
 
 	/* check for alternative variable for LIBS */
 	libs = po_get_str(hash_get(ht, "LIBS"));
@@ -749,7 +747,6 @@ bool pmk_check_config(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 		/* use default library variable */
 		libs = "LIBS"; /* XXX TODO use a define */
 	}
-	pmk_log("\tStore library flags in '%s'.\n", libs);
 
 	if (depend_check(ht, pgd) == false) {
 		pmk_log("\t%s\n", pgd->errmsg);
@@ -815,20 +812,12 @@ bool pmk_check_config(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 			opt = CFGTOOL_OPT_VERSION;
 		}
 
-		snprintf(cfgcmd, sizeof(cfgcmd), "%s %s 2>/dev/null", cfgpath, opt);
-
-		rpipe = popen(cfgcmd, "r");
-		if (rpipe == NULL) {
-			errorf("cannot get version from '%s'.", cfgtool);
+		if (ct_get_version(cfgpath, opt, pipebuf, sizeof(pipebuf)) == false) {
+			errorf("cannot get version from '%s'.", cfgpath);
 			return(false);
 		} else {
 			pmk_log("\tFound version >= %s : ", libvers);
-	
-			if (get_line(rpipe, pipebuf, sizeof(pipebuf)) == false) {
-				errorf("cannot get version from '%s'.", cfgcmd);
-				return(false);
-			}
-			pclose(rpipe);
+
 			if (check_version(libvers, pipebuf) != true) {
 				/* version does not match */
 				pmk_log("no (%s).\n", pipebuf);
@@ -859,22 +848,16 @@ bool pmk_check_config(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 		opt = CFGTOOL_OPT_CFLAGS;
 	}
 
-	snprintf(cfgcmd, sizeof(cfgcmd), "%s %s 2>/dev/null", cfgpath, opt);
-
-	rpipe = popen(cfgcmd, "r");
-	if (rpipe != NULL) {
-		/* put result in CFLAGS */
-		if (get_line(rpipe, pipebuf, sizeof(pipebuf)) == false) {
-			errorf("cannot get CFLAGS.");
-			pclose(rpipe);
-			return(false);
-		}
-		pclose(rpipe);
-
+	if (ct_get_data(cfgpath, opt, "", pipebuf, sizeof(pipebuf)) == false) {
+		errorf("cannot get CFLAGS.");
+		return(false);
+	} else {
 		/* put result in CFLAGS, CXXFLAGS or alternative variable */
 		if (single_append(pgd->htab, cflags, strdup(pipebuf)) == false) {
 			errorf("failed to append '%s' in '%s'.", pipebuf, cflags);
 			return(false);
+		} else {
+			pmk_log("\tStored compiler flags in '%s'.\n", cflags);
 		}
 	}
 
@@ -885,22 +868,16 @@ bool pmk_check_config(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 		opt = CFGTOOL_OPT_LIBS;
 	}
 
-	snprintf(cfgcmd, sizeof(cfgcmd), "%s %s 2>/dev/null", cfgpath, opt);
-
-	rpipe = popen(cfgcmd, "r");
-	if (rpipe != NULL) {
-		/* put result in LIBS */
-		if (get_line(rpipe, pipebuf, sizeof(pipebuf)) == false) {
-			errorf("cannot get LIBS");
-			pclose(rpipe);
-			return(false);
-		}
-		pclose(rpipe);
-
+	if (ct_get_data(cfgpath, opt, "", pipebuf, sizeof(pipebuf)) == false) {
+		errorf("cannot get LIBS.");
+		return(false);
+	} else {
 		/* put result in LIBS or alternative variable */
 		if (single_append(pgd->htab, libs, strdup(pipebuf)) == false) {
 			errorf("failed to append '%s' in '%s'.", pipebuf, libs);
 			return(false);
+		} else {
+			pmk_log("\tStored library flags in '%s'.\n", libs);
 		}
 	}
 
@@ -967,7 +944,6 @@ bool pmk_check_pkg_config(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 		/* use default variable of the used language */
 		cflags = pld->cflg;
 	}
-	pmk_log("\tStore compiler flags in '%s'.\n", cflags);
 
 	/* check for alternative variable for LIBS */
 	libs = po_get_str(hash_get(ht, "LIBS"));
@@ -983,8 +959,6 @@ bool pmk_check_pkg_config(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 		/* use default library variable */
 		libs = "LIBS"; /* XXX TODO use a define */
 	}
-	pmk_log("\tStore library flags in '%s'.\n", libs);
-
 
 	if (depend_check(ht, pgd) == false) {
 		pmk_log("\t%s\n", pgd->errmsg);
@@ -1110,6 +1084,8 @@ bool pmk_check_pkg_config(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 			pkgdata_destroy(ppd);
 			errorf("failed to append '%s' in '%s'.", pipebuf, cflags);
 			return(false);
+		} else {
+			pmk_log("\tStored compiler flags in '%s'.\n", cflags);
 		}
 	}
 
@@ -1125,6 +1101,8 @@ bool pmk_check_pkg_config(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 			pkgdata_destroy(ppd);
 			errorf("failed to append '%s' in '%s'.", pipebuf, libs);
 			return(false);
+		} else {
+			pmk_log("\tStored library flags in '%s'.\n", libs);
 		}
 	}
 
