@@ -608,6 +608,24 @@ bool parse_cmdline(char **val, int nbval, htable *ht) {
 }
 
 /*
+	clean global data
+*/
+
+void clean(pmkdata *gd) {
+	if (gd->htab != NULL) {
+		hash_destroy(gd->htab);
+	}
+
+	if (gd->labl != NULL) {
+		hash_destroy(gd->labl);
+	}
+
+	if (gd->tlist != NULL) {
+		da_destroy(gd->tlist);
+	}
+}
+
+/*
 	usage
 */
 
@@ -665,14 +683,39 @@ int main(int argc, char *argv[]) {
 	argc = argc - optind;
 	argv = argv + optind;
 
+	s = sizeof(functab) / sizeof(cmdkw); /* compute number of keywords */
+	keyhash = hash_init(s);
+	if (keyhash != NULL) {
+		/* fill keywords hash */
+		for(i = 0 ; i < s ; i++) {
+			snprintf(idxstr, 4, "%d", i);
+			hash_add(keyhash, functab[i].kw, idxstr); /* XXX test ? */
+		}
+	} else {
+		errorf("cannot initialize keyword table");
+		return(1);
+	}
+
 	/* initialise global data has htable */
 	gdata.htab = hash_init(MAX_DATA_KEY);
+	if (gdata.htab == NULL) {
+		clean(&gdata);
+		errorf("cannot initialize hash table for data.");
+		return(1);
+	}
+
+	gdata.labl = hash_init(MAX_LABEL_KEY);
+	if (gdata.labl == NULL) {
+		clean(&gdata);
+		errorf("cannot initialize hash table for labels.");
+		return(1);
+	}
 
 	if (read_conf(gdata.htab) == true) {
 		nbpd = hash_nbkey(gdata.htab);
 	} else {
 		/* configuration file not found */
-		hash_destroy(gdata.htab);
+		clean(&gdata);
 		return(1);
 	}
 
@@ -681,6 +724,7 @@ int main(int argc, char *argv[]) {
 		if (parse_cmdline(argv, argc, gdata.htab) == true) {
 			nbcd = argc;
 		} else {
+			clean(&gdata);
 			errorf("incorrect optional arguments");
 			return(1);
 		}
@@ -694,26 +738,19 @@ int main(int argc, char *argv[]) {
 	}
 	fd = fopen(pmkfile, "r");
 	if (fd == NULL) {
+		clean(&gdata);
 		errorf("while opening %s.", pmkfile);
 		exit(1);
 	}
 
 	/* open log file */
 	if (pmk_log_open(PREMAKE_LOG) == false) {
+		clean(&gdata);
 		errorf("while opening %s.", PREMAKE_LOG);
 		exit(1);
 	}
 
 	pmk_log("PreMaKe version %s\n\n", PREMAKE_VERSION);
-	s = sizeof(functab) / sizeof(cmdkw); /* compute number of keywords */
-	keyhash = hash_init(s);
-	if (keyhash != NULL) {
-		/* fill keywords hash */
-		for(i = 0 ; i < s ; i++) {
-			snprintf(idxstr, 4, "%d", i);
-			hash_add(keyhash, functab[i].kw, idxstr); /* XXX test ? */
-		}
-	}
 	/* print number of hashed command */
 	pmk_log("Hashed %d pmk keywords.\n", keyhash->count);
 
@@ -736,7 +773,6 @@ int main(int argc, char *argv[]) {
 				rval = 1;
 			}
 		}
-		da_destroy(da);
 
 		pmk_log("\nEnd of log\n");
 	}
@@ -753,7 +789,7 @@ int main(int argc, char *argv[]) {
 	}
 
 	/* clean global data */
-	hash_destroy(gdata.htab);
+	clean(&gdata);
 
 	return(rval);
 }

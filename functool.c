@@ -61,6 +61,25 @@ bool check_bool_str(char *str) {
 }
 
 /*
+	convert boolean into string
+
+	value : boolean value to convert to string
+
+	returns the string
+*/
+
+char *bool_to_str(bool value) {
+	static char	bstr[6];
+
+	if (value == true) {
+		snprintf(bstr, sizeof(bstr), "TRUE");
+	} else {
+		snprintf(bstr, sizeof(bstr), "FALSE");
+	}
+	return(bstr);
+}
+
+/*
 	check version
 
 	vref : reference version
@@ -212,6 +231,13 @@ char *str_to_def(char *str) {
 }
 
 /*
+	record data definition tag (DEF__*)
+
+	ht : hast table to store the definition
+	name : data name
+	status : status of data
+
+	returns true on success
 */
 
 bool record_def(htable *ht, char *name, bool status) {
@@ -237,6 +263,13 @@ bool record_def(htable *ht, char *name, bool status) {
 }
 
 /*
+	record data tag
+
+	ht : hast table to store the definition
+	name : data name
+	value : value to store
+
+	returns true on success
 */
 
 bool record_val(htable *ht, char *name, char*value) {
@@ -247,5 +280,32 @@ bool record_val(htable *ht, char *name, char*value) {
 	/*debugf("%s => %s", semidef, value);*/
 
 	free(semidef);
+	return(true); /* XXX */
+}
+
+/*
+	set label
+*/
+
+bool label_set(htable *ht, char *name, bool status) {
+	hash_add(ht, name, bool_to_str(status));
+	/*debugf("%s => %s", name, hash_get(ht, name));*/
+	return(true); /* XXX */
+}
+
+/*
+	check label
+*/
+
+bool label_check(htable *ht, char *name) {
+	return(check_bool_str(hash_get(ht, name))); /* XXX test ?*/
+}
+
+/*
+	check depends
+*/
+
+bool depend_check(htable *ht, char *deplst) {
+	/* code to parse list of depends name */
 	return(true); /* XXX */
 }
