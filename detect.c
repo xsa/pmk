@@ -42,79 +42,203 @@
 #include "common.h"
 #include "detect.h"
 
-
-comp_cell	compilers[] = {
-	{CI_TENDRA,		CD_TENDRA,	"__TenDRA__",		"0"},
-	{CI_GNUC,		CD_GNUC,	"__GNUC__",		"__GNUC__"},
-	{CI_SUNPRO_C,		CD_SUNPRO_C,	"__SUNPRO_C",		"__SUNPRO_C"},
-	{CI_SUNPRO_CXX,		CD_SUNPRO_CXX,	"__SUNPRO_CC",		"__SUNPRO_CC"},
-	{CI_COMPAQ_C,		CD_COMPAQ_C,	"__DECC",		"__DECC_VER"},
-	{CI_COMPAQ_CXX,		CD_COMPAQ_CXX,	"__DECCXX",		"__DECCXX_VER"},
-	{CI_HP_ANSI_C,		CD_HP_ANSI_C,	"__HP_cc",		"0"},
-	{CI_HP_ANSI_CXX,	CD_HP_ANSI_CXX,	"__HP_aCC",		"__HP_aCC"},
-	{CI_IBM_XLC,		CD_IBM_XLC,	"__xlC__",		"__xlC"},
-	{CI_INTEL,		CD_INTEL,	"__INTEL_COMPILER",	"__INTEL_COMPILER"},
-	{CI_SGI_MPRO,		CD_SGI_MPRO,	"__sgi",		"__COMPILER_VERSION"}
+prskw	kw_pmkcomp[] = {
+	{"ADD_COMPILER", PCC_TOK_ADDC, PRS_KW_CELL}
 };
 
-int nbcomp = sizeof(compilers) / sizeof(comp_cell);
+int	nbkwpc = sizeof(kw_pmkcomp) / sizeof(prskw);
+
+
+/*
+	add a new compiler cell
+*/
+
+bool add_compiler(comp_data *pcd, htable *pht) {
+	comp_cell	*pcell;
+	char	*pstr;
+	htable	*pcht;
+
+	pcht = pcd->cht;
+
+	pcell = (comp_cell *) malloc(sizeof(comp_cell));
+	if (pcell == NULL)
+		return(false);
+
+	pstr = po_get_str(hash_get(pht, "ID"));
+	if (pstr == NULL) {
+		free(pcell);
+		return(false);
+	} else {
+		pcell->c_id = strdup(pstr);
+	}
+
+	pstr = po_get_str(hash_get(pht, "DESCR"));
+	if (pstr == NULL) {
+		free(pcell);
+		return(false);
+	} else {
+		pcell->descr = strdup(pstr);
+	}
+
+	pstr = po_get_str(hash_get(pht, "MACRO"));
+	if (pstr == NULL) {
+		free(pcell);
+		return(false);
+	} else {
+		pcell->c_macro = strdup(pstr);
+	}
+
+	pstr = po_get_str(hash_get(pht, "VERSION"));
+	if (pstr == NULL) {
+		pcell->v_macro = strdup("0");
+	} else {
+		pcell->v_macro = strdup(pstr);
+	}
+
+	hash_add(pcd->cht, pcell->c_id, pcell);
+
+	return(true);
+}
+
+/*
+	get compiler data
+*/
+
+comp_cell *comp_get(comp_data *cdata, char *c_id) {
+	return(hash_get(cdata->cht, c_id));
+}
+
+/*
+	get compiler descr
+*/
+
+char *comp_get_descr(comp_data *cdata, char *c_id) {
+	comp_cell	*pcell;
+
+	pcell = hash_get(cdata->cht, c_id);
+
+	return(pcell->descr);
+}
+
+/*
+	parse data from PMKCOMP_DATA file
+
+	cdfile : compilers data file
+	cdata : compilers data structure
+
+	return : boolean (true on success)
+*/
+
+comp_data *parse_comp_file(char *cdfile) {
+	FILE		*fd;
+	bool		 rval;
+	comp_data	*cdata;
+	prscell		*pcell;
+	prsdata		*pdata;
+
+	cdata = (comp_data *) malloc(sizeof(comp_data)); /* XXX check */
+
+	pdata = prsdata_init();
+	if (pdata == NULL) {
+		errorf("cannot intialize prsdata.");
+		return(NULL);
+	}
+
+	cdata->cht = hash_init(MAX_COMP);
+	if (cdata->cht == NULL) {
+		prsdata_destroy(pdata);
+		debugf("cannot initialize comp_data");
+		return(NULL);
+	}
+
+debugf("cdfile = '%s'", cdfile);
+	fd = fopen(cdfile, "r");
+	if (fd == NULL) {
+		prsdata_destroy(pdata);
+		errorf("cannot open '%s'", cdfile);
+		return(NULL);
+	}
+
+	rval = parse_pmkfile(fd, pdata, kw_pmkcomp, nbkwpc);
+	fclose(fd);
+
+	if (rval == true) {
+		pcell = pdata->tree->first;
+		while (pcell != NULL) {
+			switch(pcell->token) {
+				case PCC_TOK_ADDC :
+					add_compiler(cdata, pcell->data);
+					break;
+			
+				default :
+					errorf("parsing of data file failed.");
+					prsdata_destroy(pdata);
+					return(NULL);
+					break;
+			}
+
+			pcell = pcell->next;
+		}
+	} else {
+		errorf("parsing of data file failed.");
+		prsdata_destroy(pdata);
+		return(NULL);
+	}
+
+	return(cdata);
+}
 
 /*
 	detect compiler
 */
 
-void gen_test_file(FILE *fp) {
-	int	i;
+bool gen_test_file(FILE *fp, comp_data *cdata) {
+	comp_cell	*pcell;
+	hkeys		*phk;
+	htable		*pht;
+	int		 i;
+
+	pht = cdata->cht;
+
+	phk = hash_keys(pht);
+	if (phk == NULL) {
+		debugf("arg");
+	}
 
 	fprintf(fp, COMP_TEST_HEADER);
 
-	for (i = 0 ; i < nbcomp ; i++) {
+	for(i = 0 ; i < phk->nkey ; i++) {
+		pcell = hash_get(pht, phk->keys[i]);
 		fprintf(fp, COMP_TEST_FORMAT,
-			compilers[i].descr,
-			compilers[i].c_macro,
-			compilers[i].c_id,
-			compilers[i].v_macro
+			pcell->descr,
+			pcell->c_macro,
+			pcell->c_id,
+			pcell->v_macro
 			);
 	}
 
-
 	fprintf(fp, COMP_TEST_FOOTER);
-}
 
-/*
-	return index in compiler list
-*/
-
-int cid_to_idx(unsigned int id) {
-	int	i;
-
-	for (i = 0 ; i < nbcomp ; i++) {
-		if (compilers[i].c_id == id)
-			return(i);
-	}
-
-	return(-1);
+	return(true);
 }
 
 /*
 	detect compiler
 */
 
-bool detect_compiler(char *cpath, char *blog, comp_data *cdata) {
+bool detect_compiler(char *cpath, char *blog, comp_data *cdata, comp_info *cinfo) {
 	FILE		*tfp,
 			*rpipe;
 	bool		 failed = false;
 	char		 cfgcmd[MAXPATHLEN],
 			 ftmp[MAXPATHLEN],
 			 pipebuf[TMP_BUF_LEN];
-	int		 idx,
-			 r;
-	unsigned int	 cid;
+	int		 r;
 
 	tfp = tmps_open(CC_TEST_FILE, "w", ftmp, sizeof(ftmp), sizeof(CC_TFILE_EXT));
 	if (tfp != NULL) {
 		/* fill test file */
-		gen_test_file(tfp);
+		gen_test_file(tfp, cdata);
 		fclose(tfp);
 	} else {
 		errorf("cannot open test file ('%s').", ftmp);
@@ -130,7 +254,7 @@ bool detect_compiler(char *cpath, char *blog, comp_data *cdata) {
 	/* test file no longer needed */
 	if (unlink(ftmp) == -1) {
 		/* cannot remove temporary file */
-		errorf("cannot remove %s : %s.", ftmp, strerror(errno)); 
+		errorf("cannot remove %s : %s.", ftmp, strerror(errno));
 	}
 
 	if (r == 0) {
@@ -141,22 +265,14 @@ bool detect_compiler(char *cpath, char *blog, comp_data *cdata) {
 				failed = true;
 			} else {
 				/* get compiler id */
-				cid = (unsigned int) strtoul(pipebuf, NULL, 8);
-
-				idx = cid_to_idx(cid);
-				if (idx != -1) {
-					cdata->index = idx;
-					strlcpy(cdata->descr, compilers[idx].descr,
-						sizeof(cdata->descr)); /* XXX check */
-				}
+				cinfo->c_id = strdup(pipebuf);
 			}
 
 			if (failed == false && get_line(rpipe, pipebuf, sizeof(pipebuf)) == false) {
 				errorf("cannot get compiler version.");
 				failed = true;
 			} else {
-					strlcpy(cdata->version, pipebuf,
-						sizeof(cdata->descr)); /* XXX check */
+				cinfo->version = strdup(pipebuf);
 			}
 
 			pclose(rpipe);
@@ -167,7 +283,7 @@ bool detect_compiler(char *cpath, char *blog, comp_data *cdata) {
 
 		/* delete binary */
 		if (unlink(CC_TEST_BIN) == -1) {
-			errorf("cannot remove %s : %s.", 
+			errorf("cannot remove %s : %s.",
 				CC_TEST_BIN, strerror(errno));
 		}
 

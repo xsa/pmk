@@ -35,7 +35,8 @@ USERMODE=
 #DBGFLAGS=	-DPMKSETUP_DEBUG
 #DBGFLAGS=	-DPMK_DEBUG -DPMKSETUP_DEBUG 
 
-PMKCFLAGS= $(WARN) $(DBGFLAGS) $(CFGFLAGS) $(USERMODE) $(CFLAGS)
+PMKCFLAGS= $(WARN) $(DBGFLAGS) $(CFGFLAGS) $(USERMODE) $(CFLAGS) \
+		-DDATADIR=\"$(DATADIR)\"
 
 PREMAKE=	pmk
 SETUP=		$(PREMAKE)setup
@@ -60,10 +61,6 @@ I_OBJS=		common.o compat.o dynarray.o pathtools.o $(INST).o
 
 # main target
 all: $(PREMAKE) $(SETUP) $(SCAN) $(INST)
-
-# specific object files
-$(SCAN).o:
-	$(CC) $(PMKCFLAGS) -DDATADIR=\"$(DATADIR)\" -c $(SCAN).c
 
 cfgrm:
 	@if ($(PREMAKE) -v >/dev/null 2>&1); then \
@@ -114,6 +111,7 @@ install: all
 	$(SUDO) $(INSTALL) -m 644 samples/$(SAMPLE) $(DESTDIR)$(DATADIR)
 	$(SUDO) $(INSTALL) -m 644 samples/$(CONFIG) $(DESTDIR)$(DATADIR)
 	$(SUDO) $(INSTALL) -m 644 data/pmkscan.dat $(DESTDIR)$(DATADIR)
+	$(SUDO) $(INSTALL) -m 644 data/pmkcomp.dat $(DESTDIR)$(DATADIR)
 	$(SUDO) $(INSTALL) -d -m 755 $(DESTDIR)$(MANDIR)/man1
 	$(SUDO) $(INSTALL) -m 444 man/$(PREMAKE).1 $(DESTDIR)$(MANDIR)/man1/$(PREMAKE).1
 	$(SUDO) $(INSTALL) -m 444 man/$(SCAN).1 $(DESTDIR)$(MANDIR)/man1/$(SCAN).1
@@ -180,7 +178,7 @@ test_$(PREMAKE): $(PREMAKE)
 	@echo "----------------------------------------"
 	@echo ""
 	@echo "-> Running pmk"
-	./$(PREMAKE) -l -b $(TEST_SAMPLE) -e use_gtk -f samples/pmkfile.sample -o samples/ovrfile.sample
+	$(BINDIR)/$(PREMAKE) -l -b $(TEST_SAMPLE) -e use_gtk -f samples/pmkfile.sample -o samples/ovrfile.sample
 	@echo ""
 	@echo "-> Dumping generated files"
 	@echo ""
@@ -213,7 +211,7 @@ test_$(SETUP): $(SETUP)
 	@echo "Generating local pmk.conf."
 	@echo "(need USERMODE enabled)"
 	@echo ""
-	./$(SETUP) -V
+	$(SBINDIR)/$(SETUP) -V
 	@echo ""
 	@echo "Dumping resulting pmk.conf"
 	@echo "----------------------------------------"
@@ -226,7 +224,7 @@ test_$(SETUP): $(SETUP)
 test_$(SCAN): $(SCAN)
 	@echo ""
 	@echo "=> Testing $(SCAN)"
-	./$(SCAN)
+	$(BINDIR)/$(SCAN)
 	@echo ""
 	@echo "Dumping pmkfile.scan"
 	@echo "----------------------------------------"
@@ -242,7 +240,7 @@ test_$(INST): $(INST)
 	@echo ""
 	@echo "-> Creating test directory"
 	@echo ""
-	./$(INST) -d -m 770 $(TEST_INST)
+	$(BINDIR)/$(INST) -d -m 770 $(TEST_INST)
 	@echo ""
 	@echo "-> Checking test directory"
 	@if (test -d "$(TEST_INST)"); then \
@@ -264,8 +262,8 @@ test_$(INST): $(INST)
 	@echo ""
 	@echo "-> Installing test data"
 	@echo ""
-	./$(INST) -m u+rw README $(TEST_TARGET)1
-	./$(INST) -m ug+r README $(TEST_TARGET)2
+	$(BINDIR)/$(INST) -m u+rw README $(TEST_TARGET)1
+	$(BINDIR)/$(INST) -m ug+r README $(TEST_TARGET)2
 	@echo ""
 	@echo "-> Checking test file"
 	@echo "";
@@ -301,6 +299,6 @@ test_clean:
 	@echo "=> End of cleaning."
 	@echo ""
 
-test_all: all test_$(SETUP) test_$(PREMAKE) test_$(SCAN) test_$(INST) test_clean
+test_all: install test_$(SETUP) test_$(PREMAKE) test_$(SCAN) test_$(INST) test_clean
 
 test: test_all

@@ -133,13 +133,17 @@ void prsnode_destroy(prsnode *pnode) {
 	prscell	*p,
 		*n;
 
-	p = pnode->first;
-	while (p != NULL) {
-		n = p;
-		p = n->next;
-		prscell_destroy(n);
+	if (pnode != NULL) {
+		p = pnode->first;
+
+		while (p != NULL) {
+			n = p;
+			p = n->next;
+			prscell_destroy(n);
+		}
+
+		free(pnode);
 	}
-	free(pnode);
 }
 
 /*

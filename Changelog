@@ -1,3 +1,13 @@
+17 Dec 2003  mipsator
+ * added pmkcomp.dat in data directory.
+ * moved compiler detection data in pmkcomp.dat file.
+ * modified detect.c and detect.h to use data from dat file.
+ * updated pmk.c and tests/comp_test.c to sync with previous changes.
+ * added pmkcomp.dat support in makefile.
+ * fixed makefile to use correct path (DATADIR, BINDIR).
+ * fixed check_header() to also clean object files.
+ * fixed prsdata_destroy() to avoid segfault when NULL is provided.
+
 15 Dec 2003  mipsator
  * added gen_test_file() to automate test file generation in detect. 
  * improved detect_compiler() to store data about the compiler.
