@@ -53,6 +53,7 @@
 #define LIB_TEST_CODE	"#include <stdio.h>\n" \
 			"int main() {return(0);}"
 
+/* args: func_name func_name */
 #define LIB_FUNC_TEST_CODE	"#include <stdio.h>\n" \
 				"int %s();\n" \
 				"int main() {\n" \
@@ -87,9 +88,17 @@
 					"if (sizeof(test_struct.%s)) {return(0);}\n" \
 				        "return(0);}"
 
+/* compiler command format string */
+#define HEADER_CC_FORMAT	"%s %s -o %s %s >%s 2>&1"
+				/* compiler libs binary source log */
+#define LIB_CC_FORMAT		"%s %s -o %s -l%s %s >>%s 2>&1"
+				/* compiler libs binary testlib source log */
+#define TYPE_CC_FORMAT		"%s -o %s %s >%s 2>&1"
+				/* compiler binary source log */
 
-#define TEST_FILE_NAME	"test.c"
-#define BIN_TEST_NAME	"test_bin"
+/* file names */
+#define TEST_FILE_NAME	"pmk_test.c"
+#define BIN_TEST_NAME	"pmk_test_bin"
 
 /* node tokens */
 #define PMK_TOK_SETNGS	1

@@ -45,12 +45,6 @@
 /* pmk specific version */
 #define PREMAKE_SUBVER_PMK	"7"
 
-/* prefix character used for commands */
-#define PMK_CHAR_COMMAND	'.'
-
-/* keyword to mark end of command */
-#define PMK_END_COMMAND		".END"
-
 /* character to assign a value to a key */
 #define PMK_KEY_CHAR		'='
 
@@ -81,6 +75,9 @@
 
 #define PMK_TMP_AC_CONF "config_tmp"
 
+/* build logs */
+#define PMK_BUILD_LOG	"pmk_check_build.log"
+
 /* command option type */
 typedef struct {
 	char	name[OPT_NAME_LEN],
@@ -104,6 +101,7 @@ typedef struct {
 		 srcdir[MAXPATHLEN],
 		 pmkfile[MAXPATHLEN],
 		 ovrfile[MAXPATHLEN],
+		 buildlog[MAXPATHLEN],
 		 errmsg[MAX_ERR_MSG_LEN];
 } pmkdata;
 

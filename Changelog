@@ -1,6 +1,9 @@
+10 Dec 2003  mipsator
+ * added new option to pmk to enable check build logging.
+
 09 Dec 2003  mipsator
  * added MEMBER in CHECK_TYPE to check structure member.
- * updated pmkfile man page.
+ * updated pmkfile man page to sync with MEMBER addition.
 
 06 Dec 2003  mipsator
  * moved fcopy() from pmkinstall to common.

@@ -514,7 +514,8 @@ int main(int argc, char *argv[]) {
 	bool	 go_exit = false,
 		 pmkfile_set = false,
 		 ovrfile_set = false,
-		 basedir_set = false;
+		 basedir_set = false,
+		 buildlog = false;
 	char	*pstr,
 		*enable_sw = NULL,
 		*disable_sw = NULL,
@@ -533,7 +534,7 @@ int main(int argc, char *argv[]) {
 	getcwd(buf, sizeof(buf));
 
 	while (go_exit == false) {
-		chr = getopt(argc, argv, "b:d:e:f:ho:v");
+		chr = getopt(argc, argv, "b:d:e:f:hlo:v");
 		if (chr == -1) {
 			go_exit = true;
 		} else {
@@ -575,6 +576,11 @@ int main(int argc, char *argv[]) {
 					pmkfile_set = true;
 					break;
 
+				case 'l' :
+					/* enable log of test build */
+					buildlog = true;
+					break;
+
 				case 'o' :
 					/* file path to override pmk.conf */
 					/* XXX check if path is valid */
@@ -614,6 +620,12 @@ int main(int argc, char *argv[]) {
 	if (pmkfile_set == false) {
 		strlcpy(gdata.srcdir, buf, sizeof(gdata.srcdir));
 		abspath(gdata.srcdir, PREMAKE_FILENAME, gdata.pmkfile); /* should not fail */
+	}
+
+	if (buildlog == true) {
+		strlcpy(gdata.buildlog, PMK_BUILD_LOG, sizeof(gdata.buildlog));
+	} else {
+		strlcpy(gdata.buildlog, "/dev/null", sizeof(gdata.buildlog));
 	}
 
 	/* initialise global data hash table */

@@ -440,9 +440,9 @@ bool pmk_check_header(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 		return(false);
 	}
 
-	snprintf(cfgcmd, sizeof(cfgcmd), "%s %s -o %s %s > /dev/null 2>&1",
-						ccpath, inc_path,
-						BIN_TEST_NAME, TEST_FILE_NAME);
+	/* build compiler command */
+	snprintf(cfgcmd, sizeof(cfgcmd), HEADER_CC_FORMAT,
+		ccpath, inc_path, BIN_TEST_NAME, TEST_FILE_NAME, pgd->buildlog);
 
 	/* get result */
 	r = system(cfgcmd);
@@ -592,9 +592,9 @@ bool pmk_check_lib(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 		return(false);
 	}
 
-	snprintf(cfgcmd, sizeof(cfgcmd), "%s %s -o %s -l%s %s >/dev/null 2>&1",
-						ccpath, main_libs, BIN_TEST_NAME,
-						libname, TEST_FILE_NAME);
+	/* build compiler command */
+	snprintf(cfgcmd, sizeof(cfgcmd), LIB_CC_FORMAT,
+		ccpath, main_libs, BIN_TEST_NAME, libname, TEST_FILE_NAME, pgd->buildlog);
 
 	/* get result */
 	r = system(cfgcmd);
@@ -1139,9 +1139,9 @@ bool pmk_check_type(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 		fclose(tfp);
 	}
 
-	snprintf(cfgcmd, sizeof(cfgcmd), "%s -o %s %s > /dev/null 2>&1",
-						ccpath, BIN_TEST_NAME,
-						TEST_FILE_NAME);
+	/* build compiler command */
+	snprintf(cfgcmd, sizeof(cfgcmd), TYPE_CC_FORMAT,
+		ccpath, BIN_TEST_NAME, TEST_FILE_NAME, pgd->buildlog);
 
 	/* get result */
 	r = system(cfgcmd);
