@@ -40,7 +40,9 @@
 #ifndef _STDBOOL_H_
 #define _STDBOOL_H_     
 
+#ifndef HAVE__BOOL
 typedef unsigned char _Bool;
+#endif
 
 #define bool _Bool
 #define true    1
