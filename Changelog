@@ -1,3 +1,6 @@
+17 Nov 2003 mipsator
+ * removed stuff in pmkinstall to make sunos happy.
+
 14 Nov 2003 mipsator
  * replaced remaining warn() and warnx() calls in pmkinstall.
 

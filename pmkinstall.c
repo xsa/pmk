@@ -109,11 +109,11 @@ int main(int argc, char *argv[]) {
 	struct stat	 from_sb,
 			 to_sb;
 	mode_t		*set;
-	u_int32_t	 fset;
+	u_long		 fset = 0;
 	u_int		 iflags;
 	int		 ch,
 			 no_target;
-	char		*flags,
+	char		/* XXX useless ? *flags, */
 			*to_name,
 			*group = NULL,
 			*owner = NULL;
@@ -133,6 +133,7 @@ int main(int argc, char *argv[]) {
 		case 'c':
 			/* For backwards compatibility. */
 			break;
+/* XXX need to think about the removal of this
 		case 'f':
 			flags = optarg;
 			if (strtofflags(&flags, &fset, NULL)) {
@@ -141,6 +142,7 @@ int main(int argc, char *argv[]) {
 			}
 			iflags |= SETFLAGS;
 			break;
+*/
 		case 'g':
 			group = optarg;
 			break;
