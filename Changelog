@@ -1,3 +1,7 @@
+28 Aug 2003 mipsator
+ * added missing checks.
+ * style.
+
 23 Aug 2003 mipsator
  * added switches support.
  * update man pages about switches.

@@ -148,7 +148,7 @@ htable *hash_init_adv(int table_size, void (*freefunc)(void *),
 	ht : hash table to resize
 	newsize : new size
 
-	returns 1 on success else 0
+	return : boolean 
 */
 
 bool hash_resize(htable *ht, int newsize) {
@@ -204,7 +204,7 @@ void hash_set_grow(htable *ht) {
 
 	pht : hash table to remove
 
-	returns number of keys deleted
+	return : number of keys deleted
 */
 
 int hash_destroy(htable *pht) {
@@ -244,7 +244,7 @@ int hash_destroy(htable *pht) {
 	key : key string
 	value : value object
 
-	returns an error code :
+	return : an error code
 		HASH_ADD_FAIL : addition failed.
 		HASH_ADD_OKAY : added (no collision).
 		HASH_ADD_COLL : added (collision, key chained).
@@ -307,7 +307,7 @@ int hash_add(htable *pht, char *key, void *value) {
 	phn : storage node
 	phc : cell to add
 
-	returns an error code :
+	return : an error code
 		HASH_ADD_OKAY : added (no collision).
 		HASH_ADD_COLL : added (collision, key chained).
 		HASH_ADD_UPDT : key already exists, change value.
@@ -363,7 +363,7 @@ int hash_add_cell(hnode *phn, hcell *phc) {
 	ary : array to add
 	size : size of the array
 
-	returns 1 on succes else 0
+	return : boolean 
 */
 
 bool hash_add_array(htable *pht, hpair *php, int size) {
@@ -371,7 +371,14 @@ bool hash_add_array(htable *pht, hpair *php, int size) {
 }
 
 /*
-	XXX
+	add an array into the hash table
+
+	ht : storage hash table
+	ary : array to add
+	size : size of the array
+	dup_func : object duplication function
+
+	return : boolean
 */
 
 bool hash_add_array_adv(htable *pht, hpair *php, int size, void *(dupfunc)(void *)) {
@@ -495,7 +502,7 @@ void hash_delete(htable *pht, char *key) {
 	pht : hash table
 	key : key to search
 
-	returns the value or NULL
+	return :  value or NULL
 */
 
 void *hash_get(htable *pht, char *key) {
@@ -527,7 +534,7 @@ void *hash_get(htable *pht, char *key) {
 	dst_ht : destination table
 	src_ht : table to merge
 
-	returns number of merged key
+	return : number of merged key
 */
 
 int hash_merge(htable *dst_ht, htable *src_ht) {
@@ -563,7 +570,7 @@ int hash_merge(htable *dst_ht, htable *src_ht) {
 
 	pht : hash table
 
-	returns number of keys
+	return : number of keys
 */
 
 int hash_nbkey(htable *pht) {
@@ -575,7 +582,7 @@ int hash_nbkey(htable *pht) {
 
 	pht : hash table
 
-	returns an hkeys structure
+	return : an hkeys structure
 
 	NOTE: don't forget to free the array after use.
 */

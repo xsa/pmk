@@ -209,7 +209,7 @@ bool get_make_var(char *varname, char *result, int rsize) {
 				@echo ${VARNAME}
 
 		   /!\ should check content of VARNAME, could result
-		   	in a security breach. XXX
+		   	in a security breach.
 		*/
 		fprintf(mfp, "test:\n\t@echo ${%s}", varname);
 		fclose(mfp);
@@ -256,10 +256,6 @@ bool str_to_dynary(char *str, char sep, dynary *da) {
 	int	 s;
 
 	s = sizeof(buf);
-/*	XXX TODO ?
-	s = sizeof(str);
-	buf = (char *) malloc(strlen(str + 1));
-*/
 	pbuf = buf;
 	while (*str != CHAR_EOS) {
 		if (*str == sep) {
