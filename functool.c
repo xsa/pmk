@@ -673,7 +673,6 @@ bool single_append(htable *pht, char *key, char *value) {
 		}
 		pstr = strstr(pstr, value);
 	}
-	free(cval);
 
 	if (found == false) {
 		if (hash_append(pht, key, value, " ") == HASH_ADD_FAIL) {

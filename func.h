@@ -108,7 +108,7 @@ bool	pmk_settings(pmkcmd *, prsnode *, pmkdata *);
 bool	pmk_ifcond(pmkcmd *, prsnode *, pmkdata *);
 bool	pmk_switches(pmkcmd *, htable *, pmkdata *);
 bool	pmk_check_binary(pmkcmd *, htable *, pmkdata *);
-bool	pmk_check_include(pmkcmd *, htable *, pmkdata *);
+bool	pmk_check_header(pmkcmd *, htable *, pmkdata *);
 bool	pmk_check_lib(pmkcmd *, htable *, pmkdata *);
 bool	pmk_check_config(pmkcmd *, htable *, pmkdata *);
 bool	pmk_check_pkg_config(pmkcmd *, htable *, pmkdata *);
