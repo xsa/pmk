@@ -67,7 +67,7 @@ P_OBJS=		autoconf.o cfgtool.o common.o compat.o detect.o \
 		pmk_obj.o pathtools.o pkgconfig.o $(PREMAKE).o
 
 S_OBJS=		common.o compat.o dynarray.o hash.o parse.o pmk_obj.o \
-		$(SETUP).o
+		detect_cpu.o $(SETUP).o
 
 SC_OBJS=	common.o compat.o dynarray.o hash.o hash_tools.o parse.o \
                 pmk_obj.o $(SCAN).o
