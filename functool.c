@@ -130,6 +130,7 @@ bool check_version(char *vref, char *vers) {
 	int	 i = 0,
 		 ref,
 		 cmp;
+	long	 tl;
 
 	/* need to check da_* returns */
 	vr = str_to_dynary(vref, CHAR_VERSION_SEPARATOR);
@@ -149,8 +150,17 @@ bool check_version(char *vref, char *vers) {
 
 		if (sr != NULL && sc != NULL) {
 			/* check both version */
-			ref = atoi(sr); /* XXX TODO should consider using strtol */
-			cmp = atoi(sc);
+			if (str_to_ulong(sr, 10, &tl) == false) {
+				errorf("cannot get numerical value of '%s'.", sr);
+				return(false);
+			}
+			ref = (int) tl;
+
+			if (str_to_ulong(sc, 10, &tl) == false) {
+				errorf("cannot get numerical value of '%s'.", sc);
+				return(false);
+			}
+			cmp = (int) tl;
 
 			if (ref > cmp) {
 				/* version is lower than required */
@@ -167,7 +177,11 @@ bool check_version(char *vref, char *vers) {
 			/* reached end of (at least) one version */
 			if (sr != NULL) {
 				/* reference has remaining number */
-				ref = atoi(sr);
+				if (str_to_ulong(sr, 10, &tl) == false) {
+					errorf("cannot get numerical value of '%s'.", sr);
+					return(false);
+				}
+				ref = (int) tl;
 				if (ref > 0) {
 					/* reference is greater */
 					rval = false;

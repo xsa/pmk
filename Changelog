@@ -1,3 +1,6 @@
+21 Jan 2004 mipsator
+ * use str_to_ulong() in functool and pmkinstall.
+
 20 Jan 2004 mipsator
  * moved size type from int to size_t for most functions in common.
  * added str_to_ulong() in common for string to unsigned long conversions.
