@@ -231,4 +231,4 @@ test_clean:
 	@echo "=> End of cleaning."
 	@echo ""
 
-test_all: cfgum all test_$(SETUP) test_$(PREMAKE) test_$(SCAN) test_clean
+test_all: all test_$(SETUP) test_$(PREMAKE) test_$(SCAN) test_clean

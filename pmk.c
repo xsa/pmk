@@ -271,7 +271,7 @@ bool parse_cmdline(char **val, int nbval, pmkdata *pgd) {
 		/* parse option */
 		rval = parse_opt(val[i], &opt, PRS_PMKCONF_SEP);
 		if (rval == true) {
-			if (hash_add(ht, opt.key, opt.value) == HASH_ADD_FAIL) {
+			if (hash_add(ht, opt.key, opt.value) == HASH_ADD_FAIL) { /* no need to strdup */
 				errorf("%s", PRS_ERR_HASH);
 				rval = false;
 			}

@@ -71,6 +71,13 @@
 #	define FALSE	0
 #endif
 
+#ifndef SYSCONFDIR
+#	define SYSCONFDIR	"/etc"
+#endif
+
+#ifndef CONFDIR
+#	define CONFDIR	"/etc/pmk"
+#endif
 
 #define PREMAKE_MAJOR		"0"
 #define PREMAKE_MINOR		"6"

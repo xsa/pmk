@@ -421,14 +421,14 @@ int get_binaries(htable *ht) {
 		return(-1);	
 	}
 
-	if (find_file(stpath, "cc", fbin, sizeof(fbin)) == 1) {
+	if (find_file(stpath, "cc", fbin, sizeof(fbin)) == true) {
 		if (hash_add(ht, "BIN_CC", strdup(fbin)) == HASH_ADD_FAIL) {
 			da_destroy(stpath);
 			return(-1);
 		}
 		verbosef("Setting '%s' => '%s'", "BIN_CC", fbin);
 	} else {
-		if (find_file(stpath, "gcc", fbin, sizeof(fbin)) == 1) {
+		if (find_file(stpath, "gcc", fbin, sizeof(fbin)) == true) {
 			if (hash_add(ht, "BIN_CC", strdup(fbin)) == HASH_ADD_FAIL) {
 				da_destroy(stpath);
 				return(-1);
@@ -442,14 +442,15 @@ int get_binaries(htable *ht) {
 	}
 
 	for (i = 0; i < MAXBINS; i++) {
-		if (find_file(stpath, binaries[i][0], fbin, sizeof(fbin)) == 1) {
+		if (find_file(stpath, binaries[i][0], fbin, sizeof(fbin)) == true) {
 			if (hash_add(ht, binaries[i][1], strdup(fbin)) == HASH_ADD_FAIL) {
 				da_destroy(stpath);
 				return(-1);
 			}
 			verbosef("Setting '%s' => '%s'", binaries[i][1], fbin);
-		} else
+		} else {
 			verbosef("**warning: '%s' Not Found", binaries[i][0]);
+		}
 	}
 	da_destroy(stpath);
 	return(0);
@@ -543,7 +544,7 @@ int copy_config(const char *tmp_config, const char *config) {
 		return(-1);
 	}
 
-	while(get_line(fp_t, buf, MAX_LINE_BUF) == 1) {
+	while(get_line(fp_t, buf, MAX_LINE_BUF) == true) {
 		fprintf(fp_c, "%s\n", buf);
 	}
 

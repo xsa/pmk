@@ -200,7 +200,7 @@ bool po_get_bool(pmkobj *po) {
 			return(*(bool *) po->data);
 		}
 	}
-	return(NULL);
+	return(false); /* XXX grr should return a *bool */
 }
 
 /*
