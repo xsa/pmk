@@ -40,23 +40,12 @@
 #include "dynarray.h"
 #include "hash.h"
 
-#ifndef DATADIR
-/* for lint */
-#define DATADIR	"./data"
-#endif
-
-#define PMKCFG_DATA		DATADIR "/pmkcfgtool.dat"
 #define PMKCFG_ENV_PATH		"PKG_CONFIG_PATH"
 #define PMKCFG_ENV_LIBDIR	"PKG_CONFIG_LIBDIR"
 
 #define PKGCFG_CHAR_PATH_SEP	':'
 
 #define PKGCFG_HT_SIZE	512
-#define CFGTOOL_HT_SIZE	32
-
-#define CFGTOOL_OPT_VERSION	"--version"
-#define CFGTOOL_OPT_CFLAGS	"--cflags"
-#define CFGTOOL_OPT_LIBS	"--libs"
 
 /* packages strucutres */
 
@@ -82,32 +71,12 @@ typedef struct {
 } pkgkw;
 
 
-/* config tool structures */
-
-typedef struct {
-	char	*name,
-		*binary,
-		*version,
-		*module,
-		*cflags,
-		*libs;
-} cfgtcell;
-
-
-typedef struct {
-	htable	*by_mod,
-		*by_bin;
-} cfgtdata;
-
 /* functions protos */
+
 pkgcell		*pkgcell_init();
 void		 pkgcell_destroy(pkgcell *);
 pkgdata		*pkgdata_init();
 void		 pkgdata_destroy(pkgdata *);
-
-void		 cfgtcell_destroy(cfgtcell *);
-cfgtdata	*cfgtdata_init();
-void		 cfgtdata_destroy(cfgtdata *);
 
 bool		 scan_dir(char *, pkgdata *);
 bool		 pkg_collect(char *, pkgdata *);
@@ -119,11 +88,6 @@ bool		 pkg_recurse(pkgdata *, char *);
 char		*pkg_get_cflags(pkgdata *);
 char		*pkg_get_libs(pkgdata *);
 bool		 pkg_mod_exists(pkgdata *ppd, char *mod);
-
-bool		 add_cfgtool(cfgtdata *, htable *);
-cfgtdata	*parse_cfgt_file();
-bool		 cfgtcell_get_binary(cfgtdata *, char *, char *, size_t);
-cfgtcell	*cfgtcell_get_cell(cfgtdata *, char *);
 
 #endif /* _PMK_PKGCONFIG_H_ */
 

@@ -39,7 +39,7 @@
 
 #include "dynarray.h"
 #include "hash.h"
-#include "pkgconfig.h"
+#include "cfgtool.h"
 #include "premake.h"
 
 
@@ -79,18 +79,6 @@
 /* build logs */
 #define PMK_BUILD_LOG	"pmk_build.log"
 
-
-/* command option type */
-typedef struct {
-	char	name[OPT_NAME_LEN],
-		value[OPT_VALUE_LEN];
-} pmkcmdopt;
-
-/* command type */
-typedef struct {
-	int	 token;
-	char	*label;
-} pmkcmd;
 
 /* pmk data */
 typedef struct {

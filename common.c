@@ -47,11 +47,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "common.h"
 #include "compat/pmk_string.h"
 #include "compat/pmk_unistd.h"
-#include "dynarray.h"
-#include "premake.h"
+#include "common.h"
 
 /*#define	MKVAR_DEBUG	1*/
 
