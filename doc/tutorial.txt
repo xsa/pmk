@@ -16,8 +16,8 @@ $Id$
 As make is using a makefile, the pmk binary is using a pmkfile. This
 file contains a set of commands that perform checks of source
 dependencies. Following to that, template files are processed to
-generate a final file after tags substitutions. Additionaly to this
-tutorial, we highly recommend to consult pmkfile(5).
+generate a final file after tags substitutions. In addition to this
+tutorial, we highly recommend to read the pmkfile(5) manpage.
 
 
 
@@ -67,7 +67,7 @@ CHECK_HEADER(header_string) {
 }
 
 The NAME option contains the header to check. The string into brackets
-is the label of the command. If the check succeed this label is set as
+is the label of the command. If the check succeeds, this label is set as
 true else it is set as false. We'll see later how to use this label
 state into conditional command or as dependency with the DEPEND option.
 
@@ -235,7 +235,7 @@ Notice that the storage variables have changed in the output.
 
 
 Now we are able to detect gtk we could use a switch to specify if we
-want the gtk version or not. For this we will use the SWITCH command
+want the gtk version or not. For this we will use the SWITCHES command
 and add it between SETTINGS AND DEFINE:
 
 SWITCHES {
@@ -269,7 +269,7 @@ __[OUTPUT]____________________________________________________[BEGIN]__
 
 * Checking pkg-config module [pc_gtk]
         Required 'build_gtk_version' dependency failed.
-$
+
 __[OUTPUT]______________________________________________________[END]__
 
 Another method to use switches is the IF conditional command. This will
@@ -284,7 +284,7 @@ IF(build_gtk_version) {
 	}
 }
 
-Of course you can put as many command as you want into the body.
+Of course you can put as many commands as you want into the body.
 The ouput looks like the following:
 
 __[OUTPUT]____________________________________________________[BEGIN]__
@@ -301,7 +301,7 @@ __[OUTPUT]____________________________________________________[BEGIN]__
 
 __[OUTPUT]______________________________________________________[END]__
 
-It's also possible to use inverted value by appending a '!' above the
+It's also possible to negate a value by appending a '!' above the
 dependency like this:
 
 IF(!build_gtk_version) {
@@ -309,6 +309,7 @@ IF(!build_gtk_version) {
 }
 
 or like this:
+
 DEPEND = ("!build_gtk_version")
 
 
@@ -332,6 +333,7 @@ __[OUTPUT]____________________________________________________[BEGIN]__
         Use C language with CC compiler.
         Found type '_Bool' : no.
 Error : failed to find type '_Bool'.
+
 __[OUTPUT]______________________________________________________[END]__
 
 This test could be useful to detect compilers that are ISO C99
@@ -467,7 +469,7 @@ __[OUTPUT]____________________________________________________[BEGIN]__
 
 __[OUTPUT]______________________________________________________[END]__
 
-And lookt at Makefile:
+And look at Makefile:
 
 __[FILE]______________________________________________________[BEGIN]__
 PACKAGE=hello
@@ -492,13 +494,14 @@ CHECK_VARIABLE(var_endian) {
 	VALUE = "LITTLE_ENDIAN"
 }
 
-If the value is 'BIG_ENDIAN' then the check will fail and pmk will stop
-like this:
+On big-endian machines the check will fail with an error:
 
 __[OUTPUT]____________________________________________________[BEGIN]__
 
-* Checking pkg-config module [pc_gtk]
-        Required 'build_gtk_version' dependency failed.
+* Checking variable [var_endian]
+        Found variable 'HW_BYTEORDER' : yes.
+        Variable match value 'LITTLE_ENDIAN' : no.
+Error : variable value does not match ('LITTLE_ENDIAN' != 'BIG_ENDIAN').
 
 __[OUTPUT]______________________________________________________[END]__
 
