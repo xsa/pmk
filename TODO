@@ -23,7 +23,7 @@ Indented lines means subtask.
 common:
 -----------------------------------------------------------------------
 	~R	tutorial
-	~R	improve test_pmkinstall to check more modes (octal values)
+	~.	improve test_pmkinstall to check more modes
 	-.	add test target in tests/Makefile
 	+	update README and INSTALL
 	~	new samples:
