@@ -1,8 +1,8 @@
 # $Id$
 
-CC?=		cc
-CPP?=		cpp
-AS?=		as
+CC=		@CC@
+CPP=		@CPP@
+AS=		@AS@
 
 CFLAGS?=	-Wall
 #CFLAGS+=	-Werror

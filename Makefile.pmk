@@ -1,6 +1,8 @@
 # $Id$
 
-CC?=		cc
+CC=		@CC@
+CPP=		@CPP@
+AS=		@AS@
 DEBUG?=		-g
 
 # On some platforms install is not BSD compatible
@@ -80,6 +82,9 @@ PC_OBJS=	cfgtool.o common.o compat.o dynarray.o hash.o parse.o \
 
 .c.o:
 	$(CC) $(PMKCFLAGS) -c $<
+
+.s.o:
+	$(CPP) $< | $(AS) -o $@
 
 # main target
 all: $(PREMAKE) $(SETUP) $(SCAN) $(INST) $(PKGCFG)
