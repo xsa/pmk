@@ -52,9 +52,6 @@
 /* character used as delimiter for template tags */
 #define PMK_TAG_CHAR		'@'
 
-/* maximal number of options per command */
-#define MAX_CMD_OPT		32
-
 /* maximal number of templates */
 #define MAX_TEMPLATES		32
 

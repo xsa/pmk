@@ -39,7 +39,6 @@
 
 #include "compat/pmk_string.h"
 #include "parse.h"
-#include "pmk.h"
 #include "premake.h"
 
 #ifndef DATADIR
