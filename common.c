@@ -140,20 +140,20 @@ bool get_make_var(char *varname, char *result, int rsize) {
 	mfp = tmps_open(TMP_MK_FILE, "w", mfn, sizeof(mfn), strlen(MK_FILE_EXT));
 	if (mfp != NULL) {
 		/* create a tmp makefile with the following format :
-			test:
-				@echo ${VARNAME}
+			all:
+				@printf ${VARNAME}
 
 		   /!\ should check content of VARNAME, could result
 		   	in a security breach.
 		*/
-		fprintf(mfp, "all:\n\t@echo \"$(%s)\" > %s", varname, MKVAR_FILE);
+		fprintf(mfp, "all:\n\t@printf \"$(%s)\\n\" > %s", varname, MKVAR_FILE);
 		fclose(mfp);
 	} else {
 		errorf("Failed to open %s\n", mfn);
 		return(false);
 	}
 
-	snprintf(varstr, sizeof(varstr), "/usr/bin/make -f %s > /dev/null 2>&1", mfn);
+	snprintf(varstr, sizeof(varstr), "make -f %s >/dev/null 2>&1", mfn);
 	if (system(varstr) == 0) {
 		tfp = fopen(MKVAR_FILE, "r");
 		if (tfp != NULL) {
