@@ -60,6 +60,49 @@ int		 cur_line = 0;
 
 
 /*
+	init variables
+
+	pht :
+*/
+
+void init_var(htable *pht) {
+	char	*pstr;
+
+	hash_add(pht, "CFLAGS", strdup("")); /* XXX check ? */
+	hash_add(pht, "CPPFLAGS", strdup("")); /* XXX check ? */
+	hash_add(pht, "LIBS", strdup("")); /* XXX check ? */
+	hash_add(pht, "LDFLAGS", strdup("")); /* XXX check ? */
+
+	pstr = hash_get(pht, PMKCONF_BIN_CC);
+	if (pstr != NULL)
+		hash_add(pht, "CC", strdup(pstr));
+
+	pstr = hash_get(pht, PMKCONF_BIN_CPP);
+	if (pstr != NULL)
+		hash_add(pht, "CPP", strdup(pstr));
+
+	pstr = hash_get(pht, PMKCONF_BIN_INSTALL);
+	if (pstr != NULL)
+		hash_add(pht, "INSTALL", strdup(pstr));
+
+	pstr = hash_get(pht, PMKCONF_BIN_SH);
+	if (pstr != NULL)
+		hash_add(pht, "SHELL", strdup(pstr));
+
+	pstr = hash_get(pht, PMKCONF_BIN_STRIP);
+	if (pstr != NULL)
+		hash_add(pht, "STRIP", strdup(pstr));
+
+	pstr = hash_get(pht, PMKCONF_BIN_AWK);
+	if (pstr != NULL)
+		hash_add(pht, "AWK", strdup(pstr));
+
+	pstr = hash_get(pht, PMKCONF_BIN_EGREP);
+	if (pstr != NULL)
+		hash_add(pht, "EGREP", strdup(pstr));
+}
+
+/*
 	process option line of configuration file
 
 	pht : storage hash table
@@ -433,11 +476,6 @@ int main(int argc, char *argv[]) {
 		clean(&gdata);
 		errorf("cannot initialize hash table for data.");
 		exit(1);
-	} else {
-		/* initialize some variables */
-		hash_add(gdata.htab, "CFLAGS", strdup("")); /* XXX check ? */
-		hash_add(gdata.htab, "CPPFLAGS", strdup("")); /* XXX check ? */
-		hash_add(gdata.htab, "LIBS", strdup("")); /* XXX check ? */
 	}
 
 	gdata.labl = hash_init(MAX_LABEL_KEY);
@@ -470,6 +508,9 @@ int main(int argc, char *argv[]) {
 		errorf("cannot parse '%s', run pmksetup", PREMAKE_CONFIG_PATH);
 		exit(1);
 	}
+
+	/* initialize some variables */
+	init_var(gdata.htab);
 
 	if (enable_sw != NULL) {
 		/* command line switches to enable */
