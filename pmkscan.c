@@ -155,7 +155,7 @@ char *regex_check(char *pattern, char *line) {
 	return : -
 */
 
-void idtf_check(char *idtf, htable *ht_fam, htable *phtgen) {
+void idtf_check(char *idtf, htable *ht_fam, htable *phtgen, char *langstr) {
 	char	 buf[TMP_BUF_LEN],
 		*pval,
 		*p;
@@ -191,7 +191,11 @@ void idtf_check(char *idtf, htable *ht_fam, htable *phtgen) {
 					strlcpy(buf, "", sizeof(buf));
 
 					for (i=0 ; i < da_usize(da) ; i++) {
-						strlcat(buf, da_idx(da, i), sizeof(buf));
+						p = da_idx(da, i);
+						strlcat(buf, p, sizeof(buf));
+						if (strncmp(p, "LANG=", 6) == 0) {
+							strlcat(buf, langstr, sizeof(buf));
+						}
 						strlcat(buf, "\n", sizeof(buf));
 					}
 
@@ -217,7 +221,7 @@ void idtf_check(char *idtf, htable *ht_fam, htable *phtgen) {
 	return : boolean
 */
 
-bool parse_c_file(char *filename, scandata *sdata, htable *phtgen) {
+bool parse_c_file(char *filename, scandata *sdata, htable *phtgen, char *langstr) {
 	FILE		*fp;
 	char		 line[TMP_BUF_LEN], /* XXX better size of buffer ? */
 			*p;
@@ -237,7 +241,7 @@ bool parse_c_file(char *filename, scandata *sdata, htable *phtgen) {
 			printf("Found header '%s'\n", p);
 #endif
 
-			idtf_check(p, sdata->includes, phtgen);
+			idtf_check(p, sdata->includes, phtgen, langstr);
 		}
 
 		/* check for function */
@@ -247,7 +251,7 @@ bool parse_c_file(char *filename, scandata *sdata, htable *phtgen) {
 			printf("Found function '%s'\n", p);
 #endif
 
-			idtf_check(p, sdata->functions, phtgen);
+			idtf_check(p, sdata->functions, phtgen, langstr);
 		}
 	}
 
@@ -360,7 +364,7 @@ void dir_explore(htable *pht, scandata *psd, char *path) {
 	/* parse selected files */
 	for (i = 0 ; i < g.gl_pathc ; i++) {
 		printf("\t'%s'\n", g.gl_pathv[i]);
-		parse_c_file(g.gl_pathv[i], psd, pht);
+		parse_c_file(g.gl_pathv[i], psd, pht, "\"C\"");
 	}
 
 	globfree(&g);
@@ -378,7 +382,7 @@ void dir_explore(htable *pht, scandata *psd, char *path) {
 	/* parse selected files */
 	for (i = 0 ; i < g.gl_pathc ; i++) {
 		printf("\t'%s'\n", g.gl_pathv[i]);
-		parse_c_file(g.gl_pathv[i], psd, pht);
+		parse_c_file(g.gl_pathv[i], psd, pht, "\"C++\"");
 	}
 
 	globfree(&g);

@@ -20,4 +20,4 @@ pmksetup :
 	
 pmkscan :
 - add more entries in pmkscan.dat
-- specify language of the scanned file.
++ specify language of the scanned file.
