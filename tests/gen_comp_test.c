@@ -4,7 +4,7 @@
 
 /* generate compiler detection test file */
 
-/*#define DEBUG_PRS	1*/
+/*#define PRS_DEBUG	1*/
 
 #include <stdio.h>
 #include <stdlib.h>

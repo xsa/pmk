@@ -45,7 +45,7 @@
 #include "dynarray.h"
 #include "common.h"
 
-/*#define DEBUG_FC	1*/
+/*#define FC_DEBUG	1*/
 
 #define NBLANG	2
 lgdata	ldata[NBLANG] = {
@@ -234,14 +234,14 @@ bool record_def(htable *ht, char *name, bool status) {
 			return(false);
 	}
 	
-#ifdef DEBUG_FC
+#ifdef FC_DEBUG
 	debugf("record_def() : def_val = '%s'", def_val);
 #endif
 
 	/* pmk style define ID (DEF__*) */
 	if (hash_update_dup(ht, def_str, def_val) == HASH_ADD_FAIL)
 		return(false);
-#ifdef DEBUG_FC
+#ifdef FC_DEBUG
 	debugf("record_def() : recorded '%s' with '%s'", def_str, def_val);
 #endif
 
@@ -279,7 +279,7 @@ bool record_def_data(htable *ht, char *name, char *value) {
 		if (hash_update_dup(ht, have_str, value) == HASH_ADD_FAIL)
 			return(false);
 
-#ifdef DEBUG_FC
+#ifdef FC_DEBUG
 		debugf("record_def_data() : recorded '%s' with '%s'", have_str, value);
 #endif
 
@@ -290,14 +290,14 @@ bool record_def_data(htable *ht, char *name, char *value) {
 			return(false);
 	}
 	
-#ifdef DEBUG_FC
+#ifdef FC_DEBUG
 	debugf("record_def_data() : def_val = '%s'", def_val);
 #endif
 
 	/* pmk style define ID (DEF__*) */
 	if (hash_update_dup(ht, def_str, def_val) == HASH_ADD_FAIL)
 		return(false);
-#ifdef DEBUG_FC
+#ifdef FC_DEBUG
 	debugf("record_def_data() : recorded '%s' with '%s'", def_str, def_val);
 #endif
 
@@ -330,7 +330,7 @@ bool record_val(htable *ht, char *name, char *value) {
 
 	if (hash_update_dup(ht, have_str, value) == HASH_ADD_FAIL)
 		return(false);
-#ifdef DEBUG_FC
+#ifdef FC_DEBUG
 	debugf("record_val() : recorded '%s' with '%s'", have_str, value);
 #endif
 

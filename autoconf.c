@@ -49,7 +49,7 @@
 #include "premake.h"
 
 
-/*#define DEBUG_AC	1*/
+/*#define AC_DEBUG	1*/
 
 
 /*
@@ -142,7 +142,7 @@ bool ac_parse_config(pmkdata *pgd) {
 				errorf("unable to build define name for '%s'", buf);
 				return(false);
 			}
-#ifdef DEBUG_AC
+#ifdef AC_DEBUG
 			debugf("built define name = '%s'", defname);
 #endif
 
@@ -150,19 +150,19 @@ bool ac_parse_config(pmkdata *pgd) {
 			pstr = (char *) hash_get(ht, defname);
 			if (pstr != NULL) {
 				fprintf(fp_out, "%s /* pmk parsed */\n", pstr);
-#ifdef DEBUG_AC
+#ifdef AC_DEBUG
 				debugf("define value for %s = '%s'", buf, pstr);
 #endif
 			} else {
 				pstr = (char *) hash_get(ht, buf);
 				if (pstr != NULL) {
 					fprintf(fp_out, "#define %s %s /* pmk parsed */\n", buf, pstr);
-#ifdef DEBUG_AC
+#ifdef AC_DEBUG
 					debugf("define value for %s = '%s'", buf, pstr);
 #endif
 				} else {
 					fprintf(fp_out, "#undef %s\t/* pmk parsed */\n", buf);
-#ifdef DEBUG_AC
+#ifdef AC_DEBUG
 					debugf("unset define for '%s'", buf);
 #endif
 				}
