@@ -43,7 +43,7 @@
 typedef struct {
 	int	  nbcell,
 		  nextidx;
-	char	**pary;
+	void	**pary;
 } dynary;
 
 
@@ -51,10 +51,10 @@ dynary	*da_init(void);
 bool	 da_resize(dynary *, size_t);
 size_t	 da_size(dynary *);
 size_t	 da_usize(dynary *);
-bool	 da_push(dynary *, char *);
-char	*da_pop(dynary *);
-char	*da_shift(dynary *);
-char	*da_idx(dynary *, int);
+bool	 da_push(dynary *, void *);
+void	*da_pop(dynary *);
+void	*da_shift(dynary *);
+void	*da_idx(dynary *, int);
 void	 da_destroy(dynary *);
 
 #endif /* _PMK_DYNARRAY_H_ */
