@@ -34,6 +34,9 @@
  *
  */
 
+
+/*#define PMKSETUP_DEBUG 1*/
+
 #include <sys/stat.h>
 /* include it first as if it was <sys/types.h> - this will avoid errors */ 
 #include "compat/pmk_sys_types.h"
@@ -53,11 +56,12 @@
 #include "pmksetup.h"
 
 
-char	*__progname;		/* program name from argv[0] */
-
-int	 verbose_flag = 0;	/* -V option at the cmd-line */ 
-char	 sfn[MAXPATHLEN];	/* scratch file name */		
 FILE	*sfp;			/* scratch file pointer */
+char	*__progname,		/* program name from argv[0] */
+	 sfn[MAXPATHLEN];	/* scratch file name */		
+
+htable	*ht;
+int	 verbose_flag = 0;	/* -V option at the cmd-line */ 
 
 hpair	predef[] = {
 		{PMKCONF_MISC_SYSCONFDIR,	SYSCONFDIR},
@@ -76,10 +80,9 @@ int main(int argc, char *argv[]) {
 	FILE		*config;
 	bool		 process_clopts = false;
 	char		*pstr;
-	htable		*ht;
 	int		 ch,
 			 error = 0;
-	prsopt		 opt;
+	prsopt		 *ppo;
 	
 	extern int	 optind,
 			 errno;
@@ -95,8 +98,8 @@ int main(int argc, char *argv[]) {
 
 	__progname = argv[0];
 
-	/* XXX TODO  prsopt init adv */
-	if ((ht = hash_init(MAX_CONF_OPT)) == NULL) {
+	ht = hash_init_adv(MAX_CONF_OPT, NULL, (void (*)(void *)) prsopt_destroy, NULL);
+	if (ht == NULL) {
 		errorf("cannot create hash table.");
 		exit(EXIT_FAILURE);
 	}
@@ -106,9 +109,8 @@ int main(int argc, char *argv[]) {
 		switch(ch) {
 			case 'r' :
 				/* mark to be deleted in hash */
-				/* XXX TODO  prsopt */
-				if (hash_update_dup(ht, optarg, STR_FOR_REMOVE) == HASH_ADD_FAIL) {
-					errorf("hash update failed.");
+				if (record_data(ht, optarg, PMKSTP_REC_REMV, NULL) == false) {
+					errorf("failed to record '%s'.", optarg);
 					exit(EXIT_FAILURE);
 				}
 
@@ -116,25 +118,37 @@ int main(int argc, char *argv[]) {
 				break;
 
 			case 'u' :
-				if (parse_clopt(optarg, &opt, PRS_PMKCONF_SEP) == false) {
+				/* add or update value */
+				ppo = prsopt_init();
+				if (ppo == NULL) {
+					errorf("prsopt init failed.");
+					exit(EXIT_FAILURE);
+				}
+
+				if (parse_clopt(optarg, ppo, PRS_PMKCONF_SEP) == false) {
 					errorf("bad argument for -a option: %s.", optarg);
 					exit(EXIT_FAILURE);
 				}
 
 				/* add in hash */
-				/* XXX TODO  prsopt */
-				pstr = po_get_str(opt.value);
+				pstr = po_get_str(ppo->value);
 				if (pstr == NULL) {
 					errorf("failed to get argument for -a option");
 					exit(EXIT_FAILURE);
 				}
 
-				if (hash_update_dup(ht, opt.key, pstr) == HASH_ADD_FAIL) {
-					errorf("hash update failed.");
+				/*if (hash_update_dup(ht, opt.key, pstr) == HASH_ADD_FAIL) {*/
+				/*        errorf("hash update failed.");                    */
+				/*        exit(EXIT_FAILURE);                               */
+				/*}                                                         */
+				/* XXX TODO could use prsopt structure directly, simplier */
+				if (record_data(ht, ppo->key, PMKSTP_REC_UPDT, pstr) == false) {
+					errorf("failed to record '%s'.", ppo->key);
+					prsopt_destroy(ppo);
 					exit(EXIT_FAILURE);
 				}
-				/* XXX TODO destroy data */
 
+				prsopt_destroy(ppo);
 				process_clopts = true;
 				break;
 
@@ -183,9 +197,9 @@ int main(int argc, char *argv[]) {
 		exit(EXIT_FAILURE);
 
 	/* parse configuration file */
-	if ((config = fopen(PREMAKE_CONFIG_PATH, "r")) != NULL) {
+	config = fopen(PREMAKE_CONFIG_PATH, "r");
+	if (config != NULL) {
 		printf("==> Configuration file found: %s\n", PREMAKE_CONFIG_PATH);
-		/* XXX FIXME TODO check ? */
 		if (parse_pmkconf(config, ht, PRS_PMKCONF_SEP, check_opt) == false) {
 			fclose(config);
 			errorf("parsing failed.");
@@ -229,6 +243,56 @@ int main(int argc, char *argv[]) {
 }
 
 /*
+ *	record data
+ *
+ *	pht : hash table
+ *	key : record name
+ *	opchar : operation char
+ *		PMKSTP_REC_REMV => remove
+ *		PMKSTP_REC_UPDT => add/update
+ *	value : record data
+ *
+ *	return : true on success
+ */
+
+bool record_data(htable *pht, char *key, char opchar, char *value) {
+	prsopt	*ppo;
+
+	switch (opchar) {
+		case PMKSTP_REC_REMV :
+			/* delete record */
+			ppo = prsopt_init_adv(key, opchar, NULL);
+			if (ppo == NULL) {
+				return(false);
+			}
+			break;
+
+		case PMKSTP_REC_UPDT :
+			/* update record */
+			ppo = prsopt_init_adv(key, opchar, value);
+			if (ppo == NULL) {
+				return(false);
+			}
+			break;
+
+		default :
+			/* unknown operation */
+#ifdef PMKSETUP_DEBUG
+	debugf("unknown '%c' operator in record_data.", opchar);
+#endif
+			return(false);
+	}
+
+	if (hash_update(pht, ppo->key, ppo) == HASH_ADD_FAIL) {
+		prsopt_destroy(ppo);
+		return(false);
+	}
+
+	return(true);
+}
+
+
+/*
  * gathering of system data, predefinied data, ...
  */
 
@@ -265,25 +329,39 @@ bool gather_data(htable *pht) {
  *
  * 	ht: hash table
  */
-void write_new_data(htable *ht) {
+void write_new_data(htable *pht) {
 	char	*val;
 	int	 i;
 	hkeys	*phk;
+	prsopt	*ppo;
 
-	phk = hash_keys(ht);
+	phk = hash_keys(pht);
 	if (phk != NULL) {
 		/* sort hash table */
 		qsort(phk->keys, phk->nkey, sizeof(char *), keycomp);
 
 		/* processing remaining keys */
 		for(i = 0 ; i < phk->nkey ; i++) {
-			/* XXX TODO  prsopt */
-			val = (char *) hash_get(ht, phk->keys[i]);
-
-			/* check if this key is marked for being removed */
-			if (strncmp(val, STR_FOR_REMOVE, sizeof(STR_FOR_REMOVE)) != 0) {
-				/* add value */
-				fprintf(sfp, PMKSTP_WRITE_FORMAT, phk->keys[i], CHAR_ASSIGN_UPDATE, val);
+#ifdef PMKSETUP_DEBUG
+	debugf("write_new_data: processing '%s'", phk->keys[i]);
+#endif
+			ppo = hash_get(pht, phk->keys[i]);
+			if (ppo == NULL) {
+				/* XXX */
+#ifdef PMKSETUP_DEBUG
+				debugf("write_new_data: unable to get '%s' record.", phk->keys[i]);
+#endif
+			} else {
+				/* check if this key is marked for being removed */
+				if (ppo->opchar != PMKSTP_REC_REMV) {
+					/* add value */
+					val = po_get_str(ppo->value); /* XXX check */ 
+					fprintf(sfp, PMKSTP_WRITE_FORMAT, phk->keys[i], CHAR_ASSIGN_UPDATE, val);
+#ifdef PMKSETUP_DEBUG
+				} else {
+					debugf("write_new_data: skipping '%s', remove record.", phk->keys[i]);
+#endif
+				}
 			}
 		}
 
@@ -323,6 +401,7 @@ int keycomp(const void *a, const void *b) {
 bool check_opt(htable *pht, prsopt *popt) {
 	char	*recval,
 		*optval;
+	prsopt	*ppo;
 
 	optval = po_get_str(popt->value);
 
@@ -332,20 +411,37 @@ bool check_opt(htable *pht, prsopt *popt) {
 		return(true);
 	}
 
-	/* XXX TODO  prsopt */
-	recval = (char *) hash_get(pht, popt->key);
-	if (recval != NULL) {
+#ifdef PMKSETUP_DEBUG
+	debugf("check_opt: checking key '%s'", popt->key);
+#endif
+
+	ppo = hash_get(ht, popt->key);
+	/*if ((ppo != NULL) && (ppo->value != NULL)) {*//* on remove value is NULL !!! */
+	if (ppo != NULL) {
+		/* XXX check value */
+		recval = po_get_str(ppo->value);
+
+#ifdef PMKSETUP_DEBUG
+		debugf("check_opt: original opchar '%c'", popt->opchar);
+#endif
+
 		/* checking the VAR<->VALUE separator */
 		switch (popt->opchar) {
 			case CHAR_ASSIGN_UPDATE :
-				/* check if this key is marked for being removed */
-				if (strncmp(recval, STR_FOR_REMOVE, sizeof(STR_FOR_REMOVE)) != 0) {
-					/* update value */
-					fprintf(sfp, PMKSTP_WRITE_FORMAT, popt->key, CHAR_ASSIGN_UPDATE, recval);
-				} else {
-					verbosef("Removing '%s'", popt->key);
-				}
+#ifdef PMKSETUP_DEBUG
+				debugf("check_opt: update opchar '%c'", ppo->opchar);
+#endif
+				switch (ppo->opchar) {
+					case PMKSTP_REC_REMV :
+						/* do nothing, value will not be refreshed */
+						verbosef("Removing '%s'", popt->key);
+						break;
+					case PMKSTP_REC_UPDT :
+						/* update value */
+						fprintf(sfp, PMKSTP_WRITE_FORMAT, popt->key, CHAR_ASSIGN_UPDATE, recval);
+						break;
 
+				}
 				hash_delete(pht, popt->key);
 				break;
 
@@ -355,13 +451,16 @@ bool check_opt(htable *pht, prsopt *popt) {
 				hash_delete(pht, popt->key);
 				break;
 
-				default :
-					/* should not happen now */
-					errorf("unknown operator '%c'.", popt->opchar);
-					return(false);
-					break;
+			default :
+				/* should not happen now */
+				errorf("unknown operator '%c'.", popt->opchar);
+				return(false);
+				break;
 		}
 	} else {
+#ifdef PMKSETUP_DEBUG
+	debugf("check_opt: key '%s' does not exist.", popt->key);
+#endif
 		fprintf(sfp, PMKSTP_WRITE_FORMAT, popt->key, popt->opchar, optval);
 	}
 
@@ -371,24 +470,25 @@ bool check_opt(htable *pht, prsopt *popt) {
 /*
  * Open temporary configuration file
  *
- *	returns:  boolean
+ *	return:  boolean
  */
 bool open_tmp_config(void) {
-	int	fd = -1;
+	int	fd;
 
 	/* creating temporary file to build new configuration file */
 	snprintf(sfn, sizeof(sfn), PREMAKE_CONFIG_TMP);
 
-	if ((fd = mkstemp(sfn)) == -1) {
+	fd = mkstemp(sfn);
+	if (fd == -1) {
 		errorf("could not create temporary file '%s' : %s.", 
 			sfn, strerror(errno));
 		return(false);
 	}
-	if ((sfp = fdopen(fd, "w")) == NULL) {
-		if (fd != -1) {
-			unlink(sfn);
-			close(fd);
-		}	
+
+	sfp = fdopen(fd, "w");
+	if (sfp == NULL) {
+		unlink(sfn);
+		close(fd);
 		errorf("cannot open temporary file '%s' : %s.", 
 			sfn, strerror(errno));
 		return(false);
@@ -403,17 +503,19 @@ bool open_tmp_config(void) {
  *	it deletes the temporary file on exit except if the
  *	PMKSETUP_DEBUG mode is on.
  *
- *	returns:  boolean
+ *	return:  boolean
  */
 bool close_tmp_config(void) {
-	if (sfp) {
-		if (fclose(sfp) < 0) {
-			errorf("cannot close temporary file '%s' : %s.", 
-				sfp, strerror(errno));
-			return(false);
-		}
-		sfp = NULL;
-	}        
+	if (sfp == NULL)
+		return(true);
+
+	if (fclose(sfp) != 0) {
+		errorf("cannot close temporary file '%s' : %s.", 
+			sfp, strerror(errno));
+		return(false);
+	}
+
+	sfp = NULL; /* XXX useful ? */
 	return(true);
 }
 
@@ -423,7 +525,7 @@ bool close_tmp_config(void) {
  *
  *	ht: hash table where we have to store the values
  *
- *	returns:  boolean
+ *	return:  boolean
  */
 bool get_env_vars(htable *ht) {
 	struct utsname	 utsname;
@@ -434,18 +536,15 @@ bool get_env_vars(htable *ht) {
 		return(false);
 	}
 
-	/* XXX TODO  prsopt */
-	if (hash_update_dup(ht, PMKCONF_OS_NAME, utsname.sysname) == HASH_ADD_FAIL)
+	if (record_data(ht, PMKCONF_OS_NAME, 'u', utsname.sysname) == false)
 		return(false);
 	verbosef("Setting '%s' => '%s'", PMKCONF_OS_NAME, utsname.sysname);
 
-	/* XXX TODO  prsopt */
-	if (hash_update_dup(ht, PMKCONF_OS_VERS, utsname.release) == HASH_ADD_FAIL)
+	if (record_data(ht, PMKCONF_OS_VERS, 'u', utsname.release) == false)
 		return(false);
 	verbosef("Setting '%s' => '%s'", PMKCONF_OS_VERS, utsname.release);	
 	
-	/* XXX TODO  prsopt */
-	if (hash_update_dup(ht, PMKCONF_OS_ARCH, utsname.machine) == HASH_ADD_FAIL)
+	if (record_data(ht, PMKCONF_OS_ARCH, 'u', utsname.machine) == false)
 		return(false);
 	verbosef("Setting '%s' => '%s'", PMKCONF_OS_ARCH, utsname.machine);
 
@@ -462,8 +561,7 @@ bool get_env_vars(htable *ht) {
 	 */
 	char_replace(bin_path, PATH_STR_DELIMITER, CHAR_LIST_SEPARATOR);
 
-	/* XXX TODO  prsopt */
-	if (hash_update_dup(ht, PMKCONF_PATH_BIN, bin_path) == HASH_ADD_FAIL)
+	if (record_data(ht, PMKCONF_PATH_BIN, 'u', bin_path) == false)
 		return(false);
 	verbosef("Setting '%s' => '%s'", PMKCONF_PATH_BIN, bin_path);
 
@@ -476,38 +574,51 @@ bool get_env_vars(htable *ht) {
  *
  *	ht: hash table where we have to store the values
  *
- *	returns: boolean 
+ *	return: boolean 
  */ 
 bool get_binaries(htable *ht) {
-	char	 fbin[MAXPATHLEN];	/* full binary path */
+	char	 fbin[MAXPATHLEN],	/* full binary path */
+		*pstr;
 	dynary	*stpath;
 	int	 i;
+	prsopt	*ppo;
 
         /*
          * splitting the PATH variable and storing in a 
          * dynamic array for later use by find_file
          */
-	stpath = str_to_dynary((char *) hash_get(ht, PMKCONF_PATH_BIN), CHAR_LIST_SEPARATOR);
+
+	ppo = hash_get(ht, PMKCONF_PATH_BIN);
+	if (ppo == NULL) {
+		errorf("unable to get binary path record.");
+		return(false);
+	}
+
+	pstr = po_get_str(ppo->value);
+	if (pstr == NULL) {
+		/* XXX error */
+		return(false);
+	}
+
+	stpath = str_to_dynary(pstr , CHAR_LIST_SEPARATOR);
 	if (stpath == NULL) {
 		errorf("could not split the PATH environment variable correctly.");
 		return(false);	
 	}
 
 	if (find_file(stpath, "cc", fbin, sizeof(fbin)) == true) {
-	/* XXX TODO  prsopt */
-		if (hash_update_dup(ht, "BIN_CC", fbin) == HASH_ADD_FAIL) {
+		if (record_data(ht, PMKCONF_BIN_CC, 'u', fbin) == false) {
 			da_destroy(stpath);
 			return(false);
 		}
-		verbosef("Setting '%s' => '%s'", "BIN_CC", fbin);
+		verbosef("Setting '%s' => '%s'", PMKCONF_BIN_CC, fbin);
 	} else {
 		if (find_file(stpath, "gcc", fbin, sizeof(fbin)) == true) {
-	/* XXX TODO  prsopt */
-			if (hash_update_dup(ht, "BIN_CC", fbin) == HASH_ADD_FAIL) {
+			if (record_data(ht, PMKCONF_BIN_CC, 'u', fbin) == false) {
 				da_destroy(stpath);
 				return(false);
 			}
-			verbosef("Setting '%s' => '%s'", "BIN_CC", fbin);
+			verbosef("Setting '%s' => '%s'", PMKCONF_BIN_CC, fbin);
 		} else {
 			errorf("cannot find a C compiler.");
 			da_destroy(stpath);
@@ -517,8 +628,7 @@ bool get_binaries(htable *ht) {
 
 	for (i = 0; i < MAXBINS; i++) {
 		if (find_file(stpath, binaries[i][0], fbin, sizeof(fbin)) == true) {
-	/* XXX TODO  prsopt */
-			if (hash_update_dup(ht, binaries[i][1], fbin) == HASH_ADD_FAIL) {
+			if (record_data(ht, binaries[i][1], 'u', fbin) == false) {
 				da_destroy(stpath);
 				return(false);
 			}
@@ -544,12 +654,11 @@ bool predef_vars(htable *pht) {
 	int	i;
 
 	for (i = 0 ; i < nbpredef ; i++) {
-		verbosef("Setting '%s' => '%s'", predef[i].key, predef[i].value);
-	/* XXX TODO  prsopt */
-		if (hash_update_dup(pht, predef[i].key, predef[i].value) == HASH_ADD_FAIL) {
+		if (record_data(pht, predef[i].key, 'u', predef[i].value) == false) {
 			errorf("failed to add '%s'.", predef[i].key);
 			return(false);
 		}
+		verbosef("Setting '%s' => '%s'", predef[i].key, predef[i].value);
 	}
 
 	return(true);
@@ -616,18 +725,15 @@ bool check_echo(htable *pht) {
 		}
 	}
 
-	/* XXX TODO  prsopt */
-	if (hash_update_dup(pht, PMKCONF_AC_ECHO_N, echo_n) == HASH_ADD_FAIL)
+	if (record_data(pht, PMKCONF_AC_ECHO_N, 'u', echo_n) == false)
 		return(false);
 	verbosef("Setting '%s' => '%s'", PMKCONF_AC_ECHO_N, echo_n);
 	
-	/* XXX TODO  prsopt */
-	if (hash_update_dup(pht, PMKCONF_AC_ECHO_C, echo_c) == HASH_ADD_FAIL)
+	if (record_data(pht, PMKCONF_AC_ECHO_C, 'u', echo_c) == false)
 		return(false);
 	verbosef("Setting '%s' => '%s'", PMKCONF_AC_ECHO_C, echo_c);
 
-	/* XXX TODO  prsopt */
-	if (hash_update_dup(pht, PMKCONF_AC_ECHO_T, echo_t) == HASH_ADD_FAIL)
+	if (record_data(pht, PMKCONF_AC_ECHO_T, 'u', echo_t) == false)
 		return(false);
 	verbosef("Setting '%s' => '%s'", PMKCONF_AC_ECHO_T, echo_t);
 
@@ -636,23 +742,27 @@ bool check_echo(htable *pht) {
 
 
 /*
+ *	check pkgconfig libpath
+ *
  *	pht: hash table where we have to store the values
  *
  *	returns:  boolean
+ *
+ *	NOTE: this path must be relative to the real prefix. This means
+ *		that we can't rely on predefined prefix.
  */
 
 bool check_libpath(htable *pht) {
-	char	libpath[MAXPATHLEN];
+	char	 libpath[MAXPATHLEN];
 
-	/* XXX TODO  prsopt */
-	strlcpy(libpath, hash_get(pht, PMKCONF_MISC_PREFIX), sizeof(libpath)); /* XXX check hash_get() return */
-	strlcat(libpath, PMKVAL_LIB_PKGCONFIG, sizeof(libpath));
+	/* build the path dynamically */
+	strlcpy(libpath, "$", sizeof(libpath)); /* variable prefix */
+	strlcpy(libpath, PMKCONF_MISC_PREFIX, sizeof(libpath)); /* prefix variable name */
+	strlcat(libpath, PMKVAL_LIB_PKGCONFIG, sizeof(libpath)); /* pkgconfig path suffix */
 
-	/* XXX TODO  prsopt */
 	if (hash_get(pht, PMKCONF_BIN_PKGCONFIG) != NULL) {
 		if (dir_exists(libpath) == 0) {
-	/* XXX TODO  prsopt */
-			if (hash_update_dup(pht, PMKCONF_PC_PATH_LIB, libpath) == HASH_ADD_FAIL)
+			if (record_data(pht, PMKCONF_PC_PATH_LIB, 'u', libpath) == false)
 				return(false);
 			verbosef("Setting '%s' => '%s'", PMKCONF_PC_PATH_LIB, libpath);
 		} else {
@@ -687,12 +797,12 @@ bool dir_exists(const char *fdir) {
 }
 
 /*
-	byte order check
-
-	pht : hash table to store value
-
-	return : boolean value
-*/
+ *	byte order check
+ *
+ *	pht : hash table to store value
+ *
+ *	return : boolean value
+ */
 
 bool byte_order_check(htable *pht) {
 	char	bo_type[16];
@@ -710,8 +820,7 @@ bool byte_order_check(htable *pht) {
 		}
 	}
 
-	/* XXX TODO  prsopt */
-	if (hash_update_dup(pht, PMKCONF_HW_BYTEORDER, bo_type) == HASH_ADD_FAIL)
+	if (record_data(pht, PMKCONF_HW_BYTEORDER, 'u', bo_type) == false)
 		return(false);
 
 	verbosef("Setting '%s' => '%s'", PMKCONF_HW_BYTEORDER, bo_type);

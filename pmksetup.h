@@ -49,6 +49,9 @@
 /* define printf format in pmk.conf */
 #define PMKSTP_WRITE_FORMAT	"%s %c \"%s\"\n"
 
+#define PMKSTP_REC_REMV		'r'
+#define PMKSTP_REC_UPDT		'u'
+
 /* buffer size in the copy_config() function */
 #define MAX_LINE_BUF		MAX_LINE_LEN
 
@@ -61,8 +64,6 @@
 #define	ECHO_C		"\\c"
 #define	ECHO_NL		"\\n"
 #define	ECHO_HT		"\\t"
-
-#define STR_FOR_REMOVE	"RESERVED__FOR__REMOVAL"
 
 
 /*
@@ -88,6 +89,7 @@ static  char *binaries[MAXBINS][2] = {
 
 
 /* Local functions declaration */
+bool	record_data(htable *, char *, char, char *);
 bool	gather_data(htable *);
 bool	check_opt(htable *, prsopt *);
 bool	open_tmp_config(void);
