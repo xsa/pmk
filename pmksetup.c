@@ -170,24 +170,22 @@ int main(int argc, char *argv[]) {
  * 	ht: hash table
  */
 void write_new_data(htable *ht) {
-	char	**keys,
-		*val;
-	int	n,
-		i;
+	char	*val;
+	int	 i;
+	hkeys	*phk;
 
-	n = hash_nbkey(ht);
-	keys = hash_keys(ht);
+	phk = hash_keys(ht);
 
 	/* sort hash table */
-	qsort(keys, n, sizeof(char *), keycomp);
+	qsort(phk->keys, phk->nkey, sizeof(char *), keycomp);
 
 	/* processing remaining keys */
-	for(i = 0 ; i < n ; i++) {
-		val = (char *)hash_get(ht, keys[i]);
-		fprintf(sfp, "%s%c%s\n", keys[i], CHAR_ASSIGN_UPDATE, val);
+	for(i = 0 ; i < phk->nkey ; i++) {
+		val = (char *)hash_get(ht, phk->keys[i]);
+		fprintf(sfp, "%s%c%s\n", phk->keys[i], CHAR_ASSIGN_UPDATE, val);
 	}
 
-	free(keys);
+	hash_free_hkeys(phk);
 }
 
 
