@@ -4,6 +4,7 @@ CC?=		cc
 INSTALL?=	install
 
 CFLAGS?=
+
 #CFLAGS+=	-Wall
 #CFLAGS+=	-Werror
 #CFLAGS+=	-ansi -pedantic
@@ -19,7 +20,11 @@ CFLAGS?=
 #CFLAGS+=	-DSYSCONFDIR=\"/etc/\"
 
 # Flag for platform testing checks
-#CFLAGS+=	-DUSER_TEST
+
+# Some make programs don't know about += operator.
+# Edit and use the following instead :
+#CFLAGS+=	-DUSER_TEST -DPMK_DEBUG -DPMKSETUP_DEBUG
+
 
 LDFLAGS?=
 
@@ -110,6 +115,7 @@ deinstall:
 	rm -f $(PREFIX)/man/man1/$(PREMAKE).1
 	rm -f $(PREFIX)/man/man1/$(SCAN).1
 	rm -f $(PREFIX)/man/man8/$(SETUP).8
+	rm -f $(PREFIX)/man/man5/$(PREMAKE)file.5
 	rm -f $(PREFIX)/man/man5/$(PREMAKE).conf.5
 
 test_$(PREMAKE): $(PREMAKE)
