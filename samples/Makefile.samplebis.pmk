@@ -1,0 +1,8 @@
+# Makefile example
+
+TPATH=@TPATH@
+BINPROG=@PREFIX@/bin/@PROGNAME@
+
+test:
+	@echo "running $(BINPROG)"
+	$(BINPROG) $(TPATH)/pwet
