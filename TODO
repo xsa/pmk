@@ -27,11 +27,13 @@ common:
 mips	+	improve test_pmkinstall to check more modes
 	-	add test target in tests/Makefile
 	-	improve comp_test usage
+	-	update README and INSTALL
 
 
 pmk:
 -----------------------------------------------------------------------
-	-	use a compiler.dat to store compiler data (easier to add new compiler)
+	-	handle compiler detection when needed
+	-	clean detect.*
 	~.	compatibility with autoconf (progressing) :
 			~ support for DEFS (-D options to pass to the compiler)
 			- support for LDFLAGS (misc linker options) ?
