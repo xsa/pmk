@@ -17,8 +17,6 @@ SBINDIR=	@SBINDIR@
 DATADIR=	@DATADIR@
 MANDIR=		@MANDIR@
 
-TESTDIR=	test_samples
-
 CFGFLAGS=	-DSYSCONFDIR=\"$(SYSCONFDIR)\" -DCONFDIR=\"$(CONFDIR)\"
 
 # Flag to enable pmk in user mode (check INSTALL file for details).
@@ -46,6 +44,10 @@ INST=           $(PREMAKE)install
 
 SAMPLE=		$(PREMAKE)file.sample
 CONFIG=		$(PREMAKE).conf.sample
+
+TEST_SAMPLE=	test_samples
+TEST_INST=	test_pmkinstall
+TEST_TARGET=	$(TEST_INST)/$(INST).test
 
 P_OBJS=		autoconf.o common.o compat.o dynarray.o func.o functool.o \
 		hash.o parse.o pmk_obj.o pathtools.o $(PREMAKE).o
@@ -153,7 +155,7 @@ clean: $(PREMAKE)-clean $(SETUP)-clean $(SCAN)-clean $(INST)-clean
 
 test_$(PREMAKE): $(PREMAKE)
 	@echo ""
-	@echo "=> Testing pmk with sample files"
+	@echo "=> Testing $(PREMAKE) with sample files"
 	@echo ""
 	@echo "-> Dumping target files"
 	@echo ""
@@ -179,28 +181,28 @@ test_$(PREMAKE): $(PREMAKE)
 	@echo "----------------------------------------"
 	@echo ""
 	@echo "-> Running pmk"
-	./$(PREMAKE) -b $(TESTDIR) -e use_gtk -f samples/pmkfile.sample -o samples/ovrfile.sample
+	./$(PREMAKE) -b $(TEST_SAMPLE) -e use_gtk -f samples/pmkfile.sample -o samples/ovrfile.sample
 	@echo ""
 	@echo "-> Dumping generated files"
 	@echo ""
-	@echo "$(TESTDIR)/Makefile.sample"
+	@echo "$(TEST_SAMPLE)/Makefile.sample"
 	@echo "----------------------------------------"
-	@cat $(TESTDIR)/Makefile.sample
-	@echo "----------------------------------------"
-	@echo ""
-	@echo "$(TESTDIR)/subdir/Makefile.subdir"
-	@echo "----------------------------------------"
-	@cat $(TESTDIR)/subdir/Makefile.subdir
+	@cat $(TEST_SAMPLE)/Makefile.sample
 	@echo "----------------------------------------"
 	@echo ""
-	@echo "$(TESTDIR)/config_sample.h"
+	@echo "$(TEST_SAMPLE)/subdir/Makefile.subdir"
 	@echo "----------------------------------------"
-	@cat $(TESTDIR)/config_sample.h
+	@cat $(TEST_SAMPLE)/subdir/Makefile.subdir
 	@echo "----------------------------------------"
 	@echo ""
-	@echo "$(TESTDIR)/ac_config.h"
+	@echo "$(TEST_SAMPLE)/config_sample.h"
 	@echo "----------------------------------------"
-	@cat $(TESTDIR)/ac_config.h
+	@cat $(TEST_SAMPLE)/config_sample.h
+	@echo "----------------------------------------"
+	@echo ""
+	@echo "$(TEST_SAMPLE)/ac_config.h"
+	@echo "----------------------------------------"
+	@cat $(TEST_SAMPLE)/ac_config.h
 	@echo "----------------------------------------"
 	@echo ""
 	@echo "=> End of test"
@@ -208,7 +210,7 @@ test_$(PREMAKE): $(PREMAKE)
 
 test_$(SETUP): $(SETUP)
 	@echo ""
-	@echo "=> Testing pmksetup"
+	@echo "=> Testing $(SETUP)"
 	@echo "Generating local pmk.conf."
 	@echo "(need USERMODE enabled)"
 	@echo ""
@@ -224,7 +226,7 @@ test_$(SETUP): $(SETUP)
 
 test_$(SCAN): $(SCAN)
 	@echo ""
-	@echo "=> Testing pmkscan"
+	@echo "=> Testing $(SCAN)"
 	./$(SCAN)
 	@echo ""
 	@echo "Dumping pmkfile.scan"
@@ -232,13 +234,66 @@ test_$(SCAN): $(SCAN)
 	@cat pmkfile.scan
 	@echo "----------------------------------------"
 	@echo ""
+	@echo "=> End of test"
+	@echo ""
+
+test_$(INST): $(INST)
+	@echo ""
+	@echo "=> Testing $(INST)"
+	@echo ""
+	@echo "-> Creating test directory"
+	@echo ""
+	pmkinstall -d -m 770 $(TEST_INST)
+	@echo ""
+	@echo "-> Checking test directory"
+	@if (test -d "$(TEST_INST)"); then \
+		echo ""; \
+		echo "- - - - - - - - - - - - - - - - - - -" \
+			"- - - - - - - - - - - - - - - - - -"; \
+		echo ""; \
+		ls -ld $(TEST_INST); \
+		echo ""; \
+		echo "- - - - - - - - - - - - - - - - - - -" \
+			"- - - - - - - - - - - - - - - - - -"; \
+		echo ""; \
+		echo "Directory OK."; \
+	else \
+		echo ""; \
+		echo "Failed."; \
+		exit 1; \
+	fi
+	@echo ""
+	@echo "-> Installing test data"
+	@echo ""
+	pmkinstall -m u+rw README $(TEST_TARGET)
+	@echo ""
+	@echo "-> Checking test file"
+	@if (test -f "$(TEST_TARGET)"); then \
+		echo ""; \
+		echo "- - - - - - - - - - - - - - - - - - -" \
+			"- - - - - - - - - - - - - - - - - -"; \
+		echo ""; \
+		ls -l $(TEST_TARGET); \
+		echo ""; \
+		echo "- - - - - - - - - - - - - - - - - - -" \
+			"- - - - - - - - - - - - - - - - - -"; \
+		echo ""; \
+		echo "Directory OK."; \
+	else \
+		echo ""; \
+		echo "Failed."; \
+		exit 1; \
+	fi
+	@echo ""
+	@echo "=> End of test"
+	@echo ""
+
 
 test_clean:
 	@echo ""
 	@echo "=> Removing generated files"
-	rm -f $(TESTDIR)/Makefile.sample $(TESTDIR)/config_sample.h
-	rm -f $(TESTDIR)/ac_config.h $(TESTDIR)/subdir/Makefile.subdir
-	rm -rf $(TESTDIR)
+	rm -rf $(TEST_SAMPLE)
+	rm -rf $(TEST_INST)
 	rm -f samples/ac_config.h pmkfile.scan pmk.log
 
 	@echo ""
@@ -246,3 +301,5 @@ test_clean:
 	@echo ""
 
 test_all: all test_$(SETUP) test_$(PREMAKE) test_$(SCAN) test_clean
+
+test: test_all

@@ -1,3 +1,6 @@
+26 Nov 2003 mipsator
+ * added test_pmkinstall target in makefiles.
+
 25 Nov 2003 mipsator
  * added support for -o and -g options (owner and group) of pmkinstall.
  * added mode argument to makepath() in pathtools.
