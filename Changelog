@@ -1,5 +1,6 @@
 10 Dec 2003  mipsator
  * added new option to pmk to enable check build logging.
+ * updated pmk man page with new -l option.
 
 09 Dec 2003  mipsator
  * added MEMBER in CHECK_TYPE to check structure member.
