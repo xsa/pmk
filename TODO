@@ -24,7 +24,7 @@ Indented lines means subtask.
 common:
 -----------------------------------------------------------------------
 	-	tutorial
-mips	-	improve test_pmkinstall to check more modes
+mips	+	improve test_pmkinstall to check more modes
 
 
 pmk:
@@ -61,7 +61,7 @@ pmkscan
 
 pmkinstall
 -----------------------------------------------------------------------
-mips	~	full rewrite
+	~	full rewrite
 			+ copy done
 			+ mode option
 				+ suid and sgid bits ?

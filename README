@@ -26,7 +26,7 @@ And finish by installing with :
 Testing :
 
   make clean
-  make test_all
+  make test
 
 You can send us feedback to the following email :
 
