@@ -201,17 +201,20 @@ void write_new_data(htable *ht) {
 	hkeys	*phk;
 
 	phk = hash_keys(ht);
+	if (phk != NULL) {
+		/* sort hash table */
+		qsort(phk->keys, phk->nkey, sizeof(char *), keycomp);
 
-	/* sort hash table */
-	qsort(phk->keys, phk->nkey, sizeof(char *), keycomp);
+		/* processing remaining keys */
+		for(i = 0 ; i < phk->nkey ; i++) {
+			val = (char *) hash_get(ht, phk->keys[i]);
+			fprintf(sfp, PMKSTP_WRITE_FORMAT, phk->keys[i], CHAR_ASSIGN_UPDATE, val);
+		}
 
-	/* processing remaining keys */
-	for(i = 0 ; i < phk->nkey ; i++) {
-		val = (char *) hash_get(ht, phk->keys[i]);
-		fprintf(sfp, PMKSTP_WRITE_FORMAT, phk->keys[i], CHAR_ASSIGN_UPDATE, val);
+		hash_free_hkeys(phk);
+	} else {
+		verbosef("Nothing to merge.");
 	}
-
-	hash_free_hkeys(phk);
 }
 
 

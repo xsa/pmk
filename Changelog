@@ -9,6 +9,7 @@
  * updated README and INSTALL.
  * fixed pmk_switches() and missing escape in pmkfile.
  * bunch of fixes and cosmetics changes before next snapshot.
+ * fixed vicious bug in pmksetup that results in segfault on tru64.
 
 26 Sep 2003 mipsator
  * added support to negate labels in conditions like DEPEND or IF.

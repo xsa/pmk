@@ -1,20 +1,20 @@
 Sys name	Sys Version	OS arch.	PMK Version	PMK Status	Reported by		Misc data
 ~~~~~~~~~~~~~~~ ~~~~~~~~~~~~~~~ ~~~~~~~~~~~~~~~ ~~~~~~~~~~~~~~~ ~~~~~~~~~~~~~~~	~~~~~~~~~~~~~~~~~~~~~~~	~~~~~~~~~~~~~~~~~~~~~~~~
 AIX		4.3.3		ppc		PMK 0.6		OK (USER_TEST)	Martin Reindl		AIX C COmpiler 4.4.0.2, install -d doesn't work 
-Debian		3.0		parisc		PMK 0.6		OK		Damien Couderc		gcc-3.0.4, gmake-3.79.1, linux-2.4.17-64
-Debian		3.0		ia64		PMK 0.6		OK		Damien Couderc		gcc-3.3, gmake-3.79.1, linux-2.4.18-smp
+Debian		3.0		parisc		PMK 0.6.5	OK		Damien Couderc		gcc-3.0.4, gmake-3.79.1, linux-2.4.17-64
+Debian		3.0		ia64		PMK 0.6.5	OK		Damien Couderc		gcc-3.3, gmake-3.79.1, linux-2.4.18-smp
 FreeBSD		4.8		i386		PMK 0.6.5	OK		Damien Couderc		gcc-2.95.4
-FreeBSD		4.8		alpha		PMK 0.6		OK		Damien Couderc		gcc-2.95.4
+FreeBSD		4.8		alpha		PMK 0.6.5	OK		Damien Couderc		gcc-2.95.4
 HPUX		B.11.22		ia64		PMK 0.6.5	OK		Damien Couderc		HP ANSI C++/C B3910B A.05.36, 
 MacOS		X.2.6		ppc		PMK 0.6		OK		Xavier Santolaria	gcc-3.1, gmake-3.79.1, Darwin 6.6
-Mandrake	9.1		i686		PMK 0.6		OK		Damien Couderc		gcc-3.2.2, gmake-3.80, linux-2.4.21
+Mandrake	9.1		i686		PMK 0.6.5	OK		Damien Couderc		gcc-3.3.1, gmake-3.80, linux-2.4.21
 NetBSD		1.6		i386		PMK 0.6.5	OK		Damien Couderc		gcc-2.95.3
 NetBSD		1.6		sparc		PMK 0.6		OK		Martin Reindl		gcc-2.95.3
 OpenBSD		3.3		i386		PMK 0.6.5	OK		Damien Couderc		gcc-2.95.3
 OpenBSD		3.3		sparc		PMK 0.6		OK		Damien Couderc		gcc-2.95.3 
 OpenBSD		3.3		sparc64		PMK 0.6		OK		Damien Couderc		gcc-2.95.3 
 OSF1 (tru64)	5.1B		alpha		PMK 0.6.5	FAILED		Damien Couderc		Compaq C V6.5-207, gmake 3.79.1
-RedHat Ent.	ES2.1		i686		PMK 0.6		OK		Damien Couderc		gcc-2.96, gmake-3.79.1, linux-2.4.9-smp
+RedHat Ent.	ES2.1		i686		PMK 0.6.5	OK		Damien Couderc		gcc-3.3, gmake-3.79.1, linux-2.4.9-smp
 Slackware	9.0		i686		PMK 0.6.5	OK		Damien Couderc		gcc-3.2.2, gmake-3.80, linux-2.4.20
 SunOS           5.7             sun4u           PMK 0.6         OK              Xavier Santolaria       WorkShop Compilers 5.0, gmake-3.76.1
-SuSE		7.1a		ia64		PMK 0.6		OK		Damien Couderc		gcc-2.96, gmake-3.79.1, linux-2.4.4-smp
+SuSE		7.2		ia64		PMK 0.6.5	OK		Damien Couderc		gcc-3.0, gmake-3.79.1, linux-2.4.4-smp
