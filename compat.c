@@ -37,6 +37,10 @@
 #include "compat/strlcpy.c"
 #endif
 
+#ifndef HAVE_STRLCAT
+#include "compat/strlcat.c"
+#endif
+
 #ifndef HAVE_LIBGEN_H
 #include "compat/basename.c"
 #include "compat/dirname.c"

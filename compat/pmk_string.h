@@ -57,3 +57,11 @@
 #ifndef HAVE_STRLCPY
 #include "strlcpy.h"
 #endif
+
+/*
+	strlcat
+*/
+
+#ifndef HAVE_STRLCAT
+#include "strlcat.h"
+#endif

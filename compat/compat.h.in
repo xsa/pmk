@@ -43,6 +43,9 @@
 /* availability of strlcpy */
 @DEF_STRLCPY@	HAVE_STRLCPY
 
+/* availability of strlcat */
+@DEF_STRLCAT@	HAVE_STRLCAT
+
 /* availability of stdbool.h (ISO C99) */
 @DEF_STDBOOL_H@	HAVE_STDBOOL_H
 
