@@ -76,8 +76,9 @@
 
 extern char	*optarg;
 extern int	 optind;
+#ifndef errno
 extern int	 errno;
-
+#endif
 
 /*
 	strip
