@@ -1,0 +1,177 @@
+-----------------------------------------------------------------------
+Pre Make Kit tutorial file
+
+Document revision:
+$Id$
+-----------------------------------------------------------------------
+
+
+			    PMK tutorial
+
+1) Introduction
+   ------------
+
+As make is using a makefile, the pmk binary is using a pmkfile. This
+file contains a set of commands that perform checks of source
+dependencies. Following to that, template files are processed to build
+final after tags substitutions.
+
+
+2) The settings
+   ------------
+
+The first command you will found in a pmkfile is named SETTINGS. Its
+function is to define global settings. To begin we are going to use
+only one template for the makefile. See the following example:
+
+SETTINGS {
+	TARGET = ("Makefile.in")
+}
+
+The TARGET option is taking a list as value. The list is delimited by
+parenthesis. As you can see Makefile.in will be the template name.
+
+
+3) Defining some variables
+   -----------------------
+
+It can be useful to define some basic variables such as package name
+and version. For this we will use the DEFINE command as following:
+
+DEFINE {
+	PACKAGE = "hello"
+	VERSION = "0.1"
+}
+
+If the target(s) file(s) contain the @PACKAGE@ and @VERSION@ tags then
+they will be replaced by the variables values.
+
+
+4) First check
+   -----------
+
+Lets say that we have a hello.c file that need for example the string
+header. For that we use the CHECK_HEADER command like following:
+
+CHECK_HEADER(header_misc_code) {
+	NAME = "misc_code.h"
+}
+
+The NAME option gives the header to check. Lets see what gives our
+actual pmkfile. First create the template with the following command:
+
+echo "PACKAGE=@PACKAGE@" > Makefile.in
+echo "VERSION=@VERSION@" >> Makefile.in
+
+You can now type 'pmk'. The resulting output should like this:
+
+-------------------------------------------
+[SNIP]
+Processing commands :
+
+* Parsing settings
+        Collecting targets :
+                Added 'Makefile.in'.
+                Total 1 target(s) added.
+
+* Parsing define
+        defined 'PACKAGE' variable.
+        defined 'VERSION' variable.
+
+* Checking header [header_string]
+        Use C language with CC compiler.
+        Store compiler flags in 'CFLAGS'.
+        Found header 'string.h' : yes.
+
+Process templates :
+Created '/home/mips/tmp/Makefile'.
+-------------------------------------------
+
+And the generated Makefile should be:
+
+-------------------------------------------
+PACKAGE=hello
+VERSION=0.1
+-------------------------------------------
+
+
+5) Playing with pkg-config support
+   -------------------------------
+
+Let's say that our package has the gtkhello.c source that build a gtk
+version of hello program. That said we need to check if gtk is present
+on the system. We have two possibilities to do that: first by using
+pkg-config or secondly by checking the library.
+
+We are going to learn how to check gtk via pkgconfig support:
+
+CHECK_PKG_CONFIG(gtk_data) {
+	NAME = "gtk+"
+}
+
+If gtk is present you should get the following output when running pmk:
+
+-------------------------------------------
+[SNIP]
+
+* Checking pkg-config module [gtk_data]
+        Found package 'gtk+' : yes.
+        Stored compiler flags in 'CFLAGS'.
+        Stored library flags in 'LIBS'.
+
+[SNIP]
+-------------------------------------------
+
+We could also check for a minimal version of gtk needed by the program.
+For example we could look for at least 1.2 version of gtk:
+
+CHECK_PKG_CONFIG(gtk_data) {
+	NAME = "gtk+"
+	VERSION = "1.2"
+}
+
+And the related output:
+
+-------------------------------------------
+[SNIP]
+
+* Checking pkg-config module [gtk_data]
+        Found package 'gtk+' : yes.
+        Found version >= 1.2 : yes (1.2.10).
+        Stored compiler flags in 'CFLAGS'.
+        Stored library flags in 'LIBS'.
+
+[SNIP]
+-------------------------------------------
+
+As you can see the compiler and linker flags are automatically stored
+in the default CFLAGS and LIBS variables. Your can provide alternate
+variables with the CFLAGS and LIBS options like following:
+
+CHECK_PKG_CONFIG(gtk_data) {
+	NAME = "gtk+"
+	VERSION = "1.2"
+	CFLAGS = "GTK_CFLAGS"
+	LIBS = "GTK_LIBS"
+
+}
+
+And you'll get:
+
+-------------------------------------------
+[SNIP]
+
+* Checking pkg-config module [gtk_data]
+        Found package 'gtk+' : yes.
+        Found version >= 1.2 : yes (1.2.10).
+        Stored compiler flags in 'GTK_CFLAGS'.
+        Stored library flags in 'GTK_LIBS'.
+
+[SNIP]
+-------------------------------------------
+
+Notice that the storage variables have changed in the output.
+
+
+
+TO BE CONTINUED ...
