@@ -3,6 +3,8 @@
  * fixed a bug in chkpath().
  * finished (??) to implement srcdir and builddir stuff.
  * now templates are relative to the path of pmkfile.
+ * files created from templates are now relative to basedir.
+ * modified Makefile to respect basedir.
 
 # snapshot 0.4.5
 

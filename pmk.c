@@ -129,32 +129,23 @@ bool process_template(char *template, pmkdata *pgd) {
 		*dfd;
 	bool	replace,
 		ac_flag;
-	char	*path,
-		*plb,
+	char	*plb,
 		*pbf,
 		*ptbf,
 		*ptmp,
-		final[MAXPATHLEN],
 		lbuf[MAXPATHLEN],
 		buf[MAXPATHLEN],
-		tbuf[MAXPATHLEN];
+		tbuf[MAXPATHLEN],
+		fpath[MAXPATHLEN];
 	htable	*ht;
 
 	ht = pgd->htab;
 
-	pbf = strdup(template);
-	if (pbf == NULL) {
-		errorf("not enough memory.");
-		return(false);
-	}
-	ptbf = basename(pbf); /* getting filename */
-	if (ptbf == NULL) {
-		errorf("failed to get filename of template.");
-		return(false);
-	}
+	/* get the file name */
+	strlcpy(lbuf, basename(template), MAXPATHLEN); /* XXX check ? */
 
-	/* remove suffix */
-	ptmp = strrchr(ptbf, '.');
+	/* remove the last suffix */
+	ptmp = strrchr(lbuf, '.');
 	if (ptmp != NULL) {
 		*ptmp = CHAR_EOS;
 	} else {
@@ -162,21 +153,15 @@ bool process_template(char *template, pmkdata *pgd) {
 		return(false);
 	}
 
-	ptmp = strdup(template);
-	if (ptmp == NULL) {
-		errorf("not enough memory.");
-		return(false);
-	}
-	path = dirname(ptmp);
-	if (path == NULL) {
-		errorf("failed to get path of the template.");
-		return(false);
-	}
+	/* get relative path from srcdir */
+	relpath(pgd->srcdir, dirname(template), buf); /* XXX check ? */
+	/* apply to basedir */
+	abspath(pgd->basedir, buf, tbuf); /* XXX check ? */
 
-	/* build destination file */
-	snprintf(final, sizeof(final), "%s/%s", path, ptbf);
-	free(pbf);
-	free(ptmp);
+	/* XXX should create directories of the path ? */
+	
+	/* append filename */
+	abspath(tbuf, lbuf, fpath);
 
 	tfd = fopen(template, "r");
 	if (tfd == NULL) {
@@ -184,10 +169,10 @@ bool process_template(char *template, pmkdata *pgd) {
 		return(false);
 	}
 
-	dfd = fopen(final, "w");
+	dfd = fopen(fpath, "w");
 	if (dfd == NULL) {
 		fclose(tfd);
-		errorf("cannot open %s.", final);
+		errorf("cannot open %s.", fpath);
 		return(false);
 	}
 
@@ -270,7 +255,7 @@ bool process_template(char *template, pmkdata *pgd) {
 	fclose(dfd);
 	fclose(tfd);
 
-	pmk_log("Created '%s'.\n", final);
+	pmk_log("Created '%s'.\n", fpath);
 
 	if (ac_flag == true) {
 		/* clean dyn_var */
