@@ -89,6 +89,57 @@ cmdkw		functab[] = {
 
 
 /*
+	read configuration file
+*/
+
+bool read_conf(htable *ht) {
+	FILE	*fp;
+	char	buf[MAX_LINE_LEN];
+	int	ln = 0;
+	cfg_opt	co;
+
+	fp = fopen(PREMAKE_CONFIG_PATH, "r");
+	if (fp == NULL) {
+		errorf("Cannot open %s.", PREMAKE_CONFIG_PATH);
+		return(FALSE);
+	}
+
+	while (get_line(fp, buf, sizeof(buf)) == TRUE) {
+		switch (buf[0]) {
+			case CHAR_COMMENT :
+				/* ignore comment */
+				break;
+
+			case CHAR_EOS :
+				/* ignore empty line */
+				break;
+
+			default :
+				if (parse_conf_line(buf, ln, &co) == 0) {
+					/* parse ok */
+					hash_add(ht, co.key, co.val);
+					/* XXX */
+				} else {
+					/* incorrect line */
+					return(FALSE);
+				}
+				break;
+		}
+		ln++;
+	}
+
+	if (feof(fp) == 0) {
+		/* error occuered before EOF */
+		errorf_line(PREMAKE_CONFIG_PATH, cur_line, "end of file not reached.");
+		return(FALSE);
+	}
+
+	fclose(fp);
+
+	return(TRUE);
+}
+
+/*
 	process the target file to replace tags
 
 	target : path of the target file
@@ -424,13 +475,13 @@ bool parse_opt(char *line, htable *ht) {
 	returns a boolean
 */
 
-bool parse(FILE *fd, pmkdata *gdata) {
+bool parse(FILE *fp, pmkdata *gdata) {
 	char		buf[MAX_LINE_LEN];
 	bool		process = FALSE;
 	pmkcmd		cmd;
 	htable		*tabopts = NULL;
 
-	while (get_line(fd, buf, sizeof(buf)) == TRUE) {
+	while (get_line(fp, buf, sizeof(buf)) == TRUE) {
 		/* update current line number */
 		cur_line++;
 
@@ -504,7 +555,7 @@ bool parse(FILE *fd, pmkdata *gdata) {
 		return(FALSE);
 	}
 
-	if (feof(fd) == 0) {
+	if (feof(fp) == 0) {
 		/* error occuered before EOF */
 		hash_destroy(tabopts);
 		errorf_line(pmkfile, cur_line, "end of file not reached.");
@@ -527,9 +578,7 @@ void usage(void) {
 */
 
 int main(int argc, char *argv[]) {
-	FILE	*fd,
-		*cfd;
-	char	cf[MAXPATHLEN];
+	FILE	*fd;
 	char	idxstr[4]; /* max 999 cmds, should be enough :) */
 	int	rval = 0,
 		i,
@@ -572,16 +621,16 @@ int main(int argc, char *argv[]) {
 	argc = argc - optind;
 	argv = argv + optind;
 
+	/* initialise global data has htable */
+	gdata.htab = hash_init(MAX_DATA_KEY);
+
 	/* open configuration file */
-	snprintf(cf, sizeof(cf), "%s/%s", SYSCONFDIR, PREMAKE_CONFIG);
-	cfd = fopen(cf, "r");
-	if (cfd == NULL) {
-		errorf("%s not found in %s.", PREMAKE_CONFIG, SYSCONFDIR);
+	if (read_conf(gdata.htab) == FALSE) {
 		/* no pmksetup available so we ignore this error temporary ...
 		return(-1);
 		*/
 	} else {
-		fclose(cfd);
+		debugf("Parsed configuration file.");
 	}
 
 	if (argc != 0) {
@@ -617,8 +666,6 @@ int main(int argc, char *argv[]) {
 	}
 	/* print number of hashed command */
 	pmk_log("(%d)\n", keyhash->count);
-
-	gdata.htab = hash_init(MAX_DATA_KEY);
 
 	if (parse(fd, &gdata) == FALSE) {
 		/* an error occured while parsing */
