@@ -54,7 +54,7 @@
 
 #define PREMAKE_MAJOR		"0"
 #define PREMAKE_MINOR		"3"
-#define PREMAKE_SUB		"0"
+#define PREMAKE_SUB		"1" /* only used for tests identification */
 #define PREMAKE_VERSION		PREMAKE_MAJOR "." PREMAKE_MINOR
 
 #define PREMAKE_FILENAME	"pmkfile"
