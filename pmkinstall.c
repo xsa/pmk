@@ -46,6 +46,7 @@
 #include <stdlib.h>
 
 #include "compat/pmk_ctype.h"
+#include "compat/pmk_libgen.h"
 #include "compat/pmk_stdbool.h"
 #include "compat/pmk_string.h"
 #include "compat/pmk_unistd.h"
@@ -300,12 +301,15 @@ int main(int argc, char *argv[]) {
 			*ostr = NULL,
 			*src,
 			*dst,
+			*pstr,
 			 dir[MAXPATHLEN];
 	gid_t		 gid = (gid_t) -1;
 	int		 chr;
 	mode_t		 mode = DEFAULT_MODE,
 			 tmode;
 	uid_t		 uid = (uid_t) -1;
+	unsigned int	 src_idx,
+			 dst_idx;
 	
 	while (go_exit == false) {
 		chr = getopt(argc, argv, "bcdg:hm:o:stv");
@@ -377,13 +381,13 @@ debugf("mode = %o", mode);
 	argc = argc - optind;
 	argv = argv + optind;
 
-	if ((argc != 2) && (create_dir == false)) {
-		/* XXX TODO  allow use of more than one source (<2)*/
+	/* only directory creation allow 1 parameter */
+	if ((argc < 2) && (create_dir == false)) {
+		/* not enough parameters */
 		usage();
 	}
 
-	src = argv[0];
-	dst = argv[1];
+	dst_idx = argc -1;
 
 	/* check if an owner has been provided */
 	if (ostr != NULL) {
@@ -435,76 +439,73 @@ debugf("gid = %d", gid);
 		do_chown = true;
 	}
 
-	if (create_dir == false) {
-		/* check if target exists */
+
+	/* process each source */
+	for (src_idx = 0 ; src_idx < dst_idx ; src_idx++) {
+		src = argv[src_idx];
+		dst = argv[dst_idx];
+
+#ifdef DEBUG_INST
+debugf("process '%s'", src);
+#endif
+
+		/* check if destination is a directory,
+		   XXX can be improved to be out of the loop */
 		if (stat(dst, &sb) == 0) {
 			/* XXX many checks to do (is a directory, etc ...) */
 			tmode = sb.st_mode & S_IFDIR;
 			if (tmode == 0) {
-				/* not a directory */
+				/* not a directory, XXX backup ? */
 				unlink(dst);
+			} else {
+				strlcpy(dir, dst, sizeof(dir));
+				strlcat(dir, STR_SEP, sizeof(dir));
+
+				pstr = basename(src);
+				if (pstr == NULL) {
+					errorf("unable to get basename of source.");
+					exit(EXIT_FAILURE);
+				}
+
+				strlcat(dir, pstr, sizeof(dir)); /* XXX check */
+				dst = dir;
 			}
 		}
 
+#ifdef DEBUG_INST
+debugf("copy to '%s'", dst);
+#endif
 		/* copy file */
 		if (fcopy(src, dst, mode) == false) {
 			/* copy failed, error message already displayed */
 			exit(EXIT_FAILURE);
 		}
-	} else {
-#ifdef DEBUG_INST
-debugf("create dir '%s'", src);
-#endif
-		/* create path */
-		if (*src == CHAR_SEP) {
-			/* absolute path, copy */
-			strlcpy(dir, src, sizeof(dir)); /* XXX check */
-		} else {
-			/* relative, getting current directory */
-			if (getcwd(dir, sizeof(dir)) == NULL) {
-				errorf("unable to get current directory");
-				exit(EXIT_FAILURE);
-			}
-			/* appending path */
-			strlcat(dir, STR_SEP, sizeof(dir));
-			strlcat(dir, src, sizeof(dir)); /* XXX check */
-		}
-#ifdef DEBUG_INST
-debugf("dir = '%s'", dir);
-#endif
 
-		if (makepath(dir, S_IRWXU | S_IRWXG | S_IRWXO) == false) {
-			errorf("cannot create directory.");
-			exit(EXIT_FAILURE);
+		/* strip binary if asked */
+		if (do_strip == true) {
+			strip(dst);
 		}
 
-		/* set dst for further operations */
-		dst = dir;
-	}
-
-	/* strip binary if asked */
-	if (do_strip == true) {
-		strip(dst);
-	}
-
-	/* change owner and group */
-	if (do_chown == true) {
+		/* change owner and group */
+		if (do_chown == true) {
 #ifdef DEBUG_INST
 debugf("doing chown('%s', %d, %d)", dst, uid, gid);
 #endif
-		if (chown(dst, uid, gid) != 0) {
-			errorf("chown failed : %s.", strerror(errno));
-			exit(EXIT_FAILURE);
+			if (chown(dst, uid, gid) != 0) {
+				errorf("chown failed : %s.", strerror(errno));
+				exit(EXIT_FAILURE);
+			}
 		}
-	}
 
-	/* change perms (must follow chown that can change perms) */
-	if (chmod(dst, mode) == -1) {
+		/* change perms (must follow chown that can change perms) */
+		if (chmod(dst, mode) == -1) {
 #ifdef DEBUG_INST
 debugf("chmod('%s', %o)", dst, mode);
 #endif
-		errorf("chmod failed : %s.", strerror(errno));
-		exit(EXIT_FAILURE);
+			errorf("chmod failed : %s.", strerror(errno));
+			exit(EXIT_FAILURE);
+		}
+
 	}
 
 	return(0);
