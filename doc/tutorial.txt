@@ -15,8 +15,9 @@ $Id$
 
 As make is using a makefile, the pmk binary is using a pmkfile. This
 file contains a set of commands that perform checks of source
-dependencies. Following to that, template files are processed to generate
-a final file after tags substitutions.
+dependencies. Following to that, template files are processed to
+generate a final file after tags substitutions. Additionaly to this
+tutorial, we highly recommend to consult pmkfile(5).
 
 
 
@@ -57,12 +58,17 @@ they will be replaced by the variables values.
 Lets say that we have a hello.c file that needs the string header.
 For that, we use the CHECK_HEADER command like following:
 
-CHECK_HEADER(header_misc_code) {
+CHECK_HEADER(header_string) {
 	NAME = "string.h"
 }
 
-The NAME option contains the header to check. Let's see what our actual
-pmkfile contains. First we create the template with the following command:
+The NAME option contains the header to check. The string into brackets
+is the label of the command. If the check succeed this label is set as
+true else it is set as false. We'll see later how to use this label
+state into conditional command or as dependency with the DEPEND option.
+
+Now let's see what our actual pmkfile contains. First we create the
+template with the following commands:
 
 echo "PACKAGE=@PACKAGE@" > Makefile.in
 echo "VERSION=@VERSION@" >> Makefile.in
