@@ -1,3 +1,7 @@
+21 Feb 2004 mipsator
+ * fixed pmkscan bug that happens when no sources files exist, noticed
+   by Marek Habersack.
+
 16 Feb 2004 mreindl
  * update pkgsrc and OpenBSD ports to 0.8
 
