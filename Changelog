@@ -1,6 +1,7 @@
 08 Aug 2004 mipsator
  * added support for additional defines (keyword DEFS) in CHECK_HEADER,
    CHECK_LIB, CHECK_TYPE and CHECK_VARIABLE.
+ * set option keywords as defines.
 
 08 Aug 2004 mreindl
  * added -fPIC in SLLDFLAGS for gcc.
