@@ -503,51 +503,6 @@ bool pmk_log(const char *fmt, ...) {
 }
 
 /*
-	copy a text file
-
-	src_file : file to copy
-	dst_file : filename of the copy
-
-	returns true on success
-*/
-
-bool copy_text_file(char *src_file, char *dst_file) {
-	FILE	*fp_src,
-		*fp_dst;
-	bool	 rval;
-	char	 buf[TMP_BUF_LEN];
-
-	fp_src = fopen(src_file, "r");
-	if (fp_src == NULL) {
-		return(false);
-	}
-
-	fp_dst = fopen(dst_file, "w");
-	if (fp_dst == NULL) {
-		fclose(fp_src);
-		return(false);
-	}
-
-	while (get_line(fp_src, buf, sizeof(buf)) == 1) {
-		fprintf(fp_dst, "%s\n", buf); /* should test fprintf */
-	}
-
-	fclose(fp_dst);
-
-	if (feof(fp_src) == 0) {
-		rval = false;
-		/* copy failed to achieve, erase destination file */
-		unlink(dst_file);
-	} else {
-		rval = true;
-	}
-
-	fclose(fp_src);
-
-	return(rval);
-}
-
-/*
 	copy file
 
 	src : file to copy

@@ -110,7 +110,6 @@ bool	 pmk_log_open(char *);
 void	 pmk_log_close(void);
 bool	 pmk_log(const char *, ...);
 
-bool	 copy_text_file(char *, char *);
 bool	 fcopy(char *, char *, mode_t);
 
 FILE	*tmp_open(char *, char *, char *, size_t);
