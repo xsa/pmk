@@ -54,7 +54,7 @@ file in order to run the
 configuration tool.
 .Pp
 .Nm
-reads all configuration information from the 
+reads all configuration information from the
 .Xr pmk.conf 5
 file.
 .Pp
@@ -63,7 +63,7 @@ The options are as follows:
 .It Fl h
 Display the help menu.
 .It Fl r Ar variable
-Remove the given variable from 
+Remove the given variable from
 .Xr pmk.conf 5
 if its value isn't static.
 Data gathering is skipped by this option.
@@ -78,9 +78,11 @@ Verbose, display debugging messages.
 Display the version number.
 .El
 .Sh FILES
-.Bl -tag -width Ds
+.Bl -tag -width "/etc/pmk/pmk.conf" -compact
 .It Pa /etc/pmk/pmk.conf
-Default location of the configuration file.
+default
+.Xr pmk 1
+configuration file
 .El
 .Sh SEE ALSO
 .Xr make 1 ,

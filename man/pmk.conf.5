@@ -32,7 +32,7 @@
 .Dt PMK.CONF 5
 .Os
 .Sh NAME
-.Nm pmk.conf 
+.Nm pmk.conf
 .Nd premake configuration file
 .Sh DESCRIPTION
 .Nm pmk.conf
@@ -48,24 +48,24 @@ for a complete description.
 
 .Sh OPERATORS
 .Bl -tag -width Ds
-.It Cm = 
+.It Cm =
 This operator makes the value dynamic, which means that it will
-be (re)assigned everytime you run 
+be (re)assigned everytime you run
 .Xr pmksetup 8 .
 .Pp
 For example:
-.Bd -literal -offset -indent 
+.Bd -literal -offset -indent
 BIN_CC = "/usr/bin/cc"
 .Ed
 .It Cm :
 This operator makes the value static, which means that if you want
-to regenerate the 
+to regenerate the
 .Nm pmk.conf ,
 the value will be kept and not assigned dynamically by
-.Xr pmksetup 8 . 
+.Xr pmksetup 8 .
 .Pp
 For example:
-.Bd -literal -offset -indent 
+.Bd -literal -offset -indent
 BIN_INSTALL:"/usr/local/bin/install"
 .Ed
 .El
@@ -128,9 +128,11 @@ AC_ECHO_T = ""
 .Ed
 .Pp
 .Sh FILES
-.Bl -tag -width Ds 
+.Bl -tag -width "/etc/pmk/pmk.conf" -compact
 .It Pa /etc/pmk/pmk.conf
-Default location of the configuration file.
+default
+.Xr pmk 1
+configuration file
 .El
 .Sh SEE ALSO
 .Xr make 1 ,
