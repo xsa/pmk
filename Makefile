@@ -6,8 +6,12 @@ INSTALL?=	install
 CFLAGS?=
 CFLAGS+=	-Wall
 #CFLAGS+=	-Werror
+
+# Debug stuff
 #CFLAGS+=	-DPMK_DEBUG
 #CFLAGS+=	-DPMKSETUP_DEBUG
+
+# Here you can change the default location of pmk.conf
 #CFLAGS+=	-DSYSCONFDIR=\"/etc/\"
 
 LDFLAGS?=
