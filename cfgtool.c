@@ -45,7 +45,7 @@
 #include "parse.h"
 #include "premake.h"
 
-#define CFGT_TOK_ADDCT	1
+/*#define CFGT_DEBUG	1*/
 
 /* config tools data file keyword */
 prskw	kw_pmkcfgtool[] = {
@@ -58,7 +58,7 @@ int	nbkwct = sizeof(kw_pmkcfgtool) / sizeof(prskw);
 */
 
 void cfgtcell_destroy(cfgtcell *pcc) {
-#ifdef PKGCFG_DEBUG
+#ifdef CFGT_DEBUG
 debugf("free cfgtcell '%s'", pcc->name);
 #endif
 	free(pcc->name);
@@ -84,7 +84,7 @@ cfgtdata *cfgtdata_init(void) {
 	/* initialise configt tool data structure */
 	pcd = (cfgtdata *) malloc(sizeof(cfgtdata));
 	if (pcd == NULL) {
-#ifdef PKGCFG_DEBUG
+#ifdef CFGT_DEBUG
 		debugf("cannot initialize config tool data");
 #endif
 		return(NULL);
@@ -95,7 +95,7 @@ cfgtdata *cfgtdata_init(void) {
 			(void (*)(void *)) cfgtcell_destroy, NULL);
 	if (pcd->by_mod == NULL) {
 		free(pcd);
-#ifdef PKGCFG_DEBUG
+#ifdef CFGT_DEBUG
 		debugf("cannot initialize config tool hash table");
 #endif
 		return(NULL);
@@ -106,7 +106,7 @@ cfgtdata *cfgtdata_init(void) {
 	if (pcd->by_bin == NULL) {
 		hash_destroy(pcd->by_mod);
 		free(pcd);
-#ifdef PKGCFG_DEBUG
+#ifdef CFGT_DEBUG
 		debugf("cannot initialize config tool hash table");
 #endif
 		return(NULL);
@@ -120,24 +120,24 @@ cfgtdata *cfgtdata_init(void) {
 */
 
 void cfgtdata_destroy(cfgtdata *pcd) {
-#ifdef PKGCFG_DEBUG
+#ifdef CFGT_DEBUG
 debugf("destroying module hash table.");
 #endif
 	if (pcd->by_mod != NULL) {
 		hash_destroy(pcd->by_mod);
-#ifdef PKGCFG_DEBUG
+#ifdef CFGT_DEBUG
 debugf("destroyed module hash table.");
 	} else {
 debugf("WARNING : by_mod doesn't exists !!!");
 #endif
 	}
 
-#ifdef PKGCFG_DEBUG
+#ifdef CFGT_DEBUG
 debugf("destroying binary links hash table.");
 #endif
 	if (pcd->by_mod != NULL) {
 		hash_destroy(pcd->by_bin);
-#ifdef PKGCFG_DEBUG
+#ifdef CFGT_DEBUG
 debugf("destroyed binary links hash table.");
 	} else {
 debugf("WARNING : by_bin doesn't exists !!!");
@@ -208,11 +208,11 @@ bool add_cfgtool(cfgtdata *pcd, htable *pht) {
 	}
 
 	hash_update(pcd->by_mod, pcell->name, pcell); /* no need to strdup */ /* XXX check */
-#ifdef PKGCFG_DEBUG
+#ifdef CFGT_DEBUG
 debugf("added cfgtcell '%s'", pcell->name);
 #endif
 	hash_update_dup(pcd->by_bin, pcell->binary, pcell->name); /* no need to strdup */ /* XXX check */
-#ifdef PKGCFG_DEBUG
+#ifdef CFGT_DEBUG
 debugf("added cfgtcell '%s'", pcell->binary);
 #endif
 

@@ -40,6 +40,8 @@
 #include "hash.h"
 
 
+#define CFGT_TOK_ADDCT	1
+
 #ifndef DATADIR
 /* for lint */
 #define DATADIR	"./data"
