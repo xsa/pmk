@@ -816,10 +816,12 @@ int main(int argc, char *argv[]) {
 		}
 
 		if (gdata.ac_file != NULL) {
-			pmk_log("\nProcess '%s' for autoconf compatibility.\n", gdata.ac_file);
+			pmk_log("\nProcess '%s' for autoconf "
+				"compatibility.\n", gdata.ac_file);
 			if (ac_parse_config(&gdata) == false) {
 				/* failure while processing autoconf file */
-				errorf("failed to process autoconf config file.");
+				errorf("failed to process autoconf config "
+					"file '%s'.", gdata.ac_file);
 				rval = 1;
 			}
 		}
