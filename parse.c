@@ -1159,8 +1159,8 @@ bool parse_pmkconf(FILE *fp, htable *pht, char *seplst, bool (*func)(htable *, p
 	}
 
 	if (feof(fp) == 0) {
-		/* error occuered before EOF */
-		errorf_line(PREMAKE_CONFIG_PATH, ln, "end of file not reached.");
+		/* error occured before EOF */
+		errorf("line %d : %s", ln, "end of file not reached.");
 		return(false);
 	}
 
