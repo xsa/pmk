@@ -152,7 +152,7 @@ debugf(MKVAR_FMT_MK, varname, MKVAR_FILE);
 #endif
 	} else {
 #ifdef MKVAR_DEBUG
-		errorf("Failed to open %s : %s.", mfn, strerror(errno));
+		errorf("failed to open '%s' : %s.", mfn, strerror(errno));
 #endif
 		return(false);
 	}
@@ -164,7 +164,7 @@ debugf(MKVAR_FMT_MK, varname, MKVAR_FILE);
 			/* catch output of make */
 			if (get_line(tfp, result, rsize) == false) {
 #ifdef MKVAR_DEBUG
-				errorf("failed to get result from %s : %s.", varstr, strerror(errno));
+				errorf("failed to get result from '%s' : %s.", varstr, strerror(errno));
 #endif
 				rval = false;
 			}
@@ -173,13 +173,13 @@ debugf(MKVAR_FMT_MK, varname, MKVAR_FILE);
 			rval = true;
 		} else {
 #ifdef MKVAR_DEBUG
-			errorf("failed to open %s : %s.", varstr, strerror(errno));
+			errorf("failed to open '%s' : %s.", varstr, strerror(errno));
 #endif
 			rval = false;
 		}
 	} else {
 #ifdef MKVAR_DEBUG
-		errorf("failed to execute %s : %s.", varstr, strerror(errno));
+		errorf("failed to execute '%s' : %s.", varstr, strerror(errno));
 #endif
 		rval = false;
 	}
@@ -187,14 +187,14 @@ debugf(MKVAR_FMT_MK, varname, MKVAR_FILE);
 
 	if (unlink(mfn) == -1) {
 		/* cannot remove temporary file */
-		errorf("Cannot remove temporary file: %s : %s", 
+		errorf("cannot remove temporary file: '%s' : %s.", 
 			mfn, strerror(errno));
 	}
 
 	if (unlink(MKVAR_FILE) == -1) {
 		/* cannot remove temporary file */
 #ifdef MKVAR_DEBUG
-		errorf("Cannot remove temporary file: %s : %s", 
+		errorf("cannot remove temporary file: '%s' : %s.", 
 			mfn, strerror(errno));
 #endif
 	}
@@ -406,12 +406,12 @@ void debugf(const char *fmt, ...) {
 
 bool pmk_log_open(char *logname) {
 	if (pmk_log_fp != NULL) {
-		errorf("%s already open.", logname);
+		errorf("'%s' is already open.", logname);
 		return(false);
 	}
 	pmk_log_fp = fopen(logname, "w");
 	if (pmk_log_fp == NULL) {
-		errorf("while opening %s.", logname);
+		errorf("while opening '%s'.", logname);
 		return(false);
 	} else {
 		return(true);
@@ -517,14 +517,14 @@ bool fcopy(char *src, char *dst, mode_t mode) {
 	/* try to open both source and destination files */
 	src_fd = open(src, O_RDONLY, 0);
 	if (src_fd == -1) {
-		errorf("cannot open %s : %s.", src, strerror(errno));
+		errorf("cannot open '%s' : %s.", src, strerror(errno));
 		return(false);
 	}
 /*debugf("mode = %o", mode);*/
 	dst_fd = open(dst, O_WRONLY | O_CREAT | O_TRUNC, mode);
 	if (dst_fd == -1) {
 		close(src_fd);
-		errorf("cannot open %s : %s.", dst, strerror(errno));
+		errorf("cannot open '%s' : %s.", dst, strerror(errno));
 		return(false);
 	}
 
@@ -534,7 +534,7 @@ bool fcopy(char *src, char *dst, mode_t mode) {
 		switch(rsz) {
 			case -1:
 				/* read error */
-				errorf("failed to read %s : %s.", src, strerror(errno));
+				errorf("failed to read '%s' : %s.", src, strerror(errno));
 				do_loop = false;
 				rval = false;
 				break;
@@ -548,7 +548,7 @@ bool fcopy(char *src, char *dst, mode_t mode) {
 				/* data read, trying to write */
 				if (write(dst_fd, cbuf, rsz) != rsz) {
 					/* write failed */
-					errorf("failed to write %s : %s.", dst, strerror(errno));
+					errorf("failed to write '%s' : %s.", dst, strerror(errno));
 					do_loop = false;
 					rval = false;
 				}
