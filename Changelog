@@ -5,6 +5,8 @@
 
 21 Jan 2005 mipsator
  * keep the PATH separator as is instead of replacing it with a comma.
+	NOTE: This means that you must update your pmk.conf before using
+	pmk again.
  * added a debug mechanism in pmksetup to work without fork and privsep.
  * fixed keycomp() by reverting changes that broken sorting.
  * added more information about pmk.conf in its manual page.

@@ -23,6 +23,10 @@ methods:
   make install
 
 
+For each new release of pmk we _highly_ recommend you to run pmksetup
+before any use of the new pmk binary.
+
+
 More about pmkcfg.sh
 --------------------
 
