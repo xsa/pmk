@@ -1,4 +1,7 @@
-23 MAy 2003 mipsator
+25 May 2003 mipsator
+ * few changes related to autoconf compatibility.
+
+23 May 2003 mipsator
  * added AC_COMPAT in pmkfile.sample plus some comments.
  * added samples/ac_config.h for autoconf compatibility test.
  * AC_COMPAT now handle FILENAME to set the configuration file to process.
