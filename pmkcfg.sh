@@ -34,8 +34,20 @@
 # defines
 #
 
-prefix="/usr/local"
-sysdir="/etc"
+usermode=0
+
+if [ -z $PREFIX ]; then
+	prefix="/usr/local"
+else
+	prefix=$PREFIX
+fi
+
+if [ -z $SYSCONFDIR ]; then
+	sysdir="/etc"
+else
+	sysdir=$SYSCONFDIR
+fi
+
 sconf="$sysdir/pmk"
 
 um_prfx='$(HOME)'
@@ -49,9 +61,21 @@ maketmpl="./Makefile.pmk"
 makefile="./Makefile"
 temporary="./pmkcfg.tmp"
 
+
 #
 # functions
 #
+
+# display usage
+usage() {
+	echo "\
+usage: $0 [-hup]
+
+	-h		usage
+	-u		set usermode
+	-p path		prefix override
+"
+}
 
 check_include() {
 	include="$1"
@@ -153,14 +177,35 @@ mkf_sed() {
 # init
 #
 
+# parse options
+while getopts 'hp:u' arg; do
+	case $arg in
+		p)
+			echo "overriding prefix with '$OPTARG'"
+			base=$OPTARG
+			;;
+		u)
+			usermode=1
+			;;
+		h)
+			usage
+			exit 1
+			;;
+	esac
+done
+
 cp $template $compat
 cp $maketmpl $makefile
 
-if [ "$1" = 'usermode' ]; then
+if [ $usermode = 1 ]; then
 	echo 'USERMODE ON.'
 
 	mkf_sed 'USERMODE' '-DPMK_USERMODE'
-	mkf_sed 'BASE' "$um_prfx"
+	if [ -z $base ]; then
+		mkf_sed 'BASE' "$um_prfx"
+	else
+		mkf_sed 'BASE' "$base"
+	fi
 	mkf_sed 'CONFDIR' '$(BASE)/.pmk'
 	mkf_sed 'BINDIR' '$(BASE)/bin'
 	mkf_sed 'SBINDIR' '$(BASE)/bin'
@@ -170,7 +215,11 @@ else
 	echo "USERMODE OFF."
 
 	mkf_sed 'USERMODE' ''
-	mkf_sed 'BASE' "$prefix"
+	if [ -z $base ]; then
+		mkf_sed 'BASE' "$prefix"
+	else
+		mkf_sed 'BASE' "$base"
+	fi
 	mkf_sed 'CONFDIR' '$(SYSCONFDIR)/pmk'
 	mkf_sed 'BINDIR' '$(BASE)/bin'
 	mkf_sed 'SBINDIR' '$(BASE)/sbin'
@@ -216,6 +265,11 @@ check_include libgen.h
 
 check_include_function ctype.h isblank
 
+#
+# config finished, creates config
+#
+
+echo 'OK' > config
 
 #
 # end

@@ -1,5 +1,7 @@
 18 Nov 2003 mipsator
  * disabled build of pmkinstall as it's still work in progress.
+ * added some getopts options to pmkcfg.sh (prefix override).
+ * updated Makefile.pmk and Makefile in sync with pmkcfg.sh changes.
 
 17 Nov 2003 mipsator
  * removed stuff in pmkinstall to make sunos happy.
