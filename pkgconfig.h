@@ -121,8 +121,8 @@ bool		 pkg_mod_exists(pkgdata *ppd, char *mod);
 
 bool		 add_cfgtool(cfgtdata *, htable *);
 cfgtdata	*parse_cfgt_file();
-bool		 cfgtcell_get_binary(pmkdata *, char *, char *, size_t);
-cfgtcell	*cfgtcell_get_cell(pmkdata *, char *);
+bool		 cfgtcell_get_binary(cfgtdata *, char *, char *, size_t);
+cfgtcell	*cfgtcell_get_cell(cfgtdata *, char *);
 
 #endif /* _PMK_PKGCONFIG_H_ */
 

@@ -1,3 +1,6 @@
+08 Jan 2004 mipsator
+ * fixed segfault on some platform when cleaning cfgtdata.
+
 06 Jan 2004 mipsator
  * fixed recording of cfgtool path in pmk_check_config().
 

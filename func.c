@@ -769,7 +769,7 @@ bool pmk_check_config(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 
 	/* check if specific tool option exists */
 	pmk_log("\tUsing specific options : ");
-	pcc = cfgtcell_get_cell(pgd, cfgtool);
+	pcc = cfgtcell_get_cell(pgd->cfgt, cfgtool);
 	if (pcc != NULL) {
 		pmk_log("yes\n");
 	} else {
@@ -1068,7 +1068,7 @@ bool pmk_check_pkg_config(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 		}
 
 		/* set config tool filename */
-		if (cfgtcell_get_binary(pgd, target, pc_cmd, sizeof(pc_cmd)) == false) {
+		if (cfgtcell_get_binary(pgd->cfgt, target, pc_cmd, sizeof(pc_cmd)) == false) {
 			snprintf(pc_cmd, sizeof(pc_cmd), "%s-config", target); /* XXX check */
 		}
 
