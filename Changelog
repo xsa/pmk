@@ -1,0 +1,23 @@
+25 Apr 2003 mipsator
+ * pmk_check_binary() has been completed.
+ * pmk_check_include() has been rewritten to have a better test.
+ * process_template() has been improved for speed.
+ * pmk_check_version() has been rewritten as the previous code
+   didn't work fine.
+ * improved get_line().
+
+25 Apr 2003 xsa
+ * moved BIN_PATH gathering in get_env_vars().
+ * change behavior of pmksetup when a binary is not found.
+
+24 Apr 2003 mipsator
+ * written check_version().
+ * improved version checking in pmk_check_config().
+ * fixed a vicious bug in find_file().
+
+24 Apr 2003 xsa
+ * add INC_PATH and LIB_PATH.
+
+[... changes since PMK 0.3 ...]
+
+# PMK 0.3 released

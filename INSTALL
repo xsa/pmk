@@ -2,6 +2,5 @@ INSTALL
 -------
 
 To build and install pmk on your system :
-make config
 make
 make install
