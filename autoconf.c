@@ -150,6 +150,7 @@ bool ac_parse_config(htable *ht, char *fpath) {
 void ac_process_dyn_var(htable *pht, pmkdata *pgd, char *template) {
 	char	*srcdir,
 		*basedir,
+		*pstr,
 		buf[MAXPATHLEN],
 		ac_dir[MAXPATHLEN],
 		abs_bd[MAXPATHLEN],
@@ -173,7 +174,10 @@ void ac_process_dyn_var(htable *pht, pmkdata *pgd, char *template) {
 
 	/* extract ac_dir from template
 		NOTE : ac_dir is relative */
-	relpath(srcdir, dirname(template), ac_dir);
+	/* NOTE : we use strdup to avoid problem with linux's dirname */
+	pstr = strdup(template);
+	relpath(srcdir, dirname(pstr), ac_dir);
+	free(pstr);
 
 	/* init builddir */
 	hash_add(pht, "abs_top_builddir", basedir);

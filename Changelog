@@ -1,3 +1,9 @@
+27 Jun 2003 mipsator
+ * fixed hash_destroy() to support null pointer as argument
+	(noticed by Marek Habersack).
+ * fixed use of dirname to avoid modification of the original string under
+ 	linux (noticed by Marek Habersack).
+
 # snapshot 0.4.6
 
 26 Jun 2003 mipsator
