@@ -1,3 +1,6 @@
+14 Nov 2003 mipsator
+ * replaced remaining warn() and warnx() calls in pmkinstall.
+
 13 Nov 2003 mipsator
  * removed err() and errx() calls and replaced by errof() in pmkinstall.
  * removed paths.h in pmkinstall.

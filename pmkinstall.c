@@ -76,7 +76,6 @@
 #include <sys/stat.h>
 
 #include <ctype.h>
-#include <err.h> /* finish to replace warn() and warnx() */
 #include <errno.h>
 #include <fcntl.h>
 #include <grp.h>
@@ -285,7 +284,7 @@ void install(char *from_name, char *to_name, u_long fset, u_int flags) {
 		/* Only compare against regular files. */
 		if (docompare && !S_ISREG(to_sb.st_mode)) {
 			docompare = 0;
-			warnx("%s: %s", to_name, strerror(EFTYPE));
+			errorf("%s: %s", to_name, strerror(EFTYPE));
 		}
 	} else if (docompare) {
 		/* File does not exist so silently ignore compare flag. */
@@ -447,7 +446,7 @@ void install(char *from_name, char *to_name, u_long fset, u_int flags) {
 	if (fchflags(to_fd,
 	    flags & SETFLAGS ? fset : from_sb.st_flags & ~UF_NODUMP)) {
 		if (errno != EOPNOTSUPP || (from_sb.st_flags & ~UF_NODUMP) != 0)
-			warnx("%s: chflags: %s", to_name, strerror(errno));
+			errorf("%s: chflags: %s", to_name, strerror(errno));
 	}
 
 	(void)close(to_fd);
@@ -616,14 +615,14 @@ void strip(char *to_name) {
 				exit(EX_TEMPFAIL);
 			case 0:
 				execl(path_strip, "strip", to_name, (char *)NULL);
-				warn("%s", path_strip);
+				errorf("%s", path_strip);
 				_exit(EX_OSERR);
 			default:
 				if (wait(&status) == -1 || !WIFEXITED(status))
 					(void)unlink(to_name);
 		}
 	} else {
-		warn("STRIP env variable not found, skipping.");
+		errorf("STRIP env variable not found, skipping.");
 	}
 }
 
@@ -654,7 +653,7 @@ void install_dir(char *path) {
 
 	if (((gid != (gid_t)-1 || uid != (uid_t)-1) && chown(path, uid, gid)) ||
 	    chmod(path, mode)) {
-		warn("%s", path);
+		errorf("%s", path);
 	}
 }
 
@@ -815,7 +814,7 @@ int file_write(int fd, char *str, size_t cnt, int *rem, int *isempt, int sz) {
 				 * skip, buf is empty so far
 				 */
 				if (lseek(fd, (off_t)wcnt, SEEK_CUR) < 0) {
-					warn("lseek");
+					errorf("lseek");
 					return(-1);
 				}
 				st = pt;
@@ -831,7 +830,7 @@ int file_write(int fd, char *str, size_t cnt, int *rem, int *isempt, int sz) {
 		 * have non-zero data in this file system block, have to write
 		 */
 		if (write(fd, st, wcnt) != wcnt) {
-			warn("write");
+			errorf("write");
 			return(-1);
 		}
 		st += wcnt;
@@ -860,11 +859,11 @@ void file_flush(int fd, int isempt) {
 	 * move back one byte and write a zero
 	 */
 	if (lseek(fd, (off_t)-1, SEEK_CUR) < 0) {
-		warn("Failed seek on file");
+		errorf("Failed seek on file");
 		return;
 	}
 
 	if (write(fd, blnk, 1) < 0)
-		warn("Failed write to file");
+		errorf("Failed write to file");
 	return;
 }
