@@ -163,7 +163,7 @@ bool process_node(prsnode *pnode, pmkdata *pgd) {
 
 	cmd : command structure
 	ht : command options
-	gdata : global data
+	pgd : global data
 
 	returns bool
 
@@ -175,10 +175,10 @@ bool process_node(prsnode *pnode, pmkdata *pgd) {
 
 */
 
-bool pmk_define(pmkcmd *cmd, prsnode *pnode, pmkdata *gdata) {
+bool pmk_define(pmkcmd *cmd, prsnode *pnode, pmkdata *pgd) {
 	pmk_log("\n* Parsing define\n");
 
-	return(process_node(pnode, gdata));
+	return(process_node(pnode, pgd));
 }
 
 /*
@@ -186,7 +186,7 @@ bool pmk_define(pmkcmd *cmd, prsnode *pnode, pmkdata *gdata) {
 	NOTE : now OBSOLETE with new format, kept for compatibility
 */
 
-bool pmk_target(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
+bool pmk_target(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 	pmkobj	*po;
 	prsopt	 opt;
 
@@ -204,7 +204,7 @@ bool pmk_target(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 		return(false);
 	}
 
-	return(pmk_set_parameter(cmd, &opt, gdata));
+	return(pmk_set_parameter(cmd, &opt, pgd));
 }
 
 /*
@@ -212,7 +212,7 @@ bool pmk_target(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 	NOTE : now OBSOLETE with new format, kept for compatibility
 */
 
-bool pmk_ac_compat(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
+bool pmk_ac_compat(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 	char	*acfile;
 	prsopt	 opt;
 
@@ -229,27 +229,27 @@ bool pmk_ac_compat(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 		opt.value = po_mk_str("");
 	}
 
-	return(pmk_set_parameter(cmd, &opt, gdata));
+	return(pmk_set_parameter(cmd, &opt, pgd));
 }
 
 /*
 	settings
 */
 
-bool pmk_settings(pmkcmd *cmd, prsnode *pnode, pmkdata *gdata) {
+bool pmk_settings(pmkcmd *cmd, prsnode *pnode, pmkdata *pgd) {
 	pmk_log("\n* Parsing settings\n");
 
-	return(process_node(pnode, gdata));
+	return(process_node(pnode, pgd));
 }
 
 /*
 	if condition
 */
 
-bool pmk_ifcond(pmkcmd *cmd, prsnode *pnode, pmkdata *gdata) {
-	if (label_check(gdata->labl, cmd->label) == true) {
+bool pmk_ifcond(pmkcmd *cmd, prsnode *pnode, pmkdata *pgd) {
+	if (label_check(pgd->labl, cmd->label) == true) {
 		pmk_log("\n< Begin of condition [%s]\n", cmd->label);
-		process_node(pnode, gdata);
+		process_node(pnode, pgd);
 		pmk_log("\n> End of condition [%s]\n", cmd->label);
 	} else {
 		pmk_log("\n- Skipping condition [%s]\n", cmd->label);
@@ -262,7 +262,7 @@ bool pmk_ifcond(pmkcmd *cmd, prsnode *pnode, pmkdata *gdata) {
 	switches
 */
 
-bool pmk_switches(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
+bool pmk_switches(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 	char	*value;
 	hkeys	*phk;
 	int	 i,
@@ -274,7 +274,7 @@ bool pmk_switches(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 	phk = hash_keys(ht);
 
 	for(i = 0 ; i < phk->nkey ; i++) {
-		if (hash_get(gdata->labl, phk->keys[i]) == NULL) {
+		if (hash_get(pgd->labl, phk->keys[i]) == NULL) {
 			po = hash_get(ht, phk->keys[i]);
 			switch(po_get_type(po)) {
 				case PO_BOOL :
@@ -289,7 +289,7 @@ bool pmk_switches(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 					break;
 			}
 
-			if (hash_add(gdata->labl, phk->keys[i], strdup(value)) != HASH_ADD_FAIL) {
+			if (hash_add(pgd->labl, phk->keys[i], strdup(value)) != HASH_ADD_FAIL) {
 				pmk_log("\tAdded '%s' switch.\n", phk->keys[i]);
 				n++;
 			} else {
@@ -311,7 +311,7 @@ bool pmk_switches(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 	check binary
 */
 
-bool pmk_check_binary(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
+bool pmk_check_binary(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 	bool	 required;
 	char	*filename,
 		*varname,
@@ -338,10 +338,10 @@ bool pmk_check_binary(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 		}
 	}
 
-	bpath = hash_get(gdata->htab, PMKCONF_PATH_BIN);
+	bpath = hash_get(pgd->htab, PMKCONF_PATH_BIN);
 	if (bpath == NULL) {
 		/* OBSOLETE, check for BIN_PATH for compatibility with 6.0 */
-		bpath = hash_get(gdata->htab, PREMAKE_KEY_BINPATH);
+		bpath = hash_get(pgd->htab, PREMAKE_KEY_BINPATH);
 		if (bpath == NULL) {
 			errorf("%s not available.", PMKCONF_PATH_BIN);
 			return(false);
@@ -349,14 +349,14 @@ bool pmk_check_binary(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 		pmk_log("\tWARNING : BIN_PATH is obsolete, update pmk.conf with pmksetup.\n");
 	}
 
-	if (depend_check(ht, gdata) == false) {
-		pmk_log("\t%s\n", gdata->errmsg);
+	if (depend_check(ht, pgd) == false) {
+		pmk_log("\t%s\n", pgd->errmsg);
 		if (required == true) {
 			return(false);
 		} else {
-			record_def(gdata->htab, filename, false);
+			record_def(pgd->htab, filename, false);
 			/* not found => not added in htab */ 
-			label_set(gdata->labl, cmd->label, false);
+			label_set(pgd->labl, cmd->label, false);
 			return(true);
 		}
 	}
@@ -369,24 +369,24 @@ bool pmk_check_binary(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 			return(false);
 		} else {
 			/* define for template */
-			record_def(gdata->htab, filename, false);
-			if (hash_add(gdata->htab, varname, strdup("")) == HASH_ADD_FAIL) {
+			record_def(pgd->htab, filename, false);
+			if (hash_add(pgd->htab, varname, strdup("")) == HASH_ADD_FAIL) {
 				errorf("hash error.");
 				return(false);
 			}
-			label_set(gdata->labl, cmd->label, false);
+			label_set(pgd->labl, cmd->label, false);
 			return(true);
 		}
 	} else {
 		pmk_log("yes.\n");
 		/* define for template */
-		record_def(gdata->htab, filename, true);
-		record_val(gdata->htab, filename, "");
-		if (hash_add(gdata->htab, varname, strdup(binpath)) == HASH_ADD_FAIL) {
+		record_def(pgd->htab, filename, true);
+		record_val(pgd->htab, filename, "");
+		if (hash_add(pgd->htab, varname, strdup(binpath)) == HASH_ADD_FAIL) {
 			errorf("hash error.");
 			return(false);
 		}
-		label_set(gdata->labl, cmd->label, true);
+		label_set(pgd->labl, cmd->label, true);
 		return(true);
 	}
 }
@@ -395,7 +395,7 @@ bool pmk_check_binary(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 	check include file
 */
 
-bool pmk_check_header(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
+bool pmk_check_header(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 	FILE	*tfp;
 	bool	 required,
 		 rval;
@@ -432,26 +432,26 @@ bool pmk_check_header(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 		target = incfunc;
 	}
 
-	if (depend_check(ht, gdata) == false) {
-		pmk_log("\t%s\n", gdata->errmsg);
+	if (depend_check(ht, pgd) == false) {
+		pmk_log("\t%s\n", pgd->errmsg);
 		if (required == true) {
 			return(false);
 		} else {
-			record_def(gdata->htab, target, false);
-			label_set(gdata->labl, cmd->label, false);
+			record_def(pgd->htab, target, false);
+			label_set(pgd->labl, cmd->label, false);
 			return(true);
 		}
 	}
 
 	/* get the language used */
-	pld = get_lang(ht, gdata);
+	pld = get_lang(ht, pgd);
 	if (pld == NULL) {
 		pmk_log("\tSKIPPED, unknow language.\n");
 		return(invert_bool(required));
 	}
 
 	/* get the appropriate compiler */
-	ccpath = get_comp_path(gdata->htab, pld->comp);
+	ccpath = get_comp_path(pgd->htab, pld->comp);
 	if (ccpath == NULL) {
 		pmk_log("\tSKIPPED, cannot get compiler path ('%s').\n", pld->comp);
 		return(invert_bool(required));
@@ -463,8 +463,8 @@ bool pmk_check_header(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 	cflags = po_get_str(hash_get(ht, "CFLAGS"));
 	if (cflags != NULL) {
 		/* init alternative variable */
-                if (hash_get(gdata->htab, cflags) == NULL) {
-                        if (hash_add(gdata->htab, cflags, "") == HASH_ADD_FAIL) {
+                if (hash_get(pgd->htab, cflags) == NULL) {
+                        if (hash_add(pgd->htab, cflags, "") == HASH_ADD_FAIL) {
         			errorf("hash error.");
         			return(false);
                         }
@@ -472,10 +472,10 @@ bool pmk_check_header(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 	}
 
 	/* use each element of INC_PATH with -I */
-	pstr = (char *) hash_get(gdata->htab, PMKCONF_PATH_INC);
+	pstr = (char *) hash_get(pgd->htab, PMKCONF_PATH_INC);
 	if (pstr == NULL) {
 		/* OBSOLETE, check for BIN_PATH for compatibility with 6.0 */
-		pstr = (char *) hash_get(gdata->htab, PREMAKE_KEY_INCPATH);
+		pstr = (char *) hash_get(pgd->htab, PREMAKE_KEY_INCPATH);
 		if (pstr == NULL) {
 			errorf("%s not available.", PMKCONF_PATH_INC);
 			return(false);
@@ -520,17 +520,17 @@ bool pmk_check_header(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 	if (r == 0) {
 		pmk_log("yes.\n");
 		/* define for template */
-		record_def(gdata->htab, target, true);
-		record_val(gdata->htab, target, "");
-		label_set(gdata->labl, cmd->label, true);
+		record_def(pgd->htab, target, true);
+		record_val(pgd->htab, target, "");
+		label_set(pgd->labl, cmd->label, true);
 
 		/* check for alternative variable for CFLAGS */
 		if (cflags != NULL) {
 			/* put result in special CFLAGS variable */
-			single_append(gdata->htab, cflags, strdup(inc_path)); /* XXX check */
+			single_append(pgd->htab, cflags, strdup(inc_path)); /* XXX check */
 		} else {
 			/* put result in CFLAGS */
-			single_append(gdata->htab, "CFLAGS", strdup(inc_path)); /* XXX check */
+			single_append(pgd->htab, "CFLAGS", strdup(inc_path)); /* XXX check */
 		}
 
 		rval = true;
@@ -545,8 +545,8 @@ bool pmk_check_header(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 			}
 		} else {
 			/* define for template */
-			record_def(gdata->htab, target, false);
-			label_set(gdata->labl, cmd->label, false);
+			record_def(pgd->htab, target, false);
+			label_set(pgd->labl, cmd->label, false);
 			rval = true;
 		}
 	}
@@ -566,7 +566,7 @@ bool pmk_check_header(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 	check library
 */
 
-bool pmk_check_lib(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
+bool pmk_check_lib(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 	FILE	*tfp;
 	bool	 required,
 		 rval;
@@ -601,13 +601,13 @@ bool pmk_check_lib(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 		target = libfunc;
 	}
 
-	if (depend_check(ht, gdata) == false) {
-		pmk_log("\t%s\n", gdata->errmsg);
+	if (depend_check(ht, pgd) == false) {
+		pmk_log("\t%s\n", pgd->errmsg);
 		if (required == true) {
 			return(false);
 		} else {
-			record_def(gdata->htab, target, false);
-			label_set(gdata->labl, cmd->label, false);
+			record_def(pgd->htab, target, false);
+			label_set(pgd->labl, cmd->label, false);
 			return(true);
 		}
 	}
@@ -616,8 +616,8 @@ bool pmk_check_lib(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 	libs = po_get_str(hash_get(ht, "LIBS"));
 	if (libs != NULL) {
 		/* init alternative variable */
-                if (hash_get(gdata->htab, libs) == NULL) {
-                        if (hash_add(gdata->htab, libs, "") == HASH_ADD_FAIL) {
+                if (hash_get(pgd->htab, libs) == NULL) {
+                        if (hash_add(pgd->htab, libs, "") == HASH_ADD_FAIL) {
         			errorf("hash error.");
         			return(false);
                         }
@@ -625,14 +625,14 @@ bool pmk_check_lib(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 	}
 
 	/* get the language used */
-	pld = get_lang(ht, gdata);
+	pld = get_lang(ht, pgd);
 	if (pld == NULL) {
 		pmk_log("\tSKIPPED, unknow language.\n");
 		return(invert_bool(required));
 	}
 
 	/* get the appropriate compiler */
-	ccpath = get_comp_path(gdata->htab, pld->comp);
+	ccpath = get_comp_path(pgd->htab, pld->comp);
 	if (ccpath == NULL) {
 		pmk_log("\tSKIPPED, cannot get compiler path ('%s').\n", pld->comp);
 		return(invert_bool(required));
@@ -641,7 +641,7 @@ bool pmk_check_lib(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 	}
 
 	/* check for alternative variable for LIBS */
-	main_libs = hash_get(gdata->htab, "LIBS"); /* XXX check useful ? */
+	main_libs = hash_get(pgd->htab, "LIBS"); /* XXX check useful ? */
 
 	tfp = fopen(TEST_FILE_NAME, "w");
 	if (tfp != NULL) {
@@ -669,19 +669,19 @@ bool pmk_check_lib(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 	if (r == 0) {
 		pmk_log("yes.\n");
 		/* define for template */
-		record_def(gdata->htab, target, true);
-		record_val(gdata->htab, target, "");
-		label_set(gdata->labl, cmd->label, true);
+		record_def(pgd->htab, target, true);
+		record_val(pgd->htab, target, "");
+		label_set(pgd->labl, cmd->label, true);
 
 		snprintf(lib_buf, sizeof(lib_buf), "-l%s", libname);
 
 		/* check for alternative variable for LIBS */
 		if (libs != NULL) {
 			/* put result in special LIBS variable */
-			single_append(gdata->htab, libs, strdup(lib_buf)); /* XXX check */
+			single_append(pgd->htab, libs, strdup(lib_buf)); /* XXX check */
 		} else {
 			/* put result in LIBS */
-			if (single_append(gdata->htab, "LIBS", strdup(lib_buf)) == false) {
+			if (single_append(pgd->htab, "LIBS", strdup(lib_buf)) == false) {
 				errorf("hash add failed");
 				return(false);
 			}
@@ -699,8 +699,8 @@ bool pmk_check_lib(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 			}
 		} else {
 			/* define for template */
-			record_def(gdata->htab, target, false);
-			label_set(gdata->labl, cmd->label, false);
+			record_def(pgd->htab, target, false);
+			label_set(pgd->labl, cmd->label, false);
 			rval = true;
 		}
 	}
@@ -720,7 +720,7 @@ bool pmk_check_lib(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 	check with *-config utility
 */
 
-bool pmk_check_config(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
+bool pmk_check_config(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 	FILE	*rpipe;
 	bool	 required = true,
 		 rval = false;
@@ -755,10 +755,10 @@ bool pmk_check_config(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 		}
 	}
 
-	bpath = hash_get(gdata->htab, PMKCONF_PATH_BIN);
+	bpath = hash_get(pgd->htab, PMKCONF_PATH_BIN);
 	if (bpath == NULL) {
 		/* OBSOLETE, check for BIN_PATH for compatibility with 6.0 */
-		bpath = hash_get(gdata->htab, PREMAKE_KEY_BINPATH);
+		bpath = hash_get(pgd->htab, PREMAKE_KEY_BINPATH);
 		if (bpath == NULL) {
 			errorf("BIN_PATH not available.");
 			return(false);
@@ -770,8 +770,8 @@ bool pmk_check_config(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 	cflags = po_get_str(hash_get(ht, "CFLAGS"));
 	if (cflags != NULL) {
 		/* init alternative variable */
-                if (hash_get(gdata->htab, cflags) == NULL) {
-                        if (hash_add(gdata->htab, cflags, "") == HASH_ADD_FAIL) {
+                if (hash_get(pgd->htab, cflags) == NULL) {
+                        if (hash_add(pgd->htab, cflags, "") == HASH_ADD_FAIL) {
         			errorf("hash error.");
         			return(false);
                         }
@@ -782,21 +782,21 @@ bool pmk_check_config(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 	libs = po_get_str(hash_get(ht, "LIBS"));
 	if (libs != NULL) {
 		/* init alternative variable */
-                if (hash_get(gdata->htab, libs) == NULL) {
-                        if (hash_add(gdata->htab, libs, "") == HASH_ADD_FAIL) {
+                if (hash_get(pgd->htab, libs) == NULL) {
+                        if (hash_add(pgd->htab, libs, "") == HASH_ADD_FAIL) {
         			errorf("hash error.");
         			return(false);
                         }
 		}
 	}
 
-	if (depend_check(ht, gdata) == false) {
-		pmk_log("\t%s\n", gdata->errmsg);
+	if (depend_check(ht, pgd) == false) {
+		pmk_log("\t%s\n", pgd->errmsg);
 		if (required == true) {
 			return(false);
 		} else {
-			record_def(gdata->htab, cfgtool, false);
-			label_set(gdata->labl, cmd->label, false);
+			record_def(pgd->htab, cfgtool, false);
+			label_set(pgd->labl, cmd->label, false);
 			return(true);
 		}
 	}
@@ -808,14 +808,14 @@ bool pmk_check_config(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 		if (required == true) {
 			return(false);
 		} else {
-			record_def(gdata->htab, cfgtool, false);
-			label_set(gdata->labl, cmd->label, false);
+			record_def(pgd->htab, cfgtool, false);
+			label_set(pgd->labl, cmd->label, false);
 			return(true);
 		}
 	} else {
 		pmk_log("yes.\n");
 		/* recording path of config tool */
-		if (hash_add(gdata->htab, varname, strdup(cfgpath)) == HASH_ADD_FAIL) {
+		if (hash_add(pgd->htab, varname, strdup(cfgpath)) == HASH_ADD_FAIL) {
 			errorf("hash error.");
 			return(false);
 		}
@@ -844,8 +844,8 @@ bool pmk_check_config(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 				if (required == true) {
 					rval = false;
 				} else {
-					record_def(gdata->htab, cfgtool, false);
-					label_set(gdata->labl, cmd->label, false);
+					record_def(pgd->htab, cfgtool, false);
+					label_set(pgd->labl, cmd->label, false);
 					rval = true;
 				}
 				return(rval);
@@ -857,9 +857,9 @@ bool pmk_check_config(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 
 	/* gather data */
 	/* XXX do we keep cfgtool for the tag ? */
-	record_def(gdata->htab, cfgtool, true);
-	record_val(gdata->htab, cfgtool, "");
-	label_set(gdata->labl, cmd->label, true);
+	record_def(pgd->htab, cfgtool, true);
+	record_val(pgd->htab, cfgtool, "");
+	label_set(pgd->labl, cmd->label, true);
 
 	snprintf(cfgcmd, sizeof(cfgcmd), "%s --cflags", cfgpath);
 	rpipe = popen(cfgcmd, "r");
@@ -875,10 +875,10 @@ bool pmk_check_config(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 		/* check for alternative variable for CFLAGS */
 		if (cflags != NULL) {
 			/* put result in special CFLAGS variable */
-			hash_append(gdata->htab, cflags, strdup(pipebuf), " "); /* XXX check ? */
+			hash_append(pgd->htab, cflags, strdup(pipebuf), " "); /* XXX check ? */
 		} else {
 			/* put result in CFLAGS */
-			hash_append(gdata->htab, "CFLAGS", strdup(pipebuf), " "); /* XXX check ? */
+			hash_append(pgd->htab, "CFLAGS", strdup(pipebuf), " "); /* XXX check ? */
 		}
 	}
 
@@ -896,10 +896,10 @@ bool pmk_check_config(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 		/* check for alternative variable for LIBS */
 		if (libs != NULL) {
 			/* put result in special LIBS variable */
-			hash_append(gdata->htab, libs, strdup(pipebuf), " "); /* XXX check ? */
+			hash_append(pgd->htab, libs, strdup(pipebuf), " "); /* XXX check ? */
 		} else {
 			/* put result in LIBS */
-			hash_append(gdata->htab, "LIBS", strdup(pipebuf), " "); /* XXX check ? */
+			hash_append(pgd->htab, "LIBS", strdup(pipebuf), " "); /* XXX check ? */
 		}
 	}
 
@@ -916,7 +916,7 @@ bool pmk_check_config(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 
 */
 
-bool pmk_check_pkg_config(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
+bool pmk_check_pkg_config(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 	FILE	*rpipe;
 	bool	 required = true,
 		 rval;
@@ -944,14 +944,14 @@ bool pmk_check_pkg_config(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 	}
 
 	/* try to get pkg-config path from pmk.conf setting */
-	pc_path = (char *) hash_get(gdata->htab, PMKCONF_BIN_PKGCONFIG);
+	pc_path = (char *) hash_get(pgd->htab, PMKCONF_BIN_PKGCONFIG);
 	if (pc_path == NULL) {
 		/* nothing in pmksetup hope pmk.conf is obsolete
 			and check in the path */
-		bpath = hash_get(gdata->htab, PMKCONF_PATH_BIN);
+		bpath = hash_get(pgd->htab, PMKCONF_PATH_BIN);
 		if (bpath == NULL) {
 			/* OBSOLETE, check for BIN_PATH for compatibility with 6.0 */
-			bpath = hash_get(gdata->htab, PREMAKE_KEY_BINPATH);
+			bpath = hash_get(pgd->htab, PREMAKE_KEY_BINPATH);
 			if (bpath == NULL) {
 				errorf("BIN_PATH not available.");
 				return(false);
@@ -968,8 +968,8 @@ bool pmk_check_pkg_config(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 	cflags = po_get_str(hash_get(ht, "CFLAGS"));
 	if (cflags != NULL) {
 		/* init alternative variable */
-                if (hash_get(gdata->htab, cflags) == NULL) {
-                        if (hash_add(gdata->htab, cflags, "") == HASH_ADD_FAIL) {
+                if (hash_get(pgd->htab, cflags) == NULL) {
+                        if (hash_add(pgd->htab, cflags, "") == HASH_ADD_FAIL) {
         			errorf("hash error.");
         			return(false);
                         }
@@ -980,21 +980,21 @@ bool pmk_check_pkg_config(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 	libs = po_get_str(hash_get(ht, "LIBS"));
 	if (libs != NULL) {
 		/* init alternative variable */
-                if (hash_get(gdata->htab, libs) == NULL) {
-                        if (hash_add(gdata->htab, libs, "") == HASH_ADD_FAIL) {
+                if (hash_get(pgd->htab, libs) == NULL) {
+                        if (hash_add(pgd->htab, libs, "") == HASH_ADD_FAIL) {
         			errorf("hash error.");
         			return(false);
                         }
 		}
 	}
 
-	if (depend_check(ht, gdata) == false) {
-		pmk_log("\t%s\n", gdata->errmsg);
+	if (depend_check(ht, pgd) == false) {
+		pmk_log("\t%s\n", pgd->errmsg);
 		if (required == true) {
 			return(false);
 		} else {
-			/* record_def(gdata->htab, target, false); XXX how to manage ? */
-			label_set(gdata->labl, cmd->label, false);
+			/* record_def(pgd->htab, target, false); XXX how to manage ? */
+			label_set(pgd->labl, cmd->label, false);
 			return(true);
 		}
 	}
@@ -1006,8 +1006,8 @@ bool pmk_check_pkg_config(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 		if (required == true) {
 			return(false);
 		} else {
-			/* record_def(gdata->htab, target, false); XXX how to manage ? */
-			label_set(gdata->labl, cmd->label, false);
+			/* record_def(pgd->htab, target, false); XXX how to manage ? */
+			label_set(pgd->labl, cmd->label, false);
 			return(true);
 		}
 	} else {
@@ -1022,8 +1022,8 @@ bool pmk_check_pkg_config(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 		if (required == true) {
 			return(false);
 		} else {
-			/* record_def(gdata->htab, target, false); XXX how to manage ? */
-			label_set(gdata->labl, cmd->label, false);
+			/* record_def(pgd->htab, target, false); XXX how to manage ? */
+			label_set(pgd->labl, cmd->label, false);
 			return(true);
 		}
 	} else {
@@ -1054,8 +1054,8 @@ bool pmk_check_pkg_config(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 				if (required == true) {
 					rval = false;
 				} else {
-					/* record_def(gdata->htab, target, false); XXX how to manage ? */
-					label_set(gdata->labl, cmd->label, false);
+					/* record_def(pgd->htab, target, false); XXX how to manage ? */
+					label_set(pgd->labl, cmd->label, false);
 					rval = true;
 				}
 				return(rval);
@@ -1079,10 +1079,10 @@ bool pmk_check_pkg_config(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 		/* check for alternative variable for CFLAGS */
 		if (cflags != NULL) {
 			/* put result in special CFLAGS variable */
-			hash_append(gdata->htab, cflags, strdup(pipebuf), " "); /* XXX check ? */
+			hash_append(pgd->htab, cflags, strdup(pipebuf), " "); /* XXX check ? */
 		} else {
 			/* put result in CFLAGS */
-			hash_append(gdata->htab, "CFLAGS", strdup(pipebuf), " "); /* XXX check ? */
+			hash_append(pgd->htab, "CFLAGS", strdup(pipebuf), " "); /* XXX check ? */
 		}
 	}
 
@@ -1099,10 +1099,10 @@ bool pmk_check_pkg_config(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 		/* check for alternative variable for LIBS */
 		if (libs != NULL) {
 			/* put result in special LIBS variable */
-			hash_append(gdata->htab, libs, strdup(pipebuf), " "); /* XXX check ? */
+			hash_append(pgd->htab, libs, strdup(pipebuf), " "); /* XXX check ? */
 		} else {
 			/* put result in LIBS */
-			hash_append(gdata->htab, "LIBS", strdup(pipebuf), " "); /* XXX check ? */
+			hash_append(pgd->htab, "LIBS", strdup(pipebuf), " "); /* XXX check ? */
 		}
 	}
 
@@ -1115,7 +1115,7 @@ bool pmk_check_pkg_config(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 	check type
 */
 
-bool pmk_check_type(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
+bool pmk_check_type(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 	FILE	*tfp;
 	bool	 required,
 		 rval;
@@ -1138,26 +1138,26 @@ bool pmk_check_type(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 		}
 	}
 
-	if (depend_check(ht, gdata) == false) {
-		pmk_log("\t%s\n", gdata->errmsg);
+	if (depend_check(ht, pgd) == false) {
+		pmk_log("\t%s\n", pgd->errmsg);
 		if (required == true) {
 			return(false);
 		} else {
-			record_def(gdata->htab, type, false);
-			label_set(gdata->labl, cmd->label, false);
+			record_def(pgd->htab, type, false);
+			label_set(pgd->labl, cmd->label, false);
 			return(true);
 		}
 	}
 
 	/* get the language used */
-	pld = get_lang(ht, gdata);
+	pld = get_lang(ht, pgd);
 	if (pld == NULL) {
 		pmk_log("\tSKIPPED, unknow language.\n");
 		return(invert_bool(required));
 	}
 
 	/* get the appropriate compiler */
-	ccpath = get_comp_path(gdata->htab, pld->comp);
+	ccpath = get_comp_path(pgd->htab, pld->comp);
 	if (ccpath == NULL) {
 		pmk_log("\tSKIPPED, cannot get compiler path ('%s').\n", pld->comp);
 		return(invert_bool(required));
@@ -1181,9 +1181,9 @@ bool pmk_check_type(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 	if (r == 0) {
 		pmk_log("yes.\n");
 		/* define for template */
-		record_def(gdata->htab, type, true);
-		record_val(gdata->htab, type, "");
-		label_set(gdata->labl, cmd->label, true);
+		record_def(pgd->htab, type, true);
+		record_val(pgd->htab, type, "");
+		label_set(pgd->labl, cmd->label, true);
 		rval = true;
 	} else {
 		pmk_log("no.\n");
@@ -1192,8 +1192,8 @@ bool pmk_check_type(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 			errorf("failed to find type '%s'.", type);
 		} else {
 			/* define for template */
-			record_def(gdata->htab, type, false);
-			label_set(gdata->labl, cmd->label, false);
+			record_def(pgd->htab, type, false);
+			label_set(pgd->labl, cmd->label, false);
 			rval = true;
 		}
 	}
@@ -1213,7 +1213,7 @@ bool pmk_check_type(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 	check if variable exists and optionally it's value
 */
 
-bool pmk_check_variable(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
+bool pmk_check_variable(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 	bool	 required,
 		 rval = false;
 	char	*var,
@@ -1230,13 +1230,13 @@ bool pmk_check_variable(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 		return(false);
 	}
 
-	if (depend_check(ht, gdata) == false) {
-		pmk_log("\t%s\n", gdata->errmsg);
+	if (depend_check(ht, pgd) == false) {
+		pmk_log("\t%s\n", pgd->errmsg);
 		if (required == true) {
 			return(false);
 		} else {
-			record_def(gdata->htab, var, false);
-			label_set(gdata->labl, cmd->label, false);
+			record_def(pgd->htab, var, false);
+			label_set(pgd->labl, cmd->label, false);
 			return(true);
 		}
 	}
@@ -1244,13 +1244,13 @@ bool pmk_check_variable(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 	pmk_log("\tFound variable '%s' : ", var);
 
 	/* trying to get variable */
-	varval = hash_get(gdata->htab, var);
+	varval = hash_get(pgd->htab, var);
 	if (varval != NULL) {
 		pmk_log("yes.\n");
 
 		value = po_get_str(hash_get(ht, "VALUE"));
 		if (value == NULL) {
-			label_set(gdata->labl, cmd->label, true);
+			label_set(pgd->labl, cmd->label, true);
 
 			rval = true;
 		} else {
@@ -1258,7 +1258,7 @@ bool pmk_check_variable(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 
 			if (strncmp(value, varval, sizeof(varval)) == 0) {
 				pmk_log("yes.\n");
-				label_set(gdata->labl, cmd->label, true);
+				label_set(pgd->labl, cmd->label, true);
 
 				rval = true;
 			} else {
@@ -1268,7 +1268,7 @@ bool pmk_check_variable(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 					errorf("variable value does not match ('%s' ! '%s').", value, varval);
 				} else {
 					/* define for template */
-					label_set(gdata->labl, cmd->label, false);
+					label_set(pgd->labl, cmd->label, false);
 					rval = true;
 				}
 			}
@@ -1279,7 +1279,7 @@ bool pmk_check_variable(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 			errorf("failed to find variable '%s'.", var);
 		} else {
 			/* define for template */
-			label_set(gdata->labl, cmd->label, false);
+			label_set(pgd->labl, cmd->label, false);
 			rval = true;
 		}
 	}
@@ -1291,7 +1291,7 @@ bool pmk_check_variable(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 	set parameter 
 */
 
-bool pmk_set_parameter(pmkcmd *cmd, prsopt *popt, pmkdata *gdata) {
+bool pmk_set_parameter(pmkcmd *cmd, prsopt *popt, pmkdata *pgd) {
 	bool	 rval = false;
 	char	*pstr;
 	dynary	*da;
@@ -1303,21 +1303,21 @@ bool pmk_set_parameter(pmkcmd *cmd, prsopt *popt, pmkdata *gdata) {
 		pmk_log("\tSetting autoconf compatibility :\n");
 
 		/* XXX must check if valid
-			pstr = (char *) hash_get(gdata->htab, "SYSCONFDIR");
-			hash_add(gdata->htab, "sysconfdir", strdup(pstr));
+			pstr = (char *) hash_get(pgd->htab, "SYSCONFDIR");
+			hash_add(pgd->htab, "sysconfdir", strdup(pstr));
 		*/
 
 		/* if a file is given then it will be parsed later */
 		pstr = po_get_str(popt->value);
 		if (*pstr != CHAR_EOS) {
-			gdata->ac_file = strdup(pstr);
+			pgd->ac_file = strdup(pstr);
 			pmk_log("\t\tSet file to '%s'.\n", pstr);
-			hash_add(gdata->htab, AC_VAR_DEF, strdup(AC_VALUE_DEF)); /* XXX TODO check */
+			hash_add(pgd->htab, AC_VAR_DEF, strdup(AC_VALUE_DEF)); /* XXX TODO check */
 			pmk_log("\t\tSet '%s' value to '%s'.\n", AC_VAR_DEF, AC_VALUE_DEF);
 		}
 
 		/* compatibility tags */
-		ac_set_variables(gdata->htab);
+		ac_set_variables(pgd->htab);
 		pmk_log("\t\tSet specific variables.\n");
 
 		return(true);
@@ -1333,7 +1333,7 @@ bool pmk_set_parameter(pmkcmd *cmd, prsopt *popt, pmkdata *gdata) {
 		if (pstr != NULL) {
 			/* check if provided lang is supported */
 			if (check_lang(pstr) != NULL) {
-				gdata->lang = strdup(pstr);
+				pgd->lang = strdup(pstr);
 				pmk_log("\t\tSet to '%s'.\n", pstr);
 				rval = true;
 			} else {
@@ -1360,7 +1360,7 @@ bool pmk_set_parameter(pmkcmd *cmd, prsopt *popt, pmkdata *gdata) {
 			pmk_log("\t\tAdded '%s'.\n", da_idx(da, i));
 		}
 
-		gdata->tlist = da;
+		pgd->tlist = da;
 
 		pmk_log("\t\tTotal %d target(s) added.\n", n);
 
@@ -1376,16 +1376,16 @@ bool pmk_set_parameter(pmkcmd *cmd, prsopt *popt, pmkdata *gdata) {
 	set parameter
 */
 
-bool pmk_set_variable(pmkcmd *cmd, prsopt *popt, pmkdata *gdata) {
+bool pmk_set_variable(pmkcmd *cmd, prsopt *popt, pmkdata *pgd) {
 	char	*value;
 
 /* XXX better way to do (specific hash for override)
-	if (hash_get(gdata->htab, popt->key) == NULL) {
+	if (hash_get(pgd->htab, popt->key) == NULL) {
 */
 		/* process value string */
-		value = process_string(po_get_str(popt->value), gdata->htab);
+		value = process_string(po_get_str(popt->value), pgd->htab);
 		if (value != NULL) {
-			hash_add(gdata->htab, popt->key, value); /* no need to strdup */
+			hash_add(pgd->htab, popt->key, value); /* no need to strdup */
 			/* XXX TODO check return for message : defined or redefined */
 			pmk_log("\tdefined '%s' variable.\n", popt->key);
 		} else {
