@@ -1,3 +1,5 @@
+$Id$
+
 The pmk project tries to provide an alternative to GNU configure.
 
 There are two basic ways of using pmk. The first one is the common
@@ -5,25 +7,30 @@ installation that needs root privileges and that allows all users to
 access pmk. The second one is the "user mode" that installs binaries in
 $HOME/bin/ and data in $HOME/.pmk/ of the user doing the installation.
 
-There are two targets to configure pmk before building it.
+1) Installation Steps
 
-Configuring with root mode :
+- There are two targets to configure pmk before building it.
+
+ Configuring with root mode:
 
   make cfgrm
 
-Else in user mode :
+ Else in user mode:
 
   make cfgum
 
-After configuring you can build the package with :
+ After configuring you can build the package with:
 
   make
 
-And finish by installing with :
+ And finish by installing it with:
 
   make install
 
-Testing :
+
+2) Testing
+
+- Now if you feel like testing the whole suite, follow these steps:
 
   make clean cfgum
   make install
