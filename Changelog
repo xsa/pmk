@@ -1,3 +1,7 @@
+15 Apr 2004 mipsator
+ * added new engine for pmksetup. Some minor changes are still remaining
+   but pmksetup is working fine.
+
 01 Apr 2004 mipsator
  * imported skeleton of pmkshgen.
  * fixed use of parse_clopt's value in pmk and pmksetup.

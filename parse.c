@@ -261,10 +261,15 @@ prsopt *prsopt_init_adv(char *key, char opchar, char *value) {
 
 	ppo->opchar = opchar;
 
-	ppo->value = po_mk_str(value); /* XXX check */
-	if (ppo->value == NULL) {
-		free(ppo);
-		return(NULL); /* pmkobject failed */
+	if (value != NULL) {
+		ppo->value = po_mk_str(value);
+		if (ppo->value == NULL) {
+			free(ppo);
+			return(NULL); /* pmkobject failed */
+		}
+	} else {
+		/* permit value = NULL */
+		ppo->value = NULL;
 	}
 
 	return(ppo);
