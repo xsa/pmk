@@ -336,7 +336,6 @@ bool hash_add_array(htable *pht, hpair *php, int size) {
 
 	if (error == false) {
 		hash_merge(pht, pmht);
-	} else {
 		rval = true;
 	}
 
