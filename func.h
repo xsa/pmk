@@ -97,8 +97,8 @@
 				/* compiler binary source log */
 
 /* file names */
-#define TEST_FILE_NAME	"pmk_test.c"
-#define BIN_TEST_NAME	"pmk_test_bin"
+#define TEST_FILE_NAME	TMPDIR "/pmk_XXXXXXXX.c"
+#define BIN_TEST_NAME	TMPDIR "/pmk_XXXXXXXX_bin"
 
 /* node tokens */
 #define PMK_TOK_SETNGS	1

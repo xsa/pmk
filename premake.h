@@ -82,6 +82,10 @@
 #	define CONFDIR	SYSCONFDIR "/pmk"
 #endif
 
+#ifndef TMPDIR
+#	define TMPDIR	"/tmp"
+#endif
+
 #define PREMAKE_MAJOR		"0"
 #define PREMAKE_MINOR		"7"
 #define PREMAKE_SNAP		"5" /* only used for snapshots */
@@ -94,7 +98,7 @@
 
 #define PREMAKE_CONFIG_PATH	CONFDIR "/" PREMAKE_CONFIG 
 
-#define PREMAKE_TMP_DIR		"/tmp"
+#define PREMAKE_TMP_DIR		TMPDIR
 
 /*
 	pmk.conf keys

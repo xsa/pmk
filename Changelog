@@ -1,3 +1,9 @@
+12 Dec 2003  mipsator
+ * added tmp_open() in common.
+ * updated func.c to use tmp_open().
+ * changed remaining fprintf() to sterr into errorf() in common.
+ * added preliminary TMPDIR stuff.
+
 10 Dec 2003  mipsator
  * added new option to pmk to enable check build logging.
  * updated pmk man page with new -l option.
