@@ -1,0 +1,63 @@
+# $Id$
+# pmk cpu identification data
+
+#ADD_CPU_FAMILY {
+#	NAME = ""
+#	LIST = ()
+#}
+
+ADD_CPU_FAMILY {
+	NAME = "x86_32"
+	LIST = ("i386","i486","i586","i686")
+}
+
+ADD_CPU_FAMILY {
+	NAME = "x86_64"
+	LIST = ("amd64","x86_64")
+}
+
+ADD_CPU_FAMILY {
+	NAME = "ia_64"
+	LIST = ("ia_64")
+}
+
+ADD_CPU_FAMILY {
+	NAME = "alpha"
+	LIST = ("alpha")
+}
+
+ADD_CPU_FAMILY {
+	NAME = "ppc"
+	LIST = ("ppc","powerpc")
+}
+
+ADD_CPU_FAMILY {
+	NAME = "sparc_32"
+	LIST = ("sparc")
+}
+
+ADD_CPU_FAMILY {
+	NAME = "sparc_64"
+	LIST = ("sparc64")
+}
+
+#ADD_CPU_FAMILY {
+#	NAME = "mips_64"
+#	LIST = ("sgi")
+#}
+
+ADD_CPU_FAMILY {
+	NAME = "mips"
+	LIST = ("mips")
+}
+
+ADD_CPU_FAMILY {
+	NAME = "parisc_64"
+	LIST = ("parisc64")
+}
+
+ADD_CPU_FAMILY {
+	NAME = "m68k"
+	LIST = ("m68k")
+}
+

@@ -46,6 +46,15 @@
 
 #define PREMAKE_CONFIG_TMP	PREMAKE_TMP_DIR "/pmk.XXXXXXXX"
 
+#ifndef DATADIR
+/* for lint */
+#define DATADIR	"/DATADIR_not_defined"
+#endif
+
+#define PMKCPU_DATA		DATADIR "/pmkcpu.dat"
+
+#define CPU_FAM_ADD	1
+
 /* define printf format in pmk.conf */
 #define PMKSTP_WRITE_FORMAT	"%s %c \"%s\"\n"
 
@@ -105,6 +114,7 @@ bool	get_binaries(htable *);
 bool	predef_vars(htable *);
 bool	check_echo(htable *);
 bool	check_libpath(htable *);
+char	*check_cpu_family(char *);
 bool	dir_exists(const char *);
 bool	byte_order_check(htable *pht);
 bool	copy_config(const char *, const char *);

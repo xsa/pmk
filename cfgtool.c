@@ -146,7 +146,7 @@ debugf("WARNING : by_bin doesn't exists !!!");
 }
 
 /*
-	add a new config toom cell
+	add a new config tool cell
 
 	pcd : config tool data structure
 	pht : parsed data

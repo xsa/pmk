@@ -33,10 +33,7 @@ mreindl	~.	latex version of tutorial
 
 pmk:
 -----------------------------------------------------------------------
-	+	simplify code by using more functions for redundant code
-	-	update manpage (DEFS and ELSE)
-	+	DEFS support for CHECK_CONFIG and CHECK_PKG_CONFIG
-	+	improve and fix redundancy of record_def() and record_val()
+	~	update manpage (DEFS and ELSE)
 	-	check if ~/.pmk.conf is available
 	~.	compatibility with autoconf (progressing) :
 			~ support for DEFS (-D options to pass to the compiler)
@@ -51,6 +48,7 @@ pmk:
 pmksetup:
 -----------------------------------------------------------------------
 	-	cpu identification
+	-	cpu optimisation for compiler 
 	-	use fcopy instead of text copy for the temporary file
 	-	option to append to variable of pmk.conf
 	!	clean temporary files on error

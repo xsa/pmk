@@ -72,6 +72,12 @@ hpair	predef[] = {
 
 int	nbpredef = sizeof(predef) / sizeof(hpair);
 
+/* config tools data file keyword */
+prskw	kw_pmkcpu[] = {
+	{"ADD_CPU_FAMILY", CPU_FAM_ADD, PRS_KW_CELL}
+};
+int	nbkwc = sizeof(kw_pmkcpu) / sizeof(prskw);
+
 
 /*
  * Main program for pmksetup(8)
@@ -563,7 +569,8 @@ bool close_tmp_config(void) {
  */
 bool get_env_vars(htable *pht) {
 	struct utsname	 utsname;
-	char		*bin_path;
+	char		*bin_path,
+			*cpu_fam;
 
 	if (uname(&utsname) == -1) {
 		errorf("uname : %s.", strerror(errno));
@@ -581,6 +588,13 @@ bool get_env_vars(htable *pht) {
 	if (record_data(pht, PMKCONF_OS_ARCH, 'u', utsname.machine) == false)
 		return(false);
 	verbosef("Setting '%s' => '%s'", PMKCONF_OS_ARCH, utsname.machine);
+
+	/* try to detect cpu family */
+	cpu_fam = check_cpu_family(utsname.machine);
+	if (record_data(pht, PMKCONF_CPU_FAM, 'u', cpu_fam) == false)
+		return(false);
+	verbosef("Setting '%s' => '%s'", PMKCONF_CPU_FAM, cpu_fam);
+	free(cpu_fam);
 
 
 	/* getting the environment variable PATH */
@@ -804,6 +818,77 @@ bool check_libpath(htable *pht) {
 		}
 	}
 	return(true);
+}
+
+/*
+ *	check the cpu family 
+ *
+ *	uname_m : uname machine string 
+ *
+ *	returns:  cpu family string or NULL
+ */
+
+char *check_cpu_family(char *uname_m) {
+	FILE		*fp;
+	bool		 rval;
+	char		*pstr = NULL;
+	dynary		*da;
+	htable		*pht;
+	int		 i,
+			 n;
+	prscell		*pcell;
+	prsdata		*pdata;
+
+	/* initialize parsing structure */
+	pdata = prsdata_init();
+	if (pdata == NULL) {
+		errorf("cannot intialize prsdata.");
+		return(NULL);
+	}
+
+	fp = fopen(PMKCPU_DATA, "r");
+	if (fp == NULL) {
+		prsdata_destroy(pdata);
+		errorf("cannot open '%s' : %s.",
+			PMKCPU_DATA, strerror(errno));
+		return(NULL);
+	}
+
+	/* parse data file and fill prsdata strucutre */
+	rval = parse_pmkfile(fp, pdata, kw_pmkcpu, nbkwc);
+	fclose(fp);
+
+	if (rval == true) {
+		pcell = pdata->tree->first;
+		while ((pcell != NULL) && (pstr == NULL)) {
+			if (pcell->token == CPU_FAM_ADD) {
+				pht = pcell->data;
+
+				da = po_get_list(hash_get(pht, "LIST")); /* XXX check */
+				n = da_usize(da);
+				for (i=0 ; i<n ; i++) {
+					/*
+					 * could handle regex later
+					 *
+
+					if da_idx(da, i) ~ uname_m !XXX!
+						pstr = po_get_str(hash_get(pht, "NAME"));
+						return(pstr);
+					*/
+					if (strncmp(uname_m, da_idx(da, i), sizeof(uname_m)) == 0) {
+						pstr = po_get_str(hash_get(pht, "NAME"));
+					}
+				}
+			}
+
+			pcell = pcell->next;
+		}
+	}
+
+	if (pstr == NULL)
+		pstr = "unknown";
+
+	return(strdup(pstr)); /* XXX */
 }
 
 /*
