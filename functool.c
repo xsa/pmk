@@ -157,10 +157,8 @@ char *str_to_def(char *str) {
 	static char	 buffer[TMP_BUF_LEN];
 	char		*p;
 
-	if (strlcpy(buffer, str, sizeof(buffer)) >= sizeof(buffer)) {
-		/* buffer too small */
-		return(NULL);
-	}
+	if (strlcpy_b(buffer, str, sizeof(buffer)) == false)
+		return(NULL); /* buffer too small */
 
 	p = buffer;
 
@@ -444,7 +442,7 @@ bool depend_check(htable *lht, pmkdata *gd) {
 	if (da == NULL) {
 		/* DEPEND is not a list */
 		strlcpy(gd->errmsg, "Syntax error in DEPEND !",
-					sizeof(gd->errmsg));
+					sizeof(gd->errmsg)); /* no check */
 		return(false);
 	}
 
@@ -454,7 +452,8 @@ bool depend_check(htable *lht, pmkdata *gd) {
 		if (label_check(gd->labl, fdep) == false) {
 			rval = false;
 			snprintf(gd->errmsg, sizeof(gd->errmsg),
-					"Required '%s' dependency failed.", fdep);
+					"Required '%s' dependency failed.",
+					fdep); /* no check */
 		}
 	}
 

@@ -369,7 +369,7 @@ bool ac_set_variables(htable *pht) {
         pstr = (char *) hash_get(pht, "OS_NAME");
         strlcpy(buf, pstr, sizeof(buf)); /* no need to check here */
         pstr = (char *) hash_get(pht, "OS_VERSION");
-        if (strlcat(buf, pstr, sizeof(buf)) >= sizeof(buf))
+        if (strlcat_b(buf, pstr, sizeof(buf)) ==false)
 		return(false);
 
 	if (hash_update_dup(pht, "host_os", buf) == HASH_ADD_FAIL)
@@ -393,7 +393,7 @@ bool ac_set_variables(htable *pht) {
 	strlcat(buf, pstr, sizeof(buf)); /* no need to check here */
 	strlcat(buf, "-", sizeof(buf)); /* no need to check here */
 	pstr = (char *) hash_get(pht, "host_os");
-	if (strlcat(buf, pstr, sizeof(buf)) >= sizeof(buf))
+	if (strlcat_b(buf, pstr, sizeof(buf)) == false)
 		return(false); /* overflow */
 
 	if (hash_update_dup(pht, "host", buf) == HASH_ADD_FAIL)

@@ -99,7 +99,6 @@ bool get_line(FILE *fd, char *line, size_t lsize) {
 bool env_to_opt(char *env_name, pmkcmdopt *opt) {
 	bool	 rval;
 	char	*env_val;
-	size_t	 s;
 
 	env_val = getenv(env_name);
 	if (env_val == NULL) {
@@ -107,8 +106,8 @@ bool env_to_opt(char *env_name, pmkcmdopt *opt) {
 		rval = false;
 	} else {
 		/* okay get it */
-		s = sizeof(opt->value);
-		if (strlcpy(opt->value, env_val, s) < s) {
+		if (strlcpy_b(opt->value, env_val,
+					sizeof(opt->value)) == false) {
 			rval = true;
 		} else {
 			rval = false;
@@ -134,7 +133,8 @@ bool get_make_var(char *varname, char *result, size_t rsize) {
 	bool	 rval;
 	char	 mfn[MAXPATHLEN],
 		 varstr[TMP_BUF_LEN];
-	strlcpy(mfn, TMP_MK_FILE, sizeof(mfn));
+
+	strlcpy(mfn, TMP_MK_FILE, sizeof(mfn)); /* XXX check ? */
 
 	mfp = tmps_open(TMP_MK_FILE, "w", mfn, sizeof(mfn), strlen(MK_FILE_EXT));
 	if (mfp != NULL) {
@@ -322,11 +322,11 @@ bool find_file_dir(dynary *da, char *fname, char *fpath, size_t fplen) {
 
 		strlcpy(tstr, path, sizeof(tstr));
 		strlcat(tstr, "/", sizeof(tstr));
-		if (strlcat(tstr, fname, sizeof(tstr)) < sizeof(tstr)) {
+		if (strlcat_b(tstr, fname, sizeof(tstr)) == true) {
 			fp = fopen(tstr, "r");
 			if (fp != NULL) {
 				fclose(fp);
-				if (strlcpy(fpath, path, fplen) < fplen) {
+				if (strlcpy_b(fpath, path, fplen) == true) {
 					/* fpath correctly set */
 					return(true);
 				} else {
@@ -358,7 +358,7 @@ bool find_file(dynary *da, char *fname, char *fpath, size_t fplen) {
 
 	if (find_file_dir(da, fname, fpath, fplen) == true) {
 		strlcat(fpath, "/", fplen); /* no need to check here */
-		if (strlcat(fpath, fname, fplen) < fplen) {
+		if (strlcat_b(fpath, fname, fplen) == true) {
 			/* fpath set correctly */
 			rval = true;
 		}
@@ -588,7 +588,8 @@ FILE *tmp_open(char *tfile, char *mode, char *buf, size_t bsize) {
 	int	fd;
 
 	/* copy file name in buf */
-	strlcpy(buf, tfile, bsize);
+	if (strlcpy_b(buf, tfile, bsize) == false)
+		return(NULL);
 
 	/* randomize file name */
 	fd = mkstemp(buf);
@@ -615,7 +616,8 @@ FILE *tmps_open(char *tfile, char *mode, char *buf, size_t bsize, size_t slen) {
 	int	fd;
 
 	/* copy file name in buf */
-	strlcpy(buf, tfile, bsize);
+	if (strlcpy_b(buf, tfile, bsize) == false)
+		return(NULL);
 
 	/* randomize file name */
 	fd = mkstemps(buf, slen);
