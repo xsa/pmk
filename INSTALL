@@ -1,5 +1,9 @@
-To build :
-make
+INSTALL
+-------
 
-To install :
+First you must check compat/compat.h to ensure compatibilities with your system.
+
+To install pmk on your system :
+make
 make install
+make clean
