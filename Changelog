@@ -1,3 +1,6 @@
+28 Jun 2004 mipsator
+ * more stuff to prepare changes in pmkscan.
+
 26 Jun 2004 mipsator
  * moved process_string() and single_append() into hash_tools.
  * updated pmkfile (was using obsolete commands).

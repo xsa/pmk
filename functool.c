@@ -42,7 +42,6 @@
 #include "compat/pmk_unistd.h"
 #include "functool.h"
 #include "premake.h"
-#include "hash_tools.h"
 #include "dynarray.h"
 #include "common.h"
 
@@ -460,26 +459,6 @@ char *get_comp_path(htable *pht, char *compname) {
 
 	snprintf(key, sizeof(key), "BIN_%s", compname);
 	return((char *) hash_get(pht, key));
-}
-
-/*
-	blah
-*/
-
-char *parse_idtf(char *pstr, char *pbuf, size_t size) {
-	while (((isalnum(*pstr) != 0) || (*pstr == '_')) && (size > 0)) {
-		*pbuf = *pstr;
-		pbuf++;
-		pstr++;
-		size--;
-	}
-
-	if (size == 0)
-		return(NULL);
-
-	*pbuf = CHAR_EOS;
-	
-	return(pstr);
 }
 
 /*

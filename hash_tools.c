@@ -35,8 +35,34 @@
 
 
 #include <stdio.h>
+#include <stdlib.h>
+#include <ctype.h>
+
+#include "compat/pmk_string.h"
 #include "hash_tools.h"
 #include "premake.h"
+
+
+/*
+	XXX TODO descr blah
+*/
+
+char *parse_idtf(char *pstr, char *pbuf, size_t size) {
+	while (((isalnum(*pstr) != 0) || (*pstr == '_')) && (size > 0)) {
+		*pbuf = *pstr;
+		pbuf++;
+		pstr++;
+		size--;
+	}
+
+	if (size == 0)
+		return(NULL);
+
+	*pbuf = CHAR_EOS;
+	
+	return(pstr);
+}
+
 
 
 /*

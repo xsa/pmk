@@ -39,6 +39,7 @@
 
 #include "hash.h"
 
+char	*parse_idtf(char *, char *, size_t);
 char	*process_string(char *, htable *);
 bool	 single_append(htable *, char *, char *);
 
