@@ -1,14 +1,18 @@
 .Dd April 27, 2003
 .Dt PMKFILE 5
 .Os
+
 .Sh NAME
 .Nm pmkfile
 .Nd pmk specification file
+
 .Sh SYNOPSIS
 .Nm
+
 .Sh DESCRIPTION
 .Nm
 is file containing specifications that help configuring a package build on a given platform.
+
 .Sh SYNTAX
 .Nm
 can contain comments, blank lines and commands.
@@ -32,28 +36,143 @@ Example :
  INCLUDE=string.h
  .END
 .Ed
-.Sh COMMANDS
-.Bd -literal -offset
-DEFINE : define data, has no label.
 
-TARGET : define target templates, no label.
-
-CHECK_BINARY : check if a binary is in the path.
-keys : REQUIRED, FILENAME.
-
-CHECK_CONFIG : check using a *-config tool.
-keys : REQUIRED, CFGTOOL[, VERSION].
-
-CHECK_INCLUDE : check C include header and optionally a function.
-keys : REQUIRED, INCLUDE[, FUNCTION].
-
-CHECK_LIB : check a library and optionally a function.
-keys : REQUIRED, LIBNAME[, FUNCTION].
+.Sh SPECIFIC COMMANDS
+.Pp
+The following commands have no label.
+.Bl -tag -width Ds
+.It Cm DEFINE
+This command permits to define variables.
+.Pp
+Arguments :
+.Pp
+Example :
+.Bd -literal -offset -indent
+ .DEFINE
+ PACKAGE=myprog
+ VERSION=0.1
+ .END
 .Ed
+
+.It Cm TARGET
+This command defines the target templates where values will be substitued.
+.Pp
+Arguments :
+.Bd -literal -offset -indent
+LIST : list of filename separated by a comma.
+.Ed
+.Pp
+Example :
+.Bd -literal -offset -indent
+ .TARGET
+ LIST=Makefile.in,common.pmk
+ .END
+.Ed
+
+.It Cm AC_COMPAT
+This command enable autoconf compatibility.
+.Pp
+Arguments :
+.Bd -literal -offset -indent
+FILENAME : autoconf config file.
+.Ed
+.Pp
+Example :
+.Bd -literal -offset -indent
+ .AC_COMPAT
+ FILENAME=config.h
+ .END
+.Ed
+.El
+
+.Sh STANDARD COMMANDS
+.Pp
+All these commands need a label.
+.Pp
+They all can have the following optional arguments :
+.Bl -tag -width Ds
+.It Cm REQUIRED
+Specify if this test is required to achieve the configuration. If not specified it is TRUE by default.
+.It Cm DEPEND
+Specify check dependencies. If a dependancy is already false then the test will be false.
+.El
+.Pp
+Some of these commands can also have the following arguments :
+.Bl -tag -width Ds
+.It Cm LANG
+Specify the language used in the following list :
+.Bd -literal -offset -indent
+C
+C++
+.Ed
+.Pp By default C is the used language.
+.El
+.Pp
+Here the list of commands :
+.Bl -tag -width Ds
+.It Cm CHECK_BINARY
+Check if a binary is in the path.
+.Pp
+Arguments :
+.Bd -literal -offset -indent
+FILENAME : name of the binary.
+.Ed
+.It Cm CHECK_INCLUDE
+Check language header and optionally a function.
+.Pp
+Arguments:
+.Bd -literal -offset -indent
+REQUIRED, DEPEND, LANG.
+INCLUDE : name of the header.
+FUNCTION : function to check, optional.
+.Ed
+.It Cm CHECK_LIB
+Check a library and optionally a function.
+.Pp
+Arguments:
+.Bd -literal -offset -indent
+REQUIRED, DEPEND, LANG.
+LIBNAME : library name to check.
+FUNCTION : function to check, optional.
+.Ed
+.It Cm CHECK_CONFIG
+Check using a *-config tool.
+.Pp
+Arguments:
+.Bd -literal -offset -indent
+REQUIRED, DEPEND.
+CFGTOOL : config tool name.
+VERSION : minimal version needed, optional.
+CFLAGS : variable name to store CFLAGS values, optional.
+LIBS : variable name to store LIBS values, optional.
+.Ed
+.It Cm CHECK_PKG_CONFIG
+Check a package using pkg-config.
+.Pp
+Arguments:
+.Bd -literal -offset -indent
+REQUIRED, DEPEND.
+PACKAGE : package name.
+VERSION : minimal version needed, optional.
+CFLAGS : variable name to store CFLAGS values, optional.
+LIBS : variable name to store LIBS values, optional.
+.Ed
+.It Cm CHECK_TYPE
+Check if the given type exists.
+.Pp
+Arguments:
+.Bd -literal -offset -indent
+REQUIRED, DEPEND, LANG.
+TYPE : type name.
+.Ed
+.El
+
 .Sh SEE ALSO
 .Xr pmk 1
+
 .Sh AUTHOR
 .An Damien Couderc
+
 .Sh HISTORY
 The idea to replace configure script was existing since a long time. 
 But the projet was initiated in the begining of March 2003.
