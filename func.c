@@ -415,9 +415,7 @@ bool pmk_check_lib(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 		record_def(gdata->htab, target, true); /* XXX check ?*/
 		record_val(gdata->htab, target, ""); /* XXX check ? */
 		snprintf(lib_buf, sizeof(lib_buf), "-l%s", libname);
-		debugf("lib_buf='%s'", lib_buf); /* XXX DEBUGF */
 		hash_append(gdata->htab, "LIBS", lib_buf, " "); /* XXX check ? */
-		debugf("LIBS+=%s", hash_get(gdata->htab, "LIBS")); /* XXX DEBUGF */
 		label_set(gdata->labl, cmd->label, true);
 		rval = true;
 	} else {
