@@ -633,6 +633,9 @@ hkeys *hash_keys(htable *pht) {
 
 void hash_free_hcell(htable *pht, hcell *phc) {
 	if (phc != NULL) {
+#ifdef HASH_DEBUG
+		debugf("free phcell '%s'", phc->key);
+#endif
 		if (phc->value != NULL) {
 			if (pht->freeobj != NULL)
 				pht->freeobj(phc->value);
