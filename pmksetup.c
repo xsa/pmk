@@ -88,7 +88,7 @@ int main(int argc, char *argv[]) {
 	/* pmksetup(8) must be run as root */
 	if ((uid = getuid()) != 0) {
 		errorf("you must be root.");
-		exit(1);
+		exit(EXIT_FAILURE);
 	}
 #endif
 
@@ -98,7 +98,7 @@ int main(int argc, char *argv[]) {
 		switch(ch) {
 			case 'v' :
 				fprintf(stderr, "%s\n", PREMAKE_VERSION);
-				exit(0);
+				exit(EXIT_SUCCESS);
 				break;
 			case 'V' :
 				if (0 == verbose_flag)
@@ -114,7 +114,7 @@ int main(int argc, char *argv[]) {
 
 	if ((ht = hash_init(MAX_CONF_OPT)) == NULL) {
 		errorf("cannot create hash table.");
-		exit(1);
+		exit(EXIT_FAILURE);
 	}
 
 	printf("PMKSETUP version %s", PREMAKE_VERSION);
@@ -132,36 +132,37 @@ int main(int argc, char *argv[]) {
 		if (mkdir(CONFDIR, S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH) != 0) {
 			errorf("cannot create '%s' directory : %s.", 
 				CONFDIR, strerror(errno));
-			exit(1);
+			exit(EXIT_FAILURE);
 		}
 	}
 
 	printf("==> Looking for default parameters...\n");
 	if ((get_env_vars(ht) == -1) || (get_binaries(ht) == -1))
-		exit(1);
+		exit(EXIT_FAILURE);
 
 	if (predef_vars(ht) == -1) {
 		errorf("predefined variables."); 
-		exit(1);
+		exit(EXIT_FAILURE);
 	}
 
 	if (byte_order_check(ht) == false) {
 		errorf("failure in byte order check.");
-		exit(1);
+		exit(EXIT_FAILURE);
 	}
 
 	if (check_echo(ht) == -1) {
 		errorf("failure in echo check.");
-		exit(1);
+		exit(EXIT_FAILURE);
 	}
 
 	if ((open_tmp_config() == -1))
-		exit(1);
+		exit(EXIT_FAILURE);
 
 	/* parse configuration file */
 	if ((config = fopen(PREMAKE_CONFIG_PATH, "r")) != NULL) {
 		printf("==> Configuration file found: %s\n", PREMAKE_CONFIG_PATH);
-		parse_pmkconf(config, ht, PRS_PMKCONF_SEP, check_opt); /* XXX FIXME TODO check ? */
+		/* XXX FIXME TODO check ? */
+		parse_pmkconf(config, ht, PRS_PMKCONF_SEP, check_opt);
 		fclose(config);
 	} else {
 		printf("==> Configuration file not found, generating one...\n");
@@ -174,12 +175,12 @@ int main(int argc, char *argv[]) {
 	hash_destroy(ht);
 
 	if (close_tmp_config() < 0)
-		exit(1);
+		exit(EXIT_FAILURE);
 
 	if (error == 0)
 		/* copying the temporary config to the system one */
 		if (copy_config(sfn, PREMAKE_CONFIG_PATH) == -1)
-			exit(1);
+			exit(EXIT_FAILURE);
 
 #ifdef PMKSETUP_DEBUG
 	debugf("%s has not been deleted!", sfn);
@@ -187,7 +188,7 @@ int main(int argc, char *argv[]) {
 	if (unlink(sfn) == -1) {
 		errorf("cannot remove temporary file: %s : %s.",
 			sfn, strerror(errno));
-		exit(1);	
+		exit(EXIT_FAILURE);	
 	}
 #endif	/* PMKSETUP_DEBUG */
 
@@ -682,6 +683,6 @@ void usage(void) {
 	fprintf(stderr, "  -h	Display this help menu\n"); 
 	fprintf(stderr, "  -v	Display version number\n");
 	fprintf(stderr, "  -V	Verbose, display debugging messages\n");
-	exit(1);
+	exit(EXIT_FAILURE);
 }
 
