@@ -1582,6 +1582,7 @@ bool pmk_set_parameter(pmkcmd *cmd, prsopt *popt, pmkdata *pgd) {
 				return(false);
 			} else {
 				if (detect_compiler(ccpath, pgd->buildlog, cdata, &cinfo) == true) {
+
 					pmk_log("%s (version %s).\n",
 						comp_get_descr(cdata, cinfo.c_id), cinfo.version);
 
@@ -1595,6 +1596,9 @@ bool pmk_set_parameter(pmkcmd *cmd, prsopt *popt, pmkdata *pgd) {
 						errorf("unable to set shared library compiler flags (%s).\n", pld->slflg);
 						return(false);
 					}
+				} else {
+					pmk_log("failed.\n");
+					return(false);
 				}
 
 			}

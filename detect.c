@@ -331,13 +331,13 @@ bool detect_compiler(char *cpath, char *blog, comp_data *pcd, comp_info *cinfo) 
 			} else {
 				/* get compiler id */
 				cinfo->c_id = strdup(pipebuf);
-			}
 
-			if (failed == false && get_line(rpipe, pipebuf, sizeof(pipebuf)) == false) {
-				errorf("cannot get compiler version.");
-				failed = true;
-			} else {
-				cinfo->version = strdup(pipebuf);
+				if (get_line(rpipe, pipebuf, sizeof(pipebuf)) == false) {
+					errorf("cannot get compiler version.");
+					failed = true;
+				} else {
+					cinfo->version = strdup(pipebuf);
+				}
 			}
 
 			pclose(rpipe);
@@ -353,7 +353,7 @@ bool detect_compiler(char *cpath, char *blog, comp_data *pcd, comp_info *cinfo) 
 		}
 
 		if (failed == true)
-			return(EXIT_FAILURE);
+			return(false);
 	} else {
 		errorf("failed to build test binary : %s.", strerror(errno));
 	}

@@ -2,6 +2,7 @@
  * fixed get_make_var() by replacing misused mkstemp() by tmps_open().
  * simplified mkstemps() to remove warnings about the cast.
  * improved a bit comp_test.c to display more info.
+ * fixed compiler detection failure.
 
 # snapshot 0.7.9
 
