@@ -124,7 +124,7 @@ int main(int argc, char *argv[]) {
 
 	/* check if syconfdir exists */
 	if (dir_exists(CONFDIR) == -1) {
-		verbosef("creating '%s' directory.", CONFDIR);
+		verbosef("==> Creating '%s' directory.", CONFDIR);
 		if (mkdir(CONFDIR, S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH) != 0) {
 			errorf("cannot create '%s' directory : %s.", 
 				CONFDIR, strerror(errno));
