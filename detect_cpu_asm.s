@@ -34,8 +34,12 @@
  */
 
 
+#include "cpu_arch_def.h"
+
+
 .data
 
+#ifdef ARCH_X86
 	.globl x86_cpu_vendor
 
 x86_cpu_vendor:
@@ -46,9 +50,12 @@ x86_cpu_vendor:
 
 x86_cpu_name_str:
 	.space 49
+#endif
 
 
 .text
+
+#ifdef ARCH_X86
 
 /*
 	get cpu vendor string
@@ -143,6 +150,7 @@ get_x86_cpu_name:
 	movl	$x86_cpu_name_str,%eax
 
 	ret
+#endif
 
 
 
