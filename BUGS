@@ -5,3 +5,9 @@ CYGWIN :
     So we decided to stop cygwin support until they learn how to make
     their system working transparently (yes, between the lines you can
     read cygwin sucks).
+
+HP-UX :
+ - S_BLKSIZE doesn't exists.
+
+Tru64 :
+ - int64_t doesn't exists.
