@@ -158,6 +158,8 @@ bool process_template(char *template, htable *ht) {
 		*dfd;
 	char	*path,
 		*destfile,
+		*dup_p,
+		*dup_d,
 		*dotidx,
 		*value,
 		final[MAXPATHLEN],
@@ -169,12 +171,14 @@ bool process_template(char *template, htable *ht) {
 		k;
 	bool	replace;
 
-	path = strdup(dirname(template));
+	dup_p = strdup(template);
+	path = dirname(dup_p);
 	if (path == NULL) {
 		errorf("Not enough memory !!");
 		return(false);
 	}
-	destfile = strdup(basename(template));
+	dup_d = strdup(template);
+	destfile = basename(dup_d);
 	if (destfile == NULL) {
 		errorf("Not enough memory !!");
 		return(false);
@@ -182,12 +186,17 @@ bool process_template(char *template, htable *ht) {
 
 	/* remove suffix */
 	dotidx = strrchr(destfile, '.');
-	*dotidx = CHAR_EOS;
+	if (dotidx != NULL) {
+		*dotidx = CHAR_EOS;
+	} else {
+		errorf("Error while creating name for template %s", destfile);
+		return(false);
+	}
 
 	/* build destination file */
 	snprintf(final, sizeof(final), "%s/%s", path, destfile);
-	free(path);
-	free(destfile);
+	free(dup_p);
+	free(dup_d);
 
 	tfd = fopen(template, "r");
 	if (tfd == NULL) {
