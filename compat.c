@@ -34,10 +34,10 @@
 #include "compat/compat.h"
 
 #ifndef HAVE_STRLCPY
-#include "strlcpy.c"
+#include "compat/strlcpy.c"
 #endif
 
 #ifndef HAVE_LIBGEN_H
-#include "basename.c"
-#include "dirname.c"
+#include "compat/basename.c"
+#include "compat/dirname.c"
 #endif
