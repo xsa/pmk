@@ -36,8 +36,9 @@ common:
 pmk:
 -----------------------------------------------------------------------
 	-.	MODULE support in CHECK_PKG_CONFIG
-	~R	linking flags for shared libraries (starting with our
+	+	linking flags for shared libraries (starting with our
 		supported platforms)
+	!R	test of shared lib support
 	~.	compatibility with autoconf (progressing) :
 			~ support for DEFS (-D options to pass to the compiler)
 			- support for LDFLAGS (misc linker options) ?
