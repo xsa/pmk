@@ -1,14 +1,15 @@
 common :
-- write specs somewhere in a draft
+- tutorial 
 - improve parser to parse variables
 
 pmk :
-- update pmk.1
-- update pmkfile.5
++ update pmk.1
++ update pmkfile.5
 ~ compatibility with autoconf (progressing)
 - set CPPFLAGS
 - set LDFLAGS ?
-- cache ?
+- cache ? (binary location, etc...)
+- more C++ support
 
 pmksetup :
 ~ pmk.conf(5)
