@@ -132,6 +132,10 @@
 #define KW_SETNGS_ACCOMP	"AC_COMPAT"
 #define KW_SETNGS_CCDTCT	"DETECT"
 
+#define KW_SL_VERS_NONE		"VERSION_NONE"
+#define KW_SL_VERS_MAJ		"VERSION_MAJ"
+#define KW_SL_VERS_FULL		"VERSION_FULL"
+
 
 /* structures */
 typedef struct {

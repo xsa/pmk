@@ -65,6 +65,17 @@
 #define DEF_VERSION	"#define CC_V\t%s"
 #define DEF_NOVERSION	"#undef CC_V"
 
+#define SL_LDFLAG_VARNAME	"SLLDFLAGS"
+
+/* reserved variable name */
+#define SL_KW_LIB_VNONE	"SL_LIBNAME"
+#define SL_KW_LIB_VMAJ	"SL_LIBNAME_VMAJ"
+#define SL_KW_LIB_VFULL	"SL_LIBNAME_VFULL"
+#define SL_KW_LIB_NAME	"SL_NAME"
+#define SL_KW_LIB_MAJ	"SL_MAJOR"
+#define SL_KW_LIB_MIN	"SL_MINOR"
+
+
 /* header of test code */
 #define COMP_TEST_HEADER \
 	"#include <stdio.h>\n\n"

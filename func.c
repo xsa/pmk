@@ -1324,6 +1324,7 @@ bool pmk_check_variable(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 bool pmk_build_shlib_name(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 	char	*variable,
 		*versvar,
+		*versmaj,
 		*pstr,
 		*value;
 
@@ -1348,7 +1349,7 @@ debugf("pstr(name) = '%s'", pstr);
 #ifdef SHLIB_DEBUG
 debugf("value = '%s'", value);
 #endif
-		hash_update(pgd->slht, "SL_LIBNAME", value);
+		hash_update(pgd->slht, SL_KW_LIB_NAME, value);
 	}
 
 	pstr = po_get_str(hash_get(ht, "MAJOR"));
@@ -1360,7 +1361,7 @@ debugf("pstr(major) = '%s'", pstr);
 #ifdef SHLIB_DEBUG
 debugf("value = '%s'", value);
 #endif
-		hash_update(pgd->slht, "SL_MAJOR", value); /* no dup */
+		hash_update(pgd->slht, SL_KW_LIB_MAJ, value); /* no dup */
 	}
 
 	pstr = po_get_str(hash_get(ht, "MINOR"));
@@ -1372,20 +1373,23 @@ debugf("pstr(minor) = '%s'", pstr);
 #ifdef SHLIB_DEBUG
 debugf("value = '%s'", value);
 #endif
-		hash_update(pgd->slht, "SL_MINOR", value); /* no dup */
+		hash_update(pgd->slht, SL_KW_LIB_MIN, value); /* no dup */
 	}
 
-	variable = po_get_str(hash_get(ht, "VARIABLE"));
+	/* get libname without version */
+	variable = po_get_str(hash_get(ht, KW_SL_VERS_NONE));
+	/* COMPAT old name                                        */
+	/*if (variable == NULL)                                   */
+	/*        variable = po_get_str(hash_get(ht, "VARIABLE"));*/
 	if (variable != NULL) {
-		pstr = hash_get(pgd->slht, "SL_NAME");
+		pstr = hash_get(pgd->slht, SL_KW_LIB_VNONE);
 #ifdef SHLIB_DEBUG
-debugf("pstr(sl_name) = '%s'", pstr);
+debugf("pstr = '%s'", pstr);
 #endif
 		value = process_string(pstr, pgd->slht);
 #ifdef SHLIB_DEBUG
 debugf("value = '%s'", value);
 #endif
-		/*hash_update_dup(pgd->slht, "SL_NAME", value);*/
 
 		/* no dup */
 		if (hash_update(pgd->htab, variable, value) == HASH_ADD_FAIL) {
@@ -1402,11 +1406,14 @@ debugf("variable not set");
 #endif
 	}
 
-	versvar = po_get_str(hash_get(ht, "VERSVAR"));
+	versvar = po_get_str(hash_get(ht, KW_SL_VERS_FULL));
+	/*COMPAT  old name                                      */
+	/*if (versvar != NULL)                                  */
+	/*        versvar = po_get_str(hash_get(ht, "VERSVAR"));*/
 	if (versvar != NULL) {
-		pstr = hash_get(pgd->slht, "SL_NAME_VERS");
+		pstr = hash_get(pgd->slht, SL_KW_LIB_VFULL);
 #ifdef SHLIB_DEBUG
-debugf("pstr(sl_name_vers) = '%s'", pstr);
+debugf("pstr = '%s'", pstr);
 #endif
 		value = process_string(pstr, pgd->slht);
 #ifdef SHLIB_DEBUG
@@ -1423,6 +1430,30 @@ debugf("save in '%s'", versvar);
 	} else {
 #ifdef SHLIB_DEBUG
 debugf("versvar not set");
+#endif
+	}
+
+	versmaj = po_get_str(hash_get(ht, KW_SL_VERS_MAJ));
+	if (versmaj != NULL) {
+		pstr = hash_get(pgd->slht, SL_KW_LIB_VMAJ);
+#ifdef SHLIB_DEBUG
+debugf("pstr = '%s'", pstr);
+#endif
+		value = process_string(pstr, pgd->slht);
+#ifdef SHLIB_DEBUG
+debugf("value = '%s'", value);
+#endif
+		if (hash_update(pgd->htab, versmaj, value) == HASH_ADD_FAIL) {
+			/* XXX err msg ? */
+			return(false);
+		}
+		pmk_log("\tSetting %s to '%s'\n", versmaj, value);
+#ifdef SHLIB_DEBUG
+debugf("save in '%s'", versmaj);
+#endif
+	} else {
+#ifdef SHLIB_DEBUG
+debugf("versmaj not set");
 #endif
 	}
 
