@@ -3,19 +3,77 @@
 
 # header list
 INCLUDES {
-"sys/param.h"=("# checking sys/param.h","CHECK_INCLUDE(header_sys_param_h) {","REQUIRED=FALSE","LANG=\"$LANG\"","INCLUDE=\"sys/param.h\"","}")
-"dirent.h"=("# checking dirent.h","CHECK_INCLUDE(header_dirent_h) {","REQUIRED=FALSE","LANG=\"$LANG\"","INCLUDE=\"dirent.h\"","}")
-"libgen.h"=("# checking libgen.h","CHECK_INCLUDE(header_libgen_h) {","REQUIRED=FALSE","LANG=\"$LANG\"","INCLUDE=\"libgen.h\"","}")
-"stdbool.h"=("# checking stdbool.h","CHECK_INCLUDE(header_stdbool_h) {","REQUIRED=FALSE","LANG=\"$LANG\"","INCLUDE=\"stdbool.h\"","}")
+"sys/param.h"=(	"# checking sys/param.h",
+		"CHECK_INCLUDE(header_sys_param_h) {",
+		"REQUIRED=FALSE",
+		"LANG=\"$LANG\"",
+		"INCLUDE=\"sys/param.h\"","}")
+"dirent.h"=(	"# checking dirent.h",
+		"CHECK_INCLUDE(header_dirent_h) {",
+		"REQUIRED=FALSE",
+		"LANG=\"$LANG\"",
+		"INCLUDE=\"dirent.h\"","}")
+"libgen.h"=(	"# checking libgen.h",
+		"CHECK_INCLUDE(header_libgen_h) {",
+		"REQUIRED=FALSE",
+		"LANG=\"$LANG\"",
+		"INCLUDE=\"libgen.h\"","}")
+"stdbool.h"=(	"# checking stdbool.h",
+		"CHECK_INCLUDE(header_stdbool_h) {",
+		"REQUIRED=FALSE",
+		"LANG=\"$LANG\"",
+		"INCLUDE=\"stdbool.h\"","}")
 }
 
 # functions list
 FUNCTIONS {
-isblank=("# checking isblank in ctype.h","CHECK_INCLUDE(function_isblank) {","REQUIRED=FALSE","LANG=\"$LANG\"","INCLUDE=\"ctype.h\"","FUNCTION=isblank","}")
-mkstemps=("# checking mkstemps in unistd.h","CHECK_INCLUDE(function_mkstemps) {","REQUIRED=FALSE","LANG=\"$LANG\"","INCLUDE=\"unistd.h\"","FUNCTION=mkstemps","}")
-strlcat=("# checking strlcat in string.h","CHECK_INCLUDE(function_strlcat) {","REQUIRED=FALSE","LANG=\"$LANG\"","INCLUDE=\"string.h\"","FUNCTION=strlcat","}")
-strlcpy=("# checking strlcpy in string.h","CHECK_INCLUDE(function_strlcpy) {","REQUIRED=FALSE","LANG=\"$LANG\"","INCLUDE=\"string.h\"","FUNCTION=strlcpy","}")
-strndup=("# checking strndup in string.h","CHECK_INCLUDE(function_strndup) {","REQUIRED=FALSE","LANG=\"$LANG\"","INCLUDE=\"string.h\"","FUNCTION=strndup","}")
-strndupa=("# checking strndupa in string.h","CHECK_INCLUDE(function_strndupa) {","REQUIRED=FALSE","LANG=\"$LANG\"","INCLUDE=\"string.h\"","FUNCTION=strndupa","}")
-vsyslog=("# checking vsyslog in syslog.h","CHECK_INCLUDE(function_vsyslog) {","REQUIRED=FALSE","LANG=\"$LANG\"","INCLUDE=\"syslog.h\"","FUNCTION=vsyslog","}")
+isblank=(	"# checking isblank in ctype.h",
+		"CHECK_INCLUDE(function_isblank) {",
+		"REQUIRED=FALSE",
+		"LANG=\"$LANG\"",
+		"INCLUDE=\"ctype.h\"",
+		"FUNCTION=isblank",
+		"}")
+mkstemps=(	"# checking mkstemps in unistd.h",
+		"CHECK_INCLUDE(function_mkstemps) {",
+		"REQUIRED=FALSE",
+		"LANG=\"$LANG\"",
+		"INCLUDE=\"unistd.h\"",
+		"FUNCTION=mkstemps",
+		"}")
+strlcat=(	"# checking strlcat in string.h",
+		"CHECK_INCLUDE(function_strlcat) {",
+		"REQUIRED=FALSE",
+		"LANG=\"$LANG\"",
+		"INCLUDE=\"string.h\"",
+		"FUNCTION=strlcat",
+		"}")
+strlcpy=(	"# checking strlcpy in string.h",
+		"CHECK_INCLUDE(function_strlcpy) {",
+		"REQUIRED=FALSE",
+		"LANG=\"$LANG\"",
+		"INCLUDE=\"string.h\"",
+		"FUNCTION=strlcpy",
+		"}")
+strndup=(	"# checking strndup in string.h",
+		"CHECK_INCLUDE(function_strndup) {",
+		"REQUIRED=FALSE",
+		"LANG=\"$LANG\"",
+		"INCLUDE=\"string.h\"",
+		"FUNCTION=strndup",
+		"}")
+strndupa=(	"# checking strndupa in string.h",
+		"CHECK_INCLUDE(function_strndupa) {",
+		"REQUIRED=FALSE",
+		"LANG=\"$LANG\"",
+		"INCLUDE=\"string.h\"",
+		"FUNCTION=strndupa",
+		"}")
+vsyslog=(	"# checking vsyslog in syslog.h",
+		"CHECK_INCLUDE(function_vsyslog) {",
+		"REQUIRED=FALSE",
+		"LANG=\"$LANG\"",
+		"INCLUDE=\"syslog.h\"",
+		"FUNCTION=vsyslog",
+		"}")
 }
