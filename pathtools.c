@@ -57,7 +57,7 @@
 	path : path to check
 	buffer : MAXPATHLEN sized buffer that will contain resolved path
 
-	returns bool is check is well done
+	returns bool if check is well done
 */
 
 bool chkpath(char *path, char *buffer) {
