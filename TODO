@@ -23,8 +23,7 @@ Indented lines means subtask.
 common:
 -----------------------------------------------------------------------
 	-	track and code missing checks for snprintf and strl*
-	+R	tutorial
-mreindl	~.	latex version of tutorial
+	~R	tutorial
 	~.	improve test_pmkinstall to check more modes
 	-.	add test target in tests/Makefile
 	+	update README and INSTALL
@@ -33,16 +32,14 @@ mreindl	~.	latex version of tutorial
 
 pmk:
 -----------------------------------------------------------------------
-	+	update manpage (DEFS and ELSE)
+	-	update manpage (pmk.conf)
 	-	check if ~/.pmk.conf is available
 	~.	compatibility with autoconf (progressing) :
 			~ support for DEFS (-D options to pass to the compiler)
 			- support for LDFLAGS (misc linker options) ?
 			- support for CPPFLAGS (misc linker options) ?
 			- VPATH ?
-	-.	cache ? (hash table with binary location, ...)
 	-.	verify in CHECK_BINARY that program has executable right ?
-	-.	convert gdata.labl to pmk objects ?
 
 
 pmksetup:
@@ -53,7 +50,7 @@ pmksetup:
 			- sparc support
 			- sparc64 support (priviledged)
 			+ alpha support
-			~ ia64 support (cpu class, std vendor ?)
+			+ ia64 support
 			! man page update
 	-	cpu optimisation for compiler 
 	-	option to append to variable of pmk.conf
@@ -64,8 +61,8 @@ pmksetup:
 			- long double (pmk ?)
 			- better check for install ?
 			- others ?
-	~	privilege separation (PRIVSEP branch)
-	-	escape comma in PATH_BIN (or wait for PATH_BIN to be converted as a list)
+	+	privilege separation (PRIVSEP branch)
+	-!	escape comma in PATH_BIN (or wait for PATH_BIN to be converted as a list)
 
 
 pmkscan
@@ -76,7 +73,7 @@ pmkscan
 
 pmkinstall
 -----------------------------------------------------------------------
-	-	fragment main loop in functions, it's too large
+	-!	fragment main loop in functions, it's too large
 	-.	backup option ?
 
 
