@@ -256,13 +256,30 @@ bool parse_cell(char *line, prscell *pcell) {
 #ifdef DEBUG_PRS
 			debugf("command '%s' with no label", pcell->name);
 #endif
-			/* command without label */
+			/* command without label (old format) */
 			return(true);
 			break; /* yes i know */
 
 		case PMK_CHAR_LABEL_START :
 			/* found label starting delimiter */
 			pstr++;
+			break;
+
+		case ' ' :
+			/* command without label (new format) */
+			pstr++;
+			if (*pstr != PMK_CHAR_COMMAND_START) {
+				strlcpy(parse_err, PRS_ERR_TRAILING, sizeof(parse_err));
+				return(false);
+			}
+			pstr++;
+			if (*pstr != CHAR_EOS) {
+				strlcpy(parse_err, PRS_ERR_TRAILING, sizeof(parse_err));
+				return(false);
+			} else {
+				/* format okay */
+				return(true);
+			}
 			break;
 
 		default :
