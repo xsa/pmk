@@ -311,19 +311,35 @@ bool parse_keyword(pkgcell *ppc, char *kword, char *value) {
 			switch (kw_pkg[i].kw_id) {
 				case PKGCFG_KW_NAME :
 					ppc->name = strdup(value);
+					if (ppc->name == NULL) {
+						errorf(ERRMSG_MEM);
+						return(false);
+					}
 					break;
 
 				case PKGCFG_KW_DESCR :
 					ppc->descr = strdup(value);
+					if (ppc->descr == NULL) {
+						errorf(ERRMSG_MEM);
+						return(false);
+					}
 					break;
 
 				case PKGCFG_KW_VERS :
 					ppc->version = strdup(value);
+					if (ppc->version == NULL) {
+						errorf(ERRMSG_MEM);
+						return(false);
+					}
 					break;
 
 				case PKGCFG_KW_REQS :
 					if (*value != CHAR_EOS)
 						ppc->requires = strdup(value);
+						if (ppc->requires == NULL) {
+							errorf(ERRMSG_MEM);
+							return(false);
+						}
 					break;
 
 				case PKGCFG_KW_CFLGS :
