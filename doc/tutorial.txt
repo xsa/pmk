@@ -94,10 +94,10 @@ __[OUTPUT]______________________________________________________[END]__
 
 And the generated Makefile should looks like:
 
-__[OUTPUT]____________________________________________________[BEGIN]__
+__[FILE]______________________________________________________[BEGIN]__
 PACKAGE=hello
 VERSION=0.1
-__[OUTPUT]______________________________________________________[END]__
+__[FILE]________________________________________________________[END]__
 
 
 
@@ -215,6 +215,168 @@ __[OUTPUT]____________________________________________________[BEGIN]__
 __[OUTPUT]______________________________________________________[END]__
 
 Notice that the storage variables have changed in the output.
+
+
+7) Checking types
+   --------------
+
+As an example we will check for the ISO C99 boolean type: _Bool. See
+the following:
+
+CHECK_TYPE(type_bool_isoc) {
+	NAME = "_Bool"
+}
+
+As my compiler is not compliant i got an error:
+
+__[OUTPUT]____________________________________________________[BEGIN]__
+
+* Checking type [type_bool_isoc]
+        Use C language with CC compiler.
+        Found type '_Bool' : no.
+Error : failed to find type '_Bool'.
+__[OUTPUT]______________________________________________________[END]__
+
+This test could be useful to detect compilers that are ISO C99
+compliant. For those who are not we could include an external
+definition of this type. That said, pmk is exiting with an error by
+default if a check fails. To avoid this we'll use the REQUIRED option:
+
+CHECK_TYPE(type_bool_isoc) {
+	REQUIRED = FALSE
+	NAME = "_Bool"
+}
+
+And it gives the following:
+
+__[OUTPUT]____________________________________________________[BEGIN]__
+
+* Checking type [type_bool_isoc]
+        Use C language with CC compiler.
+        Found type '_Bool' : no.
+
+__[OUTPUT]______________________________________________________[END]__
+
+Now let's see how to use this test. First we must create an header that
+will contains the tags. Here is isoc_compat.h.in:
+
+__[FILE]______________________________________________________[BEGIN]__
+/* ISO C compatibility header */
+
+
+/* _Bool type */
+@DEF___BOOL@
+
+__[FILE]________________________________________________________[END]__
+
+Now add this file in the target list:
+
+SETTINGS {
+	TARGET = ("Makefile.in","isoc_compat.h.in")
+}
+
+The definition tag is easy to build, it's "DEF__" followed by the
+string of the type in uppercase: _Bool gives _BOOL.
+
+Now see the result:
+
+__[OUTPUT]____________________________________________________[BEGIN]__
+
+* Checking type [type_bool_isoc]
+        Use C language with CC compiler.
+        Found type '_Bool' : no.
+
+Process templates :
+Created '/home/mips/tmp/pmk_tutor/Makefile'.
+Created '/home/mips/tmp/pmk_tutor/isoc_compat.h'.
+
+End of log
+__[OUTPUT]______________________________________________________[END]__
+
+And the isoc_compat.h file:
+
+__[FILE]______________________________________________________[BEGIN]__
+/* ISO C compatibility header */
+
+
+/* _Bool type */
+#undef HAVE__BOOL
+
+__[FILE]________________________________________________________[END]__
+
+The @DEF___BOOL@ has been replaced by "#undef HAVE__BOOL". Now we can
+add the code to include the definition of _Bool type if it does not
+exists.
+
+__[FILE]______________________________________________________[BEGIN]__
+/* ISO C compatibility header */
+
+
+/* _Bool type */
+@DEF___BOOL@
+
+#ifndef HAVE__BOOL
+typedef unsigned char _Bool;
+#endif
+
+__[FILE]________________________________________________________[END]__
+
+
+Which results in the following on my system:
+
+__[FILE]______________________________________________________[BEGIN]__
+/* ISO C compatibility header */
+
+
+/* _Bool type */
+#undef HAVE__BOOL
+
+#ifndef HAVE__BOOL
+typedef unsigned char _Bool;
+#endif
+
+__[FILE]________________________________________________________[END]__
+
+Mission succeeded !
+
+
+8) Looking for a binary ?
+   ----------------------
+
+Easy ! Need to know if strip program is available ? Use the following:
+
+CHECK_BINARY(bin_strip) {
+	NAME = "strip"
+	VARIABLE = "STRIP_PATH"
+}
+
+and add the tag in the Makefile.in template:
+
+__[FILE]______________________________________________________[BEGIN]__
+PACKAGE=@PACKAGE@
+VERSION=@VERSION@
+STRIP_PATH=@STRIP_PATH@
+__[FILE]________________________________________________________[END]__
+
+
+Now run pmk:
+
+__[OUTPUT]____________________________________________________[BEGIN]__
+
+* Checking binary [bin_strip]
+        Found binary 'strip' : yes.
+
+__[OUTPUT]______________________________________________________[END]__
+
+And lookt at Makefile:
+
+__[FILE]______________________________________________________[BEGIN]__
+PACKAGE=hello
+VERSION=0.1
+STRIP_PATH=/usr/bin/strip
+__[FILE]________________________________________________________[END]__
+
+Well we got it :)
 
 
 
