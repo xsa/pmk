@@ -111,3 +111,24 @@ ADD_COMPILER {
 	SLLDFLAGS = "-shared"
 }
 
+#
+# system specific data
+#
+
+ADD_SYSTEM {
+	NAME = "OpenBSD"
+	SL_EXT = ".so"
+	SL_VERSION = "$SL_MAJOR.$SL_MINOR"
+	SL_NAME = "lib$SL_LIBNAME$SL_EXT"
+	SL_NAME_VERS = "$SL_NAME.$SL_VERSION"
+}
+
+ADD_SYSTEM {
+	NAME = "Darwin"
+	SL_EXT = ".so"
+	SL_VERSION = "$SL_MAJOR.$SL_MINOR"
+	SL_NAME = "lib$SL_LIBNAME$SL_EXT"
+	SL_NAME_VERS = "$SL_NAME.$SL_VERSION"
+	gcc = "-bundle"
+}
+

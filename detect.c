@@ -43,11 +43,47 @@
 #include "detect.h"
 
 prskw	kw_pmkcomp[] = {
-	{"ADD_COMPILER", PCC_TOK_ADDC, PRS_KW_CELL}
+	{"ADD_COMPILER",	PCC_TOK_ADDC,	PRS_KW_CELL},
+	{"ADD_SYSTEM",		PCC_TOK_ADDS,	PRS_KW_CELL}
 };
 
 int	nbkwpc = sizeof(kw_pmkcomp) / sizeof(prskw);
 
+
+/*
+	init comp_data structure
+
+	return : new structure or NULL
+*/
+
+comp_data *compdata_init(size_t csize, size_t ssize) {
+	comp_data	*cdata;
+
+	/* allocate compiler data structure */
+	cdata = (comp_data *) malloc(sizeof(comp_data));
+	if (cdata == NULL)
+		return(NULL);
+
+	/* init compilers hash table */
+	cdata->cht = hash_init_adv(csize, NULL, (void (*)(void *)) compcell_destroy, NULL);
+	if (cdata->cht == NULL) {
+		free(cdata);
+		/*debugf("cannot initialize comp_data");*/
+		return(NULL);
+	}
+
+	/* init systems hash table */
+	cdata->sht = hash_init(ssize);
+	if (cdata->sht == NULL) {
+		free(cdata);
+		hash_destroy(cdata->sht);
+		/*debugf("cannot initialize comp_data");*/
+		return(NULL);
+	}
+
+	/* init ok */
+	return(cdata);
+}
 
 /*
 	clean comp_data structure
@@ -59,6 +95,7 @@ int	nbkwpc = sizeof(kw_pmkcomp) / sizeof(prskw);
 
 void compdata_destroy(comp_data *pcd) {
 	hash_destroy(pcd->cht);
+	hash_destroy(pcd->sht);
 }
 
 /*
@@ -90,8 +127,8 @@ void compcell_destroy(comp_cell *pcc) {
 
 bool add_compiler(comp_data *pcd, htable *pht) {
 	comp_cell	*pcell;
-	char	*pstr,
-		 tstr[255]; /* XXX need define ? */
+	char		*pstr,
+			 tstr[255]; /* XXX need define ? */
 
 	pcell = (comp_cell *) malloc(sizeof(comp_cell));
 	if (pcell == NULL)
@@ -151,6 +188,43 @@ bool add_compiler(comp_data *pcd, htable *pht) {
 }
 
 /*
+	add a new system cell
+
+	pcd : compiler data structure
+	pht : parsed data
+
+	return : boolean
+*/
+
+bool add_system(comp_data *pcd, htable *pht, char *osname) {
+	char		*name,
+			*pstr;
+	hkeys		*phk;
+	unsigned int	 i;
+
+	name = po_get_str(hash_get(pht, "NAME"));
+	if (name == NULL) {
+		return(false);
+	} else {
+		if (strncmp(osname, name, sizeof(osname)) != 0) {
+			/* not the target system, skipping */
+			return(true);
+		} else {
+			hash_delete(pht, "NAME");
+		}
+	}
+
+	/* remaining values are system overrides, save it */
+	phk = hash_keys(pht);
+	for(i = 0 ; i < phk->nkey ; i++) {
+		pstr = po_get_str(hash_get(pht, phk->keys[i]))	;
+		hash_update_dup(pcd->sht, phk->keys[i], pstr);
+	}
+
+	return(true);
+}
+
+/*
 	get compiler data
 
 	pcd : compiler data structure
@@ -179,42 +253,36 @@ char *comp_get_descr(comp_data *pcd, char *c_id) {
 	parse data from PMKCOMP_DATA file
 
 	cdfile : compilers data file
+	pht: XXX
 
 	return : compiler data structure or NULL
 */
 
-comp_data *parse_comp_file(char *cdfile) {
+comp_data *parse_comp_file_adv(char *cdfile, htable *pht) {
 	FILE		*fd;
 	bool		 rval;
+	char		*osname = NULL;
 	comp_data	*cdata;
 	prscell		*pcell;
 	prsdata		*pdata;
 
-	/* allocate compiler data structure */
-	cdata = (comp_data *) malloc(sizeof(comp_data));
-	if (cdata == NULL)
+	/* init compiler data structure */
+	cdata = compdata_init(MAX_COMP, MAX_OS); 
+	if (cdata == NULL) {
 		return(NULL);
+	}
 
 	/* initialize parsing structure */
 	pdata = prsdata_init();
 	if (pdata == NULL) {
-		free(cdata);
-		errorf("cannot intialize prsdata.");
-		return(NULL);
-	}
-
-	/* init compilers hash table */
-	cdata->cht = hash_init_adv(MAX_COMP, NULL, (void (*)(void *)) compcell_destroy, NULL);
-	if (cdata->cht == NULL) {
-		free(cdata);
-		prsdata_destroy(pdata);
-		debugf("cannot initialize comp_data");
+		compdata_destroy(cdata);
+		errorf("cannot initialize prsdata.");
 		return(NULL);
 	}
 
 	fd = fopen(cdfile, "r");
 	if (fd == NULL) {
-		free(cdata);
+		compdata_destroy(cdata);
 		prsdata_destroy(pdata);
 		errorf("cannot open '%s' : %s.", cdfile, strerror(errno));
 		return(NULL);
@@ -226,15 +294,28 @@ comp_data *parse_comp_file(char *cdfile) {
 
 	if (rval == true) {
 		pcell = pdata->tree->first;
+
+		if (pht != NULL) {
+			osname = hash_get(pht, PMKCONF_OS_NAME);
+		}
+
 		while (pcell != NULL) {
 			switch(pcell->token) {
 				case PCC_TOK_ADDC :
-					add_compiler(cdata, pcell->data);
+/*debugf("calling add_compiler()");*/
+					add_compiler(cdata, pcell->data); /* XXX check */
+					break;
+
+				case PCC_TOK_ADDS :
+/*debugf("calling add_system()");*/
+					if (osname != NULL) {
+						add_system(cdata, pcell->data, osname); /* XXX check */
+					}
 					break;
 			
 				default :
 					errorf("parsing of data file failed.");
-					free(cdata);
+					compdata_destroy(cdata);
 					prsdata_destroy(pdata);
 					return(NULL);
 					break;
@@ -244,7 +325,7 @@ comp_data *parse_comp_file(char *cdfile) {
 		}
 	} else {
 		errorf("parsing of data file failed.");
-		free(cdata);
+		compdata_destroy(cdata);
 		prsdata_destroy(pdata);
 		return(NULL);
 	}
@@ -253,6 +334,18 @@ comp_data *parse_comp_file(char *cdfile) {
 	prsdata_destroy(pdata);
 
 	return(cdata);
+}
+
+/*
+	parse data from PMKCOMP_DATA file
+
+	cdfile : compilers data file
+
+	return : compiler data structure or NULL
+*/
+
+comp_data *parse_comp_file(char *cdfile) {
+	return(parse_comp_file_adv(cdfile, NULL));
 }
 
 /*

@@ -49,9 +49,13 @@
 #define PMKCOMP_DATA	DATADIR "/pmkcomp.dat"
 
 #define PCC_TOK_ADDC	1
+#define PCC_TOK_ADDS	2
 
 /* max number of compilers hash table */
 #define MAX_COMP	32
+
+/* max number of OSes in hash table */
+#define MAX_OS		128
 
 #define CC_TFILE_EXT	".c"
 #define CC_TEST_FILE	TMPDIR "/cc_testXXXXXXXX" CC_TFILE_EXT
@@ -109,18 +113,32 @@ typedef struct {
 		*version;
 } comp_info;
 
+/* XXX to remove
 typedef struct {
-	htable	*cht;
+	char	*sl_ext,
+		*sl_version,
+		*sl_name,
+		*sl_namevers,
+		*ovr_gcc;
+} comp_sys;
+*/
+
+typedef struct {
+	htable	*cht,
+		*sht;
 } comp_data;
 
 
 /* function protos */
 
+comp_data	*compdata_init(size_t, size_t);
 void		 compdata_destroy(comp_data *);
 void		 compcell_destroy(comp_cell *);
 bool		 add_compiler(comp_data *, htable *);
+bool		 add_system(comp_data *, htable *, char *);
 comp_cell	*comp_get(comp_data *, char *c_id);
 char		*comp_get_descr(comp_data *, char *);
+comp_data	*parse_comp_file_adv(char *, htable *);
 comp_data	*parse_comp_file(char *);
 bool		 gen_test_file(FILE *, comp_data *);
 bool		 detect_compiler(char *, char *, comp_data *, comp_info *);

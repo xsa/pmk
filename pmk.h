@@ -87,7 +87,8 @@ typedef struct {
 			 errmsg[MAX_ERR_MSG_LEN];
 	dynary		*tlist;
 	htable		*htab,
-			*labl;
+			*labl,
+			*slht;
 
 } pmkdata;
 

@@ -110,25 +110,30 @@
 #define PMK_TOK_IFCOND	4
 
 /* special setting tokens */
-#define PMK_TOK_SETVAR	9 /* set variable */
-#define PMK_TOK_SETPRM	10 /* set parameter */
+#define PMK_TOK_SETVAR	10 /* set variable */
+#define PMK_TOK_SETPRM	11 /* set parameter */
 
 /* item command tokens */
-#define PMK_TOK_CHKBIN	17
-#define PMK_TOK_CHKINC	18
-#define PMK_TOK_CHKLIB	19
-#define PMK_TOK_CHKCFG	20
-#define PMK_TOK_CHKPKG	21
-#define PMK_TOK_CHKTYP	22
-#define PMK_TOK_CHKVAR	23
+/* checks */
+#define PMK_TOK_CHKBIN	20
+#define PMK_TOK_CHKINC	21
+#define PMK_TOK_CHKLIB	22
+#define PMK_TOK_CHKCFG	23
+#define PMK_TOK_CHKPKG	24
+#define PMK_TOK_CHKTYP	25
+#define PMK_TOK_CHKVAR	26
+/* shared lib stuff */
+#define PMK_TOK_BLDSLN	30
 
-/*
+
 #define KW_SETNGS_GLANG		"LANG"
 #define KW_SETNGS_TARGET	"TARGET"
-#define KW_SETNGS_ACCOMP	"ACCOMP"
-*/
+#define KW_SETNGS_ACCOMP	"AC_COMPAT"
+#define KW_SETNGS_ACCOMP	"AC_COMPAT"
+#define KW_SETNGS_CCDTCT	"DETECT"
 
 
+/* structures */
 typedef struct {
 	char	kw[CMD_LEN];
 	bool	(*fnp)(pmkcmd *, htable *, pmkdata *);
@@ -149,6 +154,8 @@ bool	pmk_check_config(pmkcmd *, htable *, pmkdata *);
 bool	pmk_check_pkg_config(pmkcmd *, htable *, pmkdata *);
 bool	pmk_check_type(pmkcmd *, htable *, pmkdata *);
 bool	pmk_check_variable(pmkcmd *, htable *, pmkdata *);
+bool	pmk_build_shlib_name(pmkcmd *, htable *, pmkdata *);
+
 bool	pmk_set_parameter(pmkcmd *, prsopt *, pmkdata *);
 bool	pmk_set_variable(pmkcmd *, prsopt *, pmkdata *);
 
