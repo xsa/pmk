@@ -339,12 +339,15 @@ bool parse(FILE *fd) {
 						return(FALSE);
 					}
 				} else {
-					/* looking for end of command */
 					if (strcmp(buf, PMK_END_COMMAND) == 0) {
+						/* found end of command */
 						cmd_line = 0;
 						process = FALSE;
-						/* found */
-						process_cmd(&cmd, tabopts);
+						if (process_cmd(&cmd, tabopts) == FALSE) {
+							/* command processing failed */
+							hash_destroy(tabopts);
+							return(FALSE);
+						}
 
 						/* cmd processed, clean up */
 						strncpy(cmd.name, "", MAX_CMD_NAME_LEN);
@@ -461,9 +464,9 @@ int main(int argc, char *argv[]) {
 	if (parse(fd) == FALSE) {
 		/* an error occured while parsing */
 		rval = -1;
+	} else {
+		pmk_log("End of log.\n");
 	}
-
-	pmk_log("End of log.\n");
 
 	/* flush and close files */
 	fflush(logfile);

@@ -108,11 +108,11 @@ bool pmk_check_include(pmkcmd *cmd, htable *ht) {
 
 	ifp = fopen(incpath, "r");
 
-	pmk_log("\tFound header %s : ", incfile);
+	pmk_log("\tFound header '%s' : ", incfile);
 	if (ifp != NULL) {
 		pmk_log("yes.\n");
 		if (incfunc != NULL) {
-			pmk_log("\tFound function %s : ", incfunc);
+			pmk_log("\tFound function '%s' : ", incfunc);
 			while (get_line(ifp, strbuf, sizeof(strbuf))) {
 				/* XXX should check in a better way ? */
 				if (strstr(strbuf, incfunc) != NULL) {
@@ -121,9 +121,11 @@ bool pmk_check_include(pmkcmd *cmd, htable *ht) {
 				}
 			}
 			pmk_log("no.\n");
+			errorf("Failed to find '%s' in '%s'", incfunc, incfile);
 			return(FALSE);
 		}
 	} else {
+		errorf("Failed to find %s", incfunc, incfile);
 		pmk_log("no.\n");
 		return(FALSE);
 	}
