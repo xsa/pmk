@@ -37,120 +37,99 @@
 #include "cpu_arch_def.h"
 
 
-.data
-
-#ifdef ARCH_X86
-	.globl x86_cpu_vendor
-
-x86_cpu_vendor:
-	.space 13
-
-
-	.globl x86_cpu_name_str
-
-x86_cpu_name_str:
-	.space 49
-#endif
-
-
 .text
 
 #ifdef ARCH_X86
 
+	.align	16,0x90
+
+
 /*
-	get cpu vendor string
+	check if cpuid is available
+*/
+
+	.globl	x86_check_cpuid_flag
+
+x86_check_cpuid_flag:
+	pushl	%ecx		/* save ebx register */
+
+	pushfl
+	popl	%eax		/* get eflags */
+
+	movl	%eax,%ecx	/* save flags */
+
+	xorl	$0x200000,%eax	/* clear CPU ID flag */
+
+	pushl	%eax
+	popfl			/* load eflags */
+
+	pushfl
+	popl	%eax		/* get current eflags state */
+
+	pushl	%ecx
+	popfl			/* put original state back */
+
+	popl	%ecx		/* restore ebx register */
+
+	andl	$0x200000,%eax	/* keep CPU ID  flag only */
+	rorl	$21,%eax	/* and shift it to bit 0 */
+
+	ret
+
+/*
+	exec cpuid function
 
 	returns: pointer to static buffer
 */
 
-	.globl get_x86_cpu_vendor
+	.globl x86_exec_cpuid
 
-get_x86_cpu_vendor:
+x86_exec_cpuid:
+	/* get function number */
+	movl	4(%esp),%eax
+
 	pushl	%ebx
 	pushl	%ecx
 	pushl	%edx
 
-	/* set eax to 0 and call cpuid to get cpu vendor string */
-	xorl	%eax,%eax
 	cpuid
 
-	/* copy result in x86_cpu_vendor */
-	movl	%ebx,x86_cpu_vendor
-	movl	%edx,x86_cpu_vendor+4
-	movl	%ecx,x86_cpu_vendor+8
-	movl	$0,x86_cpu_vendor+12
+	/* copy register values */
+	movl	%eax,x86_cpu_reg_eax
+	movl	%ebx,x86_cpu_reg_ebx
+	movl	%ecx,x86_cpu_reg_ecx
+	movl	%edx,x86_cpu_reg_edx
 
 	popl	%edx
 	popl	%ecx
 	popl	%ebx
 
-	/* return buffer address */
-	movl	$x86_cpu_vendor,%eax
-
 	ret
 
 
-/*
-	get cpu type
-
-	returns: cpu type in eax
-*/
-
-	.globl get_x86_cpu_type
-
-get_x86_cpu_type:
-	movl	$1,%eax
-	cpuid
-	ret
-
-
-/*
-	get cpu name string
-
-	returns: pointer to static buffer
-*/
-
-	.globl get_x86_cpu_name
-
-get_x86_cpu_name:
-	/* get first part */
-	movl	$0x80000002,%eax
-	cpuid
-
-	/* copy result in cpu_name_str */
-	movl	%eax,x86_cpu_name_str
-	movl	%ebx,x86_cpu_name_str+4
-	movl	%ecx,x86_cpu_name_str+8
-	movl	%edx,x86_cpu_name_str+12
-
-	/* get second part */
-	movl	$0x80000003,%eax
-	cpuid
-
-	/* copy result in cpu_name_str */
-	movl	%eax,x86_cpu_name_str+16
-	movl	%ebx,x86_cpu_name_str+20
-	movl	%ecx,x86_cpu_name_str+24
-	movl	%edx,x86_cpu_name_str+28
-
-	/* get first part */
-	movl	$0x80000004,%eax
-	cpuid
-
-	/* copy result in cpu_name_str */
-	movl	%eax,x86_cpu_name_str+32
-	movl	%ebx,x86_cpu_name_str+36
-	movl	%ecx,x86_cpu_name_str+40
-	movl	%edx,x86_cpu_name_str+44
-
-	/* ending 0 */
-	movl	$0,x86_cpu_name_str+48
-
-	/* return buffer address */
-	movl	$x86_cpu_name_str,%eax
-
-	ret
 #endif
 
+
+.data
+
+#ifdef ARCH_X86
+
+	.globl x86_cpu_reg_eax
+x86_cpu_reg_eax:
+	.long 0
+
+	.globl x86_cpu_reg_ebx
+x86_cpu_reg_ebx:
+	.long 0
+
+	.globl x86_cpu_reg_ecx
+x86_cpu_reg_ecx:
+	.long 0
+
+	.globl x86_cpu_reg_edx
+x86_cpu_reg_edx:
+	.long 0
+
+#endif
 
 

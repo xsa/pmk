@@ -71,21 +71,15 @@ ADD_CPU_ARCH {
 # X86 arch specific
 #
 
-ADD_X86_CPU_VENDOR {
-	NAME = "INTEL"
-	LIST = ("GenuineIntel")
-}
-
-ADD_X86_CPU_VENDOR {
-	NAME = "AMD"
-	LIST = ("AuthenticAMD","AMD ISBETTER")
-}
-
-
 LIST_X86_CPU_VENDOR {
 	"GenuineIntel" = "INTEL"
 	"AuthenticAMD" = "AMD"
 	"AMD ISBETTER" = "AMD"
 }
 
+
+LIST_X86_CPU_MODEL {
+	VENDOR = "INTEL"
+	"EF15" = "PENTIUM4"
+}
 

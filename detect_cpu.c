@@ -52,8 +52,8 @@
 /* config tools data file keyword */
 prskw	kw_pmkcpu[] = {
 	{"ADD_CPU_ARCH",	CPU_ARCH_ADD,		PRS_KW_CELL},
-	{"ADD_X86_CPU_VENDOR",	CPU_X86_VENDOR_ADD,	PRS_KW_CELL},
-	{"LIST_X86_CPU_VENDOR",	LIST_X86_CPU_VENDOR,	PRS_KW_CELL}
+	{"LIST_X86_CPU_VENDOR",	LIST_X86_CPU_VENDOR,	PRS_KW_CELL},
+	{"LIST_X86_CPU_MODEL",	LIST_X86_CPU_MODEL,	PRS_KW_CELL}
 };
 int	nbkwc = sizeof(kw_pmkcpu) / sizeof(prskw);
 
@@ -153,6 +153,8 @@ char *check_cpu_arch(char *uname_m, prsdata *pdata) {
  * x86 specific *
  ****************/
 
+#ifdef ARCH_X86
+
 /****
  defines
 ****/
@@ -176,15 +178,11 @@ char *check_cpu_arch(char *uname_m, prsdata *pdata) {
 	returns: XXX
 */
 
-char *get_x86_std_cpu_vendor(prsdata *pdata) {
-#ifdef ARCH_X86
+char *x86_get_std_cpu_vendor(prsdata *pdata, char *civendor) {
 	char		*pstr,
 			*vendor = NULL;
 	htable		*pht;
 	prscell		*pcell;
-
-	/* get the cpuid vendor */
-	pstr = get_x86_cpu_vendor();
 
 	/* look for vendor list */
 	pcell = pdata->tree->first;
@@ -193,7 +191,7 @@ char *get_x86_std_cpu_vendor(prsdata *pdata) {
 			/* got list ! */
 			pht = pcell->data;
 			/* look for standard vendor name */
-			vendor = po_get_str(hash_get(pht, pstr));
+			vendor = po_get_str(hash_get(pht, civendor));
 		}
 		pcell = pcell->next;
 	}
@@ -203,10 +201,79 @@ char *get_x86_std_cpu_vendor(prsdata *pdata) {
 		vendor = "unknown";
 
 	return(vendor); /* no check needed, NULL will be automatically returned */
-#else
-	/* unused*/
-	pdata = NULL;
-	return(pdata);
-#endif
 }
+
+
+/*
+	XXX
+*/
+
+bool x86_get_cpuid_data(x86_cpu_cell *cell) {
+	char		*pstr;
+	uint32_t	 buffer[13],
+			 cputype;
+
+	if (x86_check_cpuid_flag() == 0) {
+		/* no cpuid flag => 386 or old 486 */
+		cell->cpuid = false;
+		return(true);
+	}
+
+	cell->cpuid = true;
+
+	/* get the cpuid vendor */
+	x86_exec_cpuid(0);
+
+	cell->level = x86_cpu_reg_eax;
+
+	buffer[0] = x86_cpu_reg_ebx;
+	buffer[1] = x86_cpu_reg_edx;
+	buffer[2] = x86_cpu_reg_ecx;
+	buffer[3] = 0;	/* terminate string */
+
+	strlcpy(cell->vendor, (char *) &buffer, sizeof(cell->vendor)); /* XXX check */
+
+	/* get the cpu type */
+	x86_exec_cpuid(1);
+
+	cell->family = (unsigned int) ((x86_cpu_reg_eax & MASK_X86_CPU_FAMILY) >> 8);
+	if (cell->family == 15) {
+		/* extended family */
+		cell->extfam = (unsigned int) ((x86_cpu_reg_eax & MASK_X86_CPU_EXTFAM) >> 20);
+	}
+
+	cell->model = (unsigned int) ((x86_cpu_reg_eax & MASK_X86_CPU_MODEL) >> 4);
+
+
+	x86_exec_cpuid(0x80000000);
+	if (x86_cpu_reg_eax >= 0x80000002) {
+		/* get the cpu name */
+		x86_exec_cpuid(0x80000002);
+		buffer[0] = x86_cpu_reg_eax;
+		buffer[1] = x86_cpu_reg_ebx;
+		buffer[2] = x86_cpu_reg_ecx;
+		buffer[3] = x86_cpu_reg_edx;
+
+		x86_exec_cpuid(0x80000003);
+		buffer[4] = x86_cpu_reg_eax;
+		buffer[5] = x86_cpu_reg_ebx;
+		buffer[6] = x86_cpu_reg_ecx;
+		buffer[7] = x86_cpu_reg_edx;
+
+		x86_exec_cpuid(0x80000004);
+		buffer[8] = x86_cpu_reg_eax;
+		buffer[9] = x86_cpu_reg_ebx;
+		buffer[10] = x86_cpu_reg_ecx;
+		buffer[11] = x86_cpu_reg_edx;
+
+		buffer[12] = 0;	/* terminate string */
+		strlcpy(cell->cpuname, (char *) &buffer, sizeof(cell->cpuname)); /* XXX check */
+	} else {
+		cell->cpuname[0] = CHAR_EOS;
+	}
+
+	return(true);
+}
+
+#endif /* ARCH_X86 */
 
