@@ -41,3 +41,4 @@ clean:
 	@echo ""
 	rm -f $(NAME)
 	rm -f *.log Makefile config.h
+	@echo "Done."
