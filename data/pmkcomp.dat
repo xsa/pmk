@@ -1,4 +1,5 @@
-#pmk compilers data
+# $Id$
+# pmk compilers data
 
 # SLFLAGS = shared libs compiler flags
 # SLLDFLAGS = shared libs linking flags
