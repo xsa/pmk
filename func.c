@@ -94,7 +94,10 @@ bool pmk_target(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 		return(false);
 	}
 	da = da_init();
-	str_to_dynary(list, CHAR_LIST_SEPARATOR, da);
+	if (str_to_dynary(list, CHAR_LIST_SEPARATOR, da) == false) {
+		errorf("cannot set dynary in TARGET");
+		return(false);
+	}
 	
 	for (i=0 ; i < da_usize(da) ; i++) {
 		/* da_idx should not returns null so no check */
@@ -194,7 +197,7 @@ bool pmk_check_binary(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 	} else {
 		pmk_log("yes.\n");
 		/* define for template */
-		record_val(gdata->htab, filename, binpath); /* XXX */
+		record_val(gdata->htab, filename, binpath);
 		label_set(gdata->labl, cmd->label, true);
 		return(true);
 	}
@@ -212,8 +215,11 @@ bool pmk_check_include(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 		*incfunc,
 		*target,
 		*ccpath,
+		*pstr,
+		inc_path[TMP_BUF_LEN] = "",
 		cfgcmd[MAXPATHLEN];
-	int	r;
+	dynary	*da;
+	int	r, i;
 
 	pmk_log("* Checking include [%s]\n", cmd->label);
 
@@ -242,7 +248,6 @@ bool pmk_check_include(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 	if (tfp != NULL) {
 		if (incfunc == NULL) {
 			pmk_log("\tFound header '%s' : ", incfile);
-			/* XXX should use INC_PATH with -I ? */
 			fprintf(tfp, INC_TEST_CODE, incfile);
 			target = incfile;
 		} else {
@@ -264,14 +269,31 @@ bool pmk_check_include(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 		return(false);
 	}
 
-	snprintf(cfgcmd, sizeof(cfgcmd), "%s -o %s %s > /dev/null 2>&1", ccpath, BIN_TEST_NAME, INC_TEST_NAME);
+	/* use each element of INC_PATH with -I */
+	pstr = hash_get(gdata->htab, "INC_PATH");
+	if (pstr == NULL) {
+		strlcpy(inc_path, "", sizeof(inc_path));
+	} else {
+		da = da_init();
+		r = sizeof(inc_path);
+		str_to_dynary(pstr, CHAR_LIST_SEPARATOR, da);
+		for (i=0 ; i < da_usize(da) ; i++) {
+			strlcat(inc_path, " -I", r);
+			strlcat(inc_path, da_idx(da, i), r);
+		}
+		da_destroy(da);
+	}
+
+	snprintf(cfgcmd, sizeof(cfgcmd), "%s %s -o %s %s > /dev/null 2>&1",
+						ccpath, inc_path,
+						BIN_TEST_NAME, INC_TEST_NAME);
 	/* get result */
 	r = system(cfgcmd);
 	if (r == 0) {
 		pmk_log("yes.\n");
 		/* define for template */
-		record_def(gdata->htab, target, true); /* XXX */
-		record_val(gdata->htab, target, ""); /* XXX */
+		record_def(gdata->htab, target, true); /* XXX check ? */
+		record_val(gdata->htab, target, ""); /* XXX check ? */
 		label_set(gdata->labl, cmd->label, true);
 		rval = true;
 	} else {
@@ -285,7 +307,7 @@ bool pmk_check_include(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 			}
 		} else {
 			/* define for template */
-			record_def(gdata->htab, target, false); /* XXX */
+			record_def(gdata->htab, target, false); /* XXX check ?*/
 			label_set(gdata->labl, cmd->label, false);
 			rval = true;
 		}
@@ -314,8 +336,11 @@ bool pmk_check_lib(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 		*ccpath,
 		*libname,
 		*libfunc,
-		*target;
-	int	r;
+		*target,
+		*pstr,
+		lib_path[TMP_BUF_LEN] = "";
+	dynary	*da;
+	int	r, i;
 
 	pmk_log("* Checking library [%s]\n", cmd->label);
 
@@ -342,7 +367,6 @@ bool pmk_check_lib(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 	if (tfp != NULL) {
 		if (libfunc == NULL) {
 			pmk_log("\tFound library '%s' : ", libname);
-			/* XXX should use LIB_PATH with -L ? */
 			fprintf(tfp, LIB_TEST_CODE);
 			target = libname;
 		} else {
@@ -364,14 +388,31 @@ bool pmk_check_lib(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 		return(false);
 	}
 
-	snprintf(cfgcmd, sizeof(cfgcmd), "%s -o %s -l%s %s >/dev/null 2>&1", ccpath, BIN_TEST_NAME, libname, INC_TEST_NAME);
+	/* use each element of LIB_PATH with -L */
+	pstr = hash_get(gdata->htab, "LIB_PATH");
+	if (pstr == NULL) {
+		strlcpy(lib_path, "", sizeof(lib_path));
+	} else {
+		da = da_init();
+		r = sizeof(lib_path);
+		str_to_dynary(pstr, CHAR_LIST_SEPARATOR, da);
+		for (i=0 ; i < da_usize(da) ; i++) {
+			strlcat(lib_path, " -L", r);
+			strlcat(lib_path, da_idx(da, i), r);
+		}
+		da_destroy(da);
+	}
+
+	snprintf(cfgcmd, sizeof(cfgcmd), "%s %s -o %s -l%s %s >/dev/null 2>&1",
+						ccpath, lib_path, BIN_TEST_NAME,
+						libname, INC_TEST_NAME);
 	/* get result */
 	r = system(cfgcmd);
 	if (r == 0) {
 		pmk_log("yes.\n");
 		/* define for template */
-		record_def(gdata->htab, target, true); /* XXX */
-		record_val(gdata->htab, target, ""); /* XXX */
+		record_def(gdata->htab, target, true); /* XXX check ?*/
+		record_val(gdata->htab, target, ""); /* XXX check ? */
 		label_set(gdata->labl, cmd->label, true);
 		rval = true;
 	} else {
@@ -385,7 +426,7 @@ bool pmk_check_lib(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 			}
 		} else {
 			/* define for template */
-			record_def(gdata->htab, target, false); /* XXX */
+			record_def(gdata->htab, target, false); /* XXX check ? */
 			label_set(gdata->labl, cmd->label, false);
 			rval = true;
 		}
@@ -462,7 +503,7 @@ bool pmk_check_config(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 
 		rpipe = popen(cfgcmd, "r");
 		if (rpipe == NULL) {
-			errorf("Cannot get version from '%s'.", cfgcmd); /* XXX should correct this message ? */
+			errorf("cannot get version from '%s'.", cfgcmd); /* XXX should correct this message ? */
 			return(false);
 		} else {
 			pmk_log("\tFound version >= %s : ", libvers);
