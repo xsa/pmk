@@ -5,7 +5,7 @@ DEBUG?=		-g
 
 # On some platforms install is not BSD compatible
 # so we use our own install program.
-INSTALL=	pmkinstall
+INSTALL=	./pmkinstall
 
 SYSCONFDIR=	/etc
 
