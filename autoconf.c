@@ -148,6 +148,8 @@ bool ac_parse_config(pmkdata *pgd) {
 			defname = build_def_name(buf);
 			if (defname == NULL) {
 				errorf("unable to build define name for '%s'", buf);
+				fclose(fp_in);
+				fclose(fp_out);
 				return(false);
 			}
 #ifdef AC_DEBUG

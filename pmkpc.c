@@ -553,6 +553,7 @@ debugf("{main} new mod = '%s'", mod);
 		if (parse_pmkconf(fp, gdata.pht, PRS_PMKCONF_SEP, process_opt) == false) {
 			/* parsing failed */
 			clean(&gdata);
+			fclose(fp);
 			errorf("failed to parse '%s'.", PREMAKE_CONFIG_PATH);
 			exit(EXIT_FAILURE);
 #ifdef PMKPC_DEBUG

@@ -798,6 +798,7 @@ int main(int argc, char *argv[]) {
 		if (parse_pmkconf(fp, pgd->htab, PRS_PMKCONF_SEP, process_opt) == false) {
 			/* parsing failed */
 			clean(pgd);
+			fclose(fp);
 			errorf(ERRMSG_PARSE, PREMAKE_CONFIG_PATH);
 			exit(EXIT_FAILURE);
 		}
@@ -858,6 +859,7 @@ int main(int argc, char *argv[]) {
 			if (parse_pmkconf(fp, pgd->htab, PRS_PMKCONF_SEP, process_opt) == false) {
 				/* parsing failed */
 				clean(pgd);
+				fclose(fp);
 				errorf(ERRMSG_PARSE, pgd->ovrfile);
 				exit(EXIT_FAILURE);
 			}
