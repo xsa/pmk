@@ -40,9 +40,11 @@
 /* include it first as if it was <sys/types.h> - this will avoid errors */
 #include "compat/pmk_sys_types.h"
 #include <sys/utsname.h>
+#include <sys/wait.h>
 
 #include <dirent.h>
 #include <errno.h>
+#include <pwd.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -71,194 +73,6 @@ hpair	predef[] = {
 
 int	nbpredef = sizeof(predef) / sizeof(hpair);
 
-
-/*
- * Main program for pmksetup(8)
- */
-int main(int argc, char *argv[]) {
-	FILE		*config;
-	bool		 process_clopts = false,
-			 cfg_backup = false;
-	char		*pstr;
-	int		 ch,
-			 error = 0;
-	prsopt		 *ppo;
-	
-	extern int	 optind;
-#ifndef errno
-	extern int	 errno;
-#endif
-
-
-#ifndef PMK_USERMODE
-	/* pmksetup(8) must be run as root */
-	if (getuid() != 0) {
-		errorf("you must be root.");
-		exit(EXIT_FAILURE);
-	}
-#endif
-
-	ht = hash_init_adv(MAX_CONF_OPT, NULL, (void (*)(void *)) prsopt_destroy, NULL);
-	if (ht == NULL) {
-		errorf("cannot create hash table.");
-		exit(EXIT_FAILURE);
-	}
-
-	/*while ((ch = getopt(argc, argv, "a:hr:u:vV")) != -1)*/
-	while ((ch = getopt(argc, argv, "hr:u:vV")) != -1)
-		switch(ch) {
-			case 'r' :
-				/* mark to be deleted in hash */
-				if (record_data(ht, optarg, PMKSTP_REC_REMV, NULL) == false) {
-					errorf("failed to record '%s'.", optarg);
-					exit(EXIT_FAILURE);
-				}
-
-				process_clopts = true;
-				break;
-
-			case 'u' :
-				/* add or update value */
-				ppo = prsopt_init();
-				if (ppo == NULL) {
-					errorf("prsopt init failed.");
-					exit(EXIT_FAILURE);
-				}
-
-				if (parse_clopt(optarg, ppo, PRS_PMKCONF_SEP) == false) {
-					errorf("bad argument for -a option: %s.", optarg);
-					exit(EXIT_FAILURE);
-				}
-
-				/* add in hash */
-				pstr = po_get_str(ppo->value);
-				if (pstr == NULL) {
-					errorf("failed to get argument for -a option");
-					exit(EXIT_FAILURE);
-				}
-
-				/* record prsopt structure directly, fast and simple */
-				ppo->opchar = PMKSTP_REC_UPDT;
-				if (hash_update(ht, ppo->key, ppo) == HASH_ADD_FAIL) {
-					prsopt_destroy(ppo);	
-					errorf("hash update failed.");	
-					exit(EXIT_FAILURE);		
-				}
-
-				/* XXX use record_data => cost much memory and cpu XXX            */
-				/*if (record_data(ht, ppo->key, PMKSTP_REC_UPDT, pstr) == false) {*/
-				/*        errorf("failed to record '%s'.", ppo->key);             */
-				/*        prsopt_destroy(ppo);                                    */
-				/*        exit(EXIT_FAILURE);                                     */
-				/*}                                                               */
-				/*prsopt_destroy(ppo);						  */
-
-				process_clopts = true;
-				break;
-
-			case 'v' :
-				fprintf(stderr, "%s\n", PREMAKE_VERSION);
-				exit(EXIT_SUCCESS);
-				break;
-
-			case 'V' :
-				if (verbose_flag == 0)
-					verbose_flag = 1;
-				break;
-
-			case '?' :
-			default :
-				usage();
-				/* NOTREACHED */
-		}
-	argc -= optind;
-	argv += optind;
-
-
-	printf("PMKSETUP version %s", PREMAKE_VERSION);
-#ifdef DEBUG
-	printf(" [SUB #%s] [SNAP #%s]", PREMAKE_SUBVER_PMKSETUP, PREMAKE_SNAP);
-#endif
-	printf("\n\n");
-
-	/* check if syconfdir exists */
-	if (dir_exists(CONFDIR) == false) {
-		verbosef("==> Creating '%s' directory.", CONFDIR);
-		if (mkdir(CONFDIR, S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH) != 0) {
-			errorf("cannot create '%s' directory : %s.",
-				CONFDIR, strerror(errno));
-			exit(EXIT_FAILURE);
-		}
-	}
-
-	if (process_clopts == false) {
-		/* standard behavior, gathering data */
-		if (gather_data(ht) == false)
-			exit(EXIT_FAILURE);
-	}
-
-	if ((open_tmp_config() == false))
-		exit(EXIT_FAILURE);
-
-	/* parse configuration file */
-	config = fopen(PREMAKE_CONFIG_PATH, "r");
-	if (config != NULL) {
-		/* switch backup flag */
-		cfg_backup = true;
-
-		printf("==> Configuration file found: %s\n", PREMAKE_CONFIG_PATH);
-		if (parse_pmkconf(config, ht, PRS_PMKCONF_SEP, check_opt) == false) {
-			fclose(config);
-			errorf("parsing failed.");
-			exit(EXIT_FAILURE);
-		} else {
-			fclose(config);
-		}
-	} else {
-		printf("==> Configuration file not found.\n");
-	}
-
-	printf("==> Merging remaining data...\n");	
-	/* writing the remaining data stored in the hash */
-	write_new_data(ht);
-	/* destroying the hash once we'r done with it */	
-	hash_destroy(ht);
-
-	if (close_tmp_config() == false)
-		exit(EXIT_FAILURE);
-
-	if (cfg_backup == true) {
-		printf("==> Backing up configuration file: %s\n", PREMAKE_CONFIG_PATH_BAK);
-		if (rename(PREMAKE_CONFIG_PATH,PREMAKE_CONFIG_PATH_BAK) != 0) {
-			errorf("configuration file backup failed: %s.", strerror(errno));
-			error = -1;
-		}
-	}
-				
-	if (error == 0) {
-		/* copying the temporary config to the system one */
-		printf("==> Saving configuration file: %s\n", PREMAKE_CONFIG_PATH);
-		/* XXX if (copy_config(sfn, PREMAKE_CONFIG_PATH) == false)*/
-		if (fcopy(sfn, PREMAKE_CONFIG_PATH, PREMAKE_CONFIG_MODE) == false)
-			exit(EXIT_FAILURE);
-	}
-
-#ifdef PMKSETUP_DEBUG
-	debugf("%s has not been deleted!", sfn);
-#else
-	if (unlink(sfn) == -1) {
-		errorf("cannot remove temporary file: '%s' : %s.",
-			sfn, strerror(errno));
-		error = -1;	
-	}
-#endif	/* PMKSETUP_DEBUG */
-
-	if (error != 0) {
-		exit(EXIT_FAILURE);	
-	}
-
-	return(0);
-}
 
 /*
  *	record data
@@ -1003,3 +817,292 @@ void usage(void) {
 	exit(EXIT_FAILURE);
 }
 
+/*
+ * detection loop
+ */
+int detection_loop(int argc, char *argv[]) {
+	FILE		*config;
+	bool		 process_clopts = false,
+			 cfg_backup = false;
+	char		*pstr;
+	int		 ch,
+			 error = 0;
+	prsopt		 *ppo;
+	
+	extern int	 optind;
+#ifndef errno
+	extern int	 errno;
+#endif
+
+
+#ifndef PMK_USERMODE
+	/* pmksetup(8) must be run as root */
+	if (getuid() != 0) {
+		errorf("you must be root.");
+		exit(EXIT_FAILURE);
+	}
+#endif
+
+	ht = hash_init_adv(MAX_CONF_OPT, NULL, (void (*)(void *)) prsopt_destroy, NULL);
+	if (ht == NULL) {
+		errorf("cannot create hash table.");
+		exit(EXIT_FAILURE);
+	}
+
+	/*while ((ch = getopt(argc, argv, "a:hr:u:vV")) != -1)*/
+	while ((ch = getopt(argc, argv, "hr:u:vV")) != -1)
+		switch(ch) {
+			case 'r' :
+				/* mark to be deleted in hash */
+				if (record_data(ht, optarg, PMKSTP_REC_REMV, NULL) == false) {
+					errorf("failed to record '%s'.", optarg);
+					exit(EXIT_FAILURE);
+				}
+
+				process_clopts = true;
+				break;
+
+			case 'u' :
+				/* add or update value */
+				ppo = prsopt_init();
+				if (ppo == NULL) {
+					errorf("prsopt init failed.");
+					exit(EXIT_FAILURE);
+				}
+
+				if (parse_clopt(optarg, ppo, PRS_PMKCONF_SEP) == false) {
+					errorf("bad argument for -a option: %s.", optarg);
+					exit(EXIT_FAILURE);
+				}
+
+				/* add in hash */
+				pstr = po_get_str(ppo->value);
+				if (pstr == NULL) {
+					errorf("failed to get argument for -a option");
+					exit(EXIT_FAILURE);
+				}
+
+				/* record prsopt structure directly, fast and simple */
+				ppo->opchar = PMKSTP_REC_UPDT;
+				if (hash_update(ht, ppo->key, ppo) == HASH_ADD_FAIL) {
+					prsopt_destroy(ppo);	
+					errorf("hash update failed.");	
+					exit(EXIT_FAILURE);		
+				}
+
+				/* XXX use record_data => cost much memory and cpu XXX            */
+				/*if (record_data(ht, ppo->key, PMKSTP_REC_UPDT, pstr) == false) {*/
+				/*        errorf("failed to record '%s'.", ppo->key);             */
+				/*        prsopt_destroy(ppo);                                    */
+				/*        exit(EXIT_FAILURE);                                     */
+				/*}                                                               */
+				/*prsopt_destroy(ppo);						  */
+
+				process_clopts = true;
+				break;
+
+			case 'v' :
+				fprintf(stderr, "%s\n", PREMAKE_VERSION);
+				exit(EXIT_SUCCESS);
+				break;
+
+			case 'V' :
+				if (verbose_flag == 0)
+					verbose_flag = 1;
+				break;
+
+			case '?' :
+			default :
+				usage();
+				/* NOTREACHED */
+		}
+	argc -= optind;
+	argv += optind;
+
+
+	/* check if syconfdir exists */
+	if (dir_exists(CONFDIR) == false) {
+		verbosef("==> Creating '%s' directory.", CONFDIR);
+		if (mkdir(CONFDIR, S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH) != 0) {
+			errorf("cannot create '%s' directory : %s.",
+				CONFDIR, strerror(errno));
+			exit(EXIT_FAILURE);
+		}
+	}
+
+	if (process_clopts == false) {
+		/* standard behavior, gathering data */
+		if (gather_data(ht) == false)
+			exit(EXIT_FAILURE);
+	}
+
+	/* XXX to remove                   */
+	/*if ((open_tmp_config() == false))*/
+	/*        exit(EXIT_FAILURE);      */
+
+	/* parse configuration file */
+	config = fopen(PREMAKE_CONFIG_PATH, "r");
+	if (config != NULL) {
+		/* switch backup flag */
+		cfg_backup = true;
+
+		printf("==> Configuration file found: %s\n", PREMAKE_CONFIG_PATH);
+		if (parse_pmkconf(config, ht, PRS_PMKCONF_SEP, check_opt) == false) {
+			fclose(config);
+			errorf("parsing failed.");
+			exit(EXIT_FAILURE);
+		} else {
+			fclose(config);
+		}
+	} else {
+		printf("==> Configuration file not found.\n");
+	}
+
+	printf("==> Merging remaining data...\n");	
+	/* writing the remaining data stored in the hash */
+	write_new_data(ht);
+	/* destroying the hash once we'r done with it */	
+	hash_destroy(ht);
+
+/*         XXX to remove                                                                     */
+/*        if (close_tmp_config() == false)                                                   */
+/*                exit(EXIT_FAILURE);                                                        */
+/*                                                                                           */
+
+	if (error != 0) {
+		exit(EXIT_FAILURE);	
+	}
+
+	return(0);
+}
+
+/*
+ * XXX
+ */
+
+void child_loop(uid_t uid, gid_t gid, int argc, char *argv[]) {
+	printf("PMKSETUP version %s", PREMAKE_VERSION);
+#ifdef DEBUG
+	printf(" [SUB #%s] [SNAP #%s]", PREMAKE_SUBVER_PMKSETUP, PREMAKE_SNAP);
+#endif
+	printf("\n\n");
+
+	if (getuid() == 0) {
+		/* user has root privs */
+		if (setgid(gid) != 0) {
+			/* failed to change gid */
+			_exit(EXIT_FAILURE);
+		}
+		if (setuid(uid) != 0) {
+			/* failed to change uid */
+			_exit(EXIT_FAILURE);
+		}
+	}
+
+	detection_loop(argc, argv);
+}
+
+/*
+ * XXX
+ */
+
+void parent_loop(pid_t pid) {
+	bool	error = false;
+	int	status;
+
+	waitpid(pid, &status, WUNTRACED);
+
+	/* XXX */
+debugf("status = %d", WEXITSTATUS(status));
+
+	if (sfp != NULL) { /* XXX needed ? */
+		if (fclose(sfp) != 0) {
+			/* hazardous result => exit */
+			errorf("cannot close temporary file '%s' : %s.",
+						sfp, strerror(errno));
+			_exit(EXIT_FAILURE);
+		}
+
+		/* XXX check if pmk.conf already exists */ 
+		/* backup configuration file */
+		if (access(PREMAKE_CONFIG_PATH, F_OK) == 0) {
+			printf("==> Backing up configuration file: %s\n",
+						PREMAKE_CONFIG_PATH_BAK);
+
+			if (rename(PREMAKE_CONFIG_PATH,
+					PREMAKE_CONFIG_PATH_BAK) != 0) {
+				errorf("configuration file backup failed: %s.",
+							strerror(errno));
+				error = true;
+			}
+		}
+
+		/* copying the temporary config to the system one */
+		printf("==> Saving configuration file: %s\n", PREMAKE_CONFIG_PATH);
+		if (fcopy(sfn, PREMAKE_CONFIG_PATH, PREMAKE_CONFIG_MODE) == false)
+			exit(EXIT_FAILURE);
+
+#ifdef PMKSETUP_DEBUG
+		debugf("%s has not been deleted!", sfn);
+#else
+		if (unlink(sfn) == -1) {
+			errorf("cannot remove temporary file: '%s' : %s.",
+						sfn, strerror(errno));
+			error = true;
+		}
+#endif	/* PMKSETUP_DEBUG */
+	}
+}
+
+/*
+ * main loop
+ */
+
+int main(int argc, char *argv[]) {
+	struct passwd	*pw;
+	gid_t		 gid = 0;
+	pid_t		 pid;
+	uid_t		 uid = 0;
+
+	if (getuid() == 0) {
+		pw = getpwnam(PRIVSEP_USER);
+		if (pw == NULL) {
+			/* XXX err msg */
+			exit(EXIT_FAILURE);
+		}
+		uid = pw->pw_uid;
+		gid = pw->pw_gid;
+
+		/* XXX ? */
+	}
+
+
+	sfp = tmp_open(PREMAKE_CONFIG_TMP, "w", sfn, sizeof(sfn));
+	if (sfp == NULL) {
+		errorf("cannot open temporary file '%s' : %s.",
+				sfn, strerror(errno));
+		exit(EXIT_FAILURE);
+	}
+
+	/* forking detection code */
+	pid = fork();
+	switch (pid) {
+		case -1:
+			/* fork failed */
+			/* XXX err msg */
+			break;
+
+		case 0:
+			/* child start here after forking */
+			child_loop(uid, gid, argc, argv);
+			break;
+
+		default:
+			/* parent continue here after forking */
+			parent_loop(pid);
+			break;
+	}
+
+	return(EXIT_SUCCESS);
+
+}
