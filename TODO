@@ -33,6 +33,7 @@ mreindl	~.	latex version of tutorial
 
 pmk:
 -----------------------------------------------------------------------
+	-	update manpage (DEFS and ELSE)
 	+	DEFS support for CHECK_CONFIG and CHECK_PKG_CONFIG
 	+	improve and fix redundancy of record_def() and record_val()
 	-	check if ~/.pmk.conf is available
