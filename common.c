@@ -35,6 +35,7 @@
 #include <sys/param.h>
 
 #include <dirent.h>
+#include <errno.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -219,7 +220,8 @@ bool get_make_var(char *varname, char *result, int rsize) {
 
 	if (unlink(mfn) == -1) {
 		/* cannot remove temporary file */
-		fprintf(stderr, "Can not remove %s\n", mfn);
+		fprintf(stderr, "Cannot remove temporary file: %s : %s", 
+			mfn, strerror(errno));
 	}
 
 	return(rval);
@@ -410,7 +412,7 @@ bool pmk_log(const char *fmt, ...) {
 		fprintf(stdout, buf);
 		return(true);
 	} else {
-		errorf("Unable to log.");
+		errorf("unable to log.");
 		return(false);
 	}
 }
