@@ -38,7 +38,7 @@
 #define _PMK_FUNCTOOL_H_
 
 
-#include "hash.h"
+#include "hash_tools.h"
 #include "pmk.h"
 #include "premake.h"
 
@@ -76,7 +76,6 @@ lgdata	*check_lang(char *);
 lgdata	*check_lang_comp(char *);
 lgdata	*get_lang(htable *, pmkdata *);
 char	*get_comp_path(htable *, char *);
-char	*parse_idtf(char *, char *, size_t);
 bool	 check_cfgt_data(pmkdata *pgd);
 
 #endif /* _PMK_FUNCTOOL_H_ */
