@@ -3,7 +3,9 @@
 						Pedro Martelletto.
  * improved a bit pmkcfg.sh to use a list of templates.
  * set INSTALL back to install and added a special comment for HPUX.
- * changed hash.c and hash.h to use better types. 
+ * changed hash.c and hash.h to use better types.
+ * fixed pmkinstall bug when destination already existed.
+ * INSTALL can now safely set (back) to pmkinstall.
 
 03 Jan 2004 mipsator
  * fixed get_make_var() by replacing misused mkstemp() by tmps_open().
