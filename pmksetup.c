@@ -66,11 +66,10 @@ int main(int argc, char *argv[]) {
 	/* bad bad bad, yes it will be changed to something appropriate */
 	/* mkstemp powah */
 	snprintf(tf, sizeof(tf), "/tmp/pmktmp");
-	tfd = fopen(tf, "w");
-	if (tfd == NULL) {
+	
+	if ((tfd = fopen(tf, "w")) == NULL) {
 		/* Hey man ! What's going on ?? */
-		warn("%s", tf);
-		exit(1);
+		err(1, "%s", tf);
 	}
 
 	printf("Hey you know what ? I'm doing nothing :)\n");
