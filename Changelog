@@ -1,3 +1,6 @@
+21 Nov 2004 mipsator
+ * improved tests/Makefile to preprocess assembly files by default.
+
 17 Nov 2004 mipsator
  * modified x86 cpu detection stuff to use less assembly.
 
