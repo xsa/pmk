@@ -367,6 +367,14 @@ int hash_add_cell(hnode *phn, hcell *phc) {
 */
 
 bool hash_add_array(htable *pht, hpair *php, int size) {
+	return(hash_add_array_adv(pht, php, size, (void *) strdup));
+}
+
+/*
+	XXX
+*/
+
+bool hash_add_array_adv(htable *pht, hpair *php, int size, void *(dupfunc)(void *)) {
 	htable	*pmht;
 	int	 i;
 	bool	 error = false,
@@ -377,7 +385,7 @@ bool hash_add_array(htable *pht, hpair *php, int size) {
 		return(false);
 
 	for (i = 0 ; (i < size) && (error == false) ; i ++) {
-		if (hash_add(pmht, php[i].key, php[i].value) == HASH_ADD_FAIL)
+		if (hash_add(pmht, php[i].key, dupfunc(php[i].value)) == HASH_ADD_FAIL)
 			error = true;
 	}
 
@@ -390,6 +398,8 @@ bool hash_add_array(htable *pht, hpair *php, int size) {
 
 	return(rval);
 }
+
+
 
 /*
 	append a value to the existing value

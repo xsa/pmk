@@ -92,6 +92,7 @@ int	 hash_destroy(htable *);
 int	 hash_add(htable *, char *, void *);
 int	 hash_add_cell(hnode *, hcell *);
 bool	 hash_add_array(htable *, hpair *, int);
+bool	 hash_add_array_adv(htable *, hpair *, int, void *(*)(void *));
 int	 hash_append(htable *, char *, void *, void *);
 void	 hash_delete(htable *, char *);
 void	*hash_get(htable *, char *);
