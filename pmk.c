@@ -631,8 +631,8 @@ int main(int argc, char *argv[]) {
 	pmk_log("Hashed %d pmk keywords.\n", keyhash->count);
 
 	pmk_log("Loaded %d predefinined variables.\n", nbpd);
-	pmk_log("Loaded %d overriden switches.\n", ovrsw);
-	pmk_log("Loaded %d overriden variables.\n", nbcd);
+	pmk_log("Loaded %d overridden switches.\n", ovrsw);
+	pmk_log("Loaded %d overridden variables.\n", nbcd);
 	pmk_log("Total : %d variables.\n\n", hash_nbkey(gdata.htab));
 
 	pmk_log("Parsing '%s'\n", gdata.pmkfile);
