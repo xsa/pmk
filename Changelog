@@ -1,6 +1,8 @@
-07 Feb 2004 mreindl
+07 Feb 2004 mipsator
  * fixed building of the pmkscan location in usermode.
  * moved sample tests in samples/Makefile.
+ * added document headers that were missing in some files.
+ * imported a start of tutorial.
 
 # snapshot 0.7.12a
 

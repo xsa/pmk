@@ -1,3 +1,10 @@
+-----------------------------------------------------------------------
+Pre Make Kit shared library support specifications file
+
+Document revision:
+$Id$
+-----------------------------------------------------------------------
+
 pmkcomp data:
 
 ADD_SYSTEM {

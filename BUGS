@@ -1,3 +1,11 @@
+-----------------------------------------------------------------------
+Pre Make Kit BUGS file
+
+Document revision:
+$Id$
+-----------------------------------------------------------------------
+
+
 CYGWIN :
   - cygwin seems to not handle perfectly its binaries, a 'which gcc' give
     the path to gcc but when you're looking for it directly with dir
