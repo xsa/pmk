@@ -201,6 +201,7 @@ Arguments:
 REQUIRED, DEPEND, LANG.
 NAME : type is 'quoted', name of the header.
 FUNCTION : type is 'quoted', function to check, optional.
+CFLAGS : type is 'quoted', variable name to store CFLAGS values, optional.
 .Ed
 .It Cm CHECK_LIB
 Check a library and optionally a function.
@@ -210,6 +211,7 @@ Arguments:
 REQUIRED, DEPEND, LANG.
 NAME : type is 'quoted', name of the library to check.
 FUNCTION : type is 'quoted', function to check, optional.
+LIBS : type is 'quoted', variable name to store LIBS values, optional.
 .Ed
 .It Cm CHECK_CONFIG
 Check using a *-config tool.
@@ -221,6 +223,7 @@ NAME : type is 'quoted', config tool name.
 VERSION : type is 'quoted', minimal version needed, optional.
 CFLAGS : type is 'quoted', variable name to store CFLAGS values, optional.
 LIBS : type is 'quoted', variable name to store LIBS values, optional.
+VARIABLE : type is 'quoted', variable name to store the path of the config tool, optional.
 .Ed
 .It Cm CHECK_PKG_CONFIG
 Check a package using pkg-config.
