@@ -39,12 +39,36 @@
 
 
 /* options id */
-#define PMKPC_OPT_UNKNOWN	0
-#define PMKPC_OPT_VERSION	1
-#define PMKPC_OPT_MODVERS	2
-#define PMKPC_OPT_CFLAGS	3
-#define PMKPC_OPT_LIBS		4
-#define PMKPC_OPT_EXISTS	5
+#define PMKPC_OPT_UNKNOWN		0
+#define PMKPC_OPT_VERSION		1
+#define PMKPC_OPT_ATLPKGVERS		2
+#define PMKPC_OPT_EXISTS		3
+#define PMKPC_OPT_LISTALL		4
+#define PMKPC_OPT_UNINST		5
+#define PMKPC_OPT_DEBUG			6
+#define PMKPC_OPT_HELP			7
+#define PMKPC_OPT_USAGE			8
+
+#define PMKPC_OPT_MODVERS		10
+#define PMKPC_OPT_ATLVERS		11
+#define PMKPC_OPT_EXTVERS		12
+#define PMKPC_OPT_MAXVERS		13
+
+#define PMKPC_OPT_CFLAGS		20
+#define PMKPC_OPT_CFLAGS_ONLY_PATH	21
+#define PMKPC_OPT_CFLAGS_ONLY_OTHER	22
+
+#define PMKPC_OPT_LIBS			30
+#define PMKPC_OPT_LIBS_ONLY_LIB		31
+#define PMKPC_OPT_LIBS_ONLY_PATH	32
+#define PMKPC_OPT_LIBS_ONLY_OTHER	33
+
+#define PMKPC_OPT_VAR			40
+#define PMKPC_OPT_VAR_DEF		41
+#define PMKPC_OPT_VAR_PRNT		42
+#define PMKPC_OPT_VAR_SILC		43
+#define PMKPC_OPT_VAR_STDO		44
+
 
 #define PMKPC_COMPAT_VERSION	"0.15.0"
 
@@ -58,7 +82,8 @@ typedef struct {
 typedef struct {
 	unsigned int	 idx,
 			 id;
-	char		*arg;
+	char		*arg,
+			*err;
 } optcell;
 
 typedef struct {
