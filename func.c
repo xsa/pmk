@@ -51,7 +51,8 @@ cmdkw	functab[] = {
 		{"CHECK_BINARY", pmk_check_binary},
 		{"CHECK_INCLUDE", pmk_check_include},
 		{"CHECK_LIB", pmk_check_lib},
-		{"CHECK_CONFIG", pmk_check_config}
+		{"CHECK_CONFIG", pmk_check_config},
+		{"CHECK_PKG_CONFIG", pmk_check_pkg_config}
 };
 
 int	nbfunc = sizeof(functab) / sizeof(cmdkw);
@@ -527,6 +528,7 @@ bool pmk_check_config(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 	
 	libvers = hash_get(ht, "VERSION");
 	if (libvers != NULL) {
+		/* if VERSION is provided then check it */
 		snprintf(cfgcmd, sizeof(cfgcmd), "%s --version", cfgpath);
 
 		rpipe = popen(cfgcmd, "r");
@@ -538,37 +540,9 @@ bool pmk_check_config(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 	
 			get_line(rpipe, pipebuf, sizeof(pipebuf)); /* XXX check ? */
 			pclose(rpipe);
-			if (check_version(libvers, pipebuf) == true) {
-				pmk_log("yes (%s).\n", pipebuf);
-				rval = true;
-			
-				/* XXX do we keep cfgtool for the tag ? */
-				record_def(gdata->htab, cfgtool, true);
-				record_val(gdata->htab, cfgtool, "");
-				label_set(gdata->labl, cmd->label, true);
-
-				snprintf(cfgcmd, sizeof(cfgcmd), "%s --cflags", cfgpath);
-				rpipe = popen(cfgcmd, "r");
-				if (rpipe != NULL) {
-					/* put result in CFLAGS */
-					get_line(rpipe, pipebuf, sizeof(pipebuf)); /* XXX check ? */
-					pclose(rpipe);
-					hash_append(gdata->htab, "CFLAGS", pipebuf, " "); /* XXX check ? */
-				}
-
-				snprintf(cfgcmd, sizeof(cfgcmd), "%s --libs", cfgpath);
-				rpipe = popen(cfgcmd, "r");
-				if (rpipe != NULL) {
-					/* put result in LIBS */
-					get_line(rpipe, pipebuf, sizeof(pipebuf)); /* XXX check ? */
-					pclose(rpipe);
-					hash_append(gdata->htab, "LIBS", pipebuf, " "); /* XXX check ? */
-				}
-
-				/* XXX LDFLAGS, CPPFLAGS, LDFLAGS ? */
-			} else {
+			if (check_version(libvers, pipebuf) != true) {
+				/* version does not match */
 				pmk_log("no (%s).\n", pipebuf);
-
 				if (required == true) {
 					rval = false;
 				} else {
@@ -576,9 +550,119 @@ bool pmk_check_config(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 					label_set(gdata->labl, cmd->label, false);
 					rval = true;
 				}
+				return(rval);
+			} else {
+				pmk_log("yes (%s).\n", pipebuf);
 			}
 		}
 	}
 
-	return(rval);
+	/* XXX do we keep cfgtool for the tag ? */
+	record_def(gdata->htab, cfgtool, true);
+	record_val(gdata->htab, cfgtool, "");
+	label_set(gdata->labl, cmd->label, true);
+
+	snprintf(cfgcmd, sizeof(cfgcmd), "%s --cflags", cfgpath);
+	rpipe = popen(cfgcmd, "r");
+	if (rpipe != NULL) {
+		/* put result in CFLAGS */
+		get_line(rpipe, pipebuf, sizeof(pipebuf)); /* XXX check ? */
+		pclose(rpipe);
+		hash_append(gdata->htab, "CFLAGS", pipebuf, " "); /* XXX check ? */
+	}
+
+	snprintf(cfgcmd, sizeof(cfgcmd), "%s --libs", cfgpath);
+	rpipe = popen(cfgcmd, "r");
+	if (rpipe != NULL) {
+		/* put result in LIBS */
+		get_line(rpipe, pipebuf, sizeof(pipebuf)); /* XXX check ? */
+		pclose(rpipe);
+		hash_append(gdata->htab, "LIBS", pipebuf, " "); /* XXX check ? */
+	}
+
+	/* XXX LDFLAGS, CPPFLAGS, LDFLAGS ? */
+
+	return(true);
+}
+
+/*
+	special check with pkg-config utility
+*/
+
+bool pmk_check_pkg_config(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
+	FILE	*rpipe;
+	bool	required = true;
+	char	*target,
+		*bpath,
+		pipebuf[TMP_BUF_LEN],
+		pc_cmd[MAXPATHLEN],
+		pc_path[MAXPATHLEN];
+
+	pmk_log("* Checking for pkg-config [%s]\n", cmd->label);
+
+	required = require_check(ht);
+
+	target = hash_get(ht, "TARGET");
+	if (target == NULL) {
+		errorf("no TARGET set");
+		return(false);
+	}
+
+	bpath = hash_get(gdata->htab, "BIN_PATH");
+	if (bpath == NULL) {
+		errorf("BIN_PATH not available.");
+		return(false);
+	}
+
+	if (depend_check(ht, gdata) == false) {
+		pmk_log("\t%s\n", gdata->errmsg);
+		if (required == true) {
+			return(false);
+		} else {
+			/* record_def(gdata->htab, target, false); XXX how to manage ? */
+			label_set(gdata->labl, cmd->label, false);
+			return(true);
+		}
+	}
+
+	/* check availability of pkg-config */
+	pmk_log("\tFound pkg-config : ");
+	if (get_file_path("pkg-config", bpath, pc_path, sizeof(pc_path)) == false) {
+		pmk_log("no.\n");
+		if (required == true) {
+			return(false);
+		} else {
+			/* record_def(gdata->htab, target, false); XXX how to manage ? */
+			label_set(gdata->labl, cmd->label, false);
+			return(true);
+		}
+	} else {
+		pmk_log("yes.\n");
+	}
+
+	/* XXX check if module exists */
+
+	/* XXX check for version ? */
+
+	snprintf(pc_cmd, sizeof(pc_cmd), "pkg-config --cflags %s", target);
+	rpipe = popen(pc_cmd, "r");
+	if (rpipe != NULL) {
+		/* put result in CFLAGS */
+		get_line(rpipe, pipebuf, sizeof(pipebuf)); /* XXX check ? */
+		pclose(rpipe);
+		hash_append(gdata->htab, "CFLAGS", pipebuf, " "); /* XXX check ? */
+	}
+
+	snprintf(pc_cmd, sizeof(pc_cmd), "pkg-config --libs %s", target);
+	rpipe = popen(pc_cmd, "r");
+	if (rpipe != NULL) {
+		/* put result in LIBS */
+		get_line(rpipe, pipebuf, sizeof(pipebuf)); /* XXX check ? */
+		pclose(rpipe);
+		hash_append(gdata->htab, "LIBS", pipebuf, " "); /* XXX check ? */
+	}
+
+	/* XXX LDFLAGS, CPPFLAGS, LDFLAGS ? */
+
+	return(true);
 }

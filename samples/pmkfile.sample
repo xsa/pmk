@@ -4,6 +4,7 @@
 # put some defines
 .DEFINE
 PACKAGE=scandisk
+VERSION=0.0.1b
 .END
 
 # set the target files that will be processed
@@ -55,4 +56,10 @@ FILENAME=gtk-config
 REQUIRED=FALSE
 CFGTOOL=libpng-config
 VERSION=1.2
+.END
+
+# get data for gtk+ via pkg-config
+.CHECK_PKG_CONFIG(gtk_data)
+REQUIRED=FALSE
+TARGET=gtk+
 .END
