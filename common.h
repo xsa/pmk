@@ -44,6 +44,8 @@ typedef struct {
 	char	*pathlst[MAXTOKENS];
 } mpath;
 
+FILE	*pmk_log_fp;
+
 
 bool get_line(FILE *, char *, int);
 bool env_to_opt(char *, pmkcmdopt *);
@@ -56,5 +58,10 @@ void errorf(const char *, ...);
 void errorf_line(char *, int, const char *, ...);
 
 void debugf(const char *, ...);
+
+bool pmk_log_open(char *);
+void pmk_log_close(void);
+bool pmk_log(const char *, ...);
+
 
 #endif /* _PMK_COMMON_H_ */
