@@ -30,6 +30,7 @@
  *
  */
 
+
 #ifndef _PMK_HASH_H_
 #define _PMK_HASH_H_
 
@@ -45,6 +46,7 @@
 #define HASH_ADD_OKAY	1 /* first add */
 #define HASH_ADD_COLL	2 /* collision, key chained */
 #define HASH_ADD_UPDT	3 /* key already exists, change value */
+
 
 typedef struct shcell {
 	char		key[MAX_HASH_KEY_LEN],
@@ -64,6 +66,7 @@ typedef struct {
 	hnode	*nodetab;
 } htable;
 
+
 int	hash_compute(char *, int);
 htable	*hash_init(int);
 int	hash_destroy(htable *);
@@ -71,5 +74,7 @@ int	hash_add(htable *, char *, char *);
 void	hash_delete(htable *, char *);
 char	*hash_get(htable *, char *);
 int	hash_merge(htable *, htable *);
+int	hash_nbkey(htable *);
+char	**hash_keys(htable *);
 
 #endif /* _PMK_HASH_H_ */

@@ -334,3 +334,49 @@ int hash_merge(htable *dst_ht, htable *src_ht) {
 	/* return count of merged keys */
 	return(c);
 }
+
+/*
+	get number of keys
+
+	pht : hash table
+
+	returns number of keys
+*/
+
+int hash_nbkey(htable *pht) {
+	return(pht->count);
+}
+
+/*
+	get the keys of the hash table
+
+	pht : hash table
+
+	returns an array of keys
+*/
+
+char **hash_keys(htable *pht) {
+	char	**key_ary;
+	int	nbk,
+		i,
+		j = 0;
+	hcell	*p;
+
+	nbk = pht->count;
+
+	/* create an array with a size of the number of keys */
+	key_ary = (char **)malloc(sizeof(char *) * nbk);
+	if (key_ary != NULL) {
+		for(i = 0 ; i < pht->size ; i++) {
+			p = pht->nodetab[i].first;
+			while (p != NULL) {
+				/* add the key in key_ary */
+				key_ary[j] = p->key;
+				j++;
+				p = p->next;
+			}
+		}
+	}
+
+	return(key_ary);
+}
