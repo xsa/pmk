@@ -5,6 +5,7 @@
 .DEFINE {
 PACKAGE=scandisk
 VERSION="0.0.1b"
+FULL_NAME="$PACKAGE-$VERSION"
 }
 
 # set the target files that will be processed

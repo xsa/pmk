@@ -92,13 +92,13 @@ bool func_wrapper(prscell *pcell, pmkdata *pgd) {
 			break;
 /* XXX TODO
 		case PMK_TOK_SETNGS :
-			rval = pmk_(&cmd, pcell->ht, pgd);
+			rval = pmk_settings(&cmd, pcell->ht, pgd);
 			break;
 		case PMK_TOK_SETVAR :
-			rval = pmk_(&cmd, pcell->ht, pgd);
+			rval = pmk_set_variable(&cmd, pcell->ht, pgd);
 			break;
 		case PMK_TOK_SETPRM :
-			rval = pmk_(&cmd, pcell->ht, pgd);
+			rval = pmk_set_parameter(&cmd, pcell->ht, pgd);
 			break;
 */
 		case PMK_TOK_CHKBIN :
@@ -141,6 +141,8 @@ bool func_wrapper(prscell *pcell, pmkdata *pgd) {
 
 /*
 	define variables
+
+	XXX TODO process variables in order (and also search in global htable).
 */
 
 bool pmk_define(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
@@ -156,14 +158,15 @@ bool pmk_define(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 	for(i = 0 ; i < phk->nkey ; i++) {
 		value = po_get_str(hash_get(ht, phk->keys[i]));
 		if (hash_get(gdata->htab, phk->keys[i]) == NULL) {
-
-/*
-			value = process_string(value);
-			debugf("PROCESSED : '%s'", value);
-*/
-			hash_add(gdata->htab, phk->keys[i], value);
-			pmk_log("\tAdded '%s' define.\n", phk->keys[i]);
-			n++;
+			/* process value string */
+			value = process_string(value, ht);
+			if (value != NULL) {
+				hash_add(gdata->htab, phk->keys[i], value);
+				pmk_log("\tAdded '%s'.\n", phk->keys[i]);
+				n++;
+			} else {
+				pmk_log("\tFailed processing of '%s'.\n", phk->keys[i]);
+			}
 		} else {
 			pmk_log("\tSkipped '%s' define (overriden).\n", phk->keys[i]);
 		}
