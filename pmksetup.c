@@ -32,8 +32,10 @@
  */
 
 #include <sys/stat.h>
+#include <sys/types.h>
 #include <sys/utsname.h>
 
+#include <dirent.h>
 #include <errno.h>
 #include <stdarg.h>
 #include <stdio.h>
@@ -67,22 +69,24 @@ int	nbpredef = sizeof(predef) / sizeof(hpair);
  * Main program for pmksetup(8)
  */
 int main(int argc, char *argv[]) {
+	DIR		*cfgdir;
 	FILE		*config;
 	int		 ch,
 			 error = 0;
 	htable		*ht;
 	
-	extern int	 optind;
+	extern int	 optind,
+			 errno;
 
 
-#ifndef USER_TEST
+#ifndef USERMODE
 	uid_t		 uid;
 
 	/* pmksetup(8) must be run as root */
 	if ((uid = getuid()) != 0) {
 		errorf("you must be root.");
 		exit(1);
-	} 
+	}
 #endif
 
 	__progname = argv[0];
@@ -115,6 +119,18 @@ int main(int argc, char *argv[]) {
 	printf(" [SUB #%s] [SNAP #%s]", PREMAKE_SUBVER_PMKSETUP, PREMAKE_SNAP);
 #endif
 	printf("\n\n");
+
+	/* check if syconfdir exists */
+	cfgdir = opendir(CONFDIR);
+	if (cfgdir != NULL) {
+		closedir(cfgdir);
+	} else {
+		verbosef("creating '%s' directory.", CONFDIR);
+		if (mkdir(CONFDIR, S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH) != 0) {
+			errorf("cannot create '%s' directory (%d)", CONFDIR, errno);
+			exit(1);
+		}
+	}
 
 	printf("==> Looking for default parameters...\n");
 	if ((get_env_vars(ht) == -1) || (get_binaries(ht) == -1))

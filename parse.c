@@ -475,7 +475,12 @@ char *parse_quoted(char *pstr, pmkobj *po, size_t size) {
 				strlcpy(parse_err, "trailing escape character.", sizeof(parse_err));
 				return(NULL);
 			}
-			size--;
+
+			if (*pstr == PMK_CHAR_QUOTE_END) {
+				size--;
+			} else {
+				pstr--;
+			}
 		}
 
 		if (size > 1) {

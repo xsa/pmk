@@ -2,5 +2,14 @@ INSTALL
 -------
 
 To build and install pmk on your system :
+
+For a global use (with root privileges):
+make clean cfgrm
 make
 make install
+
+In user mode (without root privileges):
+make clean cfgum
+make
+make install
+

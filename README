@@ -1,20 +1,33 @@
 The pmk project try to provide an alternative to gnu configure.
 
-NOTE:
+NOTE: OBSOLETE ?
 HP systems seems to have 'make' unable to use '+=' operator.
-This results in an incompatibility with our Makefile so we recommand to use gmake instead of original make.
+This results in an incompatibility with our Makefile so we recommand to
+use gmake instead of original make.
 
-Building steps :
+There is two way for using pmk. The first is the common installation
+that need root privileges and that allow all users to acces pmk. The
+second is the user mode that install binaries in $HOME/bin/ and data in
+$HOME/.pmk/ of the user that do the install.
+
+There is two targets to configure pmk before building.
+Configuring with root mode :
+make cfgrm
+
+Else in user mode :
+make cfgum
+
+After configuring you can build the package with :
 make
+
+And finish by installing with :
 make install
 
 Testing :
-edit Makefile and uncomment USER_TEST to enable local test
 make clean
-make
 make test_all
 
 You can send feedback on the following email :
-premk-usersi@lists.sourceforge.net
+premk-users@lists.sourceforge.net
 Or if you have a sourceforge account on this forum :
 http://sourceforge.net/forum/forum.php?forum_id=258652

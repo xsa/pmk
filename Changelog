@@ -1,3 +1,13 @@
+27 Sep 2003 mipsator
+ * improved process_string() to allow escaping of $ character.
+ * improved parse_quoted() to not eat escape characters.
+ * added mkf_sed() and renamed do_sed() to templ_sed() in pmkcfg.
+ * improved Makefile to switch easily between root and user mode.
+ * created Makefile.pmk
+ * updated pmkcfg.sh and pmkfile to sync with Makefile changes.
+ * synced pmkscan, pmksetup and premake.h with usermode changes.
+ * updated README and INSTALL.
+
 26 Sep 2003 mipsator
  * added support to negate labels in conditions like DEPEND or IF.
  * updated pmkfile.5 to sync with latest changes.
