@@ -276,6 +276,7 @@ bool parse_opt(char *line, htable *ht) {
 			/* key value is too long */
 			err_line = cur_line;
 			snprintf(err_msg, sizeof(err_msg), "Key value is too long");
+			return(FALSE);
 		} else {
 			/* key name and value are ok */
 			hash_add(ht, tkey, tval);
@@ -320,7 +321,7 @@ bool parse(FILE *fd) {
 
 					cmd_line = cur_line;
 					process = TRUE;
-					tabopts = hash_init(MAX_CMD_OPT); /* XXX is NULL ? */
+					tabopts = hash_init(MAX_CMD_OPT);
 					if (tabopts == NULL) {
 						err_line = cmd_line;
 						snprintf(err_msg, sizeof(err_msg), "Cannot create hash table");
@@ -407,34 +408,35 @@ int main(int argc, char *argv[]) {
 		exit(1);
 	}
 
-	/* open pmk file */
-	fd = fopen(PREMAKE_FILENAME, "r");
-	if (fd == NULL) {
-		/* XXX error formating */
-		warn("%s", PREMAKE_FILENAME);
-		exit(1);
-	}
-
-	/* open log file */
-	lfd = fopen(PREMAKE_LOG, "w");
-	if (lfd == NULL) {
-		/* XXX error formating */
-		warn("%s", PREMAKE_LOG);
-		exit(1);
-	}
-	fprintf(lfd, "pmk version %s\n", PREMAKE_VERSION);
-
 	/* open configuration file */
 	snprintf(cf, sizeof(cf), "%s/%s", SYSCONFDIR, PREMAKE_CONFIG);
 	cfd = fopen(cf, "r");
 	if (cfd == NULL) {
-		printf("Error : %s not found in %s.\n", PREMAKE_CONFIG, SYSCONFDIR);
+		snprintf(err_msg, sizeof(err_msg), "%s not found in %s.", PREMAKE_CONFIG, SYSCONFDIR);
+		error(err_msg);
 		/* no pmksetup available so we ignore this error temporary ...
 		return(-1);
 		*/
 	} else {
 		fclose(cfd);
 	}
+
+	/* open pmk file */
+	fd = fopen(PREMAKE_FILENAME, "r");
+	if (fd == NULL) {
+		snprintf(err_msg, sizeof(err_msg), "while opening %s.", PREMAKE_FILENAME);
+		error(err_msg);
+		exit(1);
+	}
+
+	/* open log file */
+	lfd = fopen(PREMAKE_LOG, "w");
+	if (lfd == NULL) {
+		snprintf(err_msg, sizeof(err_msg), "while opening %s.", PREMAKE_LOG);
+		error(err_msg);
+		exit(1);
+	}
+	fprintf(lfd, "pmk version %s\n", PREMAKE_VERSION);
 
 	fprintf(lfd, "Hashing pmk keywords ");
 	s = sizeof(functab) / sizeof(cmdkw); /* compute number of keywords */
@@ -453,7 +455,7 @@ int main(int argc, char *argv[]) {
 	fprintf(lfd, "(%d)\n", khash->count);
 
 	if (parse(fd) == FALSE) {
-		printf("Error line %d : %s.\n", err_line, err_msg);
+		error_line(PREMAKE_FILENAME, err_line, err_msg);
 		rval = -1;
 	}
 
