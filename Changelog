@@ -3,6 +3,8 @@
 	pmkinstall.c and pmkscan.c files.
  * added support for suid and sgid flags in pmkinstall.
  * finished strip support in pmkinstall.
+ * re-enabled pmkinstall build in makefiles.
+ * added test_pmkinstall in test_all target in makefiles.
 
 27 Nov 2003 mipsator
  * updated pmkinstall man page.
