@@ -123,7 +123,7 @@ test_pmksetup: pmksetup
 	@echo "Generating local pmk.conf."
 	@echo "(need USER_TEST enabled)"
 	@echo ""
-	./pmksetup
+	./pmksetup -V
 	@echo ""
 	@echo "Done."
 	@echo ""

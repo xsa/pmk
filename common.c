@@ -298,8 +298,9 @@ bool find_file(dynary *da, char *fname, char *fpath, int fplen) {
 	bool		found,
 			exit;
 
-	rsize = strlen(fname);
 	found = false;
+	rsize = sizeof(de->d_name);
+
 	for (i = 0 ; (i < da_size(da)) && (found == false) ; i++) {
 		path = da_idx(da, i);
 		dp = opendir(path);
@@ -309,14 +310,13 @@ bool find_file(dynary *da, char *fname, char *fpath, int fplen) {
 			while (exit == false) {
 				de = readdir(dp);
 				if (de != NULL) {
-					if (strlen(de->d_name) == rsize) {
-						if (strncmp(de->d_name, fname, rsize) == 0) {
-							if (snprintf(fpath, fplen, "%s/%s", path, fname) < fplen) {
-								/* fpath set */
-								found = true;
-							}
-							exit = true;
+					/* found right filename ? */
+					if (strncmp(de->d_name, fname, rsize) == 0) {
+						if (snprintf(fpath, fplen, "%s/%s", path, fname) < fplen) {
+							/* fpath set */
+							found = true;
 						}
+						exit = true;
 					}
 				} else
 					/* no more entry */
