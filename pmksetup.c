@@ -942,7 +942,7 @@ void verbosef(const char *fmt, ...) {
  * pmksetup(8) usage
  */
 void usage(void) {
-	fprintf(stderr, "Usage: %s [-hVv] "
+	fprintf(stderr, "usage: %s [-hVv] "
 		"[-r variable] [-u variable=value]\n", __progname);
 	exit(EXIT_FAILURE);
 }
