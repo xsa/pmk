@@ -67,3 +67,16 @@ VERSION=1.2
 CFLAGS=GTK_CFLAGS
 LIBS=GTK_LIBS
 .END
+
+# check _Bool type
+.CHECK_TYPE(type_bool_posix)
+REQUIRED=FALSE
+TYPE=_Bool
+.END
+
+# check c++ bool type
+.CHECK_TYPE(type_bool_cxx)
+REQUIRED=FALSE
+TYPE=bool
+LANG=C++
+.END
