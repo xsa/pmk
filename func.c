@@ -77,12 +77,27 @@ int	nbfunc = sizeof(functab) / sizeof(cmdkw);
 */
 
 bool pmk_define(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
-	int	n;
+	char	*value;
+	hkeys	*phk;
+	int	 i,
+		 n = 0;
 
 	pmk_log("* Parsing define\n");
 
-	n = hash_merge(gdata->htab, ht);
-	pmk_log("\tAdded %d definitions.\n", n);
+	phk = hash_keys(ht);
+
+	for(i = 0 ; i < phk->nkey ; i++) {
+		value = po_get_str(hash_get(ht, phk->keys[i]));
+		if (hash_get(gdata->htab, phk->keys[i]) == NULL) {
+			hash_add(gdata->htab, phk->keys[i], value);
+			pmk_log("\tAdded '%s' define.\n", phk->keys[i]);
+			n++;
+		} else {
+			pmk_log("\tSkipped '%s' define (overriden).\n", phk->keys[i]);
+		}
+	}
+
+	pmk_log("\tTotal %d definition(s) added.\n", n);
 	
 	return(true);
 }
