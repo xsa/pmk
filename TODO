@@ -2,9 +2,11 @@ common :
 - write specs somewhere in a draft
 
 pmk :
-- finish pmk(1)
+- finish existing checks
+~ finish pmk(1)
 - pmkfile(5)
 
+
 pmksetup :
-- pmk.conf(5)
-- replace old pmk.conf by the new one (aka temporary file)
+~ pmk.conf(5)
+- get INC_PATH and LIB_PATH
