@@ -1,4 +1,4 @@
-/* $Id$
+/* $Id$ */
 
 /*
  * Copyright (c) 2003 Damien Couderc
