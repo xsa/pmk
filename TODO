@@ -2,12 +2,12 @@ common :
 - write specs somewhere in a draft
 
 pmk :
-~ finish existing checks
 ~ finish pmk(1)
 ~ pmkfile(5)
 - pkgconfig test
-~ fill gdata with checks results (progressing)
 ~ compatibility with autoconf (progressing)
+	- top_src
+	- src_dir
 
 pmksetup :
 ~ pmk.conf(5)
