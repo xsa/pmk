@@ -2,7 +2,7 @@ The pmk project tries to provide an alternative to GNU configure.
 
 There are two basic ways of using pmk. The first one is the common
 installation that needs root privileges and that allows all users to
-acces pmk. The second one is the "user mode" that installs binaries in
+access pmk. The second one is the "user mode" that installs binaries in
 $HOME/bin/ and data in $HOME/.pmk/ of the user doing the installation.
 
 There are two targets to configure pmk before building it.
