@@ -514,25 +514,26 @@ void usage(void) {
 */
 
 int main(int argc, char *argv[]) {
-	FILE	*fp;
-	bool	 go_exit = false,
-		 pmkfile_set = false,
-		 ovrfile_set = false,
-		 basedir_set = false,
-		 buildlog = false;
-	char	*pstr,
-		*enable_sw = NULL,
-		*disable_sw = NULL,
-		 buf[MAXPATHLEN];
-	dynary	*da;
-	int	 rval = 0,
-		 nbpd,
-		 nbcd,
-		 ovrsw = 0,
-		 i,
-		 chr;
-	pmkdata	 gdata;
-	prsdata	*pdata;
+	FILE		*fp;
+	bool		 go_exit = false,
+			 pmkfile_set = false,
+			 ovrfile_set = false,
+			 basedir_set = false,
+			 buildlog = false;
+	char		*pstr,
+			*enable_sw = NULL,
+			*disable_sw = NULL,
+			 buf[MAXPATHLEN];
+	comp_data	 cdata;
+	dynary		*da;
+	int		 rval = 0,
+			 nbpd,
+			 nbcd,
+			 ovrsw = 0,
+			 i,
+			 chr;
+	pmkdata		 gdata;
+	prsdata		*pdata;
 
 	/* get current path */
 	getcwd(buf, sizeof(buf));
@@ -759,7 +760,9 @@ int main(int argc, char *argv[]) {
 	pmk_log("Detecting compiler : ");
 	pstr = hash_get(gdata.htab, PMKCONF_BIN_CC);
 	if (pstr != NULL) {
-		detect_compiler(pstr, &gdata);
+		if (detect_compiler(pstr, gdata.buildlog, &cdata) == true) {
+			pmk_log("%s (version %s)", cdata.descr, cdata.version);
+		}
 	} else {
 		debugf("error");
 	}
