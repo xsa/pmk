@@ -53,5 +53,6 @@ bool	label_set(htable *, char *, bool);
 bool	label_check(htable *, char *);
 bool	depend_check(htable *, pmkdata *);
 bool	require_check(htable *);
+bool	parse_ac_config(htable *, char *);
 
 #endif /* _PMK_FUNCTOOL_H_ */

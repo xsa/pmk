@@ -1,3 +1,11 @@
+22 May 2003 mipsator
+ * improve a bit copy_text_file().
+ * add parse_ac_config(), not finished yet but it doesn't break the code.
+
+21 May 2003 mipsator
+ * added copy_text_file().
+ * misc on buffers.
+
 15 May 2003 xsa
  * now using hash_add_array() for the predefined variables in pmksetup.
 
