@@ -195,7 +195,7 @@ char *build_def_name(char *name) {
 	if (semidef == NULL)
 		return(NULL);
 
-	if (snprintf(def_str, sizeof(def_str), "DEF__%s", semidef) >= sizeof(def_str))
+	if (snprintf(def_str, sizeof(def_str), "DEF__%s", semidef) >= (int) sizeof(def_str))
 		return(NULL);
 
 	return(def_str);
@@ -221,17 +221,17 @@ bool record_def(htable *ht, char *name, bool status) {
 	if (semidef == NULL)
 		return(false);
 
-	if (snprintf(def_str, sizeof(def_str), "DEF__%s", semidef) >= sizeof(def_str))
+	if (snprintf(def_str, sizeof(def_str), "DEF__%s", semidef) >= (int) sizeof(def_str))
 		return(false);
 
-	if (snprintf(have_str, sizeof(def_str), "HAVE_%s", semidef) >= sizeof(def_str))
+	if (snprintf(have_str, sizeof(def_str), "HAVE_%s", semidef) >= (int) sizeof(def_str))
 		return(false);
 
 	if (status == true) {
-		if (snprintf(def_val, sizeof(def_str), "#define %s 1", have_str) >= sizeof(def_str))
+		if (snprintf(def_val, sizeof(def_str), "#define %s 1", have_str) >= (int) sizeof(def_str))
 			return(false);
 	} else {
-		if (snprintf(def_val, sizeof(def_str), "#undef %s", have_str) >= sizeof(def_str))
+		if (snprintf(def_val, sizeof(def_str), "#undef %s", have_str) >= (int) sizeof(def_str))
 			return(false);
 	}
 	
@@ -269,10 +269,10 @@ bool record_def_data(htable *ht, char *name, char *value) {
 	if (semidef == NULL)
 		return(false);
 
-	if (snprintf(def_str, sizeof(def_str), "DEF__%s", semidef) >= sizeof(def_str))
+	if (snprintf(def_str, sizeof(def_str), "DEF__%s", semidef) >= (int) sizeof(def_str))
 		return(false);
 
-	if (snprintf(have_str, sizeof(def_str), "HAVE_%s", semidef) >= sizeof(def_str))
+	if (snprintf(have_str, sizeof(def_str), "HAVE_%s", semidef) >= (int) sizeof(def_str))
 		return(false);
 
 	if (value != NULL) {
@@ -284,10 +284,10 @@ bool record_def_data(htable *ht, char *name, char *value) {
 		debugf("record_def_data() : recorded '%s' with '%s'", have_str, value);
 #endif
 
-		if (snprintf(def_val, sizeof(def_str), "#define %s %s", have_str, value) >= sizeof(def_str))
+		if (snprintf(def_val, sizeof(def_str), "#define %s %s", have_str, value) >= (int) sizeof(def_str))
 			return(false);
 	} else {
-		if (snprintf(def_val, sizeof(def_str), "#undef %s", have_str) >= sizeof(def_str))
+		if (snprintf(def_val, sizeof(def_str), "#undef %s", have_str) >= (int) sizeof(def_str))
 			return(false);
 	}
 	
@@ -421,11 +421,11 @@ bool label_check(htable *lht, char *name) {
 */
 
 bool depend_check(htable *lht, pmkdata *gd) {
-	bool	 rval = true;
-	char	*fdep;
-	dynary	*da;
-	int	 i;
-	pmkobj	*po;
+	bool		 rval = true;
+	char		*fdep;
+	dynary		*da;
+	pmkobj		*po;
+	unsigned int	 i;
 
 	po = hash_get(lht, "DEPEND");
 	if (po == NULL) {

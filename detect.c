@@ -371,7 +371,7 @@ bool gen_test_file(FILE *fp, comp_data *pcd) {
 	comp_cell	*pcell;
 	hkeys		*phk;
 	htable		*pht;
-	int		 i;
+	unsigned int	 i;
 
 	pht = pcd->cht;
 

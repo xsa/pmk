@@ -303,7 +303,7 @@ bool pkg_collect(char *pkglibdir, pkgdata *ppd) {
 */
 
 bool parse_keyword(pkgcell *ppc, char *kword, char *value) {
-	int	i;
+	unsigned int	i;
 
 	for (i = 0 ; i < nb_pkgkw ; i ++) {
 		if (strncmp(kword, kw_pkg[i].kw_name, sizeof(kword)) == 0) {
@@ -826,7 +826,7 @@ bool pkg_mod_exists(pkgdata *ppd, char *mod) {
 */
 
 int compare_version(char *vref, char *vcomp) {
-	bool		 exit = false;
+	bool		 bexit = false;
 	char		*sr,
 			*sc;
 	dynary		*vr,
@@ -849,7 +849,7 @@ int compare_version(char *vref, char *vcomp) {
 		return(false);
 	}
 
-	while (exit == false) {
+	while (bexit == false) {
 		/* process reference version */
 		sr = da_idx(vr, i);
 		if (sr != NULL) {
@@ -862,7 +862,7 @@ int compare_version(char *vref, char *vcomp) {
 		} else {
 			/* end of version string */
 			ref = 0;
-			exit = true;
+			bexit = true;
 		}
 
 		/* process compared version */
@@ -876,7 +876,7 @@ int compare_version(char *vref, char *vcomp) {
 		} else {
 			/* end of version string */
 			cmp = 0;
-			exit = true;
+			bexit = true;
 		}
 
 		/* compare versions */
@@ -884,7 +884,7 @@ int compare_version(char *vref, char *vcomp) {
 
 		if (delta != 0) {
 			/* not equal end of comparison */
-			exit = true;
+			bexit = true;
 		} else {
 			i++;
 		}

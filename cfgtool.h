@@ -84,11 +84,11 @@ typedef struct {
 /* functions protos */
 
 void		 cfgtcell_destroy(cfgtcell *);
-cfgtdata	*cfgtdata_init();
+cfgtdata	*cfgtdata_init(void);
 void		 cfgtdata_destroy(cfgtdata *);
 
 bool		 add_cfgtool(cfgtdata *, htable *);
-cfgtdata	*parse_cfgt_file();
+cfgtdata	*parse_cfgt_file(void);
 bool		 cfgtcell_get_binary(cfgtdata *, char *, char *, size_t);
 cfgtcell	*cfgtcell_get_cell(cfgtdata *, char *);
 

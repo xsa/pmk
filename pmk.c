@@ -661,10 +661,10 @@ int main(int argc, char *argv[]) {
 			 nbpd,
 			 nbcd,
 			 ovrsw = 0,
-			 i,
 			 chr;
 	pmkdata		*pgd;
 	prsdata		*pdata;
+	unsigned int	 i;
 
 	/* get current path */
 	if (getcwd(buf, sizeof(buf)) == NULL) {

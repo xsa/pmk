@@ -76,11 +76,11 @@ typedef struct {
 } arch_cell;
 
 
-void	*seek_key(prsdata *, int);
-prsdata	*parse_cpu_data(char *);
-char	*check_cpu_arch(char *, prsdata *);
-htable	*arch_wrapper(prsdata *, char *);
-
+void		*seek_key(prsdata *, int);
+prsdata		*parse_cpu_data(char *);
+char		*check_cpu_arch(char *, prsdata *);
+htable		*arch_wrapper(prsdata *, char *);
+unsigned char	 arch_name_to_id(char *);
 
 /****************
  * x86 specific *

@@ -80,6 +80,7 @@ extern int	 optind;
 extern int	 errno;
 #endif
 
+
 /*
 	strip
 
