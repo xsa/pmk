@@ -4,6 +4,8 @@
  * made version optional in CHECK_CONFIG.
  * updated pmkfile sample.
  * added version checking in pmk_check_pkg_config().
+ * added a check to ensure that the given package exists.
+ * use PACKAGE instead of TARGET in CHECK_CONFIG.
 
 07 Jun 2003 mipsator
  * cleaned-up and reorganized includes.

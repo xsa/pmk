@@ -557,6 +557,7 @@ bool pmk_check_config(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 		}
 	}
 
+	/* gather data */
 	/* XXX do we keep cfgtool for the tag ? */
 	record_def(gdata->htab, cfgtool, true);
 	record_val(gdata->htab, cfgtool, "");
@@ -604,7 +605,7 @@ bool pmk_check_pkg_config(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 
 	required = require_check(ht);
 
-	target = hash_get(ht, "TARGET");
+	target = hash_get(ht, "PACKAGE");
 	if (target == NULL) {
 		errorf("no TARGET set");
 		return(false);
@@ -642,7 +643,21 @@ bool pmk_check_pkg_config(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 		pmk_log("yes.\n");
 	}
 
-	/* XXX check if module exists */
+	/* check if package exists */
+	pmk_log("\tFound package '%s' : ", target);
+	snprintf(pc_cmd, sizeof(pc_cmd), "%s --exists %s", pc_path, target);
+	if (system(pc_cmd) != 0) {
+		pmk_log("no.\n");
+		if (required == true) {
+			return(false);
+		} else {
+			/* record_def(gdata->htab, target, false); XXX how to manage ? */
+			label_set(gdata->labl, cmd->label, false);
+			return(true);
+		}
+	} else {
+		pmk_log("yes.\n");
+	}
 
 	libvers = hash_get(ht, "VERSION");
 	if (libvers != NULL) {
@@ -675,7 +690,7 @@ bool pmk_check_pkg_config(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 		}
 	}
 
-
+	/* gather data */
 	snprintf(pc_cmd, sizeof(pc_cmd), "%s --cflags %s", pc_path, target);
 	rpipe = popen(pc_cmd, "r");
 	if (rpipe != NULL) {

@@ -61,6 +61,6 @@ VERSION=1.2
 # get data for gtk+ via pkg-config
 .CHECK_PKG_CONFIG(gtk_data)
 REQUIRED=FALSE
-TARGET=gtk+
+PACKAGE=gtk+
 VERSION=1.2
 .END
