@@ -33,9 +33,9 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include <unistd.h>
 
+#include "compat/pmk_string.h"
 #include "common.h"
 #include "func.h"
 #include "functool.h"

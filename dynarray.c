@@ -42,8 +42,8 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 
+#include "compat/pmk_string.h"
 #include "dynarray.h"
 
 
