@@ -41,8 +41,6 @@ bool get_line(FILE *, char *, int);
 bool env_to_opt(char *, pmkcmdopt *);
 bool get_make_var(char *, char *, int);
 
-void error(char *);
-void error_line(char *, int, char *);
 void errorf(const char *, ...);
 void errorf_line(char *, int, const char *, ...);
 
