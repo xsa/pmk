@@ -24,20 +24,35 @@ char	*tval[10] = {
 };
 
 int main() {
-	int	i;
+	char	*p;
 	dynary	*da;
+	int	i;
 
 	printf("Init dynary.\n");
 	da = da_init();
 
+	printf("\nAdding 9 values :\n");
 	for (i = 0 ; i < 10 ; i++) {
-		printf("Add value '%s' ", tval[i]);
+		printf("\tAdd value '%s' ", tval[i]);
 		da_push(da, tval[i]);
 		printf("(%d)\n", da_size(da));
 	}
 
+	printf("\nTesting values :\n");
 	for (i = 9 ; i >= 0 ; i--) {
-		printf("da[%d] = %s\n", i, da_idx(da, i));
+		printf("\tda[%d] = %s\n", i, da_idx(da, i));
+	}
+
+	printf("\nRemoving values using da_pop :\n");
+	i = 0;
+	while (i == 0) {
+		p = da_pop(da);
+		if (p == NULL) {
+			i = 1;
+		} else {
+			printf("\tPoped '%s' (%d)\n", p, da_size(da));
+			free(p);
+		}
 	}
 
 	da_destroy(da);

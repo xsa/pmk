@@ -2,6 +2,7 @@
  * added strlcat.c and strlcat.h in compat directory.
  * pmkcfg.sh now have a check for strlcat.
  * fully included strlcat in compat.
+ * added da_pop() in dynarray and updated relative test.
 
 28 May 2003 mipsator
  * misc changes in Makefile.

@@ -50,6 +50,7 @@ dynary	*da_init(void);
 int	da_size(dynary *);
 int	da_usize(dynary *);
 int	da_push(dynary *, char *);
+char	*da_pop(dynary *);
 char	*da_idx(dynary *, int);
 void	da_destroy(dynary *);
 
