@@ -824,6 +824,9 @@ bool check_libpath(htable *pht) {
 bool get_cpu_data(htable *pht) {
 	char	*uname_m;
 	char	*pstr;
+	hkeys	*phk;
+	htable	*spht;
+	int	 i;
 	pmkobj	*po;
 	prsdata	*pdata;
 	prsopt	*ppo;
@@ -850,6 +853,23 @@ bool get_cpu_data(htable *pht) {
 	if (record_data(pht, PMKCONF_HW_CPU_ARCH, 'u', pstr) == false)
 		return(false);
 	verbosef("Setting '%s' => '%s'", PMKCONF_HW_CPU_ARCH, pstr);
+
+	spht = arch_wrapper(pdata, pstr);
+	if (spht != NULL) {
+		phk = hash_keys(spht);
+		if (phk != NULL) {
+			for(i = 0 ; i < phk->nkey ; i++) {
+				pstr = hash_get(spht, phk->keys[i]); /* XXX check ? */
+
+				if (record_data(pht, phk->keys[i], 'u', pstr) == false)
+					return(false);
+				verbosef("Setting '%s' => '%s'", phk->keys[i], pstr);
+			}
+
+			hash_free_hkeys(phk);
+		}
+		hash_destroy(spht);
+	}
 
 	prsdata_destroy(pdata);
 

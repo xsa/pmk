@@ -42,7 +42,7 @@
 
 
 /* pmksetup specific version */
-#define PREMAKE_SUBVER_PMKSETUP	"6"
+#define PREMAKE_SUBVER_PMKSETUP	"7"
 
 #define PREMAKE_CONFIG_TMP	PREMAKE_TMP_DIR "/pmk.XXXXXXXX"
 

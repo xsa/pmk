@@ -176,3 +176,6 @@ test_all: test_bins test_libs test_scans test_$(INST)
 # test target => alias to all target
 test: all
 
+# clean all
+clean: test_clean
+

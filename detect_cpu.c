@@ -330,7 +330,6 @@ bool x86_get_cpuid_data(x86_cpu_cell *cell) {
 	x86_exec_cpuid(0);
 
 	cell->level = x86_cpu_reg_eax;
-
 	buffer[0] = x86_cpu_reg_ebx;
 	buffer[1] = x86_cpu_reg_edx;
 	buffer[2] = x86_cpu_reg_ecx;
