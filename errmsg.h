@@ -45,10 +45,13 @@
 #define ERRMSG_INIT		"failed to initialize"
 #define ERRMSG_MEM		"out of memory."
 #define ERRMSG_OPEN		"failed to open " _ERRMSG_FILE_ERRNO
-#define ERRMSG_OPEN_TMP		"failed to open temporary file" _ERRMSG_FILE_ERRNO
+#define ERRMSG_OPEN_TMP		"failed to open temporary file" \
+					_ERRMSG_FILE_ERRNO
 #define ERRMSG_PARSE		"failed to parse ``%s''."
 #define ERRMSG_PROCESS		"failed to process"
-#define ERRMSG_REMOVE		"failed to remove " _ERRMSG_FILE_ERRNO
-#define ERRMSG_REMOVE_TMP	"failed to remove temporary file" _ERRMSG_FILE_ERRNO
+#define ERRMSG_REMOVE		"failed to remove " \
+					_ERRMSG_FILE_ERRNO
+#define ERRMSG_REMOVE_TMP	"failed to remove temporary file" \
+					_ERRMSG_FILE_ERRNO
 
 #endif /* _ERRMSG_H_ */
