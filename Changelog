@@ -1,3 +1,6 @@
+03 Jan 2004 mipsator
+ * fixed get_make_var() by replacing misused mkstemp() by tmps_open().
+
 # snapshot 0.7.9
 
 02 Jan 2004 xsa
@@ -50,7 +53,7 @@
  * added code to set shared lib flags (SLCFLAGS and SLCXXFLAGS).
  * updated pmkcomp.dat to sync with shared lib support.
  * updated samples to sync with shared lib support.
- * fixed some hash_add() calls were not using strdup().
+ * fixed some hash_add() calls that were not using strdup().
 
 # snapshot 0.7.8
 
