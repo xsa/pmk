@@ -79,7 +79,7 @@ clean:
 	@echo ""
 	@echo "-> Cleaning ..."
 	@echo ""
-	rm -f $(B_OBJS) $(L_OBJS) 
+	rm -f $(B_OBJS) $(L_OBJS)
 	rm -f $(LIB_STATIC) $(LIB_SHARED) $(LIB_SHARED_V)
 	rm -f $(NAME)
 	rm -f *.log Makefile

@@ -407,7 +407,7 @@
  * added better handling of the version when unknown.
 
 15 Dec 2003  mipsator
- * added gen_test_file() to automate test file generation in detect. 
+ * added gen_test_file() to automate test file generation in detect.
  * improved detect_compiler() to store data about the compiler.
  * updated use of detect_compiler() in pmk.
  * added comp_test.c in tests directory.
@@ -526,7 +526,7 @@
  * changed target of get_make_var() from test to all.
  * enabled pmkinstall in Makefile and Makefile.pmk including man page.
  * added pmkinstall man page.
- * modified compat.c to make ansi compiler happy. 
+ * modified compat.c to make ansi compiler happy.
 
 04 Nov 2003 mipsator
  * added makepath() in pathtools.
@@ -1131,8 +1131,8 @@
 
 04 May 2003 xsa
  * added verbosef(), now using it instead of debugf for the -V flag.
- * added predef_vars(), adding the static variables to the pmk.conf file. 
- * error checking when hadh_add() 'ing values. 
+ * added predef_vars(), adding the static variables to the pmk.conf file.
+ * error checking when hadh_add() 'ing values.
 
 04 May 2003 mipsator
  * finished and tested hash_resize().
@@ -1166,7 +1166,7 @@
 28 Apr 2003 mipsator
  * many fixes for 0.4 release ...
  * fixed find_file() again should be the last time.
- 
+
 
 27 Apr 2003 mipsator
  * moved man pages in man directory.

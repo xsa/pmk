@@ -343,7 +343,7 @@ bool parse_keyword(pkgcell *ppc, char *kword, char *value) {
 			}
 
 			return(true);
-		}                               
+		}
 	}
 
 	return(true);
