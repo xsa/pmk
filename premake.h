@@ -93,6 +93,8 @@
 
 #define PREMAKE_CONFIG_PATH	CONFDIR "/" PREMAKE_CONFIG 
 
+#define PREMAKE_TMP_DIR		"/tmp"
+
 /*
 	pmk.conf keys
 */

@@ -43,7 +43,7 @@
 /* pmksetup specific version */
 #define PREMAKE_SUBVER_PMKSETUP	"5"
 
-#define PREMAKE_CONFIG_TMP	"/tmp/pmk.XXXXXXXX"
+#define PREMAKE_CONFIG_TMP	PREMAKE_TMP_DIR "/pmk.XXXXXXXX"
 
 /* define printf format in pmk.conf */
 #define PMKSTP_WRITE_FORMAT	"%s %c \"%s\"\n"
