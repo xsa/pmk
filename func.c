@@ -125,7 +125,7 @@ bool func_wrapper(prscell *pcell, pmkdata *pgd) {
 			rval = pmk_build_shlib_name(&cmd, pcell->data, pgd);
 			break;
 		default :
-			errorf("Unknow token %d", cmd.token);
+			errorf("unknown token %d", cmd.token);
 			rval = false;
 	}
 
