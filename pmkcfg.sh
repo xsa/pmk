@@ -48,7 +48,7 @@ if test "$1" != "autodetected"; then
 		fi
 	fi
 	printf "Using %s %s %s\n\n" "$posix_sh" "$0" "$*"
-	$posix_sh $0 "autodetected" "$*"
+	$posix_sh $0 "autodetected" "$@"
 	exit $?
 else
 	# skip "autodetected"
@@ -61,6 +61,7 @@ fi
 #
 
 usermode=0
+privsep_user="nobody"
 
 if [ -z "$PREFIX" ]; then
 	prefix="/usr/local"
@@ -98,8 +99,9 @@ usage() {
 usage: $0 [-hup]
 
 	-h		usage
-	-u		set usermode
 	-p path		prefix override
+	-u		set usermode
+	-U		privilege separation user (default: nobody)
 "
 }
 
@@ -353,17 +355,21 @@ mkf_sed() {
 #
 
 # parse options
-while getopts "hp:u" arg; do
+while getopts "hp:uU:" arg; do
 	case $arg in
-		p)	echo "Setting prefix to '$OPTARG'"
+		h)	usage
+			exit 1
+			;;
+
+		p)	printf "Setting prefix to '%s'\n" "$OPTARG"
 			base="$OPTARG"
 			;;
 
 		u)	usermode=1
 			;;
 
-		h)	usage
-			exit 1
+		U)	printf "Setting privsep user tp '%s'\n" "$OPTARG"
+			privsep_user="$OPTARG"
 			;;
 	esac
 done
@@ -406,6 +412,7 @@ else
 fi
 
 mkf_sed 'SYSCONFDIR' "$sysdir"
+mkf_sed 'PRIVSEP_USER' "$privsep_user"
 
 
 #

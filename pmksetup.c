@@ -238,7 +238,7 @@ void write_new_data(htable *pht) {
  *		greather, equal to, or less than the character b.
  */
 int keycomp(const void *a, const void *b) {
-	return(strcmp(*(const char **)a, *(const char **)b));
+	return(strcmp((const char *) a, (const char *) b));
 }
 
 /*
@@ -746,7 +746,6 @@ void char_replace(char *buf, const char search, const char replace) {
 	}
 }
 
-
 /*
  * Simple formated verbose function
  *
@@ -790,8 +789,7 @@ bool detection_loop(int argc, char *argv[]) {
 	bool		 process_clopts = false,
 			 cfg_backup = false;
 	char		*pstr;
-	int		 ch,
-			 error = 0;
+	int		 ch;
 	prsopt		 *ppo;
 	
 	extern int	 optind;
@@ -919,12 +917,7 @@ bool detection_loop(int argc, char *argv[]) {
 	write_new_data(ht);
 	/* destroying the hash once we're done with it */	
 	hash_destroy(ht);
-
-	if (error != 0) {
-		return(false);
-	}
-
-	return(0);
+	return(true);
 }
 
 /*
@@ -946,16 +939,32 @@ void child_loop(uid_t uid, gid_t gid, int argc, char *argv[]) {
 	printf("\n\n");
 
 	if (getuid() == 0) {
-		/* user has root privs */
+		/* user has root privs, DROP THEM ! */
+		if (setegid(gid) != 0) {
+			/* failed to change egid */
+			errorf(EMSG_PRIV_FMT, "egid");
+			_exit(EXIT_FAILURE);
+		}
 		if (setgid(gid) != 0) {
 			/* failed to change gid */
+			errorf(EMSG_PRIV_FMT, "gid");
+			_exit(EXIT_FAILURE);
+		}
+		if (seteuid(uid) != 0) {
+			/* failed to change euid */
+			errorf(EMSG_PRIV_FMT, "euid");
 			_exit(EXIT_FAILURE);
 		}
 		if (setuid(uid) != 0) {
 			/* failed to change uid */
+			errorf(EMSG_PRIV_FMT, "uid");
 			_exit(EXIT_FAILURE);
 		}
 	}
+#ifdef PMKSETUP_DEBUG
+	debugf("gid = %d", getgid());
+	debugf("uid = %d", getuid());
+#endif
 
 	if (detection_loop(argc, argv) == false)
 		exit(EXIT_FAILURE);
@@ -975,7 +984,7 @@ void parent_loop(pid_t pid) {
 
 	waitpid(pid, &status, WUNTRACED);
 
-#ifdef DEBUG
+#ifdef PMKSETUP_DEBUG
 	debugf("waitpid() status = %d", WEXITSTATUS(status));
 #endif
 
@@ -984,7 +993,7 @@ void parent_loop(pid_t pid) {
 			/* hazardous result => exit */
 			errorf("cannot close temporary file '%s' : %s.",
 						sfp, strerror(errno));
-			_exit(EXIT_FAILURE);
+			exit(EXIT_FAILURE);
 		}
 
 		/*
@@ -1021,6 +1030,9 @@ void parent_loop(pid_t pid) {
 		}
 #endif	/* PMKSETUP_DEBUG */
 	}
+
+	if (error == true)
+		exit(EXIT_FAILURE);
 }
 
 /*
@@ -1034,17 +1046,17 @@ int main(int argc, char *argv[]) {
 	uid_t		 uid = 0;
 
 	if (getuid() == 0) {
+#ifdef PMKSETUP_DEBUG
+		debugf("PRIVSEP_USER = '%s'", PRIVSEP_USER);
+#endif
 		pw = getpwnam(PRIVSEP_USER);
 		if (pw == NULL) {
-			/* XXX err msg */
+			errorf("cannot get user data for '%s'.", PRIVSEP_USER);
 			exit(EXIT_FAILURE);
 		}
 		uid = pw->pw_uid;
 		gid = pw->pw_gid;
-
-		/* XXX ? */
 	}
-
 
 	sfp = tmp_open(PREMAKE_CONFIG_TMP, "w", sfn, sizeof(sfn));
 	if (sfp == NULL) {
@@ -1058,7 +1070,7 @@ int main(int argc, char *argv[]) {
 	switch (pid) {
 		case -1:
 			/* fork failed */
-			/* XXX err msg */
+			errorf("fork failed.");
 			break;
 
 		case 0:

@@ -26,12 +26,13 @@ CFGFLAGS=	-DSYSCONFDIR=\"$(SYSCONFDIR)\" -DCONFDIR=\"$(CONFDIR)\"
 # used for the dirname() function check in libgen
 LGEN_FLAGS=	@LGEN_FLAGS@
 
-# Flag to enable pmk in user mode (check INSTALL file for details).
-USERMODE=	@USERMODE@
+# privilege separation user
+PRIVSEP_USER=	@PRIVSEP_USER@
 
-# Edit and use the following if needed :
 
-# Warning options, uncomment as your need
+# Edit and use the following only if needed:
+
+# Warning options
 #WARN=		-Wall
 #WARN=		-Werror
 #WARN=		-ansi -pedantic
@@ -46,8 +47,8 @@ USERMODE=	@USERMODE@
 
 
 CFLAGS=		@CFLAGS@ $(WARN) $(DBGFLAGS) $(CFGFLAGS) \
-		$(USERMODE) $(ENV_CFLAGS) \
-		-DDATADIR=\"$(DATADIR)\"
+		$(ENV_CFLAGS) -DDATADIR=\"$(DATADIR)\" \
+		-DPRIVSEP_USER=\"$(PRIVSEP_USER)\"
 
 LDFLAGS=	@LDFLAGS@
 
