@@ -33,7 +33,14 @@
 #ifndef _PMKSCAN_H_
 #define _PMKSCAN_H_
 
+#include "hash.h"
+
 /* pmkscan specific version */
 #define PREMAKE_SUBVER_PMKSCAN	"1"
+
+typedef struct {
+	htable	*functions,
+		*includes;
+} scandata;
 
 #endif /* _PMKSCAN_H_ */

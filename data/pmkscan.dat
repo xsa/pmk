@@ -1,5 +1,7 @@
 .INCLUDES
-sys_param=test_for_sys_param
+sys/param.h=test_for_sys_param
+dirent.h=test_dirent
+stdbool.h=test_stdbool
 .END
 
 .FUNCTIONS
