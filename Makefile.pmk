@@ -70,6 +70,8 @@ cfgrm:
 		echo 'Configure using pmkcfg.sh'; \
 		CC=$(CC) sh pmkcfg.sh; \
 	fi
+	@echo 'OK' > cfgrm
+	@rm -f cfgum
 	@echo 'Done.'
 
 cfgum:
@@ -80,6 +82,8 @@ cfgum:
 		echo 'Configure using pmkcfg.sh'; \
 		CC=$(CC) sh pmkcfg.sh -u; \
 	fi
+	@echo 'OK' > cfgum
+	@rm -f cfgrm
 	@echo 'Done.'
 
 config: @MKTARGET@
@@ -145,7 +149,7 @@ $(INST)-clean:
 	rm -f $(I_OBJS) $(INST)
 
 clean: $(PREMAKE)-clean $(SETUP)-clean $(SCAN)-clean $(INST)-clean
-	rm -f compat/compat.h config *.core
+	rm -f compat/compat.h config cfgum cfgrm *.core
 
 test_$(PREMAKE): $(PREMAKE)
 	@echo ""
