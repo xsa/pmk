@@ -99,7 +99,11 @@ pmkobj *po_mk_hash(htable *pht) {
 }
 
 /*
-	XXX useful ?
+	duplicate object
+
+	po : object to copy
+
+	return : copied object
 */
 
 pmkobj *po_dup(pmkobj *po) {
@@ -123,7 +127,11 @@ pmkobj *po_dup(pmkobj *po) {
 }
 
 /*
-	XXX
+	get object type
+
+	po : objet
+
+	return : type of object
 */
 
 potype po_get_type(pmkobj *po) {
@@ -135,7 +143,11 @@ potype po_get_type(pmkobj *po) {
 }
 
 /*
-	XXX
+	get object data
+
+	po : objet
+
+	return : generic data of object or NULL
 */
 
 void *po_get_data(pmkobj *po) {
@@ -147,7 +159,11 @@ void *po_get_data(pmkobj *po) {
 }
 
 /*
-	XXX
+	get data from string object
+
+	po : object
+
+	return : string or NULL
 */
 
 char *po_get_str(pmkobj *po) {
@@ -160,7 +176,11 @@ char *po_get_str(pmkobj *po) {
 }
 
 /*
-	XXX
+	get data from list object
+
+	po : object
+
+	return : dynary or NULL
 */
 
 dynary *po_get_list(pmkobj *po) {
@@ -173,7 +193,11 @@ dynary *po_get_list(pmkobj *po) {
 }
 
 /*
-	XXX
+	free object
+
+	po : object to deallocate
+
+	return : -
 */
 
 void po_free(pmkobj *po) {
@@ -200,11 +224,20 @@ void po_free(pmkobj *po) {
 }
 
 /*
-	XXX
+	append a value in an object
+
+	orig : original object
+	value : data to append
+	misc : misc specific data :
+		- separator for a string object
+		- unused for a list object 
+
+	return : updated object or NULL if failed
 */
 
 pmkobj *po_append(void *orig, void *value, void *misc) {
 	char	*pbuf;
+	dynary	*da;
 	pmkobj	*po_orig,
 		*po_value,
 		*po;
