@@ -40,34 +40,34 @@ parenthesis. As you can see Makefile.in will be the template name.
    -----------------------
 
 It can be useful to define some basic variables such as package name
-and version. For this we will use the DEFINE command as following:
+and version. For this, we will use the DEFINE command as following:
 
 DEFINE {
 	PACKAGE = "hello"
 	VERSION = "0.1"
 }
 
-If the target(s) file(s) contain the @PACKAGE@ and @VERSION@ tags then
+If the target(s) file(s) contain(s) the @PACKAGE@ and @VERSION@ tags then
 they will be replaced by the variables values.
 
 
 4) First check
    -----------
 
-Lets say that we have a hello.c file that needs the string header
-For that we use the CHECK_HEADER command like following:
+Lets say that we have a hello.c file that needs the string header.
+For that, we use the CHECK_HEADER command like following:
 
 CHECK_HEADER(header_misc_code) {
 	NAME = "string.h"
 }
 
-The NAME option contains the header to check. Lets see what our actual
+The NAME option contains the header to check. Let's see what our actual
 pmkfile contains. First we create the template with the following command:
 
 echo "PACKAGE=@PACKAGE@" > Makefile.in
 echo "VERSION=@VERSION@" >> Makefile.in
 
-You can now type 'pmk'. The resulting output should like this:
+You can now type 'pmk'. The resulting output should look like this:
 
 __[OUTPUT]____________________________________________________[BEGIN]__
 
@@ -92,7 +92,7 @@ Created '/home/mips/tmp/Makefile'.
 
 __[OUTPUT]______________________________________________________[END]__
 
-And the generated Makefile should looks like:
+And the generated Makefile should look like:
 
 __[FILE]______________________________________________________[BEGIN]__
 PACKAGE=hello
@@ -149,9 +149,9 @@ We'll see later how to use an alternate variable.
    -------------------------------
 
 Let's say that our package has the gtkhello.c source that builds a gtk
-version of our hello program. That said we need to check if gtk is present
+version of our hello program. That said, we need to check if gtk is present
 on the system. We have two possibilities to do that: first by using
-pkg-config or second by checking the library.
+pkg-config or second the second one by checking the library.
 
 We are going to learn how to check gtk via pkgconfig support:
 
