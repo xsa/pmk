@@ -91,7 +91,8 @@ bool parse_c_file(char *filename, scandata *sdata, htable *phtgen) {
 	FILE		*fp;
 	char		 line[TMP_BUF_LEN], /* XXX better size of buffer ? */
 			 idtf[TMP_BUF_LEN],
-			*pval;
+			*pval,
+			*p;
 	regex_t		 re_inc;
 	regmatch_t	 rm_inc[1];
 
@@ -120,8 +121,19 @@ bool parse_c_file(char *filename, scandata *sdata, htable *phtgen) {
 #ifdef DEBUG
 					printf("Setting header '%s'\n", idtf);
 #endif
+
+					/* XXX temporary */
+					p = strdup(pval);
+					pval = p;
+					while (*p != CHAR_EOS) {
+						if (*p == ',')
+							*p = '\n';
+
+						p++;
+					}
+
 					/* record header data */
-					hash_add(phtgen, idtf, strdup(pval));
+					hash_add(phtgen, idtf, pval);
 				}
 			}
 		}
@@ -160,7 +172,7 @@ bool output_file(char *ofile, htable *pht) {
 	for(i = 0 ; i < n ; i++) {
 		value = (char *)hash_get(pht, keys[i]);
 
-		fprintf(fp, "%s\n", value);
+		fprintf(fp, "%s\n\n", value);
 	}
 
 	fclose(fp);

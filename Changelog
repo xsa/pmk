@@ -2,6 +2,8 @@
  * added output_file() and misc in pmkscan.
  * improved hash functions to work with (void*) instead of (char*).
  * update all files that use hash_add() and hash_get().
+ * improve pmkscan for data parsing and output file.
+ * updated data/pmkscan.dat file.
 
 19 Jul 2003 mipsator
  * updated STATUS
