@@ -458,11 +458,44 @@ debugf("unknown = '%s'", line);
 /*
 */
 
-bool pkg_recurse(pkgdata *ppd, char *reqs) {
-	char		*mod,
-			*pcf;
-	dynary		*pda;
+pkgcell *pkg_cell_add(pkgdata *ppd, char *mod) {
+	char		*pcf;
 	pkgcell		*ppc;
+
+	/* get pc file name */
+	pcf = hash_get(ppd->files, mod);
+
+	/* parse pc file */
+	ppc = parse_pc_file(pcf);
+
+	/* store pkgcell in hash */
+	if (hash_update(ppd->cells, mod, ppc) == HASH_ADD_FAIL) {
+		return(NULL);
+#ifdef PKGCFG_DEBUG
+	} else {
+debugf("adding pkgcell for '%s'", mod);
+#endif
+	}
+
+	/* add module in list */
+	da_push(ppd->mods, strdup(mod));
+
+#ifdef PKGCFG_DEBUG
+debugf("pkgcell requires = '%s'", ppc->requires);
+#endif
+	if (ppc->requires != NULL) {
+		pkg_recurse(ppd, ppc->requires); /* XXX check */
+	}
+
+	return(ppc);
+}
+
+/*
+*/
+
+bool pkg_recurse(pkgdata *ppd, char *reqs) {
+	char		*mod;
+	dynary		*pda;
 	unsigned int	 i;
 
 #ifdef PKGCFG_DEBUG
@@ -481,27 +514,7 @@ debugf("recursing '%s'", reqs);
 
 		/*  check if module has been already processed */
 		if (hash_get(ppd->cells, mod) == NULL) {
-			/* get pc file name */
-			pcf = hash_get(ppd->files, mod);
-
-			/* parse pc file */
-			ppc = parse_pc_file(pcf);
-
-			/* store pkgcell in hash */
-			hash_update(ppd->cells, mod, ppc); /* XXX check */
-#ifdef PKGCFG_DEBUG
-debugf("adding pkgcell for '%s'", mod);
-#endif
-
-			/* add module in list */
-			da_push(ppd->mods, strdup(mod));
-
-#ifdef PKGCFG_DEBUG
-debugf("pkgcell requires = '%s'", ppc->requires);
-#endif
-			if (ppc->requires != NULL) {
-				pkg_recurse(ppd, ppc->requires); /* XXX check */
-			}
+			pkg_cell_add(ppd, mod); /* XXX check */
 		}
 	}
 
@@ -525,7 +538,7 @@ debugf("single_append '%s', '%s'", ostr, astr);
 	if (*astr == CHAR_EOS)
 		return(ostr);
 
-	if (*ostr != CHAR_EOS) {
+	if ((*ostr != CHAR_EOS) && (ostr != NULL)) {
 		pstr = strstr(ostr, astr);
 		while (pstr != NULL) {
 			pstr = pstr + strlen (astr);
@@ -604,5 +617,11 @@ char *pkg_get_libs(pkgdata *ppd) {
 /*
 */
 
-
+bool pkg_mod_exists(pkgdata *ppd, char *mod) {
+	if (hash_get(ppd->files, mod) == NULL) {
+		return(false);
+	} else {
+		return(true);
+	}
+}
 
