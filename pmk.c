@@ -147,7 +147,10 @@ bool process_template(char *template, pmkdata *pgd) {
 	ht = pgd->htab;
 
 	/* get the file name */
-	strlcpy(lbuf, basename(template), MAXPATHLEN); /* XXX check ? */
+	if (strlcpy(lbuf, basename(template), sizeof(lbuf)) >= sizeof(lbuf)) {
+		errorf("buffer overflow");
+		return(false);
+	}
 
 	/* remove the last suffix */
 	ptmp = strrchr(lbuf, '.');
@@ -310,7 +313,6 @@ bool process_cmd(prsdata *pdata, pmkdata *pgd) {
 	pcell = pdata->first;
 
 	while (pcell != NULL) {
-		/* XXX */
 		if (check_cmd(pcell->name, pgd) == false)
 			return(false);
 
@@ -560,15 +562,15 @@ int main(int argc, char *argv[]) {
 	if (enable_sw != NULL) {
 		/* command line switches to enable */
 		da = da_init();
-		str_to_dynary(enable_sw, ',', da); /* XXX check */
-		do {
-			pstr = da_pop(da);
-			if (pstr != NULL) {
-				hash_add(gdata.labl, pstr, strdup("TRUE")); /* XXX  check */
+		if (str_to_dynary(enable_sw, ',', da) == true) {
+			pstr = da_pop(da);	
+			while (pstr != NULL) {
+				hash_add(gdata.labl, pstr, strdup("TRUE"));
 				ovrsw++; /* increment number of overriden switches */
 				free(pstr);
+				pstr = da_pop(da);	
 			}
-		} while (pstr != NULL);
+		}
 		da_destroy(da);
 	}
 

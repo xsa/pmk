@@ -142,7 +142,6 @@ char *parse_quoted(char *pstr, pmkobj *po, size_t size) {
 		*pbuf;
 
 	buffer = (char *) malloc(size);
-	/* XXX TODO should do as in parse_word */
 	if (buffer == NULL) {
 		return(NULL);
 	}
@@ -219,7 +218,7 @@ char *parse_list(char *pstr, pmkobj *po, size_t size) {
 				pstr = parse_quoted(pstr, &potmp, size);
 				if (pstr == NULL) {
 					da_destroy(pda);
-					/* XXX TODO err msg */
+					strlcpy(parse_err, PRS_ERR_SYNTAX, sizeof(parse_err));
 					return(NULL);
 				}
 
@@ -277,15 +276,17 @@ char *parse_list(char *pstr, pmkobj *po, size_t size) {
 
 				}
 
+				if (pbuf == buffer) {
+					da_destroy(pda);
+					strlcpy(parse_err, PRS_ERR_SYNTAX, sizeof(parse_err));
+					return(NULL);
+				}
+
 				*pbuf = CHAR_EOS;
 
 #ifdef DEBUG_PRS
 				debugf("add '%s' into dynary (simple).", buffer);
 #endif
-
-				/* XXX TODO check if pbuf == buffer
-					like for example when having ",)"
-				*/
 
 				if (da_push(pda, buffer) == false) {
 					da_destroy(pda);
@@ -421,7 +422,7 @@ bool parse_cell(char *line, prscell *pcell) {
 		strlcpy(parse_err, "command parsing failed.", sizeof(parse_err));
 		return(false);
 	} else {
-		strlcpy(pcell->name, po.data, sizeof(pcell->name)); /* XXX  TODO check */
+		strlcpy(pcell->name, po.data, sizeof(pcell->name));
 		free(po.data);
 	}
 #ifdef DEBUG_PRS
@@ -559,7 +560,7 @@ bool parse_opt(char *line, htable *ht) {
 		strlcpy(parse_err, PRS_ERR_SYNTAX, sizeof(parse_err));
 		return(false);
 	} else {
-		strlcpy(key, po.data, sizeof(key)); /* XXX TODO check */
+		strlcpy(key, po.data, sizeof(key));
 		free(po.data);
 	}
 
@@ -663,7 +664,7 @@ bool parse(FILE *fp, prsdata *pdata) {
 				if (process == false) {
 					pcell = prscell_init();
 					if (pcell == NULL) {
-						/* XXX TODO error */
+						errorf("prscell init failed");
 						return(false);
 					}
 
