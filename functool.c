@@ -210,7 +210,10 @@ char *str_to_def(char *str) {
 	char	*newstr,
 		*p;
 
-	newstr = strdup(str); /* XXX check */
+	newstr = strdup(str);
+	if (newstr == NULL)
+		return(NULL);
+
 	p = newstr;
 
 	while (*p != CHAR_EOS) {
@@ -245,21 +248,35 @@ bool record_def(htable *ht, char *name, bool status) {
 		def_str[MAX_HASH_KEY_LEN],
 		have_str[MAX_HASH_VALUE_LEN],
 		def_val[MAX_HASH_VALUE_LEN];
+	int	s;
 
 	semidef = str_to_def(name);
-	snprintf(def_str, sizeof(def_str), "DEF__%s", semidef);
-	snprintf(have_str, sizeof(have_str), "HAVE_%s", semidef);
+	if (semidef == NULL)
+		return(false);
 
+	s = sizeof(def_str);
+	if (snprintf(def_str, s, "DEF__%s", semidef) >= s)
+		return(false);
+
+	s = sizeof(have_str);
+	if (snprintf(have_str, s, "HAVE_%s", semidef) >= s)
+		return(false);
+
+	s = sizeof(def_val);
 	if (status == true) {
-		snprintf(def_val, sizeof(def_val), "#define %s 1", have_str); /* XXX check size */
+		if (snprintf(def_val, s, "#define %s 1", have_str) >= s) 
+			return(false);
 	} else {
-		snprintf(def_val, sizeof(def_val), "#undef %s", have_str); /* XXX check size */
+		if (snprintf(def_val, s, "#undef %s", have_str) >= s)
+			return(false);
 	}
-	hash_add(ht, def_str, def_val);
+	
+	if (hash_add(ht, def_str, def_val) == HASH_ADD_FAIL)
+		return(false);
 	/*debugf("%s => %s", def_str, def_val);*/
 
 	free(semidef);
-	return(true); /* XXX */
+	return(true);
 }
 
 /*
@@ -276,11 +293,15 @@ bool record_val(htable *ht, char *name, char*value) {
 	char	*semidef;
 
 	semidef = str_to_def(name);
-	hash_add(ht, semidef, value);
+	if (semidef == NULL)
+		return(false);
+
+	if (hash_add(ht, semidef, value) == HASH_ADD_FAIL)
+		return(false);
 	/*debugf("%s => %s", semidef, value);*/
 
 	free(semidef);
-	return(true); /* XXX */
+	return(true);
 }
 
 /*
@@ -288,9 +309,11 @@ bool record_val(htable *ht, char *name, char*value) {
 */
 
 bool label_set(htable *ht, char *name, bool status) {
-	hash_add(ht, name, bool_to_str(status));
+	if (hash_add(ht, name, bool_to_str(status)) == HASH_ADD_FAIL)
+		return(false);
 	/*debugf("%s => %s", name, hash_get(ht, name));*/
-	return(true); /* XXX */
+
+	return(true);
 }
 
 /*
@@ -298,7 +321,13 @@ bool label_set(htable *ht, char *name, bool status) {
 */
 
 bool label_check(htable *ht, char *name) {
-	return(check_bool_str(hash_get(ht, name))); /* XXX test ?*/
+	char	*p;
+
+	p = hash_get(ht, name);
+	if (p == NULL)
+		return(false);
+
+	return(check_bool_str(p)); /* XXX test ?*/
 }
 
 /*

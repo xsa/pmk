@@ -1,4 +1,10 @@
+04 May 2003 mipsator
+ * added checks in str_to_def().
+ * more checks in record_def().
+ * added checks in label_set() and label_check().
+
 03 May 2003 mipsator
+ * rewritten record_def().
  * added stuff to store label states (now need to handle dependencies).
  * added cleaning function to simplify pmk (need more work).
 
