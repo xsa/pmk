@@ -230,7 +230,7 @@ bool str_to_ulong(char *str, int base, long *value) {
 dynary *str_to_dynary(char *str, char sep) {
 	static char	buf[2];
 
-	snprintf(buf, sizeof(buf), "%c", sep); /* XXX check ! */
+	snprintf(buf, sizeof(buf), "%c", sep); /* should not overflow */
 	return(str_to_dynary_adv(str, buf));
 }
 

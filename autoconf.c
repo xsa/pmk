@@ -171,7 +171,7 @@ bool ac_parse_config(pmkdata *pgd) {
 	template : target file
 */
 
-void ac_process_dyn_var(pmkdata *pgd, char *template) {
+bool ac_process_dyn_var(pmkdata *pgd, char *template) {
 	char	*pstr;
 	htable	*pht;
 
@@ -194,35 +194,46 @@ void ac_process_dyn_var(pmkdata *pgd, char *template) {
 
 	/* init builddir */
 	pstr = hash_get(pht, PMK_DIR_BLD_ROOT_ABS);
-	hash_update_dup(pht, "abs_top_builddir", pstr);
+	if (hash_update_dup(pht, "abs_top_builddir", pstr) == HASH_ADD_FAIL)
+		return(false);
 
 	/* set abs_builddir */
 	pstr = hash_get(pht, PMK_DIR_BLD_ABS);
-	hash_update_dup(pht, "abs_builddir", pstr);
+	if (hash_update_dup(pht, "abs_builddir", pstr) == HASH_ADD_FAIL)
+		return(false);
 
 	/* compute top_builddir */
 	pstr = hash_get(pht, PMK_DIR_BLD_ROOT_REL);
-	hash_update_dup(pht, "top_builddir", pstr);
+	if (hash_update_dup(pht, "top_builddir", pstr) == HASH_ADD_FAIL)
+		return(false);
 
 	/* Mr GNU said : rigorously equal to ".". So i did :) */
 	pstr = hash_get(pht, PMK_DIR_BLD_REL);
-	hash_update_dup(pht, "builddir", pstr);
+	if (hash_update_dup(pht, "builddir", pstr) == HASH_ADD_FAIL)
+		return(false);
 
 	/* set absolute srcdir */
 	pstr = hash_get(pht, PMK_DIR_SRC_ROOT_ABS);
-	hash_update_dup(pht, "abs_top_srcdir", pstr);
+	if (hash_update_dup(pht, "abs_top_srcdir", pstr) == HASH_ADD_FAIL)
+		return(false);
 
 	/* compute top_srcdir */
 	pstr = hash_get(pht, PMK_DIR_SRC_ROOT_REL);
-	hash_update_dup(pht, "top_srcdir", pstr);
+	if (hash_update_dup(pht, "top_srcdir", pstr) == HASH_ADD_FAIL)
+		return(false);
 
 	/* absolute path of template */
 	pstr = hash_get(pht, PMK_DIR_SRC_ABS);
-	hash_update_dup(pht, "abs_srcdir", pstr);
+	if (hash_update_dup(pht, "abs_srcdir", pstr) == HASH_ADD_FAIL)
+		return(false);
 
 	/* relative path to template */
 	pstr = hash_get(pht, PMK_DIR_SRC_REL);
-	hash_update_dup(pht, "srcdir", pstr);
+	if (hash_update_dup(pht, "srcdir", pstr) == HASH_ADD_FAIL)
+		return(false);
+
+	/* all operations succeeded */
+	return(true);
 }
 
 /*
@@ -246,81 +257,135 @@ void ac_clean_dyn_var(htable *pht) {
 	set autoconf specific variables
 */
 
-void ac_set_variables(htable *pht) {
+bool ac_set_variables(htable *pht) {
 	char	 buf[TMP_BUF_LEN],
                 *pstr;
 
 	/* path variables */
 	pstr = (char *) hash_get(pht, "PREFIX");
-	hash_update_dup(pht, "prefix", pstr);
+	if (hash_update_dup(pht, "prefix", pstr) == HASH_ADD_FAIL)
+		return(false);
 	
 	pstr = (char *) hash_get(pht, "SYSCONFDIR");
-	hash_update_dup(pht, "sysconfdir", pstr);
+	if (hash_update_dup(pht, "sysconfdir", pstr) == HASH_ADD_FAIL)
+		return(false);
 
 	
-	hash_update_dup(pht, "exec_prefix", "${prefix}");
-	hash_update_dup(pht, "bindir", "${exec_prefix}/bin");
-	hash_update_dup(pht, "sbindir", "${exec_prefix}/sbin");
-	hash_update_dup(pht, "libexecdir", "${exec_prefix}/libexec");
-	hash_update_dup(pht, "libdir", "${exec_prefix}/lib");
-	hash_update_dup(pht, "datadir", "${prefix}/share");
-	hash_update_dup(pht, "includedir", "${prefix}/include");
-	hash_update_dup(pht, "mandir", "${prefix}/man");
-	hash_update_dup(pht, "infodir", "${prefix}/info");
-	hash_update_dup(pht, "sharedstatedir", "${prefix}/com");
-	hash_update_dup(pht, "localstatedir", "${prefix}/var");
-	hash_update_dup(pht, "oldincludedir", "/usr/include");
+	if (hash_update_dup(pht, "exec_prefix", "${prefix}") == HASH_ADD_FAIL)
+		return(false);
+	if (hash_update_dup(pht, "bindir", "${exec_prefix}/bin") == HASH_ADD_FAIL)
+		return(false);
+	if (hash_update_dup(pht, "sbindir", "${exec_prefix}/sbin") == HASH_ADD_FAIL)
+		return(false);
+	if (hash_update_dup(pht, "libexecdir", "${exec_prefix}/libexec") == HASH_ADD_FAIL)
+		return(false);
+	if (hash_update_dup(pht, "libdir", "${exec_prefix}/lib") == HASH_ADD_FAIL)
+		return(false);
+	if (hash_update_dup(pht, "datadir", "${prefix}/share") == HASH_ADD_FAIL)
+		return(false);
+	if (hash_update_dup(pht, "includedir", "${prefix}/include") == HASH_ADD_FAIL)
+		return(false);
+	if (hash_update_dup(pht, "mandir", "${prefix}/man") == HASH_ADD_FAIL)
+		return(false);
+	if (hash_update_dup(pht, "infodir", "${prefix}/info") == HASH_ADD_FAIL)
+		return(false);
+	if (hash_update_dup(pht, "sharedstatedir", "${prefix}/com") == HASH_ADD_FAIL)
+		return(false);
+	if (hash_update_dup(pht, "localstatedir", "${prefix}/var") == HASH_ADD_FAIL)
+		return(false);
+	if (hash_update_dup(pht, "oldincludedir", "/usr/include") == HASH_ADD_FAIL)
+		return(false);
 
-	hash_update_dup(pht, "INSTALL_DATA", "${INSTALL} -m 644");
-	hash_update_dup(pht, "INSTALL_PROGRAM", "${INSTALL}");
-	hash_update_dup(pht, "INSTALL_SCRIPT", "${INSTALL}");
-	hash_update_dup(pht, "INSTALL_STRIP_PROGRAM", "${SHELL} $(install_sh) -c -s");
+	if (hash_update_dup(pht, "INSTALL_DATA", "${INSTALL} -m 644") == HASH_ADD_FAIL)
+		return(false);
+	if (hash_update_dup(pht, "INSTALL_PROGRAM", "${INSTALL}") == HASH_ADD_FAIL)
+		return(false);
+	if (hash_update_dup(pht, "INSTALL_SCRIPT", "${INSTALL}") == HASH_ADD_FAIL)
+		return(false);
+	if (hash_update_dup(pht, "INSTALL_STRIP_PROGRAM",
+			"${SHELL} $(install_sh) -c -s") == HASH_ADD_FAIL)
+		return(false);
 
 /*
 	well i dunno if the following really needs to be full compatible with autoconf 
 */
 	pstr = (char *) hash_get(pht, "OS_ARCH");
-	hash_update_dup(pht, "host_cpu", pstr);
-	hash_update_dup(pht, "build_cpu", pstr); /* XXX  ouargl cross compiling ... */
-	hash_update_dup(pht, "target_cpu", pstr); /* XXX  ouargl cross compiling ... */
+	if (hash_update_dup(pht, "host_cpu", pstr) == HASH_ADD_FAIL)
+		return(false);
+	if (hash_update_dup(pht, "build_cpu", pstr) == HASH_ADD_FAIL)
+		return(false); /* XXX  ouargl cross compiling ... */
+	if (hash_update_dup(pht, "target_cpu", pstr) == HASH_ADD_FAIL)
+		return(false); /* XXX  ouargl cross compiling ... */
 
         pstr = (char *) hash_get(pht, "OS_NAME");
         strlcpy(buf, pstr, sizeof(buf)); /* no need to check here */
         pstr = (char *) hash_get(pht, "OS_VERSION");
-        strlcat(buf, pstr, sizeof(buf)); /* XXX check */
-	hash_update_dup(pht, "host_os", buf);
-	hash_update_dup(pht, "build_os", buf); /* XXX  ouargl cross compiling ... */
-	hash_update_dup(pht, "target_os", buf); /* XXX  ouargl cross compiling ... */
+        if (strlcat(buf, pstr, sizeof(buf)) >= sizeof(buf))
+		return(false);
 
-	hash_update_dup(pht, "host_vendor", "vendorisnotset");
-	hash_update_dup(pht, "build_vendor", "vendorisnotset");
-	hash_update_dup(pht, "target_vendor", "vendorisnotset");
+	if (hash_update_dup(pht, "host_os", buf) == HASH_ADD_FAIL)
+		return(false);
+	if (hash_update_dup(pht, "build_os", buf) == HASH_ADD_FAIL)
+		return(false); /* XXX  ouargl cross compiling ... */
+	if (hash_update_dup(pht, "target_os", buf) == HASH_ADD_FAIL)
+		return(false); /* XXX  ouargl cross compiling ... */
 
-        pstr = (char *) hash_get(pht, "host_cpu");
-        strlcpy(buf, pstr, sizeof(buf)); /* no need to check here */
-        strlcat(buf, "-", sizeof(buf)); /* no need to check here */
-        pstr = (char *) hash_get(pht, "host_vendor");
-        strlcat(buf, pstr, sizeof(buf)); /* no need to check here */
-        strlcat(buf, "-", sizeof(buf)); /* no need to check here */
-        pstr = (char *) hash_get(pht, "host_os");
-        strlcat(buf, pstr, sizeof(buf)); /* XXX check */
+	if (hash_update_dup(pht, "host_vendor", "vendorisnotset") == HASH_ADD_FAIL)
+		return(false);
+	if (hash_update_dup(pht, "build_vendor", "vendorisnotset") == HASH_ADD_FAIL)
+		return(false);
+	if (hash_update_dup(pht, "target_vendor", "vendorisnotset") == HASH_ADD_FAIL)
+		return(false);
 
-	hash_update_dup(pht, "host", strdup(buf));
-	hash_update_dup(pht, "build", strdup(buf));
-	hash_update_dup(pht, "target", strdup(buf));
+	pstr = (char *) hash_get(pht, "host_cpu");
+	strlcpy(buf, pstr, sizeof(buf)); /* no need to check here */
+	strlcat(buf, "-", sizeof(buf)); /* no need to check here */
+	pstr = (char *) hash_get(pht, "host_vendor");
+	strlcat(buf, pstr, sizeof(buf)); /* no need to check here */
+	strlcat(buf, "-", sizeof(buf)); /* no need to check here */
+	pstr = (char *) hash_get(pht, "host_os");
+	if (strlcat(buf, pstr, sizeof(buf)) >= sizeof(buf))
+		return(false); /* overflow */
 
-	hash_update_dup(pht, "host_alias", strdup(""));
-	hash_update_dup(pht, "build_alias", strdup(""));
-	hash_update_dup(pht, "target_alias", strdup(""));
+	if (hash_update_dup(pht, "host", buf) == HASH_ADD_FAIL)
+		return(false);
+	if (hash_update_dup(pht, "build", buf) == HASH_ADD_FAIL)
+		return(false);
+	if (hash_update_dup(pht, "target", buf) == HASH_ADD_FAIL)
+		return(false);
 
-	hash_update_dup(pht, "build_triplet", strdup(""));
-	hash_update_dup(pht, "host_triplet", strdup(""));
-	hash_update_dup(pht, "target_triplet", strdup(""));
+	if (hash_update_dup(pht, "host_alias", "") == HASH_ADD_FAIL)
+		return(false);
+	if (hash_update_dup(pht, "build_alias", "") == HASH_ADD_FAIL)
+		return(false);
+	if (hash_update_dup(pht, "target_alias", "") == HASH_ADD_FAIL)
+		return(false);
 
-/* XXX TODO use values from pmksetup */
-	hash_update_dup(pht, "ECHO_C", "\\c");
-	hash_update_dup(pht, "ECHO_N", "");
-	hash_update_dup(pht, "ECHO_T", "");
+	if (hash_update_dup(pht, "build_triplet", "") == HASH_ADD_FAIL)
+		return(false);
+	if (hash_update_dup(pht, "host_triplet", "") == HASH_ADD_FAIL)
+		return(false);
+	if (hash_update_dup(pht, "target_triplet", "") == HASH_ADD_FAIL)
+		return(false);
+
+/* use values from pmk.conf */
+	pstr = (char *) hash_get(pht, PMKCONF_AC_ECHO_C);
+	if (pstr != NULL) {
+		if (hash_update_dup(pht, "ECHO_C", pstr) == HASH_ADD_FAIL)
+			return(false);
+	} /* XXX need else ? */
+
+	pstr = (char *) hash_get(pht, PMKCONF_AC_ECHO_N);
+	if (pstr != NULL) {
+		if (hash_update_dup(pht, "ECHO_N", pstr) == HASH_ADD_FAIL)
+			return(false);
+	} /* XXX need else ? */
+
+	pstr = (char *) hash_get(pht, PMKCONF_AC_ECHO_T);
+	if (pstr != NULL) {
+		if (hash_update_dup(pht, "ECHO_T", pstr) == HASH_ADD_FAIL)
+			return(false);
+	} /* XXX need else ? */
 
 /* XXX TODO verify the following */
 	/*hash_add(pht, "SET_MAKE", strdup(""));                            */
@@ -355,13 +420,17 @@ void ac_set_variables(htable *pht) {
 	/*pstr = (char *) hash_get(pht, "STRIP");                     */
 	/*hash_update_dup(pht, "ac_ct_STRIP", pstr); |+ XXX shit ? +| */
 
-	hash_update_dup(pht, "install_sh", strdup("pmkinstall")); /* provide our own ? */
-	hash_update_dup(pht, "program_transform_name", strdup("s,x,x,"));
-
+	if (hash_update_dup(pht, "install_sh", "pmkinstall") == HASH_ADD_FAIL)
+		return(false); /* provide our own */
+	if (hash_update_dup(pht, "program_transform_name", "s,x,x,") == HASH_ADD_FAIL)
+		return(false);
 
 	/* byte order */
 	pstr = (char *) hash_get(pht, PMKCONF_HW_BYTEORDER);
 	if (strncmp(pstr, HW_ENDIAN_BIG, sizeof(pstr)) == 0) {
-		hash_update_dup(pht, "WORDS_BIGENDIAN", "1");
+		if (hash_update_dup(pht, "WORDS_BIGENDIAN", "1") == HASH_ADD_FAIL)
+			return(false);
 	}
+
+	return(true);
 }

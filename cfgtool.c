@@ -207,11 +207,14 @@ bool add_cfgtool(cfgtdata *pcd, htable *pht) {
 		pcell->libs = NULL;
 	}
 
-	hash_update(pcd->by_mod, pcell->name, pcell); /* no need to strdup */ /* XXX check */
+	/* no need to strdup */
+	if (hash_update(pcd->by_mod, pcell->name, pcell) == HASH_ADD_FAIL)
+		return(false);
 #ifdef CFGT_DEBUG
 debugf("added cfgtcell '%s'", pcell->name);
 #endif
-	hash_update_dup(pcd->by_bin, pcell->binary, pcell->name); /* no need to strdup */ /* XXX check */
+	if (hash_update_dup(pcd->by_bin, pcell->binary, pcell->name) == HASH_ADD_FAIL)
+		return(false);
 #ifdef CFGT_DEBUG
 debugf("added cfgtcell '%s'", pcell->binary);
 #endif
