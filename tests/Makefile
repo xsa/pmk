@@ -1,6 +1,7 @@
 # $Id$
 
 CC?=		cc
+CPP?=		cpp
 AS?=		as
 
 CFLAGS?=	-Wall
@@ -12,10 +13,16 @@ DEBUG?=		-g
 
 #LINT_TARGET=	da_test.c
 
+
+CI_OBJS=	../detect_cpu_asm.o cpuid_test.o
+
 all: hash dynary path parser mkvar comp
 
 .c.o:
 	$(CC) $(CFLAGS) -c $<
+
+.s.o:
+	$(CPP) $< | $(AS) -o $@
 
 config:
 	@if [ ! -f ../compat/compat.h ]; then \
@@ -27,10 +34,8 @@ config:
 comp: config comp_test.o
 	$(CC) -o comp_test $(LDFLAGS) comp_test.o
 
-cpuid: ../detect_cpu_asm.o
-	$(AS) -o detect_cpu_asm.o ../detect_cpu_asm.s
-	$(CC) $(CFLAGS) -c cpuid_test.c
-	$(CC) -o cpuid_test detect_cpu_asm.o cpuid_test.o
+cpuid: $(CI_OBJS)
+	$(CC) -o cpuid_test $(CI_OBJS)
 
 dynary: config da_test.o
 	$(CC) -o da_test $(LDFLAGS) da_test.o
