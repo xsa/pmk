@@ -351,7 +351,7 @@ int get_env_vars(htable *ht) {
  *		 -1 on failure
  */ 
 int get_binaries(htable *ht) {
-	int	i;
+	int	i, rval = 0;
 	char	*bin_path,
 		fbin[MAXPATHLEN];	/* full binary path */
 	dynary	*stpath;
@@ -381,11 +381,12 @@ int get_binaries(htable *ht) {
          */
 	if ((stpath = da_init()) == NULL) {
 		errorf("cannot initalize the dynamic array"); 
-		return(-1);
+		return(-1);	
 	}
 	if (str_to_dynary(bin_path, CHAR_LIST_SEPARATOR, stpath) == 0) {
 		errorf("could not split the PATH environment variable correctly");
-		return(-1);
+		da_destroy(stpath);
+		return(-1);	
 	}
 
 	if(verbose_flag == 1) {
@@ -401,10 +402,12 @@ int get_binaries(htable *ht) {
 			hash_add(ht, binaries[i][1], fbin);
 		} else {
 			errorf("%s not found", binaries[i][0]);
-			return(-1);
+			rval = -1;	
 		}
 	}
-	return(0);
+	da_destroy(stpath);
+
+	return(rval);
 }
 
 
