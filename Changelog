@@ -1,27 +1,30 @@
-18 oct 2004 mipsator
+25 Oct 2004 mipsator
+ * fixed pmkcfg.sh on IRIX.
+
+18 Oct 2004 mipsator
  * improved pmkcfg.sh to try to detect posix shells before using /bin/sh
    (this fix the Tru64 and SunOS lack of default posix shell problem).
 
-11 oct 2004 mipsator
+11 Oct 2004 mipsator
  * imported experimental cpu family detection.
 
 # snapshot 0.8.1-s8
 
-26 sep 2004 mipsator
+26 Sep 2004 mipsator
  * updated pmkfile.5 to sync with latest changes.
  * updated README and INSTALL to warn about non POSIX compliant shells.
 
-26 sep 2004 mipsator
+26 Sep 2004 mipsator
  * improved CHECK_LIB to handle more than one function. 
 
-24 sep 2004 mipsator
+24 Sep 2004 mipsator
  * CHECK_HEADER is now able to check more than one function (feature
    asked by Gergely Czuczy).
  * fixed initialisation of some variables in pmk.c (noticed on irix).
  * updated samples/bin_c to use config.h and one check for strl*()
    functions.
 
-23 sep 2004 mipsator
+23 Sep 2004 mipsator
  * returned on getopts use in pmkcfg.sh to handle blanks in arguments.
 
 # snapshot 0.8.1-s7
