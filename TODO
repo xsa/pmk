@@ -33,7 +33,7 @@ mreindl	~.	latex version of tutorial
 
 pmk:
 -----------------------------------------------------------------------
-	~	update manpage (DEFS and ELSE)
+	+	update manpage (DEFS and ELSE)
 	-	check if ~/.pmk.conf is available
 	~.	compatibility with autoconf (progressing) :
 			~ support for DEFS (-D options to pass to the compiler)
