@@ -16,7 +16,7 @@ NetBSD		1.6		i386		PMK 0.7.10	OK		Damien Couderc		gcc-2.95.3
 NetBSD		1.6		sparc		PMK 0.6		OK		Martin Reindl		gcc-2.95.3
 OpenBSD		3.4		i386		PMK 0.7.10	OK		Damien Couderc		gcc-2.95.3
 OpenBSD		3.2		mac68k		PMK 0.7.8	OK		Sascha Welter		gcc-2.95.3
-OpenBSD		3.3		macppc		PMK 0.7.8	OK		Sascha Welter		gcc-2.95.3
+OpenBSD		3.3		macppc		PMK 0.7.10	OK		Sascha Welter		gcc-2.95.3
 OpenBSD		3.4		sparc		PMK 0.7.10	OK		Damien Couderc		gcc-2.95.3 
 OpenBSD		3.4		sparc64		PMK 0.7.10	OK		Damien Couderc		gcc-2.95.3 
 OpenBSD		3.4		vax		PMK 0.7.0	OK		Martin Reindl		gcc-2.95.3
