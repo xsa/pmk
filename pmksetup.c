@@ -410,6 +410,21 @@ int get_binaries(htable *ht) {
 		debugf("[Binaries Paths]"); 
 	}
 
+	if (find_file(stpath, "cc", fbin, sizeof(fbin)) == 1) {
+		hash_add(ht, "BIN_CC", fbin);
+		if (verbose_flag == 1)
+			debugf("\tFound '%s'\t(%s)", "BIN_CC", fbin);
+	} else {
+		if (find_file(stpath, "gcc", fbin, sizeof(fbin)) == 1) {
+			hash_add(ht, "BIN_CC", fbin);
+			if (verbose_flag == 1)
+				debugf("\tFound '%s'\t(%s)", "BIN_CC", fbin);
+		} else {
+			errorf("cannot find a C compiler");
+			return(-1);
+		}
+	}
+
 	for (i = 0; i < MAXBINS; i++) {
 		if (find_file(stpath, binaries[i][0], fbin, MAXPATHLEN) == 1) {
 			if (verbose_flag == 1) 

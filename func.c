@@ -144,6 +144,7 @@ bool pmk_check_include(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 		rval;
 	char	*incfile,
 		*incfunc,
+		*ccpath,
 		cfgcmd[MAXPATHLEN];
 	int	r;
 
@@ -179,7 +180,13 @@ bool pmk_check_include(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 		return(false);
 	}
 
-	snprintf(cfgcmd, sizeof(cfgcmd), "cc -o %s %s > /dev/null 2>&1", BIN_TEST_NAME, INC_TEST_NAME);
+	ccpath = hash_get(gdata->htab, "BIN_CC");
+	if (ccpath == NULL) {
+		errorf("cannot get compiler path.");
+		return(false);
+	}
+
+	snprintf(cfgcmd, sizeof(cfgcmd), "%s -o %s %s > /dev/null 2>&1", ccpath, BIN_TEST_NAME, INC_TEST_NAME);
 	/* get result */
 	r = system(cfgcmd);
 	if (r == 0) {
@@ -220,6 +227,7 @@ bool pmk_check_lib(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 	bool	required,
 		rval;
 	char	cfgcmd[MAXPATHLEN],
+		*ccpath,
 		*libname,
 		*libfunc;
 	int	r;
@@ -254,7 +262,13 @@ bool pmk_check_lib(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 		return(false);
 	}
 
-	snprintf(cfgcmd, sizeof(cfgcmd), "cc -o %s -l%s %s >/dev/null 2>&1", BIN_TEST_NAME, libname, INC_TEST_NAME);
+	ccpath = hash_get(gdata->htab, "BIN_CC");
+	if (ccpath == NULL) {
+		errorf("cannot get compiler path.");
+		return(false);
+	}
+
+	snprintf(cfgcmd, sizeof(cfgcmd), "%s -o %s -l%s %s >/dev/null 2>&1", ccpath, BIN_TEST_NAME, libname, INC_TEST_NAME);
 	/* get result */
 	r = system(cfgcmd);
 	if (r == 0) {
