@@ -1,5 +1,7 @@
 02 Jul 2003 mipsator
  * added get_lang() as preliminary work on C++ support.
+ * fixed a memory fault in pmk and corrected a typo
+	(noticed by Ritschard Pierre-Yves)
 
 # PMK 0.5 released
 
