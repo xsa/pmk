@@ -54,6 +54,10 @@
 #define HASH_ADD_UPDT	3 /* key already exists, change value */
 #define HASH_ADD_APPD	4 /* value appended */
 
+/* error messages */
+#define HASH_ERR_UPDT		"Hash table update failed."
+#define HASH_ERR_UPDT_ARG	"Failed to update hash table key '%s'."
+
 
 typedef struct s_hcell {
 	char		 key[MAX_HASH_KEY_LEN];

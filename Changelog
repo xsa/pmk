@@ -1,3 +1,8 @@
+11 May 2004 mipsator
+ * fixed samples to run properly.
+ * added missing error messages.
+ * added misc defines for LIBS and CFLAGS.
+
 # snapshot 0.8.1-s1
 
 02 May 2004 mipsator
