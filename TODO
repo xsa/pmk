@@ -16,7 +16,7 @@ pmk :
 pmksetup :
 ~ pmk.conf(5)
 - missing checks :
-	- endian type (HW_ENDIAN = BIG_ENDIAN, LITTLE_ENDIAN)
+	+ endian type (HW_ENDIAN = BIG_ENDIAN, LITTLE_ENDIAN)
 	- char unsigned (pmk ?)
 	- long double (pmk ?)
 	- better check for install ?
