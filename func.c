@@ -818,7 +818,7 @@ bool pmk_check_config(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 		} else {
 			pmk_log("\tFound version >= %s : ", libvers);
 
-			if (check_version(libvers, pipebuf) != true) {
+			if (compare_version(libvers, pipebuf) < 0) {
 				/* version does not match */
 				pmk_log("no (%s).\n", pipebuf);
 				if (required == true) {
@@ -1045,7 +1045,7 @@ bool pmk_check_pkg_config(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 			pmk_log("\tFound version >= %s : ", libvers);
 	
 			pipebuf = ppc->version;
-			if (check_version(libvers, pipebuf) != true) {
+			if (compare_version(libvers, pipebuf) < 0) {
 				/* version does not match */
 				pmk_log("no (%s).\n", pipebuf);
 				if (required == true) {
