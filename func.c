@@ -108,7 +108,7 @@ bool pmk_target(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 	str_to_dynary(list, ',', da);
 	
 	for (i=0 ; i < da_size(da) ; i++) {
-		pmk_log("\tAdded '%s'\n", da_idx(da, i));
+		pmk_log("\tAdded '%s'.\n", da_idx(da, i));
 	}
 
 	gdata->tlist = da;
