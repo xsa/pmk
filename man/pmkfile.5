@@ -16,48 +16,45 @@ on a given platform.
 .Sh DATA TYPES
 .Nm
 uses pseudo types like the following:
-.Bl -tag -width Ds
+.Bl -tag -width "identifier"
 .It Cm bool
 The classical boolean type with TRUE and FALSE values.
 .Pp
-Examples:
-.Bd -literal -offset -indent
- TRUE
- FALSE
+For example:
+.Bd -literal -offset indent
+TRUE
+FALSE
 .Ed
-
 .It Cm identifier
 An identifier is a string of alphanumerical and underscores characters.
 .Pp
-Examples:
-.Bd -literal -offset -indent
- REQUIRED
- a_label
- underscores_are_nice
+For example:
+.Bd -literal -offset indent
+REQUIRED
+a_label
+underscores_are_nice
 .Ed
-
 .It Cm quoted
 This means quoted string which can contain a set of characters delimited
 by quotation marks.
 .Pp
-Examples:
-.Bd -literal -offset -indent
- "simple quoted string"
- "string that contain \\"quotes\\" backslashed"
- "can also contain filenames like pmkfile.scan"
+For examples:
+.Bd -literal -offset indent
+"simple quoted string"
+"string that contain \\"quotes\\" backslashed"
+"can also contain filenames like pmkfile.scan"
 .Ed
-
 .It Cm list
 It is one or more of the previous types between brackets.
 Multiple objects are separated with a comma.
 Blanks are currently not allowed beside commas, this means that you can
 find them only in a quoted string of the list.
 .Pp
-Examples:
-.Bd -literal -offset -indent
- ("only_one_string")
- ("added a boolean",TRUE)
- (mixed_list_of,"words","and",TRUE,"quoted strings")
+For example:
+.Bd -literal -offset indent
+("only_one_string")
+("added a boolean",TRUE)
+(mixed_list_of,"words","and",TRUE,"quoted strings")
 .Ed
 .El
 
@@ -93,7 +90,7 @@ The key name is of identifier type.
 The key value type can be 'bool', 'quoted' or 'list'.
 The right type will depend on the key name (see further).
 .Pp
-Example:
+For example:
 .Bd -literal -offset -indent
 CHECK_INCLUDE(header_sys_param) {
  # following options use different uses of blank characters
@@ -121,7 +118,7 @@ TARGET : type is 'list', list of target's filenames.
 DETECT : type is 'list', list of compilers to detect (CC and/or CXX).
 .Ed
 .Pp
-Example:
+For example:
 .Bd -literal -offset -indent
 SETTINGS {
  AC_COMPAT="config.h"
@@ -139,7 +136,7 @@ Arguments:
 Those are the variables to be defined (quote data type only).
 .Ed
 .Pp
-Example:
+For example:
 .Bd -literal -offset -indent
 DEFINE {
  PACKAGE="my_prog"
@@ -152,7 +149,7 @@ This command is setting dependency switches (see further DEPEND definition).
 .Pp
 Arguments:
 .Pp
-Example:
+For example:
 .Bd -literal -offset -indent
 SWITCHES {
  use_curses=TRUE
@@ -178,7 +175,7 @@ A dependency is a label or a switch name.
 The value of each dependencie can be negated by adding a leading '!' sign.
 If at least one of the dependencies is false then the check will be disabled.
 .Pp
-Example:
+For example:
 .Bd -literal -offset -indent
 DEPEND = ("header_gtk","!header_qt")
 .Ed
@@ -278,7 +275,7 @@ expression is true.
 .Pp
 Arguments:
 .Pp
-Example:
+For example:
 .Bd -literal -offset -indent
 IF(header_gtk) {
 	DEFINE {
@@ -292,7 +289,7 @@ expression is false.
 .Pp
 Arguments:
 .Pp
-Example:
+For example:
 .Bd -literal -offset -indent
 ELSE(header_glib) {
 	DEFINE {
@@ -317,7 +314,7 @@ VERSION_MAJ : type is 'quoted', variable name to store library name with major v
 VERSION_FULL : type is 'quoted', variable name to store library name with full version, optional.
 .Ed
 .Pp
-Example:
+For example,
 .Bd -literal -offset -indent
 BUILD_SHLIB_NAME {
 	NAME = "test"
