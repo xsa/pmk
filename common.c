@@ -223,6 +223,42 @@ bool get_make_var(char *varname, char *result, int rsize) {
 	return(rval);
 }
 
+/*
+	split a string in a dynamic array
+
+	str : string to split
+	sep : separator
+	da : dynamic array
+
+	return TRUE on success
+*/
+
+bool str_to_dynary(char *str, char sep, dynary *da) {
+	char	buf[MAXPATHLEN];
+	int	i = 0,
+		j = 0;
+
+	while (str[i] != '\0') {
+		if (str[i] == sep) {
+			buf[j] = '\0';
+			if (da_push(da, buf) == FALSE) {
+				return(FALSE);
+			}
+			j = 0;
+		} else {
+			buf[j] = str[i];
+			j++;
+		}
+		i++;
+	}
+	buf[j] = '\0';
+	if (da_push(da, buf) == FALSE) {
+		return(FALSE);
+	}
+
+	return(TRUE);
+}
+
 /*              
  * split strings using 'delimiter'
  * 
