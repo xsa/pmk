@@ -124,7 +124,7 @@ EOF
 		templ_sed "udef" "$function"
 		echo "no"
 	fi
-	rm -f $testfile $testfile.o
+	rm -f $testfile $testobj
 }
 
 check_type() {
