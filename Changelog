@@ -1,3 +1,6 @@
+19 Jan 2004 xsa
+ * imported sample test for C binary.
+
 17 Jan 2004 mipsator
  * fixed specific deinstall stuff in Makefile.
  * fixed setting of shared lib cflags.
