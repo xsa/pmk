@@ -55,10 +55,10 @@
 #define HASH_ADD_APPD	4 /* value appended */
 
 
-typedef struct shcell {
+typedef struct s_hcell {
 	char		 key[MAX_HASH_KEY_LEN];
 	void		*value;
-	struct shcell	*next;
+	struct s_hcell	*next;
 } hcell;
 
 typedef struct {
@@ -67,9 +67,9 @@ typedef struct {
 } hnode;
 
 typedef struct {
-	int	 size,
-		 count,
+	uint	 count,
 		 autogrow;
+	size_t	 size;
 	void	*(*dupobj)(void *),
 		 (*freeobj)(void *),
 		*(*appdobj)(void *, void *, void *);
@@ -87,23 +87,23 @@ typedef struct {
 } hkeys;
 
 
-int	 hash_compute(char *, int);
-htable	*hash_init(int);
-htable	*hash_init_adv(int, void *(*)(void *), void (*)(void *), void *(*)(void *, void *, void *));
-bool	 hash_resize(htable *, int);
+uint	 hash_compute(char *, size_t);
+htable	*hash_init(size_t);
+htable	*hash_init_adv(size_t, void *(*)(void *), void (*)(void *), void *(*)(void *, void *, void *));
+bool	 hash_resize(htable *, size_t);
 void	 hash_set_grow(htable *);
-int	 hash_destroy(htable *);
-int	 hash_add(htable *, char *, void *);
-int	 hash_update(htable *, char *, void *);
-int	 hash_update_dup(htable *, char *, void *);
-int	 hash_add_cell(hnode *, hcell *);
-bool	 hash_add_array(htable *, hpair *, int);
-bool	 hash_add_array_adv(htable *, hpair *, int, void *(*)(void *));
-int	 hash_append(htable *, char *, void *, void *);
+size_t	 hash_destroy(htable *);
+uint	 hash_add(htable *, char *, void *);
+uint	 hash_update(htable *, char *, void *);
+uint	 hash_update_dup(htable *, char *, void *);
+uint	 hash_add_cell(hnode *, hcell *);
+bool	 hash_add_array(htable *, hpair *, size_t);
+bool	 hash_add_array_adv(htable *, hpair *, size_t, void *(*)(void *));
+uint	 hash_append(htable *, char *, void *, void *);
 void	 hash_delete(htable *, char *);
 void	*hash_get(htable *, char *);
-int	 hash_merge(htable *, htable *);
-int	 hash_nbkey(htable *);
+size_t	 hash_merge(htable *, htable *);
+size_t	 hash_nbkey(htable *);
 hkeys	*hash_keys(htable *);
 void	 hash_free_hcell(htable *, hcell *);
 void	 hash_free_hkeys(hkeys *);
