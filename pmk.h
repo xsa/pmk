@@ -37,6 +37,8 @@
 #	define FALSE	0
 #endif
 
+#define PREMAKE_VERSION		"0.1"
+
 #define PREMAKE_FILENAME	"pmkfile"
 #define PREMAKE_CONFIG		"pmk.conf"
 #define PREMAKE_LOG		"pmk.log"
@@ -55,10 +57,13 @@
 #define MAX_ERR_MSG_LEN		256
 
 /* maximal size of a command */
-#define MAX_CMD_LEN		64
+#define MAX_CMD_NAME_LEN	64
 
 /* maximal size of a command label */
 #define MAX_LABEL_LEN		64
+
+/* maximal size of a command string : <prefix><command>(<label>) */
+#define MAX_CMD_LEN		MAX_CMD_NAME_LEN + MAX_LABEL_LEN + 2
 
 /* maximal sizes for command pair of option (name and value) */
 #define MAX_OPT_NAME_LEN	64
@@ -66,7 +71,6 @@
 
 /* maximal size of a line */
 #define MAX_LINE_LEN		MAXPATHLEN + MAX_OPT_NAME_LEN
-
 
 /* maximal number of options per command */
 #define MAX_CMD_OPT	32
@@ -84,3 +88,4 @@ typedef struct {
 			label[MAX_LABEL_LEN];
 	pmkcmdopt	opt[MAX_CMD_OPT];
 } pmkcmd;
+

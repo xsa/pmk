@@ -68,7 +68,65 @@ bool getline(FILE *fd, char *line, int lsize) {
 	parse a command
 */
 
-bool parse_cmd() {
+bool parse_cmd(char *line, pmkcmd *command) {
+	int	i,
+		j;
+	char	buf[MAX_LABEL_LEN];
+		/* should be big enough to contain command/label name */
+	bool	cmd_found = FALSE,
+		label_found = FALSE;
+
+	i = 1; /* ignore prefix character of the command string */
+	j = 0;
+	while (line[i] != '\0' && i < MAX_CMD_LEN) {
+		if (cmd_found == FALSE) {
+			if (line[i] != '(') {
+				/* XXX should check uppercase */
+				buf[j] = line[i];
+				j++;
+			} else {
+				buf[j] = '\0';
+				strncpy(command->name, buf, MAX_CMD_NAME_LEN);
+				cmd_found = TRUE;
+				j = 0;
+			}
+		} else {
+			if (line[i] != ')') {
+				/* needed to take care of quotation marks ? */
+				buf[j] = line[i];
+				j++;
+			} else {
+				buf[j] = '\0';
+				strncpy(command->label, buf, MAX_CMD_NAME_LEN);
+				label_found = TRUE;
+				j = 0; /* useless :) */
+			}
+		}
+		i++;
+	}
+
+	if (cmd_found == FALSE) {
+		/* command without label */
+		buf[j] = '\0';
+		strncpy(command->name, buf, MAX_CMD_NAME_LEN);
+		strncpy(command->label, "", MAX_LABEL_LEN);
+	} else {
+		if (label_found == TRUE) {
+			if (line[i] != '\0') {
+				/* some data remaining after parenthesis */
+				err_line = cur_line;
+				snprintf(err_msg, sizeof(err_msg), "Trailing garbage after label");
+				return(FALSE);
+			}
+		} else {
+			/* ending parenthesis missing */
+			err_line = cur_line;
+			snprintf(err_msg, sizeof(err_msg), "Label not terminated");
+			return(FALSE);
+		}
+	}
+
+	return TRUE;
 }
 
 /*
@@ -77,24 +135,27 @@ bool parse_cmd() {
 */
 
 bool parse(FILE *fd) {
-	char	buf[MAX_LINE_LEN],
-		cmd[MAX_CMD_LEN];
+	char	buf[MAX_LINE_LEN];
 	int	cmd_line = 0;
 	bool	process = FALSE;
+	pmkcmd	cmd;
 
 	while (getline(fd, buf, sizeof(buf)) == TRUE) {
 		/* check first character */
 		switch (buf[0]) {
 			case CHAR_COMMENT :
 				/* ignore comments */
-				printf("DEBUG COMMENT = %s\n", buf);
+				/* XXX printf("DEBUG COMMENT = %s\n", buf); */
 				break;
 
 			case CHAR_COMMAND :
 				if (process == FALSE) {
-					/* XXX process cmd */
+					/* parse command and label */
+					if (parse_cmd(buf, &cmd) == FALSE) {
+						/* line number and error message already set */
+						return(FALSE);
+					}
 
-					printf("DEBUG COMMAND = %s\n", buf);
 					cmd_line = cur_line;
 					process = TRUE;
 				} else {
@@ -139,15 +200,26 @@ bool parse(FILE *fd) {
 
 int main(int argc, char *argv[]) {
 	FILE	*fd,
-		*cfd;
+		*cfd,
+		*lfd;
 	char	cf[MAXPATHLEN];
 
+	/* open pmk file */
 	fd = fopen(PREMAKE_FILENAME, "r");
 	if (fd == NULL) {
 		warn("%s", PREMAKE_FILENAME);
 		exit(1);
 	}
 
+	/* open log file */
+	lfd = fopen(PREMAKE_LOG, "w");
+	if (lfd == NULL) {
+		warn("%s", PREMAKE_LOG);
+		exit(1);
+	}
+	fprintf(lfd, "pmk version %s\n", PREMAKE_VERSION);
+
+	/* open configuration file */
 	snprintf(cf, sizeof(cf), "%s/%s", SYSCONFDIR, PREMAKE_CONFIG);
 	cfd = fopen(cf, "r");
 	if (cfd == NULL) {
@@ -160,6 +232,15 @@ int main(int argc, char *argv[]) {
 		printf("Error line %d : %s\n", err_line, err_msg);
 		return(-1);
 	}
+
+
+	fprintf(lfd, "End of log.\n");
+
+	/* flush and close files */
+	fflush(lfd);
+	fclose(lfd);
+
+	fflush(fd);
 	fclose(fd);
 
 	return(0);
