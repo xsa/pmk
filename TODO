@@ -16,7 +16,6 @@ pmk :
 - verify in CHECK_BINARY that program has executable right ?
 - convert gdata.labl to pmk objects
 - checks hash_add() in autoconf.c (void func => bool func)
-- init optional variables in checks if not exists ?
 
 pmksetup :
 ! clean temporary files on error
