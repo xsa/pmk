@@ -47,8 +47,8 @@ if test "$1" != "autodetected"; then
 			posix_sh="/bin/sh"
 		fi
 	fi
-	printf "Using $posix_sh $0 $@\n\n"
-	$posix_sh $0 "autodetected" "$@"
+	printf "Using %s %s %s\n\n" "$posix_sh" "$0" "$*"
+	$posix_sh $0 "autodetected" "$*"
 	exit $?
 else
 	# skip "autodetected"
