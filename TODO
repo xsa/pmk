@@ -22,7 +22,7 @@ Indented lines means subtask.
 
 common:
 -----------------------------------------------------------------------
-	~R	tutorial
+	+R	tutorial
 	~.	improve test_pmkinstall to check more modes
 	-.	add test target in tests/Makefile
 	+	update README and INSTALL
@@ -92,4 +92,8 @@ pmkpc
 			- PMKPC_OPT_VAR_STDO
 	~	man page
 	-	special expression ('' quoted), post 0.8
+
+misc
+-----------------------------------------------------------------------
+	-	generate template config header from pmkfile.
 
