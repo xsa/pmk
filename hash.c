@@ -159,7 +159,7 @@ htable *hash_init_adv(size_t table_size, void *(*dupfunc)(void *),
 	ht : hash table to resize
 	newsize : new size
 
-	return : boolean 
+	return : boolean
 */
 
 bool hash_resize(htable *ht, size_t newsize) {
@@ -412,7 +412,7 @@ unsigned int hash_add_cell(hnode *phn, hcell *phc) {
 	ary : array to add
 	size : size of the array
 
-	return : boolean 
+	return : boolean
 */
 
 bool hash_add_array(htable *pht, hpair *php, size_t size) {
@@ -463,7 +463,7 @@ bool hash_add_array_adv(htable *pht, hpair *php, size_t size, void *(dupfunc)(vo
 	pht : hash structure
 	key : key to be appended
 	value : value to append
-	misc : extra data to transmit to append function 
+	misc : extra data to transmit to append function
 
 	return : an error code.
 */

@@ -306,7 +306,7 @@ void usage(void) {
 
 		if (pcoptions[i].usagearg != NULL) {
 			strlcat(option, "=", sizeof(option));
-			strlcat(option, pcoptions[i].usagearg, sizeof(option)); 
+			strlcat(option, pcoptions[i].usagearg, sizeof(option));
 		}
 
 		strlcat(option, PMKPC_USAGE_CLOSE_OPT, sizeof(option));
@@ -508,7 +508,7 @@ debugf("{main} id = %d", poc->id);
 						exit(EXIT_FAILURE);
 						break;
 					default :
-						errorf("unknow option -%c", 
+						errorf("unknow option -%c",
 							mod[1]);
 						exit(EXIT_SUCCESS);
 						break;

@@ -40,7 +40,7 @@
 
 
 #include <sys/stat.h>
-/* include it first as if it was <sys/types.h> - this will avoid errors */ 
+/* include it first as if it was <sys/types.h> - this will avoid errors */
 #include "compat/pmk_sys_types.h"
 
 #include <errno.h>
@@ -102,7 +102,7 @@ bool process_dyn_var(pmkdata *pgd, char *template) {
 	relpath(srcdir, stpath, rpath);
 
 	/* compute builddir_abs with relative path */
-	abspath(basedir, rpath, btpath); 
+	abspath(basedir, rpath, btpath);
 	if (hash_update_dup(pht, PMK_DIR_BLD_ABS, btpath) == HASH_ADD_FAIL)
 		return(false);
 #ifdef PMK_DEBUG
@@ -415,7 +415,7 @@ bool process_template(char *template, pmkdata *pgd) {
 
 	tfd = fopen(template, "r");
 	if (tfd == NULL) {
-		errorf("cannot open '%s' : %s.", 
+		errorf("cannot open '%s' : %s.",
 			template, strerror(errno));
 		return(false);
 	}
@@ -423,7 +423,7 @@ bool process_template(char *template, pmkdata *pgd) {
 	dfd = fopen(fpath, "w");
 	if (dfd == NULL) {
 		fclose(tfd); /* close already opened tfd before leaving */
-		errorf("cannot open '%s' : %s.", 
+		errorf("cannot open '%s' : %s.",
 			fpath, strerror(errno));
 		return(false);
 	}
@@ -683,7 +683,7 @@ int main(int argc, char *argv[]) {
 
 					/* path of pmkfile is also the srcdir base */
 					/* NOTE : we use strdup to avoid problem with linux's dirname */
-					pstr = strdup(pgd->pmkfile); 
+					pstr = strdup(pgd->pmkfile);
 					strlcpy(pgd->srcdir, dirname(pstr), sizeof(pgd->srcdir)); /* XXX check ??? */
 					free(pstr);
 
@@ -865,7 +865,7 @@ int main(int argc, char *argv[]) {
 	fp = fopen(pgd->pmkfile, "r");
 	if (fp == NULL) {
 		clean(pgd);
-		errorf("cannot open '%s' : %s.", 
+		errorf("cannot open '%s' : %s.",
 			pgd->pmkfile, strerror(errno));
 		exit(EXIT_FAILURE);
 	}

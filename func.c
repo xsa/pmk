@@ -156,7 +156,7 @@ bool process_node(prsnode *pnode, pmkdata *pgd) {
 	these functions have the following parameters:
 
 	cmd : command structure
-	pnode : node structure 
+	pnode : node structure
 	pgd : global data
 
 	returns bool
@@ -321,7 +321,7 @@ bool pmk_check_binary(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 			return(false);
 		} else {
 			record_def_data(pgd->htab, filename, NULL);
-			/* not found => not added in htab */ 
+			/* not found => not added in htab */
 			label_set(pgd->labl, cmd->label, false);
 			return(true);
 		}
@@ -1039,7 +1039,7 @@ bool pmk_check_pkg_config(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 
 	/* check if package exists */
 	pmk_log("\tFound package '%s' : ", target);
-	if (pkg_mod_exists(ppd, target) == false) { 
+	if (pkg_mod_exists(ppd, target) == false) {
 		pkgdata_destroy(ppd);
 		pmk_log("no.\n");
 
@@ -1537,7 +1537,7 @@ debugf("versmaj not set");
 	these functions have the following parameters:
 
 	cmd : command structure
-	popt : option structure 
+	popt : option structure
 	pgd : global data
 
 	returns bool
@@ -1546,7 +1546,7 @@ debugf("versmaj not set");
 
 
 /*
-	set parameter 
+	set parameter
 */
 
 bool pmk_set_parameter(pmkcmd *cmd, prsopt *popt, pmkdata *pgd) {

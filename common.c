@@ -186,14 +186,14 @@ debugf(MKVAR_FMT_MK, varname, MKVAR_FILE);
 
 	if (unlink(mfn) == -1) {
 		/* cannot remove temporary file */
-		errorf("cannot remove temporary file: '%s' : %s.", 
+		errorf("cannot remove temporary file: '%s' : %s.",
 			mfn, strerror(errno));
 	}
 
 	if (unlink(MKVAR_FILE) == -1) {
 		/* cannot remove temporary file */
 #ifdef MKVAR_DEBUG
-		errorf("cannot remove temporary file: '%s' : %s.", 
+		errorf("cannot remove temporary file: '%s' : %s.",
 			mfn, strerror(errno));
 #endif
 	}
@@ -223,7 +223,7 @@ bool str_to_ulong(char *str, int base, unsigned long *value) {
 	str : string to split
 	sep : separator
 
-	return : dynary or NULL 
+	return : dynary or NULL
 */
 
 dynary *str_to_dynary(char *str, char sep) {
@@ -239,7 +239,7 @@ dynary *str_to_dynary(char *str, char sep) {
 	str : string to split
 	sep : separators list
 
-	return : dynary or NULL 
+	return : dynary or NULL
 */
 
 dynary *str_to_dynary_adv(char *str, char *seplst) {

@@ -337,7 +337,7 @@ bool ac_set_variables(htable *pht) {
 		return(false);
 
 /*
-	well i dunno if the following really needs to be full compatible with autoconf 
+	well i dunno if the following really needs to be full compatible with autoconf
 */
 	pstr = (char *) hash_get(pht, "OS_ARCH");
 	if (hash_update_dup(pht, "host_cpu", pstr) == HASH_ADD_FAIL)

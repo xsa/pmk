@@ -1,7 +1,7 @@
 /* $Id$ */
 
 /*
- * Copyright (c) 2003-2004 Xavier Santolaria 
+ * Copyright (c) 2003-2004 Xavier Santolaria
  * Copyright (c) 2003-2004 Damien Couderc
  * All rights reserved.
  *
@@ -37,7 +37,7 @@
 #ifndef _PMKSETUP_H_
 #define _PMKSETUP_H_
 
-#include "hash.h"	 
+#include "hash.h"	
 #include "premake.h"
 
 
@@ -56,7 +56,7 @@
 #define MAX_LINE_BUF		MAX_LINE_LEN
 
 #define MAX_CONF_OPT		256	/* XXX temp maximum hash entries */
-#define PATH_STR_DELIMITER	':'	/* string delimiter of the $PATH variable */    
+#define PATH_STR_DELIMITER	':'	/* string delimiter of the $PATH variable */   
 
 #define ECHO_CMD	"echo \"one\\c\"; echo -n two; echo three"
 #define	ECHO_EMPTY	""
