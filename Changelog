@@ -1,6 +1,6 @@
 19 Aug 2004 mreindl
-* backup pmk.conf in pmksetup if it already exists
-* update bin_c sample and integrate it into samples/Makefile
+ * backup pmk.conf in pmksetup if it already exists
+ * update bin_c sample and integrate it into samples/Makefile
 
 # snapshot 0.8.1-s4
 
