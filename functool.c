@@ -203,7 +203,10 @@ bool get_file_path(char *filename, char *path, char *storage, int size) {
 
 /*
 	generate semi-definition from a string
-	XXX
+
+	str : string to use
+
+	returns semidef string
 */
 
 char *str_to_def(char *str) {

@@ -72,7 +72,7 @@ bool read_conf(htable *ht) {
 
 	fp = fopen(PREMAKE_CONFIG_PATH, "r");
 	if (fp == NULL) {
-		errorf("Cannot open %s.", PREMAKE_CONFIG_PATH);
+		errorf("cannot open %s.", PREMAKE_CONFIG_PATH);
 		return(false);
 	}
 
@@ -89,7 +89,10 @@ bool read_conf(htable *ht) {
 			default :
 				if (parse_conf_line(buf, ln, &co) == 0) {
 					/* parse ok */
-					hash_add(ht, co.key, co.val); /* XXX test ?*/
+					if (hash_add(ht, co.key, co.val) == HASH_ADD_FAIL) {
+						errorf("hash failure.");
+						return(false);
+					}
 				} else {
 					/* incorrect line */
 					return(false);
@@ -474,7 +477,10 @@ bool parse_opt(char *line, htable *ht, bool display) {
 			return(false);
 		} else {
 			/* key name and value are ok */
-			hash_add(ht, tkey, tval); /* XXX test */
+			if (hash_add(ht, tkey, tval) == HASH_ADD_FAIL) {
+				errorf("hash failure.");
+				return false;
+			}
 			return(true);
 		}
 	}
@@ -503,7 +509,7 @@ bool parse(FILE *fp, pmkdata *gdata) {
 		switch (buf[0]) {
 			case CHAR_COMMENT :
 				/* ignore comments */
-				/* XXX printf("DEBUG COMMENT = %s\n", buf); */
+				/* printf("DEBUG COMMENT = %s\n", buf); */
 				break;
 
 			case PMK_CHAR_COMMAND :
@@ -633,7 +639,8 @@ void usage(void) {
 
 int main(int argc, char *argv[]) {
 	FILE	*fd;
-	char	idxstr[4]; /* max 999 cmds, should be enough :) */
+	char	*pstr,
+		idxstr[4]; /* max 999 cmds, should be enough :) */
 	int	rval = 0,
 		nbpd,
 		nbcd,
@@ -681,7 +688,10 @@ int main(int argc, char *argv[]) {
 		/* fill keywords hash */
 		for(i = 0 ; i < nbfunc ; i++) {
 			snprintf(idxstr, 4, "%d", i);
-			hash_add(keyhash, functab[i].kw, idxstr); /* XXX test ? */
+			if (hash_add(keyhash, functab[i].kw, idxstr) == HASH_ADD_FAIL) {
+				errorf("hash failure");
+				return(1);
+			}
 		}
 	} else {
 		errorf("cannot initialize keyword table");
@@ -759,10 +769,12 @@ int main(int argc, char *argv[]) {
 
 		da = gdata.tlist;
 		for (i = 0 ; (i < da_usize(da)) && (rval == 0) ; i++) {
-			/* XXX should check is da_idx returns null */
-			if (process_template(da_idx(da, i), gdata.htab) == false) {
-				/* failure while processing template */
-				rval = 1;
+			pstr = da_idx(da, i);
+			if (pstr != NULL) {
+				if (process_template(pstr, gdata.htab) == false) {
+					/* failure while processing template */
+					rval = 1;
+				}
 			}
 		}
 
