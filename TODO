@@ -28,18 +28,15 @@ common:
 	-	add test target in tests/Makefile
 	-	improve comp_test usage
 	-	update README and INSTALL
+xsa	-	improve deinstall target (ugly rm -rf)
 
 
 pmk:
 -----------------------------------------------------------------------
-	-	handle PKG_CONFIG_PATH (env)
-	!	set SCFLAGS (cc flags for Position Independant Code)
-			gcc => -fPIC
-			solaris cc & intel cc => -KPIC
-			SCO => -Kpic
-			sunos => -PIC
-			hpux => +Z
-	-	handle compiler detection when needed
+mips	-	MODULE support in CHECK_PKG_CONFIG
+	+	handle PKG_CONFIG_PATH (env)
+mips	-	linking flags for shared libraries
+	+	handle compiler detection when needed
 	+	clean detect.*
 	~.	compatibility with autoconf (progressing) :
 			~ support for DEFS (-D options to pass to the compiler)
