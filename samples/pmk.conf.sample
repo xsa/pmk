@@ -16,3 +16,9 @@ BIN_GREP=/usr/bin/grep
 BIN_INSTALL=/usr/bin/install
 BIN_RANLIB=/usr/bin/ranlib
 BIN_MORE:/usr/bin/less
+
+#include stuff
+INC_PATH:/usr/include
+
+# lib stuff
+LIB_PATH:/usr/lib

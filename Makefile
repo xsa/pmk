@@ -32,10 +32,10 @@ DATADIR=	$(PREFIX)/share/$(PREMAKE)/
 SAMPLE=		$(PREMAKE)file.sample
 CONFIG=		$(PREMAKE).conf.sample
 
-P_OBJS=		common.o hash.o func.o pmk.o dynarray.o compat.o
+P_OBJS=		compat.o common.o hash.o func.o functool.o dynarray.o pmk.o
 S_OBJS=		$(SETUP).o common.o hash.o dynarray.o compat.o
 
-all: config $(PREMAKE) $(SETUP)
+all: $(PREMAKE) $(SETUP)
 
 .c.o:
 	$(CC) $(CFLAGS) -c $<
@@ -49,7 +49,7 @@ $(PREMAKE): $(P_OBJS)
 $(SETUP): $(S_OBJS)
 	$(CC) -o $(SETUP) $(LDFLAGS) $(S_OBJS)
 
-install: all
+install:
 	$(INSTALL) -d -m 755 $(BINDIR)
 	$(INSTALL) -m 755 $(PREMAKE) $(BINDIR)$(PREMAKE)
 	$(INSTALL) -d -m 755 $(SBINDIR)
@@ -68,14 +68,14 @@ clean:
 	rm -f $(P_OBJS) $(S_OBJS) $(PREMAKE) $(SETUP) compat/compat.h *.core
 
 deinstall:
-	rm -f $(PREFIX)/bin/$(PREMAKE)
-	rm -f $(PREFIX)/sbin/$(SETUP)
-	rm -rf $(PREFIX)/share/$(PREMAKE)
+	rm -f $(BINDIR)$(PREMAKE)
+	rm -f $(SBINDIR)$(SETUP)
+	rm -rf $(DATADIR)
 	rm -f $(PREFIX)/man/man1/$(PREMAKE).1
 	rm -f $(PREFIX)/man/man8/$(SETUP).8
 	rm -f $(PREFIX)/man/man5/$(PREMAKE).conf.5
 
-test_pmk: pmk
+test_pmk:
 	@echo ""
 	@echo "=> Testing pmk with sample files"
 	@echo ""
@@ -112,7 +112,7 @@ test_pmk: pmk
 	@echo "=> End of test"
 	@echo ""
 
-test_pmksetup: pmksetup
+test_pmksetup:
 	@echo "Generating local pmk.conf."
 	@echo "(need USER_TEST enabled)"
 	@echo ""

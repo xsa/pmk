@@ -38,40 +38,14 @@
 
 
 /*
-	check boolean string
+	all the following functions have the same parameters :
 
-	str : string to check
+	cmd : command structure
+	ht : command options
+	gdata : global data
 
-	returns true is str is "true" else returns false
-
-	NOTE : strncmp checks only on a length of 6 because
-		lenght of "true" is 5 and "false" is 6 chr.
-		If str is longer we don't need to check as
-		we are sure that the result is false.
-
+	returns bool
 */
-
-bool check_bool_str(char *str) {
-	if (strncmp(str, "true", 6) == 0) {
-		return(true);
-	} else {
-		return(false);
-	}
-}
-
-/*
-	check version
-
-	vref : reference version
-	vers : version to check
-
-	returns true is vers >= vref
-*/
-
-bool check_version(char *vref, char *vers) {
-	/* XXX to do */
-	return(true);
-}
 
 /*
 	define variables
@@ -232,9 +206,9 @@ bool pmk_check_config(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 	cfgtool = hash_get(ht, "CFGTOOL");
 	libvers = hash_get(ht, "VERSION");
 
+	/* XXX should try to locate cfgtool */
 	pmk_log("\tFound config tool '%s' : ", cfgtool);
 
-	/* XXX should try to locate cfgtool */
 	snprintf(cfgcmd, sizeof(cfgcmd), "%s --version", cfgtool);
 
 	rpipe = popen(cfgcmd, "r");
