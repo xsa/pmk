@@ -265,26 +265,6 @@ debugf("%s = '%s'", pstr, buf);
 }
 
 /*
-	process option line of configuration file
-
-	pht : storage hash table
-	popt : option structure to record
-
-	return : boolean
-*/
-
-bool process_opt(htable *pht, prsopt *popt) {
-	if ((popt->opchar != CHAR_COMMENT) && (popt->opchar != CHAR_EOS)) {
-		/* add options that are not comment neither blank lines */
-		if (hash_update_dup(pht, popt->key, po_get_str(popt->value)) == HASH_ADD_FAIL) {
-			errorf("hash failure.");
-			return(false);
-		}
-	}
-	return(true);
-}
-
-/*
 	process the target file to replace tags
 
 	target : path of the target file

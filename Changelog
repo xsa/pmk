@@ -2,6 +2,7 @@
  * improved pmkpc to not care about argument order (like pkg-config).
  * added support for multiple module.
  * moved get_file_path() from functool to common.
+ * moved process_opt() from pmk to parse.
 
 12 Jan 2004 mipsator
  * imported preliminary code for our pkg-config alternative.
