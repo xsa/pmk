@@ -36,6 +36,7 @@
 
 #include <sys/stat.h>
 #include <ctype.h>
+#include <errno.h>
 #include <fcntl.h>
 #include <grp.h>
 #include <pwd.h>
@@ -68,6 +69,7 @@
 
 extern char	*optarg;
 extern int	 optind;
+extern int	errno;
 
 
 /*
@@ -503,7 +505,7 @@ int main(int argc, char *argv[]) {
 	if (do_chown == true) {
 /*debugf("doing chown('%s', %d, %d)", dst, uid, gid);*/
 		if (chown(dst, uid, gid) != 0) {
-			errorf("chown failed."); /* better message with errno */
+			errorf("chown failed : %s.", strerror(errno));
 			exit(1);
 		}
 	}
@@ -511,7 +513,7 @@ int main(int argc, char *argv[]) {
 	/* change perms (must follow chown that can change perms) */
 	if (chmod(dst, mode) == -1) {
 /*debugf("chmod('%s', %o)", dst, mode);*/
-		errorf("chmod failed.");
+		errorf("chmod failed : %s.", strerror(errno));
 		exit(1);
 	}
 
