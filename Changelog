@@ -1,3 +1,6 @@
+20 Aug 2003 mipsator
+ * added hash_add_array_adv() in hash.
+
 18 Aug 2003 mipsator
  * added po_get_str() and po_get_list in pmk_obj.
 
