@@ -29,7 +29,8 @@ mips	+	improve test_pmkinstall to check more modes
 
 pmk:
 -----------------------------------------------------------------------
-	~	compatibility with autoconf (progressing) :
+	-	use a compiler.dat to store compiler data (easier to add new compiler)
+	~.	compatibility with autoconf (progressing) :
 			~ support for DEFS (-D options to pass to the compiler)
 			- support for LDFLAGS (misc linker options) ?
 			- support for CPPFLAGS (misc linker options) ?
@@ -68,15 +69,7 @@ pmkscan
 pmkinstall
 -----------------------------------------------------------------------
 	~	full rewrite
-			+ copy done
-			+ mode option
-				+ suid and sgid bits ?
-				+ missing operators (-=)
-			+ dir creation
-			+ owner
-			+ group
-			+ strip
-dwecker			- backup ?
+			- backup ?
 
 
 pmkpkg
