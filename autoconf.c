@@ -235,7 +235,8 @@ void ac_clean_dyn_var(htable *pht) {
 */
 
 void ac_set_variables(htable *pht) {
-	char	*pstr;
+	char	 buf[TMP_BUF_LEN],
+                *pstr;
 
 	/* path variables */
 	pstr = (char *) hash_get(pht, "PREFIX");
@@ -270,30 +271,51 @@ void ac_set_variables(htable *pht) {
 	hash_add(pht, "host_cpu", strdup(pstr));
 	hash_add(pht, "build_cpu", strdup(pstr)); /* XXX  ouargl cross compiling ... */
 	hash_add(pht, "target_cpu", strdup(pstr)); /* XXX  ouargl cross compiling ... */
-	hash_add(pht, "host", strdup(""));
-	hash_add(pht, "host_alias", strdup(""));
-	hash_add(pht, "host_os", strdup(""));
-	hash_add(pht, "host_vendor", strdup(""));
-	hash_add(pht, "build", strdup(""));
-	hash_add(pht, "build_alias", strdup(""));
-	hash_add(pht, "build_os", strdup(""));
-	hash_add(pht, "build_vendor", strdup(""));
-	hash_add(pht, "target", strdup(""));
-	hash_add(pht, "target_alias", strdup(""));
-	hash_add(pht, "target_os", strdup(""));
-	hash_add(pht, "target_vendor", strdup(""));
 
+        pstr = (char *) hash_get(pht, "OS_NAME");
+        strlcpy(buf, pstr, sizeof(buf)); /* no need to check here */
+        pstr = (char *) hash_get(pht, "OS_VERSION");
+        strlcat(buf, pstr, sizeof(buf)); /* XXX check */
+	hash_add(pht, "host_os", strdup(buf));
+	hash_add(pht, "build_os", strdup(buf)); /* XXX  ouargl cross compiling ... */
+	hash_add(pht, "target_os", strdup(buf)); /* XXX  ouargl cross compiling ... */
+
+	hash_add(pht, "host_vendor", strdup("vendorisnotset"));
+	hash_add(pht, "build_vendor", strdup("vendorisnotset"));
+	hash_add(pht, "target_vendor", strdup("vendorisnotset"));
+
+        pstr = (char *) hash_get(pht, "host_cpu");
+        strlcpy(buf, pstr, sizeof(buf)); /* no need to check here */
+        strlcat(buf, "-", sizeof(buf)); /* no need to check here */
+        pstr = (char *) hash_get(pht, "host_vendor");
+        strlcat(buf, pstr, sizeof(buf)); /* no need to check here */
+        strlcat(buf, "-", sizeof(buf)); /* no need to check here */
+        pstr = (char *) hash_get(pht, "host_os");
+        strlcat(buf, pstr, sizeof(buf)); /* XXX check */
+
+	hash_add(pht, "host", strdup(buf));
+	hash_add(pht, "build", strdup(buf));
+	hash_add(pht, "target", strdup(buf));
+
+	hash_add(pht, "host_alias", strdup(""));
+	hash_add(pht, "build_alias", strdup(""));
+	hash_add(pht, "target_alias", strdup(""));
+
+	hash_add(pht, "build_triplet", strdup(""));
+	hash_add(pht, "host_triplet", strdup(""));
+	hash_add(pht, "target_triplet", strdup(""));
 
 /*	XXX TODO verify the following */
 	hash_add(pht, "SET_MAKE", strdup(""));
 	hash_add(pht, "AMDEP_TRUE", strdup(""));
 	hash_add(pht, "AMDEP_FALSE", strdup("#"));
 	hash_add(pht, "AMTAR", strdup("echo 'ARG!'"));
+	hash_add(pht, "ACLOCAL", strdup("echo 'ARG!'"));
 	hash_add(pht, "AUTOCONF", strdup("echo 'ARG!'"));
 	hash_add(pht, "AUTOHEADER", strdup("echo 'ARG!'"));
 	hash_add(pht, "AUTOMAKE", strdup("echo 'ARG!'"));
 	hash_add(pht, "MAKEINFO", strdup("echo 'ARG!'"));
-	hash_add(pht, "ECHO_C", strdup(""));
+	hash_add(pht, "ECHO_C", strdup("\\c"));
 	hash_add(pht, "ECHO_N", strdup(""));
 	hash_add(pht, "ECHO_T", strdup(""));
 	hash_add(pht, "EXEEXT", strdup("")); /* cygwin shit ! */
@@ -304,16 +326,12 @@ void ac_set_variables(htable *pht) {
 	hash_add(pht, "PACKAGE_VERSION", strdup(""));
 	hash_add(pht, "PACKAGE_SEPARATOR", strdup(""));
 	hash_add(pht, "SET_MAKE", strdup(""));
-	hash_add(pht, "build_triplet", strdup(""));
-	hash_add(pht, "host_triplet", strdup(""));
-	hash_add(pht, "target_triplet", strdup(""));
 	hash_add(pht, "CYGPATH_W", strdup(""));
-	hash_add(pht, "DEPDIR", strdup(""));
-	hash_add(pht, "ACLOCAL", strdup(""));
+	hash_add(pht, "DEPDIR", strdup(".deps"));
 	hash_add(pht, "CCDEPMODE", strdup(""));
 	hash_add(pht, "LIBOBJS", strdup(""));
 	hash_add(pht, "LTLIBOBJS", strdup(""));
-	hash_add(pht, "PATH_SEPARATOR", strdup(""));
+	hash_add(pht, "PATH_SEPARATOR", strdup(":")); /* default shell is sh */
 	hash_add(pht, "ac_ct_CC", strdup("")); /* XXX shit ? */
 	hash_add(pht, "ac_ct_RANLIB", strdup("")); /* XXX shit ? */
 	hash_add(pht, "ac_ct_STRIP", strdup("")); /* XXX shit ? */
