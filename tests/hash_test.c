@@ -23,13 +23,13 @@ hpair	testab[] = {
 		};
 
 int main(void) {
-	int	i,
-		n;
+	int	n;
 	char	tstr[256],
 		ttstr[256],
 		*val;
 	hkeys	*phk = NULL;
 	htable	*hp;
+	unsigned int	i;
 
 	printf("Testing init\n");
 	hp = hash_init(TAB_SIZE / 2);
