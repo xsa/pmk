@@ -1,5 +1,6 @@
 26 Jan 2005 mipsator
- * fixed segfault in X86 cpu detection.
+ * fixed segfault in x86 cpu detection.
+ * added __ALPHA in alpha architecture macro.
 
 21 Jan 2005 mipsator
  * keep the PATH separator as is instead of replacing it with a comma.
