@@ -34,13 +34,13 @@ int main() {
 	printf("\nAdding 9 values :\n");
 	for (i = 0 ; i < 10 ; i++) {
 		printf("\tAdd value '%s' ", tval[i]);
-		da_push(da, tval[i]);
+		da_push(da, strdup(tval[i]));
 		printf("(%d)\n", da_size(da));
 	}
 
 	printf("\nTesting values :\n");
 	for (i = 9 ; i >= 0 ; i--) {
-		printf("\tda[%d] = %s\n", i, da_idx(da, i));
+		printf("\tda[%d] = %s\n", i, (char *)da_idx(da, i));
 	}
 
 	printf("\nRemoving values using da_pop :\n");
@@ -55,13 +55,13 @@ int main() {
 	printf("\nAdding 9 values :\n");
 	for (i = 0 ; i < 10 ; i++) {
 		printf("\tAdd value '%s' ", tval[i]);
-		da_push(da, tval[i]);
+		da_push(da, strdup(tval[i]));
 		printf("(%d)\n", da_size(da));
 	}
 
 	printf("\nTesting values :\n");
 	for (i = 9 ; i >= 0 ; i--) {
-		printf("\tda[%d] = %s\n", i, da_idx(da, i));
+		printf("\tda[%d] = %s\n", i, (char *)da_idx(da, i));
 	}
 
 	printf("\nRemoving values using da_shift :\n");

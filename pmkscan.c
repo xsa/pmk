@@ -285,7 +285,7 @@ void dir_recurse(dynary *pda, char *path) {
 #ifdef DEBUG
 		debugf("Add directory '%s' into list.", path);
 #endif
-		da_push(pda, path);
+		da_push(pda, strdup(path));
 
 		/* check directory entries one by one */
 		do {
@@ -423,6 +423,7 @@ int main(int argc, char *argv[]) {
 	do {
 		p = da_pop(pda);
 		dir_explore(pfdata, &sd, p);
+		free(pda); /* XXX will be obj_free later */
 	} while (p != NULL);
 	printf("Parsing Ok.\n\n");
 

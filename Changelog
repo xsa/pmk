@@ -1,5 +1,6 @@
 31 Jul 2003 mipsator
  * improved dynarrays to store void* instead of char*.
+ * fixed use of new dynarrays.
 
 30 Jul 2003 mipsator
  * massive style conforming.

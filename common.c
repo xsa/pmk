@@ -260,7 +260,7 @@ bool str_to_dynary(char *str, char sep, dynary *da) {
 	while (*str != CHAR_EOS) {
 		if (*str == sep) {
 			*pbuf = CHAR_EOS;
-			if (da_push(da, buf) == false) {
+			if (da_push(da, strdup(buf)) == false) {
 				return(false);
 			}
 			pbuf = buf;
@@ -277,7 +277,7 @@ bool str_to_dynary(char *str, char sep, dynary *da) {
 		str++;
 	}
 	*pbuf = CHAR_EOS;
-	if (da_push(da, buf) == false) {
+	if (da_push(da, strdup(buf)) == false) {
 		return(false);
 	}
 
