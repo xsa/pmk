@@ -37,6 +37,9 @@
 #include "premake.h"
 
 
+/* pmksetup specific version */
+#define PREMAKE_SUBVER_PMKSETUP	"1"
+
 #define PREMAKE_CONFIG_TMP	"/tmp/pmk.XXXXXXXX"
 
 /* buffer size in the copy_config() function */

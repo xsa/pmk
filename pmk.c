@@ -560,7 +560,13 @@ int main(int argc, char *argv[]) {
 		exit(1);
 	}
 
-	pmk_log("PreMaKe version %s\n\n", PREMAKE_VERSION);
+	pmk_log("PMK version %s", PREMAKE_VERSION);
+#ifdef DEBUG
+	pmk_log(" [SUB #%s] [SNAP #%s]", PREMAKE_SUBVER_PMK, PREMAKE_SNAP);
+#endif
+	pmk_log("\n\n");
+
+
 	/* print number of hashed command */
 	pmk_log("Hashed %d pmk keywords.\n", keyhash->count);
 

@@ -33,5 +33,7 @@
 #ifndef _PMKSCAN_H_
 #define _PMKSCAN_H_
 
+/* pmkscan specific version */
+#define PREMAKE_SUBVER_PMKSCAN	"1"
 
 #endif /* _PMKSCAN_H_ */

@@ -33,6 +33,7 @@
 
 #include <stdio.h>
 #include <glob.h>
+#include <regex.h>
 
 #include "compat/pmk_string.h"
 #include "pmkscan.h"
@@ -57,9 +58,11 @@ void parse_data(prsdata *pdata) {
 	parsefile
 */
 
-bool parse_file(char *filename) {
-	FILE	*fp;
-	char	line[TMP_BUF_LEN]; /* XXX better size of buffer ? */
+bool parse_c_file(char *filename) {
+	FILE		*fp;
+	char		 line[TMP_BUF_LEN]; /* XXX better size of buffer ? */
+	regex_t		 re_inc;
+	regmatch_t	 rm_inc[1];
 
 	fp = fopen(filename, "r");
 	if (fp == NULL) {
@@ -67,11 +70,28 @@ bool parse_file(char *filename) {
 		return(false);
 	}
 
+	/* init regexps */
+	regcomp(&re_inc, "^#include[[:blank:]]+<([^>]+)>", REG_EXTENDED); /* XXX check */
+
+	/* main parsing */
 	while (get_line(fp, line, sizeof(line)) == true) {
+		/*
 		if (strstr(line, "#include") != NULL) {
 			printf("Found '%s'\n", line);
 		}
+		*/
+		if (regexec(&re_inc, line, 2, rm_inc, 0) == 0) {
+#ifdef DEBUG
+			printf("rm_so = %d\n", (int) rm_inc[1].rm_so);
+			printf("rm_eo = %d\n", (int) rm_inc[1].rm_eo);
+#endif
+			*(line + rm_inc[1].rm_eo) = CHAR_EOS;
+			printf("Found header '%s'\n", (char *) (line + rm_inc[1].rm_so));
+		}
 	}
+
+	/* clean regexps */
+	regfree(&re_inc);
 
 	return(true);
 }
@@ -94,20 +114,49 @@ int main(int argc, char *argv[]) {
 	glob_t	 g;
 	prsdata	*pdata;
 
+	printf("PMKSCAN version %s", PREMAKE_VERSION);
+#ifdef DEBUG
+	printf(" [SUB #%s] [SNAP #%s]", PREMAKE_SUBVER_PMKSCAN, PREMAKE_SNAP);
+#endif
+	printf("\n\n");
+
+
+	printf("Initializing data ... ");
 	pdata = prsdata_init();
 	if (pdata == NULL) {
-		errorf("cannot intialize prsdata.");
+		errorf("\ncannot intialize prsdata.");
 		exit(1);
 	}
-
 	parse_data(pdata);
+	printf("Ok\n\n");
 
-	glob("*.c", GLOB_NOSORT, NULL, &g);
+	printf("Parsing C related files :\n");
 
-	for (i = 0 ; i < g.gl_matchc ; i++) {
-		printf("[%d] '%s'\n", i, g.gl_pathv[i]);
-		parse_file(g.gl_pathv[i]);
+	i = glob("*.c", GLOB_NOSORT, NULL, &g);
+#ifdef DEBUG
+	if (i == 0) {
+		printf("Globbing of *.c files successful.\n");
 	}
+#endif
+
+	i = glob("*.h", GLOB_NOSORT | GLOB_APPEND, NULL, &g);
+#ifdef DEBUG
+	if (i == 0) {
+		printf("Globbing of *.h files successful.\n");
+	}
+#endif
+
+	for (i = 0 ; i < g.gl_pathc ; i++) {
+#ifdef DEBUG
+		printf("[%d] '%s'\n", i, g.gl_pathv[i]);
+#endif
+		parse_c_file(g.gl_pathv[i]);
+	}
+
+	globfree(&g);
+	printf("Parsing Ok\n\n");
+
+	printf("PMKSCAN finished.\n\n");
 
 	return(0);
 }

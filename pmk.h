@@ -39,6 +39,9 @@
 #include "premake.h"
 
 
+/* pmk specific version */
+#define PREMAKE_SUBVER_PMK	"1"
+
 /* prefix character used for commands */
 #define PMK_CHAR_COMMAND	'.'
 
