@@ -153,7 +153,7 @@ bool pmk_ac_compat(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 */
 
 	/* if a file is given then it will be parsed later */
-	acfile= (char *)po_get_data(hash_get(ht, "FILENAME"));
+	acfile= po_get_str(hash_get(ht, "FILENAME"));
 	if (acfile != NULL) {
 		gdata->ac_file = strdup(acfile);
 	}
@@ -223,7 +223,7 @@ bool pmk_check_binary(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 	pmk_log("* Checking binary [%s]\n", cmd->label);
 	required = require_check(ht);
 
-	filename = (char *)po_get_data(hash_get(ht, "FILENAME"));
+	filename = po_get_str(hash_get(ht, "FILENAME"));
 	if (filename == NULL) {
 		errorf("FILENAME not assigned in label '%s'", cmd->label);
 		return(false);
@@ -310,14 +310,14 @@ bool pmk_check_include(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 	required = require_check(ht);
 
 	/* get include filename */
-	incfile = (char *)po_get_data(hash_get(ht, "INCLUDE"));
+	incfile = po_get_str(hash_get(ht, "INCLUDE"));
 	if (incfile == NULL) {
 		errorf("INCLUDE not assigned in label '%s'", cmd->label);
 		return(false);
 	}
 
 	/* check if a function must be searched */
-	incfunc = (char *)po_get_data(hash_get(ht, "FUNCTION"));
+	incfunc = po_get_str(hash_get(ht, "FUNCTION"));
 	if (incfunc == NULL) {
 		target = incfile;
 	} else {
@@ -449,13 +449,13 @@ bool pmk_check_lib(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 
 	required = require_check(ht);
 
-	libname = (char *)po_get_data(hash_get(ht, "LIBNAME"));
+	libname = po_get_str(hash_get(ht, "LIBNAME"));
 	if (libname == NULL) {
 		errorf("LIBNAME not assigned in label '%s'.", cmd->label);
 		return(false);
 	}
 
-	libfunc = (char *)po_get_data(hash_get(ht, "FUNCTION"));
+	libfunc = po_get_str(hash_get(ht, "FUNCTION"));
 	if (libfunc == NULL) {
 		target = libname;
 	} else {
@@ -585,7 +585,7 @@ bool pmk_check_config(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 
 	required = require_check(ht);
 
-	cfgtool = (char *)po_get_data(hash_get(ht, "CFGTOOL"));
+	cfgtool = po_get_str(hash_get(ht, "CFGTOOL"));
 	if (cfgtool == NULL) {
 		errorf("CFGTOOL not assigned in label '%s'.", cmd->label);
 		return(false);
@@ -598,7 +598,7 @@ bool pmk_check_config(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 	}
 
 	/* check for alternative variable for CFLAGS */
-	cflags = (char *)po_get_data(hash_get(ht, "CFLAGS"));
+	cflags = po_get_str(hash_get(ht, "CFLAGS"));
 	if (cflags != NULL) {
 		/* init alternative variable */
 		if (hash_append(gdata->htab, cflags, strdup(""), " ") == HASH_ADD_FAIL) {
@@ -608,7 +608,7 @@ bool pmk_check_config(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 	}
 
 	/* check for alternative variable for LIBS */
-	libs = (char *)po_get_data(hash_get(ht, "LIBS"));
+	libs = po_get_str(hash_get(ht, "LIBS"));
 	if (libs != NULL) {
 		/* init alternative variable */
 		hash_append(gdata->htab, libs, strdup(""), " "); /* XXX check ? */
@@ -640,7 +640,7 @@ bool pmk_check_config(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 		pmk_log("yes.\n");
 	}
 	
-	libvers = (char *)po_get_data(hash_get(ht, "VERSION"));
+	libvers = po_get_str(hash_get(ht, "VERSION"));
 	if (libvers != NULL) {
 		/* if VERSION is provided then check it */
 		snprintf(cfgcmd, sizeof(cfgcmd), "%s --version 2>/dev/null", cfgpath);
@@ -752,7 +752,7 @@ bool pmk_check_pkg_config(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 
 	required = require_check(ht);
 
-	target = (char *)po_get_data(hash_get(ht, "PACKAGE"));
+	target = po_get_str(hash_get(ht, "PACKAGE"));
 	if (target == NULL) {
 		errorf("no TARGET set");
 		return(false);
@@ -765,14 +765,14 @@ bool pmk_check_pkg_config(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 	}
 
 	/* check for alternative variable for CFLAGS */
-	cflags = (char *)po_get_data(hash_get(ht, "CFLAGS"));
+	cflags = po_get_str(hash_get(ht, "CFLAGS"));
 	if (cflags != NULL) {
 		/* init alternative variable */
 		hash_append(gdata->htab, cflags, strdup(""), " "); /* XXX check ? */
 	}
 
 	/* check for alternative variable for LIBS */
-	libs = (char *)po_get_data(hash_get(ht, "LIBS"));
+	libs = po_get_str(hash_get(ht, "LIBS"));
 	if (libs != NULL) {
 		/* init alternative variable */
 		hash_append(gdata->htab, libs, strdup(""), " "); /* XXX check ? */
@@ -820,7 +820,7 @@ bool pmk_check_pkg_config(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 		pmk_log("yes.\n");
 	}
 
-	libvers = (char *)po_get_data(hash_get(ht, "VERSION"));
+	libvers = po_get_str(hash_get(ht, "VERSION"));
 	if (libvers != NULL) {
 		/* if VERSION is provided then check it */
 		snprintf(pc_cmd, sizeof(pc_cmd), "%s --modversion %s 2>/dev/null", pc_path, target);
@@ -919,7 +919,7 @@ bool pmk_check_type(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 
 	required = require_check(ht);
 
-	type = (char *)po_get_data(hash_get(ht, "TYPE"));
+	type = po_get_str(hash_get(ht, "TYPE"));
 	if (type == NULL) {
 		errorf("TYPE not assigned in label '%s'", cmd->label);
 		return(false);
