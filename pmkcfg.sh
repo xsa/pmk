@@ -1,7 +1,8 @@
 #!/bin/sh
 # $Id$
 
-# Copyright (c) 2003-2004 Damien Couderc, Martin Reindl
+# Copyright (c) 2003-2004 Damien Couderc
+# Copyright (c) 2004 Martin Reindl
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
