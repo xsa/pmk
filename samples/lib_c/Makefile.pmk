@@ -61,16 +61,16 @@ $(NAME):
 	@echo ""
 	@echo "-> Building binary"
 	@echo ""
-	$(CC) -o $(NAME) -L. -lhello $(NAME).c
+	$(CC) -o $(NAME) -L. -l${NAME} $(NAME).c
 
 run_$(NAME):
 	@echo ""
 	@echo "-> Running program"
 	@echo ""
-	@echo "LD_LIBRARY_PATH=. hello"
+	@echo "LD_LIBRARY_PATH=. ${NAME}"
 	@echo ""
 	@echo "--exec-begin----------------------------"
-	@LD_LIBRARY_PATH=. ./hello
+	@LD_LIBRARY_PATH=. ./${NAME}
 	@echo "--exec-end------------------------------"
 
 clean:
