@@ -33,26 +33,16 @@
  *
  */
 
-
 #ifndef _PMKINSTALL_H_
 #define _PMKINSTALL_H_
 
-#define	DIRECTORY	0x01		/* Tell install it's a directory. */
-#define	SETFLAGS	0x02		/* Tell install to set flags. */
-#define NOCHANGEBITS	(UF_IMMUTABLE | UF_APPEND | SF_IMMUTABLE | SF_APPEND)
-#define BACKUP_SUFFIX	".old"
+#ifndef blkcnt_t
+typedef int64_t		blkcnt_t;	/* file block counts */
+#endif
 
-#define PATH_DEV_NULL	"/dev/null"
-
-void	copy(int, char *, int, char *, off_t, int);
-int	compare(int, const char *, size_t, int, const char *, size_t);
-void	install(char *, char *, u_long, u_int);
-void	install_dir(char *);
-void	strip(char *);
-void	usage(void);
-int	create_newfile(char *, struct stat *);
-int	create_tempfile(char *, char *, size_t);
-int	file_write(int, char *, size_t, int *, int *, int);
-void	file_flush(int, int);
+#ifndef blksize_t
+typedef u_int32_t	blksize_t;	/* block sizes */
+#endif
 
 #endif /* _PMKINSTALL_H_ */
+
