@@ -11,7 +11,8 @@
 .Sh SYNOPSIS
 .Nm
 .Bk -words
-.Op Fl b Ar path
+.Op Fl hv
+.Op Ar path
 .Ek
 
 .Sh DESCRIPTION
@@ -23,15 +24,16 @@ template (named pmkfile.scan) containing the result of the scan.
 .Pp
 The options are as follows:
 .Bl -tag -width Ds
-.It Fl b Ar path
-Use given path as initial scanned directory.
-This is optional, default path is the current working directory.
 .It Fl h
 Display usage.
 .It Fl v
 Display the version number.
 .El
-
+.Pp
+.Ar path
+is optional as default
+.Ar path
+is the current working directory.
 .Sh FILES
 .Bl -tag -width "pmkfile.scan" -compact
 .It Pa pmkfile.scan
