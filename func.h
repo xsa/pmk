@@ -65,6 +65,13 @@
 			"if (sizeof(%s)) {return(0);}\n" \
 		        "return(0);}"
 
+#define TYPE_INC_TEST_CODE	"#include <stdio.h>\n" \
+				"#include <%s>\n" \
+				"int main() {\n" \
+				"if ((%s *) 0) {return(0);}\n" \
+				"if (sizeof(%s)) {return(0);}\n" \
+			        "return(0);}"
+
 
 #define TEST_FILE_NAME	"test.c"
 #define BIN_TEST_NAME	"test_bin"

@@ -59,6 +59,7 @@ CHECK_TYPE(bool_type) {
 CHECK_TYPE(blkcnt_t_type) {
 	REQUIRED = FALSE
 	NAME = "blkcnt_t"
+	HEADER = "sys/types.h"
 }
 
 # checking stdbool.h

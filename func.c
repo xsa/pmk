@@ -1011,6 +1011,7 @@ bool pmk_check_type(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 		 rval;
 	char	 cfgcmd[MAXPATHLEN],
 		*type,
+		*header,
 		*ccpath;
 	int	 r;
 	lgdata	*pld;
@@ -1024,6 +1025,9 @@ bool pmk_check_type(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 		errorf("NAME not assigned in label '%s'", cmd->label);
 		return(false);
 	}
+
+	/* check if an header must be used */
+	header = po_get_str(hash_get(ht, "HEADER"));
 
 	if (depend_check(ht, pgd) == false) {
 		pmk_log("\t%s\n", pgd->errmsg);
@@ -1054,8 +1058,13 @@ bool pmk_check_type(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 
 	tfp = fopen(TEST_FILE_NAME, "w");
 	if (tfp != NULL) {
+		if (header == NULL) {
+			fprintf(tfp, TYPE_TEST_CODE, type, type);
+		} else {
+			pmk_log("\tUse header '%s'.\n", header);
+			fprintf(tfp, TYPE_INC_TEST_CODE, header, type, type);
+		}
 		pmk_log("\tFound type '%s' : ", type);
-		fprintf(tfp, TYPE_TEST_CODE, type, type);
 		fclose(tfp);
 	}
 
