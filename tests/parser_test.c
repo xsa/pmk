@@ -9,6 +9,7 @@
 
 #include "../autoconf.h"
 #include "../common.h"
+#include "../compat.c"
 #include "../cfgtool.h"
 #include "../detect.h"
 #include "../dynarray.h"
