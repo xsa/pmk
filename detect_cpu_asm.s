@@ -143,7 +143,7 @@ x86_check_cpuid_flag:
 	pushq	%rax
 	popfq			/* load eflags */
 
-	pushfl
+	pushfq
 	popq	%rax		/* get current eflags state */
 
 	pushq	%rcx
