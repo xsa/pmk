@@ -1,3 +1,6 @@
+06 Dec 2004 mipsator
+ * added detection of 'ls' and 'echo' in pmksetup.
+
 27 Nov 2004 mipsator
  * added cpu features for x86 architecture.
 
