@@ -40,6 +40,7 @@
 #include "dynarray.h"
 #include "hash.h"
 #include "cfgtool.h"
+#include "parse.h"
 #include "premake.h"
 
 
@@ -94,5 +95,13 @@ typedef struct {
 
 } pmkdata;
 
+bool	init_var(pmkdata *);
+bool	parse_cmdline(char **, int, pmkdata *);
+bool	process_cmd(prsdata *, pmkdata *);
+bool	process_dyn_var(pmkdata *, char *);
+bool	process_template(char *, pmkdata *);
+pmkdata	*pmkdata_init(void);
+void	clean(pmkdata *);
+void	usage(void);
 
 #endif /* _PMK_H_ */

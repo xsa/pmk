@@ -56,7 +56,6 @@
 #include "func.h"
 #include "pathtools.h"
 #include "pmk.h"
-#include "parse.h"
 
 /*#define PMK_DEBUG	1*/
 
