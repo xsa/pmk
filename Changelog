@@ -1,5 +1,9 @@
 28 Jun 2004 mipsator
- * more stuff to prepare changes in pmkscan.
+ * added variable substitution in pmkscan.
+ * cleaned-up Makefile.pmk (obsolete tests).
+
+27 Jun 2004 mipsator
+ * added more stuff to prepare changes in pmkscan.
 
 26 Jun 2004 mipsator
  * moved process_string() and single_append() into hash_tools.
