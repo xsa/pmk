@@ -76,6 +76,8 @@ bool	 env_to_opt(char *, pmkcmdopt *);
 bool	 get_make_var(char *, char *, int);
 
 dynary	*str_to_dynary(char *, char);
+dynary	*str_to_dynary_adv(char *, char *);
+
 bool	 find_file(dynary *, char *, char *, int);
 bool	 find_file_dir(dynary *, char *, char *, int);
 
