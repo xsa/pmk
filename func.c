@@ -319,7 +319,7 @@ bool pmk_check_binary(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 
 	if (depend_check(ht, pgd) == false) {
 		pmk_log("\t%s\n", pgd->errmsg);
-		return(process_required(pgd, cmd, required, filename, NULL)); 
+		return(process_required(pgd, cmd, required, filename, NULL));
 	}
 
 	/* try to locate binary */
@@ -399,7 +399,7 @@ bool pmk_check_header(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 
 	if (depend_check(ht, pgd) == false) {
 		pmk_log("\t%s\n", pgd->errmsg);
-		return(process_required(pgd, cmd, required, target, NULL)); 
+		return(process_required(pgd, cmd, required, target, NULL));
 	}
 
 	/* get the language used */
@@ -575,7 +575,7 @@ bool pmk_check_lib(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 
 	if (depend_check(ht, pgd) == false) {
 		pmk_log("\t%s\n", pgd->errmsg);
-		return(process_required(pgd, cmd, required, target, NULL)); 
+		return(process_required(pgd, cmd, required, target, NULL));
 	}
 
 	/* get the language used */
@@ -718,7 +718,7 @@ bool pmk_check_config(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 	/* check dependencies */
 	if (depend_check(ht, pgd) == false) {
 		pmk_log("\t%s\n", pgd->errmsg);
-		return(process_required(pgd, cmd, required, cfgtool, NULL)); 
+		return(process_required(pgd, cmd, required, cfgtool, NULL));
 	}
 
 	/* check if a module name is given */
@@ -937,7 +937,7 @@ bool pmk_check_pkg_config(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 	/* check dependencies */
 	if (depend_check(ht, pgd) == false) {
 		pmk_log("\t%s\n", pgd->errmsg);
-		return(process_required(pgd, cmd, required, NULL, NULL)); /* XXX need to define something ? */ 
+		return(process_required(pgd, cmd, required, NULL, NULL)); /* XXX need to define something ? */
 	}
 
 	/* try to get pkg-config lib path from pmk.conf */
@@ -1175,7 +1175,7 @@ bool pmk_check_type(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 
 	if (depend_check(ht, pgd) == false) {
 		pmk_log("\t%s\n", pgd->errmsg);
-		return(process_required(pgd, cmd, required, type, NULL)); 
+		return(process_required(pgd, cmd, required, type, NULL));
 	}
 
 	/* get the language used */
@@ -1286,7 +1286,7 @@ bool pmk_check_variable(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 
 	if (depend_check(ht, pgd) == false) {
 		pmk_log("\t%s\n", pgd->errmsg);
-		return(process_required(pgd, cmd, required, var, NULL)); 
+		return(process_required(pgd, cmd, required, var, NULL));
 	}
 
 	/* look for additional defines */

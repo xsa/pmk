@@ -547,13 +547,13 @@ void skip_useless(prseng *peng) {
 				while ((*peng->prscur != CHAR_CR) &&
 						(*peng->prscur != CHAR_EOS)) {
 #ifdef PRS_DEBUG
-					debugf("skipping '%c'.", *peng->prscur); 
+					debugf("skipping '%c'.", *peng->prscur);
 #endif
 					peng->prscur++;
 				}
 
 #ifdef PRS_DEBUG
-				debugf("check if '%c' == CR.", *peng->prscur); 
+				debugf("check if '%c' == CR.", *peng->prscur);
 #endif
 				if (*peng->prscur == CHAR_CR)
 					peng->prscur++;
