@@ -36,7 +36,8 @@
 #define _PMK_PATHTOOLS_H_
 
 bool	chkpath(char *, char *);
-void	relpath(char *, char *, char *);
+bool	relpath(char *, char *, char *);
 bool	abspath(char *, char *, char *);
+bool	uabspath(char *, char *, char *);
 
 #endif /* _PMK_PATHTOOLS_H_ */

@@ -6,7 +6,7 @@ pmk :
 ~ pmkfile(5)
 ~ compatibility with autoconf (progressing)
 - add an option to read additional arguments from a file
-- add an option to specify basedir (~builddir)
+~ add an option to specify basedir (~builddir)
 
 pmksetup :
 ~ pmk.conf(5)
