@@ -1,3 +1,6 @@
+27 Oct 2004 mipsator
+ * added 'as' (assembler) detection in pmksetup.
+
 25 Oct 2004 mipsator
  * fixed pmkcfg.sh on IRIX.
 
