@@ -1,3 +1,5 @@
+# snapshot 0.8.1-s9
+
 27 Nov 2004 mipsator
  * incorporated x86 cpu detection code into pmksetup, enjoy !
  * miscellaneous cosmetics changes.
@@ -7,7 +9,6 @@
  * done major clean-up in tests directory (but still need some work).
  * fixed a bug in x86_get_cpuid_data() that was remaining from before
    x86_cpu_cell structure changes.
-
 
 25 Nov 2004 mipsator
  * added missing code that translate arch name into id.
