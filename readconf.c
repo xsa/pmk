@@ -31,7 +31,6 @@
  */
 
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h> 
 
 #include "common.h"
@@ -59,7 +58,7 @@ int read_config_file(FILE *f, htable *ht) {
 	 		if (line[len - 1] != '\n' && !feof(f)) {
 				errorf_line(PREMAKE_CONFIG_PATH, 
 						linenum, "line too long");
-				exit(1);
+				return(-1);
 			}
 
 			/* replace the trailing '\n' by a NULL char */
@@ -106,7 +105,7 @@ int parse_line(char *line, int linenum, conf_opt *opts) {
 			/* return a syntax error if line starts with a TAB */ 
 			errorf_line(PREMAKE_CONFIG_PATH, linenum,
 				"syntax error");
-			exit(1);
+			return(-1);
 			break;
 		default :
 			/* XXX add errors checks */
