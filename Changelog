@@ -1,3 +1,6 @@
+15 Jul 2003 mipsator
+ * add parse.c and parse.h with a new shared parsing engine.
+
 05 Jul 2003 mipsator
  * added c++ in the binary list of pmksetup.
  * modified get_lang().
