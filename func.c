@@ -52,7 +52,8 @@ cmdkw	functab[] = {
 		{"CHECK_INCLUDE", pmk_check_include},
 		{"CHECK_LIB", pmk_check_lib},
 		{"CHECK_CONFIG", pmk_check_config},
-		{"CHECK_PKG_CONFIG", pmk_check_pkg_config}
+		{"CHECK_PKG_CONFIG", pmk_check_pkg_config},
+		{"CHECK_TYPE", pmk_check_type}
 };
 
 int	nbfunc = sizeof(functab) / sizeof(cmdkw);
@@ -91,8 +92,8 @@ bool pmk_define(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 
 bool pmk_target(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 	char	*list;
-	int	i = 0;
 	dynary	*da;
+	int	 i = 0;
 
 	pmk_log("* Collecting targets\n");
 
@@ -224,17 +225,18 @@ bool pmk_check_binary(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 
 bool pmk_check_include(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 	FILE	*tfp;
-	bool	required,
-		rval;
-	char	inc_path[TMP_BUF_LEN] = "",
-		cfgcmd[MAXPATHLEN],
+	bool	 required,
+		 rval;
+	char	 inc_path[TMP_BUF_LEN] = "",
+		 cfgcmd[MAXPATHLEN],
 		*incfile,
 		*incfunc,
 		*target,
 		*ccpath,
 		*pstr;
 	dynary	*da;
-	int	r, i;
+	int	 r,
+		 i;
 	lgdata	*pld;
 
 	pmk_log("* Checking include [%s]\n", cmd->label);
@@ -277,20 +279,22 @@ bool pmk_check_include(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 		errorf("cannot get compiler path.");
 		return(false);
 	} else {
-		pmk_log("\tUse %s language with %s compiler\n", pld->name, pld->comp);
+		pmk_log("\tUse %s language with %s compiler\n.", pld->name, pld->comp);
 	}
 
-	tfp = fopen(INC_TEST_NAME, "w");
+	/* fill test file */
+	tfp = fopen(TEST_FILE_NAME, "w");
 	if (tfp != NULL) {
 		if (incfunc == NULL) {
+			/* header test */
 			pmk_log("\tFound header '%s' : ", incfile);
 			fprintf(tfp, INC_TEST_CODE, incfile);
 		} else {
+			/* header function test */
 			pmk_log("\tFound function '%s' in '%s' : ", incfunc, incfile);
 			fprintf(tfp, INC_FUNC_TEST_CODE, incfile, incfunc);
 		}
 
-		/* fill test file */
 		fclose(tfp);
 	} else {
 		errorf("cannot open test file.");
@@ -314,7 +318,7 @@ bool pmk_check_include(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 
 	snprintf(cfgcmd, sizeof(cfgcmd), "%s %s -o %s %s > /dev/null 2>&1",
 						ccpath, inc_path,
-						BIN_TEST_NAME, INC_TEST_NAME);
+						BIN_TEST_NAME, TEST_FILE_NAME);
 	/* get result */
 	r = system(cfgcmd);
 	if (r == 0) {
@@ -341,9 +345,9 @@ bool pmk_check_include(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 		}
 	}
 
-	if (unlink(INC_TEST_NAME) == -1) {
+	if (unlink(TEST_FILE_NAME) == -1) {
 		/* cannot remove temporary file */
-		fprintf(stderr, "Can not remove %s\n", INC_TEST_NAME);
+		fprintf(stderr, "Can not remove %s\n", TEST_FILE_NAME);
 	}
 
 	/* No need to check return here as binary could not exists */
@@ -358,17 +362,18 @@ bool pmk_check_include(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 
 bool pmk_check_lib(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 	FILE	*tfp;
-	bool	required,
-		rval;
-	char	cfgcmd[MAXPATHLEN],
-		lib_buf[TMP_BUF_LEN] = "",
+	bool	 required,
+		 rval;
+	char	 cfgcmd[MAXPATHLEN],
+		 lib_buf[TMP_BUF_LEN] = "",
 		*ccpath,
 		*libname,
 		*libfunc,
 		*target,
 		*pstr;
 	dynary	*da;
-	int	r, i;
+	int	 r,
+		 i;
 	lgdata	*pld;
 
 	pmk_log("* Checking library [%s]\n", cmd->label);
@@ -409,10 +414,10 @@ bool pmk_check_lib(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 		errorf("cannot get compiler path.");
 		return(false);
 	} else {
-		pmk_log("\tUse %s language with %s compiler\n", pld->name, pld->comp);
+		pmk_log("\tUse %s language with %s compiler.\n", pld->name, pld->comp);
 	}
 
-	tfp = fopen(INC_TEST_NAME, "w");
+	tfp = fopen(TEST_FILE_NAME, "w");
 	if (tfp != NULL) {
 		if (libfunc == NULL) {
 			pmk_log("\tFound library '%s' : ", libname);
@@ -446,7 +451,7 @@ bool pmk_check_lib(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 
 	snprintf(cfgcmd, sizeof(cfgcmd), "%s %s -o %s -l%s %s >/dev/null 2>&1",
 						ccpath, lib_buf, BIN_TEST_NAME,
-						libname, INC_TEST_NAME);
+						libname, TEST_FILE_NAME);
 	/* get result */
 	r = system(cfgcmd);
 	if (r == 0) {
@@ -477,9 +482,9 @@ bool pmk_check_lib(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 		}
 	}
 
-	if (unlink(INC_TEST_NAME) == -1) {
+	if (unlink(TEST_FILE_NAME) == -1) {
 		/* cannot remove temporary file */
-		fprintf(stderr, "Can not remove %s\n", INC_TEST_NAME);
+		fprintf(stderr, "Can not remove %s\n", TEST_FILE_NAME);
 	}
 
 	/* No need to check return here as binary could not exists */
@@ -494,11 +499,11 @@ bool pmk_check_lib(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 
 bool pmk_check_config(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 	FILE	*rpipe;
-	bool	required = true,
-		rval = false;
-	char	pipebuf[TMP_BUF_LEN],
-		cfgpath[MAXPATHLEN],
-		cfgcmd[MAXPATHLEN],
+	bool	 required = true,
+		 rval = false;
+	char	 pipebuf[TMP_BUF_LEN],
+		 cfgpath[MAXPATHLEN],
+		 cfgcmd[MAXPATHLEN],
 		*cfgtool,
 		*libvers,
 		*bpath,
@@ -651,18 +656,18 @@ bool pmk_check_config(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 
 bool pmk_check_pkg_config(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 	FILE	*rpipe;
-	bool	required = true,
-		rval;
-	char	pipebuf[TMP_BUF_LEN],
-		pc_cmd[MAXPATHLEN],
-		pc_path[MAXPATHLEN],
+	bool	 required = true,
+		 rval;
+	char	 pipebuf[TMP_BUF_LEN],
+		 pc_cmd[MAXPATHLEN],
+		 pc_path[MAXPATHLEN],
 		*target,
 		*bpath,
 		*libvers,
 		*cflags,
 		*libs;
 
-	pmk_log("* Checking for pkg-config [%s]\n", cmd->label);
+	pmk_log("* Checking with pkg-config [%s]\n", cmd->label);
 
 	required = require_check(ht);
 
@@ -801,4 +806,96 @@ bool pmk_check_pkg_config(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 	/* XXX LDFLAGS, CPPFLAGS ? */
 
 	return(true);
+}
+
+/*
+	check type
+*/
+
+bool pmk_check_type(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
+	FILE	*tfp;
+	bool	 required,
+		 rval;
+	char	 cfgcmd[MAXPATHLEN],
+		*type,
+		*ccpath;
+	int	 r;
+	lgdata	*pld;
+
+	pmk_log("* Checking type [%s]\n", cmd->label);
+
+	required = require_check(ht);
+
+	type = (char *)hash_get(ht, "TYPE");
+	if (type == NULL) {
+		errorf("TYPE not assigned in label '%s'", cmd->label);
+		return(false);
+	}
+
+	if (depend_check(ht, gdata) == false) {
+		pmk_log("\t%s\n", gdata->errmsg);
+		if (required == true) {
+			return(false);
+		} else {
+			record_def(gdata->htab, type, false);
+			label_set(gdata->labl, cmd->label, false);
+			return(true);
+		}
+	}
+
+	/* get the language used */
+	pld = get_lang(ht, gdata);
+
+	/* get the appropriate compiler */
+	snprintf(cfgcmd, sizeof(cfgcmd), "BIN_%s", pld->comp);
+	ccpath = (char *)hash_get(gdata->htab, cfgcmd);
+	if (ccpath == NULL) {
+		errorf("cannot get compiler path.");
+		return(false);
+	} else {
+		pmk_log("\tUse %s language with %s compiler.\n", pld->name, pld->comp);
+	}
+
+	tfp = fopen(TEST_FILE_NAME, "w");
+	if (tfp != NULL) {
+		pmk_log("\tFound type '%s' : ", type);
+		fprintf(tfp, TYPE_TEST_CODE, type, type);
+		fclose(tfp);
+	}
+
+	snprintf(cfgcmd, sizeof(cfgcmd), "%s -o %s %s > /dev/null 2>&1",
+						ccpath, BIN_TEST_NAME,
+						TEST_FILE_NAME);
+
+	/* get result */
+	r = system(cfgcmd);
+	if (r == 0) {
+		pmk_log("yes.\n");
+		/* define for template */
+		record_def(gdata->htab, type, true);
+		record_val(gdata->htab, type, "");
+		label_set(gdata->labl, cmd->label, true);
+		rval = true;
+	} else {
+		pmk_log("no.\n");
+		if (required == true) {
+			rval = false;
+			errorf("failed to find type '%s'.", type);
+		} else {
+			/* define for template */
+			record_def(gdata->htab, type, false);
+			label_set(gdata->labl, cmd->label, false);
+			rval = true;
+		}
+	}
+
+	if (unlink(TEST_FILE_NAME) == -1) {
+		/* cannot remove temporary file */
+		fprintf(stderr, "Can not remove %s\n", TEST_FILE_NAME);
+	}
+
+	/* No need to check return here as binary could not exists */
+	unlink(BIN_TEST_NAME);
+
+	return(rval);
 }
