@@ -75,7 +75,7 @@ int mkstemps(char *template, int suffixlen) {
 	/* intialise random() */
 	len = strlen(subst);
 	gettimeofday(&tv, NULL);
-	srandom(len * (unsigned int) template * tv.tv_sec + tv.tv_usec);
+	srandom((unsigned int) template * tv.tv_sec + tv.tv_usec); /* XXX make better */
 
 	/* lets go replacing the stuff */
 	for (p = start ; p <= end ; p++) {
