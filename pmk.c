@@ -30,8 +30,14 @@
  *
  */
 
+/* include needed for MAXPATHLEN */
+#ifdef __OpenBSD__
+#	include <sys/param.h>
+#endif
+#ifdef __FreeBSD__
+#	include <sys/param.h>
+#endif
 
-#include <sys/param.h>
 
 #include <ctype.h>
 #include <err.h>
