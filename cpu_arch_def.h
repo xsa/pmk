@@ -49,7 +49,8 @@
 #endif
 
 /* check alpha architecture */
-#if defined(__alpha__) || defined(__alpha)
+#if defined(__alpha__) || defined(__alpha) || \
+	defined(__ALPHA)
 #define ARCH_ALPHA	1
 #endif
 
