@@ -302,3 +302,35 @@ char *hash_get(htable *pht, char *key) {
 	/* key not found */
 	return(NULL);
 }
+
+/*
+	merge one hash table into another
+
+	dst_ht : destination table
+	src_ht : table to merge
+
+	returns number of merged key
+*/
+
+int hash_merge(htable *dst_ht, htable *src_ht) {
+	int	i,
+		s,
+		c = 0;
+	hcell	*p;
+
+	/* get table size */
+	s = src_ht->size;
+
+	for(i = 0 ; i < s ; i++) {
+		p = src_ht->nodetab[i].first;
+		while (p != NULL) {
+			/* add the key in dst_ht */
+			hash_add(dst_ht, p->key, p->value);
+			c++; /* merged one more key */
+			p = p->next;
+		}
+	}
+
+	/* return count of merged keys */
+	return(c);
+}

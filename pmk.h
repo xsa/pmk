@@ -77,7 +77,7 @@ typedef struct {
 
 /* pmk data */
 typedef struct {
-	htable	*datahash;
+	htable	*htab;
 	char	*target; /* XXX should be an array or something else */
 } pmkdata;
 

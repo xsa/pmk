@@ -76,8 +76,7 @@ char	pmkfile[MAXPATHLEN];
 int	cur_line = 0;
 
 /* keyword data */
-htable		*keyhash,
-		*datahash;
+htable		*keyhash;
 cmdkw		functab[] = {
 	{"DEFINE", pmk_define},
 	{"TARGET", pmk_target},
@@ -96,7 +95,7 @@ cmdkw		functab[] = {
 	returns TRUE on success
 */
 
-bool process_template(char *template) {
+bool process_template(char *template, htable *ht) {
 	FILE	*tfd,
 		*dfd;
 	char	*path,
@@ -166,7 +165,7 @@ bool process_template(char *template) {
 					replace = FALSE;
 					tbuf[k] = '\0';
 
-					value = hash_get(datahash, tbuf);
+					value = hash_get(ht, tbuf);
 					if (value == NULL) {
 						/* not a valid tag */
 						buf[j] = PMK_TAG_CHAR;
@@ -177,6 +176,8 @@ bool process_template(char *template) {
 							j++;
 							k++;
 						}
+						buf[j] = PMK_TAG_CHAR;
+						j++;
 					} else {
 						/* replace with value */
 						k = 0;
@@ -610,22 +611,14 @@ int main(int argc, char *argv[]) {
 	/* print number of hashed command */
 	pmk_log("(%d)\n", keyhash->count);
 
-/*
-	ugly code to test processing of template file
-*/
-	datahash = hash_init(1024);
-	hash_add(datahash, "PREFIX", "/usr/local");
-	hash_add(datahash, "PROGNAME", "scandisk"); /* uhuhuhuhuh */
-/*
-	end of ugly code
-*/
+	gdata.htab = hash_init(1024); /* XXX must be replaced by a define */
 
 	if (parse(fd) == FALSE) {
 		/* an error occured while parsing */
 		rval = 1;
 	} else {
 		pmk_log("\n");
-		process_template(gdata.target); /* XXX should use an array or something else */
+		process_template(gdata.target, gdata.htab); /* XXX should use an array or something else */
 		pmk_log("End of log.\n");
 	}
 
