@@ -107,7 +107,7 @@ bool ac_parse_config(htable *ht, char *fpath) {
 			buf[i] = CHAR_EOS;
 
 			/* check the defined value */
-			pstr = (char *)hash_get(ht, buf);
+			pstr = (char *)get_obj_data(hash_get(ht, buf));
 			/* XXX could use value of DEF__ */
 			if (pstr != NULL) {
 				/* debugf("defining '%s'", buf); XXX */
@@ -181,33 +181,33 @@ void ac_process_dyn_var(htable *pht, pmkdata *pgd, char *template) {
 	free(pstr);
 
 	/* init builddir */
-	hash_add(pht, "abs_top_builddir", strdup(basedir));
+	hash_add(pht, "abs_top_builddir", mk_obj_str(basedir));
 
 	/* set abs_builddir */
 	abspath(basedir, ac_dir, abs_bd);
-	hash_add(pht, "abs_builddir", strdup(abs_bd));
+	hash_add(pht, "abs_builddir", mk_obj_str(abs_bd));
 
 	/* compute top_builddir */
 	relpath(abs_bd, basedir, buf);
-	hash_add(pht, "top_builddir", strdup(buf));
+	hash_add(pht, "top_builddir", mk_obj_str(buf));
 
 	/* Mr GNU said : rigorously equal to ".". So i did :) */
-	hash_add(pht, "builddir", strdup("."));
+	hash_add(pht, "builddir", mk_obj_str("."));
 
 	/* set absolute srcdir */
-	hash_add(pht, "abs_top_srcdir", strdup(srcdir));
+	hash_add(pht, "abs_top_srcdir", mk_obj_str(srcdir));
 
 	/* compute top_srcdir */
 	relpath(basedir, srcdir, buf);
-	hash_add(pht, "top_srcdir", strdup(buf));
+	hash_add(pht, "top_srcdir", mk_obj_str(buf));
 
 	/* absolute path of template */
 	abspath(srcdir, ac_dir, abs_sd);
-	hash_add(pht, "abs_srcdir", strdup(abs_sd));
+	hash_add(pht, "abs_srcdir", mk_obj_str(abs_sd));
 
 	/* relative path to template */
 	relpath(abs_bd, abs_sd, buf);
-	hash_add(pht, "srcdir", strdup(buf));
+	hash_add(pht, "srcdir", mk_obj_str(buf));
 }
 
 /*

@@ -38,13 +38,25 @@ MANDIR=		$(PREFIX)/man/
 SAMPLE=		$(PREMAKE)file.sample
 CONFIG=		$(PREMAKE).conf.sample
 
-P_OBJS=		compat.o common.o hash.o func.o functool.o \
-		dynarray.o autoconf.o pathtools.o parse.o pmk.o
-S_OBJS=		$(SETUP).o common.o hash.o dynarray.o compat.o
-SC_OBJS=	$(SCAN).o common.o compat.o dynarray.o parse.o hash.o
+P_OBJS=		${PREMAKE}.o compat.o common.o hash.o func.o functool.o \
+		dynarray.o autoconf.o pathtools.o parse.o pmk_obj.o
+S_OBJS=		$(SETUP).o common.o hash.o dynarray.o compat.o pmk_obj.o
+SC_OBJS=	$(SCAN).o common.o compat.o dynarray.o parse.o hash.o pmk_obj.o
 
 .c.o:
 	$(CC) $(CFLAGS) -c $<
+
+# specific object files
+
+$(SCAN).o:
+	$(CC) $(CFLAGS) -DDATADIR=\"$(DATADIR)\" -c $(SCAN).c
+
+hash.o:
+	$(CC) $(CFLAGS) -DUSE_PMK_OBJ -c hash.c
+
+#dynarray.o:
+#	$(CC) $(CFLAGS) -DUSE_PMK_OBJ -c dynarray.c
+#
 
 all: $(PREMAKE) $(SETUP) $(SCAN)
 
@@ -63,9 +75,6 @@ $(PREMAKE): config $(P_OBJS)
 
 $(SETUP): config $(S_OBJS)
 	$(CC) -o $(SETUP) $(LDFLAGS) $(S_OBJS)
-
-$(SCAN).o:
-	$(CC) $(CFLAGS) -DDATADIR=\"$(DATADIR)\" -c $(SCAN).c
 
 ${SCAN}: config $(SC_OBJS)
 	$(CC) -o $(SCAN) $(LDFLAGS) $(SC_OBJS)
