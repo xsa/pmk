@@ -105,7 +105,7 @@
 #endif
 
 /* only used for snapshots, comment for release */
-#define PREMAKE_SNAP		"1"
+#define PREMAKE_SNAP		"2"
 
 /* build version string */
 #ifndef PREMAKE_SNAP
