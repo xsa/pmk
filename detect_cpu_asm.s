@@ -1,7 +1,7 @@
 /* $Id$ */
 
 /*
- * Copyright (c) 2004 Damien Couderc
+ * Copyright (c) 2004-2005 Damien Couderc
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -215,3 +215,16 @@ x86_cpu_reg_edx:
 #endif /* ARCH_X86_32 || ARCH_X86_64 */
 
 
+#if defined(ARCH_ALPHA)
+.text
+        .globl alpha_exec_implver
+        .ent alpha_exec_implver
+alpha_exec_implver:
+        .frame $30,0,$26,0
+$alpha_exec_implver..ng:
+        .prologue 0
+        implver $0
+        ret $31,($26),1
+        .end alpha_exec_implver
+
+#endif /* ARCH_ALPHA */

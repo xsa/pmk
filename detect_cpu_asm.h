@@ -1,7 +1,7 @@
 /* $Id$ */
 
 /*
- * Copyright (c) 2004 Damien Couderc
+ * Copyright (c) 2004-2005 Damien Couderc
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,6 +41,10 @@
 #include "cpu_arch_def.h"
 
 
+/*
+	x86 architecture
+*/
+
 #if defined(ARCH_X86_32) || defined(ARCH_X86_64)
 
 /* declare X86 assembly functions */
@@ -53,8 +57,16 @@ extern uint32_t	x86_cpu_reg_ebx;
 extern uint32_t	x86_cpu_reg_ecx;
 extern uint32_t	x86_cpu_reg_edx;
 
-
 #endif /* ARCH_X86_32 || ARCH_X86_64 */
+
+/*
+	alpha architecture
+*/
+
+#if defined(ARCH_ALPHA)
+extern unsigned long	alpha_exec_implver(void);
+
+#endif /* ARCH_ALPHA */
 
 #endif /* _DETECT_CPU_ASM_H_ */
 

@@ -1,7 +1,7 @@
 /* $Id$ */
 
 /*
- * Copyright (c) 2004 Damien Couderc
+ * Copyright (c) 2004-2005 Damien Couderc
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -52,6 +52,7 @@
 #define LIST_X86_CPU_VENDOR	2
 #define LIST_X86_CPU_MODEL	3
 #define LIST_X86_CPU_CLASS	4
+#define LIST_ALPHA_CPU_CLASS	5
 
 #define	PMK_ARCH_UNKNOWN	0
 #define	PMK_ARCH_X86_32		1
@@ -189,7 +190,29 @@ void		 x86_cpu_cell_destroy(x86_cpu_cell *);
 char		*x86_get_std_cpu_vendor(prsdata *, char *);
 bool		 x86_get_cpuid_data(x86_cpu_cell *);
 bool		 x86_set_cpu_data(prsdata *, x86_cpu_cell *, htable *);
+
 #endif /* ARCH_X86_32 || ARCH_X86_64 */
+
+
+/******************
+ * alpha specific *
+ ******************/
+
+#if defined(ARCH_ALPHA)
+
+#define ALPHA_IMPLVER_EV4	0
+#define ALPHA_IMPLVER_EV5	1
+#define ALPHA_IMPLVER_EV6	2
+
+#define ALPHA_CPU_CLASS_FMT	"IMPLVER_%u"
+#define ALPHA_CPU_UNKNOWN	"unknown"
+
+#define PMKCONF_HW_ALPHA_CPU_CLASS	"HW_ALPHA_CPU_CLASS"	/* ex: EV4, EV5, EV6 */
+
+
+bool alpha_set_cpu_data(prsdata *, htable *);
+
+#endif /* ARCH_ALPHA */
 
 #endif /* _DETECT_CPU_H_ */
 
