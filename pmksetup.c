@@ -66,28 +66,18 @@ char	sfn[MAXPATHLEN];	/* scratch file name */
 FILE	*sfp;			/* scratch file pointer */
 
 
-
 /*
  * Main program for pmksetup(8)
  */
 int main(int argc, char *argv[]) {
 	FILE		*config;
 	int		ch,
-			linenum = 0,
 			error = 0;
-	size_t		len;	
 	uid_t		uid;
-	char		*v;	
-	char		line[MAX_LINE_LEN],
-			filename[MAXPATHLEN];
- 	cfg_opt		options;	
 	htable		*ht;
 	
 	extern int	optind;
-	extern char	*optarg;
 	
-
-
 	/* pmksetup(8) must be run as root */
 	if ((uid = getuid()) != 0) {
 		errorf("you must be root.");
@@ -100,6 +90,7 @@ int main(int argc, char *argv[]) {
 			case 'v' :
 				fprintf(stderr, "%s\n", PREMAKE_VERSION);
 				exit(0);
+				break;
 			case 'V' :
 				if (0 == verbose_flag)
 					verbose_flag = 1;
@@ -111,113 +102,169 @@ int main(int argc, char *argv[]) {
 	argc -= optind;
 	argv += optind;
 
+
+	if ((ht = hash_init(MAX_CONF_OPT)) == NULL) {
+		errorf("cannot create hash table");
+		exit(1);
+	}
+
 	
-	if (snprintf(filename, sizeof(filename), "%s", PREMAKE_CONFIG_PATH) != -1) { 
+	fprintf(stderr, "==> Looking for default parameters...\n");
+	if ((get_env_vars(ht) == -1) || (get_binaries(ht) == -1))
+		exit(1);
 
-		if (verbose_flag == 1)
-			debugf("Opening configuration file: %s", PREMAKE_CONFIG_PATH);
+	if ((open_tmp_config() == -1))
+		exit(1);
 
-		if ((config = fopen(filename, "r")) != NULL) {
-			if ((ht = hash_init(MAX_CONF_OPT)) == NULL) {
-				errorf("cannot create hash table");
-				exit(1);
-			}
+	if ((config = fopen(PREMAKE_CONFIG_PATH, "r")) != NULL) {
+		fprintf(stderr, "==> Configuration file found: %s\n", PREMAKE_CONFIG_PATH);
 
-			if (verbose_flag == 1) {
-				debugf("");
-				debugf("Looking for default parameters...");
-			}
+		/* parse configuration file */
+		error = parse_conf(config, ht);
 
-			if ((open_tmp_config() == -1) ||
-					(get_env_vars(ht) == -1) ||
-					(get_binaries(ht) == -1))
-				exit(1);
+		fclose(config);
+	} else {
+		fprintf(stderr, "==> Configuration file not found, generating one...\n");
+		config = NULL;
+	}
 
-			if (verbose_flag == 1) {
-				debugf("");
-				debugf("Creating temporary configuration file");	
-			}	
+	fprintf(stderr, "==> Merging remaining data...\n");	
+	/* writing the remaining data stored in the hash */
+	write_new_data(ht);
+	/* destroying the hash once we'r done with it */	
+	hash_destroy(ht);
 
-			/* parsing the configuration file */
-			while (fgets(line, sizeof(line), config) != NULL) {
-				linenum++;
-				len = strlen(line);
+	if (close_tmp_config() < 0)
+		exit(1);
 
-				/* replace the trailing '\n' by a NULL char */
-				line[len -1] = '\0';
-
-				/* checking first character of the line */
-				switch (line[0]) {
-					case CHAR_COMMENT :
-						fprintf(sfp, "%s\n", line);
-						break;
-					case '\0' :	/* empty char */
-						fprintf(sfp, "%s\n", line);
-						break;
-					case '\t' :	/* TAB char */
-						errorf_line(PREMAKE_CONFIG_PATH, linenum, "syntax error"); 
-						return(-1);
-						break;
-					default :
-						if (parse_conf_line(line, linenum, &options) == 0) {
-							if ((v = hash_get(ht, options.key)) != NULL)
-								/* checking the VAR<->VALUE separator */
-								switch (options.opchar) {
-									case CHAR_ASSIGN_UPDATE :
-										/* get newer value */
-										fprintf(sfp, "%s%c%s\n", options.key, 
-												CHAR_ASSIGN_UPDATE, v);
-										break;
-									case CHAR_ASSIGN_STATIC :
-										/* static definition, stay unchanged */ 
-										fprintf(sfp, "%s%c%s\n", options.key,
-												CHAR_ASSIGN_STATIC, options.val);
-										break;
-									default :
-										error = 1;
-										break;
-								}
-							else
-								fprintf(sfp, "%s%c%s\n", options.key, options.opchar, options.val);
-						} else
-							error = 1;
-						break;
-				}
-			}
-			fclose(config);
-			hash_destroy(ht);
-		} else {
-			errorf("%s : %s", PREMAKE_CONFIG_PATH, strerror(errno));
+	if (error == 0)
+		/* copying the temporary config to the system one */
+		if (copy_config(sfn, PREMAKE_CONFIG_PATH) == -1)
 			exit(1);
-		}
-
-		if (close_tmp_config() < 0)
-			exit(1);
-
-		if (error == 0) {
-			/* copying the temporary config to the system one */
-			if (verbose_flag == 1)
-				debugf("Copying temporary configuration to %s", 
-					PREMAKE_CONFIG_PATH);
-			if (copy_config(sfn, PREMAKE_CONFIG_PATH) == -1)
-				exit(1);
-		}
 
 #ifdef PMKSETUP_DEBUG
-		debugf("%s has not been deleted!", sfn);
+	debugf("%s has not been deleted!", sfn);
 #else
-		if (unlink(sfn) == -1) {
-			errorf("cannot remove temporary file: %s : %s",
-				sfn, strerror(errno));
-			exit(1);	
-		}
+	if (unlink(sfn) == -1) {
+		errorf("cannot remove temporary file: %s : %s",
+			sfn, strerror(errno));
+		exit(1);	
+	}
 #endif	/* PMKSETUP_DEBUG */
 
-		 if (error == 1)
-			exit(1);
+	 if (error != 0)
+		exit(error);
 
-	}
 	return(0);
+}
+
+
+/*
+ * write remaining data
+ *
+ * 	ht: hash table
+ */
+void write_new_data(htable *ht) {
+	char	**keys,
+		*val;
+	int	n,
+		i;
+
+	n = hash_nbkey(ht);
+	keys = hash_keys(ht);
+
+	/* sort hash table */
+	qsort(keys, n, sizeof(char *), keycomp);
+
+	/* processing remaining keys */
+	for(i = 0 ; i < n ; i++) {
+		val = hash_get(ht, keys[i]);
+		fprintf(sfp, "%s%c%s\n", keys[i], CHAR_ASSIGN_UPDATE, val);
+	}
+}
+
+
+/*
+ * Compare the keys in the hash to sort them:
+ *
+ * 	here sorting the keys alphabetically before
+ *	writing the new configuration file with write_new_data()
+ *
+ *	a: first element to compare
+ *	b: second element to compare
+ *
+ *	returns an integer greater than, equal to, or
+ *		less than 0 according as the character a is
+ *		greather, equal to, or less than the character b. 
+ */
+int keycomp(const void *a, const void *b) {
+	return(strcmp(*(const char **)a, *(const char **)b));
+}
+
+
+/*
+ * Parse configuration
+ *
+ *	config: old configuration file
+ *	ht: hash table
+ *
+ *	returns error code
+ */
+int parse_conf(FILE *config, htable *ht) {
+	char	line[MAX_LINE_LEN],
+		*v;	
+	int	linenum = 0,
+		error = 0;
+	size_t	len;	
+ 	cfg_opt	options;
+
+	/* parsing the configuration file */
+	while (fgets(line, sizeof(line), config) != NULL) {
+		linenum++;
+		len = strlen(line);
+
+		/* replace the trailing '\n' by a NULL char */
+		line[len -1] = '\0';
+
+		/* checking first character of the line */
+		switch (line[0]) {
+			case CHAR_COMMENT :
+				fprintf(sfp, "%s\n", line);
+				break;
+			case '\0' :	/* empty char */
+				fprintf(sfp, "%s\n", line);
+				break;
+			case '\t' :	/* TAB char */
+				errorf_line(PREMAKE_CONFIG_PATH, linenum, "syntax error"); 
+				return(-1);
+				break;
+			default :
+				if (parse_conf_line(line, linenum, &options) == 0) {
+					if ((v = hash_get(ht, options.key)) != NULL)
+						/* checking the VAR<->VALUE separator */
+						switch (options.opchar) {
+							case CHAR_ASSIGN_UPDATE :
+								/* get newer value */
+								fprintf(sfp, "%s%c%s\n", options.key, CHAR_ASSIGN_UPDATE, v);
+								hash_delete(ht, options.key);
+								break;
+							case CHAR_ASSIGN_STATIC :
+								/* static definition, stay unchanged */ 
+								fprintf(sfp, "%s%c%s\n", options.key, CHAR_ASSIGN_STATIC, options.val);
+								hash_delete(ht, options.key);
+								break;
+							default :
+								error = 1;
+								break;
+						}
+					else
+						fprintf(sfp, "%s%c%s\n", options.key, options.opchar, options.val);
+				} else
+					error = 1;
+				break;
+		}
+	}
+	return(error);
 }
 
 
@@ -271,7 +318,6 @@ int close_tmp_config(void) {
 	}        
 	return(0);
 }
-
 
 
 /*
