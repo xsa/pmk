@@ -1,7 +1,7 @@
 common :
 - tutorial 
 + improve parser to parse variables
-! force types in parser
++ force types in parser
 ! missing function headers
 
 pmk :

@@ -250,13 +250,15 @@ char *str_to_def(char *str) {
 
 	while (*p != CHAR_EOS) {
 		switch (*p) {
-			case '-' :
-			case '.' :
-			case '/' :
-				*p = '_';
+			case '*' :
+				*p = 'P';
 				break;
 			default :
-				*p = (char) toupper((int) *p);
+				if (isalnum(*p) == 0) {
+					*p = '_';
+				} else {
+					*p = (char) toupper((int) *p);
+				}
 				break;
 		}
 		p++;

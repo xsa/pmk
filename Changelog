@@ -4,6 +4,7 @@
  * updated require_check() to support bool object.
  * updated pmkfile.
  * fixed pmkfile sample.
+ * rewritten str_to_def() to have full compatibility with autoconf.
 
 10 Sep 2003 mipsator
  * added parse_key() and parse_data() to enforce syntax checking.
