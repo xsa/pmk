@@ -44,7 +44,12 @@
 
 
 /*
-	XXX
+	parse data from PMKSCAN_DATA file
+
+	pdata : parsing data structure
+	scandata : scanning data structure
+
+	returns : boolean (true on success)
 */
 
 bool parse_data(prsdata *pdata, scandata *sdata) {
@@ -94,15 +99,14 @@ bool parse_data(prsdata *pdata, scandata *sdata) {
 
 char *regex_check(char *pattern, char *line) {
 	static char	 idtf[TMP_BUF_LEN];
-	char		*tline,
-			*rval;
+	char		*rval;
 	regex_t		 re;
 	regmatch_t	 rm[1];
 
 	if (regcomp(&re, pattern, REG_EXTENDED) != 0)
 		return(NULL);
 
-	if (regexec(&re, tline, 2, rm, 0) == 0) {
+	if (regexec(&re, line, 2, rm, 0) == 0) {
 		/* copy header name */
 		strlcpy(idtf, (char *) (line + rm[1].rm_so), rm[1].rm_eo - rm[1].rm_so + 1);
 
@@ -152,7 +156,13 @@ void idtf_check(char *idtf, htable *ht_fam, htable *phtgen) {
 
 
 /*
-	parsefile XXX
+	parse a C language file
+
+	filename : file to parse
+	scandata : scanning data
+	phtgen : ouput hash table
+
+	returns : boolean
 */
 
 bool parse_c_file(char *filename, scandata *sdata, htable *phtgen) {
@@ -195,7 +205,10 @@ bool parse_c_file(char *filename, scandata *sdata, htable *phtgen) {
 }
 
 /*
-	XXX
+	generate a pmkfile with results of the scan
+
+	ofile : file name
+	pht : output hash table
 */
 
 bool output_file(char *ofile, htable *pht) {

@@ -3,6 +3,7 @@
  * replaced free() by hash_free_hcell() where needed in hash.
  * misc in pmkscan.
  * fixed ac_process_dyn_var().
+ * another misc changes in pmkscan.
 
 22 Jul 2003 mipsator
  * rewritten hash_keys() to return a new structure (hkeys).
