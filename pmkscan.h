@@ -62,5 +62,14 @@ typedef struct {
 		*includes;
 } scandata;
 
+/* Local functions declaration */
+bool	dir_explore(htable *, scandata *, char *);
+bool	idtf_check(char *, htable *, htable *, htable *);
+bool	output_file(char *, htable *);
+bool	parse_c_file(char *, scandata *, htable *, htable *);
+bool	parse_data_file(prsdata *, scandata *);
+char	*regex_check(char *, char *);
+void	dir_recurse(dynary *, char *);
+void	usage(void);
 
 #endif /* _PMKSCAN_H_ */
