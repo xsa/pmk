@@ -1,3 +1,5 @@
+# snapshot 0.7.6
+
 12 Dec 2003  mipsator
  * added tmp_open() in common.
  * updated func.c to use tmp_open().
