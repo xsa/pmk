@@ -46,11 +46,11 @@
 
 /* XXX override PREMAKE_CONFIG_PATH for test purpose */
 #ifdef PMKSETUP_DEBUG
-	#undef PREMAKE_CONFIG_PATH
-	#define PREMAKE_CONFIG_PATH	"samples/pmk.conf.sample"
-	#define PREMAKE_CONFIG_TMP	"/tmp/pmk.notrandom"
+#undef PREMAKE_CONFIG_PATH
+#define PREMAKE_CONFIG_PATH	"samples/pmk.conf.sample"
+#define PREMAKE_CONFIG_TMP	"/tmp/pmk.notrandom"
 #else
-	#define PREMAKE_CONFIG_TMP	"/tmp/pmk.XXXXXXXX"
+#define PREMAKE_CONFIG_TMP	"/tmp/pmk.XXXXXXXX"
 #endif
 
 char	sfn[MAXPATHLEN];	/* scratch file name */		
@@ -82,6 +82,7 @@ int main(void) {
 					(get_binaries(ht) == -1))
 				exit(1);
 
+			/* parsing the configuration file */
 			while (fgets(line, sizeof(line), config) != NULL) {
 				linenum++;
 				len = strlen(line);
@@ -89,32 +90,35 @@ int main(void) {
 				/* replace the trailing '\n' by a NULL char */
 				line[len -1] = '\0';
 
+				/* checking first character of the line */
 				switch (line[0]) {
 					case CHAR_COMMENT :
 						fprintf(sfp, "%s\n", line);
 						break;
-					case '\0' :
+					case '\0' :	/* empty char */
 						fprintf(sfp, "%s\n", line);
 						break;
-					case '\t' :
+					case '\t' :	/* TAB char */
 						errorf_line(PREMAKE_CONFIG_PATH, linenum, "syntax error"); 
 						return(-1);
 						break;
 					default :
 						if (parse_line(line, linenum, &options) == 0) {
 							if ((v = hash_get(ht, options.key)) != NULL) {
+								/* checking the VAR<->VALUE separator */
 								switch (options.opchar) {
 									case PMKSETUP_ASSIGN_CHAR :
-										if (strncmp(v, options.val, MAX_OPT_VALUE_LEN) == 0)
-											fprintf(sfp, "%s%c%s\n", options.key,
-												PMKSETUP_ASSIGN_CHAR, options.val);
+										/* get newer value */
+										fprintf(sfp, "%s%c%s\n", options.key, 
+												PMKSETUP_ASSIGN_CHAR, v);
 										break;
 									case PMKSETUP_STATIC_CHAR :
+										/* static definition, stay unchanged */ 
 										fprintf(sfp, "%s%c%s\n", options.key,
-											PMKSETUP_STATIC_CHAR, options.val);
+												PMKSETUP_STATIC_CHAR, options.val);
 										break;
 									default :
-										fprintf(sfp, "%s=%s\n", options.key, v);
+										error = 1;
 										break;
 								}
 							}
@@ -136,8 +140,12 @@ int main(void) {
 }
 
 
-
-/* open temporary configuration file */
+/*
+ * Open temporary configuration file
+ *
+ *	returns:  0 on success
+ *		 -1 on failure
+ */
 int open_tmp_config(void) {
 	int	fd = -1;
 
@@ -160,7 +168,15 @@ int open_tmp_config(void) {
 }
 
 
-/* close temporary configuration file */
+/*
+ * Close temporary configuration file
+ *
+ *	it deletes the temporary file on exit except if the
+ *	PMKSETUP_DEBUG mode is on.
+ *
+ *	returns:  0 on success
+ *		 -1 on failure 
+ */
 int close_tmp_config(void) {
 	if (sfp) {
 		if (fclose(sfp) < 0) {
@@ -187,6 +203,9 @@ int close_tmp_config(void) {
  * Get the environment variables needed for the configuration file
  *
  *	ht: hash table where we have to store the values
+ *
+ *	returns:  0 on success
+ *		 -1 on failure
  */
 int get_env_vars(htable *ht) { 
 	struct	utsname	utsname;
@@ -200,7 +219,6 @@ int get_env_vars(htable *ht) {
 	hash_add(ht, PREMAKE_KEY_OSNAME, utsname.sysname);
 	hash_add(ht, PREMAKE_KEY_OSVERS, utsname.release);
 	hash_add(ht, PREMAKE_KEY_OSARCH, utsname.machine);
-
 	return(0);
 }
 
@@ -209,6 +227,9 @@ int get_env_vars(htable *ht) {
  * Get the _must be_ binaries on the system
  *
  *	ht: hash table where we have to store the values
+ *
+ *	returns:  0 on success
+ *		 -1 on failure
  */ 
 int get_binaries(htable *ht) {
 	int	i;
@@ -253,7 +274,8 @@ int get_binaries(htable *ht) {
  *	linenum: line number
  *	opts: struct where where we store the key->value data   
  *
- *	returns 0 on success else 1
+ *	returns:  0 on success
+ *		 -1 on failure
  */
 int parse_line(char *line, int linenum, conf_opt *opts) {
 	char	key[MAX_OPT_NAME_LEN],
@@ -278,7 +300,7 @@ int parse_line(char *line, int linenum, conf_opt *opts) {
 				j++;
 				if (j > MAX_OPT_NAME_LEN) {
 					/* too small, cannot store key name */
-					errorf_line(PREMAKE_CONFIG_PATH, linenum, "Key name too long.");
+					errorf_line(PREMAKE_CONFIG_PATH, linenum, "key name too long.");
 					return(-1);
 				}
 			}
@@ -287,7 +309,7 @@ int parse_line(char *line, int linenum, conf_opt *opts) {
 			k++;
 			if (k > MAX_OPT_VALUE_LEN) {
 				/* too small, cannot store key value */
-				errorf_line(PREMAKE_CONFIG_PATH, linenum, "Key value too long.");
+				errorf_line(PREMAKE_CONFIG_PATH, linenum, "key value too long.");
 				return(-1);
 			}
 		}
@@ -300,7 +322,7 @@ int parse_line(char *line, int linenum, conf_opt *opts) {
 		return(0);			
 	} else {
 		/* missing operator */
-		errorf_line(PREMAKE_CONFIG_PATH, linenum, "Operator not found.");
+		errorf_line(PREMAKE_CONFIG_PATH, linenum, "operator not found.");
 		return(-1);
 	}
 }
