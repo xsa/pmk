@@ -39,6 +39,7 @@
 /* include it first as if it was <sys/types.h> - this will avoid errors */
 #include "compat/pmk_sys_types.h"
 #include <sys/utsname.h>
+#include <errno.h>
 
 #include "compat/pmk_string.h"
 #include "common.h"
@@ -59,7 +60,7 @@ prskw	kw_pmkcpu[] = {
 	{"LIST_X86_CPU_CLASS",		LIST_X86_CPU_CLASS,	PRS_KW_CELL},
 	{"LIST_ALPHA_CPU_CLASS",	LIST_ALPHA_CPU_CLASS,	PRS_KW_CELL}
 };
-int	nbkwc = sizeof(kw_pmkcpu) / sizeof(prskw);
+size_t	nbkwc = sizeof(kw_pmkcpu) / sizeof(prskw);
 
 
 arch_cell	arch_tab[] = {
@@ -74,7 +75,7 @@ arch_cell	arch_tab[] = {
 	{"parisc_64",	PMK_ARCH_PARISC},
 	{"vax",		PMK_ARCH_VAX}
 };
-int	nbarch = sizeof(arch_tab) / sizeof(arch_cell);
+size_t	nbarch = sizeof(arch_tab) / sizeof(arch_cell);
 
 
 /*
@@ -117,15 +118,15 @@ prsdata *parse_cpu_data(char *fname) {
 	/* initialize parsing structure */
 	pdata = prsdata_init();
 	if (pdata == NULL) {
-		/*errorf("cannot intialize prsdata.");*/
+		errorf("cannot intialize parsing data structure.");
 		return(NULL);
 	}
 
 	fp = fopen(fname, "r");
 	if (fp == NULL) {
 		prsdata_destroy(pdata);
-		/*errorf("cannot open '%s' : %s.",      */
-		/*        fname, strerror(errno));*/
+		errorf("cannot open '%s' : %s.",
+				fname, strerror(errno));
 		return(NULL);
 	}
 
@@ -135,6 +136,7 @@ prsdata *parse_cpu_data(char *fname) {
 	fclose(fp);
 
 	if (rval == false) {
+		/* parsing failed, pdata is useless, cleaning */
 		prsdata_destroy(pdata);
 		pdata = NULL;
 	}
@@ -178,7 +180,7 @@ char *check_cpu_arch(char *uname_m, prsdata *pdata) {
 */
 
 unsigned char arch_name_to_id(char *arch_name) {
-	int		i;
+	unsigned int	i;
 	unsigned char	id = PMK_ARCH_UNKNOWN;
 
 	for(i = 0 ; i < nbarch ; i++) {
@@ -299,7 +301,7 @@ x86_cpu_feature	x86_cpu_feat_reg1[] = {
 	{X86_CPU_MASK_FEAT_IA64,	"IA64"},
 	{X86_CPU_MASK_FEAT_PBE,		"PBE"}
 };
-int nb_feat_reg1 = sizeof(x86_cpu_feat_reg1) / sizeof(x86_cpu_feature);
+size_t nb_feat_reg1 = sizeof(x86_cpu_feat_reg1) / sizeof(x86_cpu_feature);
 
 x86_cpu_feature	x86_cpu_feat_reg2[] = {
 	{X86_CPU_MASK_FEAT_FPU,		"FPU"},
@@ -311,14 +313,14 @@ x86_cpu_feature	x86_cpu_feat_reg2[] = {
 	{X86_CPU_MASK_FEAT_CX16,	"CX16"},
 	{X86_CPU_MASK_FEAT_ETPRD,	"ETPRD"}
 };
-int nb_feat_reg2 = sizeof(x86_cpu_feat_reg2) / sizeof(x86_cpu_feature);
+size_t nb_feat_reg2 = sizeof(x86_cpu_feat_reg2) / sizeof(x86_cpu_feature);
 
 x86_cpu_feature	x86_cpu_feat_extreg[] = {
 	{X86_CPU_MASK_FEAT_LM,		"LM"},
 	{X86_CPU_MASK_FEAT_EXT3DN,	"EXT3DN"},
 	{X86_CPU_MASK_FEAT_3DNOW,	"3DNOW"}
 };
-int nb_feat_extreg = sizeof(x86_cpu_feat_extreg) / sizeof(x86_cpu_feature);
+size_t nb_feat_extreg = sizeof(x86_cpu_feat_extreg) / sizeof(x86_cpu_feature);
 
 
 /****
