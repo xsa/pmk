@@ -72,7 +72,6 @@ int	nbpredef = sizeof(predef) / sizeof(hpair);
  * Main program for pmksetup(8)
  */
 int main(int argc, char *argv[]) {
-	DIR		*cfgdir;
 	FILE		*config;
 	int		 ch,
 			 error = 0;
@@ -124,10 +123,7 @@ int main(int argc, char *argv[]) {
 	printf("\n\n");
 
 	/* check if syconfdir exists */
-	cfgdir = opendir(CONFDIR);
-	if (cfgdir != NULL) {
-		closedir(cfgdir);
-	} else {
+	if (dir_exists(CONFDIR) == -1) {
 		verbosef("creating '%s' directory.", CONFDIR);
 		if (mkdir(CONFDIR, S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH) != 0) {
 			errorf("cannot create '%s' directory : %s.", 
