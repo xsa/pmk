@@ -25,8 +25,8 @@ common:
 -----------------------------------------------------------------------
 	-	tutorial
 	+	improve test_pmkinstall to check more modes
-	-	add test target in tests/Makefile
-	-	update README and INSTALL
+	-.	add test target in tests/Makefile
+	+	update README and INSTALL
 	-	new samples : prog c & c++, lib c & c++
 
 
@@ -64,6 +64,8 @@ pmkscan
 
 pmkinstall
 -----------------------------------------------------------------------
+	-	handle multiple sources
+	-	directory ?
 	-.	backup option ?
 
 
@@ -74,6 +76,7 @@ mips	~.	make specs, this tool should handle install and
 
 pmkpc
 -----------------------------------------------------------------------
-mips	~	main loop
-			- make the argument parser working without order
+mips	+	main loop
+			+ make the argument parser working without order
+	-	missing options
 
