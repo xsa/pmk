@@ -1,3 +1,6 @@
+16 Aug 2003 mipsator
+ * added po_dup() in pmk_obj.
+
 15 Aug 2003 mipsator
  * added po_append() to pmk_obj.
  * adapted solution of dynarray to hash functions.
