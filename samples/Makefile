@@ -152,8 +152,8 @@ test_$(INST):
 	@echo ""
 	@echo "-> Installing test data"
 	@echo ""
-	$(INST) -m u+rw README.sample $(TEST_TARGET)1
-	$(INST) -m ug+r README.sample $(TEST_TARGET)2
+	$(INST) -m u+rw README.samples $(TEST_TARGET)1
+	$(INST) -m ug+r README.samples $(TEST_TARGET)2
 	@echo ""
 	@echo "-> Checking test file"
 	@echo "";
