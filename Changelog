@@ -1,5 +1,6 @@
 07 Feb 2004 mipsator
  * implemented output filtering options in pmkpc.
+ * updated pmkpc(1) to sync with actual state.
 
 07 Feb 2004 mipsator
  * fixed building of the pmkscan location in usermode.
