@@ -1,3 +1,6 @@
+23 sep 2004 mipsator
+ * returned on getopts use in pmkcfg.sh to handle blanks in arguments.
+
 # snapshot 0.8.1-s7
 
 10 Sep 2004 xsa
