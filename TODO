@@ -22,7 +22,7 @@ Status flags:
 common:
 -----------------------------------------------------------------------
 	-	tutorial
-	-	add a test for pmkinstall ?
+damien	-	add a test for pmkinstall
 
 
 pmk:
@@ -68,7 +68,7 @@ damien	~!	full rewrite
 		+ owner
 		+ group
 		~ strip
-		- backup ?
+dennis		- backup ?
 
 
 pmkpkg
