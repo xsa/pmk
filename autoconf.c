@@ -14,6 +14,9 @@
  *      copyright notice, this list of conditions and the following
  *      disclaimer in the documentation and/or other materials provided
  *      with the distribution.
+ *    - Neither the name of the copyright holder(s) nor the names of its
+ *      contributors may be used to endorse or promote products derived
+ *      from this software without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -259,6 +262,28 @@ void ac_set_variables(htable *pht) {
 	hash_add(pht, "INSTALL_SCRIPT", strdup("${INSTALL}"));
 	hash_add(pht, "INSTALL_STRIP_PROGRAM", strdup("${SHELL} $(install_sh) -c -s"));
 
+/*
+	XXX
+	well i dunno if the following really need to be full compatible with autoconf 
+*/
+	pstr = (char *) hash_get(pht, "OS_ARCH");
+	hash_add(pht, "host_cpu", strdup(pstr));
+	hash_add(pht, "build_cpu", strdup(pstr)); /* XXX  ouargl cross compiling ... */
+	hash_add(pht, "target_cpu", strdup(pstr)); /* XXX  ouargl cross compiling ... */
+	hash_add(pht, "host", strdup(""));
+	hash_add(pht, "host_alias", strdup(""));
+	hash_add(pht, "host_os", strdup(""));
+	hash_add(pht, "host_vendor", strdup(""));
+	hash_add(pht, "build", strdup(""));
+	hash_add(pht, "build_alias", strdup(""));
+	hash_add(pht, "build_os", strdup(""));
+	hash_add(pht, "build_vendor", strdup(""));
+	hash_add(pht, "target", strdup(""));
+	hash_add(pht, "target_alias", strdup(""));
+	hash_add(pht, "target_os", strdup(""));
+	hash_add(pht, "target_vendor", strdup(""));
+
+
 /*	XXX TODO verify the following */
 	hash_add(pht, "SET_MAKE", strdup(""));
 	hash_add(pht, "AMDEP_TRUE", strdup(""));
@@ -278,6 +303,28 @@ void ac_set_variables(htable *pht) {
 	hash_add(pht, "PACKAGE_TARNAME", strdup(""));
 	hash_add(pht, "PACKAGE_VERSION", strdup(""));
 	hash_add(pht, "PACKAGE_SEPARATOR", strdup(""));
+	hash_add(pht, "SET_MAKE", strdup(""));
+	hash_add(pht, "build_triplet", strdup(""));
+	hash_add(pht, "host_triplet", strdup(""));
+	hash_add(pht, "target_triplet", strdup(""));
+	hash_add(pht, "CYGPATH_W", strdup(""));
+	hash_add(pht, "DEPDIR", strdup(""));
+	hash_add(pht, "ACLOCAL", strdup(""));
+	hash_add(pht, "CCDEPMODE", strdup(""));
+	hash_add(pht, "LIBOBJS", strdup(""));
+	hash_add(pht, "LTLIBOBJS", strdup(""));
+	hash_add(pht, "PATH_SEPARATOR", strdup(""));
+	hash_add(pht, "ac_ct_CC", strdup("")); /* XXX shit ? */
+	hash_add(pht, "ac_ct_RANLIB", strdup("")); /* XXX shit ? */
+	hash_add(pht, "ac_ct_STRIP", strdup("")); /* XXX shit ? */
+	hash_add(pht, "am__fastdepCC_FALSE", strdup("")); /* XXX shit ? */
+	hash_add(pht, "am__fastdepCC_TRUE", strdup("")); /* XXX shit ? */
+	hash_add(pht, "am__include", strdup("")); /* XXX shit ? */
+	hash_add(pht, "am__leading_dot", strdup("")); /* XXX shit ? */
+	hash_add(pht, "am__quote", strdup("")); /* XXX shit ? */
+	hash_add(pht, "oldincludedir", strdup(""));
+	hash_add(pht, "install_sh", strdup("")); /* provide our own ? */
+	hash_add(pht, "program_transform_name", strdup(""));
 
 
 	/* byte order */
