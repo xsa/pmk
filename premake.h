@@ -83,8 +83,13 @@
 #endif
 
 #ifndef TMPDIR
-#	define TMPDIR	"/tmp"
+#	define TMPDIR	"."
 #endif
+
+#ifndef TMPBINDIR
+#	define TMPBINDIR	"."
+#endif
+
 
 #define PREMAKE_MAJOR		"0"
 #define PREMAKE_MINOR		"7"
