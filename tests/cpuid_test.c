@@ -1,3 +1,9 @@
+/* $Id$ */
+
+/* Public Domain */
+
+/* CPU ID detection test */
+
 #include <sys/types.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -27,7 +33,6 @@ int main(void) {
 			 cputype;
 	struct utsname	 utsname;
 	uint32_t	 buffer[13];
-	x86_cpu_cell	 x86cc;
 
 	if (uname(&utsname) == -1) {
 		printf("uname failed.\n");
