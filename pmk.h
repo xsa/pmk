@@ -68,11 +68,20 @@ typedef struct {
 	char	name[MAX_OPT_NAME_LEN],
 		value[MAX_OPT_VALUE_LEN];
 } pmkcmdopt;
+
 /* command type */
 typedef struct {
 	char		name[MAX_CMD_NAME_LEN],
 			label[MAX_LABEL_NAME_LEN];
 } pmkcmd;
 
+/* pmk data */
+typedef struct {
+	htable	*datahash;
+	char	*target; /* XXX should be an array or something else */
+} pmkdata;
+
+
+pmkdata gdata;
 
 #endif /* _PMK_H_ */
