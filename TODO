@@ -3,6 +3,7 @@ common :
 + improve USER_TEST to make USER_MODE (aka non root pmk).
 
 pmk :
+! free bug
 + update pmk.1
 + update pmkfile.5
 ~ compatibility with autoconf (progressing) :
@@ -17,6 +18,7 @@ pmk :
 - checks hash_add() in autoconf.c (void func => bool func)
 
 pmksetup :
+! does clean temporary files on error
 - missing checks :
 	+ endian type (HW_ENDIAN = BIG_ENDIAN, LITTLE_ENDIAN)
 	- char unsigned (pmk ?)
