@@ -362,7 +362,7 @@ bool pmk_check_binary(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 }
 
 /*
-	check include file
+	check header file
 */
 
 bool pmk_check_header(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
@@ -379,10 +379,8 @@ bool pmk_check_header(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 		*ccpath,
 		*cflags,
 		*pstr;
-	dynary	*da;
-	int	 i,
-		 n,
-		 r;
+	dynary	*defs;
+	int	 r;
 	lgdata	*pld;
 
 	pmk_log("\n* Checking header [%s]\n", cmd->label);
@@ -430,6 +428,9 @@ bool pmk_check_header(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 	} else {
 		pmk_log("\tUse %s language with %s compiler.\n", pld->name, pld->comp);
 	}
+
+	/* look for additional defines */
+	defs = po_get_list(hash_get(ht, KW_OPT_DEFS));
 
 	/* check for alternative variable for CFLAGS */
 	cflags = po_get_str(hash_get(ht, PMKVAL_ENV_CFLAGS));
@@ -502,6 +503,8 @@ bool pmk_check_header(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 		/* define for template */
 		record_def_data(pgd->htab, target, DEFINE_DEFAULT);
 		label_set(pgd->labl, cmd->label, true);
+		/* process additional defines */
+		process_def_list(pgd->htab, defs);
 
 		/* put result in CFLAGS, CXXFLAGS or alternative variable */
 		if (single_append(pgd->htab, cflags, strdup(inc_path)) == false) {
@@ -524,18 +527,6 @@ bool pmk_check_header(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 			record_def_data(pgd->htab, target, NULL);
 			label_set(pgd->labl, cmd->label, false);
 			rval = true;
-		}
-	}
-
-	/* process additional defines */
-	da = po_get_list(hash_get(ht, KW_OPT_DEFS));
-	if (da != NULL) {
-		n = da_usize(da);
-		for (i = 0 ; i < n ; i++) {
-			pstr = da_idx(da, i);
-			pmk_log("\tProcessing additional define '%s': ", pstr);
-			record_def(pgd->htab, pstr, rval);
-			pmk_log("ok.\n");
 		}
 	}
 
@@ -571,12 +562,9 @@ bool pmk_check_lib(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 		*libname,
 		*libfunc,
 		*target,
-		*libs,
-		*pstr;
-	dynary	*da;
-	int	 i,
-		 n,
-		 r;
+		*libs;
+	dynary	*defs;
+	int	 r;
 	lgdata	*pld;
 
 	pmk_log("\n* Checking library [%s]\n", cmd->label);
@@ -622,6 +610,9 @@ bool pmk_check_lib(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 	} else {
 		pmk_log("\tUse %s language with %s compiler.\n", pld->name, pld->comp);
 	}
+
+	/* look for additional defines */
+	defs = po_get_list(hash_get(ht, KW_OPT_DEFS));
 
 	/* check for alternative variable for LIBS */
 	libs = po_get_str(hash_get(ht, KW_OPT_LIBS));
@@ -670,6 +661,8 @@ bool pmk_check_lib(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 		/* define for template */
 		record_def_data(pgd->htab, target, DEFINE_DEFAULT);
 		label_set(pgd->labl, cmd->label, true);
+		/* process additional defines */
+		process_def_list(pgd->htab, defs);
 
 		snprintf(lib_buf, sizeof(lib_buf), "-l%s", libname);
 
@@ -694,18 +687,6 @@ bool pmk_check_lib(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 			record_def_data(pgd->htab, target, NULL);
 			label_set(pgd->labl, cmd->label, false);
 			rval = true;
-		}
-	}
-
-	/* process additional defines */
-	da = po_get_list(hash_get(ht, KW_OPT_DEFS));
-	if (da != NULL) {
-		n = da_usize(da);
-		for (i = 0 ; i < n ; i++) {
-			pstr = da_idx(da, i);
-			pmk_log("\tProcessing additional define '%s': ", pstr);
-			record_def(pgd->htab, pstr, rval);
-			pmk_log("ok.\n");
 		}
 	}
 
@@ -1185,12 +1166,9 @@ bool pmk_check_type(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 		*type,
 		*header,
 		*member,
-		*ccpath,
-		*pstr;
-	dynary	*da;
-	int	 i,
-		 n,
-		 r;
+		*ccpath;
+	dynary	*defs;
+	int	 r;
 	lgdata	*pld;
 
 	pmk_log("\n* Checking type [%s]\n", cmd->label);
@@ -1236,6 +1214,9 @@ bool pmk_check_type(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 		pmk_log("\tUse %s language with %s compiler.\n", pld->name, pld->comp);
 	}
 
+	/* look for additional defines */
+	defs = po_get_list(hash_get(ht, KW_OPT_DEFS));
+
 	tfp = tmps_open(TEST_FILE_NAME, "w", ftmp, sizeof(ftmp), strlen(C_FILE_EXT));
 	if (tfp != NULL) {
 		if (header == NULL) {
@@ -1273,6 +1254,9 @@ bool pmk_check_type(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 		/* define for template */
 		record_def_data(pgd->htab, type, DEFINE_DEFAULT);
 		label_set(pgd->labl, cmd->label, true);
+		/* process additional defines */
+		process_def_list(pgd->htab, defs);
+
 		rval = true;
 	} else {
 		pmk_log("no.\n");
@@ -1284,18 +1268,6 @@ bool pmk_check_type(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 			record_def_data(pgd->htab, type, NULL);
 			label_set(pgd->labl, cmd->label, false);
 			rval = true;
-		}
-	}
-
-	/* process additional defines */
-	da = po_get_list(hash_get(ht, KW_OPT_DEFS));
-	if (da != NULL) {
-		n = da_usize(da);
-		for (i = 0 ; i < n ; i++) {
-			pstr = da_idx(da, i);
-			pmk_log("\tProcessing additional define '%s': ", pstr);
-			record_def(pgd->htab, pstr, rval);
-			pmk_log("ok.\n");
 		}
 	}
 
@@ -1319,11 +1291,8 @@ bool pmk_check_variable(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 		 rval = false;
 	char	*var,
 		*value,
-		*varval,
-		*pstr;
-	dynary	*da;
-	int	 i,
-		 n;
+		*varval;
+	dynary	*defs;
 
 	pmk_log("\n* Checking variable [%s]\n", cmd->label);
 
@@ -1346,6 +1315,9 @@ bool pmk_check_variable(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 		}
 	}
 
+	/* look for additional defines */
+	defs = po_get_list(hash_get(ht, KW_OPT_DEFS));
+
 	pmk_log("\tFound variable '%s' : ", var);
 
 	/* trying to get variable */
@@ -1356,6 +1328,8 @@ bool pmk_check_variable(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 		value = po_get_str(hash_get(ht, KW_OPT_VALUE));
 		if (value == NULL) {
 			label_set(pgd->labl, cmd->label, true);
+			/* process additional defines */
+			process_def_list(pgd->htab, defs);
 
 			rval = true;
 		} else {
@@ -1374,6 +1348,9 @@ bool pmk_check_variable(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 				} else {
 					/* define for template */
 					label_set(pgd->labl, cmd->label, false);
+					/* process additional defines */
+					process_def_list(pgd->htab, defs);
+
 					rval = true;
 				}
 			}
@@ -1386,18 +1363,6 @@ bool pmk_check_variable(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 			/* define for template */
 			label_set(pgd->labl, cmd->label, false);
 			rval = true;
-		}
-	}
-
-	/* process additional defines */
-	da = po_get_list(hash_get(ht, KW_OPT_DEFS));
-	if (da != NULL) {
-		n = da_usize(da);
-		for (i = 0 ; i < n ; i++) {
-			pstr = da_idx(da, i);
-			pmk_log("\tProcessing additional define '%s': ", pstr);
-			record_def(pgd->htab, pstr, rval);
-			pmk_log("ok.\n");
 		}
 	}
 

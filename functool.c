@@ -306,6 +306,7 @@ bool record_def_data(htable *ht, char *name, char *value) {
 
 /*
 	record data tag
+	XXX TODO to remove
 
 	ht : hast table to store the definition
 	name : data name
@@ -335,6 +336,32 @@ bool record_val(htable *ht, char *name, char *value) {
 
 	return(true);
 }
+
+/*
+	process list of defines
+
+	XXX
+*/
+
+bool process_def_list(htable *ht, dynary *da) {
+	char	*name;
+	int	 i,
+		 n;
+
+	/* process additional defines */
+	if (da != NULL) {
+		n = da_usize(da);
+		for (i = 0 ; i < n ; i++) {
+			name = da_idx(da, i);
+			pmk_log("\tProcessing additional define '%s': ", name);
+			record_def_data(ht, name, "1");
+			pmk_log("ok.\n");
+		}
+	}
+
+	return(true);
+}
+
 
 /*
 	set label
