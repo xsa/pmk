@@ -30,10 +30,20 @@
  *
  */
 
-#include "compat.h"
 
-#ifdef HAVE_STDBOOL_H
-#include <stdbool.h>
-#else
-#include "stdbool.h"
-#endif
+#ifndef _PMK_COMPAT_H_
+#define _PMK_COMPAT_H_
+
+/*	! WARNING !
+
+	The following data is automatically set,
+	you should not have to modify it.
+*/
+
+/* availability of strlcpy */
+@DEF_STRLCPY@	HAVE_STRLCPY
+
+/* availability of stdbool.h (ISO C99) */
+@DEF_STDBOOL_H@	HAVE_STDBOOL_H
+
+#endif /* _PMK_COMPAT_H_ */

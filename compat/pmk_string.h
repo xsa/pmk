@@ -31,8 +31,9 @@
  */
 
 
-#ifndef _PMK_COMPAT_H_
-#define _PMK_COMPAT_H_
+#include <string.h>
+
+#include "compat.h"
 
 /*
 	strlcpy
@@ -51,11 +52,8 @@
 
 	Note: Feel free to send us a notice if your system is not
 		listed here but should be.
-
-
-	If your system has no compatible strlcpy uncomment the following include.
 */
 
-/* #include "strlcpy.c" */
-
-#endif /* _PMK_COMPAT_H_ */
+#ifndef HAVE_STRLCPY
+#include "strlcpy.c"
+#endif

@@ -30,10 +30,13 @@ CONFIG=		$(PREMAKE).conf.sample
 P_OBJS=		common.o hash.o func.o pmk.o dynarray.o
 S_OBJS=		$(SETUP).o common.o hash.o dynarray.o
 
-all: $(PREMAKE) $(SETUP)
+all: config $(PREMAKE) $(SETUP)
 
 .c.o:
 	$(CC) $(CFLAGS) -c $<
+
+config:
+	@CC=$(CC) sh pmkcfg.sh
 
 $(PREMAKE): $(P_OBJS)
 	$(CC) -o $(PREMAKE) $(LDFLAGS) $(P_OBJS)
@@ -51,7 +54,7 @@ install: pmk pmksetup
 	$(INSTALL) -m 444 $(SETUP).8 $(PREFIX)/man/man8/
 
 clean:
-	rm -f $(P_OBJS) $(S_OBJS) $(PREMAKE) $(SETUP) *.core
+	rm -f $(P_OBJS) $(S_OBJS) $(PREMAKE) $(SETUP) compat/compat.h *.core
 
 deinstall:
 	rm -f $(PREFIX)/bin/$(PREMAKE)
@@ -97,28 +100,4 @@ test_pmk: pmk
 	@echo "=> End of test"
 	@echo ""
 
-test_pmksetup: pmksetup
-	@echo ""
-	@echo "=>Test pmksetup with sample file"
-	@echo "\t(PMKSETUP_DEBUG must be set)"
-	@echo ""
-	@echo "-> Dumping original configuration file"
-	@echo "----------------------------------------"
-	@cat samples/pmk.conf.sample
-	@echo "----------------------------------------"
-	@echo ""
-	@echo "-> Running pmksetup"
-	./pmksetup
-	@echo ""
-	@echo "-> Dumping temporary file"
-	@echo "----------------------------------------"
-	@cat /tmp/pmk.notrandom
-	@echo "----------------------------------------"
-	@echo ""
-	@echo "-> Removing temporary file"
-	rm -f /tmp/pmk.notrandom
-	@echo ""
-	@echo "=> End of test"
-	@echo ""
-
-test_all: test_pmk test_pmksetup clean
+test_all: test_pmk clean
