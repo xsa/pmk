@@ -10,7 +10,8 @@ SETTINGS {
 	# target files 
 	TARGET = ("Makefile.sample.pmk","config_sample.h.pmk","subdir/Makefile.subdir.pmk")
 	# detect compiler
-	DETECT = ("CC","CXX")
+	DETECT = ("CC")
+	#DETECT = ("CC","CXX")
 }
 
 # put some defines
