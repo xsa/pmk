@@ -18,7 +18,7 @@ on a given platform.
 
 .Sh DATA TYPES
 .Nm
-is using pseudo types like the following :
+is using pseudo types like the following:
 .Bl -tag -width Ds
 .It Cm bool
 The classical boolean type with TRUE and FALSE values.
@@ -68,7 +68,7 @@ Examples:
 .Nm
 can contain comments, blank lines and commands.
 .Pp
-A command has the following format (? character means optional field) :
+A command has the following format (? character means optional field):
 .Bd -literal -offset -indent
  <command><?(label)> {
  <body>
@@ -79,12 +79,12 @@ The command and label names can be assimilated to the 'word''type (see
 data types).
 .Pp
 The body can contain comment(s) and definition line(s).
-A commented line start with a '#''character like the following :
+A commented line start with a '#''character like the following:
 .Bd -literal -offset -indent
 # this is a comment line
 .Ed
 .Pp
-A definition line has the following format :
+A definition line has the following format:
 .Bd -literal -offset -indent
 <?blank><key name><?blank>=<?blank><key value>
 .Ed
@@ -166,7 +166,7 @@ SWITCHES {
 .Pp
 All these commands need a label.
 .Pp
-They all can have the following optional arguments :
+They all can have the following optional arguments:
 .Bl -tag -width Ds
 .It Cm REQUIRED
 Specify if this test is required to achieve the configuration.
@@ -184,10 +184,10 @@ DEPEND = ("header_gtk","!header_qt")
 .Ed
 .El
 .Pp
-Some of these commands can also have the following arguments :
+Some of these commands can also have the following arguments:
 .Bl -tag -width Ds
 .It Cm LANG
-Specify the language used in the following list :
+Specify the language used in the following list:
 .Bd -literal -offset -indent
 C
 C++
@@ -195,7 +195,7 @@ C++
 .Pp Type is 'quoted', by default \\"C\\" is the used language.
 .El
 .Pp
-Here the list of commands :
+Here the list of commands:
 .Bl -tag -width Ds
 .It Cm CHECK_BINARY
 Check if a binary is in the path.
