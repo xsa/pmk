@@ -50,7 +50,7 @@ pmk:
 
 pmksetup:
 -----------------------------------------------------------------------
-mips	~	rewrite engine for better flexibility.
+mips	+	rewrite engine for better flexibility.
 	-	create .bak or .old of pmk.conf
 	+	options to update or remove a variable of pmk.conf
 	-	option to append to variable of pmk.conf

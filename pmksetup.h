@@ -70,8 +70,8 @@
  * Look for location of some predefined binaries.
  * Be sure to update this list in premake.h as well.
  */
-#define MAXBINS			13	/* max slots in the binaries array */
-static  char *binaries[MAXBINS][2] = {
+
+static  char *binaries[][2] = {
 	{"ar",		PMKCONF_BIN_AR},
 	{"awk",		PMKCONF_BIN_AWK},
 	{"c++",		PMKCONF_BIN_CXX},
@@ -80,12 +80,16 @@ static  char *binaries[MAXBINS][2] = {
 	{"egrep",	PMKCONF_BIN_EGREP},
 	{"grep",	PMKCONF_BIN_GREP},
 	{"install",	PMKCONF_BIN_INSTALL},
+	{"lex",		PMKCONF_BIN_LEX},
 	{"pkg-config",  PMKCONF_BIN_PKGCONFIG},
 	{"ranlib",	PMKCONF_BIN_RANLIB},
 	{"sh",		PMKCONF_BIN_SH},
 	{"strip",	PMKCONF_BIN_STRIP},
-	{"tar",		PMKCONF_BIN_TAR}
+	{"tar",		PMKCONF_BIN_TAR},
+	{"yacc",	PMKCONF_BIN_YACC}
 };
+
+#define MAXBINS	sizeof(binaries) / sizeof(char *) / 2
 
 
 /* Local functions declaration */

@@ -83,7 +83,9 @@ pcopt	pcoptions[] = {
 size_t	nbpcopt = sizeof(pcoptions) / sizeof(pcopt);
 
 /*
-	XXX
+	init optcell structure
+
+	return : optcell structure
 */
 
 optcell *optcell_init(void) {
@@ -102,7 +104,11 @@ optcell *optcell_init(void) {
 }
 
 /*
-	XXX
+	destroy optcell structure
+
+	poc : optcell structure
+
+	return : -
 */
 
 void optcell_destroy(optcell *poc) {
@@ -110,7 +116,13 @@ void optcell_destroy(optcell *poc) {
 }
 
 /*
-	XXX
+	process command line options
+
+	ac : argument number
+	av : argument array
+	poc : optcell structure
+
+	return : boolean
 */
 
 bool pcgetopt(int ac, char *av[], optcell *poc) {
@@ -151,7 +163,12 @@ debugf("{pcgetopt} opt = '%s'", opt);
 		pstr = strchr(opt, PMKPC_ARG_SEP);
 		if (pstr != NULL) {
 			/* argument found */
-			strlcpy(buf, opt, sizeof(buf)); /* XXX check ? */
+			if (strlcpy(buf, opt, sizeof(buf)) >= sizeof(buf)) {
+#ifdef DEBUG_PMKPC
+				debugf("{pcgetopt} strlcpy failed for '%s'", opt);
+#endif
+				return(false);
+			}
 
 			/* delimit option name */
 			buf[pstr - opt] = CHAR_EOS;
@@ -498,7 +515,13 @@ debugf("{main} id = %d", poc->id);
 				}
 			} else {
 				/* add new module */
-				da_push(gdata.pda, strdup(mod)); /* XXX check */
+				if (da_push(gdata.pda, strdup(mod)) == false) {
+					errorf("unable to store module name in dynarray.");
+#ifdef DEBUG_PMKPC
+					debugf("{main} mod = '%s'", mod);
+#endif
+					exit(EXIT_FAILURE);
+				}
 #ifdef DEBUG_PMKPC
 debugf("{main} new mod = '%s'", mod);
 #endif
@@ -667,12 +690,15 @@ debugf("module not found");
 
 			/* set config tool filename */
 			if (cfgtcell_get_binary(pcd, mod, pc_cmd, sizeof(pc_cmd)) == false) {
-				snprintf(pc_cmd, sizeof(pc_cmd), "%s-config", mod); /* XXX check */
+				if (snprintf(pc_cmd, sizeof(pc_cmd), "%s-config", mod) >= sizeof(pc_cmd)) {
+					errorf("overflow in snprintf while building configure tool name.");
+					exit(EXIT_FAILURE);
+				}
 			}
 
 			bpath = hash_get(gdata.pht, PMKCONF_PATH_BIN);
 			if (bpath == NULL) {
-				/* XXX */
+				errorf("unable to get binary path.");
 				exit(EXIT_FAILURE);
 			}
 
@@ -749,7 +775,6 @@ debugf("{main} destroy data");
 #endif
 	clean(&gdata);
 	if (pcd != NULL) {
-		/* XXX msg */
 		cfgtdata_destroy(pcd);
 	}
 

@@ -841,8 +841,7 @@ bool pmk_check_config(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 		}
 	}
 
-	/* gather data */
-	/* XXX do we keep cfgtool for the tag ? */
+	/* record gathered data */
 	record_def(pgd->htab, cfgtool, true);
 	record_val(pgd->htab, cfgtool, "1");
 	label_set(pgd->labl, cmd->label, true);
@@ -1663,7 +1662,7 @@ bool pmk_setparam_detect(pmkcmd *cmd, prsopt *popt, pmkdata *pgd) {
 						return(false);
 					}
 
-					if (cdata->sht != NULL) { /* XXX need to skip if system has not data ? */
+					if (cdata->sht != NULL) { /* XXX need to skip if system has no data ? */
 						ostr = hash_get(cdata->sht, buf);
 					} else {
 						ostr = NULL;
@@ -1687,7 +1686,7 @@ bool pmk_setparam_detect(pmkcmd *cmd, prsopt *popt, pmkdata *pgd) {
 						return(false);
 					}
 
-					if (cdata->sht != NULL) { /* XXX need to skip if system has not data ? */
+					if (cdata->sht != NULL) { /* XXX need to skip if system has no data ? */
 						ostr = hash_get(cdata->sht, buf);
 					} else {
 						ostr = NULL;
