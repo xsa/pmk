@@ -505,13 +505,14 @@ bool fcopy(char *src, char *dst, mode_t mode) {
 	/* try to open both source and destination files */
 	src_fd = open(src, O_RDONLY, 0);
 	if (src_fd == -1) {
-		errorf("Cannot open %s.", src);
+		errorf("Cannot open %s : %s.", src, strerror(errno));
 		return(false);
 	}
 /*debugf("mode = %o", mode);*/
 	dst_fd = open(dst, O_WRONLY | O_CREAT | O_TRUNC, mode);
 	if (dst_fd == -1) {
-		errorf("Cannot open %s.", dst);
+		close(src_fd);
+		errorf("Cannot open %s : %s.", dst, strerror(errno));
 		return(false);
 	}
 
@@ -521,7 +522,7 @@ bool fcopy(char *src, char *dst, mode_t mode) {
 		switch(rsz) {
 			case -1:
 				/* read error */
-				errorf("Failed to read %s", src);
+				errorf("Failed to read %s : %s.", src, strerror(errno));
 				do_loop = false;
 				rval = false;
 				break;
@@ -535,7 +536,7 @@ bool fcopy(char *src, char *dst, mode_t mode) {
 				/* data read, trying to write */
 				if (write(dst_fd, cbuf, rsz) != rsz) {
 					/* write failed */
-					errorf("Failed to write %s", dst);
+					errorf("Failed to write %s : %s.", dst, strerror(errno));
 					do_loop = false;
 					rval = false;
 				}
@@ -550,8 +551,14 @@ bool fcopy(char *src, char *dst, mode_t mode) {
 }
 
 /*
-	tmp_open
-	XXX TODO descr
+	open temporary file
+	
+	tfile : template file name
+	mode : file mode
+	buf : buffer for the randomized file name
+	bsize : buffer size
+
+	return : file structure or NULL
 */
 
 FILE *tmp_open(char *tfile, char *mode, char *buf, size_t bsize) {
@@ -570,8 +577,15 @@ FILE *tmp_open(char *tfile, char *mode, char *buf, size_t bsize) {
 }
 
 /*
-	tmps_open
-	XXX TODO descr
+	open temporary file with suffix
+	
+	tfile : template file name
+	mode : file mode
+	buf : buffer for the randomized file name
+	bsize : buffer size
+	slen : suffix length
+
+	return : file structure or NULL
 */
 
 FILE *tmps_open(char *tfile, char *mode, char *buf, size_t bsize, int slen) {
