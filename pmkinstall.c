@@ -47,10 +47,121 @@
 #include "premake.h"
 
 
+/* default mode */
 #define DEFAULT_MODE	S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH
+
+/* mode masks */
+#define USR_MASK	S_IRWXU				/* user */
+#define GRP_MASK	S_IRWXG				/* group */
+#define OTH_MASK	S_IRWXO				/* other */
+#define FULL_MASK	USR_MASK | GRP_MASK | OTH_MASK	/* all */
+
+/* perm masks */
+#define R_PERM		S_IRUSR | S_IRGRP | S_IROTH
+#define W_PERM		S_IWUSR | S_IWGRP | S_IWOTH
+#define X_PERM		S_IXUSR | S_IXGRP | S_IXOTH
+
 
 extern char	*optarg;
 extern int	 optind;
+
+
+/*
+	symbolic_to_octal_mode()
+*/
+
+mode_t symbolic_to_octal_mode(char *mstr) {
+	bool	 do_loop = true;
+	char	*pstr,
+		 op = CHAR_EOS;
+	mode_t	 mask = 0,
+		 mode = 0,
+		 perm = 0;
+
+	pstr = mstr;
+
+	/* who symbols */
+	while (do_loop == true) {
+/*debugf("char = '%c'", *pstr);*/
+		switch (*pstr) {
+			case 'a':
+				mask = mask | FULL_MASK;
+				break;
+
+			case 'g':
+				mask = mask | GRP_MASK;
+				break;
+
+			case 'o':
+				mask = mask | OTH_MASK;
+				break;
+
+			case 'u':
+				mask = mask | USR_MASK;
+				break;
+
+			default:
+				/* separator found */
+				op = *pstr;
+				do_loop = false;
+				break;
+		}
+		pstr++;
+/*debugf("mask = %o", mask);*/
+	}
+
+	/* check if operator is valid */
+	if ((op != '+') && (op != '-') && (op != '=')) {
+		errorf("syntax error in symbolic mode '%s'", mstr);
+		return(-1);
+	}
+
+	/* perm symbols */
+	do_loop = true;
+	while (do_loop == true) {
+		switch (*pstr) {
+			case 'r':
+				perm = perm | R_PERM;
+				break;
+
+			case 'w':
+				perm = perm | W_PERM;
+				break;
+
+			case 'x':
+				perm = perm | X_PERM;
+				break;
+
+			case CHAR_EOS:
+				/* reached end of string */
+				do_loop = false;
+				break;
+
+			default:
+				/* unknow perm */
+				errorf("unknow permission '%c'.", *pstr);
+				return(-1);
+				break;
+		}
+		pstr++;
+	}
+/*debugf("perm = %o", perm);*/
+
+	switch (op) {
+		case '+':
+			mode = mask & perm;
+			break;
+		case '-':
+			errorf("operator '%c' not implemented.", op);
+			break;
+		case '=':
+			errorf("operator '%c' not implemented.", op);
+			break;
+	}
+
+	return(mode);
+
+}
 
 
 /*
@@ -58,7 +169,6 @@ extern int	 optind;
 */
 
 mode_t check_mode(char *mstr) {
-	int	nb = 0;
 	mode_t	mode = 0;
 
 	if (mstr == NULL)
@@ -66,11 +176,10 @@ mode_t check_mode(char *mstr) {
 
 	if (isdigit(*mstr) != 0) {
 		/* octal value */
-		mode = (mode_t) strtol(mstr, NULL, 8); /* XXX check !! */		
+		mode = strtol(mstr, NULL, 8); /* XXX check !! */		
 	} else {
 		/* symbolic value */
-		errorf("symbolic value not yet supported");
-		exit(1);
+		mode = symbolic_to_octal_mode(mstr);
 	}
 
 	return(mode);
@@ -80,9 +189,9 @@ mode_t check_mode(char *mstr) {
 	copy file
 */
 
-bool fcopy(char *src, char *dst, int mode) {
+bool fcopy(char *src, char *dst, mode_t mode) {
 	static char	cbuf[S_BLKSIZE];
-	bool		exit = false,
+	bool		do_loop = true,
 			rval = true;
 	int		src_fd,
 			dst_fd;
@@ -94,26 +203,27 @@ bool fcopy(char *src, char *dst, int mode) {
 		errorf("Cannot open %s.", src);
 		return(false);
 	}
-	dst_fd = open(dst, O_WRONLY | O_CREAT, mode);
+/*debugf("mode = %o", mode);*/
+	dst_fd = open(dst, O_WRONLY | O_CREAT | O_TRUNC, mode);
 	if (dst_fd == -1) {
 		errorf("Cannot open %s.", dst);
 		return(false);
 	}
 
-	while (exit == false) {
+	while (do_loop == true) {
 		/* reading data */
 		rsz = read(src_fd, cbuf, sizeof(cbuf));
 		switch(rsz) {
 			case -1:
 				/* read error */
 				errorf("Failed to read %s", src);
-				exit = true;
+				do_loop = false;
 				rval = false;
 				break;
 
 			case 0:
 				/* no more data to copy */
-				exit = true;
+				do_loop = false;
 				break;
 
 			default:
@@ -121,7 +231,7 @@ bool fcopy(char *src, char *dst, int mode) {
 				if (write(dst_fd, cbuf, rsz) != rsz) {
 					/* write failed */
 					errorf("Failed to write %s", dst);
-					exit = true;
+					do_loop = false;
 					rval = false;
 				}
 				break;
@@ -154,7 +264,7 @@ void usage(void) {
 int main(int argc, char *argv[]) {
 	bool	 go_exit = false;
 	char	 chr;
-	int	 mode = DEFAULT_MODE;
+	mode_t	 mode = DEFAULT_MODE;
 	
 	while (go_exit == false) {
 		chr = getopt(argc, argv, "bcdgh:m:o:stv");
@@ -183,7 +293,9 @@ int main(int argc, char *argv[]) {
 
 				case 'm' :
 					/* specify mode */
-					mode = (int) check_mode(optarg);
+					mode = check_mode(optarg);
+					if (mode == (mode_t) -1)
+						exit(1);
 /*debugf("mode = %o", mode);*/
 					break;
 
@@ -225,6 +337,11 @@ int main(int argc, char *argv[]) {
 
 	if (fcopy(argv[0], argv[1], mode) == false) {
 		/* copy failed */
+		exit(1);
+	}
+
+	if (chmod(argv[1], mode) == -1) {
+		errorf("chmod failed.");
 		exit(1);
 	}
 

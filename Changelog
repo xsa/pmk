@@ -2,6 +2,7 @@
  * started to rewrite pmkinstall from scratch (much easier than making
 	xinstall portable).
  * implemented -m option (only octal values).
+ * added basic support for symbolic values in -m option.
 
 23 Nov 2003 mipsator
  * removed oboslete definitions in kw_pmkscan[].
