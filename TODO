@@ -6,7 +6,7 @@ common :
 
 pmk :
 + update pmk.1
-? update pmkfile.5 (VARNAME in CHECK_BINARY)
++ update pmkfile.5 (VARNAME in CHECK_BINARY)
 ~ compatibility with autoconf (progressing) :
 	- support for DEFS (-D options to pass to the compiler)
 	- support for LDFLAGS (misc linker options)
