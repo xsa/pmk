@@ -1,7 +1,7 @@
 # $Id$
 # pmk compilers data
 
-# SLFLAGS = shared libs compiler flags
+# SLCFLAGS = shared libs compiler flags
 # SLLDFLAGS = shared libs linking flags
 # SLSUFFIX = shared lib suffix (needed ?)
 
@@ -9,7 +9,7 @@ ADD_COMPILER {
 	ID = "tendra"
 	DESCR = "TenDRA"
 	MACRO = "__TenDRA__"
-	SLFLAGS = "-Wt,-D1"
+	SLCFLAGS = "-Wt,-D1"
 }
 
 ADD_COMPILER {
@@ -17,7 +17,7 @@ ADD_COMPILER {
 	DESCR = "GNU gcc"
 	MACRO = "__GNUC__"
 	VERSION = "(__GNUC__ * 100 + __GNUC_MINOR__)"
-	SLFLAGS = "-fPIC"
+	SLCFLAGS = "-fPIC"
 }
 
 ADD_COMPILER {
@@ -25,7 +25,7 @@ ADD_COMPILER {
 	DESCR = "Sun Workshop C"
 	MACRO = "__SUNPRO_C"
 	VERSION = "__SUNPRO_C"
-	SLFLAGS = "-KPIC"
+	SLCFLAGS = "-KPIC"
 }
 
 ADD_COMPILER {
@@ -33,7 +33,7 @@ ADD_COMPILER {
 	DESCR = "Sun Workshop C++"
 	MACRO = "__SUNPRO_CC"
 	VERSION = "__SUNPRO_CC"
-	SLFLAGS = "-KPIC"
+	SLCFLAGS = "-KPIC"
 }
 
 ADD_COMPILER {
@@ -42,7 +42,7 @@ ADD_COMPILER {
 	MACRO = "__DECC"
 	VERSION = "__DECC_VER"
 # XXX
-	SLFLAGS = ""
+	SLCFLAGS = ""
 }
 
 ADD_COMPILER {
@@ -50,15 +50,15 @@ ADD_COMPILER {
 	DESCR = "Compaq C++"
 	MACRO = "__DECCXX"
 	VERSION = "__DECCXX_VER"
-# XXX
-	SLFLAGS = ""
+	# no flags needed for PIC
+	SLCFLAGS = ""
 }
 
 ADD_COMPILER {
 	ID = "hp_cc"
 	DESCR = "HP Ansi C"
 	MACRO = "__HP_cc"
-	SLFLAGS = "+Z"
+	SLCFLAGS = "+Z"
 }
 
 ADD_COMPILER {
@@ -66,7 +66,7 @@ ADD_COMPILER {
 	DESCR = "HP Ansi C++"
 	MACRO = "__HP_aCC"
 	VERSION = "__HP_aCC"
-	SLFLAGS = "+Z"
+	SLCFLAGS = "+Z"
 }
 
 ADD_COMPILER {
@@ -75,7 +75,7 @@ ADD_COMPILER {
 	MACRO = "__IBMC__"
 	VERSION = "__IBMC__"
 # XXX
-	SLFLAGS = ""
+	SLCFLAGS = ""
 }
 
 ADD_COMPILER {
@@ -83,8 +83,8 @@ ADD_COMPILER {
 	DESCR = "IBM xlC"
 	MACRO = "__IBMCPP__"
 	VERSION = "__IBMCPP__"
-# XXX
-	SLFLAGS = ""
+	# no flags needed for PIC
+	SLCFLAGS = ""
 }
 
 ADD_COMPILER {
@@ -93,7 +93,7 @@ ADD_COMPILER {
 	MACRO = "__INTEL_COMPILER"
 	VERSION = "__INTEL_COMPILER"
 # XXX
-	SLFLAGS = ""
+	SLCFLAGS = ""
 }
 
 ADD_COMPILER {
@@ -101,6 +101,6 @@ ADD_COMPILER {
 	DESCR = "SGI MIPSpro"
 	MACRO = "__sgi"
 	VERSION = "__COMPILER_VERSION"
-	SLFLAGS = "-KPIC"
+	SLCFLAGS = "-KPIC"
 }
 
