@@ -133,7 +133,7 @@ bool symbolic_to_octal_mode(char *mstr, mode_t *pmode) {
 	/* who symbols */
 	while (do_loop == true) {
 #ifdef INST_DEBUG
-debugf("char = '%c'", *pstr);
+		debugf("char = '%c'", *pstr);
 #endif
 		switch (*pstr) {
 			case 'a':
@@ -160,7 +160,7 @@ debugf("char = '%c'", *pstr);
 		}
 		pstr++;
 #ifdef INST_DEBUG
-debugf("mask = %o", mask);
+		debugf("mask = %o", mask);
 #endif
 	}
 
@@ -204,7 +204,7 @@ debugf("mask = %o", mask);
 		pstr++;
 	}
 #ifdef INST_DEBUG
-debugf("perm = %o", perm);
+	debugf("perm = %o", perm);
 #endif
 
 	/* apply operator */
@@ -274,6 +274,155 @@ bool check_mode(char *mstr, mode_t *pmode) {
 }
 
 /*
+	process owner string
+
+	pstr: owner string
+	puid: storage of uid
+
+	returns: true on success else false
+*/
+
+bool process_owner(char *pstr, uid_t *puid) {
+	struct passwd	*pp = NULL;
+	unsigned long	 ul;
+
+	if (isdigit(*pstr) == 0) {
+		/* user name */
+		pp = getpwnam(pstr);
+		if (pp == NULL) {
+			errorf("invalid user name.");
+			return(false);
+		} else {
+			*puid = pp->pw_uid;
+		}
+	} else {
+		/* uid */
+		if (str_to_ulong(pstr, 10, &ul) == false) {
+			errorf("cannot get numerical value of '%s'.", pstr);
+			return(false);
+		}
+		*puid = (uid_t) ul;
+	}
+
+	return(true);
+}
+
+/*
+	process owner string
+
+	pstr: owner string
+	puid: storage of uid
+
+	returns: true on success else false
+*/
+
+bool process_group(char *pstr, gid_t *pgid) {
+	struct group	*pg = NULL;
+	unsigned long	 ul;
+
+	if (isdigit(*pstr) == 0) {
+		/* group name */
+		pg = getgrnam(pstr);
+		if (pg == NULL) {
+			errorf("invalid group name.");
+			return(false);
+		}
+		*pgid = pg->gr_gid;
+	} else {
+		/* gid */
+		if (str_to_ulong(pstr, 10, &ul) == false) {
+			errorf("cannot get numerical value of '%s'.", pstr);
+			return(false);
+		}
+		*pgid = (gid_t) ul;
+	}
+
+	return(true);
+}
+
+/*
+	create directory
+
+	psrc: source directory
+	buffer: destination buffer
+	bsize: buffer size
+
+	returns: true on success else false
+*/
+
+bool create_directory(char *psrc, char *buffer, size_t bsize) {
+
+#ifdef INST_DEBUG
+	debugf("create dir '%s'", psrc);
+#endif
+
+	/* create path */
+	if (*psrc == CHAR_SEP) {
+	/* absolute path, copy */
+		if (strlcpy_b(buffer, psrc, bsize) == false) {
+			errorf("overflow in directory creation (abs. path).");
+			return(false);
+		}
+	} else {
+		/* relative, getting current directory */
+		if (getcwd(buffer, bsize) == NULL) {
+			errorf("unable to get current directory");
+			return(false);
+		}
+		/* appending path */
+		strlcat(buffer, STR_SEP, bsize); /* no check */
+		if (strlcat_b(buffer, psrc, bsize) == false) {
+			errorf("overflow in directory creation (rel. path).");
+			return(false);
+		}
+	}
+#ifdef INST_DEBUG
+	debugf("dir = '%s'", buffer);
+#endif
+
+	if (makepath(buffer, S_IRWXU | S_IRWXG | S_IRWXO) == false) {
+		errorf("cannot create directory.");
+		return(false);
+	}
+
+	return(true);
+}
+
+/*
+	build destination target
+
+	psrc: source file
+	pdst: destination directory
+	buffer: destination buffer
+	bsize: buffer size
+
+	returns: true on success else false
+*/
+
+bool build_destination(char *psrc, char *pdst, char *buffer, size_t bsize) {
+	char	*pstr;
+
+	strlcpy(buffer, pdst, bsize); /* no check */
+	if (strlcat_b(buffer, STR_SEP, bsize) == false) {
+		errorf("overflow detected in destination.");
+		return(false);
+	}
+
+	pstr = basename(psrc);
+	if (pstr == NULL) {
+		errorf("unable to get basename of source.");
+		return(false);
+	}
+
+	if (strlcat_b(buffer, pstr, bsize) == false) {
+		errorf("overflow detected in destination.");
+		return(false);
+	}
+
+	return(true);
+}
+
+/*
 	usage
 */
 
@@ -295,8 +444,6 @@ void usage(void) {
 */
 
 int main(int argc, char *argv[]) {
-	struct group	*pg = NULL;
-	struct passwd	*pp = NULL;
 	struct stat	 sb;
 	bool		 create_dir = false,
 			 do_chown = false,
@@ -306,7 +453,6 @@ int main(int argc, char *argv[]) {
 			*ostr = NULL,
 			*src,
 			*dst,
-			*pstr,
 			 dir[MAXPATHLEN];
 	gid_t		 gid = (gid_t) -1;
 	int		 chr;
@@ -315,7 +461,6 @@ int main(int argc, char *argv[]) {
 	uid_t		 uid = (uid_t) -1;
 	unsigned int	 src_idx,
 			 last_idx;
-	unsigned long	 ul;
 	
 	while (go_exit == false) {
 		chr = getopt(argc, argv, "bcdg:hm:o:stv");
@@ -342,7 +487,7 @@ int main(int argc, char *argv[]) {
 					/* specify group */
 					gstr = optarg;
 #ifdef INST_DEBUG
-debugf("gstr = %s", gstr);
+					debugf("gstr = %s", gstr);
 #endif
 					break;
 
@@ -351,7 +496,7 @@ debugf("gstr = %s", gstr);
 					if (check_mode(optarg, &mode) == false)
 						exit(EXIT_FAILURE);
 #ifdef INST_DEBUG
-debugf("mode = %o", mode);
+					debugf("mode = %o", mode);
 #endif
 					break;
 
@@ -395,57 +540,25 @@ debugf("mode = %o", mode);
 
 	/* check if an owner has been provided */
 	if (ostr != NULL) {
-		if (isdigit(*ostr) == 0) {
-			/* user name */
-			pp = getpwnam(ostr);
-			if (pp == NULL) {
-				errorf("invalid user name.");
-				exit(EXIT_FAILURE);
-			} else {
-				uid = pp->pw_uid;
-#ifdef INST_DEBUG
-debugf("uid = %d", uid);
-#endif
-			}
-		} else {
-			/* uid */
-			if (str_to_ulong(ostr, 10, &ul) == false) {
-				errorf("cannot get numerical value of '%s'.", ostr);
-				exit(EXIT_FAILURE);
-			}
-			uid = (uid_t) ul;
-#ifdef INST_DEBUG
-debugf("uid = %d", uid);
-#endif
+		if (process_owner(ostr, &uid) == false) {
+			/* error message already done */
+			exit(EXIT_FAILURE);
 		}
+#ifdef INST_DEBUG
+		debugf("uid = %d", uid);
+#endif
 		do_chown = true;
 	}
 
 	/* if a group has been provided */
 	if (gstr != NULL) {
-		if (isdigit(*gstr) == 0) {
-			/* group name */
-			pg = getgrnam(gstr);
-			if (pg == NULL) {
-				errorf("invalid group name.");
-				exit(EXIT_FAILURE);
-			} else {
-				gid = pg->gr_gid;
-#ifdef INST_DEBUG
-debugf("gid = %d", gid);
-#endif
-			}
-		} else {
-			/* gid */
-			if (str_to_ulong(gstr, 10, &ul) == false) {
-				errorf("cannot get numerical value of '%s'.", gstr);
-				exit(EXIT_FAILURE);
-			}
-			gid = (gid_t) ul;
-#ifdef INST_DEBUG
-debugf("gid = %d", gid);
-#endif
+		if (process_group(gstr, &gid) == false) {
+			/* error message already done */
+			exit(EXIT_FAILURE);
 		}
+#ifdef INST_DEBUG
+		debugf("gid = %d", gid);
+#endif
 		do_chown = true;
 	}
 
@@ -461,59 +574,26 @@ debugf("gid = %d", gid);
 		src = argv[src_idx];
 
 		if (create_dir == true) {
-			/*
-				directory creation
-			*/
-
-#ifdef INST_DEBUG
-debugf("create dir '%s'", src);
-#endif
-
-			/* create path */
-			if (*src == CHAR_SEP) {
-			/* absolute path, copy */
-				if (strlcpy_b(dir, src, sizeof(dir)) == false) {
-					errorf("overflow detected in directory creation (abs. path).");
-					exit(EXIT_FAILURE);
-				}
-			} else {
-				/* relative, getting current directory */
-				if (getcwd(dir, sizeof(dir)) == NULL) {
-					errorf("unable to get current directory");
-					exit(EXIT_FAILURE);
-				}
-				/* appending path */
-				strlcat(dir, STR_SEP, sizeof(dir)); /* no check */
-				if (strlcat_b(dir, src, sizeof(dir)) == false) {
-					errorf("overflow detected in directory creation (rel. path).");
-					exit(EXIT_FAILURE);
-				}
-			}
-#ifdef INST_DEBUG
-debugf("dir = '%s'", dir);
-#endif
-
-			if (makepath(dir, S_IRWXU | S_IRWXG | S_IRWXO) == false) {
-				errorf("cannot create directory.");
+			/* create directory */
+			if (create_directory(src, dir, sizeof(dir)) == false) {
+				/* error message already done */
 				exit(EXIT_FAILURE);
 			}
 
 			/* set dst for further operations */
 			dst = dir;
 		} else {
-			/*
-				install file
-			*/
+			/* install file	*/
 
 #ifdef INST_DEBUG
-debugf("process install of '%s'", src);
+			debugf("process install of '%s'", src);
 #endif
 
 			/*  set dst */
 			dst = argv[last_idx];
 
 #ifdef INST_DEBUG
-debugf("initial dst = '%s'", dst);
+			debugf("initial dst = '%s'", dst);
 #endif
 
 			/* check if destination is a directory */
@@ -524,28 +604,20 @@ debugf("initial dst = '%s'", dst);
 					/* not a directory, XXX backup ? */
 					unlink(dst);
 				} else {
-					strlcpy(dir, dst, sizeof(dir)); /* no check */
-					if (strlcat_b(dir, STR_SEP, sizeof(dir)) == false) {
-						errorf("overflow detected in destination.");
+					/* build destination */
+					if (build_destination(src, dst, dir,
+							sizeof(dir)) == false) {
+						/* error message already done */
 						exit(EXIT_FAILURE);
 					}
 
-					pstr = basename(src);
-					if (pstr == NULL) {
-						errorf("unable to get basename of source.");
-						exit(EXIT_FAILURE);
-					}
-
-					if (strlcat_b(dir, pstr, sizeof(dir)) == false) {
-						errorf("overflow detected in destination.");
-						exit(EXIT_FAILURE);
-					}
+					/* set dst for further operations */
 					dst = dir;
 				}
 			}
 
 #ifdef INST_DEBUG
-debugf("copy to '%s'", dst);
+			debugf("copy to '%s'", dst);
 #endif
 			/* copy file */
 			if (fcopy(src, dst, mode) == false) {
@@ -562,7 +634,7 @@ debugf("copy to '%s'", dst);
 		/* change owner and group */
 		if (do_chown == true) {
 #ifdef INST_DEBUG
-debugf("doing chown('%s', %d, %d)", dst, uid, gid);
+			debugf("doing chown('%s', %d, %d)", dst, uid, gid);
 #endif
 			if (chown(dst, uid, gid) != 0) {
 				errorf("chown failed : %s.", strerror(errno));
@@ -573,7 +645,7 @@ debugf("doing chown('%s', %d, %d)", dst, uid, gid);
 		/* change perms (must follow chown that can change perms) */
 		if (chmod(dst, mode) == -1) {
 #ifdef INST_DEBUG
-debugf("chmod('%s', %o)", dst, mode);
+			debugf("chmod('%s', %o)", dst, mode);
 #endif
 			errorf("chmod failed : %s.", strerror(errno));
 			exit(EXIT_FAILURE);

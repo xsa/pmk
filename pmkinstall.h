@@ -39,9 +39,13 @@
 #define STRIP_ENV_NAME	"STRIP"
 
 /* Local functions declaration */
-bool	check_mode(char *, mode_t *);
-bool	symbolic_to_octal_mode(char *, mode_t *);
 void	strip(char *);
+bool	symbolic_to_octal_mode(char *, mode_t *);
+bool	check_mode(char *, mode_t *);
+bool	process_owner(char *, uid_t *);
+bool	process_group(char *, gid_t *);
+bool	create_directory(char *, char *, size_t);
+bool	build_destination(char *, char *, char *, size_t);
 void	usage(void);
 
 #endif /* _PMKINSTALL_H_ */
