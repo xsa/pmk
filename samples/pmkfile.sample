@@ -77,7 +77,6 @@ IF(bin_gtk_config) {
 	# get data for gtk+ via pkg-config
 	CHECK_PKG_CONFIG(gtk_data) {
 		REQUIRED = FALSE
-		DEPEND = ("use_gtk")
 		NAME = "gtk+"
 		VERSION = "1.2"
 		CFLAGS = "GTK_CFLAGS"

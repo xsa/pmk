@@ -22,7 +22,8 @@ Bug report:
 	- Jean-Pierre Ritschard
 		(memory fault in pmk)
 	- Han Boetes
-		(memory fault in pmk_set_variable() due to a missing check)
+		(memory fault in pmk_set_variable() due to a missing
+		check, redundancy in pmkfile.sample)
 
 Notices:
 	- Pedro Martelletto
