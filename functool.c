@@ -689,6 +689,7 @@ bool single_append(htable *pht, char *key, char *value) {
 	bool	 found = false;
 	char	*cval,
 		*pstr;
+	size_t	 s;
 
 	if (value == NULL)
 		return(false);
@@ -699,8 +700,9 @@ bool single_append(htable *pht, char *key, char *value) {
 	cval = hash_get(pht, key);
 
 	pstr = strstr(cval, value);
+	s = strlen (value);
 	while ((pstr != NULL) && (found == false)) {
-		pstr = pstr + strlen (value);
+		pstr = pstr + s;
 		if ((*pstr == ' ') || (*pstr == CHAR_EOS)) {
 			/* found existing value */
 			found = true;
