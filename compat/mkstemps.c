@@ -41,6 +41,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "mkstemps.h"
+
 #define MKSTEMPS_REPLACE_CHAR	'X'
 
 int mkstemps(char *template, int suffixlen) {

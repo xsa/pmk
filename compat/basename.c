@@ -69,7 +69,7 @@ basename(path)
 	while (startp > path && *(startp - 1) != '/')
 		startp--;
 
-	if (endp - startp + 2 > sizeof(bname)) {
+	if ((size_t) (endp - startp + 2) > sizeof(bname)) {
 		errno = ENAMETOOLONG;
 		return(NULL);
 	}
