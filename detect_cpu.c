@@ -35,6 +35,7 @@
 
 
 #include <stdio.h>
+#include <stdlib.h>
 /* include it first as if it was <sys/types.h> - this will avoid errors */
 #include "compat/pmk_sys_types.h"
 #include <sys/utsname.h>
@@ -145,11 +146,7 @@ prsdata *parse_cpu_data(char *fname) {
 
 char *check_cpu_arch(char *uname_m, prsdata *pdata) {
 	char		*pstr = NULL;
-	dynary		*da;
 	htable		*pht;
-	int		 i,
-			 n;
-	prscell		*pcell;
 	void		*ptmp;
 
 	pht = (htable *) seek_key(pdata, LIST_ARCH_EQUIV);
