@@ -54,7 +54,6 @@
 #include "common.h"
 #include "func.h"
 #include "pathtools.h"
-#include "pkgconfig.h"
 #include "pmk.h"
 #include "parse.h"
 
