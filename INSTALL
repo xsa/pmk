@@ -28,8 +28,9 @@ More about pmkcfg.sh
 
 The script has the following options:
 
+  -p permits to override the default prefix used for BASE
   -u sets user mode as on
-  -p permits to override the default prefix used for BASE.
+  -U provide an alternative user for privilege separation (default is nobody)
 
 The default prefixes are:
 
@@ -50,4 +51,8 @@ The sw_usermode switch is available to set user mode as on.
 To use it do the following:
   pmk -e sw_usermode
 
+To specify an alternate privsep user you need to set PRIVSEP_USER to the
+desired user. See the following example that sets the user to '_pmk':
+
+  pmk PRIVSEP_USER="_pmk"
 

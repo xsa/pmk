@@ -14,7 +14,6 @@ SWITCHES {
 IF(sw_usermode) {
 	DEFINE {
 		MKTARGET = "user"
-		USERMODE = "-DPMK_USERMODE"
 		BASE = "\$(HOME)"
 		CONFDIR = "\$(BASE)/.pmk"
 		BINDIR = "\$(BASE)/bin"
@@ -27,13 +26,25 @@ IF(sw_usermode) {
 IF(!sw_usermode) {
 	DEFINE {
 		MKTARGET = "global"
-		USERMODE = ""
 		BASE = "$PREFIX"
 		CONFDIR = "\$(SYSCONFDIR)/pmk"
 		BINDIR = "\$(BASE)/bin"
 		SBINDIR = "\$(BASE)/sbin"
 		DATADIR = "\$(BASE)/share/\$(PREMAKE)"
 		MANDIR = "\$(BASE)/man"
+	}
+}
+
+# check alternate privsep user
+CHECK_VARIABLE(var_privsep) {
+	REQUIRED = FALSE
+	NAME = "PRIVSEP_USER"
+}
+
+# if not defined fall to default user
+IF(!var_privsep) {
+	DEFINE {
+		PRIVSEP_USER = "nobody"
 	}
 }
 

@@ -312,7 +312,6 @@ dynary *str_to_dynary_adv(char *str, char *seplst) {
 */
 
 bool find_file_dir(dynary *da, char *fname, char *fpath, size_t fplen) {
-	FILE		*fp;
 	char		 tstr[MAXPATHLEN],
 			*path;
 	unsigned int	 i;
@@ -323,9 +322,7 @@ bool find_file_dir(dynary *da, char *fname, char *fpath, size_t fplen) {
 		strlcpy(tstr, path, sizeof(tstr)); /* no check */
 		strlcat(tstr, "/", sizeof(tstr)); /* no check */
 		if (strlcat_b(tstr, fname, sizeof(tstr)) == true) {
-			fp = fopen(tstr, "r");
-			if (fp != NULL) {
-				fclose(fp);
+			if (access(tstr, F_OK) == 0) { /* no race condition here */
 				if (strlcpy_b(fpath, path, fplen) == true) {
 					/* fpath correctly set */
 					return(true);
@@ -388,7 +385,7 @@ bool get_file_path(char *filename, char *path, char *storage, size_t size) {
 		return(false);
 	}
 
-	/* try to locate cfgtool */
+	/* try to locate binary */
 	if (find_file(bplst, filename, storage, size) == true) {
 		rval = true;
 	} else {
