@@ -204,9 +204,9 @@ unsigned char arch_name_to_id(char *arch_name) {
 htable *arch_wrapper(prsdata *pdata, char *arch_name) {
 	htable		*pht;
 	unsigned char	 arch_id;
-#ifdef ARCH_X86_32
+#if defined(ARCH_X86_32) || defined(ARCH_X86_64)
 	x86_cpu_cell	*pcell;
-#endif
+#endif /* ARCH_X86_32 || ARCH_X86_64 */
 
 	arch_id = arch_name_to_id(arch_name);
 
@@ -235,10 +235,10 @@ htable *arch_wrapper(prsdata *pdata, char *arch_name) {
 		}
 
 		x86_cpu_cell_destroy(pcell);
-#else
+#else /* ARCH_X86_32 || ARCH_X86_64 */
 		errorf("architecture mismatch.");
 		return(NULL);
-#endif
+#endif /* ARCH_X86_32 || ARCH_X86_64 */
 			break;
 	}
 
