@@ -14,6 +14,12 @@
 #define NBKEYS 256
 
 
+hpair	testab[] = {
+			{ "test1", "test value 1"},
+			{ "test2", "test value 2"},
+			{ "test3", "test value 3"}
+		};
+
 int main() {
 	int	i,
 		n;
@@ -49,13 +55,9 @@ int main() {
 		printf("found\n");
 	}
 
-
-	printf("Adding 3 test keys\n");
-	for (i = 0 ; i < 3 ; i++) {
-		snprintf(ahp[i].key, sizeof(ahp[i].key), "test%d", i + 1);
-		snprintf(ahp[i].value, sizeof(ahp[i].value), "%s", "test value");
-	}
-	hash_add_array(hp, ahp, 3);
+	n = sizeof(testab) / sizeof(hpair);
+	printf("Adding %d test keys\n", n);
+	hash_add_array(hp, testab, n);
 
 	keys = hash_keys(hp);
 	n = hash_nbkey(hp);
