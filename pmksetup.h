@@ -1,7 +1,7 @@
 /* $Id$ */
 
 /*
- * Copyright (c) 2003-2004 Xavier Santolaria
+ * Copyright (c) 2003-2004 Xavier Santolaria <xavier@santolaria.net>
  * Copyright (c) 2003-2004 Damien Couderc
  * All rights reserved.
  *
