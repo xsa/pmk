@@ -468,7 +468,7 @@ bool parse_cell(char *line, prscell *pcell) {
 	pstr = parse_word(pstr, &po, sizeof(pcell->label));
 	if (pstr == NULL) {
 		strlcpy(parse_err, "label parsing failed.", sizeof(parse_err));
-		return(NULL);
+		return(false);
 	} else {
 		strlcpy(pcell->label, po.data, sizeof(pcell->label));
 		free(po.data);
