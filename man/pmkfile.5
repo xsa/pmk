@@ -64,9 +64,9 @@ can contain comments, blank lines and commands.
 .Pp
 A command has the following format (? character means optional field):
 .Bd -literal -offset indent
- <command><?(label)> {
- <body>
- }
+<command><?(label)> {
+	<body>
+}
 .Ed
 .Pp
 The command and label names can be assimilated to the 'word' type.
@@ -93,13 +93,13 @@ The right type will depend on the key name (see further).
 For example:
 .Bd -literal -offset indent
 CHECK_INCLUDE(header_sys_param) {
- # following options use different uses of blank characters
- # key value is word type
- REQUIRED = TRUE
- # key value is list type
- DEPEND=	("dep_one",dep_two,"dep_three")
- # key value is quoted type
- INCLUDE = "sys/param.h"
+	# following options use different uses of blank characters
+	# key value is word type
+	REQUIRED = TRUE
+	# key value is list type
+	DEPEND=	("dep_one",dep_two,"dep_three")
+	# key value is quoted type
+	INCLUDE = "sys/param.h"
 }
 .Ed
 
@@ -111,20 +111,24 @@ The following commands have no label.
 This command sets pmk parameters.
 .Pp
 Arguments:
-.Bd -literal -offset indent
-AC_COMPAT : type is 'quoted', enable autoconf compatibility (empty string or filename).
-LANG : type is 'quoted', global default language.
-TARGET : type is 'list', list of target's filenames.
-DETECT : type is 'list', list of compilers to detect (CC and/or CXX).
-.Ed
+.Bl -tag -width AC_COMPAT -offset indent
+.It Dv AC_COMPAT
+type is 'quoted', enable autoconf compatibility (empty string or filename).
+.It Dv LANG
+type is 'quoted', global default language.
+.It Dv TARGET
+type is 'list', list of target's filenames.
+.It Dv DETECT
+type is 'list', list of compilers to detect (CC and/or CXX).
+.El
 .Pp
 For example:
 .Bd -literal -offset indent
 SETTINGS {
- AC_COMPAT="config.h"
- LANG="C"
- TARGET=("src/file.c","src/file.h")
- DETECT=("CC")
+	AC_COMPAT="config.h"
+	LANG="C"
+	TARGET=("src/file.c","src/file.h")
+	DETECT=("CC")
 }
 .Ed
 
@@ -139,8 +143,8 @@ Those are the variables to be defined (quote data type only).
 For example:
 .Bd -literal -offset indent
 DEFINE {
- PACKAGE="my_prog"
- VERSION="0.1"
+	PACKAGE="my_prog"
+	VERSION="0.1"
 }
 .Ed
 
@@ -152,8 +156,8 @@ Arguments:
 For example:
 .Bd -literal -offset indent
 SWITCHES {
- use_curses=TRUE
- use_gtk=FALSE
+	use_curses=TRUE
+	use_gtk=FALSE
 }
 .Ed
 .El
@@ -163,7 +167,7 @@ SWITCHES {
 All these commands need a label.
 .Pp
 They can all have the following optional arguments:
-.Bl -tag -width Ds
+.Bl -tag -width REQUIRED -offset indent
 .It Cm REQUIRED
 Specify if this test is required to achieve the configuration.
 Type is 'bool'.
@@ -185,11 +189,11 @@ Some of these commands can also have the following arguments:
 .Bl -tag -width Ds
 .It Cm LANG
 Specify the language used in the following list:
-.Bd -literal -offset indent
-C
-C++
-.Ed
-.Pp Type is 'quoted', by default \\"C\\" is the used language.
+.Bl -tag -width xxx
+.It Dv C , C++
+.El
+.Pp
+Type is 'quoted', by default \\"C\\" is the used language.
 .El
 .Pp
 Here the list of commands:
@@ -198,73 +202,105 @@ Here the list of commands:
 Check if a binary is in the path.
 .Pp
 Arguments:
-.Bd -literal -offset indent
-REQUIRED, DEPEND.
-NAME : type is 'quoted', name of the binary.
-VARIABLE : type is 'quoted', variable name to store the path.
-.Ed
+.Bl -tag -width REQUIRED -offset indent
+.It Dv REQUIRED
+.It Dv DEPEND
+.It Dv NAME
+type is 'quoted', name of the binary.
+.It Dv VARIABLE
+type is 'quoted', variable name to store the path.
+.El
 .It Cm CHECK_INCLUDE
 Check language header and optionally a function.
 .Pp
 Arguments:
-.Bd -literal -offset indent
-REQUIRED, DEPEND, LANG.
-NAME : type is 'quoted', name of the header.
-FUNCTION : type is 'quoted', function to check, optional.
-CFLAGS : type is 'quoted', variable name to store CFLAGS values, optional.
-.Ed
+.Bl -tag -width REQUIRED -offset indent
+.It Dv REQUIRED
+.It Dv DEPEND
+.It Dv LANG
+.It Dv NAME
+type is 'quoted', name of the header.
+.It Dv FUNCTION
+type is 'quoted', function to check, optional.
+.It Dv CFLAGS
+type is 'quoted', variable name to store CFLAGS values, optional.
+.El
 .It Cm CHECK_LIB
 Check a library and optionally a function.
 .Pp
 Arguments:
-.Bd -literal -offset indent
-REQUIRED, DEPEND, LANG.
-NAME : type is 'quoted', name of the library to check.
-FUNCTION : type is 'quoted', function to check, optional.
-LIBS : type is 'quoted', variable name to store LIBS values, optional.
-.Ed
+.Bl -tag -width REQUIRED -offset indent
+.It Dv REQUIRED
+.It Dv DEPEND
+.It Dv LANG
+.It Dv NAME
+type is 'quoted', name of the library to check.
+.It Dv FUNCTION
+type is 'quoted', function to check, optional.
+.It Dv LIBS
+type is 'quoted', variable name to store LIBS values, optional.
+.El
 .It Cm CHECK_CONFIG
 Check using a *-config tool.
 .Pp
 Arguments:
-.Bd -literal -offset indent
-REQUIRED, DEPEND.
-NAME : type is 'quoted', config tool name.
-VERSION : type is 'quoted', minimal version needed, optional.
-CFLAGS : type is 'quoted', variable name to store CFLAGS values, optional.
-LIBS : type is 'quoted', variable name to store LIBS values, optional.
-VARIABLE : type is 'quoted', variable name to store the path of the config tool, optional.
-.Ed
+.Bl -tag -width REQUIRED -offset indent
+.It Dv REQUIRED
+.It Dv DEPEND
+.It Dv NAME
+type is 'quoted', config tool name.
+.It Dv VERSION
+type is 'quoted', minimal version needed, optional.
+.It Dv CFLAGS
+type is 'quoted', variable name to store CFLAGS values, optional.
+.It Dv LIBS
+type is 'quoted', variable name to store LIBS values, optional.
+.It Dv VARIABLE
+type is 'quoted', variable name to store the path of the config tool, optional.
+.El
 .It Cm CHECK_PKG_CONFIG
 Check a package using pkg-config.
 .Pp
 Arguments:
-.Bd -literal -offset indent
-REQUIRED, DEPEND.
-NAME : type is 'quoted', package name.
-VERSION : type is 'quoted', minimal version needed, optional.
-CFLAGS : type is 'quoted', variable name to store CFLAGS values, optional.
-LIBS : type is 'quoted', variable name to store LIBS values, optional.
-.Ed
+.Bl -tag -width REQUIRED -offset indent
+.It Dv REQUIRED
+.It Dv DEPEND
+.It Dv NAME
+type is 'quoted', package name.
+.It Dv VERSION
+type is 'quoted', minimal version needed, optional.
+.It Dv CFLAGS
+type is 'quoted', variable name to store CFLAGS values, optional.
+.It Dv LIBS
+type is 'quoted', variable name to store LIBS values, optional.
+.El
 .It Cm CHECK_TYPE
 Check if the given type exists.
 .Pp
 Arguments:
-.Bd -literal -offset indent
-REQUIRED, DEPEND, LANG.
-NAME : type is 'quoted', name of the type to check.
-HEADER : type is quoted, name of the header where to find the given type.
-MEMBER : type is quoted, name of a member of the structure given in NAME to be checked.
-.Ed
+.Bl -tag -width REQUIRED -offset indent
+.It Dv REQUIRED
+.It Dv DEPEND
+.It Dv LANG
+.It Dv NAME
+type is 'quoted', name of the type to check.
+.It Dv HEADER
+type is quoted, name of the header where to find the given type.
+.It Dv MEMBER
+type is quoted, name of a member of the structure given in NAME to be checked.
+.El
 .It Cm CHECK_VARIABLE
 Check if the given variable does exist and optionally its value.
 .Pp
 Arguments:
-.Bd -literal -offset indent
-REQUIRED, DEPEND.
-NAME : type is 'quoted', name of the variable to check.
-VALUE : type is 'quoted', value to check with the variable, optional.
-.Ed
+.Bl -tag -width REQUIRED -offset indent
+.It Dv REQUIRED
+.It Dv DEPEND
+.It Dv NAME
+type is 'quoted', name of the variable to check.
+.It Dv VALUE
+type is 'quoted', value to check with the variable, optional.
+.El
 .El
 
 .Sh CONDITIONAL COMMANDS
@@ -305,14 +341,22 @@ ELSE(header_glib) {
 This command helps you to build the name of a shared library.
 .Pp
 Arguments:
-.Bd -literal -offset indent
-NAME : type is 'quoted', name of the library (without leading 'lib').
-MAJOR : type is 'quoted', major number for the version.
-MINOR : type is 'quoted', minor number for the version.
-VERSION_NONE : type is 'quoted', variable name to store library name without version, optional.
-VERSION_MAJ : type is 'quoted', variable name to store library name with major version, optional.
-VERSION_FULL : type is 'quoted', variable name to store library name with full version, optional.
-.Ed
+.Bl -tag -width VERSION_FULL -offset indent
+.It Dv NAME
+type is 'quoted', name of the library (without leading 'lib').
+.It Dv MAJOR
+type is 'quoted', major number for the version.
+.It Dv MINOR
+type is 'quoted', minor number for the version.
+.It Dv VERSION_NONE
+type is 'quoted', variable name to store library name without version, optional.
+.It Dv VERSION_MAJ
+type is 'quoted', variable name to store library name with major version,
+optional.
+.It Dv VERSION_FULL
+type is 'quoted', variable name to store library name with full version,
+optional.
+.El
 .Pp
 For example,
 .Bd -literal -offset indent
