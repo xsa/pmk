@@ -1,3 +1,9 @@
+29 Nov 2003 mipsator
+ * added use of POSIX macro for exit() status in parse.c, pmk.c,
+	pmkinstall.c and pmkscan.c files.
+ * added support for suid and sgid flags in pmkinstall.
+ * finished strip support in pmkinstall.
+
 27 Nov 2003 mipsator
  * updated pmkinstall man page.
 

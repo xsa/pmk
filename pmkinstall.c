@@ -56,20 +56,22 @@
 #define DEFAULT_MODE	S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH
 
 /* mode masks */
-#define USR_MASK	S_IRWXU				/* user */
-#define GRP_MASK	S_IRWXG				/* group */
+#define USR_MASK	S_IRWXU | S_ISUID		/* user */
+#define GRP_MASK	S_IRWXG	| S_ISGID		/* group */
 #define OTH_MASK	S_IRWXO				/* other */
 #define FULL_MASK	USR_MASK | GRP_MASK | OTH_MASK	/* all */
 
 /* perm masks */
-#define R_PERM		S_IRUSR | S_IRGRP | S_IROTH	/* read */
-#define W_PERM		S_IWUSR | S_IWGRP | S_IWOTH	/* write */
-#define X_PERM		S_IXUSR | S_IXGRP | S_IXOTH	/* execute */
-#define FULL_PERM	R_PERM | W_PERM | X_PERM	/* all */
+#define R_PERM		S_IRUSR | S_IRGRP | S_IROTH		/* read */
+#define W_PERM		S_IWUSR | S_IWGRP | S_IWOTH		/* write */
+#define X_PERM		S_IXUSR | S_IXGRP | S_IXOTH		/* execute */
+#define S_PERM		S_ISUID | S_ISGID			/* user/group ids */
+#define FULL_PERM	R_PERM | W_PERM | X_PERM | S_PERM	/* all */
+
 
 extern char	*optarg;
 extern int	 optind;
-extern int	errno;
+extern int	 errno;
 
 
 /*
@@ -89,9 +91,13 @@ void strip(char *file) {
 	if (s_path == NULL) {
 		errorf("STRIP env variable not set, skipping.");
 	} else {
-		/* XXX TODO */
-		errorf("-s option has not been implemented yet");
-		errorf("'%s' not stripped.", file);
+		/* build the command */
+		snprintf(cmd, sizeof(cmd), "%s %s", s_path, file);
+
+		/* stripping */
+		if (system(cmd) != EXIT_SUCCESS) {
+			errorf("strip failed.");
+		}
 	}
 }
 
@@ -164,6 +170,10 @@ bool symbolic_to_octal_mode(char *mstr, mode_t *pmode) {
 
 			case 'x':
 				perm = perm | X_PERM;
+				break;
+
+			case 's':
+				perm = perm | S_PERM;
 				break;
 
 			case CHAR_EOS:
@@ -325,7 +335,7 @@ bool fcopy(char *src, char *dst, mode_t mode) {
 void usage(void) {
 	fprintf(stderr, "usage: pmkinstall [-bcdghmostv] [path]\n");
 	/* XXX to finish */
-	exit(1);
+	exit(EXIT_FAILURE);
 }
 
 /*
@@ -379,7 +389,7 @@ int main(int argc, char *argv[]) {
 				case 'm' :
 					/* specify mode */
 					if (check_mode(optarg, &mode) == false)
-						exit(1);
+						exit(EXIT_FAILURE);
 /*debugf("mode = %o", mode);*/
 					break;
 
@@ -400,7 +410,7 @@ int main(int argc, char *argv[]) {
 				case 'v' :
 					/* display version */
 					fprintf(stdout, "%s\n", PREMAKE_VERSION);
-					exit(0);
+					exit(EXIT_SUCCESS);
 					break;
 
 				case 'h' :
@@ -430,7 +440,7 @@ int main(int argc, char *argv[]) {
 			pp = getpwnam(ostr);
 			if (pp == NULL) {
 				errorf("invalid user name.");
-				exit(1);
+				exit(EXIT_FAILURE);
 			} else {
 				uid = pp->pw_uid;
 /*debugf("uid = %d", uid);*/
@@ -450,7 +460,7 @@ int main(int argc, char *argv[]) {
 			pg = getgrnam(gstr);
 			if (pg == NULL) {
 				errorf("invalid group name.");
-				exit(1);
+				exit(EXIT_FAILURE);
 			} else {
 				gid = pg->gr_gid;
 /*debugf("gid = %d", gid);*/
@@ -468,7 +478,7 @@ int main(int argc, char *argv[]) {
 		/* copy file */
 		if (fcopy(src, dst, mode) == false) {
 			/* copy failed */
-			exit(1);
+			exit(EXIT_FAILURE);
 		}
 	} else {
 		/* create path */
@@ -480,7 +490,7 @@ int main(int argc, char *argv[]) {
 			/* relative, getting current directory */
 			if (getcwd(dir, sizeof(dir)) == NULL) {
 				errorf("Unable to get current directory");
-				exit(1);
+				exit(EXIT_FAILURE);
 			}
 			/* appending path */
 			strlcat(dir, STR_SEP, sizeof(dir));
@@ -490,7 +500,7 @@ int main(int argc, char *argv[]) {
 
 		if (makepath(dir, S_IRWXU | S_IRWXG | S_IRWXO) == false) {
 			errorf("cannot create directory.");
-			exit(1);
+			exit(EXIT_FAILURE);
 		}
 
 		/* set dst for further operations */
@@ -506,7 +516,7 @@ int main(int argc, char *argv[]) {
 /*debugf("doing chown('%s', %d, %d)", dst, uid, gid);*/
 		if (chown(dst, uid, gid) != 0) {
 			errorf("chown failed : %s.", strerror(errno));
-			exit(1);
+			exit(EXIT_FAILURE);
 		}
 	}
 
@@ -514,7 +524,7 @@ int main(int argc, char *argv[]) {
 	if (chmod(dst, mode) == -1) {
 /*debugf("chmod('%s', %o)", dst, mode);*/
 		errorf("chmod failed : %s.", strerror(errno));
-		exit(1);
+		exit(EXIT_FAILURE);
 	}
 
 	return(0);
