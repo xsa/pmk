@@ -58,12 +58,16 @@ $(PREMAKE): config $(P_OBJS)
 $(SETUP): config $(S_OBJS)
 	$(CC) -o $(SETUP) $(LDFLAGS) $(S_OBJS)
 
+$(SCAN).o:
+	$(CC) $(CFLAGS) -DDATADIR=\"$(DATADIR)\" -c $(SCAN).c
+
 ${SCAN}: config $(SC_OBJS)
 	$(CC) -o $(SCAN) $(LDFLAGS) $(SC_OBJS)
 
 install: all
 	$(INSTALL) -d -m 755 $(BINDIR)
 	$(INSTALL) -m 755 $(PREMAKE) $(BINDIR)$(PREMAKE)
+	$(INSTALL) -m 755 $(SCAN) $(BINDIR)$(SCAN)
 	$(INSTALL) -d -m 755 $(SBINDIR)
 	$(INSTALL) -m 755 $(SETUP) $(SBINDIR)$(SETUP)
 	$(INSTALL) -d -m 755 $(DATADIR)
@@ -92,6 +96,7 @@ clean: $(PREMAKE)-clean $(SETUP)-clean $(SCAN)-clean
 
 deinstall:
 	rm -f $(BINDIR)$(PREMAKE)
+	rm -f $(BINDIR)$(SCAN)
 	rm -f $(SBINDIR)$(SETUP)
 	rm -rf $(DATADIR)
 	rm -f $(PREFIX)/man/man1/$(PREMAKE).1
