@@ -34,6 +34,7 @@
  */
 
 
+#include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -152,8 +153,13 @@ bool detect_compiler(char *cpath, char *blog, comp_data *cdata) {
 						sizeof(cdata->descr)); /* XXX check */
 			}
 
+			pclose(rpipe);
+
 			/* delete binary */
-			unlink(CC_TEST_BIN);
+			if (unlink(CC_TEST_BIN) == -1) {
+				errorf("cannot remove %s : %s.", 
+					ftmp, strerror(errno));
+			}
 		} else {
 		}
 	} else {
@@ -161,7 +167,7 @@ bool detect_compiler(char *cpath, char *blog, comp_data *cdata) {
 
 	if (unlink(ftmp) == -1) {
 		/* cannot remove temporary file */
-		errorf("Can not remove %s\n", ftmp);
+		errorf("cannot remove %s : %s.", ftmp, strerror(errno)); 
 	}
 
 	return(true);
