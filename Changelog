@@ -1,6 +1,9 @@
-07 Feb 2004 mipsator
+08 Feb 2004 mipsator
  * implemented output filtering options in pmkpc.
  * updated pmkpc(1) to sync with actual state.
+ * added support for multiple sources in pmkinstall.
+ * added support for case when destination is a directory.
+ * removed superfluous path creation stuff (not compatible with install).
 
 07 Feb 2004 mipsator
  * fixed building of the pmkscan location in usermode.
