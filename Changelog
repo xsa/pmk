@@ -129,7 +129,7 @@
 
 08 Jun 2003 mipsator
  * added support for pkg-config with CHECK_PKG_CONFIG.
- 	(added pmk_check_pkg_configi() in func)
+ 	(added pmk_check_pkg_config() in func)
  * made version optional in CHECK_CONFIG.
  * updated pmkfile sample.
  * added version checking in pmk_check_pkg_config().
