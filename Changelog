@@ -1,3 +1,8 @@
+# snapshot 0.7.12a
+
+07 Feb 2004 mreindl
+* fix braino that got introduced with the bcopy -> memmove switch in parse.c
+
 # snapshot 0.7.12
 
 05 Feb 2004 mipsator
