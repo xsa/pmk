@@ -34,12 +34,10 @@
 #ifndef _PMK_FUNCTOOL_H_
 #define _PMK_FUNCTOOL_H_
 
-#include "premake.h"
-#include "compat/pmk_string.h"
-#include "compat/pmk_stdbool.h"
+
 #include "hash.h"
-#include "dynarray.h"
-#include "common.h"
+#include "pmk.h"
+#include "premake.h"
 
 
 bool	check_bool_str(char *);
@@ -53,6 +51,5 @@ bool	label_set(htable *, char *, bool);
 bool	label_check(htable *, char *);
 bool	depend_check(htable *, pmkdata *);
 bool	require_check(htable *);
-bool	parse_ac_config(htable *, char *);
 
 #endif /* _PMK_FUNCTOOL_H_ */

@@ -31,70 +31,13 @@
  */
 
 
-#ifndef _PMK_H_
-#define _PMK_H_
+#ifndef _PMK_AUTOCONF_H_
+#define _PMK_AUTOCONF_H_
 
-#include "dynarray.h"
 #include "hash.h"
-#include "premake.h"
 
 
-/* prefix character used for commands */
-#define PMK_CHAR_COMMAND	'.'
+bool	ac_parse_config(htable *, char *);
+void	ac_process_dyn_var(void);
 
-/* keyword to mark end of command */
-#define PMK_END_COMMAND		".END"
-
-/* character to assign a value to a key */
-#define PMK_KEY_CHAR		'='
-
-/* character used as delimiter for template tags */
-#define PMK_TAG_CHAR		'@'
-
-/* maximal size of a command */
-#define MAX_CMD_NAME_LEN	64
-
-/* maximal size of a command label */
-#define MAX_LABEL_NAME_LEN	64
-
-/* maximal size of a command string : <prefix><command>(<label>) */
-#define MAX_CMD_LEN		MAX_CMD_NAME_LEN + MAX_LABEL_NAME_LEN + 2
-
-/* maximal number of options per command */
-#define MAX_CMD_OPT		32
-
-/* maximal number of templates */
-#define MAX_TEMPLATES		32
-
-/* maximal number of key in data hash */
-#define MAX_DATA_KEY		1024
-
-/* maximal number of key in label hash */
-#define MAX_LABEL_KEY		1024
-
-/* maximal size of error message */
-#define MAX_ERRMSG_LEN		256
-
-/* command option type */
-typedef struct {
-	char	name[MAX_OPT_NAME_LEN],
-		value[MAX_OPT_VALUE_LEN];
-} pmkcmdopt;
-
-/* command type */
-typedef struct {
-	char		name[MAX_CMD_NAME_LEN],
-			label[MAX_LABEL_NAME_LEN];
-} pmkcmd;
-
-/* pmk data */
-typedef struct {
-	htable	*htab,
-		*labl;
-	dynary	*tlist;
-	char	errmsg[MAX_ERRMSG_LEN];
-	char	*ac_file;
-} pmkdata;
-
-
-#endif /* _PMK_H_ */
+#endif /* _PMK_AUTOCONF_H_ */
