@@ -46,8 +46,8 @@
 
 #define INC_FUNC_TEST_CODE	"#include <stdio.h>\n" \
 				"#include <%s>\n" \
+				"void (*pmk_funcp)() = %s;\n" \
 				"int main() {\n" \
-				"printf(\"%%p\", %s);\n" \
 				"return(0);}"
 
 #define LIB_TEST_CODE	"#include <stdio.h>\n" \
@@ -89,11 +89,13 @@
 				        "return(0);}"
 
 /* compiler command format string */
-#define HEADER_CC_FORMAT	"%s %s -o %s %s >%s 2>&1"
-				/* compiler libs binary source log */
+#define HEADER_CC_FORMAT	"%s %s -o %s %s >>%s 2>&1"
+				/* compiler cflags binary source log */
+#define HEADER_FUNC_CC_FORMAT	"%s %s -c %s >>%s 2>&1"
+				/* compiler cflags binary source log */
 #define LIB_CC_FORMAT		"%s %s -o %s -l%s %s >>%s 2>&1"
-				/* compiler libs binary testlib source log */
-#define TYPE_CC_FORMAT		"%s -o %s %s >%s 2>&1"
+				/* compiler libflags binary testlib source log */
+#define TYPE_CC_FORMAT		"%s -o %s %s >>%s 2>&1"
 				/* compiler binary source log */
 
 /* file names */
