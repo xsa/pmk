@@ -8,7 +8,7 @@ $Id$
 
 OS name		OS version	OS architecture	PMK version	build status	Reported by		Misc data
 ~~~~~~~~~~~~~~~ ~~~~~~~~~~~~~~~ ~~~~~~~~~~~~~~~ ~~~~~~~~~~~~~~~ ~~~~~~~~~~~~~~~	~~~~~~~~~~~~~~~~~~~~~~~	~~~~~~~~~~~~~~~~~~~~~~~~
-AIX		4.3.3		ppc		0.8.1		OK		Martin Reindl		AIX C Compiler 4.4.0.2
+AIX		4.3.3		ppc		0.9.2		OK		Martin Reindl		CSet 3.1.4
 Debian		3.0		alpha		0.9.1		OK		Martin Reindl		
 Debian		3.0		i386		0.9.1		OK		Damien Couderc		
 Debian		3.0		ia64		0.9.1		OK		Damien Couderc		
