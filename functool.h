@@ -50,6 +50,10 @@
 #define CFLG_NAME_LEN	64
 #define SHFLG_NAME_LEN	64
 
+#define KW_OPT_DEPEND	"DEPEND"
+#define KW_OPT_LANG	"LANG"
+#define KW_OPT_REQUIRED	"REQUIRED"
+
 #define CHAR_VERSION_SEPARATOR	'.'
 
 #define C_FILE_EXT	".c"

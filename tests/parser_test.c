@@ -23,8 +23,6 @@
 #include "../pmk_obj.h"
 #include "../pkgconfig.h"
 
-#define PRS_DEBUG	1
-
 extern prskw	kw_pmkfile[];
 extern size_t	nbkwpf;
 

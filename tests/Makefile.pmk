@@ -10,7 +10,7 @@ AS=		@AS@
 #WARN=		-ansi -pedantic
 #WARN=		-Wall -Werror -ansi -pedantic
 
-#DEBUG=		-g
+DEBUG=		-g
 
 CFLAGS=		@CFLAGS@ $(WARN) $(DEBUG)
 LDFLAGS=	@LDFLAGS@

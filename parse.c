@@ -50,10 +50,17 @@
 char	parse_err[MAX_ERR_MSG_LEN];
 
 
-/*
+/***************
+ prsdata_init()
+
+ DESCR
 	initialize parsing data structure
 
-	return : prsdata structure
+ IN
+	NONE
+
+ OUT
+	prsdata structure
 */
 
 prsdata *prsdata_init(void) {
@@ -73,10 +80,17 @@ prsdata *prsdata_init(void) {
 	return(pdata);
 }
 
-/*
+/******************
+ prsdata_destroy()
+
+ DESCR
 	free space allocated by parsing data structure
 
-	pdata : structure to clean
+ IN
+	pdata: structure to clean
+
+ OUT
+	NONE
 */
 
 void prsdata_destroy(prsdata *pdata) {
@@ -93,10 +107,16 @@ void prsdata_destroy(prsdata *pdata) {
 #endif
 }
 
-/*
+/**************
+ prseng_init()
+ 
+ DESCR
 	initialize parsing engine structure
 
-	return : prseng structure
+ IN
+	NONE
+ OUT
+	prseng structure
 */
 
 prseng *prseng_init(void) {
@@ -115,10 +135,17 @@ prseng *prseng_init(void) {
 	return(peng);
 }
 
-/*
+/*****************
+ prseng_destroy()
+
+ DESCR
 	free space allocated by parsing engine structure
 
-	pdata : structure to clean
+ IN
+	pdata: structure to clean
+
+ OUT
+	NONE
 */
 
 void prseng_destroy(prseng *peng) {
@@ -128,10 +155,17 @@ void prseng_destroy(prseng *peng) {
 	free(peng);
 }
 
-/*
+/***************
+ prsnode_init()
+
+ DESCR
 	initialize parsing node structure
 
-	return : parsing node structure
+ IN
+	NONE
+
+ OUT
+	parsing node structure
 */
 
 prsnode *prsnode_init(void) {
@@ -146,13 +180,18 @@ prsnode *prsnode_init(void) {
 	return(pnode);
 }
 
-/*
+/**************
+ prsnode_add()
+
+ DESCR
 	add a cell to a node
 
-	pnode : target node
-	pcell : cell to add
+ IN
+	pnode: target node
+	pcell: cell to add
 
-	return : -
+ OUT
+	NONE
 */
 
 void prsnode_add(prsnode *pnode, prscell *pcell) {
@@ -177,10 +216,17 @@ void prsnode_add(prsnode *pnode, prscell *pcell) {
 }
 
 
-/*
+/******************
+ prsnode_destroy()
+
+ DESCR
 	free space allocated by parsing node structure
 
-	pnode : node structure to clean
+ IN
+	pnode: node structure to clean
+
+ OUT
+	NONE
 */
 
 void prsnode_destroy(prsnode *pnode) {
@@ -200,10 +246,17 @@ void prsnode_destroy(prsnode *pnode) {
 	}
 }
 
-/*
+/***************
+ prscell_init()
+
+ DESCR
 	initialize parsing cell structure
 
-	return : parsing cell structure or NULL if failed
+ IN
+	NONE
+
+ OUT
+	parsing cell structure or NULL if failed
 */
 
 prscell *prscell_init(int token, int type, int subtoken) {
@@ -261,10 +314,17 @@ prscell *prscell_init(int token, int type, int subtoken) {
 	return(pcell);
 }
 
-/*
+/******************
+ prscell_destroy()
+
+ DESCR
 	free space allocated for parsing cell structure
 
-	pcell : structure to clean
+ IN
+	pcell: structure to clean
+
+ OUT
+	NONE
 */
 
 void prscell_destroy(prscell *pcell) {
@@ -288,10 +348,17 @@ void prscell_destroy(prscell *pcell) {
 	}
 }
 
-/*
+/**************
+ prsopt_init()
+
+ DESCR
 	init a prsopt structure
 	
-	return : prsopt structure
+ IN
+	NONE
+
+ OUT
+	prsopt structure
 */
 
 prsopt *prsopt_init(void) {
@@ -302,10 +369,17 @@ prsopt *prsopt_init(void) {
 	return(ppo);
 }
 
-/*
+/******************
+ prsopt_init_adv()
+
+ DESCR
 	init a prsopt structure with given aguments
-	
-	return : prsopt structure
+
+ IN
+	NONE
+
+ OUT
+	prsopt structure
 */
 
 prsopt *prsopt_init_adv(char *key, char opchar, char *value) {
@@ -337,10 +411,17 @@ prsopt *prsopt_init_adv(char *key, char opchar, char *value) {
 	return(ppo);
 }
 
-/*
+/*****************
+ prsopt_destroy()
+
+ DESCR
 	destroy a prsopt structure
-	
-	ppo : prsopt structure to free
+
+ IN
+	ppo: prsopt structure to free
+
+ OUT
+	NONE
 */
 
 void prsopt_destroy(prsopt *ppo) {
@@ -350,16 +431,20 @@ void prsopt_destroy(prsopt *ppo) {
 	free(ppo);
 }
 
-/*
+/***************
+ prs_get_line()
+
+ DESCR
 	get a line from a file and pre-process it
 
-	fp : file pointer
-	line : buffer that will contain the line
-	lsize : size of the buffer
+ IN
+	fp: file pointer
+	line: buffer that will contain the line
+	lsize: size of the buffer
 
-	returns a boolean :
-		- true when a line is available
-		- false when error or eof occured
+ OUT
+	- true when a line is available
+	- false when error or eof occured
 */
 
 bool prs_get_line(FILE *fp, char *line, size_t lsize) {
@@ -398,14 +483,18 @@ bool prs_get_line(FILE *fp, char *line, size_t lsize) {
 	}
 }
 
-/*
+/***************
+ prs_fill_buf()
+
+ DESCR
         fill parsing engine's buffer
 
+ IN
         peng: parsing engine structure
 
-        return:
-                - true: buffer filled
-                - false: end of file or error
+ OUT
+	- true: buffer filled
+	- false: end of file or error
 */
 
 bool prs_fill_buf(prseng *peng) {
@@ -479,13 +568,18 @@ bool prs_fill_buf(prseng *peng) {
 	return(true);
 }
 
-/*
+/***************
+ keyword_hash()
+
+ DESCR
 	create hash table with keyword structures
 
-	kwtab : keyword table
-	nbkw : size of table
+ IN
+	kwtab: keyword table
+	nbkw: size of table
 
-	return : hash table
+ OUT
+	hash table
 */
 
 htable *keyword_hash(prskw kwtab[], int nbkw) {
@@ -510,12 +604,17 @@ htable *keyword_hash(prskw kwtab[], int nbkw) {
 	return(phkw);
 }
 
-/*
+/*************
+ skip_blank()
+
+ DESCR
 	skip blank character(s)
 
-	pstr : current parsing cursor
+ IN
+	pstr: current parsing cursor
 
-	return : new parsing cursor
+ OUT
+	new parsing cursor
 */
 
 char *skip_blank(char *pstr) {
@@ -525,12 +624,17 @@ char *skip_blank(char *pstr) {
 	return(pstr);
 }
 
-/*
+/***************
+ skip_useless()
+
+ DESCR
 	skip useless text (blanks, comments, empty lines)
 
+ IN
 	pstr: starting pointer
 
-	return: start of non useless text
+ OUT
+	NONE
 */
 
 void skip_useless(prseng *peng) {
@@ -593,14 +697,19 @@ void skip_useless(prseng *peng) {
 #endif
 }
 
-/*
+/*******************
+ parse_identifier()
+
+ DESCR
 	get identifier
 
-	pstr : current parsing cursor
-	pbuf : storage buffer
-	size : size of buffer
+ IN
+	pstr: current parsing cursor
+	pbuf: storage buffer
+	size: size of buffer
 
-	return : new parsing cursor or NULL
+ OUT
+	new parsing cursor or NULL
 */
 
 char *parse_identifier(char *pstr, char *pbuf, size_t size) {
@@ -620,14 +729,19 @@ char *parse_identifier(char *pstr, char *pbuf, size_t size) {
 	return(pstr);
 }
 
-/*
+/**************
+ parse_label()
+
+ DESCR
 	get label
 
-	pstr : current parsing cursor
-	pbuf : storage buffer
-	size : size of buffer
+ IN
+	pstr: current parsing cursor
+	pbuf: storage buffer
+	size: size of buffer
 
-	return : new parsing cursor or NULL
+ OUT
+	new parsing cursor or NULL
 */
 
 char *parse_label(char *pstr, char *pbuf, size_t size) {
@@ -641,14 +755,19 @@ char *parse_label(char *pstr, char *pbuf, size_t size) {
 	return(parse_identifier(pstr, pbuf, size));
 }
 
-/*
+/*************
+ parse_bool()
+
+ DESCR
 	get bool value
 
-	pstr : current parsing cursor
-	po : storage pmk object
-	size : size of buffer
+ IN
+	pstr: current parsing cursor
+	po: storage pmk object
+	size: size of buffer
 
-	return : new parsing cursor or NULL
+ OUT
+	new parsing cursor or NULL
 */
 
 char *parse_bool(char *pstr, pmkobj *po, size_t size) {
@@ -701,14 +820,19 @@ char *parse_bool(char *pstr, pmkobj *po, size_t size) {
 	return(pstr);
 }
 
-/*
+/***************
+ parse_quoted()
+
+ DESCR
 	get quoted string content
 
-	pstr : current parsing cursor
-	po : storage pmk object
-	size : size of buffer
+ IN
+	pstr: current parsing cursor
+	po: storage pmk object
+	size: size of buffer
 
-	return : new parsing cursor
+ OUT
+	new parsing cursor
 */
 
 char *parse_quoted(char *pstr, pmkobj *po, size_t size) {
@@ -778,14 +902,19 @@ char *parse_quoted(char *pstr, pmkobj *po, size_t size) {
 	}
 }
 
-/*
+/*************
+ parse_list()
+
+ DESCR
 	get list
 
-	pstr : current parsing cursor
-	po : storage pmk object
-	size : size of buffer
+ IN
+	pstr: current parsing cursor
+	po: storage pmk object
+	size: size of buffer
 
-	return : new parsing cursor
+ OUT
+	new parsing cursor
 */
 
 char *parse_list(char *pstr, pmkobj *po, size_t size) {
@@ -941,14 +1070,19 @@ char *parse_list(char *pstr, pmkobj *po, size_t size) {
 	}
 }
 
-/*
+/*************
+ parse_list()
+
+ DESCR
 	parse key
 
-	pstr : current parsing cursor
-	po : storage pmk object
-	size : size of buffer
+ IN
+	pstr: current parsing cursor
+	po: storage pmk object
+	size: size of buffer
 
-	return : new parsing cursor or NULL
+ OUT
+	new parsing cursor or NULL
 */
 
 char *parse_key(char *pstr, pmkobj *po, size_t size) {
@@ -991,14 +1125,19 @@ char *parse_key(char *pstr, pmkobj *po, size_t size) {
 	return(rptr);
 }
 
-/*
+/*************
+ parse_data()
+
+ DESCR
 	parse data
 
-	peng : parsing engine structure
-	po : storage pmk object
-	size : size of buffer
+ IN
+	peng: parsing engine structure
+	po: storage pmk object
+	size: size of buffer
 
-	return : boolean
+ OUT
+	boolean
 */
 
 bool parse_data(prseng *peng, pmkobj *po, size_t size) {
@@ -1029,19 +1168,24 @@ bool parse_data(prseng *peng, pmkobj *po, size_t size) {
 	}
 }
 
-/*
+/*******************
+ parse_cmd_header()
+
+ DESCR
         parse command header
 
+ IN
         peng: parser engine structure
 	pnode: parser node structure
 
-	return:
-		- parser cell structure on success
-		- NULL on failure
+ OUT
+	- parser cell structure on success
+	- NULL on failure
 */
 
 prscell *parse_cmd_header(prseng *peng, prsnode *pnode) {
 	char	 name[CMD_LEN];
+	kwopt_t	*pkwo;
 	prscell	*pcell;
 	prskw	*pkw;
 
@@ -1069,6 +1213,23 @@ prscell *parse_cmd_header(prseng *peng, prsnode *pnode) {
 		debugf("parse_cmd_header(): cmd token = %d", pcell->token);
 		debugf("parse_cmd_header(): cmd type = %d", pcell->type);
 #endif
+
+		/* check if options have to be checked */
+		if (pkw->type == PRS_KW_CELL) {
+			/* yes, keep pointer in prseng structure */
+			pkwo = pkw->kwo;
+			peng->kwopts = pkwo;
+			if (pkwo != NULL) {
+				/* assign number of required opts */
+				peng->nbreq = pkwo->nbreq;
+			} else {
+				/* no required opts */
+				peng->nbreq = 0;
+			}
+		} else {
+			peng->kwopts = NULL;
+			peng->nbreq = 0;
+		}
 	} else {
 		/* unknown command */
 		strlcpy(parse_err, "unknown command.",
@@ -1143,14 +1304,19 @@ prscell *parse_cmd_header(prseng *peng, prsnode *pnode) {
 	return(pcell);
 }
 
-/*
+/************
+ parse_opt()
+
+ DESCR
 	parse an option
 
-	peng : parsing engine structure
-	popt : option storage structure
-	seplst : string that contain all separator characters
+ IN
+	peng: parsing engine structure
+	popt: option storage structure
+	seplst: string that contain all separator characters
 
-	return : boolean
+ OUT
+	boolean
 */
 
 bool parse_opt(prseng *peng, prsopt *popt, char *seplst) {
@@ -1237,14 +1403,19 @@ bool parse_opt(prseng *peng, prsopt *popt, char *seplst) {
 	return(true);
 }
 
-/*
+/**************
+ parse_clopt()
+
+ DESCR
 	parse a command line option
 
-	line : option line
-	popt : storage structure
-	seplst : string that contain all separator characters
+ IN
+	line: option line
+	popt: storage structure
+	seplst: string that contain all separator characters
 
-	return : boolean
+ OUT
+	boolean
 */
 
 bool parse_clopt(char *line, prsopt *popt, char *seplst) {
@@ -1295,23 +1466,163 @@ bool parse_clopt(char *line, prsopt *popt, char *seplst) {
 	return(true);
 }
 
-/*
+
+/****************
+ check_opt_avl()
+
+ DESCR
+	check if the key is available in the given option array
+
+ IN
+	key: key to search
+	opts: option array
+	nbopts: number of options
+
+ OUT
+	return true if key is found else false
+*/
+
+bool check_opt_avl(char *key, char **opts, size_t nbopts) {
+	int	i;
+
+	for (i = 0 ; i < (int) nbopts ; i++) {
+		if (strncmp(key, opts[i], MAX_HASH_VALUE_LEN) == 0) {
+			return(true);
+		}
+	}
+
+	return(false);
+}
+
+/********************
+ process_block_opt()
+
+ DESCR
+	process a block option
+
+ IN
+	peng: parsing engine structure
+	pnode: parsing node structure
+	pcell: parent cell structure
+
+ OUT
+	boolean	
+*/
+
+bool process_block_opt(prseng *peng, prsnode *pnode, prscell *pcell) {
+	kwopt_t	*kwo;
+	prscell	*ncell;
+	prsopt	*nopt,
+		 opt;
+
+#ifdef PRS_DEBUG
+	debugf("process_block_opt() : calling parse_opt()");
+#endif
+	/* parse option */
+	if (parse_opt(peng, &opt, PRS_PMKFILE_SEP) == false) {
+#ifdef PRS_DEBUG
+		debugf("process_block_opt() : parse_opt() returned false");
+#endif
+		return(false);
+	}
+
+#ifdef PRS_DEBUG
+	debugf("process_block_opt() : recording '%s' key", opt.key);
+#endif
+	switch (pcell->type) {
+		case PRS_KW_NODE :
+			/*
+				process a node
+			*/
+
+			/* init item's pcell */
+			ncell = prscell_init(pnode->token,
+					PRS_KW_ITEM, PRS_TOK_NULL);
+			if (ncell == NULL) {
+				errorf("process_block_opt() : prscell init failed");
+				return(false);
+			}
+
+			nopt = ncell->data;
+
+			/* duplicate opt content in item */
+			strlcpy(nopt->key, opt.key, sizeof(opt.key)); /* XXX check */
+			nopt->value = opt.value;
+
+			/* add item in cell node */
+			prsnode_add(pnode, ncell);
+			break;
+
+		case PRS_KW_CELL :
+			/*
+				process a command
+			*/
+
+			kwo = peng->kwopts;
+			if (kwo != NULL) {
+				/* check required options */
+				if (check_opt_avl(opt.key, kwo->req,
+						kwo->nbreq) == true) {
+					/* decrement required option counter */
+					peng->nbreq--;
+/*debugf("nbreq = %d", (int) peng->nbreq);*/
+				} else {
+					/* check optional options */
+					if (check_opt_avl(opt.key, kwo->opt,
+							kwo->nbopt) == false) {
+						/* provided option is not expected */
+						snprintf(parse_err,
+								sizeof(parse_err),
+								"invalid option '%s'.",
+								opt.key);
+						return(false);
+					}
+				}
+			}
+
+			/* verify if option is allowed */
+			if (hash_get(pcell->data, opt.key) != NULL) {
+				/* duplicate option */
+				strlcpy(parse_err, "duplicate option.",
+						sizeof(parse_err)); /* XXX */
+				return(false);
+			}
+
+			if (hash_update(pcell->data, opt.key, /* no need to strdup */
+					opt.value) == HASH_ADD_FAIL) {
+				strlcpy(parse_err, PRS_ERR_HASH,
+							sizeof(parse_err)); /* no check */
+				return(false);
+			}
+		break;
+	}
+
+	return(true);
+}
+
+
+/******************
+ parse_opt_block()
+
+ DESCR
         parse a block of options
 
+ IN
         pdata: parsing data structure
 	peng: parsing engine structure
 	pcell: parent cell structure
 	chk_delim: check delimiter switch
 
-	return: boolean
+ OUT
+	boolean
 */
 
 bool parse_opt_block(prsdata *pdata, prseng *peng, prscell *pcell, bool chk_delim) {
 	bool	 loop = true;
-	prscell	*ncell;
+	/*prscell	*ncell;*/
 	prsnode	*pnode;
-	prsopt	 opt,
-		*nopt;
+	/*prsopt	 opt,*/
+	/*        *nopt;     */
 
 	pnode = pcell->data;
 
@@ -1325,107 +1636,81 @@ bool parse_opt_block(prsdata *pdata, prseng *peng, prscell *pcell, bool chk_deli
 #endif
 		/* found a block node (like for example IF command) => parse the block */
 		return(parse_cmd_block(pdata, peng, pnode, true));
-	} else {
+	}
+	
 #ifdef PRS_DEBUG
-		debugf("parse_opt_block() : parsing options.");
+	debugf("parse_opt_block() : parsing options.");
 #endif
-		while (loop == true) {
-			/* skip useless text */
-			skip_useless(peng);
-			/* update buffer window */
-			if (prs_fill_buf(peng) == false) {
-				errorf(PRS_ERR_PRSFILL);
-				return(false);
-			}
+	while (loop == true) {
+		/* skip useless text */
+		skip_useless(peng);
+		/* update buffer window */
+		if (prs_fill_buf(peng) == false) {
+			errorf(PRS_ERR_PRSFILL);
+			return(false);
+		}
 
-			switch(*peng->prscur) {
-				case PMK_CHAR_COMMAND_END :
+		switch(*peng->prscur) {
+			case PMK_CHAR_COMMAND_END :
 #ifdef PRS_DEBUG
-					debugf("parse_opt_block() : found end of block character.");
+				debugf("parse_opt_block() : found end of block character.");
 #endif
-					peng->prscur++;
+				peng->prscur++;
 
-					if (chk_delim == true) {
-						/* delimiter found, exit from the loop */
-						loop = false;
-					} else {
-						/* delimiter not expected */
+				if (chk_delim == true) {
+					/* delimiter found, exit from the loop */
+					loop = false;
+
+					/* check if all required options have been parsed */
+					if (peng->nbreq != 0) {
+						snprintf(parse_err, /* no check */
+							sizeof(parse_err),
+							"at least one required option is missing (%d).",
+							(int) peng->nbreq);
 						return(false);
 					}
-					break;
+				} else {
+					/* delimiter not expected */
+					return(false);
+				}
+				break;
 
-				case CHAR_EOS :
-					if (chk_delim == true) {
-						/* expected delimiter not found */
-						return(false);
-					} else {
-						/* main loop, no delimiter was expected => ok */
-						return(true);
-					}
-					break;
+			case CHAR_EOS :
+				if (chk_delim == true) {
+					/* expected delimiter not found */
+					return(false);
+				} else {
+					/* main loop, no delimiter was expected => ok */
+					return(true);
+				}
+				break;
 
-				default :
-#ifdef PRS_DEBUG
-					debugf("parse_opt_block() : calling parse_opt()");
-#endif
-					/* parse option */
-					if (parse_opt(peng, &opt, PRS_PMKFILE_SEP) == false) {
-#ifdef PRS_DEBUG
-						debugf("parse_opt_block() : parse_opt() returned false");
-#endif
-						return(false);
-					} else {
-#ifdef PRS_DEBUG
-						debugf("parse_opt_block() : recording '%s' key", opt.key);
-#endif
-						switch (pcell->type) {
-							case PRS_KW_NODE :
-								/* process a node */
-								/* init item's pcell */
-								ncell = prscell_init(pnode->token,
-									PRS_KW_ITEM, PRS_TOK_NULL);
-								if (ncell == NULL) {
-									errorf("parse_opt_block() : prscell init failed");
-									return(false);
-								}
-
-								nopt = ncell->data;
-
-								/* duplicate opt content in item */
-								strlcpy(nopt->key, opt.key, sizeof(opt.key)); /* XXX check */
-								nopt->value = opt.value;
-
-								/* add item in cell node */
-								prsnode_add(pnode, ncell);
-								break;
-
-							case PRS_KW_CELL :
-								/* process a command */
-								if (hash_update(pcell->data, opt.key, opt.value) == HASH_ADD_FAIL) { /* no need to strdup */
-									strlcpy(parse_err, PRS_ERR_HASH, sizeof(parse_err)); /* no check */
-									return(false);
-								}
-								break;
-						}
-
-					}
-					break;
-			}
+			default :
+				if (process_block_opt(peng, pnode, pcell) == false) {
+					/* error message already set */
+					return(false);
+				}
+				break;
 		}
 	}
 
 	return(true);
 }
 
-/*
+/******************
+ parse_cmd_block()
+
+ DESCR
         parse a block of commands
 
+ IN
         pdata: parsing data structure
 	peng: parsing engine structure
 	pcell: parent cell structure
 	chk_delim: check delimiter switch
 
-	return: boolean
+ OUT
+	boolean
 */
 
 bool parse_cmd_block(prsdata *pdata, prseng *peng, prsnode *pnode, bool chk_delim) {
@@ -1504,15 +1789,20 @@ bool parse_cmd_block(prsdata *pdata, prseng *peng, prsnode *pnode, bool chk_deli
 	return(true);
 }
 
-/*
+/****************
+ parse_pmkfile()
+
+ DESCR
 	parse pmkfile
 
-	fp : file descriptor
-	pdata : parsing data structure
-	kwtab : keyword table
-	size : size of keyword table
+ IN
+	fp: file descriptor
+	pdata: parsing data structure
+	kwtab: keyword table
+	size: size of keyword table
 
-	return : boolean
+ OUT
+	boolean
 */
 
 bool parse_pmkfile(FILE *fp, prsdata *pdata, prskw kwtab[], size_t size) {
@@ -1555,13 +1845,18 @@ bool parse_pmkfile(FILE *fp, prsdata *pdata, prskw kwtab[], size_t size) {
 	return(true);
 }
 
-/*
+/**************
+ process_opt()
+
+ DESCR
 	process option line of configuration file
 
-	pht : storage hash table
-	popt : option structure to record
+ IN
+	pht: storage hash table
+	popt: option structure to record
 
-	return : boolean
+ OUT
+	boolean
 */
 
 bool process_opt(htable *pht, prsopt *popt) {
@@ -1575,15 +1870,20 @@ bool process_opt(htable *pht, prsopt *popt) {
 	return(true);
 }
 
-/*
+/****************
+ parse_pmkconf()
+
+ DESCR
 	parse configuration file
 
-	fp : file to parse
-	pht : data used by processing function
-	seplst : list of separators
-	func : processing function
+ IN
+	fp: file to parse
+	pht: data used by processing function
+	seplst: list of separators
+	func: processing function
 
-	return : boolean
+ OUT
+	boolean
 */
 
 bool parse_pmkconf(FILE *fp, htable *pht, char *seplst, bool (*func)(htable *, prsopt *)) {

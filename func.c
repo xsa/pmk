@@ -52,20 +52,165 @@
 
 /*#define SHLIB_DEBUG 1*/
 
+
+/* common required options */
+char	*req_name[] = {
+	KW_OPT_NAME
+};
+
+/* CHECK_BIN options */
+char	*opt_chkbin[] = {
+	KW_OPT_DEFS,
+	KW_OPT_DEPEND,
+	KW_OPT_REQUIRED,
+	KW_OPT_VARIABLE
+};
+
+kwopt_t	kw_chkbin = {
+	req_name,
+	sizeof(req_name) / sizeof(char *),
+	opt_chkbin,
+	sizeof(opt_chkbin) / sizeof(char *)
+};
+
+/* CHECK_HEADER options */
+char	*opt_chkhdr[] = {
+	"CFLAGS",
+	KW_OPT_DEFS,
+	KW_OPT_DEPEND,
+	"FUNCTION",
+	"LANG",
+	"MACRO",
+	KW_OPT_REQUIRED
+};
+
+kwopt_t	kw_chkhdr = {
+	req_name,
+	sizeof(req_name) / sizeof(char *),
+	opt_chkhdr,
+	sizeof(opt_chkhdr) / sizeof(char *)
+};
+
+/* CHECK_LIB options */
+char	*opt_chklib[] = {
+	KW_OPT_DEFS,
+	KW_OPT_DEPEND,
+	"FUNCTION",
+	"LANG",
+	"LIBS",
+	"MACRO",
+	KW_OPT_REQUIRED
+};
+
+kwopt_t	kw_chklib = {
+	req_name,
+	sizeof(req_name) / sizeof(char *),
+	opt_chklib,
+	sizeof(opt_chklib) / sizeof(char *)
+};
+
+/* CHECK_CONFIG options */
+char	*opt_chkcfg[] = {
+	KW_OPT_DEFS,
+	KW_OPT_DEPEND,
+	"CFLAGS",
+	"LIBS",
+	KW_OPT_REQUIRED,
+	KW_OPT_VARIABLE,
+	KW_OPT_VERSION
+};
+
+kwopt_t	kw_chkcfg = {
+	req_name,
+	sizeof(req_name) / sizeof(char *),
+	opt_chkcfg,
+	sizeof(opt_chkcfg) / sizeof(char *)
+};
+
+/* CHECK_PKG_CONFIG options */
+char	*opt_chkpc[] = {
+	KW_OPT_DEFS,
+	KW_OPT_DEPEND,
+	"CFLAGS",
+	"LIBS",
+	KW_OPT_REQUIRED,
+	KW_OPT_VERSION
+};
+
+kwopt_t	kw_chkpc = {
+	req_name,
+	sizeof(req_name) / sizeof(char *),
+	opt_chkpc,
+	sizeof(opt_chkpc) / sizeof(char *)
+};
+
+/* CHECK_TYPE options */
+char	*opt_chktyp[] = {
+	KW_OPT_DEFS,
+	KW_OPT_DEPEND,
+	KW_OPT_HEADER,
+	"LANG",
+	"MEMBER",
+	KW_OPT_REQUIRED
+};
+
+kwopt_t	kw_chktyp = {
+	req_name,
+	sizeof(req_name) / sizeof(char *),
+	opt_chktyp,
+	sizeof(opt_chktyp) / sizeof(char *)
+};
+
+/* CHECK_VARIABLE options */
+char	*opt_chkvar[] = {
+	KW_OPT_DEFS,
+	KW_OPT_DEPEND,
+	KW_OPT_REQUIRED,
+	KW_OPT_VALUE
+};
+
+kwopt_t	kw_chkvar = {
+	req_name,
+	sizeof(req_name) / sizeof(char *),
+	opt_chkvar,
+	sizeof(opt_chkvar) / sizeof(char *)
+};
+
+/* BUILD_SHLIB_NAME options */
+
+char	*req_bldshl[] = {
+	KW_OPT_NAME,
+	KW_OPT_MAJOR,
+	KW_OPT_MINOR
+};
+
+char	*opt_bldshl	[] = {
+	KW_SL_VERS_FULL,
+	KW_SL_VERS_NONE
+};
+
+kwopt_t	kw_bldshl = {
+	req_bldshl,
+	sizeof(req_bldshl) / sizeof(char *),
+	opt_bldshl,
+	sizeof(opt_bldshl) / sizeof(char *)
+};
+
+/* keyword list */
 prskw	kw_pmkfile[] = {
-	{"DEFINE",		PMK_TOK_DEFINE,	PRS_KW_NODE, PMK_TOK_SETVAR},
-	{"SETTINGS",		PMK_TOK_SETNGS,	PRS_KW_NODE, PMK_TOK_SETPRM},
-	{"IF",			PMK_TOK_IFCOND,	PRS_KW_NODE, PRS_TOK_NULL},
-	{"ELSE",		PMK_TOK_ELCOND,	PRS_KW_NODE, PRS_TOK_NULL},
-	{"SWITCHES",		PMK_TOK_SWITCH,	PRS_KW_CELL, PRS_TOK_NULL},
-	{"CHECK_BINARY",	PMK_TOK_CHKBIN,	PRS_KW_CELL, PRS_TOK_NULL},
-	{"CHECK_HEADER",	PMK_TOK_CHKINC,	PRS_KW_CELL, PRS_TOK_NULL},
-	{"CHECK_LIB",		PMK_TOK_CHKLIB,	PRS_KW_CELL, PRS_TOK_NULL},
-	{"CHECK_CONFIG",	PMK_TOK_CHKCFG,	PRS_KW_CELL, PRS_TOK_NULL},
-	{"CHECK_PKG_CONFIG",	PMK_TOK_CHKPKG,	PRS_KW_CELL, PRS_TOK_NULL},
-	{"CHECK_TYPE",		PMK_TOK_CHKTYP,	PRS_KW_CELL, PRS_TOK_NULL},
-	{"CHECK_VARIABLE",	PMK_TOK_CHKVAR,	PRS_KW_CELL, PRS_TOK_NULL},
-	{"BUILD_SHLIB_NAME",	PMK_TOK_BLDSLN,	PRS_KW_CELL, PRS_TOK_NULL}
+	{"DEFINE",		PMK_TOK_DEFINE,	PRS_KW_NODE, PMK_TOK_SETVAR,	NULL},
+	{"SETTINGS",		PMK_TOK_SETNGS,	PRS_KW_NODE, PMK_TOK_SETPRM,	NULL},
+	{"IF",			PMK_TOK_IFCOND,	PRS_KW_NODE, PRS_TOK_NULL,	NULL},
+	{"ELSE",		PMK_TOK_ELCOND,	PRS_KW_NODE, PRS_TOK_NULL,	NULL},
+	{"SWITCHES",		PMK_TOK_SWITCH,	PRS_KW_CELL, PRS_TOK_NULL,	NULL},
+	{"CHECK_BINARY",	PMK_TOK_CHKBIN,	PRS_KW_CELL, PRS_TOK_NULL,	&kw_chkbin},
+	{"CHECK_HEADER",	PMK_TOK_CHKINC,	PRS_KW_CELL, PRS_TOK_NULL,	&kw_chkhdr},
+	{"CHECK_LIB",		PMK_TOK_CHKLIB,	PRS_KW_CELL, PRS_TOK_NULL,	&kw_chklib},
+	{"CHECK_CONFIG",	PMK_TOK_CHKCFG,	PRS_KW_CELL, PRS_TOK_NULL,	&kw_chkcfg},
+	{"CHECK_PKG_CONFIG",	PMK_TOK_CHKPKG,	PRS_KW_CELL, PRS_TOK_NULL,	&kw_chkpc},
+	{"CHECK_TYPE",		PMK_TOK_CHKTYP,	PRS_KW_CELL, PRS_TOK_NULL,	&kw_chktyp},
+	{"CHECK_VARIABLE",	PMK_TOK_CHKVAR,	PRS_KW_CELL, PRS_TOK_NULL,	&kw_chkvar},
+	{"BUILD_SHLIB_NAME",	PMK_TOK_BLDSLN,	PRS_KW_CELL, PRS_TOK_NULL,	&kw_bldshl}
 };
 
 size_t	nbkwpf = sizeof(kw_pmkfile) / sizeof(prskw);

@@ -45,6 +45,7 @@
 #include "common.h"
 #include "detect_cpu.h"
 #include "detect_cpu_asm.h"
+#include "functool.h"
 
 
 /***************
@@ -54,12 +55,12 @@
 
 /* config tools data file keyword */
 prskw	kw_pmkcpu[] = {
-	{"LIST_ARCH_EQUIV",		LIST_ARCH_EQUIV,	PRS_KW_CELL},
-	{"LIST_X86_CPU_VENDOR",		LIST_X86_CPU_VENDOR,	PRS_KW_CELL},
-	{"LIST_X86_CPU_MODEL",		LIST_X86_CPU_MODEL,	PRS_KW_CELL},
-	{"LIST_X86_CPU_CLASS",		LIST_X86_CPU_CLASS,	PRS_KW_CELL},
-	{"LIST_ALPHA_CPU_CLASS",	LIST_ALPHA_CPU_CLASS,	PRS_KW_CELL},
-	{"LIST_IA64_CPU_CLASS",		LIST_IA64_CPU_CLASS,	PRS_KW_CELL}
+	{"LIST_ARCH_EQUIV",		LIST_ARCH_EQUIV,	PRS_KW_CELL,	NULL},
+	{"LIST_X86_CPU_VENDOR",		LIST_X86_CPU_VENDOR,	PRS_KW_CELL,	NULL},
+	{"LIST_X86_CPU_MODEL",		LIST_X86_CPU_MODEL,	PRS_KW_CELL,	NULL},
+	{"LIST_X86_CPU_CLASS",		LIST_X86_CPU_CLASS,	PRS_KW_CELL,	NULL},
+	{"LIST_ALPHA_CPU_CLASS",	LIST_ALPHA_CPU_CLASS,	PRS_KW_CELL,	NULL},
+	{"LIST_IA64_CPU_CLASS",		LIST_IA64_CPU_CLASS,	PRS_KW_CELL,	NULL}
 };
 size_t	nbkwc = sizeof(kw_pmkcpu) / sizeof(prskw);
 
