@@ -656,6 +656,12 @@ bool single_append(htable *pht, char *key, char *value) {
 	char	*cval,
 		*pstr;
 
+	if (value == NULL)
+		return(false);
+
+	if (*value == CHAR_EOS)
+		return(true);
+
 	cval = hash_get(pht, key);
 
 	pstr = strstr(cval, value);
@@ -665,11 +671,12 @@ bool single_append(htable *pht, char *key, char *value) {
 			/* found existing value */
 			found = true;
 		}
-		pstr = strstr(cval, value);
+		pstr = strstr(pstr, value);
 	}
+	free(cval);
 
 	if (found == false) {
-		if (hash_append(pht, key, strdup(value), " ") == HASH_ADD_FAIL) {
+		if (hash_append(pht, key, value, " ") == HASH_ADD_FAIL) {
 			/* add failed */
 			return(false);
 		}

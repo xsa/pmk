@@ -1,5 +1,9 @@
 30 Sep 2003 mipsator
- * changed USERMODE by PMK_USERMODE to avoid conflicts. 
+ * changed USERMODE by PMK_USERMODE to avoid conflicts.
+ * fixed hash_str_append() in hash.
+ * more debug messages in hash.
+ * fixed single_append() in functool.
+ * improved pmk_check_lib() to use optional LIBS variable.
 
 28 Sep 2003 mipsator
  * added find_file_dir() in common.

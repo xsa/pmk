@@ -426,11 +426,19 @@ int hash_append(htable *pht, char *key, void *value, void *misc) {
 		*robj;
 	int	 rval;
 
-	if (value == NULL)
+	if (value == NULL) {
+#ifdef HASH_DEBUG
+		debugf("hash_append : value is null");
+#endif
 		return(HASH_ADD_FAIL);
+	}
 
-	if (pht->appdobj == NULL)
+	if (pht->appdobj == NULL) {
+#ifdef HASH_DEBUG
+		debugf("hash_append : appobj is null");
+#endif
 		return(HASH_ADD_FAIL);
+	}
 
 	pobj = hash_get(pht, key);
 	if (pobj == NULL) {
@@ -443,6 +451,9 @@ int hash_append(htable *pht, char *key, void *value, void *misc) {
 			if (rval == HASH_ADD_UPDT)
 				rval = HASH_ADD_APPD; /* not an update as we append */
 		} else {
+#ifdef HASH_DEBUG
+			debugf("hash_append : robj is null");
+#endif
 			rval = HASH_ADD_FAIL;
 		}
 	}
@@ -687,9 +698,12 @@ void *hash_str_append(void *orig, void *value, void *sep) {
 	/* allocate space */
 	pbuf = (char *) malloc(s);
 
-	if (strlcat(pbuf, orig, s) >= s) {
+	if (strlcpy(pbuf, orig, s) >= s) {
 		free(value);
 		free(pbuf);
+#ifdef HASH_DEBUG
+		debugf("hash_str_append : strlcpy1 failed");
+#endif
 		return(NULL);
 	}
 
@@ -699,12 +713,18 @@ void *hash_str_append(void *orig, void *value, void *sep) {
 		if (strlcat(pbuf, (char *) sep, s) >= s) {
 			free(value);
 			free(pbuf);
+#ifdef HASH_DEBUG
+		debugf("hash_str_append : strlcat1 failed");
+#endif
 			return(NULL);
 		}
 	}
 	if (strlcat(pbuf, value, s) >= s) {
 		free(value);
 		free(pbuf);
+#ifdef HASH_DEBUG
+		debugf("hash_str_append : strlcat2 failed");
+#endif
 		return(NULL);
 	}
 
