@@ -1,3 +1,8 @@
+05 Oct 2003 mipsator
+ * added missing variables for autoconf compatibility.
+ * added third license clause to almost all the files.
+ * imported pmkinstall tools for further use.
+
 02 Oct 2003 mipsator
  * renamed pmk_check_include() by pmk_check_header().
  * removed a useless free() in single_append().
