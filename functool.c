@@ -32,6 +32,7 @@
 
 
 #include <stdio.h>
+#include <stdlib.h>
 
 #include "functool.h"
 
@@ -68,12 +69,77 @@ bool check_bool_str(char *str) {
 */
 
 bool check_version(char *vref, char *vers) {
-	/* XXX use strncmp to check both version but not sure it is 100% right */
-	if (strncmp(vref, vers, MAX_VERS_LEN) > 0) {
+	int	i = 0,
+		ref,
+		cmp;
+	char	*sr,
+		*sc;
+	dynary	*vr,
+		*vc;
+	bool	exit = false,
+		rval = true;
+
+	/* need to check da_* returns */
+	vr = da_init();
+	if (vr == NULL) {
+		errorf("cannot initialize dynary.");
 		return(false);
-	} else {
-		return(true);
 	}
+	if (str_to_dynary(vref, '.', vr) == false) {
+		errorf("cannot parse reference version '%s'.", vref);
+		da_destroy(vr);
+		return(false);
+	}
+	vc = da_init();
+	if (vc == NULL) {
+		errorf("cannot initialize dynary.");
+		return(false);
+	}
+	if (str_to_dynary(vers, '.', vc) == false) {
+		errorf("cannot parse comparison version '%s'.", vers);
+		da_destroy(vr);
+		da_destroy(vc);
+		return(false);
+	}
+
+	while (exit == false) {
+		sr = da_idx(vr, i);
+		sc = da_idx(vc, i);
+
+		if (sr != NULL && sc != NULL) {
+			/* check both version */
+			ref = atoi(sr); /* XXX should consider using strtol */
+			cmp = atoi(sc);
+
+			if (ref > cmp) {
+				/* version is lower than required */
+				rval = false;
+				exit = true;
+			} else {
+				if (ref < cmp) {
+					/* version is greater than required */
+					rval = true;
+					exit = true;
+				}
+			}
+		} else {
+			/* reached end of (at least) one version */
+			if (sr != NULL) {
+				/* reference has remaining number */
+				ref = atoi(sr);
+				if (ref > 0) {
+					/* reference is greater */
+					rval = false;
+				}
+			}
+			exit = true;
+		}
+		i++;
+	}
+
+	da_destroy(vr);
+	da_destroy(vc);
+	return(rval);
 }
 
 /*

@@ -245,10 +245,10 @@ bool pmk_check_config(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 	
 			get_line(rpipe, version, sizeof(version)); /* XXX check returned value ? */
 			if (check_version(libvers, version) == true) {
-				pmk_log("Yes (%s).\n", version);
+				pmk_log("yes (%s).\n", version);
 				rval = true;
 			} else {
-				pmk_log("No (%s).\n", version);
+				pmk_log("no (%s).\n", version);
 				if (required == true) {
 					rval = false;
 				} else {
