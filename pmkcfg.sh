@@ -458,9 +458,16 @@ fi
 # cpp check
 #
 
-if ! check_binary cpp; then
-	printf "Unable to find C preprocessor.\n"
-	exit 0
+if [ -z "$CPP" ]; then
+	if check_binary cpp; then
+		CPP="cpp"
+	else
+		printf "Using 'cc -E'.\n"
+		CPP="cc -E"
+	fi
+else
+	printf "CPP defined, skipping C preprocessor check.\n"
+	mkf_sed 'CPP' "$CPP"
 fi
 
 #

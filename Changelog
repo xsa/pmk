@@ -1,3 +1,7 @@
+17 Mar 2005 mreindl
+ * pmkcfg.sh: fall back to 'cc -E' when cpp isn't available and obey $CPP when
+   set.
+
 13 Mar 2005 mipsator
  * added option checking in parser.
  * comment cosmetics in parser.
