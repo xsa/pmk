@@ -4,7 +4,7 @@
 
 /* pkg-config tools test */
 
-#define PKGCFG_DEBUG	1
+/*#define PKGCFG_DEBUG	1*/
 /*#define HASH_DEBUG	1*/
 
 #include <stdio.h>
@@ -49,13 +49,16 @@ int main(int argc, char *argv[]) {
 			/* XXX */
 			if (pkg_recurse(ppd, mod) == false) {
 				errorf("failed on recurse !");
+			} else {
+				printf("\ncflags = '%s'\n", pkg_get_cflags(ppd));
+				printf("\nlibs = '%s'\n", pkg_get_libs(ppd));
 			}
 		} else {
 			printf("module not found\n");
 		}
 	}
 
-debugf("destroy pkgdata");
+/*debugf("destroy pkgdata");*/
 	pkgdata_destroy(ppd);
 
 	return(0);

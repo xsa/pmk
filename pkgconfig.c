@@ -83,13 +83,38 @@ size_t	nb_pkgkw = sizeof(kw_pkg) / sizeof(pkgkw);
 	XXX
 */
 
+pkgcell *pkgcell_init(void) {
+	pkgcell *ppc;
+
+	ppc = (pkgcell *) malloc(sizeof(pkgcell));
+	if (ppc == NULL) {
+		errorf("cannot initialize pkgcell.");
+		return(NULL);
+	}
+
+	ppc->variables = hash_init(PKGCFG_HTABLE_SIZE);
+	if (ppc->variables == NULL) {
+		/*da_destroy(ppc->cflags);*/
+		/*da_destroy(ppc->libs);*/
+		free(ppc);
+		errorf("cannot initialize pkgcell hash table.");
+		return(NULL);
+	}
+
+	return(ppc);
+}
+
+/*
+	XXX
+*/
+
 void pkgcell_destroy(pkgcell *ppc) {
 	free(ppc->name);
 	free(ppc->descr);
 	free(ppc->version);
 	free(ppc->requires);
-	free(ppc->libs);
-	free(ppc->cflags);
+	da_destroy(ppc->cflags);
+	da_destroy(ppc->libs);
 	hash_destroy(ppc->variables);
 }
 
@@ -137,9 +162,21 @@ pkgdata *pkgdata_init(void) {
 */
 
 void pkgdata_destroy(pkgdata *ppd) {
+#ifdef PKGCFG_DEBUG
+debugf("clean pc files hash");
+#endif
 	hash_destroy(ppd->files);
+#ifdef PKGCFG_DEBUG
+debugf("clean cells hash");
+#endif
 	hash_destroy(ppd->cells);
+#ifdef PKGCFG_DEBUG
+debugf("clean modules list");
+#endif
 	da_destroy(ppd->mods);
+#ifdef PKGCFG_DEBUG
+debugf("clean structure");
+#endif
 	free(ppd);
 }
 
@@ -223,12 +260,12 @@ bool parse_keyword(pkgcell *ppc, char *kword, char *value) {
 					ppc->requires = strdup(value);
 					break;
 
-				case PKGCFG_KW_LIBS :
-					ppc->libs = strdup(value);
+				case PKGCFG_KW_CFLGS :
+					ppc->cflags = str_to_dynary(value, ' ');
 					break;
 
-				case PKGCFG_KW_CFLGS :
-					ppc->cflags = strdup(value);
+				case PKGCFG_KW_LIBS :
+					ppc->libs = str_to_dynary(value, ' ');
 					break;
 
 				case PKGCFG_KW_CFLCT :
@@ -442,20 +479,29 @@ debugf("recursing '%s'", reqs);
 		/* get module name */
 		mod = da_idx(pda, i);
 
-		/* get pc file name */
-		pcf = hash_get(ppd->files, mod);
+		/*  check if module has been already processed */
+		if (hash_get(ppd->cells, mod) == NULL) {
+			/* get pc file name */
+			pcf = hash_get(ppd->files, mod);
 
-		/* parse pc file */
-		ppc = parse_pc_file(pcf);
+			/* parse pc file */
+			ppc = parse_pc_file(pcf);
 
-		/* store pkgcell in hash */
-		hash_update(ppd->cells, mod, ppc); /* XXX check */
-
+			/* store pkgcell in hash */
+			hash_update(ppd->cells, mod, ppc); /* XXX check */
 #ifdef PKGCFG_DEBUG
 debugf("adding pkgcell for '%s'", mod);
 #endif
-		if (ppc->requires != NULL) {
-			pkg_recurse(ppd, ppc->requires); /* XXX check */
+
+			/* add module in list */
+			da_push(ppd->mods, strdup(mod));
+
+#ifdef PKGCFG_DEBUG
+debugf("pkgcell requires = '%s'", ppc->requires);
+#endif
+			if (ppc->requires != NULL) {
+				pkg_recurse(ppd, ppc->requires); /* XXX check */
+			}
 		}
 	}
 
@@ -467,13 +513,92 @@ debugf("adding pkgcell for '%s'", mod);
 /*
 */
 
-void pkg_get_cflags(void) {
+char *pkg_single_append(char *ostr, char *astr) {
+	char	*pstr,
+		*buf;
+	size_t	 s;
+
+#ifdef PKGCFG_DEBUG
+debugf("single_append '%s', '%s'", ostr, astr);
+#endif
+
+	if (*astr == CHAR_EOS)
+		return(ostr);
+
+	if (*ostr != CHAR_EOS) {
+		pstr = strstr(ostr, astr);
+		while (pstr != NULL) {
+			pstr = pstr + strlen (astr);
+			if ((*pstr == ' ') || (*pstr == CHAR_EOS)) {
+				/* found existing value */
+				return(ostr);
+			}
+			pstr = strstr(pstr, astr);
+		}
+
+		/* 2 is for the separator and the end of file char */
+		s = strlen(ostr) + strlen(astr) + 2;
+		buf = (char *) malloc(s);
+
+		snprintf(buf, s, "%s %s", ostr, astr);
+
+		free(ostr);
+
+	} else {
+		buf = strdup(astr);
+	}
+
+	return(buf);
 }
 
 /*
 */
 
-void pkg_get_libs(void) {
+char *pkg_get_cflags(pkgdata *ppd) {
+	char		*cflags = "";
+	dynary		*pda;
+	pkgcell		*ppc;
+	unsigned int	 i,
+			 j;
+
+	pda = ppd->mods;
+
+	for (i = 0 ; i < da_usize(pda) ; i++) {
+		/* get module name */
+		ppc = hash_get(ppd->cells, da_idx(pda, i));
+
+		/* append each element but avoid duplicate*/
+		for (j = 0 ; j < da_usize(ppc->cflags) ; j++) {
+			cflags = pkg_single_append(cflags, da_idx(ppc->cflags, j));
+		}
+	}
+
+	return(cflags);
+}
+
+/*
+*/
+
+char *pkg_get_libs(pkgdata *ppd) {
+	char		*libs = "";
+	dynary		*pda;
+	pkgcell		*ppc;
+	unsigned int	 i,
+			 j;
+
+	pda = ppd->mods;
+
+	for (i = 0 ; i < da_usize(pda) ; i++) {
+		/* get module name */
+		ppc = hash_get(ppd->cells, da_idx(pda, i));
+
+		/* append each element but avoid duplicate*/
+		for (j = 0 ; j < da_usize(ppc->libs) ; j++) {
+			libs = pkg_single_append(libs, da_idx(ppc->libs, j));
+		}
+	}
+
+	return(libs);
 }
 
 /*

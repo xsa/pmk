@@ -45,9 +45,9 @@ typedef struct s_pkgcell {
 	char	*name,
 		*descr,
 		*version,
-		*requires,
-		*libs,
-		*cflags;
+		*requires;
+	dynary	*cflags,
+		*libs;
 	htable	*variables;
 } pkgcell;
 
@@ -64,6 +64,8 @@ typedef struct s_pkgkw {
 
 
 /* functions protos */
+pkgcell	*pkgcell_init();
+void	 pkgcell_destroy(pkgcell *);
 pkgdata	*pkgdata_init();
 void	 pkgdata_destroy(pkgdata *);
 bool	 scan_dir(char *, pkgdata *);
@@ -72,6 +74,8 @@ char	*process_variables(char *, htable *);
 pkgcell	*parse_pc_file(char *);
 bool	 pkg_recurse(pkgdata *, char *);
 bool	 pkg_start_recurse(pkgdata *, char *, pkgcell *);
+char	*pkg_get_cflags(pkgdata *);
+char	*pkg_get_libs(pkgdata *);
 
 #endif /* _PMK_PKGCONFIG_H_ */
 
