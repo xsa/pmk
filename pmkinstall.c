@@ -36,9 +36,11 @@
 
 #include <sys/stat.h>
 #include <ctype.h>
-#include <stdlib.h>
 #include <fcntl.h>
+#include <grp.h>
+#include <pwd.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <unistd.h>
 
 #include "compat/pmk_stdbool.h"
@@ -262,12 +264,22 @@ void usage(void) {
 */
 
 int main(int argc, char *argv[]) {
-	bool	 go_exit = false;
-	char	 chr;
-	mode_t	 mode = DEFAULT_MODE;
+	struct group	*pg = NULL;
+	struct passwd	*pp = NULL;
+	bool		 create_dir = false,
+			 do_chown = false,
+			 go_exit = false;
+	char		 chr,
+			*gstr = NULL,
+			*ostr = NULL,
+			*src,
+			*dst;
+	gid_t		 gid = (gid_t) -1;
+	mode_t		 mode = DEFAULT_MODE;
+	uid_t		 uid = (uid_t) -1;
 	
 	while (go_exit == false) {
-		chr = getopt(argc, argv, "bcdgh:m:o:stv");
+		chr = getopt(argc, argv, "bcdg:hm:o:stv");
 		if (chr == -1) {
 			go_exit = true;
 		} else {
@@ -283,12 +295,13 @@ int main(int argc, char *argv[]) {
 
 				case 'd' :
 					/* create directories */
-					/* XXX TODO */
+					create_dir = true;
 					break;
 
 				case 'g' :
 					/* specify group */
-					/* XXX TODO */
+					gstr = optarg;
+/*debugf("gstr = %s", gstr);*/
 					break;
 
 				case 'm' :
@@ -301,7 +314,7 @@ int main(int argc, char *argv[]) {
 
 				case 'o' :
 					/* specifiy owner */
-					/* XXX TODO */
+					ostr = optarg;
 					break;
 
 				case 's' :
@@ -331,16 +344,76 @@ int main(int argc, char *argv[]) {
 	argc = argc - optind;
 	argv = argv + optind;
 
+	if (create_dir == true) {
+		debugf("the -d option is not yet implemented");
+		exit(1); /* XXX TODO (move)*/
+	}
+
 	if (argc != 2) {	/* XXX TODO  allow use of more than one source (<2)*/
 		usage();
 	}
 
-	if (fcopy(argv[0], argv[1], mode) == false) {
+	src = argv[0];
+	dst = argv[1];
+
+	/* check if an owner has been provided */
+	if (ostr != NULL) {
+		if (isdigit(*ostr) == 0) {
+			/* user name */
+			pp = getpwnam(ostr);
+			if (pp == NULL) {
+				errorf("invalid user name.");
+				exit(1);
+			} else {
+				uid = pp->pw_uid;
+/*debugf("uid = %d", uid);*/
+			}
+		} else {
+			/* uid */
+			uid = (uid_t) strtoul(ostr, NULL, 10);
+			/* XXX check for ERANGE ? */
+/*debugf("uid = %d", uid);*/
+		}
+		do_chown = true;
+	}
+
+	if (gstr != NULL) {
+		if (isdigit(*gstr) == 0) {
+			/* group name */
+			pg = getgrnam(gstr);
+			if (pg == NULL) {
+				errorf("invalid group name.");
+				exit(1);
+			} else {
+				gid = pg->gr_gid;
+/*debugf("gid = %d", gid);*/
+			}
+		} else {
+			/* gid */
+			gid = (gid_t) strtoul(gstr, NULL, 10);
+			/* XXX check for ERANGE ? */
+/*debugf("gid = %d", gid);*/
+		}
+		do_chown = true;
+	}
+
+	/* copy */
+	if (fcopy(src, dst, mode) == false) {
 		/* copy failed */
 		exit(1);
 	}
 
-	if (chmod(argv[1], mode) == -1) {
+	/* change owner and group */
+	if (do_chown == true) {
+/*debugf("doing chown(%s, %d, %d)", dst, uid, gid);*/
+		if (chown(dst, uid, gid) != 0) {
+			errorf("chown failed."); /* better message with errno */
+			exit(1);
+		}
+	}
+
+	/* change perms (must follow chown that can change perms) */
+	if (chmod(dst, mode) == -1) {
 		errorf("chmod failed.");
 		exit(1);
 	}
