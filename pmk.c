@@ -295,9 +295,9 @@ debugf("%s = '%s'", pstr, buf);
 	}
 
 	pstr = hash_get(pht, PMKCONF_BIN_INSTALL);
-        /* append -c for compat with autoconf*/
-        snprintf(buf, sizeof(buf), "%s -c", pstr);
 	if (pstr != NULL) {
+	        /* append -c for compat with autoconf*/
+	        snprintf(buf, sizeof(buf), "%s -c", pstr);
 		if (hash_update_dup(pht, "INSTALL", buf) == HASH_ADD_FAIL)
 			return(false);
 	}
