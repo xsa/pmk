@@ -58,7 +58,7 @@ bool snprintf_b(char *str, size_t siz, const char *fmt, ...) {
 
 /* boolean strlcat */
 bool strlcat_b(char *dst, const char *src, size_t siz) {
-	if (strlcpy(dst, src, siz) >= siz)
+	if (strlcat(dst, src, siz) >= siz)
 		return(false);
 	else
 		return(true);
