@@ -277,6 +277,7 @@ void dir_recurse(dynary *pda, char *path) {
 				}
 			}
 		} while (pde != NULL);
+		closedir(pd);
 	}
 }
 
@@ -357,17 +358,26 @@ int main(int argc, char *argv[]) {
 		exit(1);
 	}
 	
+	pda = da_init();
+	if (pda == NULL) {
+		prsdata_destroy(pdata);
+		errorf("init failed.");
+		exit(1);
+	}
+
+	pfdata = hash_init(256); /* XXX can do better :) */
+	if (pfdata == NULL) {
+		prsdata_destroy(pdata);
+		da_destroy(pda);
+		errorf("init failed.");
+		exit(1);
+	}
+
 	if (parse_data(pdata, &sd) == false) {
 		/* XXX TODO error message */
 		exit(1);
 	}
 	printf("Ok\n\n");
-
-	pda = da_init();
-	/* XXX TODO check */
-
-	pfdata = hash_init(256); /* XXX can do better :) */
-	/* XXX TODO check */
 
 	dir_recurse(pda, ".");
 #ifdef DEBUG
@@ -389,6 +399,7 @@ int main(int argc, char *argv[]) {
 
 	hash_destroy(pfdata);
 	da_destroy(pda);
+	prsdata_destroy(pdata);
 
 	return(0);
 }

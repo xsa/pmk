@@ -1,5 +1,9 @@
 26 Jul 2003 mipsator
  * added dir_recurse() in pmkscan to make it scanning a complete tree.
+ * added missing function comments in parse.c .
+ * added prsdata_destroy().
+ * re-enable error messages in parse().
+ * added init checks.
 
 # snapshot 0.5.2
 
