@@ -51,7 +51,6 @@ extern int	optind;
 extern cmdkw	functab[];
 extern int	nbfunc;
 
-char	pmkfile[MAXPATHLEN];
 int	cur_line = 0;
 
 /* keyword data */
@@ -295,13 +294,14 @@ bool process_cmd(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 	check if the given string is a valid command
 
 	cmdname : command to check
+	pgd : global data structure (for pmkfile name)
 
 	returns true is command is valid
 */
 
-bool check_cmd(char *cmdname) {
+bool check_cmd(char *cmdname, pmkdata *pgd) {
 	if (hash_get(keyhash, cmdname) == NULL) {
-		errorf_line(pmkfile, cur_line, "Unknown command %s", cmdname);
+		errorf_line(pgd->pmkfile, cur_line, "Unknown command %s", cmdname);
 		return(false);
 	} else {
 		return(true);
@@ -313,11 +313,12 @@ bool check_cmd(char *cmdname) {
 
 	line : line to parse
 	command : pmkcmd structure where to store the command and label
+	pgd : global data structure (for pmkfile name)
 
 	returns a boolean
 */
 
-bool parse_cmd(char *line, pmkcmd *command) {
+bool parse_cmd(char *line, pmkcmd *command, pmkdata *pgd) {
 	int	s,
 		so;
 	char	buf[MAX_LABEL_NAME_LEN], /* should be big enough to contain command/label name */
@@ -334,7 +335,7 @@ bool parse_cmd(char *line, pmkcmd *command) {
 				/* check uppercase */
 				if (isalpha(*line) && islower(*line)) {
 					/* my god, found a lowercase in command name ! */
-					errorf_line(pmkfile, cur_line, "Command should be in uppercase");
+					errorf_line(pgd->pmkfile, cur_line, "Command should be in uppercase");
 					return(false);
 				} else {
 					/* good boy */
@@ -344,13 +345,13 @@ bool parse_cmd(char *line, pmkcmd *command) {
 			} else {
 				/* end of command name */
 				*pbf = CHAR_EOS;
-				if (check_cmd(buf) == false) {
+				if (check_cmd(buf, pgd) == false) {
 					/* line number and error message already set */
 					return(false);
 				}
 				so = sizeof(command->name);
 				if (strlcpy(command->name, buf, so) >= so) {
-					errorf_line(pmkfile, cur_line, "command too long.");
+					errorf_line(pgd->pmkfile, cur_line, "command too long.");
 					return(false);
 				}
 				cmd_found = true;
@@ -360,7 +361,7 @@ bool parse_cmd(char *line, pmkcmd *command) {
 			if (*line != ')') {
 				if (isalpha(*line) == 0 && *line != '_') {
 					/* invalid character */
-					errorf_line(pmkfile, cur_line, "Invalid label name");
+					errorf_line(pgd->pmkfile, cur_line, "Invalid label name");
 					return(false);
 					
 				} else {
@@ -372,7 +373,7 @@ bool parse_cmd(char *line, pmkcmd *command) {
 				*pbf = CHAR_EOS;
 				so = sizeof(command->label);
 				if (strlcpy(command->label, buf, so) >= so) {
-					errorf_line(pmkfile, cur_line, "label too long.");
+					errorf_line(pgd->pmkfile, cur_line, "label too long.");
 					return(false);
 				}
 				label_found = true;
@@ -387,26 +388,26 @@ bool parse_cmd(char *line, pmkcmd *command) {
 		if (s != 0) {
 			/* command without label */
 			*pbf = CHAR_EOS;
-			if (check_cmd(buf) == false) {
+			if (check_cmd(buf, pgd) == false) {
 				/* line number and error message already set */
 				return(false);
 			}
 			strlcpy(command->name, buf, MAX_CMD_NAME_LEN);
 			strlcpy(command->label, "", MAX_LABEL_NAME_LEN);
 		} else {
-			errorf_line(pmkfile, cur_line, "buffer too small.");
+			errorf_line(pgd->pmkfile, cur_line, "buffer too small.");
 			return(false);
 		}
 	} else {
 		if (label_found == true) {
 			if (*line != CHAR_EOS) {
 				/* some data remaining after parenthesis */
-				errorf_line(pmkfile, cur_line, "Trailing garbage after label");
+				errorf_line(pgd->pmkfile, cur_line, "Trailing garbage after label");
 				return(false);
 			}
 		} else {
 			/* ending parenthesis missing */
-			errorf_line(pmkfile, cur_line, "Label not terminated");
+			errorf_line(pgd->pmkfile, cur_line, "Label not terminated");
 			return(false);
 		}
 	}
@@ -419,12 +420,13 @@ bool parse_cmd(char *line, pmkcmd *command) {
 
 	line : option line
 	ht : hash table to store option
+	pgd : global data structure (for pmkfile name)
 	display : enable error messages if true
 
 	returns a boolean
 */
 
-bool parse_opt(char *line, htable *ht, bool display) {
+bool parse_opt(char *line, htable *ht, pmkdata *pgd, bool display) {
 	char	buf[MAXPATHLEN],
 		tkey[MAX_OPT_NAME_LEN],
 		tval[MAX_OPT_VALUE_LEN];
@@ -440,7 +442,7 @@ bool parse_opt(char *line, htable *ht, bool display) {
 				if (strlcpy(tkey, buf, MAX_OPT_NAME_LEN) >= MAX_OPT_NAME_LEN) {
 					/* key name is too long */
 					if (display == true)
-						errorf_line(pmkfile, cur_line, "Key name is too long");
+						errorf_line(pgd->pmkfile, cur_line, "Key name is too long");
 					return(false);
 				} else {
 					keyfound = true;
@@ -450,7 +452,7 @@ bool parse_opt(char *line, htable *ht, bool display) {
 				if ((isalpha(line[i]) == 0) && (line[i] != '_')) {
 					/* invalid character */
 					if (display == true)
-						errorf_line(pmkfile, cur_line, "Malformed option");
+						errorf_line(pgd->pmkfile, cur_line, "Malformed option");
 					return(false);
 				} else {
 					buf[j] = line[i];
@@ -470,13 +472,13 @@ bool parse_opt(char *line, htable *ht, bool display) {
 	if (keyfound == false) {
 			/* key name undefined */
 			if (display == true)
-				errorf_line(pmkfile, cur_line, "Malformed option");
+				errorf_line(pgd->pmkfile, cur_line, "Malformed option");
 			return(false);
 	} else {
 		if (strlcpy(tval, buf, MAX_OPT_VALUE_LEN) >= MAX_OPT_VALUE_LEN) {
 			/* key value is too long */
 			if (display == true)
-				errorf_line(pmkfile, cur_line, "Key value is too long");
+				errorf_line(pgd->pmkfile, cur_line, "Key value is too long");
 			return(false);
 		} else {
 			/* key name and value are ok */
@@ -498,7 +500,7 @@ bool parse_opt(char *line, htable *ht, bool display) {
 	returns a boolean
 */
 
-bool parse(FILE *fp, pmkdata *gdata) {
+bool parse(FILE *fp, pmkdata *pgd) {
 	char		buf[MAX_LINE_LEN];
 	bool		process = false;
 	pmkcmd		cmd;
@@ -518,7 +520,7 @@ bool parse(FILE *fp, pmkdata *gdata) {
 			case PMK_CHAR_COMMAND :
 				if (process == false) {
 					/* parse command and label */
-					if (parse_cmd(buf, &cmd) == false) {
+					if (parse_cmd(buf, &cmd, pgd) == false) {
 						/* line number and error message already set */
 						return(false);
 					}
@@ -526,14 +528,14 @@ bool parse(FILE *fp, pmkdata *gdata) {
 					process = true;
 					tabopts = hash_init(MAX_CMD_OPT);
 					if (tabopts == NULL) {
-						errorf_line(pmkfile, cur_line, "Cannot create hash table");
+						errorf_line(pgd->pmkfile, cur_line, "Cannot create hash table");
 						return(false);
 					}
 				} else {
 					if (strcmp(buf, PMK_END_COMMAND) == 0) {
 						/* found end of command */
 						process = false;
-						if (process_cmd(&cmd, tabopts, gdata) == false) {
+						if (process_cmd(&cmd, tabopts, pgd) == false) {
 							/* command processing failed */
 							hash_destroy(tabopts);
 							return(false);
@@ -546,7 +548,7 @@ bool parse(FILE *fp, pmkdata *gdata) {
 					} else {
 						/* found another command before end of previous */
 						hash_destroy(tabopts);
-						errorf_line(pmkfile, cur_line, "%s not found", PMK_END_COMMAND);
+						errorf_line(pgd->pmkfile, cur_line, "%s not found", PMK_END_COMMAND);
 						return(false);
 					}
 				}
@@ -558,11 +560,11 @@ bool parse(FILE *fp, pmkdata *gdata) {
 
 			default :
 				if (process == false) {
-					errorf_line(pmkfile, cur_line, "Syntax error");
+					errorf_line(pgd->pmkfile, cur_line, "Syntax error");
 					return(false);
 				}
 
-				if (parse_opt(buf, tabopts, true) == false) {
+				if (parse_opt(buf, tabopts, pgd, true) == false) {
 					/* line number and error message already set */
 					hash_destroy(tabopts);
 					return(false);
@@ -574,14 +576,14 @@ bool parse(FILE *fp, pmkdata *gdata) {
 	if (process == true) {
 		/* found EOF before end of command */
 		hash_destroy(tabopts);
-		errorf_line(pmkfile, cur_line, "%s not found", PMK_END_COMMAND);
+		errorf_line(pgd->pmkfile, cur_line, "%s not found", PMK_END_COMMAND);
 		return(false);
 	}
 
 	if (feof(fp) == 0) {
 		/* error occuered before EOF */
 		hash_destroy(tabopts);
-		errorf_line(pmkfile, cur_line, "end of file not reached.");
+		errorf_line(pgd->pmkfile, cur_line, "end of file not reached.");
 		return(false);
 	}
 
@@ -598,13 +600,16 @@ bool parse(FILE *fp, pmkdata *gdata) {
 	returns true on success
 */
 
-bool parse_cmdline(char **val, int nbval, htable *ht) {
+bool parse_cmdline(char **val, int nbval, pmkdata *pgd) {
 	int	i;
 	bool	rval = true;
+	htable	*ht;
+
+	ht = pgd->htab;
 
 	for (i = 0 ; (i < nbval) && (rval == true) ; i++) {
 		/* parse option */
-		rval = parse_opt(val[i], ht, false);
+		rval = parse_opt(val[i], ht, pgd,  false);
 	}
 
 	return(rval);
@@ -645,6 +650,9 @@ void usage(void) {
 
 int main(int argc, char *argv[]) {
 	FILE	*fd;
+	bool	go_exit = false,
+		pmkfile_set = false,
+		basedir_set = false;
 	char	*pstr,
 		buf[MAXPATHLEN],
 		idxstr[4]; /* max 999 cmds, should be enough :) */
@@ -653,42 +661,70 @@ int main(int argc, char *argv[]) {
 		nbcd,
 		i,
 		chr;
-	bool	go_exit = false,
-		pmkfile_set = false;
 	pmkdata	gdata;
 	dynary	*da;
 
+	/* get current path */
+	getcwd(buf, sizeof(buf));
+
 	while (go_exit == false) {
-		chr = getopt(argc, argv, "f:hv");
+		chr = getopt(argc, argv, "b:f:hv");
 		if (chr == -1) {
 			go_exit = true;
 		} else {
 			switch (chr) {
+				case 'b' :
+					/* XXX check if path is valid */
+
+					if (uabspath(buf, optarg, gdata.basedir) == false) {
+						errorf("Cannot use basedir argument");
+						exit(1);
+					}
+					basedir_set = true;
+					break;
+
 				case 'f' :
 					/* filename */
-					if (strlcpy(pmkfile, optarg, sizeof(pmkfile)) >= sizeof(pmkfile)) {
+					if (uabspath(buf, optarg, gdata.pmkfile) == false) {
 						errorf("Cannot use file argument");
 						exit(1);
-					} else {
-						pmkfile_set = true;
 					}
+
+					/* path of pmkfile is also the srcdir base */
+					strlcpy(gdata.srcdir, dirname(gdata.pmkfile), sizeof(gdata.pmkfile)); /* XXX check ??? */
+
+					pmkfile_set = true;
 					break;
+
 				case 'v' :
 					/* display version */
 					fprintf(stdout, "%s\n", PREMAKE_VERSION);
 					exit(0);
 					break;
+
 				case 'h' :
 				case '?' :
 				default :
 					usage();
 					exit(1);
+					break;
 			}
 		}
 	}
 
 	argc = argc - optind;
 	argv = argv + optind;
+
+	/* set basedir if needed */
+	if (basedir_set == false) {
+		strlcpy(gdata.basedir, buf, sizeof(gdata.basedir));
+	}
+
+	/* set pmkfile and srcdir if needed */
+	if (pmkfile_set == false) {
+		strlcpy(gdata.srcdir, buf, sizeof(gdata.srcdir));
+		abspath(gdata.srcdir, PREMAKE_FILENAME, gdata.pmkfile); /* should not fail */
+	}
 
 	keyhash = hash_init(nbfunc);
 	if (keyhash != NULL) {
@@ -734,7 +770,7 @@ int main(int argc, char *argv[]) {
 
 	if (argc != 0) {
 		/* parse optional arguments that override pmk.conf */
-		if (parse_cmdline(argv, argc, gdata.htab) == true) {
+		if (parse_cmdline(argv, argc, &gdata) == true) {
 			nbcd = argc;
 		} else {
 			clean(&gdata);
@@ -746,19 +782,12 @@ int main(int argc, char *argv[]) {
 	}
 
 	/* open pmk file */
-	if (pmkfile_set == false) {
-		strlcpy(pmkfile, PREMAKE_FILENAME, sizeof(pmkfile)); /* should not fail */
-	}
-	fd = fopen(pmkfile, "r");
+	fd = fopen(gdata.pmkfile, "r");
 	if (fd == NULL) {
 		clean(&gdata);
-		errorf("while opening %s.", pmkfile);
+		errorf("while opening %s.", gdata.pmkfile);
 		exit(1);
 	}
-
-	/* init srcdir and basedir */
-	getcwd(gdata.basedir, sizeof(gdata.basedir)); /* XXX check ? */
-	abspath(gdata.basedir, dirname(pmkfile), gdata.srcdir); /* XXX check ? */
 
 	/* open log file */
 	if (pmk_log_open(PREMAKE_LOG) == false) {
@@ -775,7 +804,7 @@ int main(int argc, char *argv[]) {
 	pmk_log("Loaded %d overrided variables.\n", nbcd);
 	pmk_log("Total : %d variables.\n\n", hash_nbkey(gdata.htab));
 
-	pmk_log("Processing '%s' :\n", pmkfile);
+	pmk_log("Processing '%s' :\n", gdata.pmkfile);
 	if (parse(fd, &gdata) == false) {
 		/* an error occured while parsing */
 		rval = 1;
@@ -783,6 +812,11 @@ int main(int argc, char *argv[]) {
 		pmk_log("\nProcess templates :\n");
 
 		da = gdata.tlist;
+
+		if (da == NULL) {
+			errorf("no target given.");
+			exit(1);
+		}
 		for (i = 0 ; (i < da_usize(da)) && (rval == 0) ; i++) {
 			pstr = da_idx(da, i);
 			if (pstr != NULL) {

@@ -106,18 +106,18 @@ test_pmk: pmk
 	@echo "----------------------------------------"
 	@echo ""
 	@echo "-> Running pmk"
-	./pmk -f samples/pmkfile.sample
+	./pmk -b samples -f samples/pmkfile.sample
 	@echo ""
 	@echo "-> Dumping generated files"
 	@echo ""
-	@echo "Makefile.sample"
+	@echo "samples/Makefile.sample"
 	@echo "----------------------------------------"
-	@cat Makefile.sample
+	@cat samples/Makefile.sample
 	@echo "----------------------------------------"
 	@echo ""
-	@echo "config_sample.h"
+	@echo "samples/config_sample.h"
 	@echo "----------------------------------------"
-	@cat config_sample.h
+	@cat samples/config_sample.h
 	@echo "----------------------------------------"
 	@echo ""
 	@echo "samples/ac_config.h"
@@ -142,7 +142,7 @@ test_pmksetup: pmksetup
 test_clean:
 	@echo ""
 	@echo "=> Removing generated files"
-	rm -f Makefile.sample config_sample.h samples/ac_config.h pmk.log pmk.conf
+	rm -f samples/Makefile.sample samples/config_sample.h samples/ac_config.h pmk.log pmk.conf
 	@echo ""
 	@echo "=> End of cleaning."
 	@echo ""

@@ -1,3 +1,9 @@
+24 Jun 2003 mipsator
+ * added uabspath() in pathtools.
+ * added -b option to set basedir.
+ * moved pmkfile path in gdata.
+ * related misc ...
+
 22 Jun 2003 mipsator
  * added missing snapshots in Changelog.
  * fixed a bug in chkpath().

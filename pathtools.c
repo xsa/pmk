@@ -189,16 +189,21 @@ bool chkpath(char *path, char *buffer) {
 	buffer : MAXPATHLEN sized buffer that will contain relative path
 */
 
-void relpath(char *from, char *to, char *buffer) {
+bool relpath(char *from, char *to, char *buffer) {
 	bool	exit = false;
 	char	from_buf[MAXPATHLEN],
 		to_buf[MAXPATHLEN];
 
-	/* normalize path with realpath() XXX portability ? */
-	chkpath(from, from_buf);
+	/* check 'from' path */
+	if (chkpath(from, from_buf) != true) {
+		return(false);
+	}
 	from = from_buf;
 
-	chkpath(to, to_buf);
+	/* check 'to' path */
+	if (chkpath(to, to_buf) != true) {
+		return(false);
+	}
 	to = to_buf;
 
 	buffer[0] = CHAR_EOS;
@@ -241,6 +246,8 @@ void relpath(char *from, char *to, char *buffer) {
 		/* same path, return "." */
 		strlcpy(buffer, ".", MAXPATHLEN);
 	}
+
+	return(true);
 }
 
 /*
@@ -256,9 +263,35 @@ void relpath(char *from, char *to, char *buffer) {
 bool abspath(char *base, char *rel, char *buffer) {
 	char	tmp_buf[MAXPATHLEN]; /* XXX should be greater ? */
 
+	/* check if 'rel' is not relative */
+	if (*rel == CHAR_SEP) {
+		return(false);
+	}
+
 	strlcpy(tmp_buf, base, MAXPATHLEN);
 	strlcat(tmp_buf, "/", MAXPATHLEN);
 	strlcat(tmp_buf, rel, MAXPATHLEN);
 
 	return(chkpath(tmp_buf, buffer));
+}
+
+/*
+	provide an absolute path from a path with unknow type.
+
+	base : absolute base path
+	upath : path with unknow type (relative or absolute)
+	buffer : MAXPATHLEN sized buffer
+
+	NOTE : if upath is absolute then buffer is filled with
+	upath else the buffer will contain the computed path.
+*/
+
+bool uabspath(char *base, char *upath, char *buffer) {
+	if (*upath == CHAR_SEP) {
+		/* upath is absolute */
+		return(chkpath(upath, buffer));
+	} else {
+		/* upath is relative, we can call abspath */
+		return(abspath(base, upath, buffer));
+	}
 }
