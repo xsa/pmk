@@ -33,6 +33,11 @@
 #ifndef _PMK_FUNC_H_
 #define _PMK_FUNC_H_
 
+#include "premake.h"
+#include "pmk.h"
+#include "hash.h"
+
+
 typedef struct {
 	char	kw[MAX_CMD_NAME_LEN];
 	bool	(*fnp)(pmkcmd *, htable *);

@@ -33,9 +33,6 @@
 
 #include <stdio.h>
 
-#include "premake.h"
-#include "pmk.h"
-#include "hash.h"
 #include "func.h"
 
 

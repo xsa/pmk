@@ -34,6 +34,10 @@
 #ifndef _PMK_H_
 #define _PMK_H_
 
+#include "premake.h"
+#include "hash.h"
+
+
 /* prefix character used for commands */
 #define PMK_CHAR_COMMAND	'.'
 
