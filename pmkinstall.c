@@ -189,8 +189,8 @@ debugf("mask = %o", mask);
 				break;
 
 			default:
-				/* unknow perm */
-				errorf("unknow permission '%c'.", *pstr);
+				/* unknown perm */
+				errorf("unknown permission '%c'.", *pstr);
 				return(false);
 				break;
 		}
