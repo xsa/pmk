@@ -1,0 +1,7 @@
+# $Id$
+# override file example
+
+# do you like Clarke and Kubrik ?
+OS_NAME=HAL
+OS_VERSION=9000
+OS_ARCH=discovery

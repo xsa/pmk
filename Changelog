@@ -1,3 +1,7 @@
+26 Jun 2003 mipsator
+ * added override file sample.
+ * updated Makefile to use override file sample.
+
 25 Jun 2003 mipsator
  * updated pmk man page.
  * added option to load a file that override pmk.conf (not tested yet).
