@@ -43,7 +43,7 @@ pmksetup:
 -----------------------------------------------------------------------
 	!	clean temporary files on error
 	-	missing checks :
-xavier			~ ECHO_N, ECHO_C, ECHO_T in a specific proc for autoconf variables.
+xavier			+ ECHO_N, ECHO_C, ECHO_T in a specific proc for autoconf variables.
 		        . check install binary and use pmkinstall instead if not compatible.
 			- char unsigned (pmk ?)
 			- long double (pmk ?)

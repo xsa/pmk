@@ -54,6 +54,11 @@
 #define MAX_CONF_OPT		256	/* XXX temp maximum hash entries */
 #define PATH_STR_DELIMITER	':'	/* string delimiter of the $PATH variable */    
 
+#define	ECHO_EMPTY	""
+#define	ECHO_N		"-n"
+#define	ECHO_C		"\\c"
+#define	ECHO_NL		"\\n"
+#define	ECHO_HT		"\\t"
 
 /*
  * Look for location of some predefined binaries.
@@ -84,6 +89,7 @@ int	close_tmp_config(void);
 int	get_env_vars(htable *);
 int	get_binaries(htable *);
 int	predef_vars(htable *);
+int	check_echo(htable *);
 bool	byte_order_check(htable *pht);
 int	copy_config(const char *, const char *);
 int	keycomp(const void *, const void *);
