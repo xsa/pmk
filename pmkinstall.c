@@ -293,6 +293,7 @@ void usage(void) {
 int main(int argc, char *argv[]) {
 	struct group	*pg = NULL;
 	struct passwd	*pp = NULL;
+	struct stat	 sb;
 	bool		 create_dir = false,
 			 do_chown = false,
 			 do_strip = false,
@@ -304,7 +305,8 @@ int main(int argc, char *argv[]) {
 			 dir[MAXPATHLEN];
 	gid_t		 gid = (gid_t) -1;
 	int		 chr;
-	mode_t		 mode = DEFAULT_MODE;
+	mode_t		 mode = DEFAULT_MODE,
+			 tmode;
 	uid_t		 uid = (uid_t) -1;
 	
 	while (go_exit == false) {
@@ -410,6 +412,7 @@ debugf("uid = %d", uid);
 		do_chown = true;
 	}
 
+	/* if a group has been provided */
 	if (gstr != NULL) {
 		if (isdigit(*gstr) == 0) {
 			/* group name */
@@ -435,23 +438,33 @@ debugf("gid = %d", gid);
 	}
 
 	if (create_dir == false) {
+		/* check if target exists */
+		if (stat(dst, &sb) == 0) {
+			/* XXX many checks to do (is a directory, etc ...) */
+			tmode = sb.st_mode & S_IFDIR;
+			if (tmode == 0) {
+				/* not a directory */
+				unlink(dst);
+			}
+		}
+
 		/* copy file */
 		if (fcopy(src, dst, mode) == false) {
-			/* copy failed */
+			/* copy failed, error message already displayed */
 			exit(EXIT_FAILURE);
 		}
 	} else {
-		/* create path */
 #ifdef DEBUG_INST
 debugf("create dir '%s'", src);
 #endif
+		/* create path */
 		if (*src == CHAR_SEP) {
 			/* absolute path, copy */
 			strlcpy(dir, src, sizeof(dir)); /* XXX check */
 		} else {
 			/* relative, getting current directory */
 			if (getcwd(dir, sizeof(dir)) == NULL) {
-				errorf("Unable to get current directory");
+				errorf("unable to get current directory");
 				exit(EXIT_FAILURE);
 			}
 			/* appending path */
@@ -471,6 +484,7 @@ debugf("dir = '%s'", dir);
 		dst = dir;
 	}
 
+	/* strip binary if asked */
 	if (do_strip == true) {
 		strip(dst);
 	}
