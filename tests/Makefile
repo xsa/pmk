@@ -28,9 +28,9 @@ path: path_test.o
 clean:
 	rm -f *.o *_test *.core
 
-lint:
-.ifdef LINT_TARGET
-	lint $(LINT_TARGET)
-.else
-	@echo "LINT_TARGET not set."
-.endif
+#lint:
+#.ifdef LINT_TARGET
+#	lint $(LINT_TARGET)
+#.else
+#	@echo "LINT_TARGET not set."
+#.endif
