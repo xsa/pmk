@@ -43,7 +43,7 @@
 
 
 /* pmksetup specific version */
-#define PREMAKE_SUBVER_PMKSETUP	"8"
+#define PREMAKE_SUBVER_PMKSETUP	"9"
 
 #define PREMAKE_CONFIG_TMP	CONFDIR "/pmk.conf_XXXXXXXX"
 #define PREMAKE_CONFIG_MODE	S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH

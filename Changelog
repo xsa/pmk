@@ -1,3 +1,5 @@
+# PMK 0.9.2 release
+
 29 Jan 2005 mipsator
  * fixed the -v option of pmksetup.
  * fixed pmksetup behavior when the user has not the required privileges.
