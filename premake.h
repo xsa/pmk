@@ -48,7 +48,7 @@
 	MACOSX
 	Solaris			(not verified)
 	SunOS
-	HPUX
+	HP-UX
 	AIX			(not verified)
 	IRIX			(not verified)
 	OSF1
