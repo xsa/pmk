@@ -478,15 +478,16 @@ bool pmk_check_lib(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 
 bool pmk_check_config(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 	FILE	*rpipe;
+	bool	required = true,
+		rval = false;
 	char	pipebuf[TMP_BUF_LEN],
 		cfgpath[MAXPATHLEN],
 		cfgcmd[MAXPATHLEN],
 		*cfgtool,
 		*libvers,
 		*bpath,
-		*pstr;
-	bool	required = true,
-		rval = false;
+		*cflags,
+		*libs;
 
 	pmk_log("* Checking with config tool [%s]\n", cmd->label);
 
@@ -502,6 +503,20 @@ bool pmk_check_config(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 	if (bpath == NULL) {
 		errorf("BIN_PATH not available.");
 		return(false);
+	}
+
+	/* check for alternative variable for CFLAGS */
+	cflags = hash_get(ht, "CFLAGS");
+	if (cflags != NULL) {
+		/* init alternative variable */
+		hash_append(gdata->htab, cflags, "", " "); /* XXX check ? */
+	}
+
+	/* check for alternative variable for LIBS */
+	libs = hash_get(ht, "LIBS");
+	if (libs != NULL) {
+		/* init alternative variable */
+		hash_append(gdata->htab, libs, "", " "); /* XXX check ? */
 	}
 
 	if (depend_check(ht, gdata) == false) {
@@ -575,10 +590,9 @@ bool pmk_check_config(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 		pclose(rpipe);
 
 		/* check for alternative variable for CFLAGS */
-		pstr = hash_get(ht, "CFLAGS");
-		if (pstr != NULL) {
+		if (cflags != NULL) {
 			/* put result in special CFLAGS variable */
-			hash_add(gdata->htab, pstr, pipebuf); /* XXX check ? */
+			hash_append(gdata->htab, cflags, pipebuf, " "); /* XXX check ? */
 		} else {
 			/* put result in CFLAGS */
 			hash_append(gdata->htab, "CFLAGS", pipebuf, " "); /* XXX check ? */
@@ -593,10 +607,9 @@ bool pmk_check_config(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 		pclose(rpipe);
 
 		/* check for alternative variable for LIBS */
-		pstr = hash_get(ht, "LIBS");
-		if (pstr != NULL) {
+		if (libs != NULL) {
 			/* put result in special LIBS variable */
-			hash_add(gdata->htab, pstr, pipebuf); /* XXX check ? */
+			hash_append(gdata->htab, libs, pipebuf, " "); /* XXX check ? */
 		} else {
 			/* put result in LIBS */
 			hash_append(gdata->htab, "LIBS", pipebuf, " "); /* XXX check ? */
@@ -623,13 +636,14 @@ bool pmk_check_pkg_config(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 	FILE	*rpipe;
 	bool	required = true,
 		rval;
-	char	*target,
+	char	pipebuf[TMP_BUF_LEN],
+		pc_cmd[MAXPATHLEN],
+		pc_path[MAXPATHLEN],
+		*target,
 		*bpath,
 		*libvers,
-		*pstr,
-		pipebuf[TMP_BUF_LEN],
-		pc_cmd[MAXPATHLEN],
-		pc_path[MAXPATHLEN];
+		*cflags,
+		*libs;
 
 	pmk_log("* Checking for pkg-config [%s]\n", cmd->label);
 
@@ -645,6 +659,20 @@ bool pmk_check_pkg_config(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 	if (bpath == NULL) {
 		errorf("BIN_PATH not available.");
 		return(false);
+	}
+
+	/* check for alternative variable for CFLAGS */
+	cflags = hash_get(ht, "CFLAGS");
+	if (cflags != NULL) {
+		/* init alternative variable */
+		hash_append(gdata->htab, cflags, "", " "); /* XXX check ? */
+	}
+
+	/* check for alternative variable for LIBS */
+	libs = hash_get(ht, "LIBS");
+	if (libs != NULL) {
+		/* init alternative variable */
+		hash_append(gdata->htab, libs, "", " "); /* XXX check ? */
 	}
 
 	if (depend_check(ht, gdata) == false) {
@@ -728,10 +756,9 @@ bool pmk_check_pkg_config(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 		pclose(rpipe);
 
 		/* check for alternative variable for CFLAGS */
-		pstr = hash_get(ht, "CFLAGS");
-		if (pstr != NULL) {
+		if (cflags != NULL) {
 			/* put result in special CFLAGS variable */
-			hash_add(gdata->htab, pstr, pipebuf); /* XXX check ? */
+			hash_append(gdata->htab, cflags, pipebuf, " "); /* XXX check ? */
 		} else {
 			/* put result in CFLAGS */
 			hash_append(gdata->htab, "CFLAGS", pipebuf, " "); /* XXX check ? */
@@ -745,10 +772,9 @@ bool pmk_check_pkg_config(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 		pclose(rpipe);
 
 		/* check for alternative variable for LIBS */
-		pstr = hash_get(ht, "LIBS");
-		if (pstr != NULL) {
+		if (libs != NULL) {
 			/* put result in special LIBS variable */
-			hash_add(gdata->htab, pstr, pipebuf); /* XXX check ? */
+			hash_append(gdata->htab, libs, pipebuf, " "); /* XXX check ? */
 		} else {
 			/* put result in LIBS */
 			hash_append(gdata->htab, "LIBS", pipebuf, " "); /* XXX check ? */
