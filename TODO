@@ -31,7 +31,6 @@ common:
 			-	prog c++
 			~R	lib c
 			-	lib c++
-	+	move sample tests in samples directory
 
 
 pmk:
@@ -47,7 +46,6 @@ pmk:
 	-.	cache ? (hash table with binary location, ...)
 	-.	verify in CHECK_BINARY that program has executable right ?
 	-.	convert gdata.labl to pmk objects ?
-	+	checks hash_add() in autoconf.c (void func => bool func)
 
 
 pmksetup:
@@ -70,9 +68,7 @@ pmkscan
 
 pmkinstall
 -----------------------------------------------------------------------
-	+	handle multiple sources
-	+	directory as destination ?
-	-R	finish usage()
+	+	finish usage()
 	-.	backup option ?
 
 
@@ -86,11 +82,6 @@ pmkpc
 	~	missing options
 			- PMKPC_OPT_UNINST
 			- PMKPC_OPT_DEBUG
-			+ PMKPC_OPT_CFLAGS_ONLY_PATH
-			+ PMKPC_OPT_CFLAGS_ONLY_OTHER
-			+ PMKPC_OPT_LIBS_ONLY_LIB
-			+ PMKPC_OPT_LIBS_ONLY_PATH
-			+ PMKPC_OPT_LIBS_ONLY_OTHER
 			- PMKPC_OPT_VAR
 			- PMKPC_OPT_VAR_DEF
 			- PMKPC_OPT_VAR_PRNT
