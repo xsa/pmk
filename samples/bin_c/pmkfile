@@ -13,14 +13,14 @@ DEFINE {
 }
 
 # checking strlcpy() in string.h
-CHECK_INCLUDE(function_strlcpy) {
+CHECK_HEADER(function_strlcpy) {
 	REQUIRED = TRUE
 	NAME = "string.h"
 	FUNCTION = "strlcpy"
 }
 
 # checking strlcat() in string.h
-CHECK_INCLUDE(function_strlcat) {
+CHECK_HEADER(function_strlcat) {
 	REQUIRED = TRUE
 	NAME = "string.h"
 	FUNCTION = "strlcat"
