@@ -81,7 +81,7 @@
 
 #define PREMAKE_MAJOR		"0"
 #define PREMAKE_MINOR		"4"
-#define PREMAKE_SUB		"5" /* only used for snapshots */
+#define PREMAKE_SUB		"6" /* only used for snapshots */
 #define PREMAKE_VERSION		PREMAKE_MAJOR "." PREMAKE_MINOR
 
 #define PREMAKE_FILENAME	"pmkfile"
