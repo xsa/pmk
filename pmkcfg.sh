@@ -52,7 +52,7 @@ cp $template $compat
 # strlcpy check
 #
 
-echo -n "Checking strlcpy : "
+echo "Checking strlcpy : \c"
 
 cat > $testfile <<EOF
 #include <stdio.h>
@@ -89,7 +89,7 @@ rm -f $temporary $testfile $testbin
 # stdbool.h check
 #
 
-echo -n "Checking stdbool.h : "
+echo "Checking stdbool.h : \c"
 
 cat > $testfile <<EOF
 #include <stdbool.h>
