@@ -935,15 +935,8 @@ void verbosef(const char *fmt, ...) {
  * pmksetup(8) usage
  */
 void usage(void) {
-	/*fprintf(stderr, "Usage: %s [-hvV] [-a var=val] "*/
-	fprintf(stderr, "Usage: %s [-hvV] "
-		"[-r var] [-u var=val]\n", __progname);
-	/*fprintf(stderr, "\t-a var=val   Append to a variable in pmk.conf\n");*/
-	fprintf(stderr, "\t-r var       Remove a variable in pmk.conf\n");
-	fprintf(stderr, "\t-u var=val   Update a variable in pmk.conf\n");
-	fprintf(stderr, "\t-h           Display this help menu\n"); 
-	fprintf(stderr, "\t-v           Display version number\n");
-	fprintf(stderr, "\t-V           Verbose, display debugging messages\n");
+	fprintf(stderr, "Usage: %s [-hVv] "
+		"[-r variable] [-u variable=value]\n", __progname);
 	exit(EXIT_FAILURE);
 }
 
