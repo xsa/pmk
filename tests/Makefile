@@ -11,7 +11,7 @@ LDFLAGS?=
 
 #LINT_TARGET=	da_test.c
 
-all: hash dynary
+all: hash dynary path
 
 .c.o:
 	$(CC) $(CFLAGS) -c $<
@@ -21,6 +21,9 @@ hash: hash_test.o
 
 dynary: da_test.o
 	$(CC) -o da_test $(LDFLAGS) da_test.o
+
+path: path_test.o
+	$(CC) -o path_test $(LDFLAGS) path_test.o
 
 clean:
 	rm -f *.o *_test *.core
