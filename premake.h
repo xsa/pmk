@@ -87,8 +87,9 @@
 #define PREMAKE_SNAP		"5" /* only used for snapshots */
 #define PREMAKE_VERSION		PREMAKE_MAJOR "." PREMAKE_MINOR
 
-#define PREMAKE_FILENAME	"pmkfile"
 #define PREMAKE_CONFIG		"pmk.conf"
+#define PREMAKE_FILENAME	"pmkfile"
+#define PREMAKE_PKGFILE		"pkgfile"
 #define PREMAKE_LOG		"pmk.log"
 
 #define PREMAKE_CONFIG_PATH	CONFDIR "/" PREMAKE_CONFIG 
@@ -99,7 +100,7 @@
 	pmk.conf keys
 */
 
-/* new key names (see also pmksetup.h) */
+/* key names (see also pmksetup.h) */
 #define PMKCONF_BIN_AR		"BIN_AR"
 #define PMKCONF_BIN_AWK		"BIN_AWK"
 #define PMKCONF_BIN_CAT		"BIN_CAT"
@@ -132,6 +133,10 @@
 #define PMKCONF_AC_ECHO_C	"AC_ECHO_C"
 #define PMKCONF_AC_ECHO_T	"AC_ECHO_T"
 
+
+/* specific values */
+#define PMKVAL_BIN_PKGCONFIG	"pkg-config"
+
 /* prefix character used for comments */
 #define CHAR_COMMENT		'#'
 
@@ -152,14 +157,14 @@
 #define MAX_ERR_MSG_LEN		256
 
 /* maximal size of a command name */
-#define CMD_LEN		32
+#define CMD_LEN			32
 
 /* maximal size of a command label */
-#define LABEL_LEN	64
+#define LABEL_LEN		64
 
 /* maximal sizes for command pair of option (name and value) */
-#define OPT_NAME_LEN	64
-#define OPT_VALUE_LEN	MAXPATHLEN /* can contain a path */
+#define OPT_NAME_LEN		64
+#define OPT_VALUE_LEN		MAXPATHLEN /* can contain a path */
 
 /* maximal size of a line */
 #define MAX_LINE_LEN		MAXPATHLEN + OPT_NAME_LEN

@@ -435,15 +435,13 @@ bool pmk_log(const char *fmt, ...) {
 	dst_file : filename of the copy
 
 	returns true on success
-
-	XXX should raw copy in the future
 */
 
 bool copy_text_file(char *src_file, char *dst_file) {
 	FILE	*fp_src,
 		*fp_dst;
 	bool	 rval;
-	char	 buf[1024]; /* XXX length ? */
+	char	 buf[TMP_BUF_LEN];
 
 	fp_src = fopen(src_file, "r");
 	if (fp_src == NULL) {

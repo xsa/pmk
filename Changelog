@@ -1,5 +1,7 @@
 06 Dec 2003  mipsator
  * moved fcopy() from pmkinstall to common.
+ * add many missing code that was marked with XXX tags.
+	(autoconf.c, common.c, func.c, functool.c)
 
 # snapshot 0.7.5
 

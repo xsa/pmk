@@ -652,6 +652,8 @@ char *process_string(char *pstr, htable *pht) {
 	pht : hash table
 	key : key where to append
 	value : value to append
+
+	return : boolean
 */
 
 bool single_append(htable *pht, char *key, char *value) {

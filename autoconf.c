@@ -77,15 +77,22 @@ bool ac_parse_config(pmkdata *pgd) {
 	fpath = pgd->ac_file;
 
 	/* compute full path */
-	abspath(pgd->srcdir, fpath, fsrc); /* XXX check ? */
-	abspath(pgd->basedir, fpath, fname); /* XXX check ? */
+	if (abspath(pgd->srcdir, fpath, fsrc) == false) {
+		errorf("failed to compute absolute path for '%s' (srcdir).", fpath);
+		return(false);
+	}
+
+	if (abspath(pgd->basedir, fpath, fname) == false) {
+		errorf("failed to compute absolute path for '%s' (basedir).", fpath);
+		return(false);
+	}
 
 	fp_in = fopen(fsrc, "r");
 	if (fp_in == NULL) {
 		return(false);
 	}
 
-	/* XXX TODO use a define for the temporary file ? mkstemp ? */
+	/* open temporary file ? */
 	fp_out = fopen(PMK_TMP_AC_CONF, "w");
 	if (fp_out == NULL) {
 		fclose(fp_in);
@@ -144,8 +151,6 @@ bool ac_parse_config(pmkdata *pgd) {
 		unlink(PMK_TMP_AC_CONF);
 		return(false);
 	}
-
-	/* XXX TODO make path ? */
 
 	/* erase orig and copy new one */
 	unlink(fname);
@@ -272,8 +277,7 @@ void ac_set_variables(htable *pht) {
 	hash_add(pht, "INSTALL_STRIP_PROGRAM", strdup("${SHELL} $(install_sh) -c -s"));
 
 /*
-	XXX
-	well i dunno if the following really need to be full compatible with autoconf 
+	well i dunno if the following really needs to be full compatible with autoconf 
 */
 	pstr = (char *) hash_get(pht, "OS_ARCH");
 	hash_add(pht, "host_cpu", strdup(pstr));
