@@ -151,7 +151,7 @@ We'll see later how to use an alternate variable.
 Let's say that our package has the gtkhello.c source that builds a gtk
 version of our hello program. That said, we need to check if gtk is present
 on the system. We have two possibilities to do that: first by using
-pkg-config or second the second one by checking the library.
+pkg-config or the second one by checking the library.
 
 We are going to learn how to check gtk via pkgconfig support:
 
