@@ -35,10 +35,10 @@
 
 
 #include <errno.h>
-#include <libgen.h>
 #include <sys/param.h>
 
-#include "string.h"
+#include "pmk_string.h"
+#include "libgen.h"
 
 char *
 basename(path)
