@@ -7,7 +7,8 @@ pmk :
 ~ finish pmk(1)
 ~ pmkfile(5)
 - pkgconfig test
-- fill gdata with checks results
+~ fill gdata with checks results
+~ compatibility with autoconf
 
 pmksetup :
 ~ pmk.conf(5)
