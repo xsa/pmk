@@ -150,6 +150,32 @@ void *po_get_data(pmkobj *po) {
 	XXX
 */
 
+char *po_get_str(pmkobj *po) {
+	if (po != NULL) {
+		if (po->type == PO_STRING) {
+			return(po->data);
+		}
+	}
+	return(NULL);
+}
+
+/*
+	XXX
+*/
+
+dynary *po_get_list(pmkobj *po) {
+	if (po != NULL) {
+		if (po->type == PO_LIST) {
+			return(po->data);
+		}
+	}
+	return(NULL);
+}
+
+/*
+	XXX
+*/
+
 void po_free(pmkobj *po) {
 	if (po != NULL) {
 		switch (po->type) {
