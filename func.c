@@ -51,7 +51,7 @@ prskw	kw_pmkfile[] = {
 		{"DEFINE",		PMK_TOK_DEFINE, PRS_KW_NODE, PMK_TOK_SETVAR},
 		{"SETTINGS",		PMK_TOK_SETNGS, PRS_KW_NODE, PMK_TOK_SETPRM},
 		{"IF",			PMK_TOK_IFCOND,	PRS_KW_NODE, PRS_TOK_NULL},
-		{"SWITCHES",		PMK_TOK_SWITCH, PRS_KW_CELL, PRS_TOK_NULL}, /* XXX will be node */
+		{"SWITCHES",		PMK_TOK_SWITCH, PRS_KW_CELL, PRS_TOK_NULL},
 		{"CHECK_BINARY",	PMK_TOK_CHKBIN, PRS_KW_CELL, PRS_TOK_NULL},
 		{"CHECK_HEADER",	PMK_TOK_CHKINC, PRS_KW_CELL, PRS_TOK_NULL},
 		{"CHECK_LIB",		PMK_TOK_CHKLIB, PRS_KW_CELL, PRS_TOK_NULL},
@@ -141,10 +141,12 @@ bool process_node(prsnode *pnode, pmkdata *pgd) {
 }
 
 /*
-	all the following functions have the same parameters : <== XXXX eeeek not true
+	node functions
+	
+	these functions have the following parameters:
 
 	cmd : command structure
-	ht : command options
+	pnode : node structure 
 	pgd : global data
 
 	returns bool
@@ -188,6 +190,21 @@ bool pmk_ifcond(pmkcmd *cmd, prsnode *pnode, pmkdata *pgd) {
 
 	return(true);
 }
+
+
+/*
+	cell functions
+	
+	these functions have the following parameters:
+
+	cmd : command structure
+	ht : command options
+	pgd : global data
+
+	returns bool
+
+*/
+
 
 /*
 	switches
@@ -439,10 +456,16 @@ bool pmk_check_header(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 		/* check for alternative variable for CFLAGS */
 		if (cflags != NULL) {
 			/* put result in special CFLAGS variable */
-			single_append(pgd->htab, cflags, strdup(inc_path)); /* XXX check */
+			if (single_append(pgd->htab, cflags, strdup(inc_path)) == false) {
+				errorf("failed to append '%s' in '%s'.", inc_path, cflags);
+				return(false);
+			}
 		} else {
 			/* put result in CFLAGS */
-			single_append(pgd->htab, "CFLAGS", strdup(inc_path)); /* XXX check */
+			if (single_append(pgd->htab, "CFLAGS", strdup(inc_path)) == false) {
+				errorf("failed to append '%s' in CFLAGS.", inc_path);
+				return(false);
+			}
 		}
 
 		rval = true;
@@ -549,8 +572,8 @@ bool pmk_check_lib(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 		pmk_log("\tUse %s language with %s compiler.\n", pld->name, pld->comp);
 	}
 
-	/* check for alternative variable for LIBS */
-	main_libs = hash_get(pgd->htab, "LIBS"); /* XXX check useful ? */
+	/* get actual content of LIBS, no need to check as it is initialised */
+	main_libs = hash_get(pgd->htab, "LIBS");
 
 	tfp = fopen(TEST_FILE_NAME, "w");
 	if (tfp != NULL) {
@@ -587,11 +610,14 @@ bool pmk_check_lib(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 		/* check for alternative variable for LIBS */
 		if (libs != NULL) {
 			/* put result in special LIBS variable */
-			single_append(pgd->htab, libs, strdup(lib_buf)); /* XXX check */
+			if (single_append(pgd->htab, libs, strdup(lib_buf)) == false) {
+				errorf("failed to append '%s' in '%s'.", lib_buf, libs);
+				return(false);
+			}
 		} else {
 			/* put result in LIBS */
 			if (single_append(pgd->htab, "LIBS", strdup(lib_buf)) == false) {
-				errorf("hash add failed");
+				errorf("failed to append '%s' in LIBS.", lib_buf);
 				return(false);
 			}
 		}
@@ -773,10 +799,16 @@ bool pmk_check_config(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 		/* check for alternative variable for CFLAGS */
 		if (cflags != NULL) {
 			/* put result in special CFLAGS variable */
-			hash_append(pgd->htab, cflags, strdup(pipebuf), " "); /* XXX check ? */
+			if (single_append(pgd->htab, cflags, strdup(pipebuf)) == false) {
+				errorf("failed to append '%s' in '%s'.", pipebuf, cflags);
+				return(false);
+			}
 		} else {
 			/* put result in CFLAGS */
-			hash_append(pgd->htab, "CFLAGS", strdup(pipebuf), " "); /* XXX check ? */
+			if (single_append(pgd->htab, "CFLAGS", strdup(pipebuf)) == false) {
+				errorf("failed to append '%s' in CFLAGS.", pipebuf);
+				return(false);
+			}
 		}
 	}
 
@@ -794,10 +826,16 @@ bool pmk_check_config(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 		/* check for alternative variable for LIBS */
 		if (libs != NULL) {
 			/* put result in special LIBS variable */
-			hash_append(pgd->htab, libs, strdup(pipebuf), " "); /* XXX check ? */
+			if (single_append(pgd->htab, libs, strdup(pipebuf)) == false) {
+				errorf("failed to append '%s' in '%s'.", pipebuf, libs);
+				return(false);
+			}
 		} else {
 			/* put result in LIBS */
-			hash_append(pgd->htab, "LIBS", strdup(pipebuf), " "); /* XXX check ? */
+			if (single_append(pgd->htab, "LIBS", strdup(pipebuf)) == false) {
+				errorf("failed to append '%s' in LIBS.", pipebuf);
+				return(false);
+			}
 		}
 	}
 
@@ -840,16 +878,19 @@ bool pmk_check_pkg_config(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 
 	/* try to get pkg-config path from pmk.conf setting */
 	pc_path = (char *) hash_get(pgd->htab, PMKCONF_BIN_PKGCONFIG);
+
+	/* nothing in pmk.conf, hope it is obsolete
+		and look for it in the binary path */
 	if (pc_path == NULL) {
-		/* nothing in pmksetup hope pmk.conf is obsolete
-			and check in the path */
+		/* get binary path */
 		bpath = hash_get(pgd->htab, PMKCONF_PATH_BIN);
 		if (bpath == NULL) {
 		        errorf("%s not available.", PMKCONF_PATH_BIN);
 			return(false);
 		}
-		/* XXX ugly here, should clean ... */
-		if (get_file_path("pkg-config", bpath, pc_buf, sizeof(pc_buf)) == true) {
+
+		/* looking for it in the path */
+		if (get_file_path(PMKVAL_BIN_PKGCONFIG, bpath, pc_buf, sizeof(pc_buf)) == true) {
 			pc_path = pc_buf;
 		}
 	}
@@ -969,10 +1010,16 @@ bool pmk_check_pkg_config(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 		/* check for alternative variable for CFLAGS */
 		if (cflags != NULL) {
 			/* put result in special CFLAGS variable */
-			hash_append(pgd->htab, cflags, strdup(pipebuf), " "); /* XXX check ? */
+			if (single_append(pgd->htab, cflags, strdup(pipebuf)) == false) {
+				errorf("failed to append '%s' in '%s'.", pipebuf, cflags);
+				return(false);
+			}
 		} else {
 			/* put result in CFLAGS */
-			hash_append(pgd->htab, "CFLAGS", strdup(pipebuf), " "); /* XXX check ? */
+			if (single_append(pgd->htab, "CFLAGS", strdup(pipebuf)) == false) {
+				errorf("failed to append '%s' in CFLAGS.", pipebuf);
+				return(false);
+			}
 		}
 	}
 
@@ -989,10 +1036,16 @@ bool pmk_check_pkg_config(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 		/* check for alternative variable for LIBS */
 		if (libs != NULL) {
 			/* put result in special LIBS variable */
-			hash_append(pgd->htab, libs, strdup(pipebuf), " "); /* XXX check ? */
+			if (single_append(pgd->htab, libs, strdup(pipebuf)) == false) {
+				errorf("failed to append '%s' in '%s'.", pipebuf, libs);
+				return(false);
+			}
 		} else {
 			/* put result in LIBS */
-			hash_append(pgd->htab, "LIBS", strdup(pipebuf), " "); /* XXX check ? */
+			if (single_append(pgd->htab, "LIBS", strdup(pipebuf)) == false) {
+				errorf("failed to append '%s' in LIBS.", pipebuf);
+				return(false);
+			}
 		}
 	}
 
@@ -1183,6 +1236,21 @@ bool pmk_check_variable(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 	return(rval);
 }
 
+
+/*
+	option functions
+	
+	these functions have the following parameters:
+
+	cmd : command structure
+	popt : option structure 
+	pgd : global data
+
+	returns bool
+
+*/
+
+
 /*
 	set parameter 
 */
@@ -1208,7 +1276,10 @@ bool pmk_set_parameter(pmkcmd *cmd, prsopt *popt, pmkdata *pgd) {
 		if (*pstr != CHAR_EOS) {
 			pgd->ac_file = strdup(pstr);
 			pmk_log("\t\tSet file to '%s'.\n", pstr);
-			hash_add(pgd->htab, AC_VAR_DEF, strdup(AC_VALUE_DEF)); /* XXX TODO check */
+			if (hash_add(pgd->htab, AC_VAR_DEF, strdup(AC_VALUE_DEF)) == HASH_ADD_FAIL) {
+				errorf("failed to add value for '%s' in hash table.", AC_VAR_DEF);
+				return(false);
+			}
 			pmk_log("\t\tSet '%s' value to '%s'.\n", AC_VAR_DEF, AC_VALUE_DEF);
 		}
 
@@ -1274,6 +1345,7 @@ bool pmk_set_parameter(pmkcmd *cmd, prsopt *popt, pmkdata *pgd) {
 
 bool pmk_set_variable(pmkcmd *cmd, prsopt *popt, pmkdata *pgd) {
 	char	*value;
+	int	 hval;
 
 /* XXX better way to do (specific hash for override)
 	if (hash_get(pgd->htab, popt->key) == NULL) {
@@ -1281,9 +1353,26 @@ bool pmk_set_variable(pmkcmd *cmd, prsopt *popt, pmkdata *pgd) {
 		/* process value string */
 		value = process_string(po_get_str(popt->value), pgd->htab);
 		if (value != NULL) {
-			hash_add(pgd->htab, popt->key, value); /* no need to strdup */
-			/* XXX TODO check return for message : defined or redefined */
-			pmk_log("\tdefined '%s' variable.\n", popt->key);
+			hval = hash_add(pgd->htab, popt->key, value); /* no need to strdup */
+			/* check return for message : defined or redefined */
+			switch (hval) {
+				case HASH_ADD_FAIL:
+					errorf("failed to set '%s' variable.");
+					return(false);
+					break;
+
+				case HASH_ADD_OKAY:
+				case HASH_ADD_COLL:
+					pmk_log("\tdefined");
+					break;
+
+				case HASH_ADD_:
+					pmk_log("\tredefined");
+					break;
+
+			}
+			/* remaining part of the message */
+			pmk_log(" '%s' variable.\n", popt->key);
 		} else {
 			pmk_log("\tFailed processing of '%s'.\n", popt->key);
 			return(false);
