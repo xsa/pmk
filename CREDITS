@@ -13,6 +13,8 @@ Patches:
 		(dynarray rewrite, many fixes)
 	- Pedro Martelletto
 		(check_mode() improvement)
+	- Marek Habersack
+		(many segfault fixes)
 
 Bug report:
 	- Marek Habersack
