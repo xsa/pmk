@@ -1,3 +1,8 @@
+15 Dec 2003  mipsator
+ * added gen_test_file() to automate test file generation in detect. 
+ * improved detect_compiler() to store data about the compiler.
+ * updated use of detect_compiler() in pmk.
+
 # snapshot 0.7.6
 
 12 Dec 2003  mipsator

@@ -46,74 +46,56 @@
 #define CC_TEST_BIN	TMPDIR "/cc_test_bin"
 #define CC_TEST_FORMAT	"%s -o %s %s >%s 2>&1"
 
-#define COMPILER_TEST	\
-	"#include <stdio.h>\n" \
-	"/* GNU gcc */\n" \
-	"#ifdef __GNUC__\n" \
-	"#define CC_ID\t\"gnu_cc\"\n" \
-	"#define CC_V\t__GNUC__\n" \
-	"#define CC_VMIN\t__GNUC_MINOR__\n" \
+/* compiler ids */
+#define CI_UNKNOWN	0
+#define CI_TENDRA	1
+#define CI_GNUC		2
+#define CI_SUNPRO_C	3
+#define CI_SUNPRO_CXX	4
+#define CI_COMPAQ_C	5
+#define CI_COMPAQ_CXX	6
+#define CI_HP_ANSI_C	7
+#define CI_HP_ANSI_CXX	8
+#define CI_IBM_XLC	9
+#define CI_INTEL	10
+#define CI_SGI_MPRO	11
+
+/* compiler descr strings */
+#define CD_UNKNOWN	"Unknown"
+#define CD_TENDRA	"TenDRA"
+#define CD_GNUC		"GNU gcc"
+#define CD_SUNPRO_C	"Sun Workshop C"
+#define CD_SUNPRO_CXX	"Sun Workshop C++"
+#define CD_COMPAQ_C	"Compaq C"
+#define CD_COMPAQ_CXX	"Compaq C++"
+#define CD_HP_ANSI_C	"HP Ansi C"
+#define CD_HP_ANSI_CXX	"HP Ansi C++"
+#define CD_IBM_XLC	"IBM xlC"
+#define CD_INTEL	"Intel"
+#define CD_SGI_MPRO	"SGI MIPSpro"
+
+/* shared libs compiler flags */
+
+#define SCF_GNU		"-fPIC"
+#define SCF_SYSV	"-Kpic"
+#define SCF_HP		"+Z"
+
+
+/* header of test code */
+#define COMP_TEST_HEADER \
+	"#include <stdio.h>\n\n"
+
+/* descr macro c_id ver_macro */
+#define COMP_TEST_FORMAT \
+	"/* %s */\n" \
+	"#ifdef %s\n" \
+	"#define CC_ID\t%d\n" \
+	"#define CC_V\t%s\n" \
 	"#endif\n" \
-	"\n" \
-	"/* TenDRA */\n" \
-	"#ifdef __TenDRA__\n" \
-	"#define CC_ID\t\"tendra_cc\"\n" \
-	"#endif\n" \
-	"\n" \
-	"/* Sun workshop C compiler */\n" \
-	"#ifdef __SUNPRO_C\n" \
-	"#define CC_ID\t\"sun_cc\"\n" \
-	"#define CC_V\t__SUNPRO_C\n" \
-	"#endif\n" \
-	"\n" \
-	"/* Sun workshop C++ compiler */\n" \
-	"#ifdef __SUNPRO_CC\n" \
-	"#define CC_ID\t\"sun_cxx\"\n" \
-	"#define CC_V\t__SUNPRO_CC\n" \
-	"#endif\n" \
-	"\n" \
-	"/* Compaq c */\n" \
-	"#ifdef __DECC\n" \
-	"#define CC_ID\t\"compaq_cc\"\n" \
-	"#define CC_V\t__DEC_VER\n" \
-	"#endif\n" \
-	"\n" \
-	"/* Compaq c++ */\n" \
-	"#ifdef __DECCXX\n" \
-	"#define CC_ID\t\"compaq_cxx\"\n" \
-	"#define CC_V\t__DECXX_VER\n" \
-	"#endif\n" \
-	"\n" \
-	"/* HP ansi C */\n" \
-	"#ifdef __HP_cc\n" \
-	"#define CC_ID\t\"hp_cc\"\n" \
-	"#endif\n" \
-	"\n" \
-	"#ifdef __HP_aCC\n" \
-	"#define CC_ID\t\"hp_cxx\"\n" \
-	"#define CC_V\t__HP_aCC\n" \
-	"#endif\n" \
-	"\n" \
-	"/* IBM xlC */\n" \
-	"#ifdef __xlC__\n" \
-	"#define CC_ID\t\"ibm_cc\"\n" \
-	"#define CC_V\t__xlC__\n" \
-	"#endif\n" \
-	"\n" \
-	"/* __IBMC__ */\n" \
-	"\n" \
-	"/* intel compiler */\n" \
-	"#ifdef __INTEL_COMPILER\n" \
-	"#define CC_ID\t\"intel_cc\"\n" \
-	"#define CC_V\t__INTEL_COMPILER\n" \
-	"#endif\n" \
-	"\n" \
-	"/* sgi compiler */\n" \
-	"#ifdef __sgi\n" \
-	"#define CC_ID\t\"sgi_cc\"\n" \
-	"#define CC_V\t__COMPILER_VERSION\n" \
-	"#endif\n" \
-	"\n" \
+	"\n"
+
+/*  */
+#define COMP_TEST_FOOTER \
 	"/* unknown compiler found */\n" \
 	"#ifndef CC_ID\n" \
 	"#define CC_ID\t\"unknown\"\n" \
@@ -125,15 +107,30 @@
 	"#endif\n" \
 	"\n" \
 	"int main() {\n" \
-	"\tprintf(\"%%s %%d\", CC_ID, CC_V);\n" \
-	"#ifdef CC_VMIN\n" \
-	"\tprintf(\".%%d\", CC_VMIN);\n" \
-	"#endif\n" \
-	"\tprintf(\"\\n\");\n" \
+	"/* compiler id */\n" \
+	"\tprintf(\"%%d\\n\", CC_ID);\n" \
+	"/* compiler version */\n" \
+	"\tprintf(\"%%d\\n\", CC_V);\n" \
 	"\treturn(0);\n" \
 	"}\n"
 
 
-bool	detect_compiler(char *, pmkdata *);
+typedef struct {
+	unsigned int	 c_id;
+	char		*descr,
+			*c_macro,
+			*v_macro;
+} comp_cell;
+
+typedef struct {
+	char	descr[255],
+		version[255];
+	int	index;
+} comp_data;
+
+
+void	gen_test_file(FILE *);
+int	cid_to_idx(unsigned int);
+bool	detect_compiler(char *, char *, comp_data *);
 
 #endif /* _DETECT_H_ */
