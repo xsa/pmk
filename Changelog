@@ -1,3 +1,7 @@
+13 Nov 2003 mipsator
+ * removed err() and errx() calls and replaced by errof() in pmkinstall.
+ * removed paths.h in pmkinstall.
+
 # snapshot 0.7.2
 
 10 Nov 2003 mipsator

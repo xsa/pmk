@@ -51,7 +51,7 @@ P_OBJS=		autoconf.o common.o compat.o dynarray.o func.o functool.o \
 		hash.o parse.o pmk_obj.o pathtools.o $(PREMAKE).o
 S_OBJS=		dynarray.o common.o compat.o hash.o parse.o pmk_obj.o $(SETUP).o
 SC_OBJS=	dynarray.o common.o compat.o hash.o parse.o pmk_obj.o $(SCAN).o
-I_OBJS=         $(INST).o
+I_OBJS=         dynarray.o common.o $(INST).o
 
 .c.o:
 	$(CC) $(PMKCFLAGS) -c $<

@@ -42,6 +42,7 @@
 #define NOCHANGEBITS	(UF_IMMUTABLE | UF_APPEND | SF_IMMUTABLE | SF_APPEND)
 #define BACKUP_SUFFIX	".old"
 
+#define PATH_DEV_NULL	"/dev/null"
 
 void	copy(int, char *, int, char *, off_t, int);
 int	compare(int, const char *, size_t, int, const char *, size_t);
