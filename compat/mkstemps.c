@@ -37,6 +37,8 @@
 #include <sys/stat.h>
 #include <sys/time.h>
 #include <fcntl.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #define MKSTEMPS_REPLACE_CHAR	'X'
 
@@ -75,7 +77,7 @@ int mkstemps(char *template, int suffixlen) {
 	/* intialise random() */
 	len = strlen(subst);
 	gettimeofday(&tv, NULL);
-	srandom((unsigned int) template * tv.tv_sec + tv.tv_usec); /* XXX make better */
+	srandom(tv.tv_sec * tv.tv_usec);
 
 	/* lets go replacing the stuff */
 	for (p = start ; p <= end ; p++) {
