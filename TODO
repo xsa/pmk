@@ -1,6 +1,5 @@
 common :
 - write specs somewhere in a draft
-- check if pointer is freed on HASH_ADD_FAIL
 - improve parser to parse variables, quotation marks and spaces near operator.
 
 pmk :

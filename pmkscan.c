@@ -299,16 +299,15 @@ int main(int argc, char *argv[]) {
 #endif
 
 	for (i = 0 ; i < g.gl_pathc ; i++) {
-#ifdef DEBUG
-		printf("[%d] '%s'\n", i, g.gl_pathv[i]);
-#endif
+		printf("\t'%s' :", g.gl_pathv[i]);
 		parse_c_file(g.gl_pathv[i], &sd, pfdata);
+		printf("\tdone.\n");
 	}
 
 	globfree(&g);
-	printf("Parsing Ok\n\n");
+	printf("Parsing Ok.\n\n");
 
-	printf("Generating scan result");
+	printf("Generating scan result ...\n");
 	output_file(PMKSCAN_OUTPUT, pfdata);
 	printf("Saved as '%s'\n", PMKSCAN_OUTPUT);
 
