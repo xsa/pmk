@@ -81,5 +81,7 @@ char	*get_comp_path(htable *, char *);
 char	*parse_idtf(char *, char *, size_t);
 char	*process_string(char *, htable *);
 bool	 single_append(htable *, char *, char *);
+bool	 check_cfgt_data(pmkdata *pgd);
 
 #endif /* _PMK_FUNCTOOL_H_ */
+

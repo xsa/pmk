@@ -789,6 +789,12 @@ bool pmk_check_config(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 		}
 	}
 
+	/* check if config tool data is loaded */
+	if (check_cfgt_data(pgd) == false) {
+		errorf("unable to load config tool data.");
+		return(false);
+	}
+
 	/* check if specific tool option exists */
 	pmk_log("\tUse specific options : ");
 	pcc = cfgtcell_get_cell(pgd->cfgt, cfgtool);
@@ -1014,6 +1020,12 @@ bool pmk_check_pkg_config(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 		bpath = hash_get(pgd->htab, PMKCONF_PATH_BIN);
 		if (bpath == NULL) {
 		        errorf("%s not available.", PMKCONF_PATH_BIN);
+			return(false);
+		}
+
+		/* check if config tool data is loaded */
+		if (check_cfgt_data(pgd) == false) {
+			errorf("unable to load config tool data.");
 			return(false);
 		}
 

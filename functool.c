@@ -720,3 +720,22 @@ bool single_append(htable *pht, char *key, char *value) {
 	return(true);
 }
 
+/*
+	check if config tool data is loaded and try to load it if not done
+
+	pgd : global data structure
+
+	return : boolean
+*/
+
+bool check_cfgt_data(pmkdata *pgd) {
+	if (pgd->cfgt == NULL) {
+		pgd->cfgt = parse_cfgt_file();
+		if (pgd->cfgt == NULL) {
+			return(false);
+		}
+	}
+
+	return(true);
+}
+

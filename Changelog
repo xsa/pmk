@@ -2,6 +2,7 @@
  * added more C++ support in some checks (handle CXXFLAGS when needed).
  * improved some checks to be more verbose on used variables.
  * removed a fix into check_config() that was wrong.
+ * added check_cfgt_data() to load config tool data only when needed.
 
 # snapshot 0.7.10
 
