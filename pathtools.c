@@ -241,3 +241,23 @@ void relpath(char *from, char *to, char *buffer) {
 		strlcpy(buffer, ".", MAXPATHLEN);
 	}
 }
+
+/*
+	create a "valid" absolute path
+
+	base : absolute base path
+	rel : relative path from the base
+	buffer : MAXPATHLEN buffer that will contain resulting absolute path
+
+	returns true on success
+*/
+
+bool abspath(char *base, char *rel, char *buffer) {
+	char	tmp_buf[MAXPATHLEN]; /* XXX should be greater ? */
+
+	strlcpy(tmp_buf, base, MAXPATHLEN);
+	strlcat(tmp_buf, "/", MAXPATHLEN);
+	strlcat(tmp_buf, rel, MAXPATHLEN);
+
+	return(chkpath(tmp_buf, buffer));
+}
