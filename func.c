@@ -1107,6 +1107,7 @@ bool pmk_set_parameter(pmkcmd *cmd, prsopt *popt, pmkdata *gdata) {
 		if (pstr != NULL) {
 			/* check if provided lang is supported */
 			if (check_lang(pstr) != NULL) {
+				gdata->lang = strdup(pstr);
 				pmk_log("\t\tSet to '%s'.\n", pstr);
 				rval = true;
 			} else {
