@@ -74,10 +74,12 @@ BIN_INSTALL:"/usr/local/bin/install"
 .Sh FAMILY CLASSES
 Assignements can be classed in different families.
 .Bl -tag -width PATH_*
+.It Ev AC_*
+Compatibility with autoconf.
 .It Ev BIN_*
 This class is used for binary paths.
 .It Ev HW_*
-Hardware related data like for example byte order.
+Hardware related data like for example byte order or cpu features.
 .It Ev PATH_*
 Specific paths family.
 .It Ev OS_*
@@ -95,42 +97,60 @@ configuration file
 .Sh EXAMPLES
 A typical pmk.conf might appear as follows:
 .Bd -literal
-OS_NAME="OpenBSD"
-OS_VERSION="3.6"
-OS_ARCH="i386"
-HW_BYTEORDER = "LITTLE_ENDIAN"
+# autoconf compatibility
+AC_ECHO_C = "\c"
+AC_ECHO_N = ""
+AC_ECHO_T = ""
 
-PREFIX="/usr/local"
-SYSCONFDIR="/etc"
-
+# specific binaries
 BIN_AR = "/usr/bin/ar"
+BIN_AS = "/usr/bin/as"
 BIN_AWK = "/usr/bin/awk"
 BIN_CAT = "/bin/cat"
 BIN_CC = "/usr/bin/cc"
 BIN_CPP = "/usr/bin/cpp"
 BIN_CXX = "/usr/bin/c++"
+BIN_ECHO = "/bin/echo"
 BIN_EGREP = "/usr/bin/egrep"
 BIN_GREP = "/usr/bin/grep"
+BIN_ID = "/usr/bin/id"
 BIN_INSTALL = "/usr/bin/install"
 BIN_LEX = "/usr/bin/lex"
+BIN_LN = "/bin/ln"
 BIN_PKGCONFIG = "/usr/local/bin/pkg-config"
 BIN_RANLIB = "/usr/bin/ranlib"
 BIN_SH = "/bin/sh"
 BIN_STRIP = "/usr/bin/strip"
+BIN_SUDO = "/usr/bin/sudo"
 BIN_TAR = "/bin/tar"
 BIN_YACC = "/usr/bin/yacc"
-BIN_MORE:"/usr/bin/less"
 
-PATH_BIN="/bin,/sbin,/usr/bin,/usr/sbin,/usr/local/bin,/usr/local/sbin"
+# architecture specific
+HW_BYTEORDER = "LITTLE_ENDIAN"
+HW_CPU_ARCH = "x86_32"
+HW_X86_CPU_CLASS = "i686"
+HW_X86_CPU_EXTFAM = "0"
+HW_X86_CPU_EXTMOD = "0"
+HW_X86_CPU_FAMILY = "15"
+HW_X86_CPU_FEATURES = "FPU VME DE PSE TSC MSR PAE MCE CX8 APIC SEP MTRR PGE MCA CMOV PAT PSE36 CLFL DTES ACPI MMX FXR SSE SSE2 HTT TM1 PBE FPU MON DSCPL EST TM2 CX16 ETPRD "
+HW_X86_CPU_MODEL = "2"
+HW_X86_CPU_STD_VENDOR = "INTEL"
+HW_X86_CPU_VENDOR = "GenuineIntel"
+
+# OS related
+OS_ARCH = "i386"
+OS_NAME = "OpenBSD"
+OS_VERSION = "3.6"
+
+# PATH related
+PATH_BIN = "/bin,/sbin,/usr/bin,/usr/sbin,/usr/X11R6/bin,/usr/local/sbin,/usr/local/bin"
 PATH_INC = "/usr/include"
 PATH_LIB = "/usr/lib"
+PC_PATH_LIB = "$PREFIX/lib/pkgconfig"
 
-PC_PATH_LIB = "/usr/local/lib/pkgconfig"
-
-AC_ECHO_C = "\ec"
-AC_ECHO_N = ""
-AC_ECHO_T = ""
-.Ed
+# misc
+PREFIX = "/usr/local"
+SYSCONFDIR = "/etc".Ed
 .Pp
 .Sh SEE ALSO
 .Xr make 1 ,
