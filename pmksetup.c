@@ -57,8 +57,7 @@
 
 
 FILE	*sfp;			/* scratch file pointer */
-char	*__progname,		/* program name from argv[0] */
-	 sfn[MAXPATHLEN];	/* scratch file name */		
+char	sfn[MAXPATHLEN];	/* scratch file name */		
 
 htable	*ht;
 int	 verbose_flag = 0;	/* -V option at the cmd-line */
@@ -98,8 +97,6 @@ int main(int argc, char *argv[]) {
 		exit(EXIT_FAILURE);
 	}
 #endif
-
-	__progname = argv[0];
 
 	ht = hash_init_adv(MAX_CONF_OPT, NULL, (void (*)(void *)) prsopt_destroy, NULL);
 	if (ht == NULL) {
@@ -993,8 +990,8 @@ void verbosef(const char *fmt, ...) {
  * pmksetup(8) usage
  */
 void usage(void) {
-	fprintf(stderr, "usage: %s [-hVv] "
-		"[-r variable] [-u variable=value]\n", __progname);
+	fprintf(stderr, "usage: pmksetup [-hVv] "
+		"[-r variable] [-u variable=value]\n");
 	exit(EXIT_FAILURE);
 }
 
