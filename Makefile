@@ -20,6 +20,8 @@ LDFLAGS?=
 PREFIX?=	/usr/local
 DEBUG?=		-g
 
+LINT_TARGET=	pmk.c
+
 PREMAKE=	pmk
 SETUP=		pmksetup
 
@@ -27,7 +29,7 @@ DATADIR=	$(PREFIX)/share/$(PREMAKE)
 SAMPLE=		$(PREMAKE)file.sample
 CONFIG=		$(PREMAKE).conf.sample
 
-P_OBJS=		common.o hash.o func.o pmk.o
+P_OBJS=		common.o hash.o func.o pmk.o dynarray.o
 S_OBJS=		$(SETUP).o common.o hash.o
 
 all: $(PREMAKE) $(SETUP)
@@ -60,6 +62,13 @@ deinstall:
 	rm -f $(PREFIX)/man/man1/$(PREMAKE).1
 	rm -f $(PREFIX)/man/man8/$(SETUP).8
 
+lint:
+.ifdef LINT_TARGET
+	lint $(LINT_TARGET)
+.else
+	@echo "LINT_TARGET not set."
+.endif
+
 test_pmk: pmk
 	@echo ""
 	@echo "=> Testing pmk with sample files"
@@ -72,13 +81,20 @@ test_pmk: pmk
 	@echo "-> Running pmk"
 	./pmk -f samples/pmkfile.sample
 	@echo ""
-	@echo "-> Dumping generated file"
+	@echo "-> Dumping generated files"
+	@echo ""
+	@echo "samples/Makefile.sample"
 	@echo "----------------------------------------"
 	@cat samples/Makefile.sample
 	@echo "----------------------------------------"
 	@echo ""
+	@echo "samples/Makefile.samplebis"
+	@echo "----------------------------------------"
+	@cat samples/Makefile.samplebis
+	@echo "----------------------------------------"
+	@echo ""
 	@echo "-> Removing generated files"
-	rm -f samples/Makefile.sample pmk.log
+	rm -f samples/Makefile.sample samples/Makefile.samplebis pmk.log
 	@echo ""
 	@echo "=> End of test"
 	@echo ""

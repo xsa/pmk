@@ -51,7 +51,9 @@
 	line : buffer that will contain the line
 	lsize : size of the buffer
 
-	returns a boolean
+	returns a boolean :
+		- TRUE when a line is available
+		- FALSE when error or eof occured
 */
 
 bool get_line(FILE *fd, char *line, int lsize) {

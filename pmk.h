@@ -36,6 +36,7 @@
 
 #include "premake.h"
 #include "hash.h"
+#include "dynarray.h"
 
 
 /* prefix character used for commands */
@@ -60,8 +61,13 @@
 #define MAX_CMD_LEN		MAX_CMD_NAME_LEN + MAX_LABEL_NAME_LEN + 2
 
 /* maximal number of options per command */
-#define MAX_CMD_OPT	32
+#define MAX_CMD_OPT		32
 
+/* maximal number of templates */
+#define MAX_TEMPLATES		32
+
+/* maximal number of key in datahash */
+#define MAX_DATA_KEY		1024
 
 /* command option type */
 typedef struct {
@@ -78,7 +84,7 @@ typedef struct {
 /* pmk data */
 typedef struct {
 	htable	*htab;
-	char	*target; /* XXX should be an array or something else */
+	dynary	*tlist;
 } pmkdata;
 
 

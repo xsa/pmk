@@ -8,7 +8,7 @@ TPATH=/windows/desktop
 PROGNAME=scandisk
 .END
 .TARGET
-LIST=samples/Makefile.sample.pmk
+LIST=samples/Makefile.sample.pmk,samples/Makefile.samplebis.pmk
 .END
 .CHECK_LIB(lib_gtk)
 REQUIRED=TRUE

@@ -74,6 +74,42 @@ bool check_version(char *vref, char *vers) {
 }
 
 /*
+	split a string in a dynamic array
+
+	str : string to split
+	sep : separator
+	da : dynamic array
+
+	return TRUE on success
+*/
+
+bool str_to_dynary(char *str, char sep, dynary *da) {
+	char	buf[MAXPATHLEN];
+	int	i = 0,
+		j = 0;
+
+	while (str[i] != '\0') {
+		if (str[i] == sep) {
+			buf[j] = '\0';
+			if (da_push(da, buf) == FALSE) {
+				return(FALSE);
+			}
+			j = 0;
+		} else {
+			buf[j] = str[i];
+			j++;
+		}
+		i++;
+	}
+	buf[j] = '\0';
+	if (da_push(da, buf) == FALSE) {
+		return(FALSE);
+	}
+
+	return(TRUE);
+}
+
+/*
 	define variables
 */
 
@@ -94,18 +130,24 @@ bool pmk_define(pmkcmd *cmd, htable *ht) {
 
 bool pmk_target(pmkcmd *cmd, htable *ht) {
 	char	*list;
+	int	i = 0;
+	dynary	*da;
 
 	pmk_log("* Collecting targets\n");
 
-	/* XXX */
 	list = strdup(hash_get(ht, "LIST"));
 	if (list == NULL) {
-		errorf("LIST not assigned in TARGET"); /* XXX should provide cmd line ? */
+		errorf("LIST not assigned in TARGET");
 		return(FALSE);
 	}
-	/* XXX should process multiple filename */
-	pmk_log("\tSet target to '%s'.\n", list);
-	gdata.target = list;
+	da = da_init();
+	str_to_dynary(list, ',', da);
+	
+	for (i=0 ; i < da_size(da) ; i++) {
+		pmk_log("\tAdded '%s'\n", da_idx(da, i));
+	}
+
+	gdata.tlist = da;
 
 	return(TRUE);
 }
@@ -165,7 +207,7 @@ bool pmk_check_include(pmkcmd *cmd, htable *ht) {
 		pmk_log("yes.\n");
 		if (incfunc != NULL) {
 			pmk_log("\tFound function '%s' : ", incfunc);
-			while (get_line(ifp, strbuf, sizeof(strbuf))) {
+			while (get_line(ifp, strbuf, sizeof(strbuf)) == TRUE) {
 				/* XXX should check in a better way ? */
 				if (strstr(strbuf, incfunc) != NULL) {
 					pmk_log("yes.\n");
@@ -239,7 +281,7 @@ bool pmk_check_config(pmkcmd *cmd, htable *ht) {
 		pmk_log("yes.\n");
 		pmk_log("\tFound version >= %s : ", libvers);
 
-		get_line(rpipe, version, sizeof(version));
+		get_line(rpipe, version, sizeof(version)); /* XXX check returned value ? */
 		/* XXX should check version */
 		pmk_log("yes/no (%s)\n", version);
 
