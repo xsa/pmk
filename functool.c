@@ -425,7 +425,7 @@ bool parse_ac_config(htable *ht, char *fpath) {
 		buf[TMP_BUF_LEN],
 		ftmp[MAXPATHLEN],
 		*pstr;
-	int	i = 0,
+	int	i,
 		s,
 		fe;
 
@@ -462,6 +462,7 @@ bool parse_ac_config(htable *ht, char *fpath) {
 				pstr++;
 			}
 			s = sizeof(line);
+			i = 0;
 			while (((*pstr == '_') || (isalpha(*pstr) != 0)) && (i < s)) {
 				buf[i] = *pstr;
 				pstr++;

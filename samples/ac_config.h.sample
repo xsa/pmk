@@ -1,0 +1,22 @@
+/* $Id$ */
+
+/* sample of configuration header used with autoconf */
+
+/* termcap library */
+#undef HAVE_TERMCAP
+
+/* getwin function in curses library */
+#undef HAVE_GETWIN
+
+/* sys/param.h header */
+#undef HAVE_SYS_PARAM_H
+
+/* strlcpy function in string.h header */
+#undef HAVE_STRLCPY
+
+/* gtk-config binary */
+#undef HAVE_GTK_CONFIG
+
+/* gathering data via png-config */
+#undef HAVE_PNG_CONFIG
+

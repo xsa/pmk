@@ -44,13 +44,13 @@ INCLUDE=string.h
 FUNCTION=strlcpy
 .END
 
-# try to found gtk_config in path
+# try to found gtk-config in path
 .CHECK_BINARY(gtk_config)
 REQUIRED=FALSE
 FILENAME=gtk-config
 .END
 
-# get data via libpng_config
+# get data via libpng-config
 .CHECK_CONFIG(lib_png)
 REQUIRED=FALSE
 CFGTOOL=libpng-config
