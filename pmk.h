@@ -72,7 +72,4 @@ typedef struct {
 } pmkcmd;
 
 
-void pmk_log(const char *, ...);
-
-
 #endif /* _PMK_H_ */
