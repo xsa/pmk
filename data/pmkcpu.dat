@@ -6,75 +6,49 @@
 #	LIST = ()
 #}
 
-#ADD_CPU_ARCH_NEW {
+LIST_ARCH_EQUIV {
 	# x86_32
-#	"i386" = "x86_32"
-#	"i486" = "x86_32"
-#	"i586" = "x86_32"
-#	"i686" = "x86_32"
+	"i386" = "x86_32"
+	"i486" = "x86_32"
+	"i586" = "x86_32"
+	"i686" = "x86_32"
 
 	# x86_64
-#	"amd64" = "x86_64"
-#}
+	"amd64" = "x86_64"
+	"x86_64" = "x86_64"
 
-ADD_CPU_ARCH {
-	NAME = "x86_32"
-	LIST = ("i386","i486","i586","i686")
-}
+	# sparc_32
+	"sparc" = "sparc_32"
+	"sun4c" = "sparc_32"
+	"sun4d" = "sparc_32"
+	"sun4m" = "sparc_32"
 
-ADD_CPU_ARCH {
-	NAME = "x86_64"
-	LIST = ("amd64","x86_64")
-}
+	# sparc_64
+	"sparc64" = "sparc_64"
+	"sun4u" = "sparc_64"
 
-ADD_CPU_ARCH {
-	NAME = "ia_64"
-	LIST = ("ia_64")
-}
+	#ia_64
+	"ia_64" = "ia_64"
 
-ADD_CPU_ARCH {
-	NAME = "alpha"
-	LIST = ("alpha")
-}
+	# ppc
+	"ppc" = "ppc"
+	"powerpc" = "ppc"
+	"Power Macintosh" = "ppc"
+	"macppc" = "ppc"
 
-ADD_CPU_ARCH {
-	NAME = "ppc"
-	LIST = ("ppc","powerpc","Power Macintosh","macppc")
-}
+	# alpha
+	"alpha" = "alpha"
 
-ADD_CPU_ARCH {
-	NAME = "sparc_32"
-	LIST = ("sparc","sun4c","sun4d","sun4m")
-}
+	# m68k
+	"hp300" = "m68k"
+	"mac68k" = "m68k"
+	"mvme68k" = "m68k"
 
-ADD_CPU_ARCH {
-	NAME = "sparc_64"
-	LIST = ("sparc64","sun4u")
-}
+	# parisc
+	"parisc64" = "parisc_64"
 
-#ADD_CPU_ARCH {
-#	NAME = "mips_64"
-#	LIST = ("sgi")
-#}
-
-ADD_CPU_ARCH {
-	NAME = "mips"
-	LIST = ("mips")
-}
-
-ADD_CPU_ARCH {
-	NAME = "parisc_64"
-	LIST = ("parisc64")
-}
-
-ADD_CPU_ARCH {
-	NAME = "m68k"
-	LIST = ("hp300","mac68k","mvme68k")
-}
-
-ADD_CPU_ARCH {
-	NAME = "vax"
-	LIST = ("vax")
+	# vax
+	"vax" = "vax"
 }
 
 

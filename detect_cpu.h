@@ -48,7 +48,7 @@
  ***************/
 
 
-#define CPU_ARCH_ADD		1
+#define LIST_ARCH_EQUIV		1
 #define LIST_X86_CPU_VENDOR	2
 #define LIST_X86_CPU_MODEL	3
 #define LIST_X86_CPU_CLASS	4
@@ -62,7 +62,8 @@
 #define	PMK_ARCH_PPC		6
 #define	PMK_ARCH_ALPHA		7
 #define	PMK_ARCH_M68K		8
-#define	PMK_ARCH_VAX		9
+#define	PMK_ARCH_PARISC		9
+#define	PMK_ARCH_VAX		10
 
 #define	PMK_ARCH_STR_UNKNOWN	"unknown"
 

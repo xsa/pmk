@@ -52,6 +52,7 @@
 /* config tools data file keyword */
 prskw	kw_pmkcpu[] = {
 	{"ADD_CPU_ARCH",	CPU_ARCH_ADD,		PRS_KW_CELL},
+	{"LIST_ARCH_EQUIV",	LIST_ARCH_EQUIV,	PRS_KW_CELL},
 	{"LIST_X86_CPU_VENDOR",	LIST_X86_CPU_VENDOR,	PRS_KW_CELL},
 	{"LIST_X86_CPU_MODEL",	LIST_X86_CPU_MODEL,	PRS_KW_CELL},
 	{"LIST_X86_CPU_CLASS",	LIST_X86_CPU_CLASS,	PRS_KW_CELL}
@@ -68,6 +69,7 @@ arch_cell	arch_tab[] = {
 	{"ppc",		PMK_ARCH_PPC},
 	{"alpha",	PMK_ARCH_ALPHA},
 	{"m68k",	PMK_ARCH_M68K},
+	{"parisc_64",	PMK_ARCH_PARISC},
 	{"vax",		PMK_ARCH_VAX}
 };
 int	nbarch = sizeof(arch_tab) / sizeof(arch_cell);
@@ -149,30 +151,13 @@ char *check_cpu_arch(char *uname_m, prsdata *pdata) {
 	int		 i,
 			 n;
 	prscell		*pcell;
+	void		*ptmp;
 
-	pcell = pdata->tree->first;
-	while ((pcell != NULL) && (pstr == NULL)) {
-		if (pcell->token == CPU_ARCH_ADD) {
-			pht = pcell->data;
-
-			da = po_get_list(hash_get(pht, "LIST")); /* XXX , hardcode!, check */
-			n = da_usize(da);
-			for (i=0 ; i<n ; i++) {
-				/*
-				 * could handle regex later
-				 *
-
-				if da_idx(da, i) ~ uname_m !XXX!
-					pstr = po_get_str(hash_get(pht, "NAME"));
-					return(pstr);
-				*/
-				if (strncmp(uname_m, da_idx(da, i), sizeof(uname_m)) == 0) {
-					pstr = po_get_str(hash_get(pht, "NAME"));
-				}
-			}
-		}
-
-		pcell = pcell->next;
+	pht = (htable *) seek_key(pdata, LIST_ARCH_EQUIV);
+	if (pht != NULL) {
+		ptmp = hash_get(pht, uname_m); /* no check needed */
+		if (ptmp != NULL)
+			pstr = po_get_str(ptmp); /* no check needed */
 	}
 
 	if (pstr == NULL)
@@ -192,7 +177,9 @@ unsigned char arch_name_to_id(char *arch_name) {
 	unsigned char	id = PMK_ARCH_UNKNOWN;
 
 	for(i = 0 ; i < nbarch ; i++) {
-		if (strncmp(arch_name, arch_tab[i].name, sizeof(arch_name)) == 0) {
+		/* compare arch name with record key */
+		if (strncmp(arch_name, arch_tab[i].name, strlen(arch_name)) == 0) {
+			/* they are same, get the id */
 			id = arch_tab[i].id;
 			break;
 		}

@@ -1,5 +1,6 @@
 25 Nov 2004 mipsator
  * added missing code that translate arch name into id.
+ * improved architecture detection code.
 
 24 Nov 2004 mipsator
  * x86 cpu detection engine is complete, need more data now.
