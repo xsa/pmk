@@ -115,6 +115,11 @@ int main(int argc, char *argv[]) {
 		exit(1);
 	}
 
+	if (byte_order_check(ht) == false) {
+		errorf("failure in byte order check.");
+		exit(1);
+	}
+
 	if ((open_tmp_config() == -1))
 		exit(1);
 
@@ -449,7 +454,7 @@ int predef_vars(htable *ht) {
 			{PREMAKE_KEY_LIBPATH,		"/usr/lib"}
 		};
 
-	if (hash_add_array(ht, predef, sizeof(predef)/sizeof(hpair)) == 0) 
+	if (hash_add_array(ht, predef, sizeof(predef)/sizeof(hpair)) == false) 
 		return(-1);
 
 	verbosef("Setting '%s' => '%s'", PREMAKE_KEY_SYSCONFDIR, SYSCONFDIR);
@@ -458,6 +463,39 @@ int predef_vars(htable *ht) {
 	verbosef("Setting '%s' => '%s'", PREMAKE_KEY_LIBPATH, "/usr/lib");
 
 	return(0);
+}
+
+
+/*
+	byte order check
+
+	pht : hash table to store value
+
+	return : boolean value
+*/
+
+bool byte_order_check(htable *pht) {
+	char	bo_type[16];
+	int	num = 0x41424344;
+
+	if (((((char *)&num)[0]) == 0x41) && ((((char *)&num)[1]) == 0x42) &&
+	    ((((char *)&num)[2]) == 0x43) && ((((char *)&num)[3]) == 0x44)) {
+		strlcpy(bo_type, "BIG_ENDIAN", sizeof(bo_type));
+	} else {
+		if ( ((((char *)&num)[3]) == 0x41) && ((((char *)&num)[2]) == 0x42) && 
+		    ((((char *)&num)[1]) == 0x43) && ((((char *)&num)[0]) == 0x44) ) {
+			strlcpy(bo_type, "LITTLE_ENDIAN", sizeof(bo_type));
+		} else {
+			strlcpy(bo_type, "UNKNOW", sizeof(bo_type));
+		}
+	}
+
+	if (hash_add(pht, PREMAKE_KEY_BYTEORDER, strdup(bo_type)) == HASH_ADD_FAIL)
+		return(false);
+
+	verbosef("Setting '%s' => '%s'", PREMAKE_KEY_BYTEORDER, bo_type);
+
+	return(true);
 }
 
 
@@ -557,3 +595,4 @@ void usage(void) {
 	fprintf(stderr, "  -V	Verbose, display debugging messages\n");
 	exit(1);
 }
+
