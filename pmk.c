@@ -147,11 +147,9 @@ bool process_opt(htable *pht, prsopt *popt) {
 bool process_template(char *template, pmkdata *pgd) {
 	FILE	*tfd,
 		*dfd;
-	bool	 replace,
-		 ac_flag;
+	bool	 ac_flag;
 	char	*plb,
 		*pbf,
-		*ptbf,
 		*ptn,
 		*pfn,
 		*ptmp,
@@ -226,68 +224,53 @@ bool process_template(char *template, pmkdata *pgd) {
 	while (fgets(lbuf, sizeof(lbuf), tfd) != NULL) {
 		plb = lbuf;
 		pbf = buf;
-		ptbf = tbuf;
-		replace = false;
-		while (*plb != CHAR_EOS) {
-			if (replace == false) {
-				if (*plb == PMK_TAG_CHAR) {
-					/* found begining of tag */
-					replace = true;
-				} else {
-					/* copy normal text */
-					*pbf = *plb;
-					pbf++;
-				}
-			} else {
-				if (*plb == PMK_TAG_CHAR) {
-					/* tag identified */
-					replace = false;
-					*ptbf = CHAR_EOS;
 
+		while (*plb != CHAR_EOS) {
+			if (*plb == PMK_TAG_CHAR) {
+				plb++;
+				/* get tag identifier */
+				ptmp = parse_identifier(plb, tbuf, sizeof(tbuf));
+				if (ptmp == NULL) {
+					errorf("process_template(), buffer too small", fpath);
+					return(false);
+				}
+
+				plb = ptmp;
+
+				if (*ptmp == PMK_TAG_CHAR) {
 					ptmp = (char *) hash_get(ht, tbuf);
 					if (ptmp == NULL) {
 						/* not a valid tag, put it back */
-						*pbf = PMK_TAG_CHAR;
+						*pbf = PMK_TAG_CHAR; /* first tag character */
 						pbf++;
-
 						ptmp = tbuf;
-						while (*ptmp != CHAR_EOS) {
-							*pbf = *ptmp;
-							pbf++;
-							ptmp++;
-						}
-						*pbf = PMK_TAG_CHAR;
-						pbf++;
 					} else {
-						/* replace with value */
-						while (*ptmp != CHAR_EOS) {
-							*pbf = *ptmp;
-							pbf++;
-							ptmp++;
-						}
+						/* tag ok, skip ending tag char */
+						plb++;
 					}
-					ptbf = tbuf;
+
 				} else {
-					/* continue getting tag name */
-					*ptbf = *plb;
-					ptbf++;
+					/* not an identifier */
+					ptmp = tbuf;
+					*pbf = PMK_TAG_CHAR; /* first tag character */
+					pbf++;
 				}
-			}
-			plb++;
-		}
-		if (replace == true) {
-			/* not a tag, copy tbuf in buf */
-			*pbf = PMK_TAG_CHAR;
-			pbf++;
-			*ptbf = CHAR_EOS;
-			ptmp = tbuf;
-			while (*ptmp != CHAR_EOS) {
-				*pbf = *ptmp;
+
+				/* copy */
+				while (*ptmp != CHAR_EOS) {
+					*pbf = *ptmp;
+					pbf++;
+					ptmp++;
+				}
+			} else {
+				/* copy normal char */
+				*pbf = *plb;
 				pbf++;
-				ptmp++;
-			}
+				plb++;
+                        }
 		}
-		*pbf = CHAR_EOS;
+
+                *pbf = CHAR_EOS;
 		/* saving parsed line */
 		fprintf(dfd, "%s", buf);
 	}
