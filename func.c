@@ -1206,7 +1206,7 @@ bool pmk_check_variable(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 */
 
 bool pmk_set_parameter(pmkcmd *cmd, prsopt *popt, pmkdata *gdata) {
-	bool rval = false;
+	bool	 rval = false;
 	char	*pstr;
 	dynary	*da;
 	int	 i = 0,
@@ -1226,6 +1226,8 @@ bool pmk_set_parameter(pmkcmd *cmd, prsopt *popt, pmkdata *gdata) {
 		if (*pstr != CHAR_EOS) {
 			gdata->ac_file = strdup(pstr);
 			pmk_log("\t\tSet file to '%s'.\n", pstr);
+			hash_add(gdata->htab, AC_VAR_DEF, AC_VALUE_DEF); /* XXX TODO check */
+			pmk_log("\t\tSet '%s' value to '%s'.\n", AC_VAR_DEF, AC_VALUE_DEF);
 		}
 
 		/* compatibility tags */
