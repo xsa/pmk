@@ -15,7 +15,7 @@ CONFDIR=	$(HOME)/.pmk
 BINDIR=		$(BASE)/bin
 SBINDIR=	$(BASE)/bin
 DATADIR=	$(CONFDIR)
-MANDIR=		$(CONFDIR)
+MANDIR=		$(BASE)/man
 
 CFGFLAGS=	-DSYSCONFDIR=\"$(SYSCONFDIR)\" -DCONFDIR=\"$(CONFDIR)\"
 
@@ -128,12 +128,12 @@ deinstall:
 	$(SUDO) rm -f $(DESTDIR)$(BINDIR)/$(INST)
 	$(SUDO) rm -f $(DESTDIR)$(SBINDIR)/$(SETUP)
 	$(SUDO) rm -rf $(DESTDIR)$(DATADIR)
-	$(SUDO) rm -f $(DESTDIR)$(BASE)$(MANDIR)/man1/$(PREMAKE).1
-	$(SUDO) rm -f $(DESTDIR)$(BASE)$(MANDIR)/man1/$(SCAN).1
-	$(SUDO) rm -f $(DESTDIR)$(BASE)$(MANDIR)/man1/$(INST).1
-	$(SUDO) rm -f $(DESTDIR)$(BASE)$(MANDIR)/man8/$(SETUP).8
-	$(SUDO) rm -f $(DESTDIR)$(BASE)$(MANDIR)/man5/$(PREMAKE)file.5
-	$(SUDO) rm -f $(DESTDIR)$(BASE)$(MANDIR)/man5/$(PREMAKE).conf.5
+	$(SUDO) rm -f $(DESTDIR)$(MANDIR)/man1/$(PREMAKE).1
+	$(SUDO) rm -f $(DESTDIR)$(MANDIR)/man1/$(SCAN).1
+	$(SUDO) rm -f $(DESTDIR)$(MANDIR)/man1/$(INST).1
+	$(SUDO) rm -f $(DESTDIR)$(MANDIR)/man8/$(SETUP).8
+	$(SUDO) rm -f $(DESTDIR)$(MANDIR)/man5/$(PREMAKE)file.5
+	$(SUDO) rm -f $(DESTDIR)$(MANDIR)/man5/$(PREMAKE).conf.5
 
 $(PREMAKE)-clean:
 	rm -f $(P_OBJS) $(PREMAKE)

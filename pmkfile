@@ -19,7 +19,7 @@ IF(sw_usermode) {
 		BINDIR = "\$(BASE)/bin"
 		SBINDIR = "\$(BASE)/bin"
 		DATADIR = "\$(CONFDIR)"
-		MANDIR = "\$(CONFDIR)"
+		MANDIR = "\$(BASE)/man"
 	}
 }
 
