@@ -184,7 +184,7 @@ bool get_make_var(char *varname, char *result, int rsize) {
 	FILE	*mfp,
 		*tfp;
 	char	mfn[] = "/tmp/pmk_mkf.XXXXXXXX",
-		varstr[256];
+		varstr[TMP_BUF_LEN];
 	int	mfd = -1;
 	bool	rval;
 
@@ -342,7 +342,7 @@ bool find_file(dynary *da, char *fname, char *fpath, int fplen) {
 
 void errorf(const char *fmt, ...) {
 	va_list	plst;
-	char	buf[256];
+	char	buf[TMP_BUF_LEN];
 
 	va_start(plst, fmt);
 	vsnprintf(buf, sizeof(buf), fmt, plst);
@@ -361,7 +361,7 @@ void errorf(const char *fmt, ...) {
 
 void errorf_line(char *filename, int line, const char *fmt, ...) {
 	va_list	plst;
-	char	buf[256];
+	char	buf[TMP_BUF_LEN];
 
 	va_start(plst, fmt);
 	vsnprintf(buf, sizeof(buf), fmt, plst);
@@ -378,7 +378,7 @@ void errorf_line(char *filename, int line, const char *fmt, ...) {
 
 void debugf(const char *fmt, ...) {
 	va_list	plst;
-	char	buf[256];
+	char	buf[TMP_BUF_LEN];
 
 	va_start(plst, fmt);
 	vsnprintf(buf, sizeof(buf), fmt, plst);
@@ -426,7 +426,7 @@ void pmk_log_close(void) {
 
 bool pmk_log(const char *fmt, ...) {
 	va_list	plst;
-	char	buf[256];
+	char	buf[TMP_BUF_LEN];
 
 	va_start(plst, fmt);
 	vsnprintf(buf, sizeof(buf), fmt, plst);
@@ -440,4 +440,47 @@ bool pmk_log(const char *fmt, ...) {
 		errorf("unable to log.");
 		return(false);
 	}
+}
+
+/*
+	copy a text file
+
+	src_file : file to copy
+	dst_file : filename of the copy
+
+	returns true on success
+*/
+
+bool copy_text_file(char *src_file, char *dst_file) {
+	FILE	*fp_src,
+		*fp_dst;
+	bool	rval;
+	char	buf[1024]; /* XXX ? */
+
+	fp_src = fopen(src_file, "r");
+	if (fp_src == NULL) {
+		return(false);
+	}
+
+	fp_dst = fopen(dst_file, "w");
+	if (fp_dst == NULL) {
+		fclose(fp_src);
+		return(false);
+	}
+
+	while (get_line(fp_src, buf, sizeof(buf)) == 1) {
+		fprintf(fp_dst, "%s\n", buf);
+	}
+
+	if (feof(fp_src) == 0) {
+		rval = false;
+		/* XXX delete file_dst ? */
+	} else {
+		rval = true;
+	}
+
+	fclose(fp_src);
+	fclose(fp_dst);
+
+	return(rval);
 }

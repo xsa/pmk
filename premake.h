@@ -136,6 +136,9 @@
 /* maximal string lenght for a version */
 #define MAX_VERS_LEN		16
 
+/* size for temporary buffers */
+#define TMP_BUF_LEN		512
+
 /* command tokens */
 #define	TOK_NULL	 0
 #define	TOK_DEFINE	 1
