@@ -8,6 +8,7 @@
  * commented some code in autoconf.c which seems to be specific to
 	dillo but not to autoconf.
  * made consistent use of boolean string values.
+ * replaced remaining hash_add() calls in pmksetup.
 
 28 Dec 2003 mipsator
  * added check_lang_comp() into functool to get lang info via compiler.
