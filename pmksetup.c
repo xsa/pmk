@@ -47,6 +47,14 @@
 #include "pmksetup.h"
 #include "premake.h"
 
+
+#ifdef __SVR4	/* SunOS, Solaris */
+char	*__progname;
+#else
+extern char	*__progname;
+#endif	/* __SVR4 */
+
+
 #define PREMAKE_CONFIG_TMP	"/tmp/pmk.XXXXXXXX"
 
 /* buffer size in the copy_config() function */
@@ -87,15 +95,14 @@ int main(int argc, char *argv[]) {
 	} 
 
 	
-	while ((ch = getopt(argc, argv, "vV")) != -1)
+	while ((ch = getopt(argc, argv, "hvV")) != -1)
 		switch(ch) {
 			case 'v' :
 				fprintf(stderr, "%s\n", PREMAKE_VERSION);
 				exit(0);
 			case 'V' :
-				if (0 == verbose_flag) {
+				if (0 == verbose_flag)
 					verbose_flag = 1;
-				}
 				break;
 			case '?' :
 			default :
@@ -106,12 +113,11 @@ int main(int argc, char *argv[]) {
 
 	
 	if (snprintf(filename, sizeof(filename), "%s", PREMAKE_CONFIG_PATH) != -1) { 
-		
+
+		if (verbose_flag == 1)
+			debugf("Opening configuration file: %s", PREMAKE_CONFIG_PATH);
+
 		if ((config = fopen(filename, "r")) != NULL) {
-			if (verbose_flag == 1)
-				debugf("Opening configuration file: %s",
-					PREMAKE_CONFIG_PATH);
-		
 			if ((ht = hash_init(MAX_CONF_OPT)) == NULL) {
 				errorf("cannot create hash table");
 				exit(1);
@@ -154,7 +160,7 @@ int main(int argc, char *argv[]) {
 						break;
 					default :
 						if (parse_conf_line(line, linenum, &options) == 0) {
-							if ((v = hash_get(ht, options.key)) != NULL) {
+							if ((v = hash_get(ht, options.key)) != NULL)
 								/* checking the VAR<->VALUE separator */
 								switch (options.opchar) {
 									case CHAR_ASSIGN_UPDATE :
@@ -171,7 +177,8 @@ int main(int argc, char *argv[]) {
 										error = 1;
 										break;
 								}
-							}
+							else
+								fprintf(sfp, "%s%c%s\n", options.key, options.opchar, options.val);
 						} else
 							error = 1;
 						break;
@@ -180,7 +187,7 @@ int main(int argc, char *argv[]) {
 			fclose(config);
 			hash_destroy(ht);
 		} else {
-			errorf("%s not found", PREMAKE_CONFIG_PATH);
+			errorf("%s : %s", PREMAKE_CONFIG_PATH, strerror(errno));
 			exit(1);
 		}
 
@@ -434,11 +441,10 @@ void char_replace(char *buf, const char search, const char replace) {
  * pmksetup(8) usage
  */
 void usage(void) {
-	extern char	*__progname;
-
-	fprintf(stderr, "Usage: %s [-v] [-V]\n", __progname);
+	fprintf(stderr, "Usage: %s [options]\n", __progname);
 	fprintf(stderr, "Options:\n");
-	fprintf(stderr, "  -v   Display version number\n");
+	fprintf(stderr, "  -h	Displays this help menu\n"); 
+	fprintf(stderr, "  -v	Display version number\n");
 	fprintf(stderr, "  -V	Verbose, display debugging messages\n");
 	exit(1);
 }
