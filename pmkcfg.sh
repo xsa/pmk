@@ -36,13 +36,13 @@
 
 usermode=0
 
-if [ -z $PREFIX ]; then
+if [ -z "$PREFIX" ]; then
 	prefix="/usr/local"
 else
 	prefix=$PREFIX
 fi
 
-if [ -z $SYSCONFDIR ]; then
+if [ -z "$SYSCONFDIR" ]; then
 	sysdir="/etc"
 else
 	sysdir=$SYSCONFDIR
@@ -201,7 +201,7 @@ if [ $usermode = 1 ]; then
 	echo 'USERMODE ON.'
 
 	mkf_sed 'USERMODE' '-DPMK_USERMODE'
-	if [ -z $base ]; then
+	if [ -z "$base" ]; then
 		mkf_sed 'BASE' "$um_prfx"
 	else
 		mkf_sed 'BASE' "$base"
@@ -215,7 +215,7 @@ else
 	echo "USERMODE OFF."
 
 	mkf_sed 'USERMODE' ''
-	if [ -z $base ]; then
+	if [ -z "$base" ]; then
 		mkf_sed 'BASE' "$prefix"
 	else
 		mkf_sed 'BASE' "$base"
