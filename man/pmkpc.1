@@ -46,32 +46,50 @@ Check if given library modules exists.
 .It --cflags
 Display pre-processor and compiler flags for given library modules.
 Duplicates values are automatically removed.
+.It --cflags-only-I
+Enable output filtering of compiler flags and keep include path. See
+output filtering section.
+.It --cflags-only-other
+Enable output filtering of compiler flags and keep other flags than
+include path. See output filtering section.
 .It --libs
 Display linker flags for given library modules. Duplicates values are
 automatically removed.
+.It --libs_only_l
+Enable output filtering of linker flags and keep library linking flags.
+See output filtering section.
+.It --libs_only_L
+Enable output filtering of linker flags and keep library path flags. See
+output filtering section.
+.It --libs_only_other
+Enable output filtering of linker flags and keep other flags than
+library linking and path flags. See output filtering section.
 .It --help
 Only for compatibility with pkg-config. Refers to this man page.
 .It --usage
 Display usage.
+.It --list-all
+Display all module names and descriptions.
 .El
 
 .Pp
 The following options have not been implemented yet:
 .Bd -literal -offset -indent
---list-all
 --uninstalled
 --debug
---cflags-only-I
---cflags-only-other
---libs_only_l
---libs_only_L
---libs_only_other
 --variable
 --define-variable
 --print-errors
 --silence-errors
 --errors-to-stdout
 .Ed
+
+.Sh OUTPUT FILTERING
+.Pp
+As pkg-config has no standard specifications we determinated its
+behavior from pkg-config man page. The result is that filtering options
+can be accumulated. The default behavior is like if all filtering
+options were enabled.
 
 .Sh FILES
 .Bl -tag -width "pmkfile.scan" -compact
