@@ -1,5 +1,6 @@
 18 Jul 2004 mipsator
- * clean up the code before starting to play with parse_data(). 
+ * clean up the code before starting to play with parse_data().
+ * fixed getopt() call in pmkscan.
 
 13 Jul 2004 mipsator
  * misc fixes and cleanup for experimental parsing engine.

@@ -480,7 +480,7 @@ int main(int argc, char *argv[]) {
 	scandata	 sd;
 
 	while (go_exit == false) {
-		chr = getopt(argc, argv, "b:f:ho:v");
+		chr = getopt(argc, argv, "hv");
 		if (chr == -1) {
 			go_exit = true;
 		} else {
