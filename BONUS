@@ -14,5 +14,5 @@ string functions like strlcpy and strlcat.
 You are free to use some components of this package to assume compatibility
 on all the system targets until you respect the BSD license.
 
-NOTE : Some functions maybe missing as i have not the use in this present
+NOTE : Some functions are maybe missing as i have not the use in this present
 package but i can add them on request (yes you can also send patches ;).
