@@ -32,6 +32,9 @@
 .Nd premake setup
 .Sh SYNOPSIS
 .Nm pmksetup
+.Bk -words
+.Op Fl hvV
+.Ek
 .Sh DESCRIPTION
 The
 .Nm 
@@ -45,6 +48,16 @@ configuration tool.
 reads all configuration information from the 
 .Xr pmk.conf 5
 file.
+.Pp
+The options are as follows:
+.Bl -tag -width Ds
+.It Fl h
+Display the help menu.
+.It Fl v
+Display the version number.
+.It Fl V
+Verbose, display debugging messages.
+.El
 .Sh FILES
 .Bl -tag -width "/etc/pmk.conf" -compact
 .It Pa /etc/pmk.conf
