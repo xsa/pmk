@@ -700,15 +700,6 @@ int main(int argc, char *argv[]) {
 	/* initialize some variables */
 	init_var(&gdata);
 
-
-/* XXX XXX TODO check, improve ... */
-	gdata.cfgt = parse_cfgt_file();
-	if (gdata.cfgt == NULL) {
-		clean(&gdata);
-		errorf("failed parse_cfgt_file.");
-		exit(EXIT_FAILURE);
-	}
-
 	if (enable_sw != NULL) {
 		/* command line switches to enable */
 		da = str_to_dynary(enable_sw, CHAR_LIST_SEPARATOR);
