@@ -48,11 +48,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "premake.h"
+#include "common.h"
 #include "compat/pmk_string.h"
 #include "compat/pmk_unistd.h"
 #include "dynarray.h"
-#include "common.h"
+#include "premake.h"
 
 #define MKVAR_FILE	"make_var_result"
 

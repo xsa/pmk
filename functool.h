@@ -75,8 +75,8 @@ lgdata	*check_lang(char *);
 lgdata	*check_lang_comp(char *);
 lgdata	*get_lang(htable *, pmkdata *);
 char	*get_comp_path(htable *, char *);
-char	*process_string(char *, htable *);
 char	*parse_idtf(char *, char *, size_t);
+char	*process_string(char *, htable *);
 bool	 single_append(htable *, char *, char *);
 
 #endif /* _PMK_FUNCTOOL_H_ */
