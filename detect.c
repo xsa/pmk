@@ -356,6 +356,7 @@ bool detect_compiler(char *cpath, char *blog, comp_data *pcd, comp_info *cinfo) 
 			return(false);
 	} else {
 		errorf("failed to build test binary : %s.", strerror(errno));
+		return(false);
 	}
 
 	return(true);
