@@ -16,7 +16,7 @@ CFLAGS?=
 #CFLAGS+=	-DSYSCONFDIR=\"/etc/\"
 
 # Flag for platform testing checks
-#CFLAGS+=	-DUSER_TEST
+CFLAGS+=	-DUSER_TEST
 
 LDFLAGS?=
 
@@ -42,14 +42,15 @@ all: $(PREMAKE) $(SETUP)
 
 config:
 	@CC=$(CC) sh pmkcfg.sh
+	@echo "OK" > config
 
-$(PREMAKE): $(P_OBJS)
+$(PREMAKE): config $(P_OBJS)
 	$(CC) -o $(PREMAKE) $(LDFLAGS) $(P_OBJS)
 
-$(SETUP): $(S_OBJS)
+$(SETUP): config $(S_OBJS)
 	$(CC) -o $(SETUP) $(LDFLAGS) $(S_OBJS)
 
-install:
+install: all
 	$(INSTALL) -d -m 755 $(BINDIR)
 	$(INSTALL) -m 755 $(PREMAKE) $(BINDIR)$(PREMAKE)
 	$(INSTALL) -d -m 755 $(SBINDIR)
@@ -65,7 +66,7 @@ install:
 	$(INSTALL) -m 444 $(SETUP).8 $(PREFIX)/man/man8/$(SETUP).8
 
 clean:
-	rm -f $(P_OBJS) $(S_OBJS) $(PREMAKE) $(SETUP) compat/compat.h *.core
+	rm -f $(P_OBJS) $(S_OBJS) $(PREMAKE) $(SETUP) compat/compat.h config *.core
 
 deinstall:
 	rm -f $(BINDIR)$(PREMAKE)
@@ -75,7 +76,7 @@ deinstall:
 	rm -f $(PREFIX)/man/man8/$(SETUP).8
 	rm -f $(PREFIX)/man/man5/$(PREMAKE).conf.5
 
-test_pmk:
+test_pmk: pmk
 	@echo ""
 	@echo "=> Testing pmk with sample files"
 	@echo ""
@@ -112,7 +113,7 @@ test_pmk:
 	@echo "=> End of test"
 	@echo ""
 
-test_pmksetup:
+test_pmksetup: pmksetup
 	@echo "Generating local pmk.conf."
 	@echo "(need USER_TEST enabled)"
 	@echo ""
