@@ -37,7 +37,7 @@
 #ifndef _PMKSETUP_H_
 #define _PMKSETUP_H_
 
-#include "hash.h"	
+#include "hash.h"
 #include "premake.h"
 
 
@@ -90,6 +90,7 @@ static  char *binaries[][2] = {
 	{"echo",	PMKCONF_BIN_ECHO},
 	{"egrep",	PMKCONF_BIN_EGREP},
 	{"grep",	PMKCONF_BIN_GREP},
+	{"id",		PMKCONF_BIN_ID},
 	{"install",	PMKCONF_BIN_INSTALL},
 	{"lex",		PMKCONF_BIN_LEX},
 	{"ln",		PMKCONF_BIN_LN},
@@ -97,6 +98,7 @@ static  char *binaries[][2] = {
 	{"ranlib",	PMKCONF_BIN_RANLIB},
 	{"sh",		PMKCONF_BIN_SH},
 	{"strip",	PMKCONF_BIN_STRIP},
+	{"sudo",	PMKCONF_BIN_SUDO},
 	{"tar",		PMKCONF_BIN_TAR},
 	{"yacc",	PMKCONF_BIN_YACC}
 };
