@@ -484,10 +484,13 @@ lgdata *get_lang(htable *pht, pmkdata *pgd) {
 	/* check first if language has been provided locally */
 	lang = (char *)po_get_data(hash_get(pht, "LANG"));
 	if (lang == NULL) {
-		/* XXX TODO should check global lang when available */
-
-		/* return C by default */
-		return(&ldata[0]);
+		/* check global lang if available */
+		if (pgd->lang != NULL) {
+			return(check_lang(pgd->lang));
+		} else {
+			/* else return C by default */
+			return(&ldata[0]);
+		}
 	}
 
 	return(check_lang(lang));
