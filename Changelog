@@ -1,3 +1,5 @@
+# snapshot 0.6.1
+
 02 Sep 2003 mipsator
  * added byte_order_check() in pmksetup to set HW_BYTEORDER.
 
