@@ -133,8 +133,8 @@ bool pmk_ac_compat(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 		*pstr;
 
 /* XXX must check if valid
-	pstr = (char *)po_get_data(hash_get(gdata->htab, "SYSCONFDIR"));
-	hash_add(gdata->htab, "sysconfdir", po_mk_str(pstr));
+	pstr = (char *) hash_get(gdata->htab, "SYSCONFDIR");
+	hash_add(gdata->htab, "sysconfdir", strdup(pstr));
 */
 
 	/* if a file is given then it will be parsed later */
@@ -144,21 +144,21 @@ bool pmk_ac_compat(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 	}
 
 	/* compatibility tags */
-	pstr = (char *)po_get_data(hash_get(gdata->htab, "PREFIX"));
-	hash_add(gdata->htab, "prefix", po_mk_str(pstr));
+	pstr = (char *) hash_get(gdata->htab, "PREFIX");
+	hash_add(gdata->htab, "prefix", strdup(pstr));
 	
-	hash_add(gdata->htab, "exec_prefix", po_mk_str("${prefix}"));
-	hash_add(gdata->htab, "bindir", po_mk_str("${exec_prefix}/bin"));
-	hash_add(gdata->htab, "sbindir", po_mk_str("${exec_prefix}/sbin"));
-	hash_add(gdata->htab, "libexecdir", po_mk_str("${exec_prefix}/libexec"));
-	hash_add(gdata->htab, "libdir", po_mk_str("${exec_prefix}/lib"));
-	hash_add(gdata->htab, "datadir", po_mk_str("${prefix}/share"));
-	hash_add(gdata->htab, "includedir", po_mk_str("${prefix}/include"));
-	hash_add(gdata->htab, "mandir", po_mk_str("${prefix}/man"));
-	hash_add(gdata->htab, "infodir", po_mk_str("${prefix}/info"));
+	hash_add(gdata->htab, "exec_prefix", strdup("${prefix}"));
+	hash_add(gdata->htab, "bindir", strdup("${exec_prefix}/bin"));
+	hash_add(gdata->htab, "sbindir", strdup("${exec_prefix}/sbin"));
+	hash_add(gdata->htab, "libexecdir", strdup("${exec_prefix}/libexec"));
+	hash_add(gdata->htab, "libdir", strdup("${exec_prefix}/lib"));
+	hash_add(gdata->htab, "datadir", strdup("${prefix}/share"));
+	hash_add(gdata->htab, "includedir", strdup("${prefix}/include"));
+	hash_add(gdata->htab, "mandir", strdup("${prefix}/man"));
+	hash_add(gdata->htab, "infodir", strdup("${prefix}/info"));
 
-	pstr = (char *)po_get_data(hash_get(gdata->htab, "BIN_INSTALL"));
-	hash_add(gdata->htab, "INSTALL", po_mk_str(pstr));
+	pstr = (char *) hash_get(gdata->htab, "BIN_INSTALL");
+	hash_add(gdata->htab, "INSTALL", strdup(pstr));
 
 	return(true);
 }
@@ -182,7 +182,7 @@ bool pmk_check_binary(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 		return(false);
 	}
 
-	bpath = (char *)po_get_data(hash_get(gdata->htab, "BIN_PATH"));
+	bpath = (char *) hash_get(gdata->htab, "BIN_PATH");
 	if (bpath == NULL) {
 		errorf("BIN_PATH not available.");
 		return(false);
@@ -194,7 +194,7 @@ bool pmk_check_binary(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 			return(false);
 		} else {
 			record_def(gdata->htab, filename, false);
-			hash_add(gdata->htab, str_to_def(filename), po_mk_str("")); /* XXX check ? */
+			hash_add(gdata->htab, str_to_def(filename), strdup("")); /* XXX check ? */
 			label_set(gdata->labl, cmd->label, false);
 			return(true);
 		}
@@ -209,7 +209,7 @@ bool pmk_check_binary(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 		} else {
 			/* define for template */
 			record_def(gdata->htab, filename, false);
-			hash_add(gdata->htab, str_to_def(filename), po_mk_str("")); /* XXX check ? */
+			hash_add(gdata->htab, str_to_def(filename), strdup("")); /* XXX check ? */
 			label_set(gdata->labl, cmd->label, false);
 			return(true);
 		}
@@ -218,7 +218,7 @@ bool pmk_check_binary(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 		/* define for template */
 		record_def(gdata->htab, filename, true);
 		record_val(gdata->htab, filename, "");
-		hash_add(gdata->htab, str_to_def(filename), po_mk_str(binpath)); /* XXX check ? */
+		hash_add(gdata->htab, str_to_def(filename), strdup(binpath)); /* XXX check ? */
 		label_set(gdata->labl, cmd->label, true);
 		return(true);
 	}
@@ -279,7 +279,7 @@ bool pmk_check_include(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 
 	/* get the appropriate compiler */
 	snprintf(cfgcmd, sizeof(cfgcmd), "BIN_%s", pld->comp);
-	ccpath = (char *)po_get_data(hash_get(gdata->htab, cfgcmd));
+	ccpath = (char *) hash_get(gdata->htab, cfgcmd);
 	if (ccpath == NULL) {
 		errorf("cannot get compiler path.");
 		return(false);
@@ -307,7 +307,7 @@ bool pmk_check_include(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 	}
 
 	/* use each element of INC_PATH with -I */
-	pstr = (char *)po_get_data(hash_get(gdata->htab, "INC_PATH"));
+	pstr = (char *) hash_get(gdata->htab, "INC_PATH");
 	if (pstr == NULL) {
 		strlcpy(inc_path, "", sizeof(inc_path));
 	} else {
@@ -414,7 +414,7 @@ bool pmk_check_lib(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 
 	/* get the appropriate compiler */
 	snprintf(cfgcmd, sizeof(cfgcmd), "BIN_%s", pld->comp);
-	ccpath = (char *)po_get_data(hash_get(gdata->htab, cfgcmd));
+	ccpath = (char *) hash_get(gdata->htab, cfgcmd);
 	if (ccpath == NULL) {
 		errorf("cannot get compiler path.");
 		return(false);
@@ -440,7 +440,7 @@ bool pmk_check_lib(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 	}
 
 	/* use each element of LIB_PATH with -L */
-	pstr = (char *)po_get_data(hash_get(gdata->htab, "LIB_PATH"));
+	pstr = (char *) hash_get(gdata->htab, "LIB_PATH");
 	if (pstr == NULL) {
 		strlcpy(lib_buf, "", sizeof(lib_buf));
 	} else {
@@ -453,7 +453,6 @@ bool pmk_check_lib(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 		}
 		da_destroy(da);
 	}
-
 	snprintf(cfgcmd, sizeof(cfgcmd), "%s %s -o %s -l%s %s >/dev/null 2>&1",
 						ccpath, lib_buf, BIN_TEST_NAME,
 						libname, TEST_FILE_NAME);
@@ -467,7 +466,7 @@ bool pmk_check_lib(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 		label_set(gdata->labl, cmd->label, true);
 
 		snprintf(lib_buf, sizeof(lib_buf), "-l%s", libname);
-		hash_append(gdata->htab, "LIBS", lib_buf, " ");
+		hash_append(gdata->htab, "LIBS", strdup(lib_buf), " ");
 
 		rval = true;
 	} else {
@@ -525,7 +524,7 @@ bool pmk_check_config(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 		return(false);
 	}
 
-	bpath = (char *)po_get_data(hash_get(gdata->htab, "BIN_PATH"));
+	bpath = (char *) hash_get(gdata->htab, "BIN_PATH");
 	if (bpath == NULL) {
 		errorf("BIN_PATH not available.");
 		return(false);
@@ -535,14 +534,14 @@ bool pmk_check_config(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 	cflags = (char *)po_get_data(hash_get(ht, "CFLAGS"));
 	if (cflags != NULL) {
 		/* init alternative variable */
-		hash_append(gdata->htab, cflags, "", " "); /* XXX check ? */
+		hash_append(gdata->htab, cflags, strdup(""), " "); /* XXX check ? */
 	}
 
 	/* check for alternative variable for LIBS */
 	libs = (char *)po_get_data(hash_get(ht, "LIBS"));
 	if (libs != NULL) {
 		/* init alternative variable */
-		hash_append(gdata->htab, libs, "", " "); /* XXX check ? */
+		hash_append(gdata->htab, libs, strdup(""), " "); /* XXX check ? */
 	}
 
 	if (depend_check(ht, gdata) == false) {
@@ -618,10 +617,10 @@ bool pmk_check_config(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 		/* check for alternative variable for CFLAGS */
 		if (cflags != NULL) {
 			/* put result in special CFLAGS variable */
-			hash_append(gdata->htab, cflags, pipebuf, " "); /* XXX check ? */
+			hash_append(gdata->htab, cflags, strdup(pipebuf), " "); /* XXX check ? */
 		} else {
 			/* put result in CFLAGS */
-			hash_append(gdata->htab, "CFLAGS", pipebuf, " "); /* XXX check ? */
+			hash_append(gdata->htab, "CFLAGS", strdup(pipebuf), " "); /* XXX check ? */
 		}
 	}
 
@@ -635,10 +634,10 @@ bool pmk_check_config(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 		/* check for alternative variable for LIBS */
 		if (libs != NULL) {
 			/* put result in special LIBS variable */
-			hash_append(gdata->htab, libs, pipebuf, " "); /* XXX check ? */
+			hash_append(gdata->htab, libs, strdup(pipebuf), " "); /* XXX check ? */
 		} else {
 			/* put result in LIBS */
-			hash_append(gdata->htab, "LIBS", pipebuf, " "); /* XXX check ? */
+			hash_append(gdata->htab, "LIBS", strdup(pipebuf), " "); /* XXX check ? */
 		}
 	}
 
@@ -681,7 +680,7 @@ bool pmk_check_pkg_config(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 		return(false);
 	}
 
-	bpath = (char *)po_get_data(hash_get(gdata->htab, "BIN_PATH"));
+	bpath = (char *) hash_get(gdata->htab, "BIN_PATH");
 	if (bpath == NULL) {
 		errorf("BIN_PATH not available.");
 		return(false);
@@ -691,14 +690,14 @@ bool pmk_check_pkg_config(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 	cflags = (char *)po_get_data(hash_get(ht, "CFLAGS"));
 	if (cflags != NULL) {
 		/* init alternative variable */
-		hash_append(gdata->htab, cflags, "", " "); /* XXX check ? */
+		hash_append(gdata->htab, cflags, strdup(""), " "); /* XXX check ? */
 	}
 
 	/* check for alternative variable for LIBS */
 	libs = (char *)po_get_data(hash_get(ht, "LIBS"));
 	if (libs != NULL) {
 		/* init alternative variable */
-		hash_append(gdata->htab, libs, "", " "); /* XXX check ? */
+		hash_append(gdata->htab, libs, strdup(""), " "); /* XXX check ? */
 	}
 
 	if (depend_check(ht, gdata) == false) {
@@ -784,10 +783,10 @@ bool pmk_check_pkg_config(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 		/* check for alternative variable for CFLAGS */
 		if (cflags != NULL) {
 			/* put result in special CFLAGS variable */
-			hash_append(gdata->htab, cflags, pipebuf, " "); /* XXX check ? */
+			hash_append(gdata->htab, cflags, strdup(pipebuf), " "); /* XXX check ? */
 		} else {
 			/* put result in CFLAGS */
-			hash_append(gdata->htab, "CFLAGS", pipebuf, " "); /* XXX check ? */
+			hash_append(gdata->htab, "CFLAGS", strdup(pipebuf), " "); /* XXX check ? */
 		}
 	}
 
@@ -800,10 +799,10 @@ bool pmk_check_pkg_config(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 		/* check for alternative variable for LIBS */
 		if (libs != NULL) {
 			/* put result in special LIBS variable */
-			hash_append(gdata->htab, libs, pipebuf, " "); /* XXX check ? */
+			hash_append(gdata->htab, libs, strdup(pipebuf), " "); /* XXX check ? */
 		} else {
 			/* put result in LIBS */
-			hash_append(gdata->htab, "LIBS", pipebuf, " "); /* XXX check ? */
+			hash_append(gdata->htab, "LIBS", strdup(pipebuf), " "); /* XXX check ? */
 		}
 	}
 
@@ -852,7 +851,7 @@ bool pmk_check_type(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 
 	/* get the appropriate compiler */
 	snprintf(cfgcmd, sizeof(cfgcmd), "BIN_%s", pld->comp);
-	ccpath = (char *)po_get_data(hash_get(gdata->htab, cfgcmd));
+	ccpath = (char *) hash_get(gdata->htab, cfgcmd);
 	if (ccpath == NULL) {
 		errorf("cannot get compiler path.");
 		return(false);

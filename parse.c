@@ -47,8 +47,6 @@
 #define DEBUG_PRS	1
 */
 
-/* XXX TODO function header comments */
-
 
 char	parse_err[MAX_ERRMSG_LEN];
 
@@ -102,7 +100,7 @@ prscell *prscell_init(void) {
 
 	pcell = (prscell *) malloc(sizeof(prscell));
 	if (pcell != NULL) {
-		ht = hash_init(MAX_CMD_OPT);
+		ht = hash_init_adv(MAX_CMD_OPT, (void *)po_free, (void *)po_append);
 		if (ht != NULL) {
 			pcell->ht = ht;
 			pcell->next = NULL;

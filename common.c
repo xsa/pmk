@@ -256,7 +256,7 @@ bool str_to_dynary(char *str, char sep, dynary *da) {
 	int	 s;
 
 	s = sizeof(buf);
-/*
+/*	XXX TODO ?
 	s = sizeof(str);
 	buf = (char *) malloc(strlen(str + 1));
 */
@@ -280,6 +280,7 @@ bool str_to_dynary(char *str, char sep, dynary *da) {
 		}
 		str++;
 	}
+
 	*pbuf = CHAR_EOS;
 	if (da_push(da, strdup(buf)) == false) {
 		return(false);

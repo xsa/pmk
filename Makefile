@@ -47,12 +47,9 @@ SC_OBJS=	$(SCAN).o common.o compat.o dynarray.o parse.o hash.o pmk_obj.o
 	$(CC) $(CFLAGS) -c $<
 
 # specific object files
-
 $(SCAN).o:
 	$(CC) $(CFLAGS) -DDATADIR=\"$(DATADIR)\" -c $(SCAN).c
 
-hash.o:
-	$(CC) $(CFLAGS) -DUSE_PMK_OBJ -c hash.c
 
 all: $(PREMAKE) $(SETUP) $(SCAN)
 
