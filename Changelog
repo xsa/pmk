@@ -4,6 +4,8 @@
  * update all files that use hash_add() and hash_get().
  * improve pmkscan for data parsing and output file.
  * updated data/pmkscan.dat file.
+ * updated Makefile to install pmkscan.
+ * use USER_TEST to define where to find pmkscan.dat file.
 
 19 Jul 2003 mipsator
  * updated STATUS
