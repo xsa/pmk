@@ -848,6 +848,7 @@ bool add_cfgtool(cfgtdata *pcd, htable *pht) {
 
 	pstr = po_get_str(hash_get(pht, "BINARY"));
 	if (pstr == NULL) {
+		free(pcell->name);
 		free(pcell);
 		return(false);
 	} else {
