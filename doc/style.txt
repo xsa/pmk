@@ -3,7 +3,7 @@
                         RECOMMENDED CODING STYLE FOR PMK
                         --------------------------------
 
-I) Comments
+1) Comments
 
 /*
 	This is a function heading comment.
@@ -23,7 +23,7 @@ I) Comments
 Comments in the code are GREATLY appreciated.
 
 
-II) Includes
+2) Includes
 
 #include <system_first.h>
 
@@ -32,7 +32,7 @@ II) Includes
 Each group of include can be sorted in alphabetical order.
 
 
-III) Prototypes
+3) Prototypes
 
 Use of tab indenting is recommended.
 Extra space to line up functions could be nice.
@@ -42,7 +42,7 @@ char	*second_proc(char, int);
 int	 third_proc(char *);
 
 
-IV) Structures
+4) Structures
 
 It uses the same specs as above, see the following example:
 
@@ -53,7 +53,7 @@ struct mystruct {
 };
 
 
-V) Variables
+5) Variables
 
 Always the same format:
 
@@ -66,12 +66,12 @@ Variables could be sorted by type in alphabetical order.
 You can also group them by letter case with uppercase first.
 
 
-VI) Keywords
+6) Keywords
 
 Keywords should be followed by a space instead of functions.
 
 
-VII) Functions
+7) Functions
 
 Function must be declared on one line with type, function name,
 arguments and open brace as the following :
@@ -81,7 +81,7 @@ int first_proc(char *arg_one, int arg_two) {
 Variables declared in functions respect the same rules defined in 
 the fifth section.
 
-VIII) Error messages
+8) Error messages
 
 When using the errorf() function, the format should look like the following:
 
@@ -94,3 +94,7 @@ When using the errorf() function, the format should look like the following:
 You should always use strerror(errno) when possible.
 Note that error messages always end with a dot (.) and start with a lowercase.
 
+9) Exit statements
+
+- exit(EXIT_FAILURE) and exit(EXIT_SUCCESS) should be used respectively
+  instead of exit(1) and exit(0).
