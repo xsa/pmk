@@ -1,36 +1,55 @@
 # $Id$
 # pmkfile example
 
-# comment
+# put some defines
 .DEFINE
 PACKAGE=scandisk
 .END
+
+# set the target files that will be processed
 .TARGET
 LIST=samples/Makefile.sample.pmk,samples/config_sample.h.pmk
 .END
+
+# set autoconf compatibility
+.AC_COMPAT
+.END
+
+# check availability of termcap library
 .CHECK_LIB(lib_termcap)
 REQUIRED=FALSE
 LIBNAME=termcap
 .END
+
+# check function getwin in libcurses
+# this check depends of lib_termcap check for test purposes
 .CHECK_LIB(lib_curses)
 REQUIRED=FALSE
 DEPEND=lib_termcap
 LIBNAME=curses
 FUNCTION=getwin
 .END
+
+# check availability of sys/param.h header
 .CHECK_INCLUDE(sys_param)
 REQUIRED=FALSE
 INCLUDE=sys/param.h
 .END
+
+# check function strlcpy in string.h
 .CHECK_INCLUDE(string_strcpy)
 REQUIRED=FALSE
 INCLUDE=string.h
 FUNCTION=strlcpy
 .END
+
+# try to found gtk_config in path
 .CHECK_BINARY(gtk_config)
 REQUIRED=FALSE
 FILENAME=gtk-config
 .END
+
+# get data via libpng_config
 .CHECK_CONFIG(lib_png)
 REQUIRED=FALSE
 CFGTOOL=libpng-config
