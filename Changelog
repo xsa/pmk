@@ -1,5 +1,6 @@
 10 Feb 2004 mipsator
- * Added 2 sections to the tutorial.
+ * added 2 sections to the tutorial.
+ * updated pmkfile.5 with shared library name building.
 
 09 Feb 2004 mipsator
  * rewritten pmkinstall to permit multiple directory creation.
