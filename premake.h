@@ -46,11 +46,11 @@
 	FreeBSD
 	NetBSD
 	MACOSX
-	Solaris			(not verified)
+	Solaris
 	SunOS
 	HP-UX
-	AIX			(not verified)
-	IRIX			(not verified)
+	AIX
+	IRIX
 	OSF1
 	Ultrix			(not verified)
 	Linux based systems	(Debian, Mandrake, RedHat, Slackware, Suse)
