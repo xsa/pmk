@@ -63,7 +63,7 @@ bool get_line(FILE *fd, char *line, int lsize) {
 		p = (char *)strchr(line, '\n');
 		if (p != NULL) {
 			/* remove trailing newline */
-			*p= '\0';
+			*p= CHAR_EOS;
 		}
 		return(true);
 	} else {
@@ -91,12 +91,12 @@ int parse_conf_line(char *line, int linenum, cfg_opt *opts) {
 		found_op = 0;
 
 
-	while ((c = line[i]) != '\0') {
+	while ((c = line[i]) != CHAR_EOS) {
 		if (found_op == 0) {
 			if ((c == CHAR_ASSIGN_UPDATE) || (c == CHAR_ASSIGN_STATIC)) {
 				/* operator found, terminate key and copy key name in struct */
 				found_op = 1;
-				key[j] = '\0';
+				key[j] = CHAR_EOS;
 				strncpy(opts->key, key, MAX_OPT_NAME_LEN);
 
 				/* set operator in struct */
@@ -123,7 +123,7 @@ int parse_conf_line(char *line, int linenum, cfg_opt *opts) {
 	}
 	if (found_op == 1) {
 		/* line parsed without any error */
-		value[k] = '\0';
+		value[k] = CHAR_EOS;
 		strncpy(opts->val, value, MAX_OPT_VALUE_LEN);
 		return(0);			
 	} else {
@@ -238,9 +238,9 @@ bool str_to_dynary(char *str, char sep, dynary *da) {
 	int	i = 0,
 		j = 0;
 
-	while (str[i] != '\0') {
+	while (str[i] != CHAR_EOS) {
 		if (str[i] == sep) {
-			buf[j] = '\0';
+			buf[j] = CHAR_EOS;
 			if (da_push(da, buf) == false) {
 				return(false);
 			}
@@ -251,7 +251,7 @@ bool str_to_dynary(char *str, char sep, dynary *da) {
 		}
 		i++;
 	}
-	buf[j] = '\0';
+	buf[j] = CHAR_EOS;
 	if (da_push(da, buf) == false) {
 		return(false);
 	}
