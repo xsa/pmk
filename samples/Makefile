@@ -28,6 +28,19 @@ test_lib_c:
 	@echo "=> End of test"
 	@echo ""
 
+test_lib_cxx:
+	@echo ""
+	@echo "=> Testing C++ library building"
+	@echo ""
+	@echo "-> Runing pmk"
+	@echo ""
+	@cd lib_c++ && pmk
+	@echo ""
+	@cd lib_c++ && make
+	@echo ""
+	@echo "=> End of test"
+	@echo ""
+
 test_$(PREMAKE):
 	@echo ""
 	@echo "=> Testing $(PREMAKE) with sample files"
@@ -126,7 +139,7 @@ test_old_all: test_pmk_only
 test_scans: test_scan_c
 
 # all library tests
-test_libs: test_lib_c
+test_libs: test_lib_c test_lib_cxx
 
 # all tests
 test_all: test_libs test_scans test_$(INST)
