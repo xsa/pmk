@@ -39,6 +39,11 @@
 #	define FALSE	0
 #endif
 
+#ifndef MAXPATHLEN
+#	define MAXPATHLEN 512
+#endif
+
+
 #define PREMAKE_VERSION		"0.1"
 
 #define PREMAKE_FILENAME	"pmkfile"
