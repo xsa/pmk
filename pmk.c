@@ -759,10 +759,10 @@ int main(int argc, char *argv[]) {
 	}
 
 	/* initialize some variables */
-	if (init_var(pgd) == true) {
+	if (init_var(pgd) == false) {
 		/* hash error on variable initialization */
 		clean(pgd);
-		errorf("cannot parse '%s', run pmksetup.", PREMAKE_CONFIG_PATH);
+		errorf("failed to do variable init.", PREMAKE_CONFIG_PATH);
 		exit(EXIT_FAILURE);
 	}
 
