@@ -293,7 +293,7 @@ htable *keyword_hash(prskw kwtab[], int nbkw) {
 		for(i = 0 ; i < nbkw ; i++) {
 			pkw = (prskw *) malloc(sizeof(prskw));
 			bcopy(&kwtab[i], pkw, sizeof(prskw));
-			if (hash_add(phkw, kwtab[i].kw, pkw) == HASH_ADD_FAIL) {
+			if (hash_add(phkw, kwtab[i].kw, pkw) == HASH_ADD_FAIL) { /* no need to strdup */
 				free(pkw);
 				errorf("hash failure");
 				exit(1);
@@ -1065,7 +1065,8 @@ bool parse_command(FILE *fp, prsdata *pdata, prscell *pcell) {
 #ifdef DEBUG_PRS
 					debugf("recording '%s' key", opt.key);
 #endif
-					if (hash_add(pcell->data, opt.key, opt.value) == HASH_ADD_FAIL) {
+
+					if (hash_add(pcell->data, opt.key, opt.value) == HASH_ADD_FAIL) { /* no need to strdup */
 						strlcpy(parse_err, PRS_ERR_HASH, sizeof(parse_err));
 						return(false);
 					}

@@ -1264,7 +1264,7 @@ bool pmk_set_parameter(pmkcmd *cmd, prsopt *popt, pmkdata *gdata) {
 		if (*pstr != CHAR_EOS) {
 			gdata->ac_file = strdup(pstr);
 			pmk_log("\t\tSet file to '%s'.\n", pstr);
-			hash_add(gdata->htab, AC_VAR_DEF, AC_VALUE_DEF); /* XXX TODO check */
+			hash_add(gdata->htab, AC_VAR_DEF, strdup(AC_VALUE_DEF)); /* XXX TODO check */
 			pmk_log("\t\tSet '%s' value to '%s'.\n", AC_VAR_DEF, AC_VALUE_DEF);
 		}
 
@@ -1335,7 +1335,7 @@ bool pmk_set_variable(pmkcmd *cmd, prsopt *popt, pmkdata *gdata) {
 		/* process value string */
 		value = process_string(po_get_str(popt->value), gdata->htab);
 		if (value != NULL) {
-			hash_add(gdata->htab, popt->key, value);
+			hash_add(gdata->htab, popt->key, value); /* no need to strdup */
 			pmk_log("\tAdded '%s' variable.\n", popt->key);
 		} else {
 			pmk_log("\tFailed processing of '%s'.\n", popt->key);
