@@ -436,14 +436,14 @@ bool parse_ac_config(htable *ht, char *fpath) {
 	}
 
 	while (get_line(fp_in, line, sizeof(line)) == true) {
+		/* look for '#define' */
 		pstr = strstr(line, "#define");
 		if (pstr == NULL) {
+			/* else try to find '#undef' */
 			pstr = strstr(line, "#undef");
 		}
 
 		if (pstr != NULL) {
-			/* XXX get the def and check gdata about it */
-
 			/* look for the definition name */
 			while (*pstr != CHAR_EOS && isspace(*pstr) != 0) {
 				pstr++;

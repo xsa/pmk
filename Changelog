@@ -1,3 +1,9 @@
+23 MAy 2003 mipsator
+ * added AC_COMPAT in pmkfile.sample plus some comments.
+ * added samples/ac_config.h for autoconf compatibility test.
+ * AC_COMPAT now handle FILENAME to set the configuration file to process.
+ * ac_file is now included in pmkdata structure.
+
 22 May 2003 mipsator
  * improve a bit copy_text_file().
  * add parse_ac_config(), not finished yet but it doesn't break the code.

@@ -93,6 +93,7 @@ typedef struct {
 		*labl;
 	dynary	*tlist;
 	char	errmsg[MAX_ERRMSG_LEN];
+	char	*ac_file;
 } pmkdata;
 
 

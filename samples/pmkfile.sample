@@ -13,6 +13,7 @@ LIST=samples/Makefile.sample.pmk,samples/config_sample.h.pmk
 
 # set autoconf compatibility
 .AC_COMPAT
+FILENAME=samples/ac_config.h
 .END
 
 # check availability of termcap library
