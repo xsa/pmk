@@ -1,3 +1,8 @@
+31 May 2003 mipsator
+ * added strlcat.c and strlcat.h in compat directory.
+ * pmkcfg.sh now have a check for strlcat.
+ * fully included strlcat in compat.
+
 28 May 2003 mipsator
  * misc changes in Makefile.
  * changed samples/ac_config.h into samples/ac_config.h.sample .

@@ -118,6 +118,12 @@ cp $template $compat
 check_include_function string.h strlcpy
 
 #
+# strlcat check
+#
+
+check_include_function string.h strlcat
+
+#
 # stdbool.h check
 #
 
