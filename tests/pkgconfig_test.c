@@ -36,7 +36,7 @@ int main(int argc, char *argv[]) {
 	if (argc == 2) {
 		mod = argv[1];
 		if (pkg_mod_exists(ppd, mod) == true) {
-			printf("module '%s' found (in file '%s')\n", mod, pstr);
+			printf("module '%s' found\n", mod);
 			ppc = pkg_cell_add(ppd, mod);
 
 			printf("module name = %s\n", ppc->name);
