@@ -237,18 +237,24 @@ mkf_sed() {
 #
 
 # parse options
-while getopts "hp:u" arg; do
-	case $arg in
-		p)	echo "overriding prefix with '$OPTARG'"
-			base=$OPTARG
-			;;
-		u)	usermode=1
-			;;
-		h)	usage
-			exit 1
-			;;
+set -- `getopt p:uh $*`
+if [ $? != 0 ]
+then
+	exit 1
+fi
+while [ $1 != -- ]
+do
+	case $1 in
+	-p)     echo "overriding prefix with '$2'"    
+	base=$2
+	shift;;
+	-u)     usermode=1;;
+	-h)     usage
+	exit 1;;
 	esac
+	shift
 done
+shift
 
 # init templates
 process_tmpl_list "$tmpl_list"
