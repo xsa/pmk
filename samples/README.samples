@@ -7,7 +7,7 @@ Test samples for PMK
 --------------------
 
 This directory provides some samples of pmk use. General test can be
-done vie the Makefile located in the samples directory.
+done via the Makefile located in the samples directory.
 
 To run these tests you must install pmk before (see INSTALL) and then
 run 'make test' from the samples directory.
