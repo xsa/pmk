@@ -11,15 +11,16 @@
 #include "../hash.c"
 
 #define TAB_SIZE 256
-#define NBKEYS 255
+#define NBKEYS 256
 
 
 int main() {
 	int	i,
-		r;
+		n;
 	char	tstr[256],
 		ttstr[256],
-		*val;
+		*val,
+		**keys = NULL;
 	htable	*hp;
 
 	printf("Testing init\n");
@@ -46,6 +47,24 @@ int main() {
 		printf("found\n");
 	}
 
+
+	printf("Adding 3 test keys\n");
+	hash_add(hp, "test1", "test value");
+	hash_add(hp, "test2", "test value");
+	hash_add(hp, "test3", "test value");
+
+	keys = hash_keys(hp);
+	n = hash_nbkey(hp);
+	printf("Displaying %d keys :\n", n);
+	for(i = 0 ; i < n ; i++) {
+		printf("\t%s\n", keys[i]);
+	}
+
+	printf("Removing 3 test keys\n");
+	hash_delete(hp, "test1");
+	hash_delete(hp, "test2");
+	hash_delete(hp, "test3");
+
 	printf("Adding %d random keys\n", NBKEYS);
 
 	for(i = 0 ; i < NBKEYS ; i++) {
@@ -53,8 +72,8 @@ int main() {
 		if (mktemp(tstr) != NULL) {
 			snprintf(ttstr, sizeof(ttstr), "value.%s", tstr);
 
-			r = hash_add(hp, tstr, ttstr);
-			switch (r) {
+			n = hash_add(hp, tstr, ttstr);
+			switch (n) {
 				case HASH_ADD_FAIL:
 					printf("Failed add for key %s\n", tstr);
 					break;
@@ -77,8 +96,8 @@ int main() {
 	}
 
 	printf("Testing destroy\n");
-	r = hash_destroy(hp);	
-	printf("Removed %d key(s)\n", r);
+	n = hash_destroy(hp);	
+	printf("Removed %d key(s)\n", n);
 
 	return(0);
 }
