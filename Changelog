@@ -4,6 +4,7 @@
  * improved a bit comp_test.c to display more info.
  * fixed compiler detection failure.
  * fixed makefiles for HPUX.
+ * fixed pmkcomp.dat to use unique id for each compiler definition.
 
 # snapshot 0.7.9
 

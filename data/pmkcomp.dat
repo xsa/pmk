@@ -20,7 +20,7 @@ ADD_COMPILER {
 }
 
 ADD_COMPILER {
-	ID = "sunpro"
+	ID = "suncc"
 	DESCR = "Sun Workshop C"
 	MACRO = "__SUNPRO_C"
 	VERSION = "__SUNPRO_C"
@@ -28,7 +28,7 @@ ADD_COMPILER {
 }
 
 ADD_COMPILER {
-	ID = "sunpro"
+	ID = "suncxx"
 	DESCR = "Sun Workshop C++"
 	MACRO = "__SUNPRO_CC"
 	VERSION = "__SUNPRO_CC"
@@ -44,7 +44,7 @@ ADD_COMPILER {
 }
 
 ADD_COMPILER {
-	ID = "decc"
+	ID = "decxx"
 	DESCR = "Compaq C++"
 	MACRO = "__DECCXX"
 	VERSION = "__DECCXX_VER"
@@ -59,7 +59,7 @@ ADD_COMPILER {
 }
 
 ADD_COMPILER {
-	ID = "hpcc"
+	ID = "hpcxx"
 	DESCR = "HP Ansi C++"
 	MACRO = "__HP_aCC"
 	VERSION = "__HP_aCC"
