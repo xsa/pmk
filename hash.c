@@ -141,7 +141,7 @@ bool hash_resize(htable *ht, int newsize) {
 		while (phc != NULL) {
 			h = hash_compute(phc->key, newsize);
 			next = phc->next;
-			hash_add_cell(&newhn[h], phc); /* XXX test ? */
+			hash_add_cell(&newhn[h], phc);
 			phc = next;
 			c++;
 		}
@@ -235,7 +235,10 @@ int hash_add(htable *pht, char *key, char *value) {
 			return(HASH_ADD_FAIL);
 		} else {
 			/* resize the hash table (long) */
-			hash_resize(pht, size * 2); /* XXX check ? */
+			if (hash_resize(pht, size * 2) == false) {
+				/* cannot resize the hash */
+				return(HASH_ADD_FAIL);
+			}
 		}
 	}
 
@@ -245,8 +248,14 @@ int hash_add(htable *pht, char *key, char *value) {
 		return(rval);
 
 	/* if okay put key & value in a new cell */
-	strlcpy(phc->key, key, MAX_HASH_KEY_LEN); /* XXX test ? */
-	strlcpy(phc->value, value, MAX_HASH_VALUE_LEN); /* XXX test ? */
+	if (strlcpy(phc->key, key, sizeof(phc->key)) >= sizeof(phc->key)) {
+		free(phc);
+		return(HASH_ADD_FAIL);
+	}
+	if (strlcpy(phc->value, value, sizeof(phc->value)) >= sizeof(phc->value)) {
+		free(phc);
+		return(HASH_ADD_FAIL);
+	}
 
 	phn = &pht->nodetab[hash];
 	rval = hash_add_cell(phn, phc);

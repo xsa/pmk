@@ -183,8 +183,7 @@ bool env_to_opt(char *env_name, pmkcmdopt *opt) {
 bool get_make_var(char *varname, char *result, int rsize) {
 	FILE	*mfp,
 		*tfp;
-	/* XXX 256 => berk berk berk ! */
-	char	mfn[256] = "/tmp/pmk_mkf.XXXXXXXX",
+	char	mfn[] = "/tmp/pmk_mkf.XXXXXXXX",
 		varstr[256];
 	int	mfd = -1;
 	bool	rval;
@@ -212,7 +211,7 @@ bool get_make_var(char *varname, char *result, int rsize) {
 		return(false);
 	}
 
-	snprintf(varstr, 256, "/usr/bin/make -f %s", mfn);
+	snprintf(varstr, sizeof(varstr), "/usr/bin/make -f %s", mfn);
 	tfp = popen(varstr, "r");
 	if (tfp != NULL) {
 		/* catch output of make */
@@ -303,8 +302,13 @@ bool find_file(dynary *da, char *fname, char *fpath, int fplen) {
 
 	for (i = 0 ; (i < da_usize(da)) && (found == false) ; i++) {
 		path = da_idx(da, i);
-		/* XXX should check path */
-		dp = opendir(path);
+		if (path == NULL) {
+			/* skipping */
+			dp = NULL;
+		} else {
+			/* got a path, opening */
+			dp = opendir(path);
+		}
 		
 		if (dp != NULL) {
 			exit = false;
