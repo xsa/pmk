@@ -12,6 +12,7 @@ HP-UX :
 
 Tru64 :
  - int64_t doesn't exist.
+ - getopts doesn't work sp pmkcfg.sh is broken.
 
 SunOS:
  - S_BLKSIZE doesn't exist.
