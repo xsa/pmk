@@ -1,4 +1,5 @@
 15 May 2003 mipsator
+ * added AC_COMPAT for autoconf compatibility.
  * cleanup in various files (XXX comments).
  * added missing check (XXX comments).
  * misc.
