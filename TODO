@@ -71,7 +71,7 @@ pmkinstall
 
 pmkshgen
 -----------------------------------------------------------------------
-mips	~.	make specs, this tool should handle install and 
+mips	~.	make specs, this tool should handle install and
 		deinstall operations (post 0.8)
 
 pmkpc

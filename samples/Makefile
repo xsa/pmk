@@ -1,4 +1,4 @@
-# $Id$ 
+# $Id$
 
 PREMAKE=	pmk
 SETUP=		$(PREMAKE)setup
@@ -173,6 +173,6 @@ test_libs: test_lib_c test_lib_cxx
 # all tests
 test_all: test_bins test_libs test_scans test_$(INST)
 
-# test target => alias to all target 
+# test target => alias to all target
 test: all
 

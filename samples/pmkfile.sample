@@ -7,7 +7,7 @@ SETTINGS {
 	AC_COMPAT = "ac_config.h"
 	# set default language
 	LANG = "C"
-	# target files 
+	# target files
 	TARGET = ("Makefile.sample.pmk","config_sample.h.pmk",
 			"subdir/Makefile.subdir.pmk")
 	# detect compiler

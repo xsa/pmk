@@ -92,7 +92,7 @@ get_file_name() {
 	filename="$basedir/$basename"
 }
 
-# create new files from templates 
+# create new files from templates
 process_tmpl_list () {
 	newlist=""
 	for f in $*; do
@@ -245,7 +245,7 @@ fi
 while [ $1 != -- ]
 do
 	case $1 in
-	-p)     echo "Setting prefix to '$2'"    
+	-p)     echo "Setting prefix to '$2'"
 	base=$2
 	shift;;
 	-u)     usermode=1;;

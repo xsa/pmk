@@ -16,13 +16,13 @@ other projects:
 - Path manipulation tools : pathtools.c pathtools.h
 
 
-These files are released under the BSD license and are almost ready to 
+These files are released under the BSD license and are almost ready to
 be used.
 Some issues do exist due to portability as this package uses ISO99 booleans and
 string functions like strlcpy and strlcat.
 You are free to use some components of this package to assume compatibility
 on all the system targets as long as you do respect the BSD license.
 
-NOTE : Some functions are maybe missing as we do not have the use in this 
+NOTE : Some functions are maybe missing as we do not have the use in this
 current package but we could add them on request (yes, you can also send
-patches ;) ). 
+patches ;) ).

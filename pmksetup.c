@@ -808,7 +808,7 @@ bool check_libpath(htable *pht) {
 bool dir_exists(const char *fdir) {
         DIR     *dirp;
         size_t  len;
-       
+
 	len = strlen(fdir);
 
 	if (len < MAXPATHLEN) {
