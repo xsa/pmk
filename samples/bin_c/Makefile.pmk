@@ -1,15 +1,43 @@
 # $Id$
 
-CC?=	@BIN_CC@
+CC=	@BIN_CC@
 
 NAME=	hello
 
-all: $(NAME)
+all: show $(NAME) run_${NAME} clean
 
-hello:
+show:
+	@echo ""
+	@echo "-> Dumping template"
+	@echo ""
+	@echo "Makefile.pmk:"
+	@echo "--dump-begin----------------------------"
+	@cat Makefile.pmk
+	@echo "--dump-end------------------------------"
+	@echo "-> Dumping generated file"
+	@echo ""
+	@echo "Makefile:"
+	@echo "--dump-begin----------------------------"
+	@cat Makefile
+	@echo "--dump-end------------------------------"
+
+${NAME}:
+	@echo ""
+	@echo "-> Bulding binary"
+	@echo ""
 	$(CC) $(CFLAGS) -o $(NAME) $(NAME).c
 
+run_$(NAME):
+	@echo ""
+	@echo "-> Running program"
+	@echo ""
+	@echo "--exec-begin----------------------------"
+	@./${NAME}
+	@echo "--exec-end------------------------------"
+	
 clean:
+	@echo ""
+	@echo "-> Cleaning ..."
+	@echo ""
 	rm -f $(NAME)
-	rm -f Makefile config.h
-	rm -f *.core *.log
+	rm -f *.log Makefile config.h

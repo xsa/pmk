@@ -9,7 +9,7 @@ int main(void) {
 	char	buf[1024];
 
 	strlcpy(buf, "Hello ", sizeof(buf));
-	strlcat(buf, "world", sizeof(buf));
+	strlcat(buf, "World !", sizeof(buf));
 
 	printf("%s\n", buf);
 
