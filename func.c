@@ -132,7 +132,6 @@ bool pmk_check_binary(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 
 /*
 	check include file
-	XXX should be able to look for a function
 */
 
 bool pmk_check_include(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
@@ -158,13 +157,18 @@ bool pmk_check_include(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 	/* check if a function must be searched */
 	incfunc = hash_get(ht, "FUNCTION");
 
-	/* XXX should use INC_PATH with -I ? */
-	pmk_log("\tFound header '%s' : ", incfile);
-
 	tfp = fopen(INC_TEST_NAME, "w");
 	if (tfp != NULL) {
+		if (incfunc == NULL) {
+			pmk_log("\tFound header '%s' : ", incfile);
+			/* XXX should use INC_PATH with -I ? */
+			fprintf(tfp, INC_TEST_CODE, incfile);
+		} else {
+			pmk_log("\tFound function '%s' in '%s' : ", incfunc, incfile);
+			fprintf(tfp, INC_FUNC_TEST_CODE, incfile, incfunc);
+		}
+
 		/* fill test file */
-		fprintf(tfp, INC_TEST_CODE, incfile);
 		fclose(tfp);
 	} else {
 		errorf("cannot open test file.");
@@ -182,6 +186,11 @@ bool pmk_check_include(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 		pmk_log("no.\n");
 		if (required == true) {
 			rval = false;
+			if (incfunc == NULL) {
+				errorf("failed to find header '%s'.", incfile);
+			} else {
+				errorf("failed to find function '%s'.", incfunc);
+			}
 		} else {
 			rval = true;
 		}
@@ -192,6 +201,7 @@ bool pmk_check_include(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 		fprintf(stderr, "Can not remove %s\n", INC_TEST_NAME);
 	}
 
+	/* No need to check return here as binary could not exists */
 	unlink(BIN_TEST_NAME);
 
 	return(rval);

@@ -1,3 +1,6 @@
+26 Apr 2003 mipsator
+ * pmk_check_include() has been updated to check function again.
+
 25 Apr 2003 mipsator
  * pmk_check_binary() has been completed.
  * pmk_check_include() has been rewritten to have a better test.
