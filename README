@@ -1,9 +1,9 @@
 The pmk project try to provide an alternative to gnu configure.
 
-There is two way for using pmk. The first is the common installation
-that need root privileges and that allow all users to acces pmk. The
-second is the user mode that install binaries in $HOME/bin/ and data in
-$HOME/.pmk/ of the user that do the install.
+There is two basic ways for using pmk. The first is the common
+installation that need root privileges and that allow all users to
+acces pmk. The second is the user mode that install binaries in
+$HOME/bin/ and data in $HOME/.pmk/ of the user that do the install.
 
 There is two targets to configure pmk before building.
 Configuring with root mode :
@@ -35,3 +35,5 @@ Or if you have a sourceforge account on this forum :
 
   http://sourceforge.net/forum/forum.php?forum_id=258652
 
+For more experienced users it is possible to directly use the pmkcfg.sh
+script, see INSTALL.
