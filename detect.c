@@ -267,7 +267,7 @@ bool detect_compiler(char *cpath, char *blog, comp_data *pcd, comp_info *cinfo) 
 			 pipebuf[TMP_BUF_LEN];
 	int		 r;
 
-	tfp = tmps_open(CC_TEST_FILE, "w", ftmp, sizeof(ftmp), sizeof(CC_TFILE_EXT));
+	tfp = tmps_open(CC_TEST_FILE, "w", ftmp, sizeof(ftmp), strlen(CC_TFILE_EXT));
 	if (tfp != NULL) {
 		/* fill test file */
 		gen_test_file(tfp, pcd);
