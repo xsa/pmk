@@ -1,3 +1,8 @@
+07 Nov 2003 mipsator
+ * improved init of CFLAGS, CXXFLAGS, CPPFLAGS, LIBS, LDFLAGS and
+	DEBUG with values gathered from make.
+ * changed target of get_make_var() from test to all.
+
 04 Nov 2003 mipsator
  * added makepath() in pathtools.
  * modified process_template() to use makepath().

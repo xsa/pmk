@@ -152,11 +152,43 @@ void init_var(pmkdata *pgd) {
 
 	pht = pgd->htab;
 
-	hash_add(pht, "CFLAGS", strdup("")); /* XXX check ? */
-	hash_add(pht, "CPPFLAGS", strdup("")); /* XXX check ? */
-	hash_add(pht, "LIBS", strdup("")); /* XXX check ? */
-	hash_add(pht, "LDFLAGS", strdup("")); /* XXX check ? */
+	get_make_var("CFLAGS", buf, sizeof(buf));
+#ifdef PMK_DEBUG
+debugf("CFLAGS = '%s'", buf);
+#endif
+	hash_add(pht, "CFLAGS", strdup(buf)); /* XXX check ? */
 
+	get_make_var("CXXFLAGS", buf, sizeof(buf));
+#ifdef PMK_DEBUG
+debugf("CFLAGS = '%s'", buf);
+#endif
+	hash_add(pht, "CFLAGS", strdup(buf)); /* XXX check ? */
+
+	get_make_var("CPPFLAGS", buf, sizeof(buf));
+#ifdef PMK_DEBUG
+debugf("CPPFLAGS = '%s'", buf);
+#endif
+	hash_add(pht, "CPPFLAGS", strdup(buf)); /* XXX check ? */
+
+	get_make_var("LIBS", buf, sizeof(buf));
+#ifdef PMK_DEBUG
+debugf("LIBS = '%s'", buf);
+#endif
+	hash_add(pht, "LIBS", strdup(buf)); /* XXX check ? */
+
+	get_make_var("LDFLAGS", buf, sizeof(buf));
+#ifdef PMK_DEBUG
+debugf("LDFLAGS = '%s'", buf);
+#endif
+	hash_add(pht, "LDFLAGS", strdup(buf)); /* XXX check ? */
+
+	get_make_var("DEBUG", buf, sizeof(buf));
+#ifdef PMK_DEBUG
+debugf("DEBUG = '%s'", buf);
+#endif
+	hash_add(pht, "DEBUG", strdup(buf)); /* XXX check ? */
+
+	/* autoconf shit ? */
 	hash_add(pht, "OBJEXT", strdup("o")); /* XXX check ? */
 
 

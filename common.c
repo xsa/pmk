@@ -151,7 +151,7 @@ bool get_make_var(char *varname, char *result, int rsize) {
 		   /!\ should check content of VARNAME, could result
 		   	in a security breach.
 		*/
-		fprintf(mfp, "test:\n\t@echo ${%s}", varname);
+		fprintf(mfp, "all:\n\t@echo \"$(%s)\"", varname);
 		fclose(mfp);
 	} else {
 		fprintf(stderr, "Failed to open %s\n", mfn);
