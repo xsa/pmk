@@ -96,6 +96,7 @@ typedef struct {
 		basedir[MAXPATHLEN],
 		srcdir[MAXPATHLEN],
 		pmkfile[MAXPATHLEN],
+		ovrfile[MAXPATHLEN],
 		errmsg[MAX_ERRMSG_LEN];
 } pmkdata;
 

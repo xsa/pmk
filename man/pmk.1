@@ -8,7 +8,9 @@
 .Nm
 .Bk -words
 .Op Fl hv
+.Op Fl b Ar path 
 .Op Fl f Ar file 
+.Op Fl o Ar file 
 .Op Ar options
 .Ek
 .Sh DESCRIPTION
@@ -19,11 +21,13 @@ The options are as follows:
 .Bl -tag -width Ds
 .It Fl b Ar path
 Use given path as basedir.
-.It Fl f Ar filepath
+.It Fl f Ar file
 Use an alternate file instead of
 .Xr pmkfile 5 .
 .It Fl h
 Display usage.
+.It Fl o Ar file
+Override pmk.conf data with the content of the given file.
 .It Fl v
 Display the version number. 
 .El
