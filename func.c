@@ -824,9 +824,10 @@ bool pmk_check_pkg_config(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 		 rval;
 	char	 pipebuf[TMP_BUF_LEN],
 		 pc_cmd[MAXPATHLEN],
-		 pc_path[MAXPATHLEN],
+		 pc_buf[MAXPATHLEN],
 		*target,
 		*bpath,
+		*pc_path = NULL,
 		*libvers,
 		*cflags,
 		*libs;
@@ -841,15 +842,25 @@ bool pmk_check_pkg_config(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 		return(false);
 	}
 
-	bpath = hash_get(gdata->htab, PMKCONF_PATH_BIN);
-	if (bpath == NULL) {
-		/* OBSOLETE, check for BIN_PATH for compatibility with 6.0 */
-		bpath = hash_get(gdata->htab, PREMAKE_KEY_BINPATH);
+	/* try to get pkg-config path from pmk.conf setting */
+	pc_path = (char *) hash_get(gdata->htab, PMKCONF_BIN_PKGCONFIG);
+	if (pc_path == NULL) {
+		/* nothing in pmksetup hope pmk.conf is obsolete
+			and check in the path */
+		bpath = hash_get(gdata->htab, PMKCONF_PATH_BIN);
 		if (bpath == NULL) {
-			errorf("BIN_PATH not available.");
-			return(false);
+			/* OBSOLETE, check for BIN_PATH for compatibility with 6.0 */
+			bpath = hash_get(gdata->htab, PREMAKE_KEY_BINPATH);
+			if (bpath == NULL) {
+				errorf("BIN_PATH not available.");
+				return(false);
+			}
+			pmk_log("\tWARNING : BIN_PATH is obsolete, update pmk.conf with pmksetup.\n");
 		}
-		pmk_log("\tWARNING : BIN_PATH is obsolete, update pmk.conf with pmksetup.\n");
+		/* XXX ugly here, should clean ... */
+		if (get_file_path("pkg-config", bpath, pc_buf, sizeof(pc_buf)) == true) {
+			pc_path = pc_buf;
+		}
 	}
 
 	/* check for alternative variable for CFLAGS */
@@ -879,7 +890,7 @@ bool pmk_check_pkg_config(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 
 	/* check availability of pkg-config */
 	pmk_log("\tFound pkg-config : ");
-	if (get_file_path("pkg-config", bpath, pc_path, sizeof(pc_path)) == false) {
+	if (pc_path == NULL) {
 		pmk_log("no.\n");
 		if (required == true) {
 			return(false);

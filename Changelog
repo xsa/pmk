@@ -12,6 +12,8 @@
 	the configuration file.
  * rewritten predef_vars() in pmksetup (i feel better like that :).
  * updated pmk.conf sample.
+ * added pkg-config detection in pmksetup.
+ * updated pmk_check_pkg_config() to use BIN_PKGCONFIG if provided.
 
 15 Sep 2003 mipsator
  * removed useless parse_conf_line() in common.
