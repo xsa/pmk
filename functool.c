@@ -396,7 +396,7 @@ bool depend_check(htable *lht, pmkdata *gd) {
 		fdep = da_idx(da, i);
 		if (label_check(gd->labl, fdep) == false) {
 			rval = false;
-			snprintf(gd->errmsg, sizeof(gd->errmsg), "Dependency '%s' failed.", fdep);
+			snprintf(gd->errmsg, sizeof(gd->errmsg), "Required '%s' dependency failed.", fdep);
 		}
 	}
 

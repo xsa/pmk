@@ -277,8 +277,8 @@ bool parse_c_file(char *filename, scandata *sdata, htable *phtgen, char *langstr
 bool output_file(char *ofile, htable *pht) {
 	FILE	*fp;
 	char	*value;
-	int	 i;
 	hkeys	*phk;
+	int	 i;
 
 	fp = fopen(ofile, "w");
 	if (fp == NULL) {

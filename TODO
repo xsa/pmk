@@ -3,6 +3,8 @@ common :
 - improve parser to parse variables
 
 pmk :
+- update pmk.1
+- update pmkfile.5
 ~ compatibility with autoconf (progressing)
 - set CPPFLAGS
 - set LDFLAGS ?
