@@ -77,13 +77,13 @@ usage: $0 [-hup]
 "
 }
 
-check_include() {
-	include="$1"
-	printf "Checking '%s' : " "$include"
+check_header() {
+	header="$1"
+	printf "Checking header '%s' : " "$header"
 
 	cat > $testfile <<EOF
 #include <stdio.h>
-#include <$include>
+#include <$header>
 
 int main() {
 	return(0);
@@ -91,19 +91,19 @@ int main() {
 EOF
 
 	if $CC -o $testbin $testfile >/dev/null 2>&1; then
-		templ_sed "def" "$include"
+		templ_sed "def" "$header"
 		echo "yes"
 	else
-		templ_sed "udef" "$include"
+		templ_sed "udef" "$header"
 		echo "no"
 	fi
 	rm -f $testfile $testbin
 }
 
-check_include_function() {
+check_header_function() {
 	include="$1"
 	function="$2"
-	printf "Checking '%s' in '%s' : " "$function" "$include"
+	printf "Checking function '%s' in header '%s' : " "$function" "$include"
 
 	cat > $testfile <<EOF
 #include <stdio.h>
@@ -127,10 +127,38 @@ EOF
 
 check_type() {
 	type="$1"
-	printf "Checking '%s' type : " "$type"
+	printf "Checking type '%s' : " "$type"
 
 	cat > $testfile <<EOF
 #include <stdio.h>
+
+int main() {
+        if (($type *) 0)
+                return(0);
+        if (sizeof($type))
+                return(0);
+        return(0);
+}
+EOF
+
+	if $CC -o $testbin $testfile >/dev/null 2>&1; then
+		templ_sed "def" "$type"
+		echo "yes"
+	else
+		templ_sed "udef" "$type"
+		echo "no"
+	fi
+	rm -f $testfile $testbin
+}
+
+check_type_header() {
+	type="$1"
+	header="$2"
+	printf "Checking type '%s' in header '%s': " "$type" "$header"
+
+	cat > $testfile <<EOF
+#include <stdio.h>
+#include <$header>
 
 int main() {
         if (($type *) 0)
@@ -233,13 +261,13 @@ mkf_sed 'SYSCONFDIR' "$sysdir"
 # strlcpy check
 #
 
-check_include_function string.h strlcpy
+check_header_function string.h strlcpy
 
 #
 # strlcat check
 #
 
-check_include_function string.h strlcat
+check_header_function string.h strlcat
 
 #
 # _Bool type check
@@ -251,25 +279,25 @@ check_type _Bool
 # blkcnt_t type check
 #
 
-check_type blkcnt_t
+check_type_header blkcnt_t sys/types.h
 
 #
 # stdbool.h check
 #
 
-check_include stdbool.h
+check_header stdbool.h
 
 #
 # libgen.h check
 #
 
-check_include libgen.h
+check_header libgen.h
 
 #
 # isblank check
 #
 
-check_include_function ctype.h isblank
+check_header_function ctype.h isblank
 
 #
 # config finished, creates config

@@ -1,3 +1,7 @@
+30 Nov 2003 mipsator
+ * added optional HEADER in CHECK_TYPE command.
+ * updated pmkcfg.sh and pmkfile to check blkcnt_t correctly.
+
 29 Nov 2003 mipsator
  * added use of POSIX macro for exit() status in parse.c, pmk.c,
 	pmkinstall.c and pmkscan.c files.
