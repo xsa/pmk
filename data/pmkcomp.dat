@@ -18,7 +18,7 @@ ADD_COMPILER {
 	MACRO = "__GNUC__"
 	VERSION = "(__GNUC__ * 100 + __GNUC_MINOR__)"
 	SLCFLAGS = "-fPIC"
-	SLLDFLAGS = "-shared"
+	SLLDFLAGS = "-fPIC -shared"
 }
 
 ADD_COMPILER {
