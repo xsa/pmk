@@ -96,12 +96,14 @@ pkgcell *pkgcell_init(void) {
 
 	ppc->variables = hash_init(PKGCFG_HTABLE_SIZE);
 	if (ppc->variables == NULL) {
-		/*da_destroy(ppc->cflags);*/
-		/*da_destroy(ppc->libs);*/
 		free(ppc);
 		errorf("cannot initialize pkgcell hash table.");
 		return(NULL);
 	}
+
+	ppc->cflags = NULL;
+	ppc->libs = NULL;
+	ppc->requires = NULL;
 
 	return(ppc);
 }
@@ -228,7 +230,7 @@ bool scan_dir(char *dir, pkgdata *ppd) {
 				strlcat(fpath, pstr, sizeof(fpath));
 
 				hash_update_dup(ppd->files, buf, fpath);
-				/* XXX should use had_add_dup */
+				/* XXX should use hash_add_dup */
 				/* and detect if the package has already been detected */
 
 #ifdef PKGCFG_DEBUG
@@ -457,15 +459,9 @@ pkgcell *parse_pc_file(char *pcfile) {
 		return(NULL);
 	}
 
-	ppc = (pkgcell *) malloc(sizeof(pkgcell));
+	ppc = pkgcell_init();
 	if (ppc == NULL) {
 		errorf("cannot initialize pkgcell.");
-		return(NULL);
-	}
-
-	ppc->variables = hash_init(PKGCFG_HTABLE_SIZE);
-	if (ppc->variables == NULL) {
-		errorf("cannot initialize pkgcell hash table.");
 		return(NULL);
 	}
 
@@ -549,10 +545,10 @@ debugf("adding pkgcell for '%s'", mod);
 	/* add module in list */
 	da_push(ppd->mods, strdup(mod));
 
+	if (ppc->requires != NULL) {
 #ifdef PKGCFG_DEBUG
 debugf("pkgcell requires = '%s'", ppc->requires);
 #endif
-	if (ppc->requires != NULL) {
 		pkg_recurse(ppd, ppc->requires); /* XXX check */
 	}
 
