@@ -1,4 +1,6 @@
 26 Apr 2003 mipsator
+ * added BIN_CC in get_binaries and use it in pmk_check_include()
+   an pmk_check_lib().
  * added pmkfile(5).
  * implemented pmk_check_lib().
  * added check_include_function in pmkcfg.sh .
