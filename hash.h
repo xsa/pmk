@@ -81,7 +81,7 @@ typedef struct {
 } hpair;
 
 typedef struct {
-	int	  nkey;
+	size_t	  nkey;
 	char	**keys;
 } hkeys;
 

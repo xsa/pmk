@@ -42,6 +42,10 @@
 #include "pmk.h"
 #include "premake.h"
 
+#ifndef DATADIR
+/* for lint */
+#define DATADIR	"./data"
+#endif
 
 #define PMKCOMP_DATA	DATADIR "/pmkcomp.dat"
 

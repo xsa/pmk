@@ -322,7 +322,7 @@ bool detect_compiler(char *cpath, char *blog, comp_data *pcd, comp_info *cinfo) 
 		if (failed == true)
 			return(EXIT_FAILURE);
 	} else {
-		errorf("failed to build test binary.");
+		errorf("failed to build test binary : %s.", strerror(errno));
 	}
 
 	return(true);

@@ -283,13 +283,13 @@ int main(int argc, char *argv[]) {
 			 do_chown = false,
 			 do_strip = false,
 			 go_exit = false;
-	char		 chr,
-			*gstr = NULL,
+	char		*gstr = NULL,
 			*ostr = NULL,
 			*src,
 			*dst,
 			 dir[MAXPATHLEN];
 	gid_t		 gid = (gid_t) -1;
+	int		 chr;
 	mode_t		 mode = DEFAULT_MODE;
 	uid_t		 uid = (uid_t) -1;
 	
