@@ -1,3 +1,6 @@
+06 Jan 2004 mipsator
+ * fixed recording of cfgtool path in pmk_check_config().
+
 05 Jan 2004 mipsator
  * improved check_mode() in pmkinstall.c, patch provided by
 						Pedro Martelletto.
