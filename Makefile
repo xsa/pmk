@@ -89,7 +89,7 @@ $(SETUP)-clean:
 	rm -f $(S_OBJS) $(SETUP)
 
 $(SCAN)-clean:
-	rm -f $(SC_OBJS) $(SCAN)
+	rm -f $(SC_OBJS) $(SCAN) pmkfile.scan
 
 clean: $(PREMAKE)-clean $(SETUP)-clean $(SCAN)-clean
 	rm -f compat/compat.h config *.core
