@@ -58,25 +58,13 @@ configuration file
 .El
 
 .Sh EXAMPLES
-To print pmk version number:
-.Pp
-.Dl $ pmk -v
-.Pp
-To use
-.Em src
-as the basedir and disable the use of the GTK and Qt libraries:
-.Pp
-.Dl $ pmk -b src -d use_gtk,use_qt
-.Pp
-To specify an alternate
-.Xr pmkfile 5 ,
-enabling the use of the curses library and overriding
-.Pa /etc/pmk/pmk.conf
-with the content of a given file (
-.Pa pmk/pmkovr
-in this case):
-.Pp
-.Dl $ pmk -f pmk/pmkfile -e use_curses -o pmk/pmkovr
+Few examples of pmk command line arguments :
+.Bd -literal -offset indent
+ pmk -v
+
+ pmk -b src -d use_gtk,use_qt
+
+ pmk -f pmk/pmkfile -e use_curses -o pmk/pmkovr
 .Ed
 
 .Sh SEE ALSO
