@@ -79,45 +79,45 @@ bool func_wrapper(prscell *pcell, pmkdata *pgd) {
 
 	switch (cmd.token) {
 		case PMK_TOK_DEFINE :
-			rval = pmk_define(&cmd, pcell->ht, pgd);
+			rval = pmk_define(&cmd, pcell->data, pgd);
 			break;
 		case PMK_TOK_TARGET :
-			rval = pmk_target(&cmd, pcell->ht, pgd);
+			rval = pmk_target(&cmd, pcell->data, pgd);
 			break;
 		case PMK_TOK_ACCOMP :
-			rval = pmk_ac_compat(&cmd, pcell->ht, pgd);
+			rval = pmk_ac_compat(&cmd, pcell->data, pgd);
 			break;
 		case PMK_TOK_SWITCH :
-			rval = pmk_switches(&cmd, pcell->ht, pgd);
+			rval = pmk_switches(&cmd, pcell->data, pgd);
 			break;
 /* XXX TODO
 		case PMK_TOK_SETNGS :
-			rval = pmk_settings(&cmd, pcell->ht, pgd);
+			rval = pmk_settings(&cmd, pcell->data, pgd);
 			break;
 		case PMK_TOK_SETVAR :
-			rval = pmk_set_variable(&cmd, pcell->ht, pgd);
+			rval = pmk_set_variable(&cmd, pcell->data, pgd);
 			break;
 		case PMK_TOK_SETPRM :
-			rval = pmk_set_parameter(&cmd, pcell->ht, pgd);
+			rval = pmk_set_parameter(&cmd, pcell->data, pgd);
 			break;
 */
 		case PMK_TOK_CHKBIN :
-			rval = pmk_check_binary(&cmd, pcell->ht, pgd);
+			rval = pmk_check_binary(&cmd, pcell->data, pgd);
 			break;
 		case PMK_TOK_CHKINC :
-			rval = pmk_check_include(&cmd, pcell->ht, pgd);
+			rval = pmk_check_include(&cmd, pcell->data, pgd);
 			break;
 		case PMK_TOK_CHKLIB :
-			rval = pmk_check_lib(&cmd, pcell->ht, pgd);
+			rval = pmk_check_lib(&cmd, pcell->data, pgd);
 			break;
 		case PMK_TOK_CHKCFG :
-			rval = pmk_check_config(&cmd, pcell->ht, pgd);
+			rval = pmk_check_config(&cmd, pcell->data, pgd);
 			break;
 		case PMK_TOK_CHKPKG :
-			rval = pmk_check_pkg_config(&cmd, pcell->ht, pgd);
+			rval = pmk_check_pkg_config(&cmd, pcell->data, pgd);
 			break;
 		case PMK_TOK_CHKTYP :
-			rval = pmk_check_type(&cmd, pcell->ht, pgd);
+			rval = pmk_check_type(&cmd, pcell->data, pgd);
 			break;
 		default :
 			errorf("Unknow token %d", cmd.token);
@@ -127,6 +127,25 @@ bool func_wrapper(prscell *pcell, pmkdata *pgd) {
 	return(rval);
 }
 
+/*
+	process node
+*/
+
+bool process_node(prsnode *pnode, pmkdata *pgd) {
+	prscell	*pcell;
+
+	/* init pcell with the first cell of pdata */
+	pcell = pnode->first;
+
+	while (pcell != NULL) {
+		if (func_wrapper(pcell, pgd) == false)
+			return(false);
+
+		pcell = pcell->next;
+	}
+
+	return(true);
+}
 
 /*
 	all the following functions have the same parameters :
@@ -138,6 +157,16 @@ bool func_wrapper(prscell *pcell, pmkdata *pgd) {
 	returns bool
 
 */
+
+/*
+	define variables
+
+	XXX TODO process variables in order (and also search in global htable).
+*/
+
+bool pmk_settings(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
+	return(false); /* XXX TODO */
+}
 
 /*
 	define variables

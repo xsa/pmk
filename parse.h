@@ -54,14 +54,16 @@
 #define PMK_CHAR_ESCAPE		'\\'
 
 #define PRS_ERR_HASH		"hash add failure."
+#define PRS_ERR_DYNARY		"dynary push failure."
 #define PRS_ERR_OVERFLOW	"line too long."
 #define PRS_ERR_SYNTAX		"syntax error."
 #define PRS_ERR_TRAILING	"trailing garbage after value."
 #define PRS_ERR_UNKNOWN		"unknown error."
 
 /* keyword types */
-#define PRS_KW_NODE
-#define PRS_KW_ITEM
+#define PRS_KW_UNKW	0
+#define PRS_KW_NODE	1
+#define PRS_KW_ITEM	2
 
 /* keyword structure */
 typedef struct {
@@ -76,9 +78,10 @@ typedef struct {
 } prsopt;
 
 typedef struct s_prscell {
-	int			 token;			/* item token id */
+	int			 token,			/* item token id */
+				 type;			/* item type */
 	char			 label[LABEL_LEN];	/* command label */
-	htable			*ht;			/* misc data */
+	void			*data;			/* misc data */
 	struct s_prscell	*next;			/* next item */
 } prscell;
 
@@ -99,6 +102,7 @@ void	 prsdata_destroy(prsdata *);
 prsnode	*prsnode_init(void);
 void	 prsnode_destroy(prsnode *);
 prscell	*prscell_init(void);
+bool	 prscell_init_data(prscell *pcell);
 void	 prscell_destroy(prscell *);
 htable	*keyword_hash(prskw [], int);
 char	*parse_quoted(char *, pmkobj *, size_t);
