@@ -20,7 +20,7 @@ ADD_COMPILER {
 }
 
 ADD_COMPILER {
-	ID = "suncc"
+	ID = "sunpro_cc"
 	DESCR = "Sun Workshop C"
 	MACRO = "__SUNPRO_C"
 	VERSION = "__SUNPRO_C"
@@ -28,7 +28,7 @@ ADD_COMPILER {
 }
 
 ADD_COMPILER {
-	ID = "suncxx"
+	ID = "sunpro_cxx"
 	DESCR = "Sun Workshop C++"
 	MACRO = "__SUNPRO_CC"
 	VERSION = "__SUNPRO_CC"
@@ -40,7 +40,8 @@ ADD_COMPILER {
 	DESCR = "Compaq C"
 	MACRO = "__DECC"
 	VERSION = "__DECC_VER"
-	SLFLAGS = "XXX"
+# XXX
+	SLFLAGS = ""
 }
 
 ADD_COMPILER {
@@ -48,18 +49,19 @@ ADD_COMPILER {
 	DESCR = "Compaq C++"
 	MACRO = "__DECCXX"
 	VERSION = "__DECCXX_VER"
-	SLFLAGS = "XXX"
+# XXX
+	SLFLAGS = ""
 }
 
 ADD_COMPILER {
-	ID = "hpcc"
+	ID = "hp_cc"
 	DESCR = "HP Ansi C"
 	MACRO = "__HP_cc"
 	SLFLAGS = "+Z"
 }
 
 ADD_COMPILER {
-	ID = "hpcxx"
+	ID = "hp_cxx"
 	DESCR = "HP Ansi C++"
 	MACRO = "__HP_aCC"
 	VERSION = "__HP_aCC"
@@ -67,19 +69,21 @@ ADD_COMPILER {
 }
 
 ADD_COMPILER {
-	ID = "xlc"
+	ID = "xlc_cc"
 	DESCR = "IBM xlC"
 	MACRO = "__IBMC__"
 	VERSION = "__IBMC__"
-	SLFLAGS = "XXX"
+# XXX
+	SLFLAGS = ""
 }
 
 ADD_COMPILER {
-	ID = "xlc"
+	ID = "xlc_cxx"
 	DESCR = "IBM xlC"
 	MACRO = "__IBMCPP__"
 	VERSION = "__IBMCPP__"
-	SLFLAGS = "XXX"
+# XXX
+	SLFLAGS = ""
 }
 
 ADD_COMPILER {
@@ -87,7 +91,8 @@ ADD_COMPILER {
 	DESCR = "Intel"
 	MACRO = "__INTEL_COMPILER"
 	VERSION = "__INTEL_COMPILER"
-	SLFLAGS = "XXX"
+# XXX
+	SLFLAGS = ""
 }
 
 ADD_COMPILER {
