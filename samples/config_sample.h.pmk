@@ -1,0 +1,7 @@
+/* $Id$ */
+
+/* availability of strlcpy */
+@DEF__STRLCPY@
+
+/* availability of sys/param.h */
+@DEF__SYS_PARAM_H@

@@ -125,11 +125,14 @@ bool pmk_check_binary(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 		if (required == true) {
 			return(false);
 		} else {
-			/* XXX DEF_XXX */
+			/* define for template */
+			record_val(gdata->htab, filename, ""); /* XXX */
 			return(true);
 		}
 	} else {
 		pmk_log("yes.\n");
+		/* define for template */
+		record_val(gdata->htab, filename, binpath); /* XXX */
 		return(true);
 	}
 }
@@ -144,6 +147,7 @@ bool pmk_check_include(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 		rval;
 	char	*incfile,
 		*incfunc,
+		*target,
 		*ccpath,
 		cfgcmd[MAXPATHLEN];
 	int	r;
@@ -168,9 +172,11 @@ bool pmk_check_include(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 			pmk_log("\tFound header '%s' : ", incfile);
 			/* XXX should use INC_PATH with -I ? */
 			fprintf(tfp, INC_TEST_CODE, incfile);
+			target = incfile;
 		} else {
 			pmk_log("\tFound function '%s' in '%s' : ", incfunc, incfile);
 			fprintf(tfp, INC_FUNC_TEST_CODE, incfile, incfunc);
+			target = incfunc;
 		}
 
 		/* fill test file */
@@ -191,7 +197,8 @@ bool pmk_check_include(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 	r = system(cfgcmd);
 	if (r == 0) {
 		pmk_log("yes.\n");
-		/* XXX must define HAVE_... */
+		/* define for template */
+		record_def(gdata->htab, target, true); /* XXX */
 		rval = true;
 	} else {
 		pmk_log("no.\n");
@@ -203,6 +210,8 @@ bool pmk_check_include(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 				errorf("failed to find function '%s'.", incfunc);
 			}
 		} else {
+			/* define for template */
+			record_def(gdata->htab, target, false); /* XXX */
 			rval = true;
 		}
 	}
@@ -229,7 +238,8 @@ bool pmk_check_lib(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 	char	cfgcmd[MAXPATHLEN],
 		*ccpath,
 		*libname,
-		*libfunc;
+		*libfunc,
+		*target;
 	int	r;
 
 	pmk_log("* Checking library [%s]\n", cmd->label);
@@ -250,9 +260,11 @@ bool pmk_check_lib(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 			pmk_log("\tFound library '%s' : ", libname);
 			/* XXX should use LIB_PATH with -L ? */
 			fprintf(tfp, LIB_TEST_CODE);
+			target = libname;
 		} else {
 			pmk_log("\tFound function '%s' in '%s' : ", libfunc, libname);
 			fprintf(tfp, LIB_FUNC_TEST_CODE, libfunc, libfunc);
+			target = libfunc;
 		}
 
 		/* fill test file */
@@ -273,7 +285,8 @@ bool pmk_check_lib(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 	r = system(cfgcmd);
 	if (r == 0) {
 		pmk_log("yes.\n");
-		/* XXX must define HAVE_... */
+		/* define for template */
+		record_def(gdata->htab, target, true); /* XXX */
 		rval = true;
 	} else {
 		pmk_log("no.\n");
@@ -285,6 +298,8 @@ bool pmk_check_lib(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 				errorf("failed to find function '%s'.", libfunc);
 			}
 		} else {
+			/* define for template */
+			record_def(gdata->htab, target, false); /* XXX */
 			rval = true;
 		}
 	}

@@ -1,8 +1,0 @@
-# Makefile example
-
-TPATH=@TPATH@
-BINPROG=$(TPATH)/bin/@PROGNAME@
-
-test:
-	@echo "running $(BINPROG)"
-	$(BINPROG) /c_colon

@@ -37,6 +37,7 @@
 #include "premake.h"
 #include "compat/pmk_string.h"
 #include "compat/pmk_stdbool.h"
+#include "hash.h"
 #include "dynarray.h"
 #include "common.h"
 
@@ -45,5 +46,7 @@ bool	check_bool_str(char *);
 bool	check_version(char *, char *);
 bool	get_file_path(char *, char *, char *, int);
 char	*str_to_def(char *);
+bool	record_def(htable *, char *, bool);
+bool	record_val(htable *, char *, char *);
 
 #endif /* _PMK_FUNCTOOL_H_ */

@@ -1,8 +1,10 @@
+# $Id$
 # Makefile example
 
-PREFIX=@PREFIX@
-BINPROG=@BIN_GREP@
+PACKAGE=@PACKAGE@
+GTK_CONFIG=@GTK_CONFIG@
+
 
 test:
-	@echo "running $(BINPROG)"
-	$(BINPROG) gtk $(PREFIX)/include/*
+	@echo $(PACKAGE)
+	@echo `$(GTK_CONFIG) --version`

@@ -93,9 +93,9 @@ test_pmk: pmk
 	@cat samples/Makefile.sample.pmk
 	@echo "----------------------------------------"
 	@echo ""
-	@echo "samples/Makefile.sample.pmk"
+	@echo "samples/config_sample.h.pmk"
 	@echo "----------------------------------------"
-	@cat samples/Makefile.samplebis.pmk
+	@cat samples/config_sample.h.pmk
 	@echo "----------------------------------------"
 	@echo ""
 	@echo "-> Running pmk"
@@ -108,13 +108,13 @@ test_pmk: pmk
 	@cat samples/Makefile.sample
 	@echo "----------------------------------------"
 	@echo ""
-	@echo "samples/Makefile.samplebis"
+	@echo "samples/config_sample.h"
 	@echo "----------------------------------------"
-	@cat samples/Makefile.samplebis
+	@cat samples/config_sample.h
 	@echo "----------------------------------------"
 	@echo ""
 	@echo "-> Removing generated files"
-	rm -f samples/Makefile.sample samples/Makefile.samplebis pmk.log pmk.conf
+	rm -f samples/Makefile.sample samples/config_sample.h pmk.log pmk.conf
 	@echo ""
 	@echo "=> End of test"
 	@echo ""

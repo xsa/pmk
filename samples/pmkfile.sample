@@ -3,12 +3,10 @@
 
 # comment
 .DEFINE
-version=0.0
-TPATH=/windows/desktop
-PROGNAME=scandisk
+PACKAGE=scandisk
 .END
 .TARGET
-LIST=samples/Makefile.sample.pmk,samples/Makefile.samplebis.pmk
+LIST=samples/Makefile.sample.pmk,samples/config_sample.h.pmk
 .END
 .CHECK_LIB(lib_termcap)
 REQUIRED=FALSE
