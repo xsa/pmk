@@ -71,8 +71,6 @@ char *cxx_file_ext[NB_CXX_FILE_EXT] = {
 };
 
 prskw	kw_pmkscan[] = {
-		{".INCLUDES",	PSC_TOK_INCL, PRS_KW_CELL},
-		{".FUNCTIONS",	PSC_TOK_FUNC, PRS_KW_CELL},
 		{"INCLUDES",	PSC_TOK_INCL, PRS_KW_CELL},
 		{"FUNCTIONS",	PSC_TOK_FUNC, PRS_KW_CELL}
 };
