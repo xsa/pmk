@@ -102,6 +102,24 @@ prsnode *prsnode_init(void) {
 }
 
 /*
+	XXX TODO
+*/
+
+void prsnode_add(prsnode *pnode, prscell *pcell) {
+	if ((pnode != NULL) && (pcell != NULL)) {
+		if (pnode->last != NULL) {
+			/* linking to last item of node */
+			pnode->last->next = pcell;
+		} else {
+			/* empty node, link as first */
+			pnode->first = pcell;
+		}
+		pnode->last = pcell;
+	}
+}
+
+
+/*
 	free space allocated by parsing node structure
 
 	pnode : node structure to clean
@@ -115,7 +133,7 @@ void prsnode_destroy(prsnode *pnode) {
 	while (p != NULL) {
 		n = p;
 		p = n->next;
-		free(n);
+		prscell_destroy(n);
 	}
 	free(pnode);
 }
@@ -123,33 +141,26 @@ void prsnode_destroy(prsnode *pnode) {
 /*
 	initialize parsing cell structure
 
-	return : parsing cell structure
+	return : parsing cell structure or NULL if failed
 */
 
-prscell *prscell_init(void) {
+prscell *prscell_init(int token, int type, int subtoken) {
+	bool	 rval = false;
+	htable	*pht;
 	prscell	*pcell;
+	prsnode	*pnode;
 
 	pcell = (prscell *) malloc(sizeof(prscell));
 
-	return(pcell);
-}
-
-/*
-	initialize parsing cell structure
-
-	return : parsing cell structure
-*/
-
-bool prscell_init_data(prscell *pcell) {
-	bool	 rval = false;
-	htable	*pht;
-	prsnode	*pnode;
-
 	if (pcell != NULL) {
-		switch(pcell->type) {
+		pcell->token = token;
+		pcell->type = type;
+
+		switch(type) {
 			case PRS_KW_NODE :
 				pnode = prsnode_init();
 				if (pnode != NULL) {
+					pnode->token = subtoken;
 					pcell->data = pnode;
 					pcell->next = NULL;
 					rval = true;
@@ -174,7 +185,8 @@ bool prscell_init_data(prscell *pcell) {
 				break;
 		}
 	}
-	return(rval);
+
+	return(pcell);
 }
 
 /*
@@ -187,7 +199,7 @@ void prscell_destroy(prscell *pcell) {
 	if (pcell != NULL) {
 		switch(pcell->type) {
 			case PRS_KW_NODE :
-				/* XXX TODO */
+				prsnode_destroy(pcell->data);
 				break;
 			case PRS_KW_ITEM :
 				hash_destroy(pcell->data);
@@ -528,7 +540,7 @@ char *skip_blank(char *pstr) {
 	return : boolean
 */
 
-bool parse_cell(char *line, prscell *pcell, htable *phkw) {
+prscell *parse_cell(char *line, htable *phkw) {
 	char	 name[CMD_LEN],
 #ifdef PRS_OBSOLETE
 		*pname, /* temporary to skip leading dot */
@@ -537,6 +549,7 @@ bool parse_cell(char *line, prscell *pcell, htable *phkw) {
 #ifdef PRS_OBSOLETE
 	int	 s;
 #endif
+	prscell	*pcell;
 	prskw	*pkw;
 
 #ifdef PRS_OBSOLETE
@@ -557,7 +570,7 @@ bool parse_cell(char *line, prscell *pcell, htable *phkw) {
 #endif
 	if (pstr == NULL) {
 		strlcpy(parse_err, "command parsing failed.", sizeof(parse_err));
-		return(false);
+		return(NULL);
 	}
 #ifdef DEBUG_PRS
 	debugf("command = '%s'", name);
@@ -566,15 +579,17 @@ bool parse_cell(char *line, prscell *pcell, htable *phkw) {
 	/* set token */
 	pkw = hash_get(phkw, name);
 	if (pkw != NULL) {
-		pcell->token = pkw->token;
-		pcell->type = pkw->type;
-		prscell_init_data(pcell); /* XXX check */
+		pcell = prscell_init(pkw->token, pkw->type, pkw->subtoken);
+		if (pcell == NULL) {
+			strlcpy(parse_err, "pcell init failed.", sizeof(parse_err));
+			return(NULL);
+		}
 #ifdef DEBUG_PRS
 		debugf("token = %d", pcell->token);
 #endif
 	} else {
 		strlcpy(parse_err, "unknown command.", sizeof(parse_err));
-		return(false);
+		return(NULL);
 	}
 
 	if (*pstr == PMK_CHAR_LABEL_START) {
@@ -582,7 +597,7 @@ bool parse_cell(char *line, prscell *pcell, htable *phkw) {
 		pstr = parse_identifier(pstr, pcell->label, sizeof(pcell->label));
 		if (pstr == NULL) {
 			strlcpy(parse_err, "label parsing failed.", sizeof(parse_err));
-			return(false);
+			return(NULL);
 		}
 #ifdef DEBUG_PRS
 		debugf("label = '%s'", pcell->label);
@@ -591,7 +606,7 @@ bool parse_cell(char *line, prscell *pcell, htable *phkw) {
 		if (*pstr != PMK_CHAR_LABEL_END) {
 			/* label name must be immediately followed by closing delimiter */
 			strlcpy(parse_err, "label parsing failed.", sizeof(parse_err));
-			return(false);
+			return(NULL);
 		} else {
 			pstr ++;
 		}
@@ -603,28 +618,28 @@ bool parse_cell(char *line, prscell *pcell, htable *phkw) {
 
 	if (*pstr != ' ') {
 		strlcpy(parse_err, PRS_ERR_UNKNOWN, sizeof(parse_err));
-		return(false);
+		return(NULL);
 	} else {
 		pstr++;
 	}
 
 	if (*pstr != PMK_CHAR_COMMAND_START) {
 		strlcpy(parse_err, PRS_ERR_TRAILING, sizeof(parse_err));
-		return(false);
+		return(NULL);
 	} else {
 		pstr++;
 	}
 
 	if (*pstr != CHAR_EOS) {
 		strlcpy(parse_err, PRS_ERR_TRAILING, sizeof(parse_err));
-		return(false);
+		return(NULL);
 	}
 
 #ifdef DEBUG_PRS
 	debugf("command '%s' with label '%s'", name, pcell->label);
 #endif
 	/* everything is ok */
-	return(true);
+	return(pcell);
 }
 
 /*
@@ -767,15 +782,7 @@ bool parse_pmkfile(FILE *fp, prsdata *pdata, prskw kwtab[], size_t size) {
 			case PMK_CHAR_COMMAND_END :
 				if (process == true) {
 					process = false;
-					
-					if (tnode->last != NULL) {
-						/* linking to last item of node */
-						tnode->last->next = pcell;
-					} else {
-						/* empty node, link as first */
-						tnode->first = pcell;
-					}
-					tnode->last = pcell;
+					prsnode_add(tnode, pcell);					
 #ifdef DEBUG_PRS
 					debugf("end of command");
 #endif
@@ -810,6 +817,17 @@ bool parse_pmkfile(FILE *fp, prsdata *pdata, prskw kwtab[], size_t size) {
 									set type to PRS_KW_UNKW
 									link it in node
 									NOTE : could set token instead of type
+
+								pcell = prscell_init();
+								if (pcell == NULL) {
+									errorf("prscell init failed");
+									return(false);
+								}
+
+								pcell->token = pkw->token;
+								pcell->type = pkw->type;
+
+								prsnode_add(tnode, pcell);					
 								*/
 								break;
 							case PRS_KW_ITEM :
@@ -825,17 +843,12 @@ bool parse_pmkfile(FILE *fp, prsdata *pdata, prskw kwtab[], size_t size) {
 						}
 					}
 				} else {
-					pcell = prscell_init();
-					if (pcell == NULL) {
-						errorf("prscell init failed");
-						return(false);
-					}
-
 					/* parse command and label */
-					if (parse_cell(buf, pcell, phkw) == false) { /* XXX TODO should use prsdata */
+					pcell = parse_cell(buf, phkw);
+					if (pcell == NULL) {
 						errorf("line %d : %s", cur_line, parse_err);
 #ifdef DEBUG_PRS
-						debugf("parse_cell returned false");
+						debugf("parse_cell returned NULL");
 #endif
 						return(false);
 					}

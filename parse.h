@@ -65,11 +65,15 @@
 #define PRS_KW_NODE	1
 #define PRS_KW_ITEM	2
 
+/* null token */
+#define PRS_TOK_NULL	0
+
 /* keyword structure */
 typedef struct {
-	char	*kw;	/* keyword string */
-	int	 token,	/* associated token */
-		 type;	/* type */
+	char	*kw;		/* keyword string */
+	int	 token,		/* associated token */
+		 type,		/* type */
+		 subtoken;	/* node specific subtoken */
 } prskw;
 
 typedef struct {
@@ -86,9 +90,9 @@ typedef struct s_prscell {
 } prscell;
 
 typedef struct {
-	int	 token;	/* node token id */
-	prscell	*first,	/* first item of this node */
-		*last;	/* last item of this node */
+	int	 token;		/* node specific token */
+	prscell	*first,		/* first item of this node */
+		*last;		/* last item of this node */
 } prsnode;
 
 typedef struct {
@@ -101,8 +105,7 @@ prsdata	*prsdata_init(void);
 void	 prsdata_destroy(prsdata *);
 prsnode	*prsnode_init(void);
 void	 prsnode_destroy(prsnode *);
-prscell	*prscell_init(void);
-bool	 prscell_init_data(prscell *pcell);
+prscell	*prscell_init(int, int, int);
 void	 prscell_destroy(prscell *);
 htable	*keyword_hash(prskw [], int);
 char	*parse_quoted(char *, pmkobj *, size_t);
@@ -110,7 +113,7 @@ char	*parse_list(char *, pmkobj *, size_t);
 char	*parse_word(char *, pmkobj *, size_t);
 char	*parse_identifier(char *, char *, size_t);
 char	*skip_blank(char *pstr);
-bool	 parse_cell(char *, prscell *, htable *);
+prscell	*parse_cell(char *, htable *);
 bool	 parse_pmkfile(FILE *, prsdata *, prskw [], size_t);
 bool	 parse_opt(char *, prsopt *);
 
