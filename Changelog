@@ -1,3 +1,5 @@
+# snapshot 0.8.1-s5
+
 27 Aug 2004 mipsator
  * fixed bugs in parse_pmkconf().
  * added more debug stuff.
