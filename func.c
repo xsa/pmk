@@ -78,7 +78,13 @@ bool check_version(char *vref, char *vers) {
 */
 
 bool pmk_define(pmkcmd *cmd, htable *ht) {
+	int	n;
+
 	pmk_log("* Parsing define\n");
+
+	n = hash_merge(gdata.htab, ht);
+	pmk_log("\tAdded %d definitions.\n", n);
+	
 	return(TRUE);
 }
 
@@ -98,6 +104,7 @@ bool pmk_target(pmkcmd *cmd, htable *ht) {
 		return(FALSE);
 	}
 	/* XXX should process multiple filename */
+	pmk_log("\tSet target to '%s'.\n", list);
 	gdata.target = list;
 
 	return(TRUE);

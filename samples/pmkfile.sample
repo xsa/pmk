@@ -4,6 +4,7 @@
 # comment
 .DEFINE
 version=0.0
+TPATH=/windows/desktop
 PROGNAME=scandisk
 .END
 .TARGET

@@ -64,11 +64,12 @@ typedef struct {
 	hnode	*nodetab;
 } htable;
 
-int hash_compute(char *, int);
-htable *hash_init(int);
-int hash_destroy(htable *);
-int hash_add(htable *, char *, char *);
-void hash_delete(htable *, char *);
-char *hash_get(htable *, char *);
+int	hash_compute(char *, int);
+htable	*hash_init(int);
+int	hash_destroy(htable *);
+int	hash_add(htable *, char *, char *);
+void	hash_delete(htable *, char *);
+char	*hash_get(htable *, char *);
+int	hash_merge(htable *, htable *);
 
 #endif /* _PMK_HASH_H_ */
