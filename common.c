@@ -39,7 +39,6 @@
  *
  */
 
-#define EMPTY_OPT_VALUE ""
 
 #include <sys/param.h>
 #include <dirent.h>
@@ -54,7 +53,7 @@
 #include "dynarray.h"
 #include "premake.h"
 
-#define MKVAR_FILE	"make_var_result"
+/*#define	MKVAR_DEBUG	1*/
 
 
 /*
@@ -146,14 +145,17 @@ bool get_make_var(char *varname, char *result, int rsize) {
 		   /!\ should check content of VARNAME, could result
 		   	in a security breach.
 		*/
-		fprintf(mfp, "all:\n\t@printf \"$(%s)\\n\" > %s", varname, MKVAR_FILE);
+		fprintf(mfp, MKVAR_FMT_MK, varname, MKVAR_FILE);
 		fclose(mfp);
+#ifdef MKVAR_DEBUG
+debugf(MKVAR_FMT_MK, varname, MKVAR_FILE);
+#endif
 	} else {
 		errorf("Failed to open %s\n", mfn);
 		return(false);
 	}
 
-	snprintf(varstr, sizeof(varstr), "make -f %s >/dev/null 2>&1", mfn);
+	snprintf(varstr, sizeof(varstr), MKVAR_FMT_CMD, mfn);
 	if (system(varstr) == 0) {
 		tfp = fopen(MKVAR_FILE, "r");
 		if (tfp != NULL) {
