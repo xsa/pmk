@@ -463,9 +463,11 @@ bool pmk_check_header(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 	cflags = po_get_str(hash_get(ht, "CFLAGS"));
 	if (cflags != NULL) {
 		/* init alternative variable */
-		if (hash_append(gdata->htab, cflags, strdup(""), " ") == HASH_ADD_FAIL) {
-			errorf("hash error.");
-			return(false);
+                if (hash_get(gdata->htab, cflags) == NULL) {
+                        if (hash_add(gdata->htab, cflags, "") == HASH_ADD_FAIL) {
+        			errorf("hash error.");
+        			return(false);
+                        }
 		}
 	}
 
@@ -614,7 +616,12 @@ bool pmk_check_lib(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 	libs = po_get_str(hash_get(ht, "LIBS"));
 	if (libs != NULL) {
 		/* init alternative variable */
-		hash_append(gdata->htab, libs, strdup(""), " "); /* XXX check ? */
+                if (hash_get(gdata->htab, libs) == NULL) {
+                        if (hash_add(gdata->htab, libs, "") == HASH_ADD_FAIL) {
+        			errorf("hash error.");
+        			return(false);
+                        }
+		}
 	}
 
 	/* get the language used */
@@ -763,9 +770,11 @@ bool pmk_check_config(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 	cflags = po_get_str(hash_get(ht, "CFLAGS"));
 	if (cflags != NULL) {
 		/* init alternative variable */
-		if (hash_append(gdata->htab, cflags, strdup(""), " ") == HASH_ADD_FAIL) {
-			errorf("hash error.");
-			return(false);
+                if (hash_get(gdata->htab, cflags) == NULL) {
+                        if (hash_add(gdata->htab, cflags, "") == HASH_ADD_FAIL) {
+        			errorf("hash error.");
+        			return(false);
+                        }
 		}
 	}
 
@@ -773,7 +782,12 @@ bool pmk_check_config(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 	libs = po_get_str(hash_get(ht, "LIBS"));
 	if (libs != NULL) {
 		/* init alternative variable */
-		hash_append(gdata->htab, libs, strdup(""), " "); /* XXX check ? */
+                if (hash_get(gdata->htab, libs) == NULL) {
+                        if (hash_add(gdata->htab, libs, "") == HASH_ADD_FAIL) {
+        			errorf("hash error.");
+        			return(false);
+                        }
+		}
 	}
 
 	if (depend_check(ht, gdata) == false) {
@@ -954,14 +968,24 @@ bool pmk_check_pkg_config(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 	cflags = po_get_str(hash_get(ht, "CFLAGS"));
 	if (cflags != NULL) {
 		/* init alternative variable */
-		hash_append(gdata->htab, cflags, strdup(""), " "); /* XXX check ? */
+                if (hash_get(gdata->htab, cflags) == NULL) {
+                        if (hash_add(gdata->htab, cflags, "") == HASH_ADD_FAIL) {
+        			errorf("hash error.");
+        			return(false);
+                        }
+		}
 	}
 
 	/* check for alternative variable for LIBS */
 	libs = po_get_str(hash_get(ht, "LIBS"));
 	if (libs != NULL) {
 		/* init alternative variable */
-		hash_append(gdata->htab, libs, strdup(""), " "); /* XXX check ? */
+                if (hash_get(gdata->htab, libs) == NULL) {
+                        if (hash_add(gdata->htab, libs, "") == HASH_ADD_FAIL) {
+        			errorf("hash error.");
+        			return(false);
+                        }
+		}
 	}
 
 	if (depend_check(ht, gdata) == false) {
@@ -1226,8 +1250,6 @@ bool pmk_check_variable(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 
 		value = po_get_str(hash_get(ht, "VALUE"));
 		if (value == NULL) {
-/* XXX !!!			record_val(gdata->htab, var, ""); */
-/* XXX ???			record_def(gdata->htab, var, true); */
 			label_set(gdata->labl, cmd->label, true);
 
 			rval = true;
@@ -1236,8 +1258,6 @@ bool pmk_check_variable(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 
 			if (strncmp(value, varval, sizeof(varval)) == 0) {
 				pmk_log("yes.\n");
-/* XXX !!!				record_val(gdata->htab, var, ""); */
-/* XXX ???				record_def(gdata->htab, var, true); */
 				label_set(gdata->labl, cmd->label, true);
 
 				rval = true;
