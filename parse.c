@@ -738,7 +738,8 @@ char *parse_quoted(char *pstr, pmkobj *po, size_t size) {
 		/* found end of quoted string */
 		*pbuf = CHAR_EOS;
 		po->type = PO_STRING;
-		/* use strdup to gain memory (but lose some cpu ;) */
+		/* use strdup to gain memory (but loose some cpu ;) */
+
 		po->data = strdup(buffer);
 		free(buffer);
 		pstr++;
