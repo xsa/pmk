@@ -1,3 +1,6 @@
+18 Nov 2003 mipsator
+ * added DESTDIR and fixed Makefiles.
+
 # snapshot 0.7.3
 
 18 Nov 2003 mipsator
