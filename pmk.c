@@ -157,9 +157,6 @@ bool process_template(char *template, htable *ht) {
 	FILE	*tfd,
 		*dfd;
 	char	*path,
-		*destfile,
-		*dup_p,
-		*dup_d,
 		*plb,
 		*pbf,
 		*ptbf,
@@ -170,32 +167,33 @@ bool process_template(char *template, htable *ht) {
 		tbuf[MAXPATHLEN];
 	bool	replace;
 
-	dup_p = strdup(template);
-	path = dirname(dup_p);
-	if (path == NULL) {
-		errorf("not enough memory !!");
-		return(false);
-	}
-	dup_d = strdup(template);
-	destfile = basename(dup_d);
-	if (destfile == NULL) {
-		errorf("not enough memory !!");
+	pbf = strdup(template);
+	ptbf = basename(pbf); /* getting filename */
+	if (ptbf == NULL) {
+		errorf("failed to get filename of template.");
 		return(false);
 	}
 
 	/* remove suffix */
-	ptmp = strrchr(destfile, '.');
+	ptmp = strrchr(ptbf, '.');
 	if (ptmp != NULL) {
 		*ptmp = CHAR_EOS;
 	} else {
-		errorf("error while creating name for template %s", destfile);
+		errorf("error while creating name of template");
+		return(false);
+	}
+
+	ptmp = strdup(template);
+	path = dirname(ptmp);
+	if (path == NULL) {
+		errorf("failed to get path of the template.");
 		return(false);
 	}
 
 	/* build destination file */
-	snprintf(final, sizeof(final), "%s/%s", path, destfile);
-	free(dup_p);
-	free(dup_d);
+	snprintf(final, sizeof(final), "%s/%s", path, ptbf);
+	free(pbf);
+	free(ptmp);
 
 	tfd = fopen(template, "r");
 	if (tfd == NULL) {

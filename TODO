@@ -3,11 +3,12 @@ common :
 - moving man page in a directory
 
 pmk :
-- finish existing checks
+~ finish existing checks
 ~ finish pmk(1)
-- pmkfile(5)
-
+~ pmkfile(5)
+- pkgconfig test
+- fill gdata with checks results
 
 pmksetup :
 ~ pmk.conf(5)
-- get INC_PATH and LIB_PATH
+~ get INC_PATH and LIB_PATH
