@@ -16,13 +16,15 @@ Status flags:
 	! high priority
 	. low priority
 
+Indented lines means subtask.
+
 #######################################
 
 
 common:
 -----------------------------------------------------------------------
-		-	tutorial
-mipsator	-	improve test_pmkinstall to check more modes
+	-	tutorial
+mips	-	improve test_pmkinstall to check more modes
 
 
 pmk:
@@ -59,20 +61,20 @@ pmkscan
 
 pmkinstall
 -----------------------------------------------------------------------
-mipsator	~!	full rewrite
+mips	~!	full rewrite
 			+ copy done
 			~ mode option
 				- suid and sgid bits ?
 				+ missing operators (-=)
 			+ dir creation
 			+ owner
-		+ group
-		~ strip
-dwecker		- backup ?
+			+ group
+			~ strip
+dwecker			- backup ?
 
 
 pmkpkg
 -----------------------------------------------------------------------
-mipsator	~.	make specs, this tool should handle install and 
+mips	~.	make specs, this tool should handle install and 
 			deinstall operations
 
