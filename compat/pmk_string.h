@@ -40,6 +40,7 @@
 #include <string.h>
 
 #include "compat.h"
+#include "pmk_stdbool.h"
 
 /*
 	strlcpy() function
@@ -73,4 +74,9 @@
 #endif
 
 #endif /* _PMK_STRING_H_ */
+
+
+bool	snprintf_b(char *, size_t, const char *, ...);
+bool	strlcat_b(char *, const char *, size_t);
+bool	strlcpy_b(char *, const char *, size_t);
 

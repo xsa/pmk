@@ -1,7 +1,7 @@
 /* $Id$ */
 
 /*
- * Copyright (c) 2003 Damien Couderc
+ * Copyright (c) 2004 Damien Couderc
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,38 +34,41 @@
  */
 
 
-#ifndef _PMK_COMPAT_H_
-#define _PMK_COMPAT_H_
+#include <stdio.h>
 
-/*	! WARNING !
-
-	The following data is automatically set,
-	you should not have to modify it.
-*/
-
-/* strlcpy */
-@DEF__STRLCPY@
-
-/* strlcat */
-@DEF__STRLCAT@
-
-/* _Bool type (ISO C99) */
-@DEF___BOOL@
-
-/* blkcnt_t type (POSIX 1003.1-2003) */
-@DEF__BLKCNT_T@
-
-/* stdbool.h (ISO C99) */
-@DEF__STDBOOL_H@
-
-/* libgen.h (dirname and filename) */
-@DEF__LIBGEN_H@
-
-/* isblank */
-@DEF__ISBLANK@
-
-/* mkstemps */
-@DEF__MKSTEMPS@
+#include "pmk_string.h"
 
 
-#endif /* _PMK_COMPAT_H_ */
+/* boolean snprintf */
+bool snprintf_b(char *str, size_t siz, const char *fmt, ...) {
+	bool	rslt;
+	va_list	ap;
+
+	va_start(ap, fmt);
+
+	if (vsnprintf(str, siz, fmt, ap) >= (int) siz)
+		rslt = false;
+	else
+		rslt = true;
+
+	va_end(ap);
+
+	return(rslt);
+}
+
+/* boolean strlcat */
+bool strlcat_b(char *dst, const char *src, size_t siz) {
+	if (strlcpy(dst, src, siz) >= siz)
+		return(false);
+	else
+		return(true);
+}
+
+/* boolean strlcpy */
+bool strlcpy_b(char *dst, const char *src, size_t siz) {
+	if (strlcpy(dst, src, siz) >= siz)
+		return(false);
+	else
+		return(true);
+}
+

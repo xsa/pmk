@@ -1,7 +1,7 @@
 /* $Id$ */
 
 /*
- * Copyright (c) 2003 Damien Couderc
+ * Copyright (c) 2003-2004 Damien Couderc
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,7 +34,13 @@
  */
 
 
+#include <stdio.h>
+#include <stdarg.h>
+
 #include "compat/compat.h"
+
+/* include boolean string functions */
+#include "compat/pmk_string.c"
 
 #ifndef HAVE_STRLCPY
 #include "compat/strlcpy.c"
@@ -56,7 +62,4 @@
 #ifndef HAVE_MKSTEMPS
 #include "compat/mkstemps.c"
 #endif
-
-void empty_func_to_make_ansi_compiler_happy() {
-}
 
