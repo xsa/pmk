@@ -1,3 +1,6 @@
+21 Aug 2004 mipsator
+ * added compiler flags in sample bin makefiles.
+
 20 Aug 2004 mreindl
  * add bin_c++ sample
 

@@ -1,6 +1,7 @@
 # $Id$
 
 CC=	@BIN_CC@
+CFLAGS=	@CFLAGS@
 
 NAME=	hello
 

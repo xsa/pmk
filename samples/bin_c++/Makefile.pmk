@@ -1,8 +1,9 @@
 # $Id$
 
-CXX=		@BIN_CXX@
+CXX=	@BIN_CXX@
+CFLAGS=	@CXXFLAGS@
 
-NAME=		hello
+NAME=	hello
 
 all: show $(NAME) run_$(NAME) clean
 
