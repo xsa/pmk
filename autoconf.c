@@ -198,7 +198,7 @@ bool ac_parse_config(pmkdata *pgd) {
 	*/
 	unlink(fname);
 	/* copy new one */
-	rval = copy_text_file(ftmp, fname);
+	rval = fcopy(ftmp, fname, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
 
 	if (unlink(ftmp) == -1) {
 		errorf(ERRMSG_REMOVE_TMP, ftmp, strerror(errno));

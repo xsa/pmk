@@ -1,5 +1,7 @@
 20 Dec 2004 mipsator
  * reworked CHECK_LIB in the same spirit as CHECK_HEADER.
+ * replaced remaining copy_text_file() by fcopy().
+ * removed copy_text_file() from common object as it is useless now.
 
 19 Dec 2004 mipsator
  * added c_file_builder() to reduce redundant code.
