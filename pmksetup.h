@@ -37,6 +37,7 @@
 #ifndef _PMKSETUP_H_
 #define _PMKSETUP_H_
 
+#include "sys/stat.h"
 #include "hash.h"
 #include "premake.h"
 
@@ -45,6 +46,8 @@
 #define PREMAKE_SUBVER_PMKSETUP	"7"
 
 #define PREMAKE_CONFIG_TMP	PREMAKE_TMP_DIR "/pmk.XXXXXXXX"
+#define PREMAKE_CONFIG_MODE	S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH
+
 
 #ifndef DATADIR
 /* for lint */
@@ -120,7 +123,6 @@ bool	check_libpath(htable *);
 bool	get_cpu_data(htable *);
 bool	dir_exists(const char *);
 bool	byte_order_check(htable *pht);
-bool	copy_config(const char *, const char *);
 int	keycomp(const void *, const void *);
 void	char_replace(char *, const char, const char);
 void	write_new_data(htable *);

@@ -55,7 +55,7 @@ pmksetup:
 			- alpha support
 			! man page update
 	-	cpu optimisation for compiler 
-	-	use fcopy instead of text copy for the temporary file
+	+	use fcopy instead of text copy for the temporary file
 	-	option to append to variable of pmk.conf
 	!	clean temporary files on error
 	-	missing checks :

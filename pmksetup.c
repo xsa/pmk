@@ -37,7 +37,6 @@
 
 /*#define PMKSETUP_DEBUG 1*/
 
-#include <sys/stat.h>
 /* include it first as if it was <sys/types.h> - this will avoid errors */
 #include "compat/pmk_sys_types.h"
 #include <sys/utsname.h>
@@ -240,7 +239,8 @@ int main(int argc, char *argv[]) {
 	if (error == 0) {
 		/* copying the temporary config to the system one */
 		printf("==> Saving configuration file: %s\n", PREMAKE_CONFIG_PATH);
-		if (copy_config(sfn, PREMAKE_CONFIG_PATH) == false)
+		/* XXX if (copy_config(sfn, PREMAKE_CONFIG_PATH) == false)*/
+		if (fcopy(sfn, PREMAKE_CONFIG_PATH, PREMAKE_CONFIG_MODE) == false)
 			exit(EXIT_FAILURE);
 	}
 
@@ -930,53 +930,6 @@ bool byte_order_check(htable *pht) {
 	verbosef("Setting '%s' => '%s'", PMKCONF_HW_BYTEORDER, bo_type);
 
 	return(true);
-}
-
-
-/*
- * Copy the temporary configuration file to the system one
- *
- *	tmp_config: temporary configuration file name
- *	config: system configuration file name
- *
- *	returns:  boolean
- */
-bool copy_config(const char *tmp_config, const char *config) {
-	FILE	*fp_t,
-		*fp_c;
-	bool	 rval;
-	char	 buf[MAX_LINE_BUF];
-
-
-	if ((fp_t = fopen(tmp_config, "r")) == NULL) {
-		errorf("cannot open temporary configuration "
-			"file for reading '%s' : %s.", tmp_config,
-				strerror(errno));
-		return(false);	
-	}
-	if ((fp_c = fopen(config, "w")) == NULL) {
-		errorf("cannot open '%s' for writing : %s.",
-			config, strerror(errno));
-
-		fclose(fp_t);	
-		return(false);
-	}
-
-	while(get_line(fp_t, buf, MAX_LINE_BUF) == true) {
-		fprintf(fp_c, "%s\n", buf);
-	}
-
-	if (feof(fp_t) == 0) {
-		errorf("read failure, cannot copy "
-			"'%s' to '%s'.", tmp_config, config);
-		rval = false;	
-	} else
-		rval = true;
-
-	fclose(fp_t);
-	fclose(fp_c);
-
-	return(rval);
 }
 
 
