@@ -16,7 +16,8 @@ int main() {
 	int	i,
 		r;
 	char	tstr[256],
-		ttstr[256];
+		ttstr[256],
+		*val;
 	htable	*hp;
 
 	printf("Testing init\n");
@@ -26,10 +27,11 @@ int main() {
 	hash_add(hp, "prefix", "/usr/locallll");
 
 	printf("Testing key : ");
-	if (hash_get(hp, "prefix") == NULL) {
+	val = hash_get(hp, "prefix");
+	if (val == NULL) {
 		printf("not found\n");
 	} else {
-		printf("found\n");
+		printf("found '%s'\n", val);
 	}
 
 	printf("Removing test key\n");
