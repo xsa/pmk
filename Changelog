@@ -1,3 +1,6 @@
+18 Dec 2003 mipsator
+ * fixed detect.c and func.c to use correctly tmps_open().
+
 # snapshot 0.7.7
 
 17 Dec 2003  mipsator

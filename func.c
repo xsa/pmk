@@ -424,7 +424,7 @@ bool pmk_check_header(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 	}
 
 	/* fill test file */
-	tfp = tmps_open(TEST_FILE_NAME, "w", ftmp, sizeof(ftmp), sizeof(C_FILE_EXT));
+	tfp = tmps_open(TEST_FILE_NAME, "w", ftmp, sizeof(ftmp), strlen(C_FILE_EXT));
 	if (tfp != NULL) {
 		if (incfunc == NULL) {
 			/* header test */
@@ -592,7 +592,7 @@ bool pmk_check_lib(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 	/* get actual content of LIBS, no need to check as it is initialised */
 	main_libs = hash_get(pgd->htab, "LIBS");
 
-	tfp = tmps_open(TEST_FILE_NAME, "w", ftmp, sizeof(ftmp), sizeof(C_FILE_EXT));
+	tfp = tmps_open(TEST_FILE_NAME, "w", ftmp, sizeof(ftmp), strlen(C_FILE_EXT));
 	if (tfp != NULL) {
 		if (libfunc == NULL) {
 			pmk_log("\tFound library '%s' : ", libname);
@@ -1131,7 +1131,7 @@ bool pmk_check_type(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 		pmk_log("\tUse %s language with %s compiler.\n", pld->name, pld->comp);
 	}
 
-	tfp = tmps_open(TEST_FILE_NAME, "w", ftmp, sizeof(ftmp), sizeof(C_FILE_EXT));
+	tfp = tmps_open(TEST_FILE_NAME, "w", ftmp, sizeof(ftmp), strlen(C_FILE_EXT));
 	if (tfp != NULL) {
 		if (header == NULL) {
 			/* header provided */
