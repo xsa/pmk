@@ -41,5 +41,7 @@ bool get_line(FILE *, char *, int);
 bool env_to_opt(char *, pmkcmdopt *);
 bool get_make_var(char *, char *, int);
 
+void error(char *);
+void error_line(char *, int, char *);
 
 #endif /* _PMK_COMMON_H_ */

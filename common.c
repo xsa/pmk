@@ -166,3 +166,26 @@ bool get_make_var(char *varname, char *result, int rsize) {
 
 	return(rval);
 }
+
+
+/*
+	simple error
+
+	errmsg : error message
+*/
+
+void error(char *errmsg) {
+	fprintf(stderr, "Error : %s\n", errmsg);
+}
+
+/*
+	parse error
+
+	filename : parsed file name
+	line : line of error
+	errmsg : error message
+*/
+
+void error_line(char *filename, int line, char *errmsg) {
+	fprintf(stderr, "Error in '%s' line %d : %s\n", filename, line, errmsg);
+}
