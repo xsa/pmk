@@ -4,6 +4,7 @@
  * changed target of get_make_var() from test to all.
  * enabled pmkinstall in Makefile and Makefile.pmk including man page.
  * added pmkinstall man page.
+ * modified compat.c to make ansi compiler happy. 
 
 04 Nov 2003 mipsator
  * added makepath() in pathtools.
