@@ -382,7 +382,7 @@ char *process_variables(char *pstr, htable *pht) {
 					pstr++;
 					/* skip '{' */
 					pstr++;
-					pstr = parse_identifier(pstr, var, size);
+					pstr = parse_identifier(pstr, var, sizeof(var));
 					if (pstr == NULL) {
 						/* debugf("parse_idtf returned null."); */
 						return(NULL);
@@ -505,10 +505,11 @@ debugf("keyword = '%s', value = '%s', string = '%s'", buf, pps, pstr);
 debugf("variable = '%s', value = '%s', string = '%s'", buf, pps, pstr);
 #endif
 				/* store variable in hash */
-				if (hash_update_dup(ppc->variables, buf, pps) == HASH_ADD_FAIL)
+				if (hash_update_dup(ppc->variables, buf, pps) == HASH_ADD_FAIL) {
 					errorf("cannot fill pkgcell structure (variables).");
 					pkgcell_destroy(ppc);
 					return(NULL);
+				}
 
 				break;
 

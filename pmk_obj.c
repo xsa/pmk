@@ -203,7 +203,7 @@ bool po_get_bool(pmkobj *po) {
 			return(*(bool *) po->data);
 		}
 	}
-	return(false); /* XXX grr should return a *bool */
+	return(false);
 }
 
 /*
@@ -217,7 +217,7 @@ bool po_get_bool(pmkobj *po) {
 char *po_get_str(pmkobj *po) {
 	if (po != NULL) {
 		if (po->type == PO_STRING) {
-			return(po->data);
+			return((char *) po->data);
 		}
 	}
 	return(NULL);
@@ -234,7 +234,7 @@ char *po_get_str(pmkobj *po) {
 dynary *po_get_list(pmkobj *po) {
 	if (po != NULL) {
 		if (po->type == PO_LIST) {
-			return(po->data);
+			return((dynary *) po->data);
 		}
 	}
 	return(NULL);

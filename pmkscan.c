@@ -186,24 +186,26 @@ void idtf_check(char *idtf, htable *ht_fam, htable *phtgen, char *langstr) {
 	dynary	*da;
 	int	 i;
 	pmkobj	*po;
+	potype	 pot;
 
-	/* check data for this identifier */
+	/* check if data exist for this identifier */
 	po = hash_get(ht_fam, idtf);
 
 	if (po != NULL) {
-		/* check if it has been already added in phtgen */
+		/*
+			check if the identifier has already been processed
+			by looking if it has been added in phtgen
+		*/
 		if (hash_get(phtgen, idtf) == NULL) {
-			switch (po_get_type(po)) {
+			/* not present in phtgen => processing */
+			pot = po_get_type(po);
+			switch (pot) {
 				case PO_STRING :
-					/* XXX TODO temporary,  */
+					/* process a string */
 					pval = strdup(po_get_str(po));
 					p = pval;
-					while (*p != CHAR_EOS) {
-						if (*p == ',')
-							*p = '\n';
-		
-						p++;
-					}
+
+					/* XXX TODO insert code to support variables */ 
 		
 					/* record header data */
 					hash_update(phtgen, idtf, po_mk_str(pval));
@@ -211,6 +213,7 @@ void idtf_check(char *idtf, htable *ht_fam, htable *phtgen, char *langstr) {
 					break;
 
 				case PO_LIST :
+					/* process a list */
 					da = po_get_list(po); /* XXX also pval */
 					strlcpy(buf, "", sizeof(buf));
 
@@ -227,7 +230,7 @@ void idtf_check(char *idtf, htable *ht_fam, htable *phtgen, char *langstr) {
 					break;
 
 				default :
-					debugf("DOH !!"); /* XXX temporary */
+					errorf("type %u (key '%s') is not supported in idtf_check()", pot, idtf);
 					break;
 			}
 		}
