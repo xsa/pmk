@@ -44,7 +44,8 @@ ADD_COMPILER {
 	DESCR = "Compaq C"
 	MACRO = "__DECC"
 	VERSION = "__DECC_VER"
-	SLCFLAGS = "XXX flags not set in pmkcomp.dat XXX"
+	# no flags needed for PIC
+	SLCFLAGS = ""
 }
 
 ADD_COMPILER {
