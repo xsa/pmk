@@ -49,7 +49,7 @@
 #include "premake.h"
 
 
-#define DEBUG_AC	1
+/*#define DEBUG_AC	1*/
 
 
 /*
