@@ -1,3 +1,7 @@
+15 Aug 2004 mipsator
+ * added missing support of additional defines in CHECK_CONFIG and
+   CHECK_PKG_CONFIG.
+
 08 Aug 2004 mipsator
  * added support for additional defines (keyword DEFS) in CHECK_HEADER,
    CHECK_LIB, CHECK_TYPE and CHECK_VARIABLE.
