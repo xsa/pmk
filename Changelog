@@ -1,5 +1,6 @@
 17 Aug 2003 mipsator
  * fixed a small bug in depend_check().
+ * finished parser improvement for list parsing.
 
 16 Aug 2003 mipsator
  * added po_dup() in pmk_obj.
