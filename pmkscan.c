@@ -393,10 +393,7 @@ void dir_explore(htable *pht, scandata *psd, char *path) {
 */
 
 void usage(void) {
-	fprintf(stderr, "usage: pmkscan\n");
-	/* XXX TODO
-	fprintf(stderr, "usage: pmkscan [path]\n");
-	*/
+	fprintf(stderr, "usage: pmkscan [-vh] [path]\n");
 }
 
 
@@ -405,11 +402,39 @@ void usage(void) {
 */
 
 int main(int argc, char *argv[]) {
-	char		*p;
+	bool		 go_exit = false;
+	char		 buf[MAXPATHLEN],
+			*p;
 	dynary		*pda;
 	htable		*pfdata;
+	int		 chr;
 	prsdata		*pdata;
 	scandata	 sd;
+
+	while (go_exit == false) {
+		chr = getopt(argc, argv, "b:f:ho:v");
+		if (chr == -1) {
+			go_exit = true;
+		} else {
+			switch (chr) {
+				case 'v' :
+					/* display version */
+					fprintf(stdout, "%s\n", PREMAKE_VERSION);
+					exit(0);
+					break;
+
+				case 'h' :
+				case '?' :
+				default :
+					usage();
+					exit(1);
+					break;
+			}
+		}
+	}
+
+	argc = argc - optind;
+	argv = argv + optind;
 
 	printf("PMKSCAN version %s", PREMAKE_VERSION);
 #ifdef DEBUG
@@ -444,9 +469,17 @@ int main(int argc, char *argv[]) {
 		/* XXX TODO error message */
 		exit(1);
 	}
+
+	if (argc != 0) {
+		/* use optional path */
+		strlcpy(buf, argv[0], sizeof(buf));
+	} else {
+		strlcpy(buf, ".", sizeof(buf));
+	}
+
 	printf("Ok\n\n");
 
-	dir_recurse(pda, ".");
+	dir_recurse(pda, buf);
 #ifdef DEBUG
 	printf("dir_recurse finished.\n");
 #endif

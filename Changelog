@@ -4,6 +4,7 @@
  * allow use of lists in pmkscan data file.
  * added code to set the language of a check in pmkscan.
  * updated pmkfile.5 man page.
+ * added arguments to pmkscan (-v -h and optional path).
 
 20 Aug 2003 mipsator
  * added hash_add_array_adv() in hash.
