@@ -60,11 +60,13 @@ prskw	kw_pmkfile[] = {
 		{"SETTINGS",		PMK_TOK_SETNGS, PRS_KW_NODE, PMK_TOK_SETPRM},
 		{"SWITCHES",		PMK_TOK_SWITCH, PRS_KW_CELL, PRS_TOK_NULL}, /* XXX will be node */
 		{"CHECK_BINARY",	PMK_TOK_CHKBIN, PRS_KW_CELL, PRS_TOK_NULL},
-		{"CHECK_INCLUDE",	PMK_TOK_CHKINC, PRS_KW_CELL, PRS_TOK_NULL},
+		{"CHECK_HEADER",	PMK_TOK_CHKINC, PRS_KW_CELL, PRS_TOK_NULL},
 		{"CHECK_LIB",		PMK_TOK_CHKLIB, PRS_KW_CELL, PRS_TOK_NULL},
 		{"CHECK_CONFIG",	PMK_TOK_CHKCFG, PRS_KW_CELL, PRS_TOK_NULL},
 		{"CHECK_PKG_CONFIG",	PMK_TOK_CHKPKG, PRS_KW_CELL, PRS_TOK_NULL},
-		{"CHECK_TYPE",		PMK_TOK_CHKTYP, PRS_KW_CELL, PRS_TOK_NULL}
+		{"CHECK_TYPE",		PMK_TOK_CHKTYP, PRS_KW_CELL, PRS_TOK_NULL},
+		{"CHECK_VARIABLE",	PMK_TOK_CHKVAR, PRS_KW_CELL, PRS_TOK_NULL},
+		{"CHECK_INCLUDE",	PMK_TOK_CHKINC, PRS_KW_CELL, PRS_TOK_NULL}
 };
 
 int	nbkwpf = sizeof(kw_pmkfile) / sizeof(prskw);
@@ -82,10 +84,10 @@ bool func_wrapper(prscell *pcell, pmkdata *pgd) {
 			rval = pmk_define(&cmd, pcell->data, pgd);
 			break;
 		case PMK_TOK_TARGET :
-			rval = pmk_target(&cmd, pcell->data, pgd);
+			rval = pmk_target(&cmd, pcell->data, pgd); /* OBSOLETE */
 			break;
 		case PMK_TOK_ACCOMP :
-			rval = pmk_ac_compat(&cmd, pcell->data, pgd);
+			rval = pmk_ac_compat(&cmd, pcell->data, pgd); /* OBSOLETE */
 			break;
 		case PMK_TOK_SWITCH :
 			rval = pmk_switches(&cmd, pcell->data, pgd);
@@ -116,6 +118,9 @@ bool func_wrapper(prscell *pcell, pmkdata *pgd) {
 			break;
 		case PMK_TOK_CHKTYP :
 			rval = pmk_check_type(&cmd, pcell->data, pgd);
+			break;
+		case PMK_TOK_CHKVAR :
+			rval = pmk_check_variable(&cmd, pcell->data, pgd);
 			break;
 		default :
 			errorf("Unknow token %d", cmd.token);
@@ -164,7 +169,7 @@ bool process_node(prsnode *pnode, pmkdata *pgd) {
 */
 
 bool pmk_define(pmkcmd *cmd, prsnode *pnode, pmkdata *gdata) {
-	pmk_log("* Parsing define\n");
+	pmk_log("\n* Parsing define\n");
 
 	return(process_node(pnode, gdata));
 }
@@ -178,7 +183,7 @@ bool pmk_target(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 	pmkobj	*po;
 	prsopt	 opt;
 
-	pmk_log("* Parsing target\n");
+	pmk_log("\n* Parsing target\n");
 	pmk_log("\tWARNING : TARGET command is obsolete, consider using SETTINGS.\n");
 
 	strlcpy(opt.key, "TARGET", sizeof(opt.key));
@@ -204,7 +209,7 @@ bool pmk_ac_compat(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 	char	*acfile;
 	prsopt	 opt;
 
-	pmk_log("* Parsing ac_compat\n");
+	pmk_log("\n* Parsing ac_compat\n");
 	pmk_log("\tWARNING : AC_COMPAT command is obsolete, consider using SETTINGS.\n");
 
 	strlcpy(opt.key, "AC_COMPAT", sizeof(opt.key));
@@ -225,7 +230,7 @@ bool pmk_ac_compat(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 */
 
 bool pmk_settings(pmkcmd *cmd, prsnode *pnode, pmkdata *gdata) {
-	pmk_log("* Parsing settings\n");
+	pmk_log("\n* Parsing settings\n");
 
 	return(process_node(pnode, gdata));
 }
@@ -240,7 +245,7 @@ bool pmk_switches(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 	int	 i,
 		 n = 0;
 
-	pmk_log("* Parsing switches\n");
+	pmk_log("\n* Parsing switches\n");
 
 	phk = hash_keys(ht);
 
@@ -272,18 +277,24 @@ bool pmk_check_binary(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 		*bpath,
 		 binpath[MAXPATHLEN];
 
-	pmk_log("* Checking binary [%s]\n", cmd->label);
+	pmk_log("\n* Checking binary [%s]\n", cmd->label);
 	required = require_check(ht);
 
-	filename = po_get_str(hash_get(ht, "FILENAME"));
+	filename = po_get_str(hash_get(ht, "NAME"));
 	if (filename == NULL) {
-		errorf("FILENAME not assigned in label '%s'", cmd->label);
-		return(false);
+		filename = po_get_str(hash_get(ht, "FILENAME")); /* OBSOLETE */
+		if (filename == NULL) {
+			errorf("NAME not assigned in label '%s'", cmd->label);
+			return(false);
+		}
 	}
 
-	varname = po_get_str(hash_get(ht, "VARNAME"));
+	varname = po_get_str(hash_get(ht, "VARIABLE"));
 	if (varname == NULL) {
-		varname = str_to_def(filename);
+		varname = po_get_str(hash_get(ht, "VARNAME")); /* OBSOLETE */
+		if (varname == NULL) {
+			varname = str_to_def(filename);
+		}
 	}
 
 	bpath = hash_get(gdata->htab, PMKCONF_PATH_BIN);
@@ -362,15 +373,18 @@ bool pmk_check_include(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 		 i;
 	lgdata	*pld;
 
-	pmk_log("* Checking include [%s]\n", cmd->label);
+	pmk_log("\n* Checking header [%s]\n", cmd->label);
 
 	required = require_check(ht);
 
 	/* get include filename */
-	incfile = po_get_str(hash_get(ht, "INCLUDE"));
+	incfile = po_get_str(hash_get(ht, "NAME"));
 	if (incfile == NULL) {
-		errorf("INCLUDE not assigned in label '%s'", cmd->label);
-		return(false);
+		incfile = po_get_str(hash_get(ht, "INCLUDE")); /* OBSOLETE */
+		if (incfile == NULL) {
+			errorf("NAME not assigned in label '%s'", cmd->label);
+			return(false);
+		}
 	}
 
 	/* check if a function must be searched */
@@ -512,14 +526,17 @@ bool pmk_check_lib(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 		 i;
 	lgdata	*pld;
 
-	pmk_log("* Checking library [%s]\n", cmd->label);
+	pmk_log("\n* Checking library [%s]\n", cmd->label);
 
 	required = require_check(ht);
 
-	libname = po_get_str(hash_get(ht, "LIBNAME"));
+	libname = po_get_str(hash_get(ht, "NAME"));
 	if (libname == NULL) {
-		errorf("LIBNAME not assigned in label '%s'.", cmd->label);
-		return(false);
+		libname = po_get_str(hash_get(ht, "LIBNAME")); /* OBSOLETE */
+		if (libname == NULL) {
+			errorf("NAME not assigned in label '%s'.", cmd->label);
+			return(false);
+		}
 	}
 
 	libfunc = po_get_str(hash_get(ht, "FUNCTION"));
@@ -659,14 +676,17 @@ bool pmk_check_config(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 		*cflags,
 		*libs;
 
-	pmk_log("* Checking with config tool [%s]\n", cmd->label);
+	pmk_log("\n* Checking with config tool [%s]\n", cmd->label);
 
 	required = require_check(ht);
 
-	cfgtool = po_get_str(hash_get(ht, "CFGTOOL"));
+	cfgtool = po_get_str(hash_get(ht, "NAME"));
 	if (cfgtool == NULL) {
-		errorf("CFGTOOL not assigned in label '%s'.", cmd->label);
-		return(false);
+		cfgtool = po_get_str(hash_get(ht, "CFGTOOL")); /* OBSOLETE */
+		if (cfgtool == NULL) {
+			errorf("NAME not assigned in label '%s'.", cmd->label);
+			return(false);
+		}
 	}
 
 	bpath = hash_get(gdata->htab, PMKCONF_PATH_BIN);
@@ -832,14 +852,17 @@ bool pmk_check_pkg_config(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 		*cflags,
 		*libs;
 
-	pmk_log("* Checking with pkg-config [%s]\n", cmd->label);
+	pmk_log("\n* Checking with pkg-config [%s]\n", cmd->label);
 
 	required = require_check(ht);
 
-	target = po_get_str(hash_get(ht, "PACKAGE"));
+	target = po_get_str(hash_get(ht, "NAME"));
 	if (target == NULL) {
-		errorf("no TARGET set");
-		return(false);
+		target = po_get_str(hash_get(ht, "PACKAGE")); /* OBSOLETE */
+		if (target == NULL) {
+			errorf("NAME not assigned in label '%s'.", cmd->label);
+			return(false);
+		}
 	}
 
 	/* try to get pkg-config path from pmk.conf setting */
@@ -1014,14 +1037,17 @@ bool pmk_check_type(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 	int	 r;
 	lgdata	*pld;
 
-	pmk_log("* Checking type [%s]\n", cmd->label);
+	pmk_log("\n* Checking type [%s]\n", cmd->label);
 
 	required = require_check(ht);
 
-	type = po_get_str(hash_get(ht, "TYPE"));
+	type = po_get_str(hash_get(ht, "NAME"));
 	if (type == NULL) {
-		errorf("TYPE not assigned in label '%s'", cmd->label);
-		return(false);
+		type = po_get_str(hash_get(ht, "TYPE")); /* OBSOLETE */
+		if (type == NULL) {
+			errorf("NAME not assigned in label '%s'", cmd->label);
+			return(false);
+		}
 	}
 
 	if (depend_check(ht, gdata) == false) {
@@ -1091,6 +1117,85 @@ bool pmk_check_type(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 
 	/* No need to check return here as binary could not exists */
 	unlink(BIN_TEST_NAME);
+
+	return(rval);
+}
+
+/*
+	check if variable exists and optionally it's value
+*/
+
+bool pmk_check_variable(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
+	bool	 required,
+		 rval = false;
+	char	*var,
+		*value,
+		*varval;
+
+	pmk_log("\n* Checking variable [%s]\n", cmd->label);
+
+	required = require_check(ht);
+
+	var = po_get_str(hash_get(ht, "NAME"));
+	if (var == NULL) {
+		errorf("NAME not assigned in label '%s'", cmd->label);
+		return(false);
+	}
+
+	if (depend_check(ht, gdata) == false) {
+		pmk_log("\t%s\n", gdata->errmsg);
+		if (required == true) {
+			return(false);
+		} else {
+			record_def(gdata->htab, var, false);
+			label_set(gdata->labl, cmd->label, false);
+			return(true);
+		}
+	}
+
+	pmk_log("\tFound variable '%s' : ", var);
+
+	/* trying to get variable */
+	varval = hash_get(gdata->htab, var);
+	if (varval != NULL) {
+		pmk_log("yes.\n");
+
+		value = po_get_str(hash_get(ht, "VALUE"));
+		if (value == NULL) {
+			record_val(gdata->htab, var, "");
+			rval = true;
+		} else {
+			pmk_log("\tVariable match value '%s' : ", value);
+
+			if (strncmp(value, varval, sizeof(varval)) == 0) {
+				pmk_log("yes.\n");
+				record_val(gdata->htab, var, "");
+				rval = true;
+			} else {
+				pmk_log("no.\n");
+				if (required == true) {
+					rval = false;
+					errorf("variable value does not match ('%s' ! '%s').", value, varval);
+				} else {
+					/* define for template */
+					label_set(gdata->labl, cmd->label, false);
+					rval = true;
+				}
+			}
+		}
+	} else {
+		pmk_log("no.\n");
+		if (required == true) {
+			errorf("failed to find variable '%s'.", var);
+		} else {
+			/* define for template */
+			label_set(gdata->labl, cmd->label, false);
+			rval = true;
+		}
+	}
+
+	record_def(gdata->htab, var, rval);
+	label_set(gdata->labl, cmd->label, rval);
 
 	return(rval);
 }

@@ -183,8 +183,9 @@ Check if a binary is in the path.
 .Pp
 Arguments :
 .Bd -literal -offset -indent
-FILENAME : type is 'quoted', name of the binary.
-VARNAME : type is 'quoted', variable name to store the path.
+REQUIRED, DEPEND.
+NAME : type is 'quoted', name of the binary.
+VARIABLE : type is 'quoted', variable name to store the path.
 .Ed
 .It Cm CHECK_INCLUDE
 Check language header and optionally a function.
@@ -192,7 +193,7 @@ Check language header and optionally a function.
 Arguments:
 .Bd -literal -offset -indent
 REQUIRED, DEPEND, LANG.
-INCLUDE : type is 'quoted', name of the header.
+NAME : type is 'quoted', name of the header.
 FUNCTION : type is 'quoted', function to check, optional.
 .Ed
 .It Cm CHECK_LIB
@@ -201,7 +202,7 @@ Check a library and optionally a function.
 Arguments:
 .Bd -literal -offset -indent
 REQUIRED, DEPEND, LANG.
-LIBNAME : type is 'quoted', library name to check.
+NAME : type is 'quoted', name of the library to check.
 FUNCTION : type is 'quoted', function to check, optional.
 .Ed
 .It Cm CHECK_CONFIG
@@ -210,7 +211,7 @@ Check using a *-config tool.
 Arguments:
 .Bd -literal -offset -indent
 REQUIRED, DEPEND.
-CFGTOOL : type is 'quoted', config tool name.
+NAME : type is 'quoted', config tool name.
 VERSION : type is 'quoted', minimal version needed, optional.
 CFLAGS : type is 'quoted', variable name to store CFLAGS values, optional.
 LIBS : type is 'quoted', variable name to store LIBS values, optional.
@@ -221,7 +222,7 @@ Check a package using pkg-config.
 Arguments:
 .Bd -literal -offset -indent
 REQUIRED, DEPEND.
-PACKAGE : type is 'quoted', package name.
+NAME : type is 'quoted', package name.
 VERSION : type is 'quoted', minimal version needed, optional.
 CFLAGS : type is 'quoted', variable name to store CFLAGS values, optional.
 LIBS : type is 'quoted', variable name to store LIBS values, optional.
@@ -232,7 +233,16 @@ Check if the given type exists.
 Arguments:
 .Bd -literal -offset -indent
 REQUIRED, DEPEND, LANG.
-TYPE : type is 'quoted', type name to check.
+NAME : type is 'quoted', name of the type to check.
+.Ed
+.It Cm CHECK_VARIABLE
+Check if the given variable exists and optionally it's value.
+.Pp
+Arguments:
+.Bd -literal -offset -indent
+REQUIRED, DEPEND.
+NAME : type is 'quoted', name of the variable to check.
+VALUE : type is 'quoted', value to check with the variable, optional.
 .Ed
 .El
 
