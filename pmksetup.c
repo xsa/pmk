@@ -32,9 +32,11 @@
  */
 
 #include <sys/param.h>
+#include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/utsname.h>
 
+#include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -44,14 +46,11 @@
 #include "pmksetup.h"
 #include "premake.h"
 
-/* XXX override PREMAKE_CONFIG_PATH for test purpose */
-#ifdef PMKSETUP_DEBUG
-#undef PREMAKE_CONFIG_PATH
-#define PREMAKE_CONFIG_PATH	"samples/pmk.conf.sample"
-#define PREMAKE_CONFIG_TMP	"/tmp/pmk.notrandom"
-#else
 #define PREMAKE_CONFIG_TMP	"/tmp/pmk.XXXXXXXX"
-#endif
+
+/* buffer size in the copy_config() function */
+#define	MAX_LINE_BUF		MAX_LINE_LEN
+
 
 char	sfn[MAXPATHLEN];	/* scratch file name */		
 FILE	*sfp;			/* scratch file pointer */
@@ -59,15 +58,22 @@ FILE	*sfp;			/* scratch file pointer */
 
 int main(void) {
 	FILE		*config;
-	int		len,
-			linenum = 0,
+	int		linenum = 0,
 			error = 0;
+	size_t		len;	
+	uid_t		uid;
 	char		*v;	
 	char		line[MAX_LINE_LEN],
 			filename[MAXPATHLEN];
  	conf_opt	options;	
 	htable		*ht;
 
+
+	/* pmksetup(8) must be run as root */
+	if ((uid = getuid()) != 0) {
+		errorf("you must be root.");
+		exit(1);
+	} 
 	
 	if (snprintf(filename, sizeof(filename), "%s", PREMAKE_CONFIG_PATH) != -1) { 
 		
@@ -133,8 +139,25 @@ int main(void) {
 		if (close_tmp_config() < 0)
 			exit(1);
 
-		if (error == 1)
+		if (error == 0) {
+			/* copying the temporary config to the system one */
+			if (copy_config(sfn, PREMAKE_CONFIG_PATH) == -1)
+				exit(1);
+		}
+
+#ifdef PMKSETUP_DEBUG
+		debugf("%s has not been deleted!", sfn);
+#else
+		if (unlink(sfn) == -1) {
+			errorf("cannot remove temporary file: %s : %s",
+				sfn, strerror(errno));
+			exit(1);	
+		}
+#endif	/* PMKSETUP_DEBUG */
+
+		 if (error == 1)
 			exit(1);
+
 	}
 	return(0);
 }
@@ -153,7 +176,8 @@ int open_tmp_config(void) {
 	snprintf(sfn, sizeof(sfn), PREMAKE_CONFIG_TMP);
 
 	if ((fd = mkstemp(sfn)) == -1) {
-		errorf("could not create temporary file: %s", sfn);
+		errorf("could not create temporary file: %s : %s", 
+			sfn, strerror(errno));
 		return(-1);
 	}
 	if ((sfp = fdopen(fd, "w")) == NULL) {
@@ -161,7 +185,8 @@ int open_tmp_config(void) {
 			unlink(sfn);
 			close(fd);
 		}	
-		errorf("cannot open temporary file: %s", sfn);
+		errorf("cannot open temporary file: %s : %s", 
+			sfn, strerror(errno));
 		return(-1);
 	}
 	return(0);
@@ -180,20 +205,12 @@ int open_tmp_config(void) {
 int close_tmp_config(void) {
 	if (sfp) {
 		if (fclose(sfp) < 0) {
-			errorf("cannot close temporary file: %s", sfp);
+			errorf("cannot close temporary file: %s : %s", 
+				sfp, strerror(errno));
 			return(-1);
 		}
 		sfp = NULL;
-        
-#ifdef PMKSETUP_DEBUG
-		debugf("%s has not been deleted!", sfn);
-#else
-		if (unlink(sfn) == -1) {
-			errorf("cannot remove temporary file: %s", sfn);
-			return(-1);
-		}
-#endif  /* PMKSETUP_DEBUG */
-	}
+	}        
 	return(0);
 }
 
@@ -253,7 +270,6 @@ int get_binaries(htable *ht) {
 		return(-1);
 	}
 
-	debugf("Looking for needed binaries...");
 	for (i = 0; i < MAXBINS; i++) {
 		if (find_file(&stpath, binaries[i][0], fbin, MAXPATHLEN) == 0) {
 			fprintf(stderr, "Looking for %s => %s ... found\n", binaries[i][0], fbin);
@@ -325,4 +341,50 @@ int parse_line(char *line, int linenum, conf_opt *opts) {
 		errorf_line(PREMAKE_CONFIG_PATH, linenum, "operator not found.");
 		return(-1);
 	}
+}
+
+/*
+ * Copy the temporary configuration file to the system one
+ *
+ *	tmp_config: temporary configuration file name
+ *	config: system configuration file name
+ *
+ *	returns:  0 on success
+ *		 -1 on failure  	
+ */
+int copy_config(const char *tmp_config, const char *config) {
+	FILE	*fp_t, *fp_c;
+	int	rval;
+	char	buf[MAX_LINE_BUF];
+
+
+	if ((fp_t = fopen(tmp_config, "r")) == NULL) {
+		errorf("cannot open temporary configuration "
+			"file for reading: %s : %s", tmp_config, 
+				strerror(errno));
+		return(-1);	
+	}
+	if ((fp_c = fopen(config, "w")) == NULL) {
+		errorf("cannot open %s for writing: %s", 
+			config, strerror(errno));
+
+		fclose(fp_t);	
+		return(-1);
+	}
+
+	while(get_line(fp_t, buf, MAX_LINE_BUF) == 1) {
+		fprintf(fp_c, "%s\n", buf);
+	}
+
+	if (feof(fp_t) == 0) {
+		errorf("read failure, cannot copy "
+			"%s to %s", tmp_config, config);
+		rval = -1;	
+	} else
+		rval = 0;
+
+	fclose(fp_t);
+	fclose(fp_c);
+
+	return(rval);
 }
