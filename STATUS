@@ -4,8 +4,8 @@ Cygwin		?		?		HEAD_2003_04_??	Fail		Saad Kadhi		need basename & filename (should
 Debian		3.0		i586		PMK 0.3		OK		Xavier Santolaria	gcc-2.95.4, gmake-3.79.1, linux-2.4.20
 Debian		?		ia64		PMK 0.3		OK		Damien Couderc		gcc-2.95.4, gmake-3.79.1, linux-2.4.18-smp
 FreeBSD		4.7		i386		PMK 0.3		OK		Damien Couderc		gcc-2.95.4
-Gentoo		1.4.2.8		i686		PMK 0.3		OK		Xavier Santolaria	gcc-3.2.2, gmake-3.80, linux-2.4.19
-Gentoo		?		parisc		HEAD_2003_04_??	Fail		Xavier Santolaria	segfault (should be fixed now)
+Gentoo		1.4		i686		PMK 0.3		OK		Xavier Santolaria	gcc-3.2.2, gmake-3.80, linux-2.4.19
+Gentoo		1.4		parisc		PMK 0.3		OK		Xavier Santolaria	gcc-3.2.2, gmake-3.80, linux-2.4.20
 HPUX		B.11.22		ia64		HEAD_2003_04_18	Fail		Damien Couderc		make does not support '+=', __progname unknown
 LFS		4		i686		HEAD_2003_04_??	Fail		Xavier Santolaria	segfault (should be fixed now)
 MacOS		X.2.5		ppc		PMK 0.3		OK		Xavier Santolaria	gcc-3.1, gmake-3.79.1, Darwin 6.5
