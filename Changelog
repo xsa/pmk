@@ -3,7 +3,8 @@
  * added the --help option in pmkpc.
 
 21 Jan 2004 mipsator
- * use str_to_ulong() in functool and pmkinstall.
+ * use str_to_ulong() in functool* and pmkinstall*.
+ * added compare_version() in pkgconfig* for version string comparison.
 
 20 Jan 2004 mipsator
  * moved size type from int to size_t for most functions in common.

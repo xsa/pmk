@@ -47,6 +47,8 @@
 
 #define PKGCFG_HT_SIZE	512
 
+#define VERSION_CHAR_SEP	'.'
+
 /* packages strucutres */
 
 typedef struct {
@@ -88,6 +90,8 @@ bool		 pkg_recurse(pkgdata *, char *);
 char		*pkg_get_cflags(pkgdata *);
 char		*pkg_get_libs(pkgdata *);
 bool		 pkg_mod_exists(pkgdata *ppd, char *mod);
+
+int		 compare_version(char *, char *);
 
 #endif /* _PMK_PKGCONFIG_H_ */
 

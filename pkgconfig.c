@@ -719,3 +719,87 @@ bool pkg_mod_exists(pkgdata *ppd, char *mod) {
 	}
 }
 
+/*
+	compare two version strings
+
+	vref : reference version
+	vcomp : version to check
+
+	return :
+		<0 if vref is greater than vcomp
+		=0 if vref is equal to vcomp
+		>0 if vref is smaller than vcomp
+*/
+
+int compare_version(char *vref, char *vcomp) {
+	bool	 exit = false;
+	char	*sr,
+		*sc;
+	dynary	*vr,
+		*vc;
+	int	 i = 0,
+		 ref,
+		 cmp,
+		 delta;
+	long	 tl;
+
+	/* need to check da_* returns */
+	vr = str_to_dynary(vref, VERSION_CHAR_SEP);
+	if (vr == NULL) {
+		errorf("cannot parse reference version '%s'.", vref);
+		return(false);
+	}
+	vc = str_to_dynary(vcomp, VERSION_CHAR_SEP);
+	if (vc == NULL) {
+		errorf("cannot parse comparison version '%s'.", vcomp);
+		return(false);
+	}
+
+	while (exit == false) {
+		/* process reference version */
+		sr = da_idx(vr, i);
+		if (sr != NULL) {
+			/* convert string */
+			if (str_to_ulong(sr, 10, &tl) == false) {
+				errorf("cannot get numerical value of '%s'.", sr);
+				return(false);
+			}
+			ref = (int) tl;
+		} else {
+			/* end of version string */
+			ref = 0;
+			exit = true;
+		}
+
+		/* process compared version */
+		sc = da_idx(vc, i);
+		if (sc != NULL) {
+			if (str_to_ulong(sc, 10, &tl) == false) {
+				errorf("cannot get numerical value of '%s'.", sc);
+				return(false);
+			}
+			cmp = (int) tl;
+		} else {
+			/* end of version string */
+			cmp = 0;
+			exit = true;
+		}
+
+		/* compare versions */
+		delta = cmp - ref;
+
+		if (delta != 0) {
+			/* not equal end of comparison */
+			exit = true;
+		} else {
+			i++;
+		}
+	}
+
+	/* destroy dynaries */
+	da_destroy(vr);
+	da_destroy(vc);
+
+	return(delta);
+}
+
