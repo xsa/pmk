@@ -1,3 +1,6 @@
+30 Jul 2003 mipsator
+ * massive style conforming.
+
 29 Jul 2003 mipsator
  * style, descriptions and misc in pmk.
  * added pmk_check_type() and some style cosmetics in func.

@@ -1,0 +1,80 @@
+RECOMMENDED STYLE
+-----------------
+
+
+I) Comments
+
+/*
+	This is a function heading comment.
+
+	Here the input arguments.
+
+	return : and here the output.
+*/
+
+/* simple in-code comment */
+
+/*
+	Recommended multiline comment.
+	Other formats are allowed.
+*/
+
+Comments in the code are GREATLY appreciated.
+
+
+II) Includes
+
+#include <system_first.h>
+
+#include "local_after.h"
+
+Each group of include can be sorted in alphabetical order.
+
+
+III) Prototypes
+
+Use of tab indenting is recommended.
+Extra space to line up functions could be nice.
+
+void	 first_proc(void *);
+char	*second_proc(char, int);
+int	 third_proc(char *);
+
+
+IV) Structures
+
+It use the same specs as above, see the following example :
+
+struct mystruct {
+	char	*first_field;
+	int	 second_field;
+	double	 third_field;
+};
+
+
+V) Variables
+
+Always the same format :
+
+FILE	*first_var;
+int	 second_var;
+char	 third_var[NB_CHAR],
+	*fourth_var;
+
+Variables could be sorted by type in alphabetical order.
+You can also group by letter case with uppercase first.
+
+
+VI) Keywords
+
+Keywords should be followed by a space instead of functions.
+
+
+VII) Functions
+
+Function must be declared on one line with type, function name,
+arguments and open brace as the following :
+
+int first_proc(char *arg_one, int arg_two) {
+
+Variables declared in functions respect the same rules as in fifth section.
