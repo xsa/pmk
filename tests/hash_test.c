@@ -24,7 +24,8 @@ int main() {
 	htable	*hp;
 
 	printf("Testing init\n");
-	hp = hash_init(TAB_SIZE);
+	hp = hash_init(TAB_SIZE / 2);
+	hash_set_grow(hp);
 
 	printf("Adding test key\n");
 	hash_add(hp, "prefix", "/usr/locallll");
@@ -73,6 +74,7 @@ int main() {
 			snprintf(ttstr, sizeof(ttstr), "value.%s", tstr);
 
 			n = hash_add(hp, tstr, ttstr);
+printf("(%3d) ", i);
 			switch (n) {
 				case HASH_ADD_FAIL:
 					printf("Failed add for key %s\n", tstr);

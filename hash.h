@@ -55,7 +55,6 @@ typedef struct shcell {
 } hcell;
 
 typedef struct {
-	int	nbcoll;
 	hcell	*first,
 		*last;
 } hnode;
@@ -71,6 +70,7 @@ typedef struct {
 int	hash_compute(char *, int);
 htable	*hash_init(int);
 int	hash_resize(htable *, int);
+void	hash_set_grow(htable *);
 int	hash_destroy(htable *);
 int	hash_add(htable *, char *, char *);
 int	hash_add_cell(hnode *, hcell *);
