@@ -69,7 +69,6 @@ int	nbfunc = sizeof(functab) / sizeof(cmdkw);
 
 	returns bool
 
-	XXX need to check return value of record_def, record_val and label_set ?
 */
 
 /*
@@ -128,7 +127,6 @@ bool pmk_target(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 	}
 	
 	for (i=0 ; i < da_usize(da) ; i++) {
-		/* da_idx should not returns null so no check <= XXX still true ? */
 		pmk_log("\tAdded '%s'.\n", da_idx(da, i));
 	}
 
@@ -238,7 +236,10 @@ bool pmk_check_binary(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 			return(false);
 		} else {
 			record_def(gdata->htab, filename, false);
-			hash_add(gdata->htab, str_to_def(filename), strdup("")); /* XXX check ? */
+			if (hash_add(gdata->htab, str_to_def(filename), strdup("")) == HASH_ADD_FAIL) {
+				errorf("hash error.");
+				return(false);
+			}
 			label_set(gdata->labl, cmd->label, false);
 			return(true);
 		}
@@ -253,7 +254,10 @@ bool pmk_check_binary(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 		} else {
 			/* define for template */
 			record_def(gdata->htab, filename, false);
-			hash_add(gdata->htab, str_to_def(filename), strdup("")); /* XXX check ? */
+			if (hash_add(gdata->htab, str_to_def(filename), strdup("")) == HASH_ADD_FAIL) {
+				errorf("hash error.");
+				return(false);
+			}
 			label_set(gdata->labl, cmd->label, false);
 			return(true);
 		}
@@ -262,7 +266,10 @@ bool pmk_check_binary(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 		/* define for template */
 		record_def(gdata->htab, filename, true);
 		record_val(gdata->htab, filename, "");
-		hash_add(gdata->htab, str_to_def(filename), strdup(binpath)); /* XXX check ? */
+		if (hash_add(gdata->htab, str_to_def(filename), strdup(binpath)) == HASH_ADD_FAIL) {
+			errorf("hash error.");
+			return(false);
+		}
 		label_set(gdata->labl, cmd->label, true);
 		return(true);
 	}
@@ -359,7 +366,7 @@ bool pmk_check_include(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 		r = sizeof(inc_path);
 		str_to_dynary(pstr, CHAR_LIST_SEPARATOR, da);
 		for (i=0 ; i < da_usize(da) ; i++) {
-			strlcat(inc_path, " -I", r);
+			strlcat(inc_path, " -I", r); /* XXX check */
 			strlcat(inc_path, da_idx(da, i), r);
 		}
 		da_destroy(da);
@@ -510,7 +517,7 @@ bool pmk_check_lib(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 		label_set(gdata->labl, cmd->label, true);
 
 		snprintf(lib_buf, sizeof(lib_buf), "-l%s", libname);
-		hash_append(gdata->htab, "LIBS", strdup(lib_buf), " ");
+		hash_append(gdata->htab, "LIBS", strdup(lib_buf), " "); /* XXX check */
 
 		rval = true;
 	} else {
@@ -578,7 +585,10 @@ bool pmk_check_config(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 	cflags = (char *)po_get_data(hash_get(ht, "CFLAGS"));
 	if (cflags != NULL) {
 		/* init alternative variable */
-		hash_append(gdata->htab, cflags, strdup(""), " "); /* XXX check ? */
+		if (hash_append(gdata->htab, cflags, strdup(""), " ") == HASH_ADD_FAIL) {
+			errorf("hash error.");
+			return(false);
+		}
 	}
 
 	/* check for alternative variable for LIBS */
@@ -621,12 +631,15 @@ bool pmk_check_config(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 
 		rpipe = popen(cfgcmd, "r");
 		if (rpipe == NULL) {
-			errorf("cannot get version from '%s'.", cfgcmd); /* XXX should correct this message ? */
+			errorf("cannot get version from '%s'.", cfgtool);
 			return(false);
 		} else {
 			pmk_log("\tFound version >= %s : ", libvers);
 	
-			get_line(rpipe, pipebuf, sizeof(pipebuf)); /* XXX check ? */
+			if (get_line(rpipe, pipebuf, sizeof(pipebuf)) == false) {
+				errorf("cannot get version from '%s'.", cfgcmd);
+				return(false);
+			}
 			pclose(rpipe);
 			if (check_version(libvers, pipebuf) != true) {
 				/* version does not match */
@@ -655,7 +668,11 @@ bool pmk_check_config(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 	rpipe = popen(cfgcmd, "r");
 	if (rpipe != NULL) {
 		/* put result in CFLAGS */
-		get_line(rpipe, pipebuf, sizeof(pipebuf)); /* XXX check ? */
+		if (get_line(rpipe, pipebuf, sizeof(pipebuf)) == false) {
+			errorf("cannot get CFLAGS.");
+			pclose(rpipe);
+			return(false);
+		}
 		pclose(rpipe);
 
 		/* check for alternative variable for CFLAGS */
@@ -672,7 +689,11 @@ bool pmk_check_config(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 	rpipe = popen(cfgcmd, "r");
 	if (rpipe != NULL) {
 		/* put result in LIBS */
-		get_line(rpipe, pipebuf, sizeof(pipebuf)); /* XXX check ? */
+		if (get_line(rpipe, pipebuf, sizeof(pipebuf)) == false) {
+			errorf("cannot get LIBS");
+			pclose(rpipe);
+			return(false);
+		}
 		pclose(rpipe);
 
 		/* check for alternative variable for LIBS */
@@ -696,9 +717,6 @@ bool pmk_check_config(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 	XXX could store pkg-config path to improve speed
 		(avoiding multiple checks for pkg-config path)
 
-	XXX should add a switch to use global LIBS & CFLAGS or local
-	definitions, example :
-		gtk => GTK_LIBS & GTK_CFLAGS
 */
 
 bool pmk_check_pkg_config(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
@@ -793,12 +811,16 @@ bool pmk_check_pkg_config(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 
 		rpipe = popen(pc_cmd, "r");
 		if (rpipe == NULL) {
-			errorf("cannot get version from '%s'.", pc_cmd); /* XXX should correct this message ? */
+			errorf("cannot get version from '%s'.", pc_cmd);
 			return(false);
 		} else {
 			pmk_log("\tFound version >= %s : ", libvers);
 	
-			get_line(rpipe, pipebuf, sizeof(pipebuf)); /* XXX check ? */
+			if (get_line(rpipe, pipebuf, sizeof(pipebuf)) == false) {
+				errorf("cannot get version from '%s'.", pc_cmd);
+				pclose(rpipe);
+				return(false);
+			}
 			pclose(rpipe);
 			if (check_version(libvers, pipebuf) != true) {
 				/* version does not match */
@@ -821,7 +843,11 @@ bool pmk_check_pkg_config(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 	snprintf(pc_cmd, sizeof(pc_cmd), "%s --cflags %s", pc_path, target);
 	rpipe = popen(pc_cmd, "r");
 	if (rpipe != NULL) {
-		get_line(rpipe, pipebuf, sizeof(pipebuf)); /* XXX check ? */
+		if (get_line(rpipe, pipebuf, sizeof(pipebuf)) == false) {
+			errorf("cannot get CFLAGS.");
+			pclose(rpipe);
+			return(false);
+		}
 		pclose(rpipe);
 
 		/* check for alternative variable for CFLAGS */
@@ -837,7 +863,11 @@ bool pmk_check_pkg_config(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 	snprintf(pc_cmd, sizeof(pc_cmd), "%s --libs %s", pc_path, target);
 	rpipe = popen(pc_cmd, "r");
 	if (rpipe != NULL) {
-		get_line(rpipe, pipebuf, sizeof(pipebuf)); /* XXX check ? */
+		if (get_line(rpipe, pipebuf, sizeof(pipebuf)) == false) {
+			errorf("cannot get LIBS.");
+			pclose(rpipe);
+			return(false);
+		}
 		pclose(rpipe);
 
 		/* check for alternative variable for LIBS */

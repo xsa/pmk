@@ -50,7 +50,7 @@
 	ht : def table
 	fpath : file path
 
-	return : XXX
+	return : boolean
 */
 
 bool ac_parse_config(htable *ht, char *fpath) {
@@ -65,7 +65,9 @@ bool ac_parse_config(htable *ht, char *fpath) {
 		 s,
 		 fe;
 
-	strlcpy(ftmp, "config_tmp", sizeof(ftmp)); /* XXX check ? */
+	if (strlcpy(ftmp, "config_tmp", sizeof(ftmp)) >= sizeof(ftmp)) {
+		return(false);
+	}
 	fp_out = fopen(ftmp, "w");
 	if (fp_out == NULL)
 		return(false);
@@ -110,10 +112,8 @@ bool ac_parse_config(htable *ht, char *fpath) {
 			pstr = (char *) hash_get(ht, buf);
 			/* XXX could use value of DEF__ */
 			if (pstr != NULL) {
-				/* debugf("defining '%s'", buf); XXX */
 				fprintf(fp_out, "#define %s 1\t/* pmk parsed */\n", buf);
 			} else {
-				/* debugf("undefining '%s'", buf); XXX */
 				fprintf(fp_out, "#undef %s\t/* pmk parsed */\n", buf);
 			}
 		} else {
@@ -128,7 +128,7 @@ bool ac_parse_config(htable *ht, char *fpath) {
 
 	if (fe == 0) {
 		unlink(ftmp);
-		return(false); /* XXX correct ? */
+		return(false);
 	}
 
 	/* erase orig and copy new one */

@@ -290,8 +290,6 @@ bool record_def(htable *ht, char *name, bool status) {
 	if (hash_add(ht, def_str, strdup(def_val)) == HASH_ADD_FAIL)
 		return(false);
 
-	/* debugf("record_def '%s=%s'", def_str, def_val); XXX DEBUGF */
-
 	free(semidef);
 	return(true);
 }
@@ -318,8 +316,6 @@ bool record_val(htable *ht, char *name, char*value) {
 	s = sizeof(have_str);
 	if (snprintf(have_str, s, "HAVE_%s", semidef) >= s)
 		return(false);
-
-	/* XXX debugf("record_val '%s'", have_str); */
 
 	if (hash_add(ht, have_str, strdup(value)) == HASH_ADD_FAIL)
 		return(false);
@@ -428,8 +424,8 @@ bool require_check(htable *pht) {
 /*
 	provide data on language used
 
-	pht : XXX
-	pgd : XXX
+	pht : hash table that should contain LANG 
+	pgd : XXX TODO to get global LANG 
 
 	return : lgdata structure
 */
