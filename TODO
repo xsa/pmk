@@ -21,8 +21,8 @@ Status flags:
 
 common:
 -----------------------------------------------------------------------
-	-	tutorial
-damien	-	improve test_pmkinstall to check more modes
+		-	tutorial
+mipsator	-	improve test_pmkinstall to check more modes
 
 
 pmk:
@@ -43,7 +43,7 @@ pmksetup:
 -----------------------------------------------------------------------
 	!	clean temporary files on error
 	-	missing checks :
-xavier			+ ECHO_N, ECHO_C, ECHO_T in a specific proc for autoconf variables.
+xsa			+ ECHO_N, ECHO_C, ECHO_T in a specific proc for autoconf variables.
 		        . check install binary and use pmkinstall instead if not compatible.
 			- char unsigned (pmk ?)
 			- long double (pmk ?)
@@ -59,19 +59,20 @@ pmkscan
 
 pmkinstall
 -----------------------------------------------------------------------
-damien	~!	full rewrite
-		+ copy done
-		~ mode option
-			- suid and sgid bits ?
-			+ missing operators (-=)
-		+ dir creation
-		+ owner
+mipsator	~!	full rewrite
+			+ copy done
+			~ mode option
+				- suid and sgid bits ?
+				+ missing operators (-=)
+			+ dir creation
+			+ owner
 		+ group
 		~ strip
-dennis		- backup ?
+dwecker		- backup ?
 
 
 pmkpkg
 -----------------------------------------------------------------------
-damien	~.	make specs, this tool should handle install and deinstall operations
+mipsator	~.	make specs, this tool should handle install and 
+			deinstall operations
 
