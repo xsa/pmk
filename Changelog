@@ -1,3 +1,12 @@
+13 Sep 2003 mipsator
+ * added dumping of pmk.conf in test_pmksetup target of Makefile.
+ * added parse_obsolete() for pmk.conf compatibility with old format.
+ * modified parse_opt() to check a list of operator instead of
+	'=' by default. This permit to use it from pmksetup and pmk.
+ * updated read_conf() and parse_conf() to use parse_opt().
+ * defined write format for pmk.conf in pmksetup.h
+	(see PMKSTP_WRITE_FORMAT).
+
 11 Sep 2003 mipsator
  * added bool object in pmk objects.
  * added bool object support in parser.

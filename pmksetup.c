@@ -43,6 +43,7 @@
 #include "compat/pmk_string.h"
 #include "common.h"
 #include "dynarray.h"
+#include "parse.h"
 #include "pmksetup.h"
 
 
@@ -128,6 +129,7 @@ int main(int argc, char *argv[]) {
 
 		/* parse configuration file */
 		error = parse_conf(config, ht);
+		/* XXX shouldn't stop on error before merging ??? */
 
 		fclose(config);
 	} else {
@@ -185,7 +187,7 @@ void write_new_data(htable *ht) {
 	/* processing remaining keys */
 	for(i = 0 ; i < phk->nkey ; i++) {
 		val = (char *) hash_get(ht, phk->keys[i]);
-		fprintf(sfp, "%s%c%s\n", phk->keys[i], CHAR_ASSIGN_UPDATE, val);
+		fprintf(sfp, PMKSTP_WRITE_FORMAT, phk->keys[i], CHAR_ASSIGN_UPDATE, val);
 	}
 
 	hash_free_hkeys(phk);
@@ -219,7 +221,7 @@ int keycomp(const void *a, const void *b) {
  *	returns error code
  */
 int parse_conf(FILE *config, htable *ht) {
- 	cfg_opt	 options;
+	prsopt	 opt;
 	char	 line[MAX_LINE_LEN],
 		*v;	
 	int	 linenum = 0,
@@ -242,28 +244,35 @@ int parse_conf(FILE *config, htable *ht) {
 				return(-1);
 				break;
 			default :
-				if (parse_conf_line(line, linenum, &options) == 0) {
-					if ((v = (char *) hash_get(ht, options.key)) != NULL)
+				if (parse_opt(line, &opt, PRS_PMKCONF_SEP) == true) {
+					if ((v = (char *) hash_get(ht, opt.key)) != NULL)
 						/* checking the VAR<->VALUE separator */
-						switch (options.opchar) {
+						switch (opt.opchar) {
 							case CHAR_ASSIGN_UPDATE :
 								/* get newer value */
-								fprintf(sfp, "%s%c%s\n", options.key, CHAR_ASSIGN_UPDATE, v);
-								hash_delete(ht, options.key);
+								fprintf(sfp, PMKSTP_WRITE_FORMAT,
+									opt.key, CHAR_ASSIGN_UPDATE, v);
+								hash_delete(ht, opt.key);
 								break;
 							case CHAR_ASSIGN_STATIC :
 								/* static definition, stay unchanged */ 
-								fprintf(sfp, "%s%c%s\n", options.key, CHAR_ASSIGN_STATIC, options.val);
-								hash_delete(ht, options.key);
+								fprintf(sfp, PMKSTP_WRITE_FORMAT,
+									opt.key, CHAR_ASSIGN_STATIC, po_get_str(opt.value));
+								hash_delete(ht, opt.key);
 								break;
 							default :
+								/* should not happen now */
+								errorf("unknow operator '%c'", opt.opchar);
 								error = 1;
 								break;
 						}
 					else
-						fprintf(sfp, "%s%c%s\n", options.key, options.opchar, options.val);
-				} else
+						fprintf(sfp, PMKSTP_WRITE_FORMAT,
+							opt.key, opt.opchar, po_get_str(opt.value));
+				} else {
+					errorf("parse_opt failed");
 					error = 1;
+				}
 				break;
 		}
 	}

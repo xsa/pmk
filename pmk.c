@@ -70,13 +70,13 @@ int		 cur_line = 0;
 
 bool read_conf(htable *ht, char *filename) {
 	FILE	*fp;
-	cfg_opt	 co;
+	prsopt	 opt;
 	char	 buf[MAX_LINE_LEN];
 	int	 ln = 0;
 
 	fp = fopen(filename, "r");
 	if (fp == NULL) {
-		errorf("cannot open %s.", filename);
+		errorf("cannot open '%s' (read_conf).", filename);
 		return(false);
 	}
 
@@ -91,9 +91,9 @@ bool read_conf(htable *ht, char *filename) {
 				break;
 
 			default :
-				if (parse_conf_line(buf, ln, &co) == 0) {
+				if (parse_opt(buf, &opt, PRS_PMKCONF_SEP) == true) {
 					/* parse ok */
-					if (hash_add(ht, co.key, strdup(co.val)) == HASH_ADD_FAIL) {
+					if (hash_add(ht, opt.key, strdup(po_get_str(opt.value))) == HASH_ADD_FAIL) {
 						errorf("hash failure.");
 						return(false);
 					}
@@ -307,7 +307,7 @@ bool parse_cmdline(char **val, int nbval, pmkdata *pgd) {
 
 	for (i = 0 ; (i < nbval) && (rval == true) ; i++) {
 		/* parse option */
-		rval = parse_opt(val[i], &opt);
+		rval = parse_opt(val[i], &opt, PRS_PMKCONF_SEP);
 		if (rval == true) {
 			if (hash_add(ht, opt.key, opt.value) == HASH_ADD_FAIL) {
 				errorf("%s", PRS_ERR_HASH);

@@ -35,7 +35,6 @@
 #include <stdlib.h>
 
 #include "compat/pmk_ctype.h"
-#include "compat/pmk_stdbool.h"
 #include "compat/pmk_string.h"
 
 #include "common.h"
@@ -263,6 +262,28 @@ char *skip_blank(char *pstr) {
 }
 
 /*
+	parse obsolete
+	for pmk 0.6 compatibility
+	XXX TODO
+*/
+
+char *parse_obsolete(char *pstr, char *pbuf, size_t size) {
+	while ((*pstr != CHAR_EOS) && (*pstr != ' ') && (size > 0)) {
+		*pbuf = *pstr;
+		pbuf++;
+		pstr++;
+		size--;
+	}
+
+	if (size == 0)
+		return(NULL);
+
+	*pbuf = CHAR_EOS;
+	
+	return(pstr);
+}
+
+/*
 	get identifier 
 
 	pstr : current parsing cursor
@@ -289,6 +310,7 @@ char *parse_identifier(char *pstr, char *pbuf, size_t size) {
 }
 
 /*
+	XXX TODO
 */
 
 char *parse_bool(char *pstr, pmkobj *po, size_t size) {
@@ -611,7 +633,7 @@ char *parse_data(char *pstr, pmkobj *po, size_t size) {
 				return(NULL);
 			}
 
-			pstr = parse_identifier(pstr, buffer, size);
+			pstr = parse_obsolete(pstr, buffer, size);
 
 			if (pstr == NULL) {
 				free(buffer);
@@ -747,14 +769,13 @@ prscell *parse_cell(char *line, htable *phkw) {
 	parse an option line
 
 	line : option line
-	ht : hash table to store option
-	pgd : global data structure (for pmkfile name)
-	display : enable error messages if true
+	popt : storage structure 
+	seplst : string that contain all separator characters
 
 	return : boolean
 */
 
-bool parse_opt(char *line, prsopt *popt) {
+bool parse_opt(char *line, prsopt *popt, char *seplst) {
 	char	*pstr;
 	pmkobj	 po;
 
@@ -781,10 +802,12 @@ bool parse_opt(char *line, prsopt *popt) {
 	debugf("assign = '%c'", *pstr);
 #endif
 
-	if (*pstr != PMK_CHAR_ASSIGN) {
+	/* check if character is in separator list */
+	if (strchr(seplst, *pstr) == NULL) {
 		strlcpy(parse_err, PRS_ERR_SYNTAX, sizeof(parse_err));
 		return(false);
 	} else {
+		popt->opchar = *pstr;
 		pstr++;
 	}
 
@@ -883,7 +906,7 @@ bool parse_pmkfile(FILE *fp, prsdata *pdata, prskw kwtab[], size_t size) {
 
 			default :
 				if (process == true) {
-					if (parse_opt(pbuf, &opt) == false) {
+					if (parse_opt(pbuf, &opt, PRS_PMKFILE_SEP) == false) {
 						errorf("line %d : %s", cur_line, parse_err);
 #ifdef DEBUG_PRS
 						debugf("parse_opt returned false");

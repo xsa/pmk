@@ -42,6 +42,9 @@
 
 #define PREMAKE_CONFIG_TMP	"/tmp/pmk.XXXXXXXX"
 
+/* define printf format in pmk.conf */
+#define PMKSTP_WRITE_FORMAT	"%s %c \"%s\"\n"
+
 /* buffer size in the copy_config() function */
 #define MAX_LINE_BUF		MAX_LINE_LEN
 

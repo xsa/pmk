@@ -2,7 +2,7 @@ common :
 - tutorial 
 + improve parser to parse variables
 + force types in parser
-! missing function headers
+! missing function comments
 
 pmk :
 + update pmk.1
