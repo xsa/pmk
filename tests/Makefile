@@ -19,7 +19,7 @@ all: hash dynary path parser mkvar comp
 config:
 	@if [ ! -f ../config ]; then \
 		echo "Not configured, run \
-		'cd ../ && make clean cfgum' first."; \
+		'cd ../ && make clean cfgum; make' first."; \
 		exit 1; \
 	fi
 
