@@ -1,3 +1,5 @@
+# snapshot 0.4.5
+
 21 Jun 2003 mipsator
  * added pathtools.c and pathtools.h files.
  * moved relpath() into pathtools.
