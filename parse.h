@@ -155,7 +155,6 @@ prsopt	*prsopt_init_adv(char *, char, char *);
 void	 prsopt_destroy(prsopt *);
 bool	 prs_get_line(FILE *, char *, size_t);
 bool	 prs_fill_buf(prseng *);
-bool	 prs_fill_buf_by_line(prseng *);
 htable	*keyword_hash(prskw [], int);
 char	*skip_blank(char *pstr);
 void	 skip_useless(prseng *);
@@ -165,7 +164,7 @@ char	*parse_bool(char *, pmkobj *, size_t);
 char	*parse_quoted(char *, pmkobj *, size_t);
 char	*parse_list(char *, pmkobj *, size_t);
 char	*parse_key(char *, pmkobj *, size_t);
-char	*parse_data(char *, pmkobj *, size_t);
+bool	 parse_data(prseng *, pmkobj *, size_t);
 prscell	*parse_cell(char *, htable *);
 prscell	*parse_cmd_header(prseng *peng, prsnode *pnode);
 bool	 parse_opt(prseng *, prsopt *, char *);
@@ -179,3 +178,4 @@ bool	 process_opt(htable *, prsopt *);
 bool	 parse_pmkconf(FILE *, htable *, char *, bool (*)(htable *, prsopt *));
 
 #endif /* _PMK_PARSE_H_ */
+

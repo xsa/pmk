@@ -3,6 +3,8 @@
  * fixed getopt() parameters in pmkscan.
  * added option to parse config file in parser_test.
  * modified parse_pmkconf() to use prseng structure.
+ * improved parser to be able to process a multiple lines list.
+ * modified pmkscan.dat to put list data in multiple lines. 
 
 13 Jul 2004 mipsator
  * misc fixes and cleanup for experimental parsing engine.
