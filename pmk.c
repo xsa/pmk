@@ -68,7 +68,10 @@ int		 cur_line = 0;
 /*
 	init variables
 
-	pht : XXX
+	pht : global data structure
+	template : file to process
+
+	return : -
 */
 
 void process_dyn_var(pmkdata *pgd, char *template) {

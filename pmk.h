@@ -73,7 +73,7 @@
 #define PMK_DIR_SRC_ROOT_ABS "srcdir_root_abs"
 #define PMK_DIR_SRC_ROOT_REL "srcdir_root_rel"
 
-#define PMK_TMP_AC_CONF "config_tmp"
+#define PMK_TMP_AC_CONF TMPDIR "/pmk_ac_XXXXXXXX"
 
 /* build logs */
 #define PMK_BUILD_LOG	"pmk_check_build.log"
