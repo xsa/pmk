@@ -220,7 +220,7 @@ bool		 x86_set_cpu_data(prsdata *, x86_cpu_cell *, htable *);
 
 
 typedef struct {
-	uint32_t	 mask;
+	uint64_t	 mask;
 	char		*descr;
 } alpha_cpu_feature;
 

@@ -650,7 +650,7 @@ bool alpha_set_cpu_data(prsdata *pdata, htable *pht) {
 			*pstr;
 	htable		*phtbis;
 	unsigned int	 i;
-	unsigned long	 implver,
+	uint64_t	 implver,
 			 amask;
 
 /*debugf("alpha_set_cpu_data() : end");*/
