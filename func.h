@@ -108,6 +108,7 @@
 #define PMK_TOK_DEFINE	2
 #define PMK_TOK_SWITCH	3
 #define PMK_TOK_IFCOND	4
+#define PMK_TOK_ELCOND	5
 
 /* special setting tokens */
 #define PMK_TOK_SETVAR	10 /* set variable */
@@ -150,6 +151,7 @@ bool	pmk_target(pmkcmd *, htable *, pmkdata *);
 bool	pmk_ac_compat(pmkcmd *, htable *, pmkdata *);
 bool	pmk_settings(pmkcmd *, prsnode *, pmkdata *);
 bool	pmk_ifcond(pmkcmd *, prsnode *, pmkdata *);
+bool	pmk_elcond(pmkcmd *, prsnode *, pmkdata *);
 bool	pmk_switches(pmkcmd *, htable *, pmkdata *);
 bool	pmk_check_binary(pmkcmd *, htable *, pmkdata *);
 bool	pmk_check_header(pmkcmd *, htable *, pmkdata *);

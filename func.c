@@ -54,6 +54,7 @@ prskw	kw_pmkfile[] = {
 	{"DEFINE",		PMK_TOK_DEFINE,	PRS_KW_NODE, PMK_TOK_SETVAR},
 	{"SETTINGS",		PMK_TOK_SETNGS,	PRS_KW_NODE, PMK_TOK_SETPRM},
 	{"IF",			PMK_TOK_IFCOND,	PRS_KW_NODE, PRS_TOK_NULL},
+	{"ELSE",		PMK_TOK_ELCOND,	PRS_KW_NODE, PRS_TOK_NULL},
 	{"SWITCHES",		PMK_TOK_SWITCH,	PRS_KW_CELL, PRS_TOK_NULL},
 	{"CHECK_BINARY",	PMK_TOK_CHKBIN,	PRS_KW_CELL, PRS_TOK_NULL},
 	{"CHECK_HEADER",	PMK_TOK_CHKINC,	PRS_KW_CELL, PRS_TOK_NULL},
@@ -87,6 +88,9 @@ bool func_wrapper(prscell *pcell, pmkdata *pgd) {
 			break;
 		case PMK_TOK_IFCOND :
 			rval = pmk_ifcond(&cmd, pcell->data, pgd);
+			break;
+		case PMK_TOK_ELCOND :
+			rval = pmk_elcond(&cmd, pcell->data, pgd);
 			break;
 		case PMK_TOK_SETVAR :
 			rval = pmk_set_variable(&cmd, pcell->data, pgd);
@@ -187,11 +191,28 @@ bool pmk_settings(pmkcmd *cmd, prsnode *pnode, pmkdata *pgd) {
 
 bool pmk_ifcond(pmkcmd *cmd, prsnode *pnode, pmkdata *pgd) {
 	if (label_check(pgd->labl, cmd->label) == true) {
-		pmk_log("\n< Begin of condition [%s]\n", cmd->label);
+		pmk_log("\n< Begin of 'IF' condition [%s]\n", cmd->label);
 		process_node(pnode, pgd);
-		pmk_log("\n> End of condition [%s]\n", cmd->label);
+		pmk_log("\n> End of 'IF' condition [%s]\n", cmd->label);
 	} else {
-		pmk_log("\n- Skipping condition [%s]\n", cmd->label);
+		pmk_log("\n- Skipping 'IF' condition [%s]\n", cmd->label);
+	}
+
+	return(true);
+}
+
+
+/*
+	else condition
+*/
+
+bool pmk_elcond(pmkcmd *cmd, prsnode *pnode, pmkdata *pgd) {
+	if (label_check(pgd->labl, cmd->label) == false) {
+		pmk_log("\n< Begin of 'ELSE' condition [%s]\n", cmd->label);
+		process_node(pnode, pgd);
+		pmk_log("\n> End of 'ELSE' condition [%s]\n", cmd->label);
+	} else {
+		pmk_log("\n- Skipping 'ELSE' condition [%s]\n", cmd->label);
 	}
 
 	return(true);
