@@ -3,6 +3,7 @@
  	(added pmk_check_pkg_configi() in func)
  * made version optional in CHECK_CONFIG.
  * updated pmkfile sample.
+ * added version checking in pmk_check_pkg_config().
 
 07 Jun 2003 mipsator
  * cleaned-up and reorganized includes.

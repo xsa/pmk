@@ -591,9 +591,11 @@ bool pmk_check_config(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 
 bool pmk_check_pkg_config(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 	FILE	*rpipe;
-	bool	required = true;
+	bool	required = true,
+		rval;
 	char	*target,
 		*bpath,
+		*libvers,
 		pipebuf[TMP_BUF_LEN],
 		pc_cmd[MAXPATHLEN],
 		pc_path[MAXPATHLEN];
@@ -642,9 +644,39 @@ bool pmk_check_pkg_config(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 
 	/* XXX check if module exists */
 
-	/* XXX check for version ? */
+	libvers = hash_get(ht, "VERSION");
+	if (libvers != NULL) {
+		/* if VERSION is provided then check it */
+		snprintf(pc_cmd, sizeof(pc_cmd), "%s --modversion %s", pc_path, target);
 
-	snprintf(pc_cmd, sizeof(pc_cmd), "pkg-config --cflags %s", target);
+		rpipe = popen(pc_cmd, "r");
+		if (rpipe == NULL) {
+			errorf("cannot get version from '%s'.", pc_cmd); /* XXX should correct this message ? */
+			return(false);
+		} else {
+			pmk_log("\tFound version >= %s : ", libvers);
+	
+			get_line(rpipe, pipebuf, sizeof(pipebuf)); /* XXX check ? */
+			pclose(rpipe);
+			if (check_version(libvers, pipebuf) != true) {
+				/* version does not match */
+				pmk_log("no (%s).\n", pipebuf);
+				if (required == true) {
+					rval = false;
+				} else {
+					/* record_def(gdata->htab, target, false); XXX how to manage ? */
+					label_set(gdata->labl, cmd->label, false);
+					rval = true;
+				}
+				return(rval);
+			} else {
+				pmk_log("yes (%s).\n", pipebuf);
+			}
+		}
+	}
+
+
+	snprintf(pc_cmd, sizeof(pc_cmd), "%s --cflags %s", pc_path, target);
 	rpipe = popen(pc_cmd, "r");
 	if (rpipe != NULL) {
 		/* put result in CFLAGS */
@@ -653,7 +685,7 @@ bool pmk_check_pkg_config(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 		hash_append(gdata->htab, "CFLAGS", pipebuf, " "); /* XXX check ? */
 	}
 
-	snprintf(pc_cmd, sizeof(pc_cmd), "pkg-config --libs %s", target);
+	snprintf(pc_cmd, sizeof(pc_cmd), "%s --libs %s", pc_path, target);
 	rpipe = popen(pc_cmd, "r");
 	if (rpipe != NULL) {
 		/* put result in LIBS */
