@@ -179,7 +179,11 @@ int main(int argc, char *argv[]) {
 			}
 			fclose(config);
 			hash_destroy(ht);
+		} else {
+			errorf("%s not found", PREMAKE_CONFIG_PATH);
+			exit(1);
 		}
+
 		if (close_tmp_config() < 0)
 			exit(1);
 
