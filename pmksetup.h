@@ -45,13 +45,6 @@
 #define PMKSETUP_STATIC_CHAR	':'
 
 
-/* configuration file layout: VAR=VALUE */
-typedef struct {
-        char    key[MAX_OPT_NAME_LEN],
-                val[MAX_OPT_VALUE_LEN],
-		opchar;
-} conf_opt;
-
 /* _must be_ binaries to search for */
 static  char *binaries[MAXBINS][2] = {
 	{"ar",		PREMAKE_KEY_BIN_AR},
@@ -67,7 +60,6 @@ int	open_tmp_config(void);
 int	close_tmp_config(void);
 int	get_env_vars(htable *);
 int	get_binaries(htable *);
-int	parse_line(char *, int, conf_opt *);
 int	copy_config(const char *, const char *);
 
 #endif	/* _PMKSETUP_H_ */
