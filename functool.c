@@ -569,6 +569,7 @@ char *get_comp_path(htable *pht, char *compname) {
 	return((char *) hash_get(pht, key));
 }
 
+
 /*
 	check if config tool data is loaded and try to load it if not done
 
@@ -587,4 +588,33 @@ bool check_cfgt_data(pmkdata *pgd) {
 
 	return(true);
 }
+
+
+/*
+	process the required flag on failure
+
+	pgd : global data structure
+	pcmd : command data structure
+	required : required flag
+	key : optional define to record (not processed if NULL)
+	value : optional value to record (see key)
+
+	return : true if not required else false
+*/
+
+bool process_required(pmkdata *pgd, pmkcmd *pcmd, bool required,
+					char *key, char *value) {
+	if (key != NULL) {
+		/* record definition */
+		record_def_data(pgd->htab, key, value);
+	}
+	
+	/* set label value */
+	label_set(pgd->labl, pcmd->label, false);
+
+	/* if required is false then we can
+	   continue (true) else stop (false) */
+	return(invert_bool(required));
+}
+
 

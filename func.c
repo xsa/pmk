@@ -50,6 +50,8 @@
 #include "premake.h"
 
 
+/*#define SHLIB_DEBUG 1*/
+
 prskw	kw_pmkfile[] = {
 	{"DEFINE",		PMK_TOK_DEFINE,	PRS_KW_NODE, PMK_TOK_SETVAR},
 	{"SETTINGS",		PMK_TOK_SETNGS,	PRS_KW_NODE, PMK_TOK_SETPRM},
@@ -317,14 +319,7 @@ bool pmk_check_binary(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 
 	if (depend_check(ht, pgd) == false) {
 		pmk_log("\t%s\n", pgd->errmsg);
-		if (required == true) {
-			return(false);
-		} else {
-			record_def_data(pgd->htab, filename, NULL);
-			/* not found => not added in htab */
-			label_set(pgd->labl, cmd->label, false);
-			return(true);
-		}
+		return(process_required(pgd, cmd, required, filename, NULL)); 
 	}
 
 	/* try to locate binary */
@@ -404,13 +399,7 @@ bool pmk_check_header(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 
 	if (depend_check(ht, pgd) == false) {
 		pmk_log("\t%s\n", pgd->errmsg);
-		if (required == true) {
-			return(false);
-		} else {
-			record_def_data(pgd->htab, target, NULL);
-			label_set(pgd->labl, cmd->label, false);
-			return(true);
-		}
+		return(process_required(pgd, cmd, required, target, NULL)); 
 	}
 
 	/* get the language used */
@@ -586,13 +575,7 @@ bool pmk_check_lib(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 
 	if (depend_check(ht, pgd) == false) {
 		pmk_log("\t%s\n", pgd->errmsg);
-		if (required == true) {
-			return(false);
-		} else {
-			record_def_data(pgd->htab, target, NULL);
-			label_set(pgd->labl, cmd->label, false);
-			return(true);
-		}
+		return(process_required(pgd, cmd, required, target, NULL)); 
 	}
 
 	/* get the language used */
@@ -735,13 +718,7 @@ bool pmk_check_config(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 	/* check dependencies */
 	if (depend_check(ht, pgd) == false) {
 		pmk_log("\t%s\n", pgd->errmsg);
-		if (required == true) {
-			return(false);
-		} else {
-			record_def_data(pgd->htab, cfgtool, NULL);
-			label_set(pgd->labl, cmd->label, false);
-			return(true);
-		}
+		return(process_required(pgd, cmd, required, cfgtool, NULL)); 
 	}
 
 	/* check if a module name is given */
@@ -960,13 +937,7 @@ bool pmk_check_pkg_config(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 	/* check dependencies */
 	if (depend_check(ht, pgd) == false) {
 		pmk_log("\t%s\n", pgd->errmsg);
-		if (required == true) {
-			return(false);
-		} else {
-			/* record_def(pgd->htab, target, false); XXX how to manage ? */
-			label_set(pgd->labl, cmd->label, false);
-			return(true);
-		}
+		return(process_required(pgd, cmd, required, NULL, NULL)); /* XXX need to define something ? */ 
 	}
 
 	/* try to get pkg-config lib path from pmk.conf */
@@ -1204,13 +1175,7 @@ bool pmk_check_type(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 
 	if (depend_check(ht, pgd) == false) {
 		pmk_log("\t%s\n", pgd->errmsg);
-		if (required == true) {
-			return(false);
-		} else {
-			record_def_data(pgd->htab, type, NULL);
-			label_set(pgd->labl, cmd->label, false);
-			return(true);
-		}
+		return(process_required(pgd, cmd, required, type, NULL)); 
 	}
 
 	/* get the language used */
@@ -1321,13 +1286,7 @@ bool pmk_check_variable(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 
 	if (depend_check(ht, pgd) == false) {
 		pmk_log("\t%s\n", pgd->errmsg);
-		if (required == true) {
-			return(false);
-		} else {
-			record_def_data(pgd->htab, var, NULL);
-			label_set(pgd->labl, cmd->label, false);
-			return(true);
-		}
+		return(process_required(pgd, cmd, required, var, NULL)); 
 	}
 
 	/* look for additional defines */
@@ -1388,8 +1347,6 @@ bool pmk_check_variable(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 /*
 	build name of a shared library
 */
-
-/*#define SHLIB_DEBUG 1*/
 
 bool pmk_build_shlib_name(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 	char	*variable,
