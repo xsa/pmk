@@ -84,6 +84,8 @@
 #define	ECHO_HT		"\\t"
 
 
+#define EMSG_PRIV_FMT	"Failed to change privilege (%s)"
+
 /*
  * Look for location of some predefined binaries.
  * Be sure to update this list in premake.h as well.
