@@ -1,3 +1,5 @@
+# snapshot 0.9.2-s1
+
 23 Mar 2005 mipsator
  * added option checking for compiler data.
  * improved option checking so we can specify required options and
