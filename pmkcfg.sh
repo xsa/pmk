@@ -322,7 +322,7 @@ while getopts "hp:u" arg; do
 			;;
 	esac
 done
-shift $(($OPTIND-1))
+shift `expr $OPTIND - 1`
 
 # init templates
 process_tmpl_list "$tmpl_list"
