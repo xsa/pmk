@@ -274,8 +274,12 @@ bool check_mode(char *mstr, mode_t *pmode) {
 */
 
 void usage(void) {
-	fprintf(stderr, "usage: pmkinstall [-bcdghmostv] [path]\n");
-	/* XXX to finish */
+	fprintf(stderr, "usage: pmkinstall [-cs] [-g group] [-m mode] [-o owner] file1 file2\n");
+	fprintf(stderr, "       pmkinstall [-cs] [-g group] [-m mode] [-o owner] file1 ... fileN directory\n");
+	fprintf(stderr, "       pmkinstall -d [-g group] [-m mode] [-o owner] directory ...\n");
+	fprintf(stderr, "       pmkinstall -v\n");
+	fprintf(stderr, "       pmkinstall -h\n");
+
 	exit(EXIT_FAILURE);
 }
 

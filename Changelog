@@ -1,6 +1,7 @@
 09 Feb 2004 mipsator
  * rewritten pmkinstall to permit multiple directory creation.
  * updated pmkinstall man page.
+ * updated usage() of pmkinstall.
 
 08 Feb 2004 mipsator
  * implemented output filtering options in pmkpc.
