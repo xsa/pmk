@@ -1,13 +1,19 @@
 The pmk project try to provide an alternative to gnu configure.
 
+NOTE:
+HP systems seems to have 'make' unable to use '+=' operator.
+This results in an incompatibility with our Makefile so we recommand to use gmake instead of original make.
+
 Building steps :
 make config
 make
 make install
 
 Testing :
-sudo pmksetup -V
-make test_pmk
+make clean
+make config
+make
+make test_all
 
 You can send feedback on the following url :
 http://sourceforge.net/forum/forum.php?forum_id=258652
