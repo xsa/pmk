@@ -55,7 +55,7 @@
 #include "pmkinstall.h"
 #include "premake.h"
 
-/*#define DEBUG_INST	1*/
+/*#define INST_DEBUG	1*/
 
 /* default mode */
 #define DEFAULT_MODE	S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH
@@ -128,7 +128,7 @@ bool symbolic_to_octal_mode(char *mstr, mode_t *pmode) {
 
 	/* who symbols */
 	while (do_loop == true) {
-#ifdef DEBUG_INST
+#ifdef INST_DEBUG
 debugf("char = '%c'", *pstr);
 #endif
 		switch (*pstr) {
@@ -155,7 +155,7 @@ debugf("char = '%c'", *pstr);
 				break;
 		}
 		pstr++;
-#ifdef DEBUG_INST
+#ifdef INST_DEBUG
 debugf("mask = %o", mask);
 #endif
 	}
@@ -199,7 +199,7 @@ debugf("mask = %o", mask);
 		}
 		pstr++;
 	}
-#ifdef DEBUG_INST
+#ifdef INST_DEBUG
 debugf("perm = %o", perm);
 #endif
 
@@ -337,7 +337,7 @@ int main(int argc, char *argv[]) {
 				case 'g' :
 					/* specify group */
 					gstr = optarg;
-#ifdef DEBUG_INST
+#ifdef INST_DEBUG
 debugf("gstr = %s", gstr);
 #endif
 					break;
@@ -346,7 +346,7 @@ debugf("gstr = %s", gstr);
 					/* specify mode */
 					if (check_mode(optarg, &mode) == false)
 						exit(EXIT_FAILURE);
-#ifdef DEBUG_INST
+#ifdef INST_DEBUG
 debugf("mode = %o", mode);
 #endif
 					break;
@@ -399,7 +399,7 @@ debugf("mode = %o", mode);
 				exit(EXIT_FAILURE);
 			} else {
 				uid = pp->pw_uid;
-#ifdef DEBUG_INST
+#ifdef INST_DEBUG
 debugf("uid = %d", uid);
 #endif
 			}
@@ -410,7 +410,7 @@ debugf("uid = %d", uid);
 				exit(EXIT_FAILURE);
 			}
 			uid = (uid_t) ul;
-#ifdef DEBUG_INST
+#ifdef INST_DEBUG
 debugf("uid = %d", uid);
 #endif
 		}
@@ -427,7 +427,7 @@ debugf("uid = %d", uid);
 				exit(EXIT_FAILURE);
 			} else {
 				gid = pg->gr_gid;
-#ifdef DEBUG_INST
+#ifdef INST_DEBUG
 debugf("gid = %d", gid);
 #endif
 			}
@@ -438,7 +438,7 @@ debugf("gid = %d", gid);
 				exit(EXIT_FAILURE);
 			}
 			gid = (gid_t) ul;
-#ifdef DEBUG_INST
+#ifdef INST_DEBUG
 debugf("gid = %d", gid);
 #endif
 		}
@@ -461,7 +461,7 @@ debugf("gid = %d", gid);
 				directory creation
 			*/
 
-#ifdef DEBUG_INST
+#ifdef INST_DEBUG
 debugf("create dir '%s'", src);
 #endif
 
@@ -485,7 +485,7 @@ debugf("create dir '%s'", src);
 					exit(EXIT_FAILURE);
 				}
 			}
-#ifdef DEBUG_INST
+#ifdef INST_DEBUG
 debugf("dir = '%s'", dir);
 #endif
 
@@ -501,14 +501,14 @@ debugf("dir = '%s'", dir);
 				install file
 			*/
 
-#ifdef DEBUG_INST
+#ifdef INST_DEBUG
 debugf("process install of '%s'", src);
 #endif
 
 			/*  set dst */
 			dst = argv[last_idx];
 
-#ifdef DEBUG_INST
+#ifdef INST_DEBUG
 debugf("initial dst = '%s'", dst);
 #endif
 
@@ -537,7 +537,7 @@ debugf("initial dst = '%s'", dst);
 				}
 			}
 
-#ifdef DEBUG_INST
+#ifdef INST_DEBUG
 debugf("copy to '%s'", dst);
 #endif
 			/* copy file */
@@ -554,7 +554,7 @@ debugf("copy to '%s'", dst);
 
 		/* change owner and group */
 		if (do_chown == true) {
-#ifdef DEBUG_INST
+#ifdef INST_DEBUG
 debugf("doing chown('%s', %d, %d)", dst, uid, gid);
 #endif
 			if (chown(dst, uid, gid) != 0) {
@@ -565,7 +565,7 @@ debugf("doing chown('%s', %d, %d)", dst, uid, gid);
 
 		/* change perms (must follow chown that can change perms) */
 		if (chmod(dst, mode) == -1) {
-#ifdef DEBUG_INST
+#ifdef INST_DEBUG
 debugf("chmod('%s', %o)", dst, mode);
 #endif
 			errorf("chmod failed : %s.", strerror(errno));

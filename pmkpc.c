@@ -49,7 +49,7 @@
 #include "premake.h"
 
 
-/*#define DEBUG_PMKPC	1*/
+/*#define PMKPC_DEBUG	1*/
 
 extern char	*optarg;
 extern int	 optind;
@@ -136,7 +136,7 @@ bool pcgetopt(int ac, char *av[], optcell *poc) {
 	idx = poc->idx;
 
 	if (idx >= ac) {
-#ifdef DEBUG_PMKPC
+#ifdef PMKPC_DEBUG
 debugf("{pcgetopt} ac = %d", ac);
 #endif
 		/* no more args */
@@ -146,7 +146,7 @@ debugf("{pcgetopt} ac = %d", ac);
 	opt = av[idx];
 	
 	if ((opt[0] != '-') || (opt[1] != '-')) {
-#ifdef DEBUG_PMKPC
+#ifdef PMKPC_DEBUG
 debugf("{pcgetopt} full opt = '%s'", opt);
 #endif
 		/* not an option */
@@ -155,7 +155,7 @@ debugf("{pcgetopt} full opt = '%s'", opt);
 	} else {
 		/* skip leading "--" */
 		opt = opt + 2;
-#ifdef DEBUG_PMKPC
+#ifdef PMKPC_DEBUG
 debugf("{pcgetopt} opt = '%s'", opt);
 #endif
 
@@ -164,7 +164,7 @@ debugf("{pcgetopt} opt = '%s'", opt);
 		if (pstr != NULL) {
 			/* argument found */
 			if (strlcpy(buf, opt, sizeof(buf)) >= sizeof(buf)) {
-#ifdef DEBUG_PMKPC
+#ifdef PMKPC_DEBUG
 				debugf("{pcgetopt} strlcpy failed for '%s'", opt);
 #endif
 				return(false);
@@ -176,7 +176,7 @@ debugf("{pcgetopt} opt = '%s'", opt);
 			/* save argument position */
 			pstr++;
 			poc->arg = pstr;
-#ifdef DEBUG_PMKPC
+#ifdef PMKPC_DEBUG
 debugf("{pcgetopt} opt arg = '%s'", poc->arg);
 #endif
 
@@ -187,7 +187,7 @@ debugf("{pcgetopt} opt arg = '%s'", poc->arg);
 
 		l = strlen(opt);
 		idx++;
-#ifdef DEBUG_PMKPC
+#ifdef PMKPC_DEBUG
 debugf("{pcgetopt} idx = %d", idx);
 #endif
 	}
@@ -388,7 +388,7 @@ int main(int argc, char *argv[]) {
 
 	while (poc->idx != argc) {
 		if (pcgetopt(argc, argv, poc) == true) {
-#ifdef DEBUG_PMKPC
+#ifdef PMKPC_DEBUG
 debugf("{main} id = %d", poc->id);
 #endif
 			/* found an option */
@@ -517,12 +517,12 @@ debugf("{main} id = %d", poc->id);
 				/* add new module */
 				if (da_push(gdata.pda, strdup(mod)) == false) {
 					errorf("unable to store module name in dynarray.");
-#ifdef DEBUG_PMKPC
+#ifdef PMKPC_DEBUG
 					debugf("{main} mod = '%s'", mod);
 #endif
 					exit(EXIT_FAILURE);
 				}
-#ifdef DEBUG_PMKPC
+#ifdef PMKPC_DEBUG
 debugf("{main} new mod = '%s'", mod);
 #endif
 				poc->idx++;
@@ -555,7 +555,7 @@ debugf("{main} new mod = '%s'", mod);
 			clean(&gdata);
 			errorf("failed to parse '%s'.", PREMAKE_CONFIG_PATH);
 			exit(EXIT_FAILURE);
-#ifdef DEBUG_PMKPC
+#ifdef PMKPC_DEBUG
 		} else {
 debugf("{main} parsed '%s'", PREMAKE_CONFIG_PATH);
 #endif
@@ -588,16 +588,16 @@ debugf("{main} parsed '%s'", PREMAKE_CONFIG_PATH);
 	}
 
 
-#ifdef DEBUG_PMKPC
+#ifdef PMKPC_DEBUG
 debugf("{main} usize = '%d'", da_usize(gdata.pda));
 #endif
 	for (i = 0 ; i < da_usize(gdata.pda) ; i++) {
 		mod = da_idx(gdata.pda, i);
-#ifdef DEBUG_PMKPC
+#ifdef PMKPC_DEBUG
 debugf("{main} mod = '%s' (i = %d)", mod, i);
 #endif
 		if (pkg_mod_exists(gdata.ppd, mod) == true) {
-#ifdef DEBUG_PMKPC
+#ifdef PMKPC_DEBUG
 debugf("{main} module '%s' found", mod);
 #endif
 			ppc = pkg_cell_add(gdata.ppd, mod); /* ppc is part of ppd, don't destroy */
@@ -674,7 +674,7 @@ debugf("{main} module '%s' found", mod);
 				printf("\n");
 			}
 		} else {
-#ifdef DEBUG_PMKPC
+#ifdef PMKPC_DEBUG
 debugf("module not found");
 #endif
 
@@ -707,7 +707,7 @@ debugf("module not found");
 			/* looking for it in the path */
 			if (get_file_path(pc_cmd, bpath, pc_buf, sizeof(pc_buf)) == true) {
 				/* use CHECK_CONFIG */
-#ifdef DEBUG_PMKPC
+#ifdef PMKPC_DEBUG
 debugf("Found alternative '%s' tool.", pc_cmd);
 #endif
 
@@ -770,7 +770,7 @@ debugf("Found alternative '%s' tool.", pc_cmd);
 			}
 		}
 	}
-#ifdef DEBUG_PMKPC
+#ifdef PMKPC_DEBUG
 debugf("{main} destroy data");
 #endif
 	clean(&gdata);
@@ -778,7 +778,7 @@ debugf("{main} destroy data");
 		cfgtdata_destroy(pcd);
 	}
 
-#ifdef DEBUG_PMKPC
+#ifdef PMKPC_DEBUG
 debugf("End.");
 #endif
 

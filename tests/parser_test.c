@@ -18,7 +18,7 @@
 #include "../pmk_obj.c"
 #include "../pkgconfig.c"
 
-#define DEBUG_PRS	1
+#define PRS_DEBUG	1
 #include "../parse.c"
 
 
