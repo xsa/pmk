@@ -52,7 +52,7 @@
 */
 
 bool check_bool_str(char *str) {
-	if (strncmp(str, "true", 6) == 0) {
+	if (strncmp(str, "TRUE", 6) == 0) {
 		return(true);
 	} else {
 		return(false);
