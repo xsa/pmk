@@ -43,9 +43,9 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
 
 #include "compat/pmk_string.h"
+#include "compat/pmk_unistd.h"
 #include "common.h"
 #include "dynarray.h"
 #include "parse.h"

@@ -44,10 +44,10 @@
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
 
 #include "compat/pmk_libgen.h" /* basename, dirname */
 #include "compat/pmk_string.h" /* strlcpy */
+#include "compat/pmk_unistd.h"
 #include "autoconf.h"
 #include "common.h"
 #include "detect.h"

@@ -47,10 +47,10 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
 
 #include "premake.h"
 #include "compat/pmk_string.h"
+#include "compat/pmk_unistd.h"
 #include "dynarray.h"
 #include "common.h"
 
