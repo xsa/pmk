@@ -1,3 +1,6 @@
+09 Aug 2003 mipsator
+ * more stuff in pmkfile man page.
+
 08 Aug 2003 mipsator
  * rewritten parse_cell() in the same spirit as parse_opt().
  * modified parse_cell() and parse() to parse new and old format of pmkfile.
