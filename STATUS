@@ -1,13 +1,10 @@
-Verified working platforms :
-
-OpenBSD
-MacOSX
-
-
-Estimated working platforms :
-
-NetBSD
-FreeBSD
-
-
-Non working platforms :
+Sys name	Sys Version	OS arch.	PMK Version	PMK Status	Reported by		Misc data
+~~~~~~~~~~~~~~~ ~~~~~~~~~~~~~~~ ~~~~~~~~~~~~~~~ ~~~~~~~~~~~~~~~ ~~~~~~~~~~~~~~~	~~~~~~~~~~~~~~~ 	~~~~~~~~~~~~~~~~~~~~~~~~
+Debian		?		i686		HEAD_2003_04_18	OK		Damien Couderc		gcc-2.95.4, gmake-3.79.1, linux-2.4.18-smp
+FreeBSD		4.7		i386		HEAD_2003_04_18	OK		Damien Couderc		gcc-2.95.4
+HPUX		B.11.22		ia64		HEAD_2003_04_18	Fail		Damien Couderc		make does not support '+=', __progname unknown
+?(Linux)	?		i586		HEAD_2003_04_??	OK		Xavier Santolaria	gcc-2.95.4, linux-2.4.20
+MacOS		X		ppc		HEAD_2003_04_??	OK		Xavier Santolaria	gcc-3.1, gnumake-??
+NetBSD		1.6		i386		HEAD_2003_04_18 Fail		Damien Couderc		segfault on template processing
+OpenBSD		3.3		i386		HEAD_2003_04_18	OK		Damien Couderc		gcc-2.95.3
+OSF1		5.1		alpha		HEAD_2003_04_18	Fail		Damien Couderc		make does not support '+=', __progname unknown
