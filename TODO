@@ -27,15 +27,12 @@ common:
 	+	improve test_pmkinstall to check more modes
 	-	add test target in tests/Makefile
 	-	update README and INSTALL
-xsa	+	improve deinstall target (ugly rm -rf)
 	-	new samples : prog c & c++, lib c & c++
 
 
 pmk:
 -----------------------------------------------------------------------
 mips	-	MODULE support in CHECK_PKG_CONFIG
-mips	-	config tool data init when needed
-	+	handle PKG_CONFIG_PATH (env)
 mips	-	linking flags for shared libraries
 	~.	compatibility with autoconf (progressing) :
 			~ support for DEFS (-D options to pass to the compiler)
@@ -43,7 +40,6 @@ mips	-	linking flags for shared libraries
 			- support for CPPFLAGS (misc linker options) ?
 			- VPATH ?
 	-.	cache ? (hash table with binary location, ...)
-	+	more C++ support ! (CXXFLAGS in func)
 	-.	verify in CHECK_BINARY that program has executable right ?
 	-.	convert gdata.labl to pmk objects ?
 	-.	checks hash_add() in autoconf.c (void func => bool func)
@@ -51,7 +47,6 @@ mips	-	linking flags for shared libraries
 
 pmksetup:
 -----------------------------------------------------------------------
-xsa	+	adding PC_PATH_LIB (look if PREFIX/lib/pkgconfig exists and then set the variable).
 	!	clean temporary files on error
 	-	missing checks :
 		        . check install binary and use pmkinstall instead if not compatible.
@@ -69,12 +64,16 @@ pmkscan
 
 pmkinstall
 -----------------------------------------------------------------------
-	~	full rewrite
-			- backup ?
+	-.	backup option ?
 
 
-pmkpkg
+pmkshgen
 -----------------------------------------------------------------------
-mips	~	make specs, this tool should handle install and 
+mips	~.	make specs, this tool should handle install and 
 			deinstall operations
+
+pmkpc
+-----------------------------------------------------------------------
+mips	~	main loop
+			- make the argument parser working without order
 
