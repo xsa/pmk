@@ -7,20 +7,20 @@ INSTALL=	install
 SYSCONFDIR=	/etc
 
 # base path for install
-BASE=		/usr/local
+BASE=		$(HOME)
 
 # configuration file location
-CONFDIR=	$(SYSCONFDIR)/pmk
+CONFDIR=	$(HOME)/.pmk
 
 BINDIR=		$(BASE)/bin
-SBINDIR=	$(BASE)/sbin
-DATADIR=	$(BASE)/share/$(PREMAKE)
-MANDIR=		$(BASE)/man
+SBINDIR=	$(BASE)/bin
+DATADIR=	$(CONFDIR)
+MANDIR=		$(CONFDIR)
 
 CFGFLAGS=	-DSYSCONFDIR=\"$(SYSCONFDIR)\" -DCONFDIR=\"$(CONFDIR)\"
 
 # Flag to enable pmk in user mode (check INSTALL file for details).
-USERMODE=	
+USERMODE=	-DPMK_USERMODE
 
 # Edit and use the following if needed :
 
@@ -128,12 +128,12 @@ deinstall:
 	$(SUDO) rm -f $(DESTDIR)$(BINDIR)/$(INST)
 	$(SUDO) rm -f $(DESTDIR)$(SBINDIR)/$(SETUP)
 	$(SUDO) rm -rf $(DESTDIR)$(DATADIR)
-	$(SUDO) rm -f $(DESTDIR)$(BASE)/man/man1/$(PREMAKE).1
-	$(SUDO) rm -f $(DESTDIR)$(BASE)/man/man1/$(SCAN).1
-	$(SUDO) rm -f $(DESTDIR)$(BASE)/man/man1/$(INST).1
-	$(SUDO) rm -f $(DESTDIR)$(BASE)/man/man8/$(SETUP).8
-	$(SUDO) rm -f $(DESTDIR)$(BASE)/man/man5/$(PREMAKE)file.5
-	$(SUDO) rm -f $(DESTDIR)$(BASE)/man/man5/$(PREMAKE).conf.5
+	$(SUDO) rm -f $(DESTDIR)$(BASE)$(MANDIR)/man1/$(PREMAKE).1
+	$(SUDO) rm -f $(DESTDIR)$(BASE)$(MANDIR)/man1/$(SCAN).1
+	$(SUDO) rm -f $(DESTDIR)$(BASE)$(MANDIR)/man1/$(INST).1
+	$(SUDO) rm -f $(DESTDIR)$(BASE)$(MANDIR)/man8/$(SETUP).8
+	$(SUDO) rm -f $(DESTDIR)$(BASE)$(MANDIR)/man5/$(PREMAKE)file.5
+	$(SUDO) rm -f $(DESTDIR)$(BASE)$(MANDIR)/man5/$(PREMAKE).conf.5
 
 $(PREMAKE)-clean:
 	rm -f $(P_OBJS) $(PREMAKE)
