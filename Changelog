@@ -1,3 +1,6 @@
+30 Dec 2003 mipsator
+ * imported some code for internal support of pkgconfig.
+
 29 Dec 2003 mipsator
  * moved hash_add() as hash_update() and kept hash_add() as an alias.
  * updated hash_init_adv() to support data duplication.
