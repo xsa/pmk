@@ -445,10 +445,10 @@ int get_binaries(htable *ht) {
  */ 
 int predef_vars(htable *ht) {
 	hpair	predef[] = {
-			{PREMAKE_KEY_SYSCONFDIR,	strdup(SYSCONFDIR)},
-			{PREMAKE_KEY_PREFIX,		strdup("/usr/local")},
-			{PREMAKE_KEY_INCPATH,		strdup("/usr/include")},
-			{PREMAKE_KEY_LIBPATH,		strdup("/usr/lib")}
+			{PREMAKE_KEY_SYSCONFDIR,	SYSCONFDIR},
+			{PREMAKE_KEY_PREFIX,		"/usr/local"},
+			{PREMAKE_KEY_INCPATH,		"/usr/include"},
+			{PREMAKE_KEY_LIBPATH,		"/usr/lib"}
 		};
 
 	if (hash_add_array(ht, predef, sizeof(predef)/sizeof(hpair)) == 0) 
