@@ -34,6 +34,8 @@
 #ifndef _PMK_DYNARRAY_H_
 #define _PMK_DYNARRAY_H_
 
+#include "compat/pmk_stdbool.h"
+
 #ifndef DYNARY_AUTO_GROW
 #define	DYNARY_AUTO_GROW	4
 #endif
@@ -46,10 +48,12 @@ typedef struct {
 
 
 dynary	*da_init(void);
-int	 da_size(dynary *);
-int	 da_usize(dynary *);
-int	 da_push(dynary *, char *);
+bool	 da_resize(dynary *, size_t);
+size_t	 da_size(dynary *);
+size_t	 da_usize(dynary *);
+bool	 da_push(dynary *, char *);
 char	*da_pop(dynary *);
+char	*da_shift(dynary *);
 char	*da_idx(dynary *, int);
 void	 da_destroy(dynary *);
 
