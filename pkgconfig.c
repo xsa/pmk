@@ -653,11 +653,26 @@ debugf("single_append '%s', '%s'", ostr, astr);
 */
 
 char *pkg_get_cflags(pkgdata *ppd) {
-	char		*cflags = "";
+	return(pkg_get_cflags_adv(ppd, PKGCFG_CFLAGS_ALL));
+}
+
+/*
+	get recursed list of cflags with output filtering
+
+	ppd : packages data structure
+	opts : output filtering options
+
+	return : cflags string
+*/
+
+char *pkg_get_cflags_adv(pkgdata *ppd, unsigned int opts) {
+	char		*cflags = "",
+			*pstr;
 	dynary		*pda;
 	pkgcell		*ppc;
 	unsigned int	 i,
-			 j;
+			 j,
+			 o;
 
 	pda = ppd->mods;
 
@@ -667,7 +682,21 @@ char *pkg_get_cflags(pkgdata *ppd) {
 
 		/* append each element but avoid duplicate*/
 		for (j = 0 ; j < da_usize(ppc->cflags) ; j++) {
-			cflags = pkg_single_append(cflags, da_idx(ppc->cflags, j));
+			/* get element */
+			pstr = da_idx(ppc->cflags, j);
+
+			/* check type of element */
+			if (pstr[0] == '-' && pstr[1] == 'I') {
+				/* include path */
+				o = PKGCFG_CFLAGS_I;
+			} else {
+				/* other */
+				o = PKGCFG_CFLAGS_o;
+			}
+
+			/* append if not filtered */
+			if ((opts & o) != 0)
+				cflags = pkg_single_append(cflags, pstr);
 		}
 	}
 
@@ -683,11 +712,26 @@ char *pkg_get_cflags(pkgdata *ppd) {
 */
 
 char *pkg_get_libs(pkgdata *ppd) {
-	char		*libs = "";
+	return(pkg_get_libs_adv(ppd, PKGCFG_LIBS_ALL));
+}
+
+/*
+	get recursed list of libs with output filtering
+
+	ppd : packages data structure
+	opts : output filtering options
+
+	return : libs string
+*/
+
+char *pkg_get_libs_adv(pkgdata *ppd, unsigned int opts) {
+	char		*libs = "",
+			*pstr;
 	dynary		*pda;
 	pkgcell		*ppc;
 	unsigned int	 i,
-			 j;
+			 j,
+			 o;
 
 	pda = ppd->mods;
 
@@ -697,7 +741,35 @@ char *pkg_get_libs(pkgdata *ppd) {
 
 		/* append each element but avoid duplicate*/
 		for (j = 0 ; j < da_usize(ppc->libs) ; j++) {
-			libs = pkg_single_append(libs, da_idx(ppc->libs, j));
+			/* get element */
+			pstr = da_idx(ppc->libs, j);
+
+			/* check type of element */
+			if (pstr[0] == '-') {
+				switch (pstr[1]) {
+					case 'L':
+						/* lib path */
+						o = PKGCFG_LIBS_L;
+						break;
+
+					case 'l':
+						/* lib name */
+						o = PKGCFG_LIBS_l;
+						break;
+
+					default:
+						/* other */
+						o = PKGCFG_LIBS_o;
+						break;
+				}
+			} else {
+				/* other */
+				o = PKGCFG_LIBS_o;
+			}
+
+			/* append if not filtered */
+			if ((opts & o) != 0)
+				libs = pkg_single_append(libs, pstr);
 		}
 	}
 
