@@ -105,7 +105,7 @@ int parse_conf_line(char *line, int linenum, cfg_opt *opts) {
 				*pkey = CHAR_EOS;
 
 				/* set operator in struct */
-				opts->opchar = *pkey;
+				opts->opchar = *line;
 			} else {
 				*pkey = *line;
 				pkey++;
