@@ -104,6 +104,9 @@ dynary *da_init_adv(void (*freefunc)(void *)) {
 bool da_resize(dynary *da, size_t nsize) {
 	void	**tary;
 
+	if (da == NULL)
+		return(false);
+
 	tary = realloc(da->pary, nsize * sizeof(void *));
 	if (tary != NULL) {
 		da->pary = tary;
@@ -121,6 +124,9 @@ bool da_resize(dynary *da, size_t nsize) {
 */
 
 size_t	da_size(dynary *da) {
+	if (da == NULL)
+		abort(); /* shouldn't happen */
+
 	return((size_t) da->nbcell);
 }
 
@@ -131,6 +137,9 @@ size_t	da_size(dynary *da) {
 */
 
 size_t	da_usize(dynary *da) {
+	if (da == NULL)
+		abort(); /* shouldn't happen */
+
 	return((size_t) da->nextidx);
 }
 
@@ -145,6 +154,9 @@ size_t	da_usize(dynary *da) {
 
 bool da_push(dynary *da, void *pval) {
 	size_t	gsize;
+
+	if (da == NULL)
+		return(false);
 
 	if (da->nbcell == da->nextidx) {
 		/* compute growing size */
@@ -174,6 +186,9 @@ bool da_push(dynary *da, void *pval) {
 void *da_pop(dynary *da) {
 	void	 *p;
 	size_t	  gsize;
+
+	if (da == NULL)
+		return(NULL);
 
 	if (da->nextidx == 0) {
 		/* empty */
@@ -209,6 +224,9 @@ void *da_shift(dynary *da) {
 	void	*p;
 	int	 i;
 	size_t	 gsize;
+
+	if (da == NULL)
+		return(NULL);
 
 	if (da->nextidx == 0) {
 		/* empty */
@@ -249,6 +267,9 @@ void *da_shift(dynary *da) {
 */
 
 void *da_idx(dynary *da, int idx) {
+	if (da == NULL)
+		return(NULL);
+
 	if (idx >= da->nextidx) {
 		return(NULL);
 	}
@@ -265,9 +286,11 @@ void *da_idx(dynary *da, int idx) {
 void da_destroy(dynary *da) {
 	int	i;
 
-	for (i = 0 ; i < da->nextidx ; i++) {
-		da->freeobj(da->pary[i]);
+	if (da != NULL) {
+		for (i = 0 ; i < da->nextidx ; i++) {
+			da->freeobj(da->pary[i]);
+		}
+		free(da->pary);
+		free(da);
 	}
-	free(da->pary);
-	free(da);
 }

@@ -1,3 +1,9 @@
+29 Feb 2004 mipsator
+ * added failsafe checks in dynarray functions, based on a patch from
+   Marek Habersack.
+ * fixed pkgcell_destroy() to call free() only when needed, based on a
+   patch from Marek Habersack.
+
 25 Feb 2004 mipsator
  * moved tests for pmkscan and pmkinstall.
  * fixed pmkc against segfault when .pc doesn't exists or empty

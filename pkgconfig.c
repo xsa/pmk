@@ -114,10 +114,14 @@ pkgcell *pkgcell_init(void) {
 */
 
 void pkgcell_destroy(pkgcell *ppc) {
-	free(ppc->name);
-	free(ppc->descr);
-	free(ppc->version);
-	free(ppc->requires);
+	if (ppc->name != NULL)
+		free(ppc->name);
+	if (ppc->descr != NULL)
+		free(ppc->descr);
+	if (ppc->version != NULL)
+		free(ppc->version);
+	if (ppc->requires != NULL)
+		free(ppc->requires);
 	da_destroy(ppc->cflags);
 	da_destroy(ppc->libs);
 	hash_destroy(ppc->variables);
