@@ -34,6 +34,10 @@
 #ifndef _PMK_HASH_H_
 #define _PMK_HASH_H_
 
+#include "compat/pmk_string.h"
+#include "compat/pmk_stdbool.h"
+
+
 #ifndef MAX_HASH_KEY_LEN
 #	define MAX_HASH_KEY_LEN 256
 #endif
@@ -74,11 +78,12 @@ typedef struct {
 
 int	hash_compute(char *, int);
 htable	*hash_init(int);
-int	hash_resize(htable *, int);
+bool	hash_resize(htable *, int);
 void	hash_set_grow(htable *);
 int	hash_destroy(htable *);
 int	hash_add(htable *, char *, char *);
 int	hash_add_cell(hnode *, hcell *);
+bool	hash_add_array(htable *, hpair *, int);
 void	hash_delete(htable *, char *);
 char	*hash_get(htable *, char *);
 int	hash_merge(htable *, htable *);
