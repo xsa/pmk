@@ -1,6 +1,6 @@
 common :
 - tutorial 
-- improve parser to parse variables
++ improve parser to parse variables
 
 pmk :
 + update pmk.1
@@ -10,7 +10,7 @@ pmk :
 - set LDFLAGS ?
 - cache ? (hash table with binary location, ...)
 - more C++ support
-- global LANG
+~ global LANG
 ~ replace po_get_data
 
 pmksetup :
