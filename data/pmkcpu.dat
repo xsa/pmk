@@ -58,6 +58,7 @@ ADD_CPU_FAMILY {
 
 ADD_CPU_FAMILY {
 	NAME = "m68k"
-	LIST = ("m68k")
+	LIST = ("hp300","mac68k","mvme68k")
 }
+
 
