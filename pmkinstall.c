@@ -51,6 +51,7 @@
 #include "pmkinstall.h"
 #include "premake.h"
 
+/*#define DEBUG_INST	1*/
 
 /* default mode */
 #define DEFAULT_MODE	S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH
@@ -123,7 +124,9 @@ bool symbolic_to_octal_mode(char *mstr, mode_t *pmode) {
 
 	/* who symbols */
 	while (do_loop == true) {
-/*debugf("char = '%c'", *pstr);*/
+#ifdef DEBUG_INST
+debugf("char = '%c'", *pstr);
+#endif
 		switch (*pstr) {
 			case 'a':
 				mask = mask | FULL_MASK;
@@ -148,7 +151,9 @@ bool symbolic_to_octal_mode(char *mstr, mode_t *pmode) {
 				break;
 		}
 		pstr++;
-/*debugf("mask = %o", mask);*/
+#ifdef DEBUG_INST
+debugf("mask = %o", mask);
+#endif
 	}
 
 	/* check if operator is valid */
@@ -190,7 +195,9 @@ bool symbolic_to_octal_mode(char *mstr, mode_t *pmode) {
 		}
 		pstr++;
 	}
-/*debugf("perm = %o", perm);*/
+#ifdef DEBUG_INST
+debugf("perm = %o", perm);
+#endif
 
 	/* apply operator */
 	switch (op) {
@@ -324,14 +331,18 @@ int main(int argc, char *argv[]) {
 				case 'g' :
 					/* specify group */
 					gstr = optarg;
-/*debugf("gstr = %s", gstr);*/
+#ifdef DEBUG_INST
+debugf("gstr = %s", gstr);
+#endif
 					break;
 
 				case 'm' :
 					/* specify mode */
 					if (check_mode(optarg, &mode) == false)
 						exit(EXIT_FAILURE);
-/*debugf("mode = %o", mode);*/
+#ifdef DEBUG_INST
+debugf("mode = %o", mode);
+#endif
 					break;
 
 				case 'o' :
@@ -384,13 +395,17 @@ int main(int argc, char *argv[]) {
 				exit(EXIT_FAILURE);
 			} else {
 				uid = pp->pw_uid;
-/*debugf("uid = %d", uid);*/
+#ifdef DEBUG_INST
+debugf("uid = %d", uid);
+#endif
 			}
 		} else {
 			/* uid */
 			uid = (uid_t) strtoul(ostr, NULL, 10);
 			/* XXX check for ERANGE ? */
-/*debugf("uid = %d", uid);*/
+#ifdef DEBUG_INST
+debugf("uid = %d", uid);
+#endif
 		}
 		do_chown = true;
 	}
@@ -404,13 +419,17 @@ int main(int argc, char *argv[]) {
 				exit(EXIT_FAILURE);
 			} else {
 				gid = pg->gr_gid;
-/*debugf("gid = %d", gid);*/
+#ifdef DEBUG_INST
+debugf("gid = %d", gid);
+#endif
 			}
 		} else {
 			/* gid */
 			gid = (gid_t) strtoul(gstr, NULL, 10);
 			/* XXX check for ERANGE ? */
-/*debugf("gid = %d", gid);*/
+#ifdef DEBUG_INST
+debugf("gid = %d", gid);
+#endif
 		}
 		do_chown = true;
 	}
@@ -423,7 +442,9 @@ int main(int argc, char *argv[]) {
 		}
 	} else {
 		/* create path */
-/*debugf("create dir '%s'", src);*/
+#ifdef DEBUG_INST
+debugf("create dir '%s'", src);
+#endif
 		if (*src == CHAR_SEP) {
 			/* absolute path, copy */
 			strlcpy(dir, src, sizeof(dir)); /* XXX check */
@@ -437,7 +458,9 @@ int main(int argc, char *argv[]) {
 			strlcat(dir, STR_SEP, sizeof(dir));
 			strlcat(dir, src, sizeof(dir)); /* XXX check */
 		}
-/*debugf("dir = '%s'", dir);*/
+#ifdef DEBUG_INST
+debugf("dir = '%s'", dir);
+#endif
 
 		if (makepath(dir, S_IRWXU | S_IRWXG | S_IRWXO) == false) {
 			errorf("cannot create directory.");
@@ -454,7 +477,9 @@ int main(int argc, char *argv[]) {
 
 	/* change owner and group */
 	if (do_chown == true) {
-/*debugf("doing chown('%s', %d, %d)", dst, uid, gid);*/
+#ifdef DEBUG_INST
+debugf("doing chown('%s', %d, %d)", dst, uid, gid);
+#endif
 		if (chown(dst, uid, gid) != 0) {
 			errorf("chown failed : %s.", strerror(errno));
 			exit(EXIT_FAILURE);
@@ -463,7 +488,9 @@ int main(int argc, char *argv[]) {
 
 	/* change perms (must follow chown that can change perms) */
 	if (chmod(dst, mode) == -1) {
-/*debugf("chmod('%s', %o)", dst, mode);*/
+#ifdef DEBUG_INST
+debugf("chmod('%s', %o)", dst, mode);
+#endif
 		errorf("chmod failed : %s.", strerror(errno));
 		exit(EXIT_FAILURE);
 	}
