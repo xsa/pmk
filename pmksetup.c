@@ -446,20 +446,19 @@ int get_binaries(htable *ht) {
  *		 -1 on failure
  */ 
 int predef_vars(htable *ht) {
-	if (hash_add(ht, PREMAKE_KEY_SYSCONFDIR, SYSCONFDIR) == HASH_ADD_FAIL)
+	hpair	predef[] = {
+			{PREMAKE_KEY_SYSCONFDIR,	SYSCONFDIR},
+			{PREMAKE_KEY_PREFIX,		"/usr/local"},
+			{PREMAKE_KEY_INCPATH,		"/usr/include"},
+			{PREMAKE_KEY_LIBPATH,		"/usr/lib"}
+		};
+
+	if (hash_add_array(ht, predef, sizeof(predef)/sizeof(hpair)) == 0) 
 		return(-1);
+
 	verbosef("Setting '%s' => '%s'", PREMAKE_KEY_SYSCONFDIR, SYSCONFDIR);
-
-	if (hash_add(ht, PREMAKE_KEY_PREFIX, "/usr/local") == HASH_ADD_FAIL)
-		return(-1);
-	verbosef("Setting '%s' =>'%s'", PREMAKE_KEY_PREFIX, "/usr/local");
-
-	if (hash_add(ht, PREMAKE_KEY_INCPATH, "/usr/include") == HASH_ADD_FAIL)
-		return(-1);
+	verbosef("Setting '%s' => '%s'", PREMAKE_KEY_PREFIX, "/usr/local");
 	verbosef("Setting '%s' => '%s'", PREMAKE_KEY_INCPATH, "/usr/include");
-
-	if (hash_add(ht, PREMAKE_KEY_LIBPATH, "/usr/lib") == HASH_ADD_FAIL)
-		return(-1);
 	verbosef("Setting '%s' => '%s'", PREMAKE_KEY_LIBPATH, "/usr/lib");
 
 	return(0);

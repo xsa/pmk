@@ -1,3 +1,6 @@
+15 May 2003 xsa
+ * now using hash_add_array() for the predefined variables in pmksetup.
+
 15 May 2003 mipsator
  * added AC_COMPAT for autoconf compatibility.
  * cleanup in various files (XXX comments).
