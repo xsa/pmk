@@ -67,10 +67,8 @@ int main(int argc, char *argv[]) {
 	/* mkstemp powah */
 	snprintf(tf, sizeof(tf), "/tmp/pmktmp");
 	
-	if ((tfd = fopen(tf, "w")) == NULL) {
-		/* Hey man ! What's going on ?? */
+	if ((tfd = fopen(tf, "w")) == NULL)
 		err(1, "%s", tf);
-	}
 
 	printf("Hey you know what ? I'm doing nothing :)\n");
 
