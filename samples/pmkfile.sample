@@ -4,7 +4,10 @@
 # comment
 .DEFINE
 version=0.0
-infile=src/Makefile.in,src/blah.in
+PROGNAME=scandisk
+.END
+.TARGET
+LIST=samples/Makefile.sample.pmk
 .END
 .CHECK_LIB(lib_gtk)
 REQUIRED=TRUE

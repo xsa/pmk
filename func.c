@@ -60,11 +60,46 @@ bool check_bool_str(char *str) {
 }
 
 /*
+	check version
+
+	vref : reference version
+	vers : version to check
+
+	returns TRUE is vers >= vref
+*/
+
+bool check_version(char *vref, char *vers) {
+	/* XXX to do */
+	return(TRUE);
+}
+
+/*
 	define variables
 */
 
 bool pmk_define(pmkcmd *cmd, htable *ht) {
 	pmk_log("* Parsing define\n");
+	return(TRUE);
+}
+
+/*
+	set target files (templates) to process
+*/
+
+bool pmk_target(pmkcmd *cmd, htable *ht) {
+	char	*list;
+
+	pmk_log("* Collecting targets\n");
+
+	/* XXX */
+	list = strdup(hash_get(ht, "LIST"));
+	if (list == NULL) {
+		errorf("LIST not assigned in TARGET"); /* XXX should provide cmd line ? */
+		return(FALSE);
+	}
+	/* XXX should process multiple filename */
+	gdata.target = list;
+
 	return(TRUE);
 }
 
@@ -133,6 +168,9 @@ bool pmk_check_include(pmkcmd *cmd, htable *ht) {
 			pmk_log("no.\n");
 			errorf("Failed to find '%s' in '%s'", incfunc, incfile);
 			return(FALSE);
+		} else {
+			/* no function to test */
+			return(TRUE);
 		}
 	} else {
 		errorf("Failed to find %s", incfunc, incfile);

@@ -80,12 +80,12 @@ htable		*keyhash,
 		*datahash;
 cmdkw		functab[] = {
 	{"DEFINE", pmk_define},
+	{"TARGET", pmk_target},
 	{"CHECK_BINARY", pmk_check_binary},
 	{"CHECK_INCLUDE", pmk_check_include},
 	{"CHECK_LIB", pmk_check_lib},
 	{"CHECK_CONFIG", pmk_check_config}
 };
-
 
 
 /*
@@ -214,6 +214,9 @@ bool process_template(char *template) {
 
 	fclose(dfd);
 	fclose(tfd);
+
+	pmk_log("Created %s.\n", final);
+	
 	return(TRUE);
 }
 
@@ -621,7 +624,8 @@ int main(int argc, char *argv[]) {
 		/* an error occured while parsing */
 		rval = 1;
 	} else {
-		process_template("samples/Makefile.sample.pmk");
+		pmk_log("\n");
+		process_template(gdata.target); /* XXX should use an array or something else */
 		pmk_log("End of log.\n");
 	}
 

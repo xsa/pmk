@@ -46,10 +46,14 @@ typedef struct {
 
 
 bool check_bool_str(char *);
+bool check_version(char *, char *);
+
 bool pmk_define(pmkcmd *, htable *);
+bool pmk_target(pmkcmd *, htable *);
 bool pmk_check_binary(pmkcmd *, htable *);
 bool pmk_check_include(pmkcmd *, htable *);
 bool pmk_check_lib(pmkcmd *, htable *);
 bool pmk_check_config(pmkcmd *, htable *);
+
 
 #endif /* _PMK_FUNC_H_ */
