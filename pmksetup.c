@@ -541,7 +541,7 @@ void verbosef(const char *fmt, ...) {
 		vsnprintf(buf, sizeof(buf), fmt, plst);
 		va_end(plst);
 
-		fprintf(stderr, "%s\n", buf);
+		fprintf(stdout, "%s\n", buf);
 	}
 }
 
