@@ -290,7 +290,7 @@ char *hash_get(htable *pht, char *key) {
 		/* hash not empty */
 		if (strncmp(key, phc->key, MAX_HASH_KEY_LEN) == 0) {
 			/* found key, return pointer on value */
-			return(phc->key);
+			return(phc->value);
 		} else {
 			/* go to next cell */
 			phc = phc->next;
