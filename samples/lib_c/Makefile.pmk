@@ -1,0 +1,43 @@
+# $Id$
+
+CC?=		@BIN_CC@
+AR?=		@BIN_AR@
+RANLIB?=	@BIN_RANLIB@
+
+ARFLAGS=	cru
+SLCFLAGS=	@SLCFLAGS@
+SLLDFLAGS=	@SLLDFLAGS@
+
+NAME=		hello
+LIBNAME=	lib$(NAME)
+#MAJOR=		0
+#MINOR=		1
+
+LIB_STATIC=	$(LIBNAME).a
+LIB_SHARED=	$(LIBNAME).so
+
+B_OBJS=		$(NAME).o
+L_OBJS=		$(LIBNAME).o
+
+
+all: $(LIB_STATIC) $(LIB_SHARED) $(NAME)
+
+.c.o:
+	$(CC) $(CFLAGS) $(SLCFLAGS) -c $<
+
+$(LIB_STATIC): $(L_OBJS)
+	$(AR) $(ARFLAGS) $@ $(L_OBJS)
+	$(RANLIB) $@
+
+$(LIB_SHARED): $(L_OBJS)
+	$(CC) $(SLLDFLAGS) -o $@ $(L_OBJS)
+
+$(NAME):
+	$(CC) -o $(NAME) -L. -lhello $(NAME).c
+
+clean:
+	rm -f $(B_OBJS) $(L_OBJS) 
+	rm -f $(LIB_STATIC) $(LIB_SHARED)
+	rm -f $(NAME)
+	rm -f *.log Makefile
+
