@@ -15,6 +15,9 @@ CFLAGS?=
 # Here you can change the default location of pmk.conf
 #CFLAGS+=	-DSYSCONFDIR=\"/etc/\"
 
+# Flag for platform testing checks
+#CFLAGS+=	-DUSER_TEST
+
 LDFLAGS?=
 
 PREFIX?=	/usr/local
@@ -109,4 +112,13 @@ test_pmk: pmk
 	@echo "=> End of test"
 	@echo ""
 
-test_all: test_pmk clean
+test_pmksetup: pmksetup
+	@echo "Generating local pmk.conf."
+	@echo "(need USER_TEST enabled)"
+	@echo ""
+	./pmksetup
+	@echo ""
+	@echo "Done."
+	@echo ""
+
+test_all: test_pmksetup test_pmk clean
