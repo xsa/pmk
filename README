@@ -9,7 +9,9 @@ $Id$
 Introduction
 ------------
 
-The pmk project tries to provide an alternative to GNU autoconf.
+The pmk project tries to provide an alternative to GNU autoconf, GNU
+libtool and pkg-config. It also provides a basic BSD install like tool
+and a source scanner to help building of pmkfiles.
 
 
 1) Installation Steps
