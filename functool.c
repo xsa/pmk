@@ -438,6 +438,22 @@ bool require_check(htable *pht) {
 }
 
 /*
+	check language
+*/
+
+lgdata *check_lang(char *lang) {
+	int	 i;
+
+	for (i = 0 ; i < NBLANG ; i++) {
+		if (strncmp(ldata[i].name, lang, LANG_NAME_LEN) == 0) {
+			return(&ldata[i]);
+		}
+	}
+
+	return(NULL);
+}
+
+/*
 	provide data on language used
 
 	pht : hash table that should contain LANG 
@@ -448,7 +464,6 @@ bool require_check(htable *pht) {
 
 lgdata *get_lang(htable *pht, pmkdata *pgd) {
 	char	*lang;
-	int	 i;
 
 	/* check first if language has been provided locally */
 	lang = (char *)po_get_data(hash_get(pht, "LANG"));
@@ -459,13 +474,7 @@ lgdata *get_lang(htable *pht, pmkdata *pgd) {
 		return(&ldata[0]);
 	}
 
-	for (i = 0 ; i < NBLANG ; i++) {
-		if (strncmp(ldata[i].name, lang, LANG_NAME_LEN) == 0) {
-			return(&ldata[i]);
-		}
-	}
-
-	return(NULL);
+	return(check_lang(lang));
 }
 
 /*
@@ -524,11 +533,11 @@ char *process_string(char *pstr, htable *pht) {
 			pstr++;
 			pstr = parse_idtf(pstr, var, size);
 			if (pstr == NULL) {
-				debugf("parse_idtf returned null."); /* XXX */
+/*				debugf("parse_idtf returned null."); XXX */
 				return(NULL);
 			} else {
 				/* check if identifier exists */
-				pvar = po_get_str(hash_get(pht, var));
+				pvar = hash_get(pht, var);
 				if (pvar != NULL) {
 					/* identifier found, append value */
 					while ((*pvar != CHAR_EOS) && (size > 0)) {
@@ -549,11 +558,10 @@ char *process_string(char *pstr, htable *pht) {
 	}
 
 	if (size == 0) {
-		debugf("overflow."); /* XXX */
+/*		debugf("overflow."); XXX */
 		return(NULL);
 	}
 
 	*pbuf = CHAR_EOS;
-
 	return(strdup(buf));
 }

@@ -2,6 +2,12 @@
  * more stuff to permit node command (i will explain later).
  * modified parse_cell() and prscell_init() to meet our current goal.
  * added more stuff again for node command.
+ * finished node command stuff.
+ * enabled SETTINGS command.
+ * converted DEFINE command as node.
+ * defined values can contain variable.
+ * added some support for global language.
+ * updated pmkfile.sample and pmkscan.dat to new format.
 
 05 Sep 2003 mipsator
  * improved parser engine again (first part).

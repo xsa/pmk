@@ -63,7 +63,8 @@
 /* keyword types */
 #define PRS_KW_UNKW	0
 #define PRS_KW_NODE	1
-#define PRS_KW_ITEM	2
+#define PRS_KW_CELL	2
+#define PRS_KW_ITEM	3
 
 /* null token */
 #define PRS_TOK_NULL	0
