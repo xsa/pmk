@@ -1,3 +1,7 @@
+27 Nov 2004 mipsator
+ * incorporated x86 cpu detection code into pmksetup, enjoy !
+ * miscellaneous cosmetics changes.
+
 26 Nov 2004 mipsator
  * made cpuid_test using compat.
  * done major clean-up in tests directory (but still need some work).

@@ -22,7 +22,7 @@
 
 int main(void) {
 	char		*pstr;
-	hkeys	*phk;
+	hkeys		*phk;
 	htable		*pht;
 	int		 ui,
 			 i;
@@ -43,7 +43,7 @@ int main(void) {
 		exit(EXIT_FAILURE);
 	}
 
-	pstr = check_cpu_arch(utsname.machine, pdata); /* check */
+	pstr = check_cpu_arch(utsname.machine, pdata); /* XXX check ? */
 	printf("arch = '%s'\n", pstr);
 
 	pht = arch_wrapper(pdata, pstr);
@@ -51,7 +51,6 @@ int main(void) {
 		phk = hash_keys(pht);
 		if (phk != NULL) {
 			for(i = 0 ; i < phk->nkey ; i++) {
-				/*pstr = po_get_str(hash_get(pht, phk->keys[i]));*/
 				pstr = hash_get(pht, phk->keys[i]);
 				printf("%s = '%s'\n", phk->keys[i], pstr);
 			}
