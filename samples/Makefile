@@ -15,6 +15,19 @@ TEST_SAMPLE=	test_samples
 
 all: test_all
 
+test_bin_c:
+	@echo ""
+	@echo "=> Testing C binary building"
+	@echo ""
+	@echo "-> Runing pmk"
+	@echo ""
+	@cd bin_c && pmk
+	@echo ""
+	@cd bin_c && make
+	@echo ""
+	@echo "=> End of test"
+	@echo ""
+
 test_lib_c:
 	@echo ""
 	@echo "=> Testing C library building"
@@ -135,6 +148,9 @@ test_pmk_only: test_$(SETUP) test_$(PREMAKE) test_clean
 
 test_old_all: test_pmk_only
 
+# all binary tests
+test_bins: test_bin_c
+
 # all scan tests
 test_scans: test_scan_c
 
@@ -142,7 +158,7 @@ test_scans: test_scan_c
 test_libs: test_lib_c test_lib_cxx
 
 # all tests
-test_all: test_libs test_scans test_$(INST)
+test_all: test_bins test_libs test_scans test_$(INST)
 
 # test target => alias to all target 
 test: all
