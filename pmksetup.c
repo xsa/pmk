@@ -43,34 +43,42 @@
 #include <string.h>
 #include <unistd.h>
 
+#include "common.h"
+#include "pmksetup.h"
 #include "premake.h"
-
-#define	PATH_DELIMITER	":"	/* string delimiter of the $PATH variable */	
-#define	MAXTOKENS	128	/* max slots in the paths array */
-#define	MAXBINS		4	/* max slots in the binaries array */	
-
-
-/* _must be_ binaries to search for */
-static	char *binaries[MAXBINS] = {
-	"ar", "cat", "grep", "install" 
-};
-
-
-/* Local functions declaration */
-int	create_tmp_config(void);
-int	get_env_vars(FILE *);
-int	find_file(char *, char *, char *, int);
-int	strsplit(char *, char **, int);
+#include "readconf.h"
 
 
 
 int main(int argc, char *argv[]) {
+	FILE	*f;
 	char	config[MAXPATHLEN];
+	htable	*ht;
 
 	/* try to open configuration file if it exists */
 	snprintf(config, sizeof(config), "%s", PREMAKE_CONFIG_PATH);
 
-	/* XXX open configuration file if it does exist */
+	if(config != NULL) {
+		if ((f = fopen(config, "r")) != NULL) {
+
+#ifdef PMKSETUP_DEBUG
+			debugf("Reading configuration file: %s", 
+				PREMAKE_CONFIG_PATH); 
+#endif	/* PMKSETUP_DEBUG */
+
+                	if ((ht = hash_init(MAX_CONF_OPT)) == NULL) {
+                        	error("cannot create hash table");
+                        	exit(1);
+			}
+			read_config_file(f, ht);
+			
+			/* XXX will need to compare values
+			 * from the configuration file and the ones
+			 * found on the system
+			 */
+			hash_destroy(ht);
+		}
+	}
 
 	/* create simple temp config */
 	create_tmp_config();
@@ -88,13 +96,18 @@ int create_tmp_config(void) {
 
 	/* creating temporary file to build new configuration file */
 	snprintf(tf, sizeof(tf), "/tmp/pmk.XXXXXXXX");
-	if ((mtfd = mkstemp(tf)) == -1 ||
-		(tfd = fdopen(mtfd, "w")) == NULL) {
-			if (mtfd != -1) {
-				unlink(tf);
-				close(mtfd);
-			}
-			err(1, "%s", tf);
+
+	if ((mtfd = mkstemp(tf)) != -1)
+		tfd = fdopen(mtfd, "w");
+		
+	/* XXX this way it passes -ansi -pedantic ... should be rewritten */
+	if ((mtfd == -1) || (tfd == NULL)) {
+		if (mtfd != -1) {
+			unlink(tf);
+			close(mtfd);
+		}	
+		errorf("%s", tf);
+		exit(1);
 	}	
 
 	fprintf(tfd, "# premake configuration file, read by pmk(1)" 
@@ -106,46 +119,53 @@ int create_tmp_config(void) {
 	fclose(tfd);
 
 #ifdef PMKSETUP_DEBUG
-	fprintf(stderr, "[DEBUG] %s has not been deleted !\n", tf);
+	debugf("%s has not been deleted!", tf);
 #else
-	if (unlink(tf) == -1)
-		/* cannot remove temporary file */
-		err(1, "%s", tf);
-
+	if (unlink(tf) == -1) {
+	 	error("cannot remove temporary file");
+		exit(1);	
+	}
 #endif  /* PMKSETUP_DEBUG */
-
 	return(0);
 }
 
 /* Get the environment variables needed for the configuration file */
 
-int get_env_vars(FILE *tfd) { 
+int get_env_vars(FILE *f) { 
 	int	j;
 	char	*bin_path, *tpath, buf[MAXPATHLEN];
 	struct	utsname	utsname;
 
-	if (uname(&utsname) == -1)
-		err(1, "uname");	
-
-	if ((bin_path = getenv("PATH")) == NULL)
-		err(1, "getenv");
+	if (uname(&utsname) == -1) {
+		error("uname");
+		exit(1);
+	}
+	if ((bin_path = getenv("PATH")) == NULL) {
+		error("could not get the PATH environment variable");
+		exit(1);
+	}
 
 	/* Temporarily printing the variables */
-	fprintf(tfd, "OS_NAME=%s\n", utsname.sysname);
-	fprintf(tfd, "OS_RELEASE=%s\n", utsname.release);
-	fprintf(tfd, "ARCH=%s\n", utsname.machine);
-	fprintf(tfd, "BIN_PATH=%s\n", bin_path);
+	fprintf(f, "OS_NAME=%s\n", utsname.sysname);
+	fprintf(f, "OS_RELEASE=%s\n", utsname.release);
+	fprintf(f, "ARCH=%s\n", utsname.machine);
+	fprintf(f, "BIN_PATH=%s\n", bin_path);
 
 	/* 
 	 * XXX should store the above variables in a hash instead of
 	 * looping here. 
-	 */ 
+	 */
+	debugf("Looking for needed binaries...");
 	for (j = 0; j < MAXBINS; j++) {
 		tpath = strdup(bin_path);
-		if (find_file(tpath, binaries[j], buf, MAXPATHLEN) == 0)
-			fprintf(stderr, "%s => %s\n", binaries[j], buf);
-		else
-			fprintf(stderr, "%s not found\n",binaries[j]);
+		if (find_file(tpath, binaries[j], buf, MAXPATHLEN) == 0) {
+			fprintf(stderr, "Looking for %s => %s\n", 
+				binaries[j], buf);
+		}
+		else {
+			errorf("%s not found", binaries[j]);
+			exit(1);
+		}
 	}
 	return(0);
 }
@@ -170,9 +190,10 @@ int find_file(char *bin_path, char *file_name, char *file_path, int fp_len) {
 	s = strsplit(bin_path, path, MAXTOKENS);
 
 	for (i = 0; i < s; i++) {
-		if (!(dirp = opendir(path[i])))
-			err(1, "opendir");
-	
+		if (!(dirp = opendir(path[i]))) {
+			errorf("could not open directory: %s", path[i]);
+			exit(1);
+		}
 		while ((dp = readdir(dirp)) != NULL) {
 			if (dp->d_ino == 0)
 				continue;
