@@ -4,9 +4,10 @@ common :
 
 pmk :
 + update pmk.1
-! update pmkfile.5 (VARIABLE in CHECK_CONFIG, CFLAGS in CHECK_HEADER)
+! update pmkfile.5
+	(VARIABLE in CHECK_CONFIG, CFLAGS in CHECK_HEADER, LIBS in CHECK_LIB)
 ! define CFLAGS, LIBS, LDFLAGS with values from make
-- CHECK_LIB should set LIBS and need a LIBS option
++ CHECK_LIB should set LIBS and need a LIBS option
 	(check with a glob da_idx(da, i)+"lib"+libname+".*")
 ~ compatibility with autoconf (progressing) :
 	~ support for DEFS (-D options to pass to the compiler)
