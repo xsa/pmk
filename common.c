@@ -200,7 +200,7 @@ bool get_make_var(char *varname, char *result, int rsize) {
 }
 
 /*
-	split a string into a dynamic array
+	split a string into a dynamic array (one separator)
 
 	str : string to split
 	sep : separator
@@ -209,6 +209,22 @@ bool get_make_var(char *varname, char *result, int rsize) {
 */
 
 dynary *str_to_dynary(char *str, char sep) {
+	static char	buf[2];
+
+	snprintf(buf, sizeof(buf), "%c", sep); /* XXX check ! */
+	return(str_to_dynary_adv(str, buf));
+}
+
+/*
+	split a string into a dynamic array (list of separators)
+
+	str : string to split
+	sep : separators list
+
+	return : dynary or NULL 
+*/
+
+dynary *str_to_dynary_adv(char *str, char *seplst) {
 	char	 buf[MAXPATHLEN],
 		*pbuf;
 	dynary	*da;
@@ -228,7 +244,9 @@ dynary *str_to_dynary(char *str, char sep) {
 	s = sizeof(buf);
 	pbuf = buf;
 	while (*str != CHAR_EOS) {
-		if (*str == sep) {
+
+		/* check if character is in separator list */
+		if (strchr(seplst, *str) != NULL) {
 			*pbuf = CHAR_EOS;
 			if (da_push(da, strdup(buf)) == false) {
 				da_destroy(da);
@@ -274,7 +292,7 @@ bool find_file_dir(dynary *da, char *fname, char *fpath, int fplen) {
 	bool		 found = false;
 	char		 tstr[MAXPATHLEN],
 			*path;
-	int		 i;
+	unsigned int	 i;
 
 	for (i = 0 ; (i < da_usize(da)) && (found == false) ; i++) {
 		path = da_idx(da, i);
@@ -287,14 +305,14 @@ bool find_file_dir(dynary *da, char *fname, char *fpath, int fplen) {
 				fclose(fp);
 				if (strlcpy(fpath, path, fplen) < fplen) {
 					/* fpath correctly set */
-					found = true;
+					found = true; /* XXX OPTIM return(true) ? */
 				}
 			}
 		}
 
 	}
 
-	return(found);
+	return(found); /* XXX OPTIM return(false); ? */
 }
 
 /*
