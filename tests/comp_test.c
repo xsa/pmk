@@ -36,19 +36,23 @@ int main(int argc, char *argv[]) {
 
 	printf("Detecting compiler ...\n");
 	if (detect_compiler(cc, "/dev/null", cdata, &cinfo) == false) {
+		compdata_destroy(cdata);
 		printf("Failed");
 		exit(EXIT_FAILURE);
 	}
 
 	pcell = comp_get(cdata, cinfo.c_id);
 	if (pcell == NULL) {
+		compdata_destroy(cdata);
 		printf("Failed.\n");
 		exit(EXIT_FAILURE);
 	} else {
 		printf("Detected compiler : '%s'\n", comp_get_descr(cdata, cinfo.c_id));
 		printf("Compiler version : '%s'\n", cinfo.version);
 	}
-	
+
+	compdata_destroy(cdata);
+
 	return(0);
 }
 
