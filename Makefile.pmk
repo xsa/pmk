@@ -57,7 +57,7 @@ I_OBJS=         $(INST).o
 	$(CC) $(PMKCFLAGS) -c $<
 
 # main target
-all: $(PREMAKE) $(SETUP) $(SCAN)
+all: $(PREMAKE) $(SETUP) $(SCAN) $(INST)
 
 # specific object files
 $(SCAN).o:
@@ -105,7 +105,7 @@ install: all
 	$(INSTALL) -d -m 755 $(BINDIR)
 	$(INSTALL) -m 755 $(PREMAKE) $(BINDIR)/$(PREMAKE)
 	$(INSTALL) -m 755 $(SCAN) $(BINDIR)/$(SCAN)
-#	$(INSTALL) -m 755 $(INST) $(BINDIR)/$(INST)
+	$(INSTALL) -m 755 $(INST) $(BINDIR)/$(INST)
 	$(INSTALL) -d -m 755 $(SBINDIR)
 	$(INSTALL) -m 755 $(SETUP) $(SBINDIR)/$(SETUP)
 	$(INSTALL) -d -m 755 $(DATADIR)
@@ -115,6 +115,7 @@ install: all
 	$(INSTALL) -d -m 755 $(MANDIR)/man1
 	$(INSTALL) -m 444 man/$(PREMAKE).1 $(MANDIR)/man1/$(PREMAKE).1
 	$(INSTALL) -m 444 man/$(SCAN).1 $(MANDIR)/man1/$(SCAN).1
+	$(INSTALL) -m 444 man/$(INST).1 $(MANDIR)/man1/$(INST).1
 	$(INSTALL) -d -m 755 $(MANDIR)/man5
 	$(INSTALL) -m 444 man/$(PREMAKE).conf.5 $(MANDIR)/man5/$(PREMAKE).conf.5
 	$(INSTALL) -m 444 man/$(PREMAKE)file.5 $(MANDIR)/man5/$(PREMAKE)file.5
@@ -124,11 +125,12 @@ install: all
 deinstall:
 	rm -f $(BINDIR)/$(PREMAKE)
 	rm -f $(BINDIR)/$(SCAN)
-#	rm -f $(BINDIR)/$(INST)
+	rm -f $(BINDIR)/$(INST)
 	rm -f $(SBINDIR)/$(SETUP)
 	rm -rf $(DATADIR)
 	rm -f $(BASE)/man/man1/$(PREMAKE).1
 	rm -f $(BASE)/man/man1/$(SCAN).1
+	rm -f $(BASE)/man/man1/$(INST).1
 	rm -f $(BASE)/man/man8/$(SETUP).8
 	rm -f $(BASE)/man/man5/$(PREMAKE)file.5
 	rm -f $(BASE)/man/man5/$(PREMAKE).conf.5
@@ -142,7 +144,10 @@ $(SETUP)-clean:
 $(SCAN)-clean:
 	rm -f $(SC_OBJS) $(SCAN)
 
-clean: $(PREMAKE)-clean $(SETUP)-clean $(SCAN)-clean
+$(INST)-clean:
+	rm -f $(I_OBJS) $(INST)
+
+clean: $(PREMAKE)-clean $(SETUP)-clean $(SCAN)-clean $(INST)-clean
 	rm -f compat/compat.h config *.core
 
 test_$(PREMAKE): $(PREMAKE)
