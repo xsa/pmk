@@ -916,7 +916,8 @@ bool pmk_check_pkg_config(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 	/* try to get pkg-config lib path from pmk.conf */
 	pstr = hash_get(pgd->htab, PMKCONF_PC_PATH_LIB);
 	if (pstr == NULL) {
-		pmk_log("\tUnable to get %s from pmk.conf.\n", PMKCONF_PC_PATH_LIB);
+		pmk_log("\tUnable to get %s from %s.\n",
+			PMKCONF_PC_PATH_LIB, PREMAKE_CONFIG_PATH);
 		return(false);
 	}
 
