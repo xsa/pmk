@@ -1,0 +1,13 @@
+# $Id$
+# pmkfile example
+
+# settings
+SETTINGS {
+	# set default language
+	LANG = "C"
+	# target files 
+	TARGET = ("Makefile.pmk")
+	# detect compiler
+	DETECT = ("CC")
+}
+

@@ -3,6 +3,7 @@
  * fixed setting of shared lib cflags.
  * fixed init of ac_file and lang in global data.
  * added support for shared libs linking flags.
+ * imported sample test for C shared library.
 
 # snapshot 0.7.11
 
