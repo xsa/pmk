@@ -1,3 +1,6 @@
+05 May 2003 xsa
+ * added SYSCONFDIR to predef_vars(), so it's now in the pmk.conf as well.
+
 04 May 2003 xsa
  * added verbosef(), now using it instead of debugf for the -V flag.
  * added predef_vars(), adding the static variables to the pmk.conf file. 

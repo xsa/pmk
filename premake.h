@@ -108,6 +108,8 @@
 
 #define PREMAKE_KEY_LIBPATH	"LIB_PATH"
 
+#define PREMAKE_KEY_SYSCONFDIR	"SYSCONFDIR"
+
 #define PREMAKE_KEY_PREFIX	"PREFIX"
 
 /* prefix character used for comments */
