@@ -1,3 +1,18 @@
+18 Sep 2003 mipsator
+ * improved str_to_dynary() to init and return dynary structure.
+ * updated use of str_to_dynary in func, funtool, pmk and pmksetup.
+ * changed syntax of path variables in pmk configuration file.
+ * updated func.c to match with new PATH_* variables but kept the
+	compatibility with old format.
+ * added warnings for obsolete variables in both pmk and pmksetup.
+ * updated pmk.conf.5 to match with PATH_* variables.
+ * fixed parse_pmkconf() to take care of comment and blank lines as
+ * fixed pmk to take care of parse_pmkconf() changes.
+ * fixed pmksetup to keep comments and blank lines when updating
+	the configuration file.
+ * rewritten predef_vars() in pmksetup (i feel better like that :).
+ * updated pmk.conf sample.
+
 15 Sep 2003 mipsator
  * removed useless parse_conf_line() in common.
  * added function comments that were missing.

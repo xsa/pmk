@@ -90,19 +90,32 @@ Some other data (such as PREFIX) cannot fit into previous families.
 .Sh EXAMPLES
 A typical pmk.conf will look something like this:
 .Bd -literal -offset -indent
+# pmk.conf example
+
+# misc
 OS_NAME="OpenBSD"
 OS_VERSION="3.3"
 OS_ARCH="i386"
+HW_BYTEORDER = "LITTLE_ENDIAN"
 
 PREFIX="/usr/local"
 SYSCONFDIR="/etc"
 
-INC_PATH="/usr/include"
-LIB_PATH="/usr/lib"
-
+# binary locations
 BIN_AR="/usr/bin/ar"
+BIN_CAT="/bin/cat"
+BIN_CC = "/usr/bin/cc"
+BIN_CXX = "/usr/bin/c++"
+BIN_GREP="/usr/bin/grep"
 BIN_INSTALL="/usr/bin/install"
 BIN_RANLIB="/usr/bin/ranlib"
+BIN_MORE:"/usr/bin/less"
+
+# path variables
+PATH_BIN="/bin,/sbin,/usr/bin,/usr/sbin,/usr/local/bin,/usr/local/sbin"
+PATH_INC = "/usr/include"
+PATH_LIB = "/usr/lib"
+
 .Ed
 .Pp
 .Sh FILES

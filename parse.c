@@ -1028,11 +1028,19 @@ bool parse_pmkconf(FILE *fp, htable *pht, char *seplst, bool (*func)(htable *, p
 	while (get_line(fp, buf, sizeof(buf)) == true) {
 		switch (buf[0]) {
 			case CHAR_COMMENT :
-				/* ignore comment */
+				/* comment */
+				strlcpy(opt.key, "comment", sizeof(opt.key)); /* don't check */
+				opt.opchar = CHAR_COMMENT;
+				opt.value = po_mk_str(buf);
+				func(pht, &opt);
 				break;
 
 			case CHAR_EOS :
-				/* ignore empty line */
+				/* empty line */
+				strlcpy(opt.key, "", sizeof(opt.key)); /* don't check */
+				opt.opchar = CHAR_EOS;
+				opt.value = po_mk_str(buf);
+				func(pht, &opt);
 				break;
 
 			default :

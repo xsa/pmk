@@ -53,6 +53,15 @@ int	 verbose_flag = 0;	/* -V option at the cmd-line */
 char	 sfn[MAXPATHLEN];	/* scratch file name */		
 FILE	*sfp;			/* scratch file pointer */
 
+hpair	predef[] = {
+		{PMKCONF_MISC_SYSCONFDIR,	SYSCONFDIR},
+		{PMKCONF_MISC_PREFIX,		"/usr/local"},
+		{PMKCONF_PATH_INC,		"/usr/include"},
+		{PMKCONF_PATH_LIB,		"/usr/lib"}
+};
+
+int	nbpredef = sizeof(predef) / sizeof(hpair);
+
 
 /*
  * Main program for pmksetup(8)
@@ -220,7 +229,28 @@ bool check_opt(htable *pht, prsopt *popt) {
 	char	*recval,
 		*optval;
 
+	/* OBSOLETE, warning about compatibility with <0.6 */
+	if (strncmp(popt->key, PREMAKE_KEY_BINPATH, sizeof(popt->key)) == 0) {
+		printf("WARNING : %s is obsoleted by %s. Removing is recommended.\n",
+				PREMAKE_KEY_BINPATH, PMKCONF_PATH_BIN);
+	}
+	if (strncmp(popt->key, PREMAKE_KEY_INCPATH, sizeof(popt->key)) == 0) {
+		printf("WARNING : %s is obsoleted by %s. Removing is recommended.\n",
+				PREMAKE_KEY_INCPATH, PMKCONF_PATH_INC);
+	}
+	if (strncmp(popt->key, PREMAKE_KEY_LIBPATH, sizeof(popt->key)) == 0) {
+		printf("WARNING : %s is obsoleted by %s. Removing is recommended.\n",
+				PREMAKE_KEY_LIBPATH, PMKCONF_PATH_LIB);
+	}
+	/* end of OBSOLETE stuff */
+
 	optval = po_get_str(popt->value);
+
+	if ((popt->opchar == CHAR_COMMENT) || (popt->opchar == CHAR_EOS)) {
+		/* found comment or empty line */
+		fprintf(sfp, "%s\n", optval);
+		return(true);
+	}
 
 	if ((recval = (char *) hash_get(pht, popt->key)) != NULL) {
 		/* checking the VAR<->VALUE separator */
@@ -344,9 +374,9 @@ int get_env_vars(htable *ht) {
 	 */
 	char_replace(bin_path, PATH_STR_DELIMITER, CHAR_LIST_SEPARATOR);
 
-	if (hash_add(ht, PREMAKE_KEY_BINPATH, strdup(bin_path)) == HASH_ADD_FAIL)
+	if (hash_add(ht, PMKCONF_PATH_BIN, strdup(bin_path)) == HASH_ADD_FAIL)
 		return(-1);
-	verbosef("Setting '%s' => '%s'", PREMAKE_KEY_BINPATH, bin_path);
+	verbosef("Setting '%s' => '%s'", PMKCONF_PATH_BIN, bin_path);
 
 	return(0);
 }
@@ -369,15 +399,9 @@ int get_binaries(htable *ht) {
          * splitting the PATH variable and storing in a 
          * dynamic array for later use by find_file
          */
-	if ((stpath = da_init()) == NULL) {
-		errorf("cannot initalize the dynamic array."); 
-		return(-1);	
-	}
-
-	if (str_to_dynary((char *) hash_get(ht, PREMAKE_KEY_BINPATH), 
-			CHAR_LIST_SEPARATOR, stpath) == 0) {
+	stpath = str_to_dynary((char *) hash_get(ht, PMKCONF_PATH_BIN), CHAR_LIST_SEPARATOR);
+	if (stpath == NULL) {
 		errorf("could not split the PATH environment variable correctly.");
-		da_destroy(stpath);
 		return(-1);	
 	}
 
@@ -420,26 +444,21 @@ int get_binaries(htable *ht) {
  * Add to the hash table the predefined variables we
  * cannot get automagically
  *
- *	ht: hash table where we have to store the values
+ *	pht: hash table where we have to store the values
  *
  *	returns:  0 on success
  *		 -1 on failure
  */ 
-int predef_vars(htable *ht) {
-	hpair	predef[] = {
-			{PMKCONF_MISC_SYSCONFDIR,	SYSCONFDIR},
-			{PMKCONF_MISC_PREFIX,		"/usr/local"},
-			{PREMAKE_KEY_INCPATH,		"/usr/include"},
-			{PREMAKE_KEY_LIBPATH,		"/usr/lib"}
-		};
+int predef_vars(htable *pht) {
+	int	i;
 
-	if (hash_add_array(ht, predef, sizeof(predef)/sizeof(hpair)) == false) 
-		return(-1);
-
-	verbosef("Setting '%s' => '%s'", PMKCONF_MISC_SYSCONFDIR, SYSCONFDIR);
-	verbosef("Setting '%s' => '%s'", PMKCONF_MISC_PREFIX, "/usr/local");
-	verbosef("Setting '%s' => '%s'", PREMAKE_KEY_INCPATH, "/usr/include");
-	verbosef("Setting '%s' => '%s'", PREMAKE_KEY_LIBPATH, "/usr/lib");
+	for (i = 0 ; i < nbpredef ; i++) {
+		verbosef("Setting '%s' => '%s'", predef[i].key, predef[i].value);
+		if (hash_add(pht, predef[i].key, strdup(predef[i].value)) == HASH_ADD_FAIL) {
+			errorf("failed to add %s.", predef[i].key);
+			return(-1);
+		}
+	}
 
 	return(0);
 }
