@@ -17,6 +17,10 @@ methods:
   make
   make install
 
+  Note: on some system the default sh shell is not POSIX compliant.
+  For example, on Tru64, you will need to set the BIN_SH variable to
+  'xpg4' to call sh in POSIX mode.
+
 2) Using previously installed pmk binary:
   pmk
   make
