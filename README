@@ -6,7 +6,7 @@ make
 make install
 
 Testing :
-sudo pmksetup
+sudo pmksetup -V
 make test_pmk
 
 You can send feedback on the following url :

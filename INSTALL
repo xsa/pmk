@@ -1,9 +1,11 @@
 INSTALL
 -------
 
-First you must check compat/compat.h to ensure compatibilities with your system.
-
-To install pmk on your system :
+To build and install pmk on your system :
+make config
 make
 make install
-make clean
+
+To test pmk on your system :
+sudo pmksetup -V
+make test_pmk
