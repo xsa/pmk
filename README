@@ -1,11 +1,12 @@
-The pmk project try to provide an alternative to gnu configure.
+The pmk project tries to provide an alternative to GNU configure.
 
-There is two basic ways for using pmk. The first is the common
-installation that need root privileges and that allow all users to
-acces pmk. The second is the user mode that install binaries in
-$HOME/bin/ and data in $HOME/.pmk/ of the user that do the install.
+There are two basic ways of using pmk. The first one is the common
+installation that needs root privileges and that allows all users to
+acces pmk. The second one is the "user mode" that installs binaries in
+$HOME/bin/ and data in $HOME/.pmk/ of the user doing the installation.
 
-There is two targets to configure pmk before building.
+There are two targets to configure pmk before building it.
+
 Configuring with root mode :
 
   make cfgrm
@@ -27,7 +28,7 @@ Testing :
   make clean
   make test_all
 
-You can send feedback to the following email :
+You can send us feedback to the following email :
 
   pmk-users@lists.sourceforge.net
 
@@ -36,4 +37,4 @@ Or if you have a sourceforge account on this forum :
   http://sourceforge.net/forum/forum.php?forum_id=258652
 
 For more experienced users it is possible to directly use the pmkcfg.sh
-script, see INSTALL.
+script, see INSTALL for further information.
