@@ -465,7 +465,7 @@ bool pmk_check_header(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 		snprintf(cfgcmd, sizeof(cfgcmd), HEADER_CC_FORMAT,
 			ccpath, inc_path, BIN_TEST_NAME, ftmp, pgd->buildlog);
 	} else {
-		/* compute objet file name */
+		/* compute object file name */
 		strlcpy(btmp, ftmp, sizeof(btmp));
 		btmp[strlen(btmp) - 1] = 'o';
 
@@ -515,7 +515,7 @@ bool pmk_check_header(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 		/* No need to check return here as binary could not exists */
 		unlink(BIN_TEST_NAME);
 	} else {
-		/* No need to check return here as objet file could not exists */
+		/* No need to check return here as object file could not exists */
 		unlink(btmp);
 	}
 
