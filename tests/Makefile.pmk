@@ -10,10 +10,11 @@ AS=		@AS@
 #WARN=		-ansi -pedantic
 #WARN=		-Wall -Werror -ansi -pedantic
 
-LDFLAGS?=
-#DEBUG?=	-g
+#DEBUG=		-g
 
-#CFLAGS=	$(WARN) $(DEBUG)
+CFLAGS=		@CFLAGS@ $(WARN) $(DEBUG)
+LDFLAGS=	@LDFLAGS@
+
 
 CI_OBJS=	../common.o ../compat.o ../detect_cpu.o ../detect_cpu_asm.o \
 		../dynarray.o ../hash.o ../parse.o ../pmk_obj.o cpuid_test.o

@@ -80,6 +80,8 @@ um_prfx='$(HOME)'
 
 testbin="./cfgtest"
 testfile="$testbin.c"
+testmake="./maketest.mk"
+testmkvar="./test_mkvar"
 testobj="$testbin.o"
 
 temporary="./pmkcfg.tmp"
@@ -123,6 +125,25 @@ process_tmpl_list () {
 	done
 }
 
+get_make_var() {
+	mkvar="$1"
+	printf "Getting '%s' value : " "$mkvar"
+
+	cat > $testmake << EOF
+all:
+	@printf "%s\n" "\$($mkvar)" > $testmkvar
+EOF
+
+	make -f $testmake >/dev/null 2>&1
+
+	rslt=`cat $testmkvar`
+
+	rm $testmake $testmkvar
+
+	printf "'%s'\n" "$rslt"
+	mkf_sed "$mkvar" "$rslt"
+}
+
 check_binary() {
 	binary="$1"
 	tname=`echo "$binary" | tr [a-z] [A-Z] | tr . _`
@@ -142,9 +163,9 @@ check_binary() {
 	done
 
 	if test "$r" -eq 0; then
-		echo "yes"
+		printf "yes\n"
 	else
-		echo "no"
+		printf "no\n"
 	fi
 	mkf_sed "$tname" "$tval"
 
@@ -166,11 +187,11 @@ EOF
 
 	if $CC -o $testbin $testfile >/dev/null 2>&1; then
 		sed_define "def" "$header"
-		echo "yes"
+		printf "yes\n"
 		r=0
 	else
 		sed_define "udef" "$header"
-		echo "no"
+		printf "no\n"
 		r=1
 	fi
 	rm -f $testfile $testbin
@@ -196,11 +217,11 @@ EOF
 
 	if $CC -o $testobj -c $testfile >/dev/null 2>&1; then
 		sed_define "def" "$function"
-		echo "yes"
+		printf "yes\n"
 		r=0
 	else
 		sed_define "udef" "$function"
-		echo "no"
+		printf "no\n"
 		r=1
 	fi
 	rm -f $testfile $testobj
@@ -226,11 +247,11 @@ EOF
 
 	if $CC -o $testobj $testfile -l$lib >/dev/null 2>&1; then
 		sed_define "def" "$function"
-		echo "yes"
+		printf "yes\n"
 		r=0
 	else
 		sed_define "udef" "$function"
-		echo "no"
+		printf "no\n"
 		r=1
 	fi
 	rm -f $testfile $testobj
@@ -256,11 +277,11 @@ EOF
 
 	if $CC -o $testbin $testfile >/dev/null 2>&1; then
 		sed_define "def" "$type"
-		echo "yes"
+		printf "yes\n"
 		r=0
 	else
 		sed_define "udef" "$type"
-		echo "no"
+		printf "no\n"
 		r=1
 	fi
 	rm -f $testfile $testbin
@@ -288,11 +309,11 @@ EOF
 
 	if $CC -o $testbin $testfile >/dev/null 2>&1; then
 		sed_define "def" "$type"
-		echo "yes"
+		printf "yes\n"
 		r=0
 	else
 		sed_define "udef" "$type"
-		echo "no"
+		printf "no\n"
 		r=1
 	fi
 	rm -f $testfile $testbin
@@ -385,6 +406,29 @@ else
 fi
 
 mkf_sed 'SYSCONFDIR' "$sysdir"
+
+
+#
+# gathering CFLAGS
+#
+
+if [ -z "$CFLAGS" ]; then
+	get_make_var CFLAGS
+else
+	printf "CFLAGS defined, skipping detection.\n"
+	mkf_sed 'CFLAGS' "$CFLAGS"
+fi
+
+#
+# gathering LDFLAGS
+#
+
+if [ -z "$LDFLAGS" ]; then
+	get_make_var LDFLAGS
+else
+	printf "LDFLAGS defined, skipping detection.\n"
+	mkf_sed 'LDFLAGS' "$LDFLAGS"
+fi
 
 #
 # cc check

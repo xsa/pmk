@@ -1,3 +1,6 @@
+27 Dec 2004 mipsator
+ * improved handling of CFLAGS and LDFLAGS with pmkcfg.sh
+
 26 Dec 2004 mipsator
  * added snprintf_b(), strlcat_b() and strlcpy_b() in pmk_string.c.
  * added support for AMD cpu feature detection.
