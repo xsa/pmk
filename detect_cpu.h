@@ -53,6 +53,7 @@
 #define LIST_X86_CPU_MODEL	3
 #define LIST_X86_CPU_CLASS	4
 #define LIST_ALPHA_CPU_CLASS	5
+#define LIST_IA64_CPU_CLASS	6
 
 #define	PMK_ARCH_UNKNOWN	0
 #define	PMK_ARCH_X86_32		1
@@ -256,6 +257,10 @@ bool alpha_set_cpu_data(prsdata *, htable *);
 #define PMKCONF_HW_IA64_CPU_ARCHREV	"HW_IA64_CPU_ARCHREV"	/* architecture revision */
 #define PMKCONF_HW_IA64_CPU_FEATURES	"HW_IA64_CPU_FEATURES"	/* features */
 #define PMKCONF_HW_IA64_CPU_VENDOR	"HW_IA64_CPU_VENDOR"	/* vendor name */
+#define PMKCONF_HW_IA64_CPU_CLASS	"HW_IA64_CPU_CLASS"	/* cpu class */
+
+
+#define IA64_CPU_CLASS_FAMILY_FMT	"FAM%d"		/* family */
 
 
 typedef struct {

@@ -1,11 +1,6 @@
 # $Id$
 # pmk cpu identification data
 
-#ADD_CPU_ARCH {
-#	NAME = ""
-#	LIST = ()
-#}
-
 LIST_ARCH_EQUIV {
 	# x86_32
 	"i386" = "x86_32"
@@ -86,5 +81,11 @@ LIST_ALPHA_CPU_CLASS {
 	"IMPLVER_0" = "EV4"
 	"IMPLVER_1" = "EV5"
 	"IMPLVER_2" = "EV6"
+}
+
+LIST_IA64_CPU_CLASS {
+	DEFAULT = "Itanium"
+	"FAM7" = "Itanium"
+	"FAM31" = "Itanium2"
 }
 
