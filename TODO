@@ -21,18 +21,22 @@ Indented lines means subtask.
 
 common:
 -----------------------------------------------------------------------
-	-	tutorial
+	~	tutorial
 	~	improve test_pmkinstall to check more modes (octal values)
 	-.	add test target in tests/Makefile
 	+	update README and INSTALL
-	~	new samples : prog c & c++, lib c & c++
-	-	move sample tests in samples directory
+	~	new samples:
+			~ prog c
+			- prog c++
+			~ lib c
+			- lib c++
+	+	move sample tests in samples directory
 
 
 pmk:
 -----------------------------------------------------------------------
-mips	-	MODULE support in CHECK_PKG_CONFIG
-mips	-	linking flags for shared libraries
+	-.	MODULE support in CHECK_PKG_CONFIG
+mips	~	linking flags for shared libraries
 	~.	compatibility with autoconf (progressing) :
 			~ support for DEFS (-D options to pass to the compiler)
 			- support for LDFLAGS (misc linker options) ?
@@ -41,7 +45,7 @@ mips	-	linking flags for shared libraries
 	-.	cache ? (hash table with binary location, ...)
 	-.	verify in CHECK_BINARY that program has executable right ?
 	-.	convert gdata.labl to pmk objects ?
-	-.	checks hash_add() in autoconf.c (void func => bool func)
+	+	checks hash_add() in autoconf.c (void func => bool func)
 
 
 pmksetup:
@@ -72,25 +76,23 @@ pmkinstall
 pmkshgen
 -----------------------------------------------------------------------
 mips	~.	make specs, this tool should handle install and 
-			deinstall operations
+		deinstall operations (post 0.8)
 
 pmkpc
 -----------------------------------------------------------------------
 	~	missing options
-			+ PMKPC_OPT_ATLPKGVERS
-			+ PMKPC_OPT_LISTALL
 			- PMKPC_OPT_UNINST
 			- PMKPC_OPT_DEBUG
-			- PMKPC_OPT_CFLAGS_ONLY_PATH
-			- PMKPC_OPT_CFLAGS_ONLY_OTHER
-			- PMKPC_OPT_LIBS_ONLY_LIB
-			- PMKPC_OPT_LIBS_ONLY_PATH
-			- PMKPC_OPT_LIBS_ONLY_OTHER
+			+ PMKPC_OPT_CFLAGS_ONLY_PATH
+			+ PMKPC_OPT_CFLAGS_ONLY_OTHER
+			+ PMKPC_OPT_LIBS_ONLY_LIB
+			+ PMKPC_OPT_LIBS_ONLY_PATH
+			+ PMKPC_OPT_LIBS_ONLY_OTHER
 			- PMKPC_OPT_VAR
 			- PMKPC_OPT_VAR_DEF
 			- PMKPC_OPT_VAR_PRNT
 			- PMKPC_OPT_VAR_SILC
 			- PMKPC_OPT_VAR_STDO
 	~	man page
-	-	special expression ('' quoted)
+	-	special expression ('' quoted), post 0.8
 
