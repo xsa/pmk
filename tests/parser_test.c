@@ -4,6 +4,7 @@
 #include "../hash.c"
 #include "../pmk_obj.c"
 #include "../func.c"
+#include "../functool.c"
 
 #define DEBUG_PRS	1
 #include "../parse.c"
