@@ -342,15 +342,15 @@ int get_env_vars(htable *ht) {
 
 	if (hash_add(ht, PREMAKE_KEY_OSNAME, strdup(utsname.sysname)) == HASH_ADD_FAIL)
 		return(-1);
-		verbosef("Setting '%s' => '%s'", PREMAKE_KEY_OSNAME, utsname.sysname);
+	verbosef("Setting '%s' => '%s'", PREMAKE_KEY_OSNAME, utsname.sysname);
 
 	if (hash_add(ht, PREMAKE_KEY_OSVERS, strdup(utsname.release)) == HASH_ADD_FAIL)
 		return(-1);
-		verbosef("Setting '%s' => '%s'", PREMAKE_KEY_OSVERS, utsname.release);	
+	verbosef("Setting '%s' => '%s'", PREMAKE_KEY_OSVERS, utsname.release);	
 	
 	if (hash_add(ht, PREMAKE_KEY_OSARCH, strdup(utsname.machine)) == HASH_ADD_FAIL)
 		return(-1);
-		verbosef("Setting '%s' => '%s'", PREMAKE_KEY_OSARCH, utsname.machine);
+	verbosef("Setting '%s' => '%s'", PREMAKE_KEY_OSARCH, utsname.machine);
 
 
 	/* getting the environment variable PATH */
