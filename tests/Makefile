@@ -29,6 +29,9 @@ comp: config comp_test.o
 dynary: config da_test.o
 	$(CC) -o da_test $(LDFLAGS) da_test.o
 
+gencomp: config gen_comp_test.o
+	$(CC) -o gen_comp_test $(LDFLAGS) gen_comp_test.o
+
 hash: config hash_test.o
 	$(CC) -o hash_test $(LDFLAGS) hash_test.o
 
