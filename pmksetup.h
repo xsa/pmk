@@ -68,5 +68,6 @@ int	close_tmp_config(void);
 int	get_env_vars(htable *);
 int	get_binaries(htable *);
 int	parse_line(char *, int, conf_opt *);
+int	copy_config(const char *, const char *);
 
 #endif	/* _PMKSETUP_H_ */
