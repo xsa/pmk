@@ -4,17 +4,17 @@ Cygwin		?		?		HEAD_2003_04_??	Fail		Saad Kadhi		need basename & filename (should
 Debian		?		i686		PMK 0.3		OK		Damien Couderc		gcc-2.95.4, gmake-3.79.1, linux-2.4.18-smp
 Debian		?		ia64		PMK 0.3		OK		Damien Couderc		gcc-2.95.4, gmake-3.79.1, linux-2.4.18-smp
 FreeBSD		4.7		i386		PMK 0.3		OK		Damien Couderc		gcc-2.95.4
-Gentoo		?		i686		HEAD_2003_04_??	Fail		Xavier Santolaria	segfault (should be fixed now)
+Gentoo		1.4.2.8		i686		PMK 0.3		OK		Xavier Santolaria	gcc-3.2.2, gmake-3.80, linux-2.4.19
 Gentoo		?		parisc		HEAD_2003_04_??	Fail		Xavier Santolaria	segfault (should be fixed now)
 HPUX		B.11.22		ia64		HEAD_2003_04_18	Fail		Damien Couderc		make does not support '+=', __progname unknown
 ?(Linux)	?		i586		HEAD_2003_04_??	OK		Xavier Santolaria	gcc-2.95.4, linux-2.4.20
 LFS		4		i686		HEAD_2003_04_??	Fail		Xavier Santolaria	segfault (should be fixed now)
-MacOS		X		ppc		HEAD_2003_04_??	OK		Xavier Santolaria	gcc-3.1, gmake-??
+MacOS		X		ppc		PMK 0.3		OK		Xavier Santolaria	gcc-3.1, gmake-3.79.1, Darwin 6.5
 Mandrake	9.1		i686		PMK 0.3		OK		Damien Couderc		gcc-3.2.2, gmake-3.80, linux-2.4.21
 NetBSD		1.6		i386		PMK 0.3		OK		Damien Couderc		gcc-2.95.3
 OpenBSD		3.3		i386		PMK 0.3		OK		Damien Couderc		gcc-2.95.3
 OSF1		5.1		alpha		HEAD_2003_04_18	Fail		Damien Couderc		make does not support '+=', __progname unknown
 RedHat		8.0		i686		PMK 0.3		OK		Damien Couderc		gcc-3.2, gmake-3.79.1, linux-2.4.18-smp
 Slackware	9.0		i686		PMK 0.3		OK		Damien Couderc		gcc-3.2.2, gmake-3.80, linux-2.4.20
-SunOs		5.7		sun4u		HEAD_2003_04_?? OK		Xavier Santolaria	?
+SunOS		5.7		sun4u		HEAD_2003_04_?? OK		Xavier Santolaria	?
 Suse		8.1		i686		PMK 0.3		OK		Damien Couderc		gcc-3.2, gmake-3.79.1, linux-2.4.19-smp
