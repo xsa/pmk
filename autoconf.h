@@ -35,9 +35,10 @@
 #define _PMK_AUTOCONF_H_
 
 #include "hash.h"
-
+#include "pmk.h"
 
 bool	ac_parse_config(htable *, char *);
-void	ac_process_dyn_var(void);
+void	ac_process_dyn_var(htable *, pmkdata *, char *);
+void	ac_clean_dyn_var(htable *);
 
 #endif /* _PMK_AUTOCONF_H_ */

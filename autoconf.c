@@ -35,9 +35,11 @@
 #include <unistd.h>
 
 #include "compat/pmk_string.h"
-#include "common.h"
-#include "premake.h"
+#include "compat/pmk_libgen.h"
 #include "autoconf.h"
+#include "common.h"
+#include "pathtools.h"
+#include "premake.h"
 
 
 /*
@@ -139,18 +141,64 @@ bool ac_parse_config(htable *ht, char *fpath) {
 /*
 	process special variables
 
-	XXX TODO :)
+	pht : storage table
+	pgd : global data
+	template : target file
 */
 
-void ac_process_dyn_var(void) {
-	/* should process variables like :
-		- srcdir
-		- abs_srcdir
-		- top_srcdir
-		- abs_top_srcdir
-		- builddir
-		- abs_builddir
-		- top_builddir
-		- abs_top_builddir
+void ac_process_dyn_var(htable *pht, pmkdata *pgd, char *template) {
+	char	*ac_dir,
+		*srcdir,
+		*basedir,
+		buf[MAXPATHLEN];
+
+	/* should process variables like following :
+		- srcdir : the relative path to the directory that contains the source code for that `Makefile'.
+		- abs_srcdir : absolute path of srcdir.
+		- top_srcdir : the relative path to the top-level source code directory for the package.
+			In the top-level directory, this is the same as srcdir.
+		- abs_top_srcdir : absolute path of top_srcdir.
+		- builddir : rigorously equal to ".", added for symmetry only.
+		- abs_builddir : absolute path of builddir.
+		- top_builddir : the relative path to the top-level of the current build tree.
+			In the top-level directory, this is the same as builddir.
+		- abs_top_builddir : absolute path of top_builddir.
 	*/
+
+	ac_dir = strdup(dirname(template));
+	srcdir = pgd->srcdir;
+	basedir = pgd->basedir;
+
+	hash_add(pht, "abs_top_srcdir", srcdir);
+
+	relpath(basedir, srcdir, buf);
+	hash_add(pht, "top_srcdir", buf);
+
+	hash_add(pht, "abs_srcdir", "# TODO"); /* XXX TODO */
+	hash_add(pht, "srcdir", "# TODO"); /* XXX TODO */
+
+	hash_add(pht, "abs_top_builddir", basedir);
+	hash_add(pht, "top_builddir", "# TODO"); /* XXX TODO */
+
+	/* Mr GNU said : rigorously equal to ".". So i did :) */
+	hash_add(pht, "builddir", ".");
+
+	hash_add(pht, "abs_builddir", "# TODO"); /* XXX TODO */
+}
+
+/*
+	clean dynamic variables
+
+	pht : storage table
+*/
+
+void ac_clean_dyn_var(htable *pht) {
+	hash_delete(pht, "srcdir");
+	hash_delete(pht, "abs_srcdir");
+	hash_delete(pht, "top_srcdir");
+	hash_delete(pht, "abs_top_srcdir");
+	hash_delete(pht, "builddir");
+	hash_delete(pht, "abs_builddir");
+	hash_delete(pht, "top_builddir");
+	hash_delete(pht, "abs_top_builddir");
 }
