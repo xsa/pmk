@@ -388,7 +388,6 @@ mkf_sed 'SYSCONFDIR' "$sysdir"
 
 if [ -z "$CC" ]; then
 	if check_binary cc; then
-		mkf_sed 'CC' 'cc'
 		CC="cc"
 	else
 		printf "Unable to find C compiler"
@@ -397,6 +396,7 @@ if [ -z "$CC" ]; then
 else
 	printf "CC defined, skipping C compiler check.\n"
 fi
+mkf_sed 'CC' "$CC"
 
 #
 # cpp check
