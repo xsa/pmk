@@ -245,7 +245,7 @@ fi
 while [ $1 != -- ]
 do
 	case $1 in
-	-p)     echo "overriding prefix with '$2'"    
+	-p)     echo "Setting prefix to '$2'"    
 	base=$2
 	shift;;
 	-u)     usermode=1;;
