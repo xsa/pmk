@@ -2,9 +2,10 @@
 
 CC?=		cc
 
-CFLAGS?=	-Wall
-#CFLAGS=	-Werror
-#CFLAGS=	-ansi -pedantic
+CFLAGS?=
+CFLAGS+=	-Wall
+#CFLAGS+=	-Werror
+#CFLAGS+=	-ansi -pedantic
 
 LDFLAGS?=
 DEBUG?=		-g
