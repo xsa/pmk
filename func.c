@@ -42,20 +42,20 @@
 
 	str : string to check
 
-	returns TRUE is str is "TRUE" else returns FALSE
+	returns true is str is "true" else returns false
 
 	NOTE : strncmp checks only on a length of 6 because
-		lenght of "TRUE" is 5 and "FALSE" is 6 chr.
+		lenght of "true" is 5 and "false" is 6 chr.
 		If str is longer we don't need to check as
-		we are sure that the result is FALSE.
+		we are sure that the result is false.
 
 */
 
 bool check_bool_str(char *str) {
-	if (strncmp(str, "TRUE", 6) == 0) {
-		return(TRUE);
+	if (strncmp(str, "true", 6) == 0) {
+		return(true);
 	} else {
-		return(FALSE);
+		return(false);
 	}
 }
 
@@ -65,12 +65,12 @@ bool check_bool_str(char *str) {
 	vref : reference version
 	vers : version to check
 
-	returns TRUE is vers >= vref
+	returns true is vers >= vref
 */
 
 bool check_version(char *vref, char *vers) {
 	/* XXX to do */
-	return(TRUE);
+	return(true);
 }
 
 /*
@@ -85,7 +85,7 @@ bool pmk_define(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 	n = hash_merge(gdata->htab, ht);
 	pmk_log("\tAdded %d definitions.\n", n);
 	
-	return(TRUE);
+	return(true);
 }
 
 /*
@@ -102,7 +102,7 @@ bool pmk_target(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 	list = strdup(hash_get(ht, "LIST"));
 	if (list == NULL) {
 		errorf("LIST not assigned in TARGET");
-		return(FALSE);
+		return(false);
 	}
 	da = da_init();
 	str_to_dynary(list, ',', da);
@@ -113,7 +113,7 @@ bool pmk_target(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 
 	gdata->tlist = da;
 
-	return(TRUE);
+	return(true);
 }
 
 /*
@@ -122,7 +122,7 @@ bool pmk_target(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 
 bool pmk_check_binary(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 	char	*filename;
-	bool	required = TRUE;
+	bool	required = true;
 
 	pmk_log("* Checking binary [%s]\n", cmd->label);
 
@@ -132,7 +132,7 @@ bool pmk_check_binary(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 
 	pmk_log("\tFound binary '%s' : ", filename);
 	pmk_log("XXX.\n");
-	return(TRUE);
+	return(true);
 }
 
 /*
@@ -145,7 +145,7 @@ bool pmk_check_include(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 		incpath[MAXPATHLEN],
 		strbuf[512];
 	FILE	*ifp;
-	bool	required = TRUE;
+	bool	required = true;
 
 	pmk_log("* Checking include [%s]\n", cmd->label);
 
@@ -155,7 +155,7 @@ bool pmk_check_include(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 	incfile = hash_get(ht, "INCLUDE");
 	if (incfile == NULL) {
 		errorf("INCLUDE not assigned in label %s", cmd->label);
-		return(FALSE);
+		return(false);
 	}
 
 	/* check if a function must be searched */
@@ -171,24 +171,24 @@ bool pmk_check_include(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 		pmk_log("yes.\n");
 		if (incfunc != NULL) {
 			pmk_log("\tFound function '%s' : ", incfunc);
-			while (get_line(ifp, strbuf, sizeof(strbuf)) == TRUE) {
+			while (get_line(ifp, strbuf, sizeof(strbuf)) == true) {
 				/* XXX should check in a better way ? */
 				if (strstr(strbuf, incfunc) != NULL) {
 					pmk_log("yes.\n");
-					return(TRUE);
+					return(true);
 				}
 			}
 			pmk_log("no.\n");
 			errorf("Failed to find '%s' in '%s'", incfunc, incfile);
-			return(FALSE);
+			return(false);
 		} else {
 			/* no function to test */
-			return(TRUE);
+			return(true);
 		}
 	} else {
 		errorf("Failed to find %s", incfunc, incfile);
 		pmk_log("no.\n");
-		return(FALSE);
+		return(false);
 	}
 }
 
@@ -199,7 +199,7 @@ bool pmk_check_include(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 bool pmk_check_lib(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 	char	*libname,
 		*libvers;
-	bool	required = TRUE;
+	bool	required = true;
 
 	pmk_log("* Checking library [%s]\n", cmd->label);
 
@@ -210,7 +210,7 @@ bool pmk_check_lib(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 
 	pmk_log("\tFound library '%s %s' : ", libname, libvers);
 	pmk_log("XXX.\n");
-	return(TRUE);
+	return(true);
 }
 
 /*
@@ -223,7 +223,7 @@ bool pmk_check_config(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 		cfgcmd[MAXPATHLEN],
 		*cfgtool,
 		*libvers;
-	bool	required = TRUE;
+	bool	required = true;
 
 	pmk_log("* Checking with config tool [%s]\n", cmd->label);
 
@@ -240,7 +240,7 @@ bool pmk_check_config(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 	rpipe = popen(cfgcmd, "r");
 	if (rpipe == NULL) {
 		pmk_log("no.\n");
-		return(FALSE);
+		return(false);
 	} else {
 		pmk_log("yes.\n");
 		pmk_log("\tFound version >= %s : ", libvers);
@@ -250,6 +250,6 @@ bool pmk_check_config(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 		pmk_log("yes/no (%s)\n", version);
 
 		pclose(rpipe);
-		return(TRUE);
+		return(true);
 	}
 }

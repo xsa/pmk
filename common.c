@@ -52,8 +52,8 @@
 	lsize : size of the buffer
 
 	returns a boolean :
-		- TRUE when a line is available
-		- FALSE when error or eof occured
+		- true when a line is available
+		- false when error or eof occured
 */
 
 bool get_line(FILE *fd, char *line, int lsize) {
@@ -65,10 +65,10 @@ bool get_line(FILE *fd, char *line, int lsize) {
 			/* remove trailing newline */
 			*p= '\0';
 		}
-		return(TRUE);
+		return(true);
 	} else {
 		/* reached eof or error */
-		return(FALSE);
+		return(false);
 	}
 }
 
@@ -139,7 +139,7 @@ int parse_conf_line(char *line, int linenum, cfg_opt *opts) {
 	env_name : variable name
 	opt : option struct
 
-	returns TRUE if env_name exists
+	returns true if env_name exists
 */
 
 bool env_to_opt(char *env_name, pmkcmdopt *opt) {
@@ -150,11 +150,11 @@ bool env_to_opt(char *env_name, pmkcmdopt *opt) {
 	if (env_val == NULL) {
 		/* env variable name not found */
 		strncpy(opt->value, EMPTY_OPT_VALUE, sizeof(EMPTY_OPT_VALUE));
-		rval = FALSE;
+		rval = false;
 	} else {
 		/* okay get it */
 		strncpy(opt->value, env_val, sizeof(env_val));
-		rval = TRUE;
+		rval = true;
 		
 	}
 	return(rval);
@@ -167,7 +167,7 @@ bool env_to_opt(char *env_name, pmkcmdopt *opt) {
 	result: storage of result
 	rsize: result size
 
-	return TRUE on success
+	return true on success
 */
 
 bool get_make_var(char *varname, char *result, int rsize) {
@@ -183,7 +183,7 @@ bool get_make_var(char *varname, char *result, int rsize) {
 	if (mfd == -1) {
 		/* name randomize failed */
 		fprintf(stderr, "Failed to randomize filename\n");
-		return(FALSE);
+		return(false);
 	}
 
 	mfp = fdopen(mfd, "w");
@@ -199,7 +199,7 @@ bool get_make_var(char *varname, char *result, int rsize) {
 		fclose(mfp);
 	} else {
 		fprintf(stderr, "Failed to open %s\n", mfn);
-		return(FALSE);
+		return(false);
 	}
 
 	snprintf(varstr, 256, "/usr/bin/make -f %s", mfn);
@@ -209,10 +209,10 @@ bool get_make_var(char *varname, char *result, int rsize) {
 		get_line(tfp, result, rsize);
 		fclose(tfp);
 
-		rval = TRUE;
+		rval = true;
 	} else {
 		fprintf(stderr, "Failed to exec %s\n", varstr);
-		rval = FALSE;
+		rval = false;
 	}
 
 	if (unlink(mfn) == -1) {
@@ -230,7 +230,7 @@ bool get_make_var(char *varname, char *result, int rsize) {
 	sep : separator
 	da : dynamic array
 
-	return TRUE on success
+	return true on success
 */
 
 bool str_to_dynary(char *str, char sep, dynary *da) {
@@ -241,8 +241,8 @@ bool str_to_dynary(char *str, char sep, dynary *da) {
 	while (str[i] != '\0') {
 		if (str[i] == sep) {
 			buf[j] = '\0';
-			if (da_push(da, buf) == FALSE) {
-				return(FALSE);
+			if (da_push(da, buf) == false) {
+				return(false);
 			}
 			j = 0;
 		} else {
@@ -252,11 +252,11 @@ bool str_to_dynary(char *str, char sep, dynary *da) {
 		i++;
 	}
 	buf[j] = '\0';
-	if (da_push(da, buf) == FALSE) {
-		return(FALSE);
+	if (da_push(da, buf) == false) {
+		return(false);
 	}
 
-	return(TRUE);
+	return(true);
 }
 
 /*
@@ -267,7 +267,7 @@ bool str_to_dynary(char *str, char sep, dynary *da) {
 	fpath : storage of the full path
 	fplen : size of the storage
 
-	returns TRUE on success
+	returns true on success
 
 	XXX not yet tested
 */
@@ -280,28 +280,28 @@ bool find_file_bis(dynary *da, char *fname, char *fpath, int fplen) {
 	bool		found,
 			exit;
 
-	found = FALSE;
-	for (i = 0 ; (i < da_size(da)) && (found == FALSE) ; i++) {
+	found = false;
+	for (i = 0 ; (i < da_size(da)) && (found == false) ; i++) {
 		path = da_idx(da, i);
 		dp = opendir(path);
 		if (dp == NULL) {
 			errorf("could not open directory: %s", path);
-			return(FALSE);
+			return(false);
 		}
-		exit = FALSE;
-		while (exit == FALSE) {
+		exit = false;
+		while (exit == false) {
 			de = readdir(dp);
 			if (de != NULL) {
 				if (strncmp(de->d_name, fname, sizeof(fname)) == 0) {
 					if (snprintf(fpath, fplen, "%s/%s", path, fname) < fplen) {
 						/* fpath set */
-						found = TRUE;
+						found = true;
 					}
-					exit = TRUE;
+					exit = true;
 				}
 			} else {
 				/* no more entry */
-				exit = TRUE;
+				exit = true;
 			}
 		}
 		closedir(dp);
@@ -438,20 +438,20 @@ void debugf(const char *fmt, ...) {
 
 	logname : log file name
 
-	returns TRUE if opened
+	returns true if opened
 */
 
 bool pmk_log_open(char *logname) {
 	if (pmk_log_fp != NULL) {
 		errorf("%s already open.", logname);
-		return(FALSE);
+		return(false);
 	}
 	pmk_log_fp = fopen(logname, "w");
 	if (pmk_log_fp == NULL) {
 		errorf("while opening %s.", logname);
-		return(FALSE);
+		return(false);
 	} else {
-		return(TRUE);
+		return(true);
 	}
 }
 
@@ -481,9 +481,9 @@ bool pmk_log(const char *fmt, ...) {
 	if (pmk_log_fp != NULL) {
 		fprintf(pmk_log_fp, buf);
 		fprintf(stdout, buf);
-		return(TRUE);
+		return(true);
 	} else {
 		errorf("Unable to log.");
-		return(FALSE);
+		return(false);
 	}
 }
