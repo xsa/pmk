@@ -32,6 +32,7 @@
 
 #include <ctype.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <unistd.h>
 
 #include "compat/pmk_string.h"
@@ -152,7 +153,7 @@ void ac_process_dyn_var(htable *pht, pmkdata *pgd, char *template) {
 		*basedir,
 		buf[MAXPATHLEN];
 
-	/* should process variables like following :
+	/* should process variables like following (if i believe autoconf manual) :
 		- srcdir : the relative path to the directory that contains the source code for that `Makefile'.
 		- abs_srcdir : absolute path of srcdir.
 		- top_srcdir : the relative path to the top-level source code directory for the package.
@@ -169,21 +170,34 @@ void ac_process_dyn_var(htable *pht, pmkdata *pgd, char *template) {
 	srcdir = pgd->srcdir;
 	basedir = pgd->basedir;
 
-	hash_add(pht, "abs_top_srcdir", srcdir);
-
-	relpath(basedir, srcdir, buf);
-	hash_add(pht, "top_srcdir", buf);
-
-	hash_add(pht, "abs_srcdir", "# TODO"); /* XXX TODO */
-	hash_add(pht, "srcdir", "# TODO"); /* XXX TODO */
-
+	/* init builddir */
 	hash_add(pht, "abs_top_builddir", basedir);
-	hash_add(pht, "top_builddir", "# TODO"); /* XXX TODO */
+
+	/* compute top_builddir */
+	relpath(ac_dir, basedir, buf);
+	hash_add(pht, "top_builddir", buf);
+
+	/* set abs_builddir */
+	hash_add(pht, "abs_builddir", ac_dir);
 
 	/* Mr GNU said : rigorously equal to ".". So i did :) */
 	hash_add(pht, "builddir", ".");
 
-	hash_add(pht, "abs_builddir", "# TODO"); /* XXX TODO */
+	/* set srcdir */
+	hash_add(pht, "abs_top_srcdir", srcdir);
+
+	/* compute top_srcdir */
+	relpath(basedir, srcdir, buf);
+	hash_add(pht, "top_srcdir", buf);
+
+	/* absolute path of template */
+	hash_add(pht, "abs_srcdir", ac_dir);
+
+	/* relative path to template */
+	relpath(basedir, ac_dir, buf);
+	hash_add(pht, "srcdir", buf);
+
+	free(ac_dir);
 }
 
 /*

@@ -661,6 +661,7 @@ void usage(void) {
 int main(int argc, char *argv[]) {
 	FILE	*fd;
 	char	*pstr,
+		buf[MAXPATHLEN],
 		idxstr[4]; /* max 999 cmds, should be enough :) */
 	int	rval = 0,
 		nbpd,
@@ -800,7 +801,8 @@ int main(int argc, char *argv[]) {
 		for (i = 0 ; (i < da_usize(da)) && (rval == 0) ; i++) {
 			pstr = da_idx(da, i);
 			if (pstr != NULL) {
-				if (process_template(pstr, &gdata) == false) {
+				abspath(gdata.srcdir, pstr, buf); /* XXX check ??? */
+				if (process_template(buf, &gdata) == false) {
 					/* failure while processing template */
 					rval = 1;
 				}
