@@ -191,7 +191,7 @@ void ac_process_dyn_var(htable *pht, pmkdata *pgd, char *template) {
 	hash_add(pht, "top_builddir", strdup(buf));
 
 	/* Mr GNU said : rigorously equal to ".". So i did :) */
-	hash_add(pht, "builddir", ".");
+	hash_add(pht, "builddir", strdup("."));
 
 	/* set absolute srcdir */
 	hash_add(pht, "abs_top_srcdir", strdup(srcdir));
