@@ -424,8 +424,10 @@ int main(int argc, char *argv[]) {
 	printf("Start parsing files :\n");
 	do {
 		p = da_pop(pda);
-		dir_explore(pfdata, &sd, p);
-		free(p);
+		if (p != NULL) {
+			dir_explore(pfdata, &sd, p);
+			free(p);
+		}
 	} while (p != NULL);
 	printf("Parsing Ok.\n\n");
 
