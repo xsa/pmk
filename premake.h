@@ -133,9 +133,6 @@
 /* maximal size of a line */
 #define MAX_LINE_LEN		MAXPATHLEN + MAX_OPT_NAME_LEN
 
-/* maximal string lenght for a version */
-#define MAX_VERS_LEN		16
-
 /* size for temporary buffers */
 #define TMP_BUF_LEN		512
 

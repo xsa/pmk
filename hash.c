@@ -370,7 +370,7 @@ bool hash_add_array(htable *pht, hpair *php, int size) {
 
 int hash_append(htable *pht, char *key, char *value, char *sep) {
 	char	*pstr,
-		buf[MAX_HASH_VALUE_LEN];
+		buf[MAX_HASH_VALUE_LEN] = "";
 	int	rval,
 		s;
 
@@ -391,7 +391,7 @@ int hash_append(htable *pht, char *key, char *value, char *sep) {
 
 		rval = hash_add(pht, key, buf);
 		if (rval == HASH_ADD_UPDT)
-			rval = HASH_ADD_APPD;
+			rval = HASH_ADD_APPD; /* not an update as we append */
 	}
 
 	return(rval);

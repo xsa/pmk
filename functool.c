@@ -278,6 +278,8 @@ bool record_def(htable *ht, char *name, bool status) {
 	if (hash_add(ht, def_str, def_val) == HASH_ADD_FAIL)
 		return(false);
 
+	/* debugf("record_def '%s=%s'", def_str, def_val); XXX DEBUGF */
+
 	free(semidef);
 	return(true);
 }
@@ -472,6 +474,7 @@ bool parse_ac_config(htable *ht, char *fpath) {
 
 			/* check the defined value */
 			pstr = hash_get(ht, buf);
+			/* XXX could use value of DEF__ */
 			if (pstr != NULL) {
 				/* debugf("defining '%s'", buf); XXX */
 				fprintf(fp_out, "#define %s 1\t/* pmk parsed */\n", buf);
