@@ -240,11 +240,49 @@ bool output_file(char *ofile, htable *pht) {
 }
 
 /*
+	XXX
+*/
+
+void dir_explore(htable *pht, scandata *psd) {
+	int	i;
+	glob_t	g;
+
+	printf("Parsing C related files :\n");
+
+	i = glob("*.c", GLOB_NOSORT, NULL, &g);
+#ifdef DEBUG
+	if (i == 0) {
+		printf("Globbing of *.c files successful.\n");
+	}
+#endif
+
+	i = glob("*.h", GLOB_NOSORT | GLOB_APPEND, NULL, &g);
+#ifdef DEBUG
+	if (i == 0) {
+		printf("Globbing of *.h files successful.\n");
+	}
+#endif
+
+	for (i = 0 ; i < g.gl_pathc ; i++) {
+		printf("\t'%s' :", g.gl_pathv[i]);
+		parse_c_file(g.gl_pathv[i], psd, pht);
+		printf("\tdone.\n");
+	}
+
+	globfree(&g);
+	printf("Parsing Ok.\n\n");
+
+}
+
+/*
 	usage
 */
 
 void usage(void) {
+	fprintf(stderr, "usage: pmkscan\n");
+	/* XXX TODO
 	fprintf(stderr, "usage: pmkscan [path]\n");
+	*/
 }
 
 
@@ -253,8 +291,6 @@ void usage(void) {
 */
 
 int main(int argc, char *argv[]) {
-	int		 i;
-	glob_t		 g;
 	htable		*pfdata;
 	prsdata		*pdata;
 	scandata	 sd;
@@ -277,35 +313,10 @@ int main(int argc, char *argv[]) {
 		/* XXX TODO error message */
 		exit(1);
 	}
-
-	pfdata = hash_init(256); /* XXX can do better :) */
-
 	printf("Ok\n\n");
 
-	printf("Parsing C related files :\n");
-
-	i = glob("*.c", GLOB_NOSORT, NULL, &g);
-#ifdef DEBUG
-	if (i == 0) {
-		printf("Globbing of *.c files successful.\n");
-	}
-#endif
-
-	i = glob("*.h", GLOB_NOSORT | GLOB_APPEND, NULL, &g);
-#ifdef DEBUG
-	if (i == 0) {
-		printf("Globbing of *.h files successful.\n");
-	}
-#endif
-
-	for (i = 0 ; i < g.gl_pathc ; i++) {
-		printf("\t'%s' :", g.gl_pathv[i]);
-		parse_c_file(g.gl_pathv[i], &sd, pfdata);
-		printf("\tdone.\n");
-	}
-
-	globfree(&g);
-	printf("Parsing Ok.\n\n");
+	pfdata = hash_init(256); /* XXX can do better :) */
+	dir_explore(pfdata, &sd);
 
 	printf("Generating scan result ...\n");
 	output_file(PMKSCAN_OUTPUT, pfdata);
