@@ -7,8 +7,6 @@ pmk :
 ~ compatibility with autoconf (progressing)
 	- srcdir stuff
 	- builddir stuff
-- init CFLAGS, LIBS
-- fill check variables with empty value
 
 pmksetup :
 ~ pmk.conf(5)

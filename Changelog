@@ -1,3 +1,10 @@
+11 Jun 2003 mipsator
+ * added srcdir in gdata structure.
+ * modified hash_append() to avoid adding separator to an empty string.
+ * added init of CFLAGS and LIBS.
+ * empty binary path in pmk_check_binary() when not found this avoiding
+	remaining tags after parsing.
+
 # snapshot 0.4.4
 
 10 Jun 2003 mipsator

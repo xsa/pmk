@@ -92,8 +92,9 @@ typedef struct {
 	htable	*htab,
 		*labl;
 	dynary	*tlist;
-	char	errmsg[MAX_ERRMSG_LEN];
-	char	*ac_file;
+	char	*ac_file,
+		*srcdir,
+		errmsg[MAX_ERRMSG_LEN];
 } pmkdata;
 
 

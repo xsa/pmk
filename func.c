@@ -188,6 +188,7 @@ bool pmk_check_binary(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 			return(false);
 		} else {
 			record_def(gdata->htab, filename, false);
+			hash_add(gdata->htab, str_to_def(filename), ""); /* XXX check ? */
 			label_set(gdata->labl, cmd->label, false);
 			return(true);
 		}
@@ -202,6 +203,7 @@ bool pmk_check_binary(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 		} else {
 			/* define for template */
 			record_def(gdata->htab, filename, false);
+			hash_add(gdata->htab, str_to_def(filename), ""); /* XXX check ? */
 			label_set(gdata->labl, cmd->label, false);
 			return(true);
 		}

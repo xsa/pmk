@@ -708,6 +708,10 @@ int main(int argc, char *argv[]) {
 		clean(&gdata);
 		errorf("cannot initialize hash table for data.");
 		return(1);
+	} else {
+		/* initialize some variables */
+		hash_add(gdata.htab, "CFLAGS", ""); /* XXX check ? */
+		hash_add(gdata.htab, "LIBS", ""); /* XXX check ? */
 	}
 
 	gdata.labl = hash_init(MAX_LABEL_KEY);
