@@ -9,4 +9,6 @@ int main() {
 	printf(" ");
 	print_world();
 	printf(" !\n");
+
+	return(0);
 }
