@@ -49,19 +49,13 @@
 #include "hash.h"
 #include "compat/pmk_string.h"
 
-#ifdef USE_PMK_OBJ
-#include "pmk_obj.h"
-#define free_obj(obj) po_free(obj)
-#else
-#define free_obj(obj) free(obj)
-#endif
 
 /*
 	compute hash (perfect hashing)
 
 	key : key string
 
-	returns : resulting hash
+	return : resulting hash
 */
 
 int hash_compute(char *key, int table_size) {
@@ -85,14 +79,33 @@ int hash_compute(char *key, int table_size) {
 }
 
 /*
-	init hash structure
+	init hash structure of character strings
 
 	table_size : number of hash elements
 
-	returns a pointer to the hash structure
+	return : a pointer to the hash structure
 */
 
 htable *hash_init(int table_size) {
+	return(hash_init_adv(table_size, free, hash_str_append));
+}
+
+/*
+	init hash structure of objects
+
+	table_size : number of hash elements
+	freefunc : function to free an object
+	appdfunc : function to create appended object
+
+	return : a pointer to the hash structure
+
+	NOTE : append function will have three arguments (original object,
+	value to append, misc data) and will return the resulting object
+	(see hash_append_str for an example).
+*/
+
+htable *hash_init_adv(int table_size, void (*freefunc)(void *),
+		void *(*appdfunc)(void *, void *, void *)) {
 	int	 i;
 	htable	*pht;
 	hnode	*phn;
@@ -122,6 +135,8 @@ htable *hash_init(int table_size) {
 	pht->size = table_size;
 	pht->count = 0;
 	pht->autogrow = 0; /* disabled by default */
+	pht->freeobj = freefunc;
+	pht->appdobj = appdfunc;
 	pht->nodetab = phn;
 
 	return(pht);
@@ -209,7 +224,7 @@ int hash_destroy(htable *pht) {
 		t = NULL;
 		while (p != NULL) {
 			t = p->next;
-			hash_free_hcell(p);
+			hash_free_hcell(pht, p);
 			c++; /* removed one more key */
 			p = t;
 		}
@@ -269,7 +284,7 @@ int hash_add(htable *pht, char *key, void *value) {
 
 	/* if okay put key & value in a new cell */
 	if (strlcpy(phc->key, key, sizeof(phc->key)) >= sizeof(phc->key)) {
-		hash_free_hcell(phc);
+		hash_free_hcell(pht, phc);
 		return(HASH_ADD_FAIL);
 	}
 	phc->value = value;
@@ -378,62 +393,36 @@ bool hash_add_array(htable *pht, hpair *php, int size) {
 
 /*
 	append a value to the existing value
-		ONLY APPLY ON (char *) VALUES !!
 
 	pht : hash structure
-	key : key string
-	value : value string
-	sep : separator (can be NULL)
+	key : key to be appended
+	value : value to append
+	misc : extra data to transmit to append function 
 
-	returns an error code.
-
-	NOTE : the separator is only used while appending,
-		if the key doesn't exists then only the value is added.
+	return : an error code.
 */
 
-int hash_append(htable *pht, char *key, char *value, char *sep) {
-	char	*pstr,
-		*pbuf;
-	int	 rval,
-		 s;
+int hash_append(htable *pht, char *key, void *value, void *misc) {
+	void	*pobj,
+		*robj;
+	int	 rval;
 
-#ifdef USE_PMK_OBJ
-	pstr = (char *)po_get_data(hash_get(pht, key));
-#else
-	pstr = (char *)hash_get(pht, key);
-#endif
-	if (pstr == NULL) {
+	if (value == NULL)
+		return(HASH_ADD_FAIL);
+
+	pobj = hash_get(pht, key);
+	if (pobj == NULL) {
 		/* no previous value, adding given data */
-#ifdef USE_PMK_OBJ
-		rval = hash_add(pht, key, po_mk_str(value));
-#else
-		rval = hash_add(pht, key, strdup(value));
-#endif
+		rval = hash_add(pht, key, value);
 	} else {
-		/* compute needed space */
-		s = strlen(pstr) + strlen(value) + 1;
-		/* allocate space */
-		pbuf = (char *) malloc(s);
-
-		if (strlcat(pbuf, pstr, s) >= s)
-			return(HASH_ADD_FAIL);
-		if ((sep != NULL) && (pbuf[0] != '\0')) {
-			/* adding separator if provided and if
-				string is not empty */
-			if (strlcat(pbuf, sep, s) >= s)
-				return(HASH_ADD_FAIL);
+		robj = pht->appdobj(pobj, value, misc);
+		if (robj != NULL) {
+			rval = hash_add(pht, key, robj);
+			if (rval == HASH_ADD_UPDT)
+				rval = HASH_ADD_APPD; /* not an update as we append */
+		} else {
+			rval = HASH_ADD_FAIL;
 		}
-		if (strlcat(pbuf, value, s) >= s)
-			return(HASH_ADD_FAIL);
-
-#ifdef USE_PMK_OBJ
-		rval = hash_add(pht, key, po_mk_str(pbuf));
-		free(pbuf);
-#else
-		rval = hash_add(pht, key, pbuf);
-#endif
-		if (rval == HASH_ADD_UPDT)
-			rval = HASH_ADD_APPD; /* not an update as we append */
 	}
 
 	return(rval);
@@ -477,7 +466,7 @@ void hash_delete(htable *pht, char *key) {
 					pht->nodetab[hash].last = last;
 				}
 			}
-			hash_free_hcell(phc);
+			hash_free_hcell(pht, phc);
 			phc = NULL;
 
 			pht->count--;
@@ -622,9 +611,13 @@ hkeys *hash_keys(htable *pht) {
 	phc : structure to free
 */
 
-void hash_free_hcell(hcell *phc) {
-	free_obj(phc->value);
-	free(phc);
+void hash_free_hcell(htable *pht, hcell *phc) {
+	if (phc != NULL) {
+		if (phc->value != NULL) {
+			pht->freeobj(phc->value);
+		}
+		free(phc);
+	}
 }
 
 /*
@@ -637,4 +630,48 @@ void hash_free_hkeys(hkeys *phk) {
 	/* XXX TODO  also free pointed values */
 	free(phk->keys);
 	free(phk);
+}
+
+/*
+	append function for string hash
+*/
+
+void *hash_str_append(void *orig, void *value, void *sep) {
+	char	*pbuf;
+	size_t	 s;
+
+	/* compute needed space */
+	if (sep != NULL) {
+		s = strlen((char *) sep);
+	} else {
+		s = 0;
+	}
+	s = s + strlen((char *) orig) + strlen((char *) value) + 1;
+
+	/* allocate space */
+	pbuf = (char *) malloc(s);
+
+	if (strlcat(pbuf, orig, s) >= s) {
+		free(value);
+		free(pbuf);
+		return(NULL);
+	}
+
+	if ((sep != NULL) && (pbuf[0] != '\0')) {
+		/* adding separator if provided and if
+			string is not empty */
+		if (strlcat(pbuf, (char *) sep, s) >= s) {
+			free(value);
+			free(pbuf);
+			return(NULL);
+		}
+	}
+	if (strlcat(pbuf, value, s) >= s) {
+		free(value);
+		free(pbuf);
+		return(NULL);
+	}
+
+	free(value);
+	return((void *) pbuf);
 }
