@@ -1,5 +1,6 @@
 common :
 - write specs somewhere in a draft
+- check if pointer is freed on HASH_ADD_FAIL
 
 pmk :
 ~ finish pmk(1)

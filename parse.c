@@ -234,7 +234,7 @@ bool parse_cell(char *line, prscell *pcell) {
 
 bool parse_opt(char *line, htable *ht) {
 	bool	 keyfound = false;
-	char	 buf[MAXPATHLEN],
+	char	 buf[MAXPATHLEN], /* XXX buf len ? */
 		 tkey[MAX_OPT_NAME_LEN],
 		 tval[MAX_OPT_VALUE_LEN];
 	int	 i = 0,
@@ -254,14 +254,18 @@ bool parse_opt(char *line, htable *ht) {
 					j = 0;
 				}
 			} else {
+				/* XXX disable check until new new new engine ;)
 				if ((isalpha(line[i]) == 0) && (line[i] != '_')) {
-					/* invalid character */
+					*//* invalid character *//*
 					strlcpy(parse_err, "malformed option.", sizeof(parse_err));
 					return(false);
 				} else {
+				*/
 					buf[j] = line[i];
 					j++;
+				/*
 				}
+				*/
 			}
 		} else {
 			/* grabbing key value */
@@ -284,7 +288,7 @@ bool parse_opt(char *line, htable *ht) {
 			return(false);
 		} else {
 			/* key name and value are ok */
-			if (hash_add(ht, tkey, tval) == HASH_ADD_FAIL) {
+			if (hash_add(ht, tkey, strdup(tval)) == HASH_ADD_FAIL) {
 				errorf("hash failure.");
 				return false;
 			}
