@@ -27,6 +27,7 @@ ADD_COMPILER {
 	MACRO = "__SUNPRO_C"
 	VERSION = "__SUNPRO_C"
 	SLCFLAGS = "-KPIC"
+	SLLDFLAGS = "-G"
 }
 
 ADD_COMPILER {
@@ -35,6 +36,7 @@ ADD_COMPILER {
 	MACRO = "__SUNPRO_CC"
 	VERSION = "__SUNPRO_CC"
 	SLCFLAGS = "-KPIC"
+	SLLDFLAGS = "-G"
 }
 
 ADD_COMPILER {
@@ -42,8 +44,7 @@ ADD_COMPILER {
 	DESCR = "Compaq C"
 	MACRO = "__DECC"
 	VERSION = "__DECC_VER"
-# XXX
-	SLCFLAGS = ""
+	SLCFLAGS = "XXX flags not set in pmkcomp.dat XXX"
 }
 
 ADD_COMPILER {
@@ -60,6 +61,7 @@ ADD_COMPILER {
 	DESCR = "HP Ansi C"
 	MACRO = "__HP_cc"
 	SLCFLAGS = "+Z"
+	SLLDFLAGS = "-b"
 }
 
 ADD_COMPILER {
@@ -68,24 +70,27 @@ ADD_COMPILER {
 	MACRO = "__HP_aCC"
 	VERSION = "__HP_aCC"
 	SLCFLAGS = "+Z"
+	SLLDFLAGS = "-b"
 }
 
 ADD_COMPILER {
 	ID = "xlc_cc"
-	DESCR = "IBM xlC"
+	DESCR = "IBM C"
 	MACRO = "__IBMC__"
 	VERSION = "__IBMC__"
-# XXX
+	# no flags needed for PIC
 	SLCFLAGS = ""
+	SLLDFLAGS = "-G"
 }
 
 ADD_COMPILER {
 	ID = "xlc_cxx"
-	DESCR = "IBM xlC"
+	DESCR = "IBM C++"
 	MACRO = "__IBMCPP__"
 	VERSION = "__IBMCPP__"
 	# no flags needed for PIC
 	SLCFLAGS = ""
+	SLLDFLAGS = "-G"
 }
 
 ADD_COMPILER {
@@ -93,8 +98,8 @@ ADD_COMPILER {
 	DESCR = "Intel"
 	MACRO = "__INTEL_COMPILER"
 	VERSION = "__INTEL_COMPILER"
-# XXX
-	SLCFLAGS = ""
+	SLCFLAGS = "XXX flags not set in pmkcomp.dat XXX"
+	SLLDFLAGS = "-shared"
 }
 
 ADD_COMPILER {
@@ -103,5 +108,6 @@ ADD_COMPILER {
 	MACRO = "__sgi"
 	VERSION = "__COMPILER_VERSION"
 	SLCFLAGS = "-KPIC"
+	SLLDFLAGS = "-shared"
 }
 
