@@ -226,3 +226,34 @@ void ac_clean_dyn_var(htable *pht) {
 	hash_delete(pht, "top_builddir");
 	hash_delete(pht, "abs_top_builddir");
 }
+
+/*
+	set autoconf specific variables
+*/
+
+void ac_set_variables(htable *pht) {
+	char	*pstr;
+
+	/* path variables */
+	pstr = (char *) hash_get(pht, "PREFIX");
+	hash_add(pht, "prefix", strdup(pstr));
+	
+	hash_add(pht, "exec_prefix", strdup("${prefix}"));
+	hash_add(pht, "bindir", strdup("${exec_prefix}/bin"));
+	hash_add(pht, "sbindir", strdup("${exec_prefix}/sbin"));
+	hash_add(pht, "libexecdir", strdup("${exec_prefix}/libexec"));
+	hash_add(pht, "libdir", strdup("${exec_prefix}/lib"));
+	hash_add(pht, "datadir", strdup("${prefix}/share"));
+	hash_add(pht, "includedir", strdup("${prefix}/include"));
+	hash_add(pht, "mandir", strdup("${prefix}/man"));
+	hash_add(pht, "infodir", strdup("${prefix}/info"));
+
+	pstr = (char *) hash_get(pht, "BIN_INSTALL");
+	hash_add(pht, "INSTALL", strdup(pstr));
+
+	/* byte order */
+	pstr = (char *) hash_get(pht, PMKCONF_HW_BYTEORDER);
+	if (strncmp(pstr, HW_ENDIAN_BIG, sizeof(pstr)) == 0) {
+		hash_add(pht, "WORDS_BIGENDIAN", strdup("1"));
+	}
+}

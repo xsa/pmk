@@ -134,6 +134,11 @@
 #define CHAR_ASSIGN_STATIC	':'
 #define CHAR_LIST_SEPARATOR	','
 
+/* hw values */
+#define HW_ENDIAN_BIG		"BIG_ENDIAN"
+#define HW_ENDIAN_LITTLE	"LITTLE_ENDIAN"
+#define HW_ENDIAN_UNKNOW	"UNKNOW_ENDIAN"
+
 /* maximal size of an error message */
 #define MAX_ERR_MSG_LEN		256
 

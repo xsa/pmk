@@ -1,3 +1,7 @@
+20 Sep 2003 mipsator
+ * added ac_set_variables() in autoconf.
+ * added autoconf compatibility stuff for byte order.
+
 19 Sep 2003 mipsator
  * made syntax more simple, now all the checks use NAME for the main
 	target (example in CHECK_TYPE, NAME contain the type to check).
