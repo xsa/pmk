@@ -1,1 +1,3 @@
 The pmk project try to provide an alternative to gnu configure.
+
+It is actually preliminary code, use 'make test_all' to help testing code.

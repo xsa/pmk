@@ -10,7 +10,7 @@ CFLAGS+=	-Wall
 
 # Debug stuff
 #CFLAGS+=	-DPMK_DEBUG
-#CFLAGS+=	-DPMKSETUP_DEBUG
+CFLAGS+=	-DPMKSETUP_DEBUG
 
 # Here you can change the default location of pmk.conf
 #CFLAGS+=	-DSYSCONFDIR=\"/etc/\"
@@ -36,9 +36,13 @@ all: $(PREMAKE) $(SETUP)
 	$(CC) $(CFLAGS) -c $<
 
 $(PREMAKE): $(P_OBJS)
+	@echo ""
+	@echo "Building ${PREMAKE}"
 	$(CC) -o $(PREMAKE) $(LDFLAGS) $(P_OBJS)
 
 $(SETUP): $(S_OBJS)
+	@echo ""
+	@echo "Building ${SETUP}"
 	$(CC) -o $(SETUP) $(LDFLAGS) $(S_OBJS)
 
 install: pmk pmksetup
@@ -51,6 +55,8 @@ install: pmk pmksetup
 	$(INSTALL) -m 444 $(SETUP).8 $(PREFIX)/man/man8/
 
 clean:
+	@echo ""
+	@echo "Cleaning ..."
 	rm -f $(P_OBJS) $(S_OBJS) $(PREMAKE) $(SETUP) *.core
 
 deinstall:
@@ -61,5 +67,50 @@ deinstall:
 	rm -f $(PREFIX)/man/man8/$(SETUP).8
 
 test_pmk: pmk
-	@echo "Testing pmk with sample file"
+	@echo ""
+	@echo "=> Testing pmk with sample files"
+	@echo ""
+	@echo "-> Dumping target file"
+	@echo "----------------------------------------"
+	@cat samples/Makefile.sample.pmk
+	@echo "----------------------------------------"
+	@echo ""
+	@echo "-> Running pmk"
 	pmk -f samples/pmkfile.sample
+	@echo ""
+	@echo "-> Dumping generated file"
+	@echo "----------------------------------------"
+	@cat samples/Makefile.sample
+	@echo "----------------------------------------"
+	@echo ""
+	@echo "-> Removing generated files"
+	rm -f samples/Makefile.sample pmk.log
+	@echo ""
+	@echo "=> End of test"
+	@echo ""
+
+test_pmksetup: pmksetup
+	@echo ""
+	@echo "=>Test pmksetup with sample file"
+	@echo "\t(PMKSETUP_DEBUG must be set)"
+	@echo ""
+	@echo "-> Dumping original configuration file"
+	@echo "----------------------------------------"
+	@cat samples/pmk.conf.sample
+	@echo "----------------------------------------"
+	@echo ""
+	@echo "-> Running pmksetup"
+	pmksetup
+	@echo ""
+	@echo "-> Dumping temporary file"
+	@echo "----------------------------------------"
+	@cat /tmp/pmk.notrandom
+	@echo "----------------------------------------"
+	@echo ""
+	@echo "-> Removing temporary file"
+	rm -f /tmp/pmk.notrandom
+	@echo ""
+	@echo "=> End of test"
+	@echo ""
+
+test_all: test_pmk test_pmksetup clean
