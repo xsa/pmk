@@ -49,6 +49,7 @@ int main(void) {
 	printf("arch = '%s'\n", pstr);
 
 #ifdef ARCH_X86
+	x86_cpu_cell	x86cc;
 	printf("ARCH_X86 is defined.\n");
 
 	cpuidflag = x86_check_cpuid_flag();
