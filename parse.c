@@ -324,27 +324,6 @@ char *skip_blank(char *pstr) {
 }
 
 /*
-	parse obsolete
-	for pmk 0.6 compatibility
-*/
-
-char *parse_obsolete(char *pstr, char *pbuf, size_t size) {
-	while ((*pstr != CHAR_EOS) && (*pstr != ' ') && (size > 0)) {
-		*pbuf = *pstr;
-		pbuf++;
-		pstr++;
-		size--;
-	}
-
-	if (size == 0)
-		return(NULL);
-
-	*pbuf = CHAR_EOS;
-	
-	return(pstr);
-}
-
-/*
 	get identifier 
 
 	pstr : current parsing cursor
