@@ -38,8 +38,34 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "premake.h"
-#include "pmk.h"
+#include "common.h"
+
+
+/*
+	get a line from a file and remove newline character
+
+	fd : file descriptor
+	line : buffer that will contain the line
+	lsize : size of the buffer
+
+	returns a boolean
+*/
+
+bool get_line(FILE *fd, char *line, int lsize) {
+	char	*p;
+
+	if (fgets(line, lsize, fd) != NULL) {
+		p = (char *)strchr(line, '\n');
+		if (p != NULL) {
+			/* remove trailing newline */
+			*p= '\0';
+		}
+		return TRUE;
+	} else {
+		/* XXX test eof ? */
+		return FALSE;
+	}
+}
 
 /*
 	put env variable in an option
@@ -80,10 +106,10 @@ void get_make_var(char *varname) {
 	system(varstr);
 
 	tfd = fopen(tf, "r");
-	fgets(result, 256, tfd);
+	get_line(tfd, result, 256);
 	fclose(tfd);
 
-//	unlink(tf);
+	unlink(tf);
 
 	printf("%s => %s\n", varname, result);
 }

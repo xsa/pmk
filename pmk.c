@@ -31,64 +31,33 @@
  */
 
 
-/* include needed for MAXPATHLEN */
-#ifdef __OpenBSD__
-#	include <sys/param.h>
-#endif
-#ifdef __FreeBSD__
-#	include <sys/param.h>
-#endif
-#ifdef __NetBSD__
-/* not tested */
-#	include <sys/param.h>
-#endif
-#ifdef MACOSX
-#	include <sys/param.h>
-#endif
-#ifdef SOLARIS
-/* not tested */
-#	include <sys/param.h>
-#endif
-#ifdef SUNOS
-#	include <sys/param.h>
-#endif
-#ifdef hpux
-/* not tested */
-#	include <sys/param.h>
-#endif
-#ifdef AIX
-/* not tested */
-#	include <sys/param.h>
-#endif
-#ifdef IRIX
-/* not tested */
-#	include <sys/param.h>
-#endif
-#ifdef OSF1
-/* not tested */
-#	include <sys/param.h>
-#endif
-#ifdef __osf__
-/* not tested */
-#	include <sys/param.h>
-#endif
-#ifdef ULTRIX
-/* not tested */
-#	include <sys/param.h>
-#endif
-#ifdef linux
-/* not tested */
-#	include <sys/param.h>
-#endif
+/* We include sys/param.h to get MAXPATHLEN.
+   This is known to work under following operanding systems :
+	OpenBSD
+	FreeBSD
+	NetBSD			(not verified)
+	MACOSX
+	Solaris			(not verified)
+	SunOS			(not verified)
+	HPUX			(not verified)
+	AIX			(not verified)
+	IRIX			(not verified)
+	OSF1			(not verified)
+	Ultrix			(not verified)
+	Linux based systems	(not verified)
+	DG-UX			(not verified)
+	4.4BSD			(not verified)
 
-/* sys/param.h also valid for :
-	dg-ux
-	4.4BSD
-*/
+   Some systems does not provide the same location :
+   	Chorus			arpa/ftp.h
 
-/* imcompatible systems :
-	chorus		arpa/ftp.h
+
+   Comments about this stuff is welcome. If your system is not
+   supported then take contact with us to fix it.
 */
+#ifdef MAXPATHLEN_
+#	include <sys/param.h>
+#endif
 
 
 #include <ctype.h>
@@ -97,10 +66,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "premake.h"
 #include "pmk.h"
-#include "hash.h"
 #include "func.h"
+#include "common.h"
 
 int	cur_line = 0,
 	err_line = 0;
@@ -115,35 +83,6 @@ cmdkw	functab[] = {
 	{"CHECK_LIB", pmk_check_lib}
 };
 
-
-/*
-	get a line from a file
-
-	fd : file descriptor
-	line : buffer that will contain the line
-	lsize : size of the buffer
-
-	returns a boolean
-*/
-
-bool getline(FILE *fd, char *line, int lsize) {
-	char	*p;
-
-	if (fgets(line, lsize, fd) != NULL) {
-		/* update current line number */
-		cur_line++;
-
-		p = (char *)strchr(line, '\n');
-		if (p != NULL) {
-			/* remove trailing newline */
-			*p= '\0';
-		}
-		return TRUE;
-	} else {
-		/* XXX test eof ? */
-		return FALSE;
-	}
-}
 
 /*
 	process a command
@@ -309,7 +248,10 @@ bool parse(FILE *fd) {
 	pmkcmd		cmd;
 	htable		*tabopts = NULL;
 
-	while (getline(fd, buf, sizeof(buf)) == TRUE) {
+	while (get_line(fd, buf, sizeof(buf)) == TRUE) {
+		/* update current line number */
+		cur_line++;
+
 		/* check first character */
 		switch (buf[0]) {
 			case CHAR_COMMENT :
