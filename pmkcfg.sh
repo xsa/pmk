@@ -175,7 +175,7 @@ int main() {
 }
 EOF
 
-	if $CC -o $testobj -l$lib $testfile >/dev/null 2>&1; then
+	if $CC -o $testobj $testfile -l$lib >/dev/null 2>&1; then
 		sed_define "def" "$function"
 		echo "yes"
 		r=0
