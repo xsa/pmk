@@ -1,3 +1,5 @@
+# snapshot 0.6.3
+
 14 Sep 2003 mipsator
  * finished global language support.
  * fixed parsing of bool data in compatibility mode.
