@@ -248,6 +248,47 @@ htable *keyword_hash(prskw kwtab[], int nbkw) {
 }
 
 /*
+	skip blank character(s)
+
+	pstr : current parsing cursor
+
+	return : new parsing cursor
+*/
+
+char *skip_blank(char *pstr) {
+	while (isblank(*pstr) != 0) {
+		pstr++;
+	}
+	return(pstr);
+}
+
+/*
+	get identifier 
+
+	pstr : current parsing cursor
+	pbuf : storage buffer
+	size : size of buffer
+
+	return : new parsing cursor or NULL
+*/
+
+char *parse_identifier(char *pstr, char *pbuf, size_t size) {
+	while (((isalnum(*pstr) != 0) || (*pstr == '_')) && (size > 0)) {
+		*pbuf = *pstr;
+		pbuf++;
+		pstr++;
+		size--;
+	}
+
+	if (size == 0)
+		return(NULL);
+
+	*pbuf = CHAR_EOS;
+	
+	return(pstr);
+}
+
+/*
 	get quoted string content
 
 	pstr : current parsing cursor
@@ -322,8 +363,7 @@ char *parse_quoted(char *pstr, pmkobj *po, size_t size) {
 */
 
 char *parse_list(char *pstr, pmkobj *po, size_t size) {
-	char	*buffer,
-		*pbuf;
+	char	*buffer;
 	dynary	*pda;
 	pmkobj	 potmp;
 
@@ -374,33 +414,23 @@ char *parse_list(char *pstr, pmkobj *po, size_t size) {
 			default :
 				buffer = (char *) malloc(size);
 				if (buffer == NULL) {
+					strlcpy(parse_err, "arg", sizeof(parse_err));
 					return(NULL);
-				} else {
-					pbuf = buffer;
 				}
 
-				while ((isalnum(*pstr) != 0) || (*pstr == '_')) {
-					if (size > 1) {
-						*pbuf = *pstr;
-						pbuf++;
-						pstr++;
-						size--;
-					} else {
-						da_destroy(pda);
-						free(buffer);
-						strlcpy(parse_err, PRS_ERR_OVERFLOW, sizeof(parse_err));
-						return(NULL);
-					}
+				pstr = parse_identifier(pstr, buffer, size);
 
-				}
-
-				if (pbuf == buffer) {
+				if (*buffer == CHAR_EOS) {
 					da_destroy(pda);
 					strlcpy(parse_err, PRS_ERR_SYNTAX, sizeof(parse_err));
 					return(NULL);
 				}
 
-				*pbuf = CHAR_EOS;
+				if (pstr == NULL) {
+					da_destroy(pda);
+					strlcpy(parse_err, PRS_ERR_OVERFLOW, sizeof(parse_err));
+					return(NULL);
+				}
 
 #ifdef DEBUG_PRS
 				debugf("add '%s' into dynary (simple).", buffer);
@@ -443,8 +473,7 @@ char *parse_list(char *pstr, pmkobj *po, size_t size) {
 }
 
 /*
-	get word
-
+	parse key (quoted or list)
 	pstr : current parsing cursor
 	buffer : storage buffer
 	size : size of buffer
@@ -452,9 +481,60 @@ char *parse_list(char *pstr, pmkobj *po, size_t size) {
 	return : new parsing cursor or NULL
 */
 
-char *parse_word(char *pstr, pmkobj *po, size_t size) {
-	char	*buffer;
+char *parse_key(char *pstr, pmkobj *po, size_t size) {
+	char	*buffer,
+		*rptr;
+
+	po->type = PO_NULL;
+
+	switch (*pstr) {
+		case PMK_CHAR_QUOTE_START :
+			/* found a quoted string */
+			pstr++;
+			rptr = parse_quoted(pstr, po, size);
+			break;
+
+		default :
+			/* identifier */
+			buffer = (char *) malloc(size);
+			if (buffer == NULL) {
+				strlcpy(parse_err, "arg", sizeof(parse_err));
+				return(NULL);
+			}
+
+			pstr = parse_identifier(pstr, buffer, size);
+
+			if (pstr == NULL) {
+				free(buffer);
+				strlcpy(parse_err, PRS_ERR_OVERFLOW, sizeof(parse_err));
+				return(NULL);
+			}
+
+			po->type = PO_STRING;
+			po->data = buffer;
+
+			rptr = pstr;
+			break;
+	}
+	return(rptr);
+}
+
+/*
+	parse data (quoted or list)
+	pstr : current parsing cursor
+	buffer : storage buffer
+	size : size of buffer
+
+	return : new parsing cursor or NULL
+*/
+
+char *parse_data(char *pstr, pmkobj *po, size_t size) {
+#ifdef PRS_OBSOLETE
+	char	*buffer,
+		*rptr;
+#else
 	char	*rptr;
+#endif
 
 	po->type = PO_NULL;
 
@@ -472,72 +552,32 @@ char *parse_word(char *pstr, pmkobj *po, size_t size) {
 			break;
 
 		default :
+#ifdef PRS_OBSOLETE
 			buffer = (char *) malloc(size);
-			if (buffer == NULL)
+			if (buffer == NULL) {
+				strlcpy(parse_err, "arg", sizeof(parse_err));
 				return(NULL);
+			}
+
+			pstr = parse_identifier(pstr, buffer, size);
+
+			if (pstr == NULL) {
+				free(buffer);
+				strlcpy(parse_err, PRS_ERR_OVERFLOW, sizeof(parse_err));
+				return(NULL);
+			}
 
 			po->type = PO_STRING;
 			po->data = buffer;
 
-			while ((isalnum(*pstr) != 0) || (*pstr == '_')) {
-				if (size > 1) {
-					*buffer = *pstr;
-					pstr++;
-					buffer++;
-					size--;
-				} else {
-					free(po->data);
-					strlcpy(parse_err, PRS_ERR_OVERFLOW, sizeof(parse_err));
-					return(NULL);
-				}
-			}
-
-			*buffer = CHAR_EOS;
 			rptr = pstr;
+#else
+			strlcpy(parse_err, PRS_ERR_SYNTAX, sizeof(parse_err));
+			return(NULL);
+#endif
 			break;
 	}
 	return(rptr);
-}
-
-/*
-	get identifier 
-
-	pstr : current parsing cursor
-	pbuf : storage buffer
-	size : size of buffer
-
-	return : new parsing cursor or NULL
-*/
-
-char *parse_identifier(char *pstr, char *pbuf, size_t size) {
-	while (((isalnum(*pstr) != 0) || (*pstr == '_')) && (size > 0)) {
-		*pbuf = *pstr;
-		pbuf++;
-		pstr++;
-		size--;
-	}
-
-	if (size == 0)
-		return(NULL);
-
-	*pbuf = CHAR_EOS;
-	
-	return(pstr);
-}
-
-/*
-	skip blank character(s)
-
-	pstr : current parsing cursor
-
-	return : new parsing cursor
-*/
-
-char *skip_blank(char *pstr) {
-	while (isblank(*pstr) != 0) {
-		pstr++;
-	}
-	return(pstr);
 }
 
 /*
@@ -671,21 +711,7 @@ bool parse_opt(char *line, prsopt *popt) {
 	debugf("line = '%s'", line);
 #endif
 
-	if (*line == PMK_CHAR_COMMENT) {
-#ifdef DEBUG_PRS
-		debugf("comment : '%s'", line);
-#endif
-		 /* comment is ok */
-		return(true);
-	}
-
-	pstr = skip_blank(line);
-	if (pstr == NULL) {
-		strlcpy(parse_err, PRS_ERR_UNKNOWN, sizeof(parse_err));
-		return(false);
-	}
-
-	pstr = parse_word(pstr, &po, sizeof(popt->key));
+	pstr = parse_key(line, &po, sizeof(popt->key));
 	if (pstr == NULL) {
 		strlcpy(parse_err, PRS_ERR_SYNTAX, sizeof(parse_err));
 		return(false);
@@ -699,10 +725,6 @@ bool parse_opt(char *line, prsopt *popt) {
 #endif
 
 	pstr = skip_blank(pstr);
-	if (pstr == NULL) {
-		strlcpy(parse_err, PRS_ERR_SYNTAX, sizeof(parse_err));
-		return(false);
-	}
 
 #ifdef DEBUG_PRS
 	debugf("assign = '%c'", *pstr);
@@ -716,10 +738,6 @@ bool parse_opt(char *line, prsopt *popt) {
 	}
 
 	pstr = skip_blank(pstr);
-	if (pstr == NULL) {
-		strlcpy(parse_err, PRS_ERR_SYNTAX, sizeof(parse_err));
-		return(false);
-	}
 
 	popt->value = (pmkobj *) malloc(sizeof(pmkobj));
 	if (popt->value == NULL) {
@@ -727,7 +745,7 @@ bool parse_opt(char *line, prsopt *popt) {
 		return(false);
 	}
 
-	pstr = parse_word(pstr, popt->value, OPT_VALUE_LEN);
+	pstr = parse_data(pstr, popt->value, OPT_VALUE_LEN);
 	if (pstr == NULL) {
 		strlcpy(parse_err, PRS_ERR_SYNTAX, sizeof(parse_err));
 		return(false);
@@ -766,7 +784,8 @@ bool parse_opt(char *line, prsopt *popt) {
 
 bool parse_pmkfile(FILE *fp, prsdata *pdata, prskw kwtab[], size_t size) {
 	bool	 process = false;
-	char	 buf[MAX_LINE_LEN];
+	char	 buf[MAX_LINE_LEN],
+		*pbuf;
 	htable	*phkw;
 	int	 cur_line = 0;
 	prscell	*pcell = NULL,
@@ -785,8 +804,10 @@ bool parse_pmkfile(FILE *fp, prsdata *pdata, prskw kwtab[], size_t size) {
 		/* update current line number */
 		cur_line++;
 
+		pbuf = skip_blank(buf);
+
 		/* check first character */
-		switch (buf[0]) {
+		switch (*pbuf) {
 			case CHAR_COMMENT :
 				/* ignore comments */
 				/* printf("DEBUG COMMENT = %s\n", buf); */
@@ -811,58 +832,56 @@ bool parse_pmkfile(FILE *fp, prsdata *pdata, prskw kwtab[], size_t size) {
 
 			default :
 				if (process == true) {
-					if (*buf != PMK_CHAR_COMMENT) {
-						if (parse_opt(buf, &opt) == false) {
-							errorf("line %d : %s", cur_line, parse_err);
+					if (parse_opt(pbuf, &opt) == false) {
+						errorf("line %d : %s", cur_line, parse_err);
 #ifdef DEBUG_PRS
-							debugf("parse_opt returned false");
+						debugf("parse_opt returned false");
 #endif
-							prscell_destroy(pcell);
-							return(false);
-						} else {
+						prscell_destroy(pcell);
+						return(false);
+					} else {
 #ifdef DEBUG_PRS
-							debugf("recording '%s' key", opt.key);
+						debugf("recording '%s' key", opt.key);
 #endif
-							/* key name and value are ok */
-							switch(pcell->type) {
-								case PRS_KW_NODE :
-									pnode = pcell->data;
+						/* key name and value are ok */
+						switch(pcell->type) {
+							case PRS_KW_NODE :
+								pnode = pcell->data;
 
-									/* init item's pcell */
-									ncell = prscell_init(pnode->token,
-											PRS_KW_ITEM, PRS_TOK_NULL);
-									if (ncell == NULL) {
-										errorf("prscell init failed");
-										return(false);
-									}
-
-									nopt = ncell->data;
-
-									/* duplicate opt content in item */
-									strlcpy(nopt->key, opt.key, sizeof(opt.key));
-									nopt->value = opt.value;
-
-									/* add item in cell node */
-									prsnode_add(pnode, ncell);
-									break;
-
-								case PRS_KW_CELL :
-									if (hash_add(pcell->data, opt.key, opt.value) == HASH_ADD_FAIL) {
-										strlcpy(parse_err, PRS_ERR_HASH, sizeof(parse_err));
-										return(false);
-									}
-									break;
-
-								default :
-									strlcpy(parse_err, "unknow type.", sizeof(parse_err));
+								/* init item's pcell */
+								ncell = prscell_init(pnode->token,
+										PRS_KW_ITEM, PRS_TOK_NULL);
+								if (ncell == NULL) {
+									errorf("prscell init failed");
 									return(false);
-									break;
-							}
+								}
+
+								nopt = ncell->data;
+
+								/* duplicate opt content in item */
+								strlcpy(nopt->key, opt.key, sizeof(opt.key));
+								nopt->value = opt.value;
+
+								/* add item in cell node */
+								prsnode_add(pnode, ncell);
+								break;
+
+							case PRS_KW_CELL :
+								if (hash_add(pcell->data, opt.key, opt.value) == HASH_ADD_FAIL) {
+									strlcpy(parse_err, PRS_ERR_HASH, sizeof(parse_err));
+									return(false);
+								}
+								break;
+
+							default :
+								strlcpy(parse_err, "unknow type.", sizeof(parse_err));
+								return(false);
+								break;
 						}
 					}
 				} else {
 					/* parse command and label */
-					pcell = parse_cell(buf, phkw);
+					pcell = parse_cell(pbuf, phkw);
 					if (pcell == NULL) {
 						errorf("line %d : %s", cur_line, parse_err);
 #ifdef DEBUG_PRS

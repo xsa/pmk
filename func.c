@@ -146,7 +146,7 @@ bool process_node(prsnode *pnode, pmkdata *pgd) {
 }
 
 /*
-	all the following functions have the same parameters :
+	all the following functions have the same parameters : <== XXXX eeeek not true
 
 	cmd : command structure
 	ht : command options
@@ -179,6 +179,7 @@ bool pmk_target(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 	prsopt	 opt;
 
 	pmk_log("* Parsing target\n");
+	pmk_log("\tWARNING : TARGET command is obsolete, consider using SETTINGS.\n");
 
 	strlcpy(opt.key, "TARGET", sizeof(opt.key));
 
@@ -204,6 +205,7 @@ bool pmk_ac_compat(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 	prsopt	 opt;
 
 	pmk_log("* Parsing ac_compat\n");
+	pmk_log("\tWARNING : AC_COMPAT command is obsolete, consider using SETTINGS.\n");
 
 	strlcpy(opt.key, "AC_COMPAT", sizeof(opt.key));
 

@@ -88,7 +88,7 @@ extern int	 optind;
 	return : boolean (true on success)
 */
 
-bool parse_data(prsdata *pdata, scandata *sdata) {
+bool parse_data_file(prsdata *pdata, scandata *sdata) {
 	FILE	*fd;
 	bool	 rval;
 	prscell	*pcell;
@@ -483,7 +483,7 @@ int main(int argc, char *argv[]) {
 		exit(1);
 	}
 
-	if (parse_data(pdata, &sd) == false) {
+	if (parse_data_file(pdata, &sd) == false) {
 		/* XXX TODO error message */
 		exit(1);
 	}
