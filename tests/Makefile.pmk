@@ -45,7 +45,9 @@ all: comp cpuid dynary gencomp hash mkvar parser path pkgconfig
 	$(CC) $(CFLAGS) -o $@ -c $<
 
 .s.o:
-	$(CPP) $< | $(AS) -o $@
+	$(CPP) $< | sed '/^#/d' > tmp_asm.s
+	$(AS) -o $@ tmp_asm.s
+	rm tmp_asm.s
 
 config:
 	@if [ ! -f ../compat/compat.h ]; then \
