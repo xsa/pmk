@@ -48,6 +48,7 @@ mips	-	linking flags for shared libraries
 
 pmksetup:
 -----------------------------------------------------------------------
+	-	options to add, update or remove a variable of pmk.conf
 	!	clean temporary files on error
 	-	missing checks :
 		        . check install binary and use pmkinstall instead if not compatible.
