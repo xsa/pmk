@@ -51,7 +51,7 @@
 #define PMK_DATADIR	DATADIR
 #endif
 
-#define PMKSCAN_DATA	PMK_DATADIR "pmkscan.dat"
+#define PMKSCAN_DATA	PMK_DATADIR "/pmkscan.dat"
 #define PMKSCAN_OUTPUT	"pmkfile.scan"
 
 #define PSC_TOK_INCL	1
