@@ -57,7 +57,8 @@ I_OBJS=         dynarray.o common.o $(INST).o
 	$(CC) $(PMKCFLAGS) -c $<
 
 # main target
-all: $(PREMAKE) $(SETUP) $(SCAN) $(INST)
+all: $(PREMAKE) $(SETUP) $(SCAN)
+# $(INST) is still a work in progress
 
 # specific object files
 $(SCAN).o:
@@ -105,7 +106,7 @@ install: all
 	$(INSTALL) -d -m 755 $(BINDIR)
 	$(INSTALL) -m 755 $(PREMAKE) $(BINDIR)/$(PREMAKE)
 	$(INSTALL) -m 755 $(SCAN) $(BINDIR)/$(SCAN)
-	$(INSTALL) -m 755 $(INST) $(BINDIR)/$(INST)
+#	$(INSTALL) -m 755 $(INST) $(BINDIR)/$(INST)
 	$(INSTALL) -d -m 755 $(SBINDIR)
 	$(INSTALL) -m 755 $(SETUP) $(SBINDIR)/$(SETUP)
 	$(INSTALL) -d -m 755 $(DATADIR)
@@ -125,7 +126,7 @@ install: all
 deinstall:
 	rm -f $(BINDIR)/$(PREMAKE)
 	rm -f $(BINDIR)/$(SCAN)
-	rm -f $(BINDIR)/$(INST)
+#	rm -f $(BINDIR)/$(INST)
 	rm -f $(SBINDIR)/$(SETUP)
 	rm -rf $(DATADIR)
 	rm -f $(BASE)/man/man1/$(PREMAKE).1
