@@ -37,6 +37,57 @@
 #ifdef __FreeBSD__
 #	include <sys/param.h>
 #endif
+#ifdef __NetBSD__
+/* not tested */
+#	include <sys/param.h>
+#endif
+#ifdef MACOSX
+#	include <sys/param.h>
+#endif
+#ifdef SOLARIS
+/* not tested */
+#	include <sys/param.h>
+#endif
+#ifdef SUNOS
+#	include <sys/param.h>
+#endif
+#ifdef hpux
+/* not tested */
+#	include <sys/param.h>
+#endif
+#ifdef AIX
+/* not tested */
+#	include <sys/param.h>
+#endif
+#ifdef IRIX
+/* not tested */
+#	include <sys/param.h>
+#endif
+#ifdef OSF1
+/* not tested */
+#	include <sys/param.h>
+#endif
+#ifdef __osf__
+/* not tested */
+#	include <sys/param.h>
+#endif
+#ifdef ULTRIX
+/* not tested */
+#	include <sys/param.h>
+#endif
+#ifdef linux
+/* not tested */
+#	include <sys/param.h>
+#endif
+
+/* sys/param.h also valid for :
+	dg-ux
+	4.4BSD
+*/
+
+/* imcompatible systems :
+	chorus		arpa/ftp.h
+*/
 
 
 #include <ctype.h>

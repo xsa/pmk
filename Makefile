@@ -45,6 +45,6 @@ clean:
 
 deinstall:
 	rm -f $(PREFIX)/bin/$(PREMAKE)
-	rm -f $(PREFIX)/bin/$(SETUP)
+	rm -f $(PREFIX)/sbin/$(SETUP)
 	rm -rf $(PREFIX)/share/$(PREMAKE)
 
