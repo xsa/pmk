@@ -45,7 +45,7 @@
 #define AC_VALUE_DEF	"-DHAVE_CONFIG_H"
 
 bool	ac_parse_config(pmkdata *);
-void	ac_process_dyn_var(htable *, pmkdata *, char *);
+void	ac_process_dyn_var(pmkdata *, char *);
 void	ac_clean_dyn_var(htable *);
 void	ac_set_variables(htable *);
 
