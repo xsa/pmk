@@ -4,6 +4,7 @@
  * updated pmkfile.
  * improved pmkcfg.sh to provide full path in check_binary().
  * updated pmk.conf.5 to reflect latest changes.
+ * more warning fixes in compat found with aggressive compiler options.
 
 23 Dec 2004 mipsator
  * fixed use of the assembler to comply with SunOS.
