@@ -20,6 +20,7 @@ pmk :
 pmksetup :
 ! does clean temporary files on error
 - missing checks :
+        ! ECHO_N, ECHO_C, ECHO_T in a specific proc for autoconf variables.
 	- char unsigned (pmk ?)
 	- long double (pmk ?)
 	- better check for install ?
