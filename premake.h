@@ -30,6 +30,9 @@
  *
  */
 
+#ifndef _PREMAKE_H_
+#define _PREMAKE_H_
+
 #ifndef SYSCONFDIR
 #	define SYSCONFDIR	"/etc"
 #endif
@@ -105,3 +108,5 @@ typedef struct {
 	char		name[MAX_CMD_NAME_LEN],
 			label[MAX_LABEL_NAME_LEN];
 } pmkcmd;
+
+#endif /* _PREMAKE_H_ */
