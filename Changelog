@@ -1,3 +1,6 @@
+25 Nov 2003 mipsator
+ * added support for -o and -g options (owner and group).
+
 24 Nov 2003 mipsator
  * started to rewrite pmkinstall from scratch (much easier than making
 	xinstall portable).
