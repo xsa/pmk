@@ -28,7 +28,7 @@ common:
 	-	add test target in tests/Makefile
 	-	improve comp_test usage
 	-	update README and INSTALL
-xsa	-	improve deinstall target (ugly rm -rf)
+xsa	+	improve deinstall target (ugly rm -rf)
 
 
 pmk:
