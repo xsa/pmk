@@ -799,15 +799,21 @@ bool check_libpath(htable *pht) {
 	char	 libpath[MAXPATHLEN];
 
 	/* build the path dynamically */
-	strlcpy(libpath, "$", sizeof(libpath)); /* variable prefix */
-	strlcat(libpath, PMKCONF_MISC_PREFIX, sizeof(libpath)); /* prefix variable name */
-	strlcat(libpath, PMKVAL_LIB_PKGCONFIG, sizeof(libpath)); /* pkgconfig path suffix */
+	/* variable prefix */
+	strlcpy(libpath, "$", sizeof(libpath));
+
+	/* prefix variable name */
+	strlcat(libpath, PMKCONF_MISC_PREFIX, sizeof(libpath));
+
+	/* pkgconfig path suffix */
+	strlcat(libpath, PMKVAL_LIB_PKGCONFIG, sizeof(libpath));
 
 	if (hash_get(pht, PMKCONF_BIN_PKGCONFIG) != NULL) {
 		if (dir_exists(libpath) == 0) {
 			if (record_data(pht, PMKCONF_PC_PATH_LIB, 'u', libpath) == false)
 				return(false);
-			verbosef("Setting '%s' => '%s'", PMKCONF_PC_PATH_LIB, libpath);
+			verbosef("Setting '%s' => '%s'",
+					PMKCONF_PC_PATH_LIB, libpath);
 		} else {
 			verbosef("**warning: %s does not exist.", libpath);
 		}
