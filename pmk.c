@@ -153,7 +153,10 @@ bool process_template(char *template, pmkdata *pgd) {
 	}
 
 	/* get relative path from srcdir */
-	relpath(pgd->srcdir, dirname(template), buf); /* XXX check ? */
+	/* NOTE : we use strdup to avoid problem with linux's dirname */
+	ptmp = strdup(template);
+	relpath(pgd->srcdir, dirname(ptmp), buf); /* XXX check ? */
+	free(ptmp);
 	/* apply to basedir */
 	abspath(pgd->basedir, buf, tbuf); /* XXX check ? */
 
@@ -693,7 +696,10 @@ int main(int argc, char *argv[]) {
 					}
 
 					/* path of pmkfile is also the srcdir base */
-					strlcpy(gdata.srcdir, dirname(gdata.pmkfile), sizeof(gdata.pmkfile)); /* XXX check ??? */
+					/* NOTE : we use strdup to avoid problem with linux's dirname */
+					pstr = strdup(gdata.pmkfile); 
+					strlcpy(gdata.srcdir, dirname(pstr), sizeof(gdata.srcdir)); /* XXX check ??? */
+					free(pstr);
 
 					pmkfile_set = true;
 					break;

@@ -188,6 +188,9 @@ int hash_destroy(htable *pht) {
 	hcell	*p,
 		*t;
 
+	if (pht == NULL)
+		return(0);
+
 	s = pht->size;
 
 	for(i = 0 ; i < s ; i++) {
