@@ -76,7 +76,7 @@
 #endif
 
 #ifndef CONFDIR
-#	define CONFDIR	"/etc/pmk"
+#	define CONFDIR	SYSCONFDIR "/pmk"
 #endif
 
 #define PREMAKE_MAJOR		"0"
