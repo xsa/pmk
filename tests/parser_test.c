@@ -24,9 +24,13 @@
 
 #define PRS_DEBUG	1
 
-
 extern prskw	kw_pmkfile[];
 extern size_t	nbkwpf;
+
+
+bool	process_fake(htable *, prsopt *);
+void	usage(void);
+
 
 /*
 	process option line of configuration file

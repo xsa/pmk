@@ -10,7 +10,7 @@
 #include "../compat/compat.h"
 #include "../dynarray.h"
 
-int main() {
+int main(void) {
 	char	tmp[256];
 
 	get_make_var("CC", tmp, 256);
