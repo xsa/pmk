@@ -61,7 +61,7 @@ bool get_line(FILE *fd, char *line, int lsize) {
 
 	if (fgets(line, lsize, fd) != NULL) {
 		p = line;
-		while (*p != '\0') {
+		while (*p != CHAR_EOS) {
 			if (*p == '\n') {
 				/* remove trailing newline */
 				*p= CHAR_EOS;

@@ -47,13 +47,38 @@ udef="#undef"
 
 check_include() {
 	include="$1"
-	printf "Checking %s : " "$include"
+	printf "Checking '%s' : " "$include"
 
 	cat > $testfile <<EOF
 #include <stdio.h>
 #include <$include>
 
 int main() {
+	return(0);
+}
+EOF
+
+	if $CC -o $testbin $testfile >/dev/null 2>&1; then
+		do_sed "$def" "$include"
+		echo "yes"
+	else
+		do_sed "$udef" "$include"
+		echo "no"
+	fi
+	rm -f $testfile $testbin
+}
+
+check_include_function() {
+	include="$1"
+	function="$2"
+	printf "Checking '%s' in '%s' : " "$function" "$include"
+
+	cat > $testfile <<EOF
+#include <stdio.h>
+#include <$include>
+
+int main() {
+	printf("%p", $function);
 	return(0);
 }
 EOF
@@ -90,35 +115,7 @@ cp $template $compat
 # strlcpy check
 #
 
-printf "Checking strlcpy : "
-
-cat > $testfile <<EOF
-#include <stdio.h>
-#include <string.h>
-
-#define str	"test string"
-
-char	buf[256];
-
-int main() {
-	strlcpy(buf, str, sizeof(buf));
-	return(0);
-}
-EOF
-
-if $CC -o $testbin $testfile >/dev/null 2>&1; then
-	sedstr="$def"
-	msg="yes"
-else
-	sedstr="$udef"
-	msg="no"
-fi
-
-cp $compat $temporary
-cat $temporary | sed -e s/@DEF_STRLCPY@/$sedstr/ > $compat
-echo "$msg"
-rm -f $temporary $testfile $testbin
-
+check_include_function string.h strlcpy
 
 #
 # stdbool.h check
