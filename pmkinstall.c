@@ -35,7 +35,7 @@
 
 
 #include <sys/stat.h>
-/* include it first as if it was <sys/types.h> - this will avoid errors */ 
+/* include it first as if it was <sys/types.h> - this will avoid errors */
 #include "compat/pmk_sys_types.h"
 
 #include <errno.h>
@@ -241,7 +241,7 @@ debugf("perm = %o", perm);
 	mstr : mode string
 	pmode : resulting mode
 
-	return : boolean 
+	return : boolean
 
 */
 

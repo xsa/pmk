@@ -281,7 +281,7 @@ void po_free(pmkobj *po) {
 	value : data to append
 	misc : misc specific data :
 		- separator for a string object
-		- unused for a list object 
+		- unused for a list object
 
 	return : updated object or NULL if failed
 */

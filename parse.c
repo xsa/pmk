@@ -561,7 +561,7 @@ void skip_useless(prseng *peng) {
 }
 
 /*
-	get identifier 
+	get identifier
 
 	pstr : current parsing cursor
 	pbuf : storage buffer
@@ -942,7 +942,7 @@ char *parse_key(char *pstr, pmkobj *po, size_t size) {
 	po : storage pmk object
 	size : size of buffer
 
-	return : boolean 
+	return : boolean
 */
 
 bool parse_data(prseng *peng, pmkobj *po, size_t size) {
@@ -1167,7 +1167,7 @@ bool parse_opt(prseng *peng, prsopt *popt, char *seplst) {
 	parse a command line option
 
 	line : option line
-	popt : storage structure 
+	popt : storage structure
 	seplst : string that contain all separator characters
 
 	return : boolean
@@ -1502,7 +1502,7 @@ bool process_opt(htable *pht, prsopt *popt) {
 /*
 	parse configuration file
 
-	fp : file to parse 
+	fp : file to parse
 	pht : data used by processing function
 	seplst : list of separators
 	func : processing function

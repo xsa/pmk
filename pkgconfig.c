@@ -33,7 +33,7 @@
  *
  */
 
-/* include it first as if it was <sys/types.h> - this will avoid errors */ 
+/* include it first as if it was <sys/types.h> - this will avoid errors */
 #include "compat/pmk_sys_types.h"
 
 #include <dirent.h>
@@ -209,7 +209,7 @@ bool scan_dir(char *dir, pkgdata *ppd) {
 	/* open directory */
 	pdir = opendir(dir);
 	if (pdir == NULL) {
-		errorf("cannot open '%s' directory : %s.", 
+		errorf("cannot open '%s' directory : %s.",
 			dir, strerror(errno));
 		return(false);
 	}
@@ -343,7 +343,7 @@ bool parse_keyword(pkgcell *ppc, char *kword, char *value) {
 			}
 
 			return(true);
-		}                                
+		}                               
 	}
 
 	return(true);

@@ -253,7 +253,7 @@ char *comp_get_descr(comp_data *pcd, char *c_id) {
 	parse data from PMKCOMP_DATA file
 
 	cdfile : compilers data file
-	pht: config hash table 
+	pht: config hash table
 
 	return : compiler data structure or NULL
 */
@@ -267,7 +267,7 @@ comp_data *parse_comp_file_adv(char *cdfile, htable *pht) {
 	prsdata		*pdata;
 
 	/* init compiler data structure */
-	cdata = compdata_init(MAX_COMP, MAX_OS); 
+	cdata = compdata_init(MAX_COMP, MAX_OS);
 	if (cdata == NULL) {
 		return(NULL);
 	}

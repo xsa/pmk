@@ -227,7 +227,7 @@ bool record_def(htable *ht, char *name, bool status) {
 		return(false);
 
 	if (status == true) {
-		if (snprintf(def_val, sizeof(def_str), "#define %s 1", have_str) >= sizeof(def_str)) 
+		if (snprintf(def_val, sizeof(def_str), "#define %s 1", have_str) >= sizeof(def_str))
 			return(false);
 	} else {
 		if (snprintf(def_val, sizeof(def_str), "#undef %s", have_str) >= sizeof(def_str))
@@ -252,8 +252,8 @@ bool record_def(htable *ht, char *name, bool status) {
 	record definition data (DEF__* and HAVE_*)
 
 	ht : hast table to store the definition
-	name : tag name 
-	value : tag value 
+	name : tag name
+	value : tag value
 
 	returns true on success
 */
@@ -283,7 +283,7 @@ bool record_def_data(htable *ht, char *name, char *value) {
 		debugf("record_def_data() : recorded '%s' with '%s'", have_str, value);
 #endif
 
-		if (snprintf(def_val, sizeof(def_str), "#define %s %s", have_str, value) >= sizeof(def_str)) 
+		if (snprintf(def_val, sizeof(def_str), "#define %s %s", have_str, value) >= sizeof(def_str))
 			return(false);
 	} else {
 		if (snprintf(def_val, sizeof(def_str), "#undef %s", have_str) >= sizeof(def_str))
@@ -529,8 +529,8 @@ lgdata *check_lang_comp(char *comp) {
 /*
 	provide data on language used
 
-	pht : hash table that should contain LANG 
-	pgd : global data structure 
+	pht : hash table that should contain LANG
+	pgd : global data structure
 
 	return : lgdata structure or NULL for unknown language
 */

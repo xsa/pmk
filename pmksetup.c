@@ -38,7 +38,7 @@
 /*#define PMKSETUP_DEBUG 1*/
 
 #include <sys/stat.h>
-/* include it first as if it was <sys/types.h> - this will avoid errors */ 
+/* include it first as if it was <sys/types.h> - this will avoid errors */
 #include "compat/pmk_sys_types.h"
 #include <sys/utsname.h>
 
@@ -61,7 +61,7 @@ char	*__progname,		/* program name from argv[0] */
 	 sfn[MAXPATHLEN];	/* scratch file name */		
 
 htable	*ht;
-int	 verbose_flag = 0;	/* -V option at the cmd-line */ 
+int	 verbose_flag = 0;	/* -V option at the cmd-line */
 
 hpair	predef[] = {
 		{PMKCONF_MISC_SYSCONFDIR,	SYSCONFDIR},
@@ -186,7 +186,7 @@ int main(int argc, char *argv[]) {
 	if (dir_exists(CONFDIR) == false) {
 		verbosef("==> Creating '%s' directory.", CONFDIR);
 		if (mkdir(CONFDIR, S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH) != 0) {
-			errorf("cannot create '%s' directory : %s.", 
+			errorf("cannot create '%s' directory : %s.",
 				CONFDIR, strerror(errno));
 			exit(EXIT_FAILURE);
 		}
@@ -323,7 +323,7 @@ bool gather_data(htable *pht) {
 
 	/* set predifined variables */
 	if (predef_vars(pht) == false) {
-		errorf("predefined variables."); 
+		errorf("predefined variables.");
 		return(false);
 	}
 
@@ -408,7 +408,7 @@ void write_new_data(htable *pht) {
  *
  *	returns an integer greater than, equal to, or
  *		less than 0 according as the character a is
- *		greather, equal to, or less than the character b. 
+ *		greather, equal to, or less than the character b.
  */
 int keycomp(const void *a, const void *b) {
 	return(strcmp(*(const char **)a, *(const char **)b));
@@ -471,7 +471,7 @@ bool check_opt(htable *cht, prsopt *popt) {
 				break;
 
 			case CHAR_ASSIGN_STATIC :
-				/* static definition, stay unchanged */ 
+				/* static definition, stay unchanged */
 				fprintf(sfp, PMKSTP_WRITE_FORMAT, popt->key, CHAR_ASSIGN_STATIC, optval);
 				hash_delete(cht, popt->key);
 				break;
@@ -505,7 +505,7 @@ bool open_tmp_config(void) {
 
 	fd = mkstemp(sfn);
 	if (fd == -1) {
-		errorf("could not create temporary file '%s' : %s.", 
+		errorf("could not create temporary file '%s' : %s.",
 			sfn, strerror(errno));
 		return(false);
 	}
@@ -514,7 +514,7 @@ bool open_tmp_config(void) {
 	if (sfp == NULL) {
 		unlink(sfn);
 		close(fd);
-		errorf("cannot open temporary file '%s' : %s.", 
+		errorf("cannot open temporary file '%s' : %s.",
 			sfn, strerror(errno));
 		return(false);
 	}
@@ -535,7 +535,7 @@ bool close_tmp_config(void) {
 		return(true);
 
 	if (fclose(sfp) != 0) {
-		errorf("cannot close temporary file '%s' : %s.", 
+		errorf("cannot close temporary file '%s' : %s.",
 			sfp, strerror(errno));
 		return(false);
 	}
@@ -580,8 +580,8 @@ bool get_env_vars(htable *pht) {
 		return(false);
 	}
 
-	/* 
-	 * replace the string separator in the PATH 
+	/*
+	 * replace the string separator in the PATH
 	 * to fit to our standards
 	 */
 	char_replace(bin_path, PATH_STR_DELIMITER, CHAR_LIST_SEPARATOR);
@@ -594,13 +594,13 @@ bool get_env_vars(htable *pht) {
 }
 
 
-/* 
+/*
  * Look for location of some predefined binaries
  *
  *	ht: hash table where we have to store the values
  *
- *	return: boolean 
- */ 
+ *	return: boolean
+ */
 bool get_binaries(htable *pht) {
 	char	 fbin[MAXPATHLEN],	/* full binary path */
 		*pstr;
@@ -609,7 +609,7 @@ bool get_binaries(htable *pht) {
 	prsopt	*ppo;
 
         /*
-         * splitting the PATH variable and storing in a 
+         * splitting the PATH variable and storing in a
          * dynamic array for later use by find_file
          */
 
@@ -674,7 +674,7 @@ bool get_binaries(htable *pht) {
  *	pht: hash table where we have to store the values
  *
  *	returns:  boolean
- */ 
+ */
 bool predef_vars(htable *pht) {
 	int	i;
 
@@ -798,7 +798,7 @@ bool check_libpath(htable *pht) {
 }
 
 /*
- *	check if a directory does exist 
+ *	check if a directory does exist
  *
  *	fdir : directory to search
  *
@@ -808,7 +808,7 @@ bool check_libpath(htable *pht) {
 bool dir_exists(const char *fdir) {
         DIR     *dirp;
         size_t  len;
-        
+       
 	len = strlen(fdir);
 
 	if (len < MAXPATHLEN) {
@@ -837,7 +837,7 @@ bool byte_order_check(htable *pht) {
 	    ((((char *)&num)[2]) == 0x43) && ((((char *)&num)[3]) == 0x44)) {
 		strlcpy(bo_type, HW_ENDIAN_BIG, sizeof(bo_type));
 	} else {
-		if ( ((((char *)&num)[3]) == 0x41) && ((((char *)&num)[2]) == 0x42) && 
+		if ( ((((char *)&num)[3]) == 0x41) && ((((char *)&num)[2]) == 0x42) &&
 		    ((((char *)&num)[1]) == 0x43) && ((((char *)&num)[0]) == 0x44) ) {
 			strlcpy(bo_type, HW_ENDIAN_LITTLE, sizeof(bo_type));
 		} else {
@@ -871,12 +871,12 @@ bool copy_config(const char *tmp_config, const char *config) {
 
 	if ((fp_t = fopen(tmp_config, "r")) == NULL) {
 		errorf("cannot open temporary configuration "
-			"file for reading '%s' : %s.", tmp_config, 
+			"file for reading '%s' : %s.", tmp_config,
 				strerror(errno));
 		return(false);	
 	}
 	if ((fp_c = fopen(config, "w")) == NULL) {
-		errorf("cannot open '%s' for writing : %s.", 
+		errorf("cannot open '%s' for writing : %s.",
 			config, strerror(errno));
 
 		fclose(fp_t);	
@@ -907,7 +907,7 @@ bool copy_config(const char *tmp_config, const char *config) {
  *	buf: string we want to modify
  *	search: the char with want to replace
  *	replace: the new char which will replace 'search'
- */ 
+ */
 void char_replace(char *buf, const char search, const char replace) {
 	char	c;
 	int	i = 0;
