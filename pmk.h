@@ -69,6 +69,18 @@
 /* maximal number of key in label hash */
 #define MAX_LABEL_KEY		1024
 
+/* pmk's directory tags */
+#define PMK_DIR_BLD_ABS "builddir_abs"
+#define PMK_DIR_BLD_REL "builddir_rel"
+#define PMK_DIR_BLD_ROOT_ABS "builddir_root_abs"
+#define PMK_DIR_BLD_ROOT_REL "builddir_root_rel"
+#define PMK_DIR_SRC_ABS "srcdir_abs"
+#define PMK_DIR_SRC_REL "srcdir_rel"
+#define PMK_DIR_SRC_ROOT_ABS "srcdir_root_abs"
+#define PMK_DIR_SRC_ROOT_REL "srcdir_root_rel"
+
+#define PMK_TMP_AC_CONF "config_tmp"
+
 /* command option type */
 typedef struct {
 	char	name[OPT_NAME_LEN],

@@ -17,11 +17,21 @@ GTK_LIBS=	@GTK_LIBS@
 
 GTK_CONFIG=	@GTK_CONFIG@
 
+# pmk directories
+SRCDIR_ABS=		@srcdir_abs@
+SRCDIR_REL=		@srcdir_rel@
+SRCDIR_ROOT_ABS=	@srcdir_root_abs@
+SRCDIR_ROOT_REL=	@srcdir_root_rel@
+BUILDDIR_ABS=		@builddir_abs@
+BUILDDIR_REL=		@builddir_rel@
+BUILDDIR_ROOT_ABS=	@builddir_root_abs@
+BUILDDIR_ROOT_REL=	@builddir_root_rel@
+
+# autoconf directories
 SRCDIR=		@srcdir@
 ABS_SRCDIR=	@abs_srcdir@
 TOP_SRCDIR=	@top_srcdir@
 ABS_TOP_SRCDIR=	@abs_top_srcdir@
-
 BUILDDIR=		@builddir@
 ABS_BUILDDIR=		@abs_builddir@
 TOP_BUILDDIR=		@top_builddir@

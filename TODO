@@ -2,9 +2,11 @@ common :
 - tutorial
 
 pmk :
+- change ac_process_dyn_var() to use values of process_dyn_var().
+- make dir creation better in process_template().
 + update pmk.1
 + update pmkfile.5
-! define CFLAGS, LIBS, LDFLAGS with values from make
+- define CFLAGS, LIBS, LDFLAGS with values from make !
 ~ compatibility with autoconf (progressing) :
 	~ support for DEFS (-D options to pass to the compiler)
 	! missing stuff noticed with dillo conversion
@@ -12,9 +14,9 @@ pmk :
 	- support for CPPFLAGS (misc linker options)
 	- VPATH ?
 - cache ? (hash table with binary location, ...)
-- more C++ support
+- more C++ support !
 - verify in CHECK_BINARY that program has executable right ?
-- convert gdata.labl to pmk objects
+- convert gdata.labl to pmk objects ?
 - checks hash_add() in autoconf.c (void func => bool func)
 
 pmksetup :
