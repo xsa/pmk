@@ -68,6 +68,8 @@ bool	 get_file_dir_path(char *, char *, char *, int);
 char	*str_to_def(char *);
 char	*build_def_name(char *);
 bool	 record_def(htable *, char *, bool);
+bool	 record_def_data(htable *, char *, char *);
+bool	 record_have(htable *, char *, char *);
 bool	 record_val(htable *, char *, char *);
 bool	 label_set(htable *, char *, bool);
 bool	 label_check(htable *, char *);

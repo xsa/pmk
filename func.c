@@ -306,7 +306,7 @@ bool pmk_check_binary(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 	varname = po_get_str(hash_get(ht, KW_OPT_VARIABLE));
 	if (varname == NULL) {
 		/* if not then use default naming scheme */
-		varname = str_to_def(filename);
+		varname = strdup(str_to_def(filename)); /* XXX check */
 	}
 
 	bpath = hash_get(pgd->htab, PMKCONF_PATH_BIN);
@@ -320,7 +320,7 @@ bool pmk_check_binary(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 		if (required == true) {
 			return(false);
 		} else {
-			record_def(pgd->htab, filename, false);
+			record_def_data(pgd->htab, filename, NULL);
 			/* not found => not added in htab */ 
 			label_set(pgd->labl, cmd->label, false);
 			return(true);
@@ -335,7 +335,7 @@ bool pmk_check_binary(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 			return(false);
 		} else {
 			/* define for template */
-			record_def(pgd->htab, filename, false);
+			record_def_data(pgd->htab, filename, NULL);
 
 			/* set path as empty for the key given by varname */
 			if (hash_update_dup(pgd->htab, varname, "") == HASH_ADD_FAIL) {
@@ -349,8 +349,7 @@ bool pmk_check_binary(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 	} else {
 		pmk_log("yes.\n");
 		/* define for template */
-		record_def(pgd->htab, filename, true);
-		record_val(pgd->htab, filename, "1");
+		record_def_data(pgd->htab, filename, DEFINE_DEFAULT);
 
 		/* recording path of config tool under the key given by varname */
 		if (hash_update_dup(pgd->htab, varname, binpath) == HASH_ADD_FAIL) {
@@ -410,7 +409,7 @@ bool pmk_check_header(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 		if (required == true) {
 			return(false);
 		} else {
-			record_def(pgd->htab, target, false);
+			record_def_data(pgd->htab, target, NULL);
 			label_set(pgd->labl, cmd->label, false);
 			return(true);
 		}
@@ -501,8 +500,7 @@ bool pmk_check_header(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 	if (r == 0) {
 		pmk_log("yes.\n");
 		/* define for template */
-		record_def(pgd->htab, target, true);
-		record_val(pgd->htab, target, "1");
+		record_def_data(pgd->htab, target, DEFINE_DEFAULT);
 		label_set(pgd->labl, cmd->label, true);
 
 		/* put result in CFLAGS, CXXFLAGS or alternative variable */
@@ -523,7 +521,7 @@ bool pmk_check_header(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 			}
 		} else {
 			/* define for template */
-			record_def(pgd->htab, target, false);
+			record_def_data(pgd->htab, target, NULL);
 			label_set(pgd->labl, cmd->label, false);
 			rval = true;
 		}
@@ -603,7 +601,7 @@ bool pmk_check_lib(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 		if (required == true) {
 			return(false);
 		} else {
-			record_def(pgd->htab, target, false);
+			record_def_data(pgd->htab, target, NULL);
 			label_set(pgd->labl, cmd->label, false);
 			return(true);
 		}
@@ -670,8 +668,7 @@ bool pmk_check_lib(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 	if (r == 0) {
 		pmk_log("yes.\n");
 		/* define for template */
-		record_def(pgd->htab, target, true);
-		record_val(pgd->htab, target, "1");
+		record_def_data(pgd->htab, target, DEFINE_DEFAULT);
 		label_set(pgd->labl, cmd->label, true);
 
 		snprintf(lib_buf, sizeof(lib_buf), "-l%s", libname);
@@ -694,7 +691,7 @@ bool pmk_check_lib(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 			}
 		} else {
 			/* define for template */
-			record_def(pgd->htab, target, false);
+			record_def_data(pgd->htab, target, NULL);
 			label_set(pgd->labl, cmd->label, false);
 			rval = true;
 		}
@@ -760,7 +757,7 @@ bool pmk_check_config(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 	varname = po_get_str(hash_get(ht, KW_OPT_VARIABLE));
 	if (varname == NULL) {
 		/* if not then use default naming scheme */
-		varname = str_to_def(cfgtool);
+		varname = strdup(str_to_def(cfgtool)); /* XXX check */
 	}
 
 	bpath = hash_get(pgd->htab, PMKCONF_PATH_BIN);
@@ -811,7 +808,7 @@ bool pmk_check_config(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 		if (required == true) {
 			return(false);
 		} else {
-			record_def(pgd->htab, cfgtool, false);
+			record_def_data(pgd->htab, cfgtool, NULL);
 			label_set(pgd->labl, cmd->label, false);
 			return(true);
 		}
@@ -824,13 +821,13 @@ bool pmk_check_config(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 		if (required == true) {
 			return(false);
 		} else {
-			record_def(pgd->htab, cfgtool, false);
+			record_def_data(pgd->htab, cfgtool, NULL);
 
 			/* set path as empty for the key given by varname */
 			if (hash_update_dup(pgd->htab, varname, "") == HASH_ADD_FAIL) {
 				errorf(HASH_ERR_UPDT_ARG, varname);
 				return(false);
-			}
+		}
 
 			label_set(pgd->labl, cmd->label, false);
 			return(true);
@@ -882,7 +879,7 @@ bool pmk_check_config(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 				if (required == true) {
 					rval = false;
 				} else {
-					record_def(pgd->htab, cfgtool, false);
+					record_def_data(pgd->htab, cfgtool, NULL);
 					label_set(pgd->labl, cmd->label, false);
 					rval = true;
 				}
@@ -894,8 +891,7 @@ bool pmk_check_config(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 	}
 
 	/* record gathered data */
-	record_def(pgd->htab, cfgtool, true);
-	record_val(pgd->htab, cfgtool, "1");
+	record_def_data(pgd->htab, cfgtool, DEFINE_DEFAULT);
 	label_set(pgd->labl, cmd->label, true);
 
 	/* check if specific option exists */
@@ -1218,7 +1214,7 @@ bool pmk_check_type(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 		if (required == true) {
 			return(false);
 		} else {
-			record_def(pgd->htab, type, false);
+			record_def_data(pgd->htab, type, NULL);
 			label_set(pgd->labl, cmd->label, false);
 			return(true);
 		}
@@ -1275,8 +1271,7 @@ bool pmk_check_type(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 	if (r == 0) {
 		pmk_log("yes.\n");
 		/* define for template */
-		record_def(pgd->htab, type, true);
-		record_val(pgd->htab, type, "1");
+		record_def_data(pgd->htab, type, DEFINE_DEFAULT);
 		label_set(pgd->labl, cmd->label, true);
 		rval = true;
 	} else {
@@ -1286,7 +1281,7 @@ bool pmk_check_type(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 			errorf("failed to find type '%s'.", type);
 		} else {
 			/* define for template */
-			record_def(pgd->htab, type, false);
+			record_def_data(pgd->htab, type, NULL);
 			label_set(pgd->labl, cmd->label, false);
 			rval = true;
 		}
@@ -1345,7 +1340,7 @@ bool pmk_check_variable(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 		if (required == true) {
 			return(false);
 		} else {
-			record_def(pgd->htab, var, false);
+			record_def_data(pgd->htab, var, NULL);
 			label_set(pgd->labl, cmd->label, false);
 			return(true);
 		}

@@ -2,6 +2,8 @@
  * added support for additional defines (keyword DEFS) in CHECK_HEADER,
    CHECK_LIB, CHECK_TYPE and CHECK_VARIABLE.
  * set option keywords as defines.
+ * modified str_to_def() to use static buffer.
+ * added record_def_data() that generate both DEF__* and HAVE_* records.
 
 08 Aug 2004 mreindl
  * added -fPIC in SLLDFLAGS for gcc.

@@ -153,14 +153,15 @@ bool get_file_dir_path(char *filename, char *path, char *storage, int size) {
 */
 
 char *str_to_def(char *str) {
-	char	*newstr,
-		*p;
+	static char	 buffer[TMP_BUF_LEN];
+	char		*p;
 
-	newstr = strdup(str);
-	if (newstr == NULL)
+	if (strlcpy(buffer, str, sizeof(buffer)) >= sizeof(buffer)) {
+		/* buffer too small */
 		return(NULL);
+	}
 
-	p = newstr;
+	p = buffer;
 
 	while (*p != CHAR_EOS) {
 		switch (*p) {
@@ -178,7 +179,7 @@ char *str_to_def(char *str) {
 		p++;
 	}
 
-	return(newstr);
+	return(buffer);
 }
 
 /*
@@ -195,8 +196,6 @@ char *build_def_name(char *name) {
 
 	if (snprintf(def_str, sizeof(def_str), "DEF__%s", semidef) >= sizeof(def_str))
 		return(NULL);
-
-	free(semidef);
 
 	return(def_str);
 }
@@ -246,7 +245,62 @@ bool record_def(htable *ht, char *name, bool status) {
 	debugf("record_def() : recorded '%s' with '%s'", def_str, def_val);
 #endif
 
-	free(semidef);
+	return(true);
+}
+
+/*
+	record definition data (DEF__* and HAVE_*)
+
+	ht : hast table to store the definition
+	name : tag name 
+	value : tag value 
+
+	returns true on success
+*/
+
+bool record_def_data(htable *ht, char *name, char *value) {
+	char	*semidef,
+		 def_str[MAX_HASH_KEY_LEN],
+		 def_val[MAX_HASH_VALUE_LEN],
+		 have_str[MAX_HASH_VALUE_LEN];
+
+	semidef = str_to_def(name);
+	if (semidef == NULL)
+		return(false);
+
+	if (snprintf(def_str, sizeof(def_str), "DEF__%s", semidef) >= sizeof(def_str))
+		return(false);
+
+	if (snprintf(have_str, sizeof(def_str), "HAVE_%s", semidef) >= sizeof(def_str))
+		return(false);
+
+	if (value != NULL) {
+		/* common variable tag HAVE_* */
+		if (hash_update_dup(ht, have_str, value) == HASH_ADD_FAIL)
+			return(false);
+
+#ifdef DEBUG_FC
+		debugf("record_def_data() : recorded '%s' with '%s'", have_str, value);
+#endif
+
+		if (snprintf(def_val, sizeof(def_str), "#define %s %s", have_str, value) >= sizeof(def_str)) 
+			return(false);
+	} else {
+		if (snprintf(def_val, sizeof(def_str), "#undef %s", have_str) >= sizeof(def_str))
+			return(false);
+	}
+	
+#ifdef DEBUG_FC
+	debugf("record_def_data() : def_val = '%s'", def_val);
+#endif
+
+	/* pmk style define ID (DEF__*) */
+	if (hash_update_dup(ht, def_str, def_val) == HASH_ADD_FAIL)
+		return(false);
+#ifdef DEBUG_FC
+	debugf("record_def_data() : recorded '%s' with '%s'", def_str, def_val);
+#endif
+
 	return(true);
 }
 
@@ -279,7 +333,6 @@ bool record_val(htable *ht, char *name, char *value) {
 	debugf("record_val() : recorded '%s' with '%s'", have_str, value);
 #endif
 
-	free(semidef);
 	return(true);
 }
 
