@@ -432,7 +432,7 @@ bool depend_check(htable *lht, pmkdata *gd) {
 	pmkobj		*po;
 	unsigned int	 i;
 
-	po = hash_get(lht, "DEPEND");
+	po = hash_get(lht, KW_OPT_DEPEND);
 	if (po == NULL) {
 		/* no dependencies, check is true */
 		return(true);
@@ -457,7 +457,7 @@ bool depend_check(htable *lht, pmkdata *gd) {
 		}
 	}
 
-	hash_delete(lht, "DEPEND"); /* not really useful but save memory */
+	hash_delete(lht, KW_OPT_DEPEND); /* not really useful but save memory */
 
 	return(rval);
 }
@@ -474,7 +474,7 @@ bool require_check(htable *pht) {
 	bool	 rval;
 	pmkobj	*req;
 
-	req = hash_get(pht, "REQUIRED");
+	req = hash_get(pht, KW_OPT_REQUIRED);
 	if (req == NULL) {
 		/* by default REQUIRED is true if not specified */
 		return(true);
@@ -548,7 +548,7 @@ lgdata *get_lang(htable *pht, pmkdata *pgd) {
 	char	*lang;
 
 	/* check first if language has been provided locally */
-	lang = (char *)po_get_data(hash_get(pht, "LANG"));
+	lang = (char *)po_get_data(hash_get(pht, KW_OPT_LANG));
 	if (lang == NULL) {
 		/* check global lang if available */
 		if (pgd->lang != NULL) {

@@ -99,20 +99,32 @@
 /* parsing buffer size */
 #define PRS_BUF_LEN            1024
 
+
+/* keyword options */
+typedef struct {
+	char	**req;
+	size_t	  nbreq;
+	char	**opt;
+	size_t	  nbopt;
+} kwopt_t;
+
 /* keyword structure */
 typedef struct {
 	char	*kw;		/* keyword string */
 	int	 token,		/* associated token */
 		 type,		/* type */
 		 subtoken;	/* node specific subtoken */
+	kwopt_t	*kwo;		/* keyword specific options */
 } prskw;
 
+/* parser option structure */
 typedef struct {
 	char	 key[OPT_NAME_LEN],	/* key name */
 		 opchar;		/* operator */
 	pmkobj	*value;			/* value */
 } prsopt;
 
+/* parser cell structure */
 typedef struct s_prscell {
 	int			 token,			/* item token id */
 				 type;			/* item type */
@@ -121,17 +133,20 @@ typedef struct s_prscell {
 	struct s_prscell	*next;			/* next item */
 } prscell;
 
+/* parser node structure */
 typedef struct {
 	int	 token;		/* node specific token */
 	prscell	*first,		/* first item of this node */
 		*last;		/* last item of this node */
 } prsnode;
 
+/* parser data structure */
 typedef struct {
 	int	 linenum;		/* current line */
 	prsnode	*tree;			/* parser tree */
 } prsdata;
 
+/* parser engine structure */
 typedef struct {
         FILE	*fp;			/* file structure pointer */
 	bool	 eof;			/* end of file flag */
@@ -140,6 +155,8 @@ typedef struct {
 	htable	*phtkw;			/* command keywords */
 	int	 linenum;		/* current line */
 	long	 offset;		/* offset of the buffer window */
+	kwopt_t	*kwopts;		/* pointer to keyword def */
+	size_t	 nbreq;			/* number of required options */
 } prseng;
 
 prsdata	*prsdata_init(void);
@@ -172,6 +189,8 @@ bool	 parse_opt(prseng *, prsopt *, char *);
 bool	 parse_clopt(char *, prsopt *, char *);
 bool	 parse_node(prsdata *, prseng *peng, prscell *);
 bool	 parse_command(prsdata *, prseng *peng, prscell *);
+bool	 check_opt_avl(char *, char **, size_t);
+bool	 process_block_opt(prseng *, prsnode *, prscell *);
 bool	 parse_opt_block(prsdata *, prseng *, prscell *, bool);
 bool	 parse_cmd_block(prsdata *, prseng *, prsnode *, bool);
 bool	 parse_pmkfile(FILE *, prsdata *, prskw [], size_t);

@@ -43,8 +43,8 @@
 #include "detect.h"
 
 prskw	kw_pmkcomp[] = {
-	{"ADD_COMPILER",	PCC_TOK_ADDC,	PRS_KW_CELL},
-	{"ADD_SYSTEM",		PCC_TOK_ADDS,	PRS_KW_CELL}
+	{"ADD_COMPILER",	PCC_TOK_ADDC,	PRS_KW_CELL,	NULL},
+	{"ADD_SYSTEM",		PCC_TOK_ADDS,	PRS_KW_CELL,	NULL}
 };
 
 int	nbkwpc = sizeof(kw_pmkcomp) / sizeof(prskw);
