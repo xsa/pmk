@@ -1,3 +1,5 @@
+# snapshot 0.6.2
+
 06 Sep 2003 mipsator
  * more stuff to permit node command (i will explain later).
  * modified parse_cell() and prscell_init() to meet our current goal.
