@@ -42,6 +42,7 @@
 cmdkw	functab[] = {
 		{"DEFINE", pmk_define},
 		{"TARGET", pmk_target},
+		{"AC_COMPAT", pmk_ac_compat},
 		{"CHECK_BINARY", pmk_check_binary},
 		{"CHECK_INCLUDE", pmk_check_include},
 		{"CHECK_LIB", pmk_check_lib},
@@ -101,6 +102,23 @@ bool pmk_target(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 	}
 
 	gdata->tlist = da;
+
+	return(true);
+}
+
+/*
+	gnu autoconf compatibility
+*/
+
+bool pmk_ac_compat(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
+	char	*pstr;
+
+	pstr = hash_get(gdata->htab, "PREFIX");
+	hash_add(gdata->htab, "prefix", pstr);
+	hash_add(gdata->htab, "exec_prefix", pstr);
+
+	hash_add(gdata->htab, "bindir", "${exec_prefix}/bin");
+	hash_add(gdata->htab, "sbindir", "${exec_prefix}/sbin");
 
 	return(true);
 }
