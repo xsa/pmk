@@ -49,7 +49,8 @@
 
 #define MAXTOKENS	128	/* max slots in the paths array */
 
-#define TMP_MK_FILE	TMPDIR "/pmk_XXXXXXXX.mk"
+#define MK_FILE_EXT	".mk"
+#define TMP_MK_FILE	TMPDIR "/pmk_XXXXXXXX" MK_FILE_EXT
 
 
 /* structure to store multiple path */

@@ -135,18 +135,9 @@ bool get_make_var(char *varname, char *result, int rsize) {
 	bool	 rval;
 	char	 mfn[MAXPATHLEN],
 		 varstr[TMP_BUF_LEN];
-	int	 mfd = -1;
-
 	strlcpy(mfn, TMP_MK_FILE, sizeof(mfn));
 
-	mfd = mkstemp(mfn);
-	if (mfd == -1) {
-		/* name randomize failed */
-		errorf("Failed to randomize filename\n");
-		return(false);
-	}
-
-	mfp = fdopen(mfd, "w");
+	mfp = tmps_open(TMP_MK_FILE, "w", mfn, sizeof(mfn), strlen(MK_FILE_EXT));
 	if (mfp != NULL) {
 		/* create a tmp makefile with the following format :
 			test:
@@ -555,7 +546,7 @@ bool fcopy(char *src, char *dst, mode_t mode) {
 	close(src_fd);
 	close(dst_fd);
 
-	return(true);
+	return(rval);
 }
 
 /*
