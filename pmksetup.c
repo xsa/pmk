@@ -98,7 +98,7 @@ int main(int argc, char *argv[]) {
 
 
 	if ((ht = hash_init(MAX_CONF_OPT)) == NULL) {
-		errorf("cannot create hash table");
+		errorf("cannot create hash table.");
 		exit(1);
 	}
 
@@ -140,15 +140,16 @@ int main(int argc, char *argv[]) {
 	debugf("%s has not been deleted!", sfn);
 #else
 	if (unlink(sfn) == -1) {
-		errorf("cannot remove temporary file: %s : %s",
+		errorf("cannot remove temporary file: %s : %s.",
 			sfn, strerror(errno));
 		exit(1);	
 	}
 #endif	/* PMKSETUP_DEBUG */
 
-	 if (error != 0)
+	if (error != 0) {
+		errorf("returned code '%d' during parsing", error);
 		exit(error);
-
+	}
 	return(0);
 }
 
@@ -230,7 +231,7 @@ int parse_conf(FILE *config, htable *ht) {
 				fprintf(sfp, "%s\n", line);
 				break;
 			case '\t' :	/* TAB char */
-				errorf_line(PREMAKE_CONFIG_PATH, linenum, "syntax error"); 
+				errorf_line(PREMAKE_CONFIG_PATH, linenum, "syntax error."); 
 				return(-1);
 				break;
 			default :
@@ -276,7 +277,7 @@ int open_tmp_config(void) {
 	snprintf(sfn, sizeof(sfn), PREMAKE_CONFIG_TMP);
 
 	if ((fd = mkstemp(sfn)) == -1) {
-		errorf("could not create temporary file: %s : %s", 
+		errorf("could not create temporary file: %s : %s.", 
 			sfn, strerror(errno));
 		return(-1);
 	}
@@ -285,7 +286,7 @@ int open_tmp_config(void) {
 			unlink(sfn);
 			close(fd);
 		}	
-		errorf("cannot open temporary file: %s : %s", 
+		errorf("cannot open temporary file: %s : %s.", 
 			sfn, strerror(errno));
 		return(-1);
 	}
@@ -305,7 +306,7 @@ int open_tmp_config(void) {
 int close_tmp_config(void) {
 	if (sfp) {
 		if (fclose(sfp) < 0) {
-			errorf("cannot close temporary file: %s : %s", 
+			errorf("cannot close temporary file: %s : %s.", 
 				sfp, strerror(errno));
 			return(-1);
 		}
@@ -354,7 +355,7 @@ int get_env_vars(htable *ht) {
 
 	/* getting the environment variable PATH */
 	if ((bin_path = getenv("PATH")) == NULL) {
-		errorf("could not get the PATH environment variable");
+		errorf("could not get the PATH environment variable.");
 		return(-1);
 	}
 
@@ -393,13 +394,13 @@ int get_binaries(htable *ht) {
          * dynamic array for later use by find_file
          */
 	if ((stpath = da_init()) == NULL) {
-		errorf("cannot initalize the dynamic array"); 
+		errorf("cannot initalize the dynamic array."); 
 		return(-1);	
 	}
 
 	if (str_to_dynary(hash_get(ht, PREMAKE_KEY_BINPATH), 
 			CHAR_LIST_SEPARATOR, stpath) == 0) {
-		errorf("could not split the PATH environment variable correctly");
+		errorf("could not split the PATH environment variable correctly.");
 		da_destroy(stpath);
 		return(-1);	
 	}
@@ -441,12 +442,12 @@ int copy_config(const char *tmp_config, const char *config) {
 
 	if ((fp_t = fopen(tmp_config, "r")) == NULL) {
 		errorf("cannot open temporary configuration "
-			"file for reading: %s : %s", tmp_config, 
+			"file for reading: %s : %s.", tmp_config, 
 				strerror(errno));
 		return(-1);	
 	}
 	if ((fp_c = fopen(config, "w")) == NULL) {
-		errorf("cannot open %s for writing: %s", 
+		errorf("cannot open %s for writing: %s.", 
 			config, strerror(errno));
 
 		fclose(fp_t);	
@@ -459,7 +460,7 @@ int copy_config(const char *tmp_config, const char *config) {
 
 	if (feof(fp_t) == 0) {
 		errorf("read failure, cannot copy "
-			"%s to %s", tmp_config, config);
+			"%s to %s.", tmp_config, config);
 		rval = -1;	
 	} else
 		rval = 0;
