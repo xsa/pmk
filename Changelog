@@ -1,3 +1,6 @@
+24 Apr 2004 mipsator
+ * more stuff related to the pmksetup engine changes.
+
 15 Apr 2004 mipsator
  * added new engine for pmksetup. Some minor changes are still remaining
    but pmksetup is working fine.

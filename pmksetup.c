@@ -137,18 +137,22 @@ int main(int argc, char *argv[]) {
 					exit(EXIT_FAILURE);
 				}
 
-				/*if (hash_update_dup(ht, opt.key, pstr) == HASH_ADD_FAIL) {*/
-				/*        errorf("hash update failed.");                    */
-				/*        exit(EXIT_FAILURE);                               */
-				/*}                                                         */
-				/* XXX TODO could use prsopt structure directly, simplier */
-				if (record_data(ht, ppo->key, PMKSTP_REC_UPDT, pstr) == false) {
-					errorf("failed to record '%s'.", ppo->key);
-					prsopt_destroy(ppo);
-					exit(EXIT_FAILURE);
+				/* record prsopt structure directly, fast and simple */
+				ppo->opchar = PMKSTP_REC_UPDT;
+				if (hash_update(ht, ppo->key, ppo) == HASH_ADD_FAIL) {
+					prsopt_destroy(ppo);	
+					errorf("hash update failed.");	
+					exit(EXIT_FAILURE);		
 				}
 
-				prsopt_destroy(ppo);
+				/* XXX use record_data => cost much memory and cpu XXX            */
+				/*if (record_data(ht, ppo->key, PMKSTP_REC_UPDT, pstr) == false) {*/
+				/*        errorf("failed to record '%s'.", ppo->key);             */
+				/*        prsopt_destroy(ppo);                                    */
+				/*        exit(EXIT_FAILURE);                                     */
+				/*}                                                               */
+				/*prsopt_destroy(ppo);						  */
+
 				process_clopts = true;
 				break;
 
@@ -327,7 +331,7 @@ bool gather_data(htable *pht) {
 /*
  * write remaining data
  *
- * 	ht: hash table
+ * 	pht: hash table
  */
 void write_new_data(htable *pht) {
 	char	*val;
@@ -347,17 +351,22 @@ void write_new_data(htable *pht) {
 #endif
 			ppo = hash_get(pht, phk->keys[i]);
 			if (ppo == NULL) {
-				/* XXX */
 #ifdef PMKSETUP_DEBUG
 				debugf("write_new_data: unable to get '%s' record.", phk->keys[i]);
 #endif
+				/* XXX  exit ? */
 			} else {
 				/* check if this key is marked for being removed */
 				if (ppo->opchar != PMKSTP_REC_REMV) {
 					/* add value */
-					val = po_get_str(ppo->value); /* XXX check */ 
-					fprintf(sfp, PMKSTP_WRITE_FORMAT, phk->keys[i], CHAR_ASSIGN_UPDATE, val);
+					val = po_get_str(ppo->value);
+					if (val != NULL) {
+						fprintf(sfp, PMKSTP_WRITE_FORMAT, phk->keys[i], CHAR_ASSIGN_UPDATE, val);
 #ifdef PMKSETUP_DEBUG
+					} else {
+						debugf("write_new_data: skipping '%s', empty value.", phk->keys[i]);
+						/* XXX  exit ? */
+					}
 				} else {
 					debugf("write_new_data: skipping '%s', remove record.", phk->keys[i]);
 #endif
@@ -398,7 +407,7 @@ int keycomp(const void *a, const void *b) {
  *	return : boolean
  */
 
-bool check_opt(htable *pht, prsopt *popt) {
+bool check_opt(htable *cht, prsopt *popt) {
 	char	*recval,
 		*optval;
 	prsopt	*ppo;
@@ -442,13 +451,13 @@ bool check_opt(htable *pht, prsopt *popt) {
 						break;
 
 				}
-				hash_delete(pht, popt->key);
+				hash_delete(cht, popt->key);
 				break;
 
 			case CHAR_ASSIGN_STATIC :
 				/* static definition, stay unchanged */ 
 				fprintf(sfp, PMKSTP_WRITE_FORMAT, popt->key, CHAR_ASSIGN_STATIC, optval);
-				hash_delete(pht, popt->key);
+				hash_delete(cht, popt->key);
 				break;
 
 			default :
@@ -527,7 +536,7 @@ bool close_tmp_config(void) {
  *
  *	return:  boolean
  */
-bool get_env_vars(htable *ht) {
+bool get_env_vars(htable *pht) {
 	struct utsname	 utsname;
 	char		*bin_path;
 
@@ -536,15 +545,15 @@ bool get_env_vars(htable *ht) {
 		return(false);
 	}
 
-	if (record_data(ht, PMKCONF_OS_NAME, 'u', utsname.sysname) == false)
+	if (record_data(pht, PMKCONF_OS_NAME, 'u', utsname.sysname) == false)
 		return(false);
 	verbosef("Setting '%s' => '%s'", PMKCONF_OS_NAME, utsname.sysname);
 
-	if (record_data(ht, PMKCONF_OS_VERS, 'u', utsname.release) == false)
+	if (record_data(pht, PMKCONF_OS_VERS, 'u', utsname.release) == false)
 		return(false);
 	verbosef("Setting '%s' => '%s'", PMKCONF_OS_VERS, utsname.release);	
 	
-	if (record_data(ht, PMKCONF_OS_ARCH, 'u', utsname.machine) == false)
+	if (record_data(pht, PMKCONF_OS_ARCH, 'u', utsname.machine) == false)
 		return(false);
 	verbosef("Setting '%s' => '%s'", PMKCONF_OS_ARCH, utsname.machine);
 
@@ -561,7 +570,7 @@ bool get_env_vars(htable *ht) {
 	 */
 	char_replace(bin_path, PATH_STR_DELIMITER, CHAR_LIST_SEPARATOR);
 
-	if (record_data(ht, PMKCONF_PATH_BIN, 'u', bin_path) == false)
+	if (record_data(pht, PMKCONF_PATH_BIN, 'u', bin_path) == false)
 		return(false);
 	verbosef("Setting '%s' => '%s'", PMKCONF_PATH_BIN, bin_path);
 
@@ -576,7 +585,7 @@ bool get_env_vars(htable *ht) {
  *
  *	return: boolean 
  */ 
-bool get_binaries(htable *ht) {
+bool get_binaries(htable *pht) {
 	char	 fbin[MAXPATHLEN],	/* full binary path */
 		*pstr;
 	dynary	*stpath;
@@ -588,7 +597,7 @@ bool get_binaries(htable *ht) {
          * dynamic array for later use by find_file
          */
 
-	ppo = hash_get(ht, PMKCONF_PATH_BIN);
+	ppo = hash_get(pht, PMKCONF_PATH_BIN);
 	if (ppo == NULL) {
 		errorf("unable to get binary path record.");
 		return(false);
@@ -607,14 +616,14 @@ bool get_binaries(htable *ht) {
 	}
 
 	if (find_file(stpath, "cc", fbin, sizeof(fbin)) == true) {
-		if (record_data(ht, PMKCONF_BIN_CC, 'u', fbin) == false) {
+		if (record_data(pht, PMKCONF_BIN_CC, 'u', fbin) == false) {
 			da_destroy(stpath);
 			return(false);
 		}
 		verbosef("Setting '%s' => '%s'", PMKCONF_BIN_CC, fbin);
 	} else {
 		if (find_file(stpath, "gcc", fbin, sizeof(fbin)) == true) {
-			if (record_data(ht, PMKCONF_BIN_CC, 'u', fbin) == false) {
+			if (record_data(pht, PMKCONF_BIN_CC, 'u', fbin) == false) {
 				da_destroy(stpath);
 				return(false);
 			}
@@ -628,7 +637,7 @@ bool get_binaries(htable *ht) {
 
 	for (i = 0; i < MAXBINS; i++) {
 		if (find_file(stpath, binaries[i][0], fbin, sizeof(fbin)) == true) {
-			if (record_data(ht, binaries[i][1], 'u', fbin) == false) {
+			if (record_data(pht, binaries[i][1], 'u', fbin) == false) {
 				da_destroy(stpath);
 				return(false);
 			}
