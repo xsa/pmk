@@ -278,7 +278,7 @@ int hash_add(htable *pht, char *key, char *value) {
 		HASH_ADD_COLL : added (collision, key chained).
 		HASH_ADD_UPDT : key already exists, change value.
 
-	note : this function does not increment the cell number of the hash table.
+	NOTE : this function does not increment the cell number of the hash table.
 */
 
 int hash_add_cell(hnode *phn, hcell *phc) {
@@ -360,22 +360,41 @@ bool hash_add_array(htable *pht, hpair *php, int size) {
 	pht : hash structure
 	key : key string
 	value : value string
+	sep : separator (can be NULL)
 
-	XXX need more work
+	returns an error code.
+
+	NOTE : the separator is only used while appending, if the key doesn't exists
+		then only the value is added.
 */
 
-void hash_append(htable *pht, char *key, char *value) {
+int hash_append(htable *pht, char *key, char *value, char *sep) {
 	char	*pstr,
 		buf[MAX_HASH_VALUE_LEN];
+	int	rval,
+		s;
 
 	pstr = hash_get(pht, key);
 	if (pstr == NULL) {
-		hash_add(pht, key, value); /* XXX */
+		rval = hash_add(pht, key, value);
 	} else {
-		strlcat(buf, pstr, sizeof(buf));
-		strlcat(buf, value, sizeof(buf)); /* XXX should add a comma ? */
-		hash_add(pht, key, buf);
+		s = sizeof(buf);
+		if (strlcat(buf, pstr, s) >= s)
+			return(HASH_ADD_FAIL);
+		if (sep != NULL) {
+			/* adding separator if provided */
+			if (strlcat(buf, sep, s) >= s)
+				return(HASH_ADD_FAIL);
+		}
+		if (strlcat(buf, value, s) >= s)
+			return(HASH_ADD_FAIL);
+
+		rval = hash_add(pht, key, buf);
+		if (rval == HASH_ADD_UPDT)
+			rval = HASH_ADD_APPD;
 	}
+
+	return(rval);
 }
 
 /*

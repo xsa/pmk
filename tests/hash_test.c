@@ -28,14 +28,35 @@ int main() {
 		*val,
 		**keys = NULL;
 	htable	*hp;
-	hpair	ahp[3];
 
 	printf("Testing init\n");
 	hp = hash_init(TAB_SIZE / 2);
 	hash_set_grow(hp);
 
 	printf("Adding test key\n");
-	hash_add(hp, "prefix", "/usr/locallll");
+	hash_add(hp, "prefix", "/usr/local");
+
+	printf("Testing key : ");
+	val = hash_get(hp, "prefix");
+	if (val == NULL) {
+		printf("not found\n");
+	} else {
+		printf("found '%s'\n", val);
+	}
+
+	printf("Appending to the test key value\n");
+	hash_append(hp, "prefix", "lll", NULL);
+
+	printf("Testing key : ");
+	val = hash_get(hp, "prefix");
+	if (val == NULL) {
+		printf("not found\n");
+	} else {
+		printf("found '%s'\n", val);
+	}
+
+	printf("Appending to the test key value with a separator\n");
+	hash_append(hp, "prefix", "/opt", ",");
 
 	printf("Testing key : ");
 	val = hash_get(hp, "prefix");
