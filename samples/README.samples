@@ -10,14 +10,13 @@ This directory provides some samples of pmk use. General test can be
 done via the Makefile located in the samples directory.
 
 To run these tests you must install pmk before (see INSTALL) and then
-run 'make test' from the samples directory.
+run ``make test'' from the samples directory.
 
 
-You can send us feedback to the following email :
+You can send us feedback to the following email:
 
   pmk-users@lists.sourceforge.net
 
-Or if you have a sourceforge account on this forum :
+Or if you have a sourceforge account, on this forum:
 
   http://sourceforge.net/forum/forum.php?forum_id=326673
-
