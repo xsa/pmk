@@ -41,6 +41,7 @@
 #include <sys/utsname.h>
 
 #include "compat/pmk_string.h"
+#include "common.h"
 #include "detect_cpu.h"
 #include "detect_cpu_asm.h"
 
