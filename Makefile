@@ -49,9 +49,9 @@ CONFIG=		$(PREMAKE).conf.sample
 
 P_OBJS=		autoconf.o common.o compat.o dynarray.o func.o functool.o \
 		hash.o parse.o pmk_obj.o pathtools.o $(PREMAKE).o
-S_OBJS=		dynarray.o common.o compat.o hash.o parse.o pmk_obj.o $(SETUP).o
-SC_OBJS=	dynarray.o common.o compat.o hash.o parse.o pmk_obj.o $(SCAN).o
-I_OBJS=         dynarray.o common.o $(INST).o
+S_OBJS=		common.o compat.o dynarray.o hash.o parse.o pmk_obj.o $(SETUP).o
+SC_OBJS=	common.o compat.o dynarray.o hash.o parse.o pmk_obj.o $(SCAN).o
+I_OBJS=		common.o dynarray.o pathtools.o $(INST).o
 
 .c.o:
 	$(CC) $(PMKCFLAGS) -c $<

@@ -38,10 +38,16 @@
 #ifndef _PMK_PATHTOOLS_H_
 #define _PMK_PATHTOOLS_H_
 
+#define CHAR_DOT	'.'
+#define CHAR_EOS	'\0'
+#define CHAR_SEP	'/'
+#define STR_SEP		"/"
+
+
 bool	chkpath(char *, char *);
 bool	relpath(char *, char *, char *);
 bool	abspath(char *, char *, char *);
 bool	uabspath(char *, char *, char *);
-bool	makepath(char *);
+bool	makepath(char *, mode_t);
 
 #endif /* _PMK_PATHTOOLS_H_ */

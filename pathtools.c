@@ -51,10 +51,6 @@
 #include "compat/pmk_string.h"
 #include "pathtools.h"
 
-#define CHAR_DOT '.'
-#define CHAR_EOS '\0'
-#define CHAR_SEP '/'
-
 /*
 	check a path and resolve "./", "../" and extra '/' characters
 
@@ -304,11 +300,12 @@ bool uabspath(char *base, char *upath, char *buffer) {
 	build path if it does not exists
 
 	path : path to build
+	mode : permissions used to create new directories
 
 	return : boolean
 */
 
-bool makepath(char *path) {
+bool makepath(char *path, mode_t mode) {
 	bool		 exit = false;
 	char		 save,
 			*pstr,
@@ -332,7 +329,7 @@ bool makepath(char *path) {
 
 			/* check if the path already exists */
 			if (stat(copy, &sb) != 0) {
-				if (mkdir(copy, S_IRWXU) != 0) {
+				if (mkdir(copy, mode) != 0) {
 					free(copy);
 					return(false);
 				}

@@ -1,11 +1,16 @@
 25 Nov 2003 mipsator
- * added support for -o and -g options (owner and group).
+ * added support for -o and -g options (owner and group) of pmkinstall.
+ * added mode argument to makepath() in pathtools.
+ * updated pmk.c to provide mode to makepath().
+ * moved defines from source to header in pathtools.
+ * added support for -d option (directory creation) of pmkinstall.
+ * updated makefiles to include pathtools for pmkinstall.
 
 24 Nov 2003 mipsator
  * started to rewrite pmkinstall from scratch (much easier than making
 	xinstall portable).
- * implemented -m option (only octal values).
- * added basic support for symbolic values in -m option.
+ * implemented -m option (only octal values) of pmkinstall.
+ * added basic support for symbolic values in -m option of pmkinstall.
 
 23 Nov 2003 mipsator
  * removed oboslete definitions in kw_pmkscan[].

@@ -319,7 +319,7 @@ bool process_template(char *template, pmkdata *pgd) {
 	abspath(pgd->basedir, buf, tpath); /* XXX check ? */
 
 	/* create path if it does not exists */
-	if (makepath(tpath) == false) {
+	if (makepath(tpath, S_IRWXU | S_IRWXG | S_IRWXO) == false) {
 		errorf("cannot build template path '%s'.", tpath);
 		return(false);
 	}
