@@ -1,3 +1,6 @@
+20 Dec 2003 mipsator
+ * avoided use of srandomdev() in mkstemps as it is not portable.
+
 19 Dec 2003 mipsator
  * added mkstemps.c, mkstemps.h and pmk_unistd.h in compat directory.
  * added detection of mkstemps() in pmkcfg.sh and pmkfile.
