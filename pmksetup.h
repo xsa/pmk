@@ -53,14 +53,15 @@
 
 
 /* Look for location of some predefined binaries */
-#define MAXBINS			6	/* max slots in the binaries array */
+#define MAXBINS			7	/* max slots in the binaries array */
 static  char *binaries[MAXBINS][2] = {
 	{"ar",		PMKCONF_BIN_AR},
 	{"c++",		PMKCONF_BIN_CXX},
 	{"cat",		PMKCONF_BIN_CAT},
 	{"grep",	PMKCONF_BIN_GREP},
 	{"install",	PMKCONF_BIN_INSTALL},
-	{"ranlib",	PMKCONF_BIN_RANLIB}
+	{"ranlib",	PMKCONF_BIN_RANLIB},
+	{"pkg-config",	PMKCONF_BIN_PKGCONFIG}
 };
 
 
