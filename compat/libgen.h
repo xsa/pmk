@@ -30,30 +30,12 @@
  *
  */
 
+#ifndef _LIBGEN_H_
+#define _LIBGEN_H_
 
-#include <string.h>
+char *basename(const char *);
+char *dirname(const char *);
 
-#include "compat.h"
 
-/*
-	strlcpy
+#endif /* _LIBGEN_H_ */
 
-	Systems known to have compatible strlcpy in string.h :
-		OpenBSD		since 2.4
-		FreeBSD		since 3.3
-		NetBSD		since 1.5
-		SCO OpenServer	since 5.0.6
-		SunOs		since 5.8
-		MacOSX
-
-	Systems without strlcpy in string.h :
-		AIX		(4.3)
-		glibc based	(at least before 4 Mar 2002)
-
-	Note: Feel free to send us a notice if your system is not
-		listed here but should be.
-*/
-
-#ifndef HAVE_STRLCPY
-#include "strlcpy.h"
-#endif
