@@ -1,6 +1,7 @@
 29 Jul 2003 mipsator
  * style, descriptions and misc in pmk.
  * added pmk_check_type() and some style cosmetics in func.
+ * updated pmkfile sample to use CHECK_TYPE.
 
 28 Jul 2003 mipsator
  * improved dir_explore().
