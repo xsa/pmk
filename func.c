@@ -211,6 +211,7 @@ bool pmk_switches(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 
 bool pmk_check_binary(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 	char	*filename,
+		*varname,
 		*bpath,
 		 binpath[MAXPATHLEN];
 	bool	 required;
@@ -222,6 +223,11 @@ bool pmk_check_binary(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 	if (filename == NULL) {
 		errorf("FILENAME not assigned in label '%s'", cmd->label);
 		return(false);
+	}
+
+	varname = po_get_str(hash_get(ht, "VARNAME"));
+	if (varname == NULL) {
+		varname = str_to_def(filename);
 	}
 
 	bpath = (char *) hash_get(gdata->htab, "BIN_PATH");
@@ -236,7 +242,7 @@ bool pmk_check_binary(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 			return(false);
 		} else {
 			record_def(gdata->htab, filename, false);
-			if (hash_add(gdata->htab, str_to_def(filename), strdup("")) == HASH_ADD_FAIL) {
+			if (hash_add(gdata->htab, varname, strdup("")) == HASH_ADD_FAIL) {
 				errorf("hash error.");
 				return(false);
 			}
@@ -254,7 +260,7 @@ bool pmk_check_binary(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 		} else {
 			/* define for template */
 			record_def(gdata->htab, filename, false);
-			if (hash_add(gdata->htab, str_to_def(filename), strdup("")) == HASH_ADD_FAIL) {
+			if (hash_add(gdata->htab, varname, strdup("")) == HASH_ADD_FAIL) {
 				errorf("hash error.");
 				return(false);
 			}
@@ -266,7 +272,7 @@ bool pmk_check_binary(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 		/* define for template */
 		record_def(gdata->htab, filename, true);
 		record_val(gdata->htab, filename, "");
-		if (hash_add(gdata->htab, str_to_def(filename), strdup(binpath)) == HASH_ADD_FAIL) {
+		if (hash_add(gdata->htab, varname, strdup(binpath)) == HASH_ADD_FAIL) {
 			errorf("hash error.");
 			return(false);
 		}
