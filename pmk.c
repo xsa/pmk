@@ -61,7 +61,6 @@
 
 
 #include <ctype.h>
-#include <err.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -265,6 +264,8 @@ bool parse_opt(char *line, htable *ht) {
 		}
 		i++;
 	}
+	buf[j] = '\0'; /* terminate buf */
+
 	
 	if (keyfound == FALSE) {
 			/* key name undefined */
@@ -452,7 +453,7 @@ int main(int argc, char *argv[]) {
 	fprintf(lfd, "(%d)\n", khash->count);
 
 	if (parse(fd) == FALSE) {
-		error_line(PREMAKE_FILENAME, err_line, err_msg);
+		errorf_line(PREMAKE_FILENAME, err_line, err_msg);
 		rval = -1;
 	}
 
