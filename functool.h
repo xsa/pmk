@@ -54,6 +54,7 @@ typedef struct {
 
 
 bool	 check_bool_str(char *);
+bool	 invert_bool(bool);
 char	*bool_to_str(bool);
 bool	 check_version(char *, char *);
 bool	 get_file_path(char *, char *, char *, int);
@@ -65,5 +66,6 @@ bool	 label_check(htable *, char *);
 bool	 depend_check(htable *, pmkdata *);
 bool	 require_check(htable *);
 lgdata	*get_lang(htable *, pmkdata *);
+char	*get_comp_path(htable *, char *);
 
 #endif /* _PMK_FUNCTOOL_H_ */
