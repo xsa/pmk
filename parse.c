@@ -101,7 +101,12 @@ prsnode *prsnode_init(void) {
 }
 
 /*
-	XXX TODO
+	add a cell to a node
+
+	pnode : target node
+	pcell : cell to add
+
+	return : -
 */
 
 void prsnode_add(prsnode *pnode, prscell *pcell) {
@@ -221,7 +226,12 @@ void prscell_destroy(prscell *pcell) {
 }
 
 /*
-	XXX TODO
+	create hash table with keyword structures
+
+	kwtab : keyword table
+	nbkw : size of table
+
+	return : hash table
 */
 
 htable *keyword_hash(prskw kwtab[], int nbkw) {
@@ -264,7 +274,6 @@ char *skip_blank(char *pstr) {
 /*
 	parse obsolete
 	for pmk 0.6 compatibility
-	XXX TODO
 */
 
 char *parse_obsolete(char *pstr, char *pbuf, size_t size) {
@@ -310,7 +319,13 @@ char *parse_identifier(char *pstr, char *pbuf, size_t size) {
 }
 
 /*
-	XXX TODO
+	get bool value
+
+	pstr : current parsing cursor
+	po : storage pmk object
+	size : size of buffer
+
+	return : new parsing cursor or NULL
 */
 
 char *parse_bool(char *pstr, pmkobj *po, size_t size) {
@@ -366,7 +381,7 @@ char *parse_bool(char *pstr, pmkobj *po, size_t size) {
 	get quoted string content
 
 	pstr : current parsing cursor
-	buffer : storage buffer
+	po : storage pmk object
 	size : size of buffer
 
 	return : new parsing cursor
@@ -426,14 +441,10 @@ char *parse_quoted(char *pstr, pmkobj *po, size_t size) {
 	get list
 
 	pstr : current parsing cursor
-	buffer : storage buffer
+	po : storage pmk object
 	size : size of buffer
 
 	return : new parsing cursor
-
-	NOTE: code is especially redundant as it will create pmk object later.
-
-	XXX need more comments
 */
 
 char *parse_list(char *pstr, pmkobj *po, size_t size) {
@@ -547,9 +558,10 @@ char *parse_list(char *pstr, pmkobj *po, size_t size) {
 }
 
 /*
-	parse key (quoted or list)
+	parse key
+
 	pstr : current parsing cursor
-	buffer : storage buffer
+	po : storage pmk object
 	size : size of buffer
 
 	return : new parsing cursor or NULL
@@ -594,9 +606,10 @@ char *parse_key(char *pstr, pmkobj *po, size_t size) {
 }
 
 /*
-	parse data (quoted or list)
+	parse data
+
 	pstr : current parsing cursor
-	buffer : storage buffer
+	po : storage pmk object
 	size : size of buffer
 
 	return : new parsing cursor or NULL
@@ -662,10 +675,9 @@ char *parse_data(char *pstr, pmkobj *po, size_t size) {
 	parse a command
 
 	line : line to parse
-	command : pmkcmd structure where to store the command and label
-	pgd : global data structure (for pmkfile name)
+	phkw : keyword hash table 
 
-	return : boolean
+	return : parsing cell structure
 */
 
 prscell *parse_cell(char *line, htable *phkw) {
@@ -853,10 +865,12 @@ bool parse_opt(char *line, prsopt *popt, char *seplst) {
 }
 
 /*
-	parse the configuration file
+	parse pmkfile
 
 	fd : file descriptor
-	gdata : pmkdata struct
+	pdata : parsing data structure
+	kwtab : keyword table
+	size : size of keyword table
 
 	return : boolean
 */
