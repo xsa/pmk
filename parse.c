@@ -45,9 +45,7 @@
 #include "parse.h"
 
 
-/*
-#define DEBUG_PRS	1
-*/
+/*#define DEBUG_PRS	1*/
 
 char	parse_err[MAX_ERR_MSG_LEN];
 
@@ -214,15 +212,17 @@ prscell *prscell_init(int token, int type, int subtoken) {
 
 void prscell_destroy(prscell *pcell) {
 	if (pcell != NULL) {
-		switch(pcell->type) {
-			case PRS_KW_NODE :
-				prsnode_destroy(pcell->data);
-				break;
-			case PRS_KW_CELL :
-				hash_destroy(pcell->data);
-				break;
-			default :
-				break;
+		if (pcell->data != NULL) {
+			switch(pcell->type) {
+				case PRS_KW_NODE :
+					prsnode_destroy(pcell->data);
+					break;
+				case PRS_KW_CELL :
+					hash_destroy(pcell->data);
+					break;
+				default :
+					break;
+			}
 		}
 		free(pcell);
 	}
