@@ -373,23 +373,23 @@ bool label_check(htable *lht, char *name) {
 
 bool depend_check(htable *lht, pmkdata *gd) {
 	bool	 rval = true;
-	char	*deplst,
-		*fdep;
+	char	*fdep;
 	dynary	*da;
 	int	 i;
+	pmkobj	*po;
 
-	deplst = (char *) po_get_data(hash_get(lht, "DEPEND"));
-	if (deplst == NULL) {
+	po = hash_get(lht, "DEPEND");
+	if (po == NULL) {
 		/* no dependencies, check is true */
 		return(true);
 	}
 
-	da = da_init();
-	if (da == NULL)
+	da = po_get_list(po);
+	if (da == NULL) {
+		/* DEPEND is not a list */
+		snprintf(gd->errmsg, sizeof(gd->errmsg), "Syntax error in DEPEND !");
 		return(false);
-
-	/* get the label dependencies in a dynary */
-	str_to_dynary(deplst, CHAR_LIST_SEPARATOR, da);
+	}
 
 	/* check labels one by one */
 	for (i = 0 ; (i < da_usize(da)) && (rval == true) ; i++) {
@@ -400,7 +400,7 @@ bool depend_check(htable *lht, pmkdata *gd) {
 		}
 	}
 
-	da_destroy(da);
+	da_destroy(da); /* not really useful but save memory */
 
 	return(rval);
 }
