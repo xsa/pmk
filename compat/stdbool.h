@@ -2,6 +2,7 @@
 
 /*
  * Copyright (c) 2003 Damien Couderc
+ * Copyright (c) 2004 Martin Reindl
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,8 +44,21 @@
 #ifndef _STDBOOL_H_
 #define _STDBOOL_H_
 
+/*
+	Sun Forte 5.4 C compiler and previous versions give out a
+	"warning: _Bool is a keyword in ISO C99"
+	message when we use typedef_. In addition, every Sun Pro C compiler
+	which conforms to ANSI C (and therefore sets __STDC__ to 1) shows the
+	same behaviour. We avoid this by defining _Bool in a macro in these
+	cases.
+*/
+
 #ifndef HAVE__BOOL
+#	if defined __SUNPRO_C && (__SUNPRO_C < 0x550 || __STDC__ == 1)
+#		define _Bool unsigned char
+#	else
 typedef unsigned char _Bool;
+#	endif
 #endif
 
 #define bool _Bool
