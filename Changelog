@@ -1,3 +1,9 @@
+# snapshot 0.8.1-s6
+
+27 Aug 2004 mipsator
+ * fixed a bug introduced by an improvement while fixing config file
+   parsing.
+
 # snapshot 0.8.1-s5
 
 27 Aug 2004 mipsator
