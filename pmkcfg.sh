@@ -38,9 +38,6 @@ template="compat/compat.h.in"
 compat="compat/compat.h"
 temporary="compat/compat.tmp"
 
-def="#define"
-udef="#undef"
-
 #
 # functions
 #
@@ -59,10 +56,10 @@ int main() {
 EOF
 
 	if $CC -o $testbin $testfile >/dev/null 2>&1; then
-		do_sed "$def" "$include"
+		do_sed "def" "$include"
 		echo "yes"
 	else
-		do_sed "$udef" "$include"
+		do_sed "udef" "$include"
 		echo "no"
 	fi
 	rm -f $testfile $testbin
@@ -84,22 +81,25 @@ int main() {
 EOF
 
 	if $CC -o $testbin $testfile >/dev/null 2>&1; then
-		do_sed "$def" "$function"
+		do_sed "def" "$function"
 		echo "yes"
 	else
-		do_sed "$udef" "$function"
+		do_sed "udef" "$function"
 		echo "no"
 	fi
 	rm -f $testfile $testbin
 }
 
 do_sed() {
-	sed_str="$1"
 	sed_uc=`echo "$2" | tr [a-z] [A-Z] | tr . _`
-	sed_tag="@DEF_$sed_uc@"
+	case $1 in
+		def)	sed_str="#define HAVE_$sed_uc 1";;
+		udef)	sed_str="#undef HAVE_$sed_uc";;
+	esac
+	sed_tag="@DEF__$sed_uc@"
 
 	cp $compat $temporary
-	cat $temporary | sed -e s/$sed_tag/$sed_str/ > $compat
+	cat $temporary | sed -e "s/$sed_tag/$sed_str/" > $compat
 	rm -f $temporary
 }
 
