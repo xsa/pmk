@@ -80,6 +80,7 @@
 #define PRS_ERR_OVERFLOW	"line too long."
 #define PRS_ERR_SYNTAX		"syntax error."
 #define PRS_ERR_TRAILING	"trailing garbage after value."
+#define PRS_ERR_PRSFILL		"parsing buffer could not be filled."
 #define PRS_ERR_UNKNOWN		"unknown error."
 
 /* keyword types */
@@ -145,6 +146,7 @@ void	 prsdata_destroy(prsdata *);
 prseng	*prseng_init(void);
 void	 prseng_destroy(prseng *);
 prsnode	*prsnode_init(void);
+void	 prsnode_add(prsnode *, prscell *);
 void	 prsnode_destroy(prsnode *);
 prscell	*prscell_init(int, int, int);
 void	 prscell_destroy(prscell *);
