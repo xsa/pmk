@@ -56,24 +56,26 @@ typedef struct {
 FILE	*pmk_log_fp;
 
 
-bool get_line(FILE *, char *, int);
-int parse_conf_line(char *, int, cfg_opt *);
+bool	get_line(FILE *, char *, int);
+int	parse_conf_line(char *, int, cfg_opt *);
 
-bool env_to_opt(char *, pmkcmdopt *);
-bool get_make_var(char *, char *, int);
+bool	env_to_opt(char *, pmkcmdopt *);
+bool	get_make_var(char *, char *, int);
 
-bool str_to_dynary(char *, char, dynary *);
-bool find_file(dynary *, char *, char *, int);
+bool	str_to_dynary(char *, char, dynary *);
+bool	find_file(dynary *, char *, char *, int);
 
-void errorf(const char *, ...);
-void errorf_line(char *, int, const char *, ...);
+void	errorf(const char *, ...);
+void	errorf_line(char *, int, const char *, ...);
 
-void debugf(const char *, ...);
+void	debugf(const char *, ...);
 
-bool pmk_log_open(char *);
-void pmk_log_close(void);
-bool pmk_log(const char *, ...);
+bool	pmk_log_open(char *);
+void	pmk_log_close(void);
+bool	pmk_log(const char *, ...);
 
-bool copy_text_file(char *, char *);
+bool	copy_text_file(char *, char *);
+
+char	*relpath(char *, char *);
 
 #endif /* _PMK_COMMON_H_ */
