@@ -51,7 +51,7 @@
 #include "premake.h"
 
 
-/*#define AC_DEBUG	1*/
+#define AC_DEBUG	1
 
 
 /*
@@ -88,11 +88,17 @@ bool ac_parse_config(pmkdata *pgd) {
 		errorf("failed to compute absolute path for '%s' (srcdir).", fpath);
 		return(false);
 	}
+#ifdef AC_DEBUG
+	debugf("computed fsrc = '%s'", fsrc);
+#endif
 
 	if (abspath(pgd->basedir, fpath, fname) == false) {
 		errorf("failed to compute absolute path for '%s' (basedir).", fpath);
 		return(false);
 	}
+#ifdef AC_DEBUG
+	debugf("computed fname = '%s'", fname);
+#endif
 
 	fp_in = fopen(fsrc, "r");
 	if (fp_in == NULL) {
@@ -185,11 +191,13 @@ bool ac_parse_config(pmkdata *pgd) {
 		return(false);
 	}
 
-	/* erase orig and copy new one */
-	if (unlink(fname) == -1) {
-		errorf(ERRMSG_REMOVE, fname, strerror(errno));
-		return(false);
-	}
+	/*
+		Try to erase original file if it exists.
+		If build directory is different than source directory
+		then there is nothing to delete (so we don't check the result).
+	*/
+	unlink(fname);
+	/* copy new one */
 	rval = copy_text_file(ftmp, fname);
 
 	if (unlink(ftmp) == -1) {
