@@ -30,6 +30,7 @@
  *
  */
 
+
 /* include needed for MAXPATHLEN */
 #ifdef __OpenBSD__
 #	include <sys/param.h>
@@ -98,10 +99,20 @@
 
 #include "pmk.h"
 #include "hash.c"
+#include "func.c"
 
 int	cur_line = 0,
 	err_line = 0;
 char	err_msg[MAX_ERR_MSG_LEN] = "";
+
+/* keyword data */
+htable		*khash;
+cmdkw	functab[] = {
+	{"DEFINE", pmk_define},
+	{"CHECK_BINARY", pmk_check_binary},
+	{"CHECK_INCLUDE", pmk_check_include},
+	{"CHECK_LIB", pmk_check_lib}
+};
 
 
 /*
@@ -138,9 +149,32 @@ bool getline(FILE *fd, char *line, int lsize) {
 */
 
 bool process_cmd(pmkcmd *cmd, htable *ht) {
-	/* XXX */
-	printf("[DEBUG] processing command : %s\n", cmd->name);
+	char	*aidx;
 
+	printf("[DEBUG] processing command : %s\n", cmd->name); /* XXX */
+	aidx = hash_get(khash, cmd->name);
+	if (aidx != NULL) {
+		/* XXX */
+		printf("[DEBUG] kw index = %d\n", atoi(aidx));
+	}
+
+	return(TRUE);
+}
+
+/*
+	check if the given string is a valid command
+
+	cmdname : command to check
+
+	returns TRUE is command is valid
+*/
+
+bool check_cmd(char *cmdname) {
+	if (hash_get(khash, cmdname) == NULL) {
+		err_line = cur_line;
+		snprintf(err_msg, sizeof(err_msg), "Unknown command %s", cmdname);
+		return(FALSE);
+	}
 	return(TRUE);
 }
 
@@ -180,6 +214,10 @@ bool parse_cmd(char *line, pmkcmd *command) {
 			} else {
 				/* end of command name */
 				buf[j] = '\0';
+				if (check_cmd(buf) == FALSE) {
+					/* line number and error message already set */
+					return(FALSE);
+				}
 				strncpy(command->name, buf, MAX_CMD_NAME_LEN);
 				cmd_found = TRUE;
 				j = 0;
@@ -202,6 +240,10 @@ bool parse_cmd(char *line, pmkcmd *command) {
 	if (cmd_found == FALSE) {
 		/* command without label */
 		buf[j] = '\0';
+		if (check_cmd(buf) == FALSE) {
+			/* line number and error message already set */
+			return(FALSE);
+		}
 		strncpy(command->name, buf, MAX_CMD_NAME_LEN);
 		strncpy(command->label, "", MAX_LABEL_NAME_LEN);
 	} else {
@@ -320,12 +362,10 @@ bool parse(FILE *fd) {
 					return(FALSE);
 				}
 
-				/* XXX actually just parse option without adding it to cmd */
 				if (parse_opt(buf, tabopts) == FALSE) {
 					/* line number and error message already set */
 					hash_destroy(tabopts);
 					return(FALSE);
-				} else {
 				}
 				break;
 		}
@@ -359,6 +399,10 @@ int main(int argc, char *argv[]) {
 		*cfd,
 		*lfd;
 	char	cf[MAXPATHLEN];
+	char	idxstr[4]; /* max 999 cmds, should be enough :) */
+	int	rval = 0,
+		i,
+		s;
 
 
 	if (argc != 1) {
@@ -393,9 +437,25 @@ int main(int argc, char *argv[]) {
 		fclose(cfd);
 	}
 
+	fprintf(lfd, "Hashing pmk keywords ");
+	s = sizeof(functab) / sizeof(cmdkw); /* compute number of keywords */
+	khash = hash_init(s);
+	if (khash != NULL) {
+		/* fill keywords hash */
+		for(i = 0 ; i < s ; i++) {
+			snprintf(idxstr, 4, "%d", i);
+			/* XXX
+			printf("[DEBUG] add '%s' to keyword hash (%s)\n", functab[i].kw, idxstr);
+			*/
+			hash_add(khash, functab[i].kw, idxstr);
+		}
+	}
+	/* print number of hashed command */
+	fprintf(lfd, "(%d)\n", khash->count);
+
 	if (parse(fd) == FALSE) {
 		printf("Error line %d : %s.\n", err_line, err_msg);
-		return(-1);
+		rval = -1;
 	}
 
 	fprintf(lfd, "End of log.\n");
@@ -407,5 +467,10 @@ int main(int argc, char *argv[]) {
 	fflush(fd);
 	fclose(fd);
 
-	return(0);
+	/* clear cmd hash */
+	if (khash != NULL) {
+		hash_destroy(khash);
+	}
+
+	return(rval);
 }
