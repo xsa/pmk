@@ -1,3 +1,9 @@
+/* $Id$ */
+
+/* Public Domain */
+
+/* path tools test */
+
 #include <stdio.h>
 #include "../pathtools.c"
 

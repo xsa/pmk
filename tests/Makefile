@@ -23,23 +23,26 @@ config:
 		exit 1; \
 	fi
 
-hash: config hash_test.o
-	$(CC) -o hash_test $(LDFLAGS) hash_test.o
+comp: config comp_test.o
+	$(CC) -o comp_test $(LDFLAGS) comp_test.o
 
 dynary: config da_test.o
 	$(CC) -o da_test $(LDFLAGS) da_test.o
 
-path: config path_test.o
-	$(CC) -o path_test $(LDFLAGS) path_test.o
-
-parser: config parser_test.o
-	$(CC) -o parser_test $(LDFLAGS) parser_test.o
+hash: config hash_test.o
+	$(CC) -o hash_test $(LDFLAGS) hash_test.o
 
 mkvar: config mkvar_test.o
 	$(CC) -o mkvar_test $(LDFLAGS) mkvar_test.o
 
-comp: config comp_test.o
-	$(CC) -o comp_test $(LDFLAGS) comp_test.o
+parser: config parser_test.o
+	$(CC) -o parser_test $(LDFLAGS) parser_test.o
+
+path: config path_test.o
+	$(CC) -o path_test $(LDFLAGS) path_test.o
+
+pkgconfig: config pkgconfig_test.o
+	$(CC) -o pkgconfig_test $(LDFLAGS) pkgconfig_test.o
 
 clean:
 	rm -f *.o *_test *.core
