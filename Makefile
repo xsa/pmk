@@ -4,7 +4,7 @@ CC?=		cc
 INSTALL?=	install
 
 CFLAGS?=
-CFLAGS+=	-Wall
+CFLAGS+=	-Wall -Werror
 #CFLAGS+=	-DSYSCONFDIR=\"/etc/\"
 
 LDFLAGS?=
