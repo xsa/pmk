@@ -64,8 +64,8 @@ extern uint32_t	x86_cpu_reg_edx;
 */
 
 #if defined(ARCH_ALPHA)
-extern unsigned long	alpha_exec_implver(void);
-extern unsigned long	alpha_exec_amask(void);
+uint64_t	alpha_exec_implver(void);
+uint64_t	alpha_exec_amask(void);
 
 #endif /* ARCH_ALPHA */
 
