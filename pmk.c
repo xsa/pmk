@@ -160,9 +160,9 @@ debugf("CFLAGS = '%s'", buf);
 
 	get_make_var("CXXFLAGS", buf, sizeof(buf));
 #ifdef PMK_DEBUG
-debugf("CFLAGS = '%s'", buf);
+debugf("CXXFLAGS = '%s'", buf);
 #endif
-	hash_add(pht, "CFLAGS", strdup(buf)); /* XXX check ? */
+	hash_add(pht, "CXXFLAGS", strdup(buf)); /* XXX check ? */
 
 	get_make_var("CPPFLAGS", buf, sizeof(buf));
 #ifdef PMK_DEBUG
@@ -195,6 +195,10 @@ debugf("DEBUG = '%s'", buf);
 	pstr = hash_get(pht, PMKCONF_BIN_CC);
 	if (pstr != NULL)
 		hash_add(pht, "CC", strdup(pstr));
+
+	pstr = hash_get(pht, PMKCONF_BIN_CXX);
+	if (pstr != NULL)
+		hash_add(pht, "CXX", strdup(pstr));
 
 	pstr = hash_get(pht, PMKCONF_BIN_CPP);
 	if (pstr != NULL)
