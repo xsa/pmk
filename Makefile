@@ -131,7 +131,14 @@ deinstall:
 	$(SUDO) rm -f $(DESTDIR)$(BINDIR)/$(SCAN)
 	$(SUDO) rm -f $(DESTDIR)$(BINDIR)/$(INST)
 	$(SUDO) rm -f $(DESTDIR)$(SBINDIR)/$(SETUP)
-	$(SUDO) rm -rf $(DESTDIR)$(DATADIR)
+	$(SUDO) rm -f $(DESTDIR)$(DATADIR)/$(SAMPLE)
+	$(SUDO) rm -f $(DESTDIR)$(DATADIR)/$(CONFIG)
+	$(SUDO) rm -f $(DESTDIR)$(DATADIR)/pmkscan.dat
+	$(SUDO) rm -f $(DESTDIR)$(DATADIR)/pmkcomp.dat
+	$(SUDO) rm -f $(DESTDIR)$(DATADIR)/pmkcfgtool.dat
+	@if [ ! -f cfgum ]; then \
+		$(SUDO) rm -rf $(DESTDIR)$(DATADIR); \
+	fi
 	$(SUDO) rm -f $(DESTDIR)$(MANDIR)/man1/$(PREMAKE).1
 	$(SUDO) rm -f $(DESTDIR)$(MANDIR)/man1/$(SCAN).1
 	$(SUDO) rm -f $(DESTDIR)$(MANDIR)/man1/$(INST).1
