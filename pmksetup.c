@@ -36,7 +36,6 @@
 #include <sys/types.h>
 #include <sys/utsname.h>
 
-#include <dirent.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -59,11 +58,8 @@ int main(int argc, char *argv[]) {
 
 	if(config != NULL) {
 		if ((f = fopen(config, "r")) != NULL) {
-
-#ifdef PMKSETUP_DEBUG
 			debugf("Reading configuration file: %s", 
-				PREMAKE_CONFIG_PATH); 
-#endif	/* PMKSETUP_DEBUG */
+						PREMAKE_CONFIG_PATH); 
 
                 	if ((ht = hash_init(MAX_CONF_OPT)) == NULL) {
                         	errorf("cannot create hash table");
@@ -132,8 +128,9 @@ int create_tmp_config(void) {
 
 int get_env_vars(FILE *f) { 
 	int	j;
-	char	*bin_path, *tpath, buf[MAXPATHLEN];
+	char	*bin_path, buf[MAXPATHLEN];
 	struct	utsname	utsname;
+	mpath	stpath;
 
 	if (uname(&utsname) == -1) {
 		errorf("uname");
@@ -141,6 +138,15 @@ int get_env_vars(FILE *f) {
 	}
 	if ((bin_path = getenv("PATH")) == NULL) {
 		errorf("could not get the PATH environment variable");
+		exit(1);
+	}
+
+	/* 
+	 *splitting the PATH variable and storing in a struct 
+	 * for later use by find_file
+	 */ 
+	if ((strsplit(bin_path, &stpath, STR_DELIMITER)) == -1) {
+		errorf("could not split the PATH correctly");
 		exit(1);
 	}
 
@@ -156,8 +162,7 @@ int get_env_vars(FILE *f) {
 	 */
 	debugf("Looking for needed binaries...");
 	for (j = 0; j < MAXBINS; j++) {
-		tpath = strdup(bin_path);
-		if (find_file(tpath, binaries[j], buf, MAXPATHLEN) == 0) {
+		if (find_file(&stpath, binaries[j], buf, MAXPATHLEN) == 0) {
 			fprintf(stderr, "Looking for %s => %s\n", 
 				binaries[j], buf);
 		}
@@ -167,63 +172,4 @@ int get_env_vars(FILE *f) {
 		}
 	}
 	return(0);
-}
-
-/* 
- * find a file in the binary path; 
- * atm it just prints the path to the binary we are looking for.
- *
- *	bin_path : path style string
- *	file_name : name of the file to search
- *	file_path : storage of the full path if find
- *	fp_len : size of the storage
- */
-
-int find_file(char *bin_path, char *file_name, char *file_path, int fp_len) {
- 	DIR	*dirp;
-	struct	dirent	*dp;
-
-	int	i, s;
-	char	*path[MAXTOKENS];  
-
-	s = strsplit(bin_path, path, MAXTOKENS);
-
-	for (i = 0; i < s; i++) {
-		if (!(dirp = opendir(path[i]))) {
-			errorf("could not open directory: %s", path[i]);
-			exit(1);
-		}
-		while ((dp = readdir(dirp)) != NULL) {
-			if (dp->d_ino == 0)
-				continue;
-						
-			if ((strncmp(dp->d_name, file_name, fp_len) == 0) &&  
-				(snprintf(file_path, fp_len, "%s/%s", 
-					path[i], file_name) < fp_len)) {
-						closedir(dirp);
-						return(0);
-			}
-		}
-		closedir(dirp);
-	}
-	return(-1);
-}
-
-
-/* 
- * split the $PATH environment variable using PATH_DELIMITER as 
- * the string delimiter.
- * Returns the number of elements of the array.
- */
-
-int strsplit(char *path, char **tokens, int tsize) {
-	int	i = 0;
-	char	*p, *last;
-
-	for ((p = strtok_r(path, PATH_DELIMITER, &last)); p;
-		(p = strtok_r(NULL, PATH_DELIMITER, &last)), i++) {
-			if (i < tsize -1)
-				tokens[i] = p;
-	}
-	return(i);
 }

@@ -34,8 +34,7 @@
 #define _PMKSETUP_H_
 
 
-#define PATH_DELIMITER	":"	/* string delimiter of the $PATH variable */    
-#define MAXTOKENS	128	/* max slots in the paths array */
+#define STR_DELIMITER	":"	/* string delimiter of the $PATH variable */    
 #define MAXBINS		5	/* max slots in the binaries array */
 
 
@@ -48,9 +47,6 @@ static  char *binaries[MAXBINS] = {
 /* Local functions declaration */
 int	create_tmp_config(void);
 int	get_env_vars(FILE *);
-int	find_file(char *, char *, char *, int);
-int	strsplit(char *, char **, int);
-
 
 
 #endif	/* _PMKSETUP_H_ */

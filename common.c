@@ -33,9 +33,11 @@
 #define EMPTY_OPT_VALUE ""
 
 #include <sys/param.h>
+
+#include <dirent.h>
 #include <stdarg.h>
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 
@@ -167,6 +169,71 @@ bool get_make_var(char *varname, char *result, int rsize) {
 
 	return(rval);
 }
+
+
+/*              
+ * split strings using 'delimiter'
+ * 
+ *	str: string to split
+ *	stpath: pointer to the struct where we'll store the paths 
+ *	delimiter: string delimiter(s)
+ */       
+int strsplit(char *str, mpath *stpath, char *delimiter) {
+	int	i = 0;
+	char	*p, *last;
+
+	for ((p = strtok_r(str, delimiter, &last)); p;
+		(p = strtok_r(NULL, delimiter, &last)), i++) {
+			if (i < MAXTOKENS -1)
+				stpath->pathlst[i] = p;
+			else
+				return(-1);
+	}
+	stpath->pathnum = i;
+	return(0);
+}
+
+
+
+/* 
+ * find a file in a specified path;
+ *
+ *      stp : struct where we gather the path information from 
+ *      file_name : name of the file to search
+ *      file_path : storage of the full path if find
+ *      fp_len : size of the storage, usually MAXPATHLEN
+ */
+int find_file(mpath *stp, char *file_name, char *file_path, int fp_len) { 
+	DIR	*dirp;
+	struct	dirent	*dp;
+	int	i, s;
+	char	**path;
+
+	/* XXX add more checks later */
+	s = stp->pathnum;
+	path = stp->pathlst;
+
+	for (i = 0; i < s; i++) {
+		if (!(dirp = opendir(path[i]))) {
+			errorf("could not open directory: %s", path[i]);
+			return(-1);
+		}
+		while ((dp = readdir(dirp)) != NULL) {
+			if (dp->d_ino == 0)
+				continue;
+
+			if ((strncmp(dp->d_name, file_name, fp_len) == 0) &&
+				(snprintf(file_path, fp_len, "%s/%s",
+					path[i], file_name) < fp_len)) {
+						closedir(dirp);
+						return(0);
+			}
+		}
+		closedir(dirp);
+	}
+	return(-1);
+}
+
 
 
 /*
