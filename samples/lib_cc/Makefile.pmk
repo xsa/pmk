@@ -1,0 +1,85 @@
+# $Id$
+
+CXX=		@BIN_CXX@
+AR=		@BIN_AR@
+RANLIB=		@BIN_RANLIB@
+
+ARFLAGS=	cr
+SLCFLAGS=	@SLCFLAGS@
+SLLDFLAGS=	@SLLDFLAGS@
+
+NAME=		hello
+LIBNAME=	lib$(NAME)
+MAJOR=		@LIBPMK_MAJ@
+MINOR=		@LIBPMK_MIN@
+
+LIB_STATIC=	$(LIBNAME).a
+LIB_SHARED=	@LIBNAME@
+LIB_SHARED_V=	@LIBNAMEV@
+
+B_OBJS=		$(NAME).o
+L_OBJS=		$(LIBNAME).o
+
+
+all: show $(LIB_STATIC) $(LIB_SHARED) $(NAME) run_$(NAME) clean
+
+.c.o:
+	@echo ""
+	@echo "-> Building object file"
+	$(CXX) $(CFLAGS) $(SLCFLAGS) -c $<
+
+show:
+	@echo ""
+	@echo "-> Dumping template"
+	@echo ""
+	@echo "Makefile.pmk:"
+	@echo "--dump-begin----------------------------"
+	@cat Makefile.pmk
+	@echo "--dump-end------------------------------"
+	@echo "-> Dumping generated file"
+	@echo ""
+	@echo "Makefile:"
+	@echo "--dump-begin----------------------------"
+	@cat Makefile
+	@echo "--dump-end------------------------------"
+
+$(LIB_STATIC): $(L_OBJS)
+	@echo ""
+	@echo "-> Building static lib"
+	@echo ""
+	$(AR) $(ARFLAGS) $@ $(L_OBJS)
+	$(RANLIB) $@
+
+$(LIB_SHARED): $(L_OBJS)
+	@echo ""
+	@echo "-> Building shared lib"
+	@echo ""
+	$(CXX) $(SLLDFLAGS) -o $@ $(L_OBJS)
+	cp $(LIB_SHARED) $(LIB_SHARED_V)
+
+$(NAME):
+	@echo ""
+	@echo "-> Building binary"
+	@echo ""
+	$(CXX) -o $(NAME) -L. -lhello++ $(NAME).cc
+
+run_$(NAME):
+	@echo ""
+	@echo "-> Running program"
+	@echo ""
+	@echo "LD_LIBRARY_PATH=. hello"
+	@echo ""
+	@echo "--exec-begin----------------------------"
+	@LD_LIBRARY_PATH=. hello
+	@echo "--exec-end------------------------------"
+
+clean:
+	@echo ""
+	@echo "-> Cleaning ..."
+	@echo ""
+	rm -f $(B_OBJS) $(L_OBJS) 
+	rm -f $(LIB_STATIC) $(LIB_SHARED) $(LIB_SHARED_V)
+	rm -f $(NAME)
+	rm -f *.log Makefile
+	@echo "Done."
+

@@ -1,0 +1,27 @@
+# $Id$
+# pmkfile example
+
+# settings
+SETTINGS {
+	# set default language
+	LANG = "C++"
+	# target files 
+	TARGET = ("Makefile.pmk")
+	# detect compiler
+	DETECT = ("CXX")
+}
+
+DEFINE {
+	LIBPMK_NAME = "hello++"
+	LIBPMK_MAJ = "1"
+	LIBPMK_MIN = "2"
+}
+
+
+BUILD_SHLIB_NAME {
+	NAME = "$LIBPMK_NAME"
+	MAJOR = "$LIBPMK_MAJ"
+	MINOR = "$LIBPMK_MIN"
+	VERSION_NONE = "LIBNAME"
+	VERSION_FULL = "LIBNAMEV"
+}
