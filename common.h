@@ -78,5 +78,6 @@ bool pmk_log_open(char *);
 void pmk_log_close(void);
 bool pmk_log(const char *, ...);
 
+bool copy_text_file(char *, char *);
 
 #endif /* _PMK_COMMON_H_ */
