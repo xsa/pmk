@@ -165,8 +165,8 @@ x86_check_cpuid_flag:
 	.globl x86_exec_cpuid
 
 x86_exec_cpuid:
-	/* get function number */
-	movl	4(%rsp),%eax
+	/* get function number (arg0 in rdi register) */
+	movq	%rdi,%rax
 
 	pushq	%rbx
 	pushq	%rcx
