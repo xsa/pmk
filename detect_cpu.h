@@ -53,7 +53,7 @@
 #define LIST_X86_CPU_MODEL	3
 #define LIST_X86_CPU_CLASS	4
 
-#define	PMK_ARCH_UNKNOW		0
+#define	PMK_ARCH_UNKNOWN		0
 #define	PMK_ARCH_X86_32		1
 
 #define	PMK_ARCH_STR_UNKNOWN	"unknown"
