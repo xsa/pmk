@@ -167,9 +167,17 @@ bool parse_cmd(char *line, pmkcmd *command) {
 			}
 		} else {
 			if (line[i] != ')') {
-				/* needed to take care of quotation marks ? */
-				buf[j] = line[i];
-				j++;
+				if (isalpha(line[i]) == 0 && line[i] != '_') {
+					/* invalid character */
+					err_line = cur_line;
+					snprintf(err_msg, sizeof(err_msg), "Invalid label name");
+					return(FALSE);
+					
+				} else {
+					/* needed to take care of quotation marks ? */
+					buf[j] = line[i];
+					j++;
+				}
 			} else {
 				buf[j] = '\0';
 				strncpy(command->label, buf, MAX_LABEL_NAME_LEN);
@@ -234,8 +242,15 @@ bool parse_opt(char *line, htable *ht) {
 				keyfound = TRUE;
 				j = 0;
 			} else {
-				buf[j] = line[i];
-				j++;
+				if (isalpha(line[i]) == 0) {
+					/* invalid character */
+					err_line = cur_line;
+					snprintf(err_msg, sizeof(err_msg), "Malformed option");
+					return(FALSE);
+				} else {
+					buf[j] = line[i];
+					j++;
+				}
 			}
 		} else {
 			buf[j] = line[i];

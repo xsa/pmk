@@ -60,10 +60,10 @@ bool get_line(FILE *fd, char *line, int lsize) {
 			/* remove trailing newline */
 			*p= '\0';
 		}
-		return TRUE;
+		return(TRUE);
 	} else {
-		/* XXX test eof ? */
-		return FALSE;
+		/* reached eof or error */
+		return(FALSE);
 	}
 }
 
