@@ -28,6 +28,7 @@ common:
 	+	update README and INSTALL
 	~!	new samples
         	        - add a sample that show architecture data from pmk
+	-R	handle allocation through garbage collector.
 
 
 pmk:
@@ -43,7 +44,7 @@ pmk:
 
 pmksetup:
 -----------------------------------------------------------------------
-	~	cpu identification
+	~.	cpu identification
 			- ppc support (priviledged)
 			- sparc support
 			- sparc64 support (priviledged)
@@ -51,7 +52,7 @@ pmksetup:
 	-	cpu optimisation for compiler 
 	-	option to append to variable of pmk.conf
 	!	clean temporary files on error
-	-	missing checks :
+	-.	missing checks :
 			- char unsigned (pmk ?)
 			- long double (pmk ?)
 			- better check for install ?
@@ -60,9 +61,9 @@ pmksetup:
 
 pmkscan
 -----------------------------------------------------------------------
-	-	add more entries in pmkscan.dat
-	-	improve engine to detect types
-
+	-R?	add more entries in pmkscan.dat
+	-R	improve engine to detect types
+	-R	generate makefile template from the scanned sources
 
 pmkinstall
 -----------------------------------------------------------------------
@@ -71,7 +72,7 @@ pmkinstall
 
 pmkshgen
 -----------------------------------------------------------------------
-mips	~.	make specs, this tool should handle install and
+mips	~...	make specs, this tool should handle install and
 		deinstall operations (post 0.8)
 
 pmkpc
@@ -89,5 +90,5 @@ pmkpc
 
 misc
 -----------------------------------------------------------------------
-	-	generate template config header from pmkfile
+	-R	generate template config header from pmkfile (pmkscan ?)
 

@@ -57,6 +57,9 @@
 #define MKVAR_FMT_CMD	"make -f %s >/dev/null 2>&1"
 #define EMPTY_OPT_VALUE ""
 
+/*
+#define DEBUGF(fmt, arg...)	fprintf(stderr, "DEBUGF File '%s', Line %d: " fmt "\n", __FILE__, __LINE__, ## arg)
+*/
 
 /* structure to store multiple path */
 typedef struct {

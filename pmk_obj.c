@@ -41,13 +41,18 @@
 #include "pmk_obj.h"
 
 
-/*
-	make bool object
+/*************
+ po_mk_bool()
 
-	value : boolean to objectify
+ DESCR
+	make a bool object
 
-	return : object
-*/
+ IN
+	value: boolean to objectify
+
+ OUT
+	object or NULL if failed
+***********************************************************************/
 
 pmkobj *po_mk_bool(bool value) {
 	bool	*pb;
@@ -69,13 +74,18 @@ pmkobj *po_mk_bool(bool value) {
 	return(po);
 }
 
-/*
+/************
+ po_mk_str()
+
+ DESCR
 	make string object
 
-	str : string to objectify
+ IN
+	str: string to objectify
 
-	return : object
-*/
+ OUT
+	object or NULL if failed
+***********************************************************************/
 
 pmkobj *po_mk_str(char *str) {
 	pmkobj	*p;
@@ -89,13 +99,18 @@ pmkobj *po_mk_str(char *str) {
 	return(p);
 }
 
-/*
+/*************
+ po_mk_list()
+
+ DESCR
 	make list object
 
-	pda : dynary to objectify
+ IN
+	pda: dynary to objectify
 
-	return : object
-*/
+ OUT
+	object or NULL if failed
+***********************************************************************/
 
 pmkobj *po_mk_list(dynary *pda) {
 	pmkobj	*p;
@@ -109,13 +124,18 @@ pmkobj *po_mk_list(dynary *pda) {
 	return(p);
 }
 
-/*
+/*************
+ po_mk_hash()
+
+ DESCR
 	make hash object
 
-	pht : hash table to objectify
+ IN
+	pht: hash table to objectify
 
-	return : object
-*/
+ OUT
+	object or NULL if failed
+***********************************************************************/
 
 pmkobj *po_mk_hash(htable *pht) {
 	pmkobj	*p;
@@ -129,13 +149,18 @@ pmkobj *po_mk_hash(htable *pht) {
 	return(p);
 }
 
-/*
+/*********
+ po_dup()
+
+ DESCR
 	duplicate object
 
-	po : object to copy
+ IN
+	po: object to copy
 
-	return : copied object
-*/
+ OUT
+	duplicated object
+***********************************************************************/
 
 pmkobj *po_dup(pmkobj *po) {
 	pmkobj	*dup;
@@ -157,13 +182,18 @@ pmkobj *po_dup(pmkobj *po) {
 	return(dup);
 }
 
-/*
+/**************
+ po_get_type()
+
+ DESCR
 	get object type
 
-	po : object
+ IN
+	po: object
 
-	return : type of object
-*/
+ OUT
+	type of object
+***********************************************************************/
 
 potype po_get_type(pmkobj *po) {
 	if (po != NULL) {
@@ -173,13 +203,18 @@ potype po_get_type(pmkobj *po) {
 	}
 }
 
-/*
+/**************
+ po_get_data()
+
+ DESCR
 	get object data
 
-	po : object
+ IN
+	po: object
 
-	return : generic data of object or NULL
-*/
+ OUT
+	generic data of object or NULL
+***********************************************************************/
 
 void *po_get_data(pmkobj *po) {
 	if (po != NULL) {
@@ -189,13 +224,18 @@ void *po_get_data(pmkobj *po) {
 	}
 }
 
-/*
+/**************
+ po_get_bool()
+
+ DESCR
 	get data from string object
 
-	po : object
+ IN
+	po: object
 
-	return : string or NULL
-*/
+ OUT
+	string or NULL
+***********************************************************************/
 
 bool po_get_bool(pmkobj *po) {
 	if (po != NULL) {
@@ -206,13 +246,18 @@ bool po_get_bool(pmkobj *po) {
 	return(false);
 }
 
-/*
+/*************
+ po_get_str()
+
+ DESCR
 	get data from string object
 
-	po : object
+ IN
+	po: object
 
-	return : string or NULL
-*/
+ OUT
+	string or NULL
+***********************************************************************/
 
 char *po_get_str(pmkobj *po) {
 	if (po != NULL) {
@@ -223,13 +268,18 @@ char *po_get_str(pmkobj *po) {
 	return(NULL);
 }
 
-/*
+/**************
+ po_get_list()
+
+ DESCR
 	get data from list object
 
-	po : object
+ IN
+	po: object
 
-	return : dynary or NULL
-*/
+ OUT
+	dynary or NULL
+***********************************************************************/
 
 dynary *po_get_list(pmkobj *po) {
 	if (po != NULL) {
@@ -240,13 +290,18 @@ dynary *po_get_list(pmkobj *po) {
 	return(NULL);
 }
 
-/*
+/**********
+ po_free()
+
+ DESCR
 	free object
 
-	po : object to deallocate
+ IN
+	po: object to deallocate
 
-	return : -
-*/
+ OUT
+	NONE
+***********************************************************************/
 
 void po_free(pmkobj *po) {
 	if (po != NULL) {
@@ -274,17 +329,22 @@ void po_free(pmkobj *po) {
 	}
 }
 
-/*
+/************
+ po_append()
+
+ DESCR
 	append a value in an object
 
+ IN
 	orig : original object
 	value : data to append
 	misc : misc specific data :
 		- separator for a string object
 		- unused for a list object
 
-	return : updated object or NULL if failed
-*/
+ OUT
+	updated object or NULL if failed
+***********************************************************************/
 
 pmkobj *po_append(void *orig, void *value, void *misc) {
 	char	*pbuf;
@@ -366,3 +426,4 @@ pmkobj *po_append(void *orig, void *value, void *misc) {
 
 	return(po);
 }
+

@@ -46,6 +46,10 @@
 */
 
 
+/***********
+ constants
+***********************************************************************/
+
 #define PMK_CHAR_COMMENT	'#'
 #define PMK_CHAR_COMMAND	'.'
 #define PMK_CHAR_COMMAND_START	'{'
@@ -75,6 +79,7 @@
 #define PRS_PMKFILE_SEP		"="
 #define PRS_PMKCONF_SEP		"=:"
 
+#define PRS_ERR_UNKNOWN		"unknown error."
 #define PRS_ERR_ALLOC		"memory allocation failed."
 #define PRS_ERR_HASH		"hash add failure."
 #define PRS_ERR_DYNARY		"dynary push failure."
@@ -82,7 +87,8 @@
 #define PRS_ERR_SYNTAX		"syntax error."
 #define PRS_ERR_TRAILING	"trailing garbage after value."
 #define PRS_ERR_PRSFILL		"parsing buffer could not be filled."
-#define PRS_ERR_UNKNOWN		"unknown error."
+#define PRS_ERR_INV_OPT		"invalid option '%s'."
+#define PRS_ERR_TYP_OPT		"wrong type for option '%s'."
 
 /* keyword types */
 #define PRS_KW_UNKW	0
@@ -100,12 +106,21 @@
 #define PRS_BUF_LEN            1024
 
 
+/*********************
+ types and structures
+***********************************************************************/
+
+typedef struct {
+	char	*name;
+	potype	 mask;
+} kw_t;
+
 /* keyword options */
 typedef struct {
-	char	**req;
-	size_t	  nbreq;
-	char	**opt;
-	size_t	  nbopt;
+	kw_t	*req;
+	size_t	 nbreq;
+	kw_t	*opt;
+	size_t	 nbopt;
 } kwopt_t;
 
 /* keyword structure */
@@ -159,6 +174,11 @@ typedef struct {
 	size_t	 nbreq;			/* number of required options */
 } prseng;
 
+
+/********************
+ function prototypes
+***********************************************************************/
+
 prsdata	*prsdata_init(void);
 void	 prsdata_destroy(prsdata *);
 prseng	*prseng_init(void);
@@ -189,7 +209,9 @@ bool	 parse_opt(prseng *, prsopt *, char *);
 bool	 parse_clopt(char *, prsopt *, char *);
 bool	 parse_node(prsdata *, prseng *peng, prscell *);
 bool	 parse_command(prsdata *, prseng *peng, prscell *);
-bool	 check_opt_avl(char *, char **, size_t);
+kw_t	*check_opt_avl(char *, kw_t *, size_t);
+bool	 check_opt_type(kw_t *, pmkobj *);
+bool	 check_option(prseng *, prsopt *, kwopt_t *);
 bool	 process_block_opt(prseng *, prsnode *, prscell *);
 bool	 parse_opt_block(prsdata *, prseng *, prscell *, bool);
 bool	 parse_cmd_block(prsdata *, prseng *, prsnode *, bool);
