@@ -77,6 +77,14 @@
 /* maximal number of options per command */
 #define MAX_CMD_OPT	32
 
+
+/* command tokens */
+#define	TOK_DEFINE	 0
+#define TOK_CHK_BIN	 2
+#define TOK_CHK_INC	 3
+#define TOK_CHK_LIB	 4
+
+
 /* boolean type */
 typedef unsigned char bool;
 /* command option type */
@@ -86,6 +94,7 @@ typedef struct {
 } pmkcmdopt;
 /* command type */
 typedef struct {
+	int		type; /* command token */
 	char		name[MAX_CMD_LEN],
 			label[MAX_LABEL_LEN];
 	pmkcmdopt	opt[MAX_CMD_OPT];

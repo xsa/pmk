@@ -77,6 +77,21 @@ bool getline(FILE *fd, char *line, int lsize) {
 }
 
 /*
+	return token of a command
+
+	cmd : commande
+
+	returns the token or TOK_NULL is the command is unknow
+*/
+
+int get_token(char *cmd) {
+	int	token=0;
+
+	/* hum */
+	return(0);
+}
+
+/*
 	parse a command
 
 	line : line to parse
