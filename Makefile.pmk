@@ -22,6 +22,7 @@ MANDIR=		@MANDIR@
 
 CFGFLAGS=	-DSYSCONFDIR=\"$(SYSCONFDIR)\" -DCONFDIR=\"$(CONFDIR)\"
 
+# used for the dirname() function check in libgen
 LGEN_FLAGS=	@LGEN_FLAGS@
 
 # Flag to enable pmk in user mode (check INSTALL file for details).
@@ -88,7 +89,7 @@ showmode:
 sm: showmode
 
 $(PREMAKE): $(P_OBJS)
-	$(CC) -o $(PREMAKE) $(LDFLAGS) $(P_OBJS)
+	$(CC) -o $(PREMAKE) $(LDFLAGS) $(P_OBJS) $(LGEN_FLAGS)
 
 $(SETUP): $(S_OBJS)
 	$(CC) -o $(SETUP) $(LDFLAGS) $(S_OBJS)
@@ -97,7 +98,7 @@ $(SCAN): $(SC_OBJS)
 	$(CC) -o $(SCAN) $(LDFLAGS) $(SC_OBJS)
 
 $(INST): $(I_OBJS)
-	$(CC) -o $(INST) $(LDFLAGS) $(I_OBJS)
+	$(CC) -o $(INST) $(LDFLAGS) $(I_OBJS) $(LGEN_FLAGS)
 
 $(PKGCFG): $(PC_OBJS)
 	$(CC) -o $(PKGCFG) $(LDFLAGS) $(PC_OBJS)
