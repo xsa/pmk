@@ -546,17 +546,18 @@ void skip_useless(prseng *peng) {
 				 * look for the next end of line */
 				while ((*peng->prscur != CHAR_CR) &&
 						(*peng->prscur != CHAR_EOS)) {
-					peng->prscur++;
 #ifdef DEBUG_PRS
 					debugf("skipping '%c'.", *peng->prscur); 
 #endif
+					peng->prscur++;
 				}
 
+#ifdef DEBUG_PRS
+				debugf("check if '%c' == CR.", *peng->prscur); 
+#endif
 				if (*peng->prscur == CHAR_CR)
 					peng->prscur++;
-
-				/* don't break to use following
-				 * incrementation to skip end of line */
+				break;
 
 			case CHAR_CR:
 #ifdef DEBUG_PRS
