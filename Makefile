@@ -53,7 +53,7 @@ $(SCAN).o:
 	$(CC) $(CFLAGS) -DDATADIR=\"$(DATADIR)\" -c $(SCAN).c
 
 config:
-	@if (pmk -v >/dev/null); then \
+	@if ($(PREMAKE) -v >/dev/null 2>&1); then \
 		echo "Configure using pmk."; \
 		pmk; \
 	else \
