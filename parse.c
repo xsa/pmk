@@ -566,6 +566,9 @@ void skip_useless(prseng *peng) {
 #endif
 				if (*peng->prscur == CHAR_CR)
 					peng->prscur++;
+
+				peng->linenum++; /* update line number */
+
 				break;
 
 			case CHAR_CR:
@@ -580,9 +583,11 @@ void skip_useless(prseng *peng) {
 				/* found non useless char */
 				loop = false;
 		}
+
+		/* update parsing frame */
+		prs_fill_buf(peng); /* XXX check ? */
 	}
 
-	/*peng->prscur = pstr;*/
 #ifdef PRS_DEBUG
 	debugf("skip_useless() : process ended on line %d", peng->linenum);
 #endif
@@ -1668,11 +1673,11 @@ bool parse_pmkconf(FILE *fp, htable *pht, char *seplst, bool (*func)(htable *, p
 				break;
 
 			default :
-#ifdef PRS_DEBUG
-				strlcpy(buf, po_get_str(opt.value), sizeof(buf)); /* no check */
-				debugf("parse_pmkconf(): opt line to parse = '%s'.", buf);
-#endif
 				if (parse_opt(peng, &opt, seplst) == true) {
+#ifdef PRS_DEBUG
+					strlcpy(buf, po_get_str(opt.value), sizeof(buf)); /* no check */
+					debugf("parse_pmkconf(): opt line to parse = '%s'.", buf);
+#endif
 					/* parse ok */
 					if (func(pht, &opt) == false) {
 						errorf("line %d : processing failed", peng->linenum);

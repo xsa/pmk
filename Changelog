@@ -1,3 +1,6 @@
+20 Jan 2005 mipsator
+ * fixed skip_useless() to update frame buffer.
+
 18 Jan 2005 mipsator
  * moved pmksetup into bin instead of sbin.
  * use lists for install and deinstall.
