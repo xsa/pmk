@@ -15,6 +15,7 @@ Mandrake	9.2		i686		PMK 0.7.10	OK		Damien Couderc		gcc-3.3.1, gmake-3.80, linux-
 NetBSD		1.6ZF		alpha		PMK 0.7.10	OK		Martin Reindl		gcc-3.3.2
 NetBSD		1.6		i386		PMK 0.7.10	OK		Damien Couderc		gcc-2.95.3
 NetBSD		1.6.1		ppc		PMK 0.7.10	OK		Martin Reindl		gcc-2.95.3
+NetBSD		1.6ZG		sgimips		PMK 0.7.10	OK		Martin Reindl		gcc-3.3.2
 NetBSD		1.6Y		sparc		PMK 0.7.10	OK		Martin Reindl		gcc-2.95.3
 OpenBSD		3.4		alpha		PMK 0.7.10	OK		Martin Reindl		gcc-2.95.3
 OpenBSD		3.4		i386		PMK 0.7.10	OK		Damien Couderc		gcc-2.95.3
