@@ -24,6 +24,7 @@ tutorial, we highly recommend to consult pmkfile(5).
 2) The settings
    ------------
 
+
 The first command you will find in a pmkfile is named SETTINGS. Its
 function is to define global settings. To begin we are going to use
 only one template for the makefile. See the following example:
@@ -40,6 +41,7 @@ parenthesis. As you can see Makefile.in will be the template name.
 3) Defining some variables
    -----------------------
 
+
 It can be useful to define some basic variables such as package name
 and version. For this, we will use the DEFINE command as following:
 
@@ -52,8 +54,10 @@ If the target(s) file(s) contain(s) the @PACKAGE@ and @VERSION@ tags then
 they will be replaced by the variables values.
 
 
+
 4) First check
    -----------
+
 
 Lets say that we have a hello.c file that needs the string header.
 For that, we use the CHECK_HEADER command like following:
@@ -110,6 +114,7 @@ __[FILE]________________________________________________________[END]__
 5) Using external libraries
    ------------------------
 
+
 Our hello program also needs the curses library. To check if this
 library is present we will use the following command:
 
@@ -153,6 +158,7 @@ We'll see later how to use an alternate variable.
 
 6) Playing with pkg-config support
    -------------------------------
+
 
 Let's say that our package has the gtkhello.c source that builds a gtk
 version of our hello program. That said, we need to check if gtk is present
@@ -223,8 +229,93 @@ __[OUTPUT]______________________________________________________[END]__
 Notice that the storage variables have changed in the output.
 
 
-7) Checking types
+
+7) Using switches
    --------------
+
+
+Now we are able to detect gtk we could use a switch to specify if we
+want the gtk version or not. For this we will use the SWITCH command
+and add it between SETTINGS AND DEFINE:
+
+SWITCHES {
+	build_gtk_version = FALSE
+}
+
+By default we don't want the gtk version to be build so it's set to
+FALSE. A switch can be modified by using -e (enable) and -d (disable)
+options, see pmk(1). For example we could use the following to enable
+the build of the gtk program:
+
+pmk -e build_gtk_version
+
+We are going to see the two methods of using switchs. First using the
+DEPEND option:
+
+CHECK_PKG_CONFIG(pc_gtk) {
+	NAME = "gtk+"
+	DEPEND = ("build_gtk_version")
+	VERSION = "1.2"
+	CFLAGS = "GTK_CFLAGS"
+	LIBS = "GTK_LIBS"
+}
+
+As you can see we added 'build_gtk_version' in the dependency list of
+the DEPEND option. A dependency can be a command label or a switch. If
+all the dependencies in the list are true then the command is executed.
+Else if the test is required pmk fill fail like this:
+
+__[OUTPUT]____________________________________________________[BEGIN]__
+
+* Checking pkg-config module [pc_gtk]
+        Required 'build_gtk_version' dependency failed.
+$
+__[OUTPUT]______________________________________________________[END]__
+
+Another method to use switches is the IF conditional command. This will
+look like the following:
+
+IF(build_gtk_version) {
+	CHECK_PKG_CONFIG(pc_gtk) {
+		NAME = "gtk+"
+		VERSION = "1.2"
+		CFLAGS = "GTK_CFLAGS"
+		LIBS = "GTK_LIBS"
+	}
+}
+
+Of course you can put as many command as you want into the body.
+The ouput looks like the following:
+
+__[OUTPUT]____________________________________________________[BEGIN]__
+
+< Begin of condition [build_gtk_version]
+
+* Checking pkg-config module [pc_gtk]
+        Found package 'gtk+' : yes.
+        Found version >= 1.2 : yes (1.2.10).
+        Stored compiler flags in 'GTK_CFLAGS'.
+        Stored library flags in 'GTK_LIBS'.
+
+> End of condition [build_gtk_version]
+
+__[OUTPUT]______________________________________________________[END]__
+
+It's also possible to use inverted value by appending a '!' above the
+dependency like this:
+
+IF(!build_gtk_version) {
+	[commands]
+}
+
+or like this:
+DEPEND = ("!build_gtk_version")
+
+
+
+8) Checking types
+   --------------
+
 
 As an example we will check for the ISO C99 boolean type: _Bool. See
 the following:
@@ -346,8 +437,10 @@ __[FILE]________________________________________________________[END]__
 Mission succeeded !
 
 
-8) Looking for a binary ?
+
+9) Looking for a binary ?
    ----------------------
+
 
 Easy ! Need to know if strip program is available ? Use the following:
 
@@ -383,6 +476,150 @@ STRIP_PATH=/usr/bin/strip
 __[FILE]________________________________________________________[END]__
 
 Well we got it :)
+
+
+
+10) Checking a variable
+    -------------------
+
+
+As an example we'll take the case of a program that will run only on
+'little endian' byte ordered CPUs. For that matter we'll check the
+HW_BYTEORDER variable set by pmksetup:
+
+CHECK_VARIABLE(var_endian) {
+	NAME = "HW_BYTEORDER"
+	VALUE = "LITTLE_ENDIAN"
+}
+
+If the value is 'BIG_ENDIAN' then the check will fail and pmk will stop
+like this:
+
+__[OUTPUT]____________________________________________________[BEGIN]__
+
+* Checking pkg-config module [pc_gtk]
+        Required 'build_gtk_version' dependency failed.
+
+__[OUTPUT]______________________________________________________[END]__
+
+
+
+
+11) Shared library support
+    ----------------------
+
+
+The first step is to detect the compiler used. We do that with the
+DETECT option of the SETTINGS command:
+
+SETTINGS {
+	TARGET = ("Makefile.in","isoc_compat.h.in")
+	DETECT = ("CC")
+}
+
+In this example we detect the C compiler but we could have detected
+the C++ compiler by using DETECT=("CXX"). You can also detect both
+compilers with DETECT=("CC","CXX"). 
+
+The output should look almost like the following:
+
+__[OUTPUT]____________________________________________________[BEGIN]__
+
+* Parsing settings
+        Collecting targets :
+                Added 'Makefile.in'.
+                Added 'isoc_compat.h.in'.
+                Total 2 target(s) added.
+        Detecting compilers :
+                Gathering data for compiler detection.
+                Detecting 'CC' : GNU gcc (version 295).
+                Setting SLCFLAGS to '-fPIC'
+                Setting SLLDFLAGS to '-shared'
+
+__[OUTPUT]______________________________________________________[END]__
+
+In this example the compiler used is gcc (version 2.95). As you can see
+the shared library flags (-fpic and -shared) are set in the reserved
+variables.
+
+Now we're going to see how to build the name of the shared library
+using the BUILD_SHLIB_NAME command:
+
+BUILD_SHLIB_NAME {
+	NAME = "hello"
+	MAJOR = "2"
+	MINOR = "1"
+	VERSION_NONE = "LIBNAME"
+	VERSION_MAJ = "LIBNAME_MAJ"
+	VERSION_FULL = "LIBNAME_FULL"
+}
+
+This will give the following output:
+
+__[OUTPUT]____________________________________________________[BEGIN]__
+
+* Building shared library name
+        Shared library support : yes.
+        Setting LIBNAME to 'libhello.so'
+        Setting LIBNAME_FULL to 'libhello.so.2.1'
+        Setting LIBNAME_MAJ to 'libhello.so.2'
+
+__[OUTPUT]______________________________________________________[END]__
+
+To use all this stuff we could use a template of makefile like
+following:
+
+__[FILE]______________________________________________________[BEGIN]__
+PACKAGE=@PACKAGE@
+VERSION=@VERSION@
+STRIP_PATH=@STRIP_PATH@
+
+CFLAGS=@CFLAGS@
+LIBS=@LIBS@
+
+SLCFLAGS=@SLCFLAGS@
+SLLDFLAGS=@SLLDFLAGS@
+
+LIBNAME=@LIBNAME@
+LIBNAME_MAJ=@LIBNAME_MAJ@
+LIBNAME_FULL=@LIBNAME_FULL@
+
+
+libhello.o:
+	$(CC) $(CFLAGS) $(SLCFLAGS) -c libhello.c
+
+$(LIBNAME): libhello.o
+	$(CC) $(SLLDFLAGS) -o $@ libhello.o
+	cp $(LIBNAME) $(LIBNAME_MAJ)
+	cp $(LIBNAME) $(LIBNAME_FULL)
+__[FILE]________________________________________________________[END]__
+
+And after running pmk we should obtain a makefile like this one:
+
+__[FILE]______________________________________________________[BEGIN]__
+PACKAGE=hello
+VERSION=0.1
+STRIP_PATH=/usr/bin/strip
+
+CFLAGS=-O2 -I/usr/include
+LIBS=-lcurses
+
+SLCFLAGS=-fPIC
+SLLDFLAGS=-shared
+
+LIBNAME=libhello.so
+LIBNAME_MAJ=libhello.so.2
+LIBNAME_FULL=libhello.so.2.1
+
+
+libhello.o:
+	$(CC) $(CFLAGS) $(SLCFLAGS) -c libhello.c
+
+$(LIBNAME): libhello.o
+	$(CC) $(SLLDFLAGS) -o $@ libhello.o
+	cp $(LIBNAME) $(LIBNAME_MAJ)
+	cp $(LIBNAME) $(LIBNAME_FULL)
+__[FILE]________________________________________________________[END]__
 
 
 
