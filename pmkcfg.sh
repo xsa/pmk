@@ -58,17 +58,14 @@ int main() {
 }
 EOF
 
-	$CC -o $testbin $testfile >/dev/null 2>&1
-
-	rm -f $testfile
-	if [ -x "$testbin" ]; then
-		rm -f $testbin
+	if $CC -o $testbin $testfile >/dev/null 2>&1; then
 		do_sed "$def" "$include"
 		echo "yes"
 	else
 		do_sed "$udef" "$include"
 		echo "no"
 	fi
+	rm -f $testfile $testbin
 }
 
 do_sed() {
@@ -109,11 +106,7 @@ int main() {
 }
 EOF
 
-$CC -o $testbin $testfile >/dev/null 2>&1
-
-cp $compat $temporary
-
-if [ -x "$testbin" ]; then
+if $CC -o $testbin $testfile >/dev/null 2>&1; then
 	sedstr="$def"
 	msg="yes"
 else
@@ -121,6 +114,7 @@ else
 	msg="no"
 fi
 
+cp $compat $temporary
 cat $temporary | sed -e s/@DEF_STRLCPY@/$sedstr/ > $compat
 echo "$msg"
 rm -f $temporary $testfile $testbin
