@@ -72,13 +72,13 @@ A command has the following format (? character means optional field):
  }
 .Ed
 .Pp
-The command and label names can be assimilated to the 'word''type.
+The command and label names can be assimilated to the 'word' type.
 See
 .Sx DATA TYPES
 above.
 .Pp
 The body can contain comment(s) and definition line(s).
-A commented line start with a '#''character like the following:
+A commented line start with a '#' character like the following:
 .Bd -literal -offset -indent
 # this is a comment line
 .Ed
@@ -90,7 +90,7 @@ A definition line has the following format:
 .Pp
 The key name is of identifier type.
 .Pp
-The key value type can be 'bool', 'quoted''or 'list'.
+The key value type can be 'bool', 'quoted' or 'list'.
 The right type will depend on the key name (see further).
 .Pp
 Example:
@@ -174,7 +174,7 @@ If not specified it is TRUE by default.
 .It Cm DEPEND
 Specify check dependencies. Type is 'list'.
 A dependency is a label or a switch name.
-The value of each dependencie can be negated by adding a leading '!''sign.
+The value of each dependencie can be negated by adding a leading '!' sign.
 If at least one of the dependencies is false then the check will be disabled.
 .Pp
 Example:
