@@ -125,6 +125,9 @@ process_tmpl_list () {
 
 check_binary() {
 	binary="$1"
+	tname=`echo "$binary" | tr [a-z] [A-Z] | tr . _`
+	tval=""
+
 	printf "Checking binary '%s' : " "$binary"
 
 	plst=`echo $PATH | sed "s/:/ /g"`
@@ -132,6 +135,7 @@ check_binary() {
 	r=1
 	for d in $plst; do
 		if test -x "$d/$binary"; then
+			tval="$d/$binary"
 			r=0
 			break
 		fi
@@ -142,6 +146,7 @@ check_binary() {
 	else
 		echo "no"
 	fi
+	mkf_sed "$tname" "$tval"
 
 	return $r
 }
@@ -387,24 +392,20 @@ mkf_sed 'SYSCONFDIR' "$sysdir"
 
 
 if [ -z "$CC" ]; then
-	if check_binary cc; then
-		CC="cc"
-	else
+	if ! check_binary cc; then
 		printf "Unable to find C compiler"
 		exit 0
 	fi
 else
 	printf "CC defined, skipping C compiler check.\n"
+	mkf_sed 'CC' "$CC"
 fi
-mkf_sed 'CC' "$CC"
 
 #
 # cpp check
 #
 
-if check_binary cpp; then
-	mkf_sed 'CPP' 'cpp'
-else
+if ! check_binary cpp; then
 	printf "Unable to find C preprocessor"
 	exit 0
 fi
@@ -413,9 +414,7 @@ fi
 # as check
 #
 
-if check_binary as; then
-	mkf_sed 'AS' 'as'
-else
+if ! check_binary as; then
 	printf "Unable to find assembler"
 	exit 0
 fi
