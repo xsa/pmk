@@ -52,8 +52,9 @@ sconf="$sysdir/pmk"
 
 um_prfx='$(HOME)'
 
-testfile="./cfgtest.c"
 testbin="./cfgtest"
+testfile="$testbin.c"
+testobj="$testbin.o"
 
 template="compat/compat.h.in"
 compat="compat/compat.h"
@@ -109,20 +110,21 @@ check_header_function() {
 #include <stdio.h>
 #include <$include>
 
+void (*pmk_funcp)() = $function;
+
 int main() {
-	printf("%p", $function);
 	return(0);
 }
 EOF
 
-	if $CC -o $testbin $testfile >/dev/null 2>&1; then
+	if $CC -o $testobj -c $testfile >/dev/null 2>&1; then
 		templ_sed "def" "$function"
 		echo "yes"
 	else
 		templ_sed "udef" "$function"
 		echo "no"
 	fi
-	rm -f $testfile $testbin
+	rm -f $testfile $testfile.o
 }
 
 check_type() {
@@ -298,6 +300,12 @@ check_header libgen.h
 #
 
 check_header_function ctype.h isblank
+
+#
+# mkstemps check
+#
+
+check_header_function unistd.h mkstemps
 
 #
 # config finished, creates config
