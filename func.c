@@ -31,7 +31,10 @@
  */
 
 
-/* hash.c is supposed to be already included */
+#include <stdio.h>
+
+#include "hash.h"
+#include "premake.h"
 #include "func.h"
 
 

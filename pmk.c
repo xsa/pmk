@@ -97,9 +97,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "pmk.h"
-#include "hash.c"
-#include "func.c"
+#include "premake.h"
+#include "hash.h"
+#include "func.h"
 
 int	cur_line = 0,
 	err_line = 0;

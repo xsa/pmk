@@ -30,11 +30,18 @@
  *
  */
 
-/*
-#include "hash.c"
-*/
+#ifndef _PMK_FUNC_H_
+#define _PMK_FUNC_H_
 
 typedef struct {
 	char	kw[MAX_CMD_NAME_LEN];
 	bool	(*fnp)(pmkcmd *, htable *);
 } cmdkw;
+
+
+bool pmk_define(pmkcmd *, htable *);
+bool pmk_check_binary(pmkcmd *, htable *);
+bool pmk_check_include(pmkcmd *, htable *);
+bool pmk_check_lib(pmkcmd *, htable *);
+
+#endif /* _PMK_FUNC_H_ */
