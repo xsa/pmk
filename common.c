@@ -273,3 +273,58 @@ void debugf(const char *fmt, ...) {
 
 	fprintf(stdout, "!DEBUG! %s\n", buf);
 }
+
+/*
+	open log file
+
+	logname : log file name
+
+	returns TRUE if opened
+*/
+
+bool pmk_log_open(char *logname) {
+	if (pmk_log_fp != NULL) {
+		errorf("%s already open.", logname);
+		return(FALSE);
+	}
+	pmk_log_fp = fopen(logname, "w");
+	if (pmk_log_fp == NULL) {
+		errorf("while opening %s.", logname);
+		return(FALSE);
+	} else {
+		return(TRUE);
+	}
+}
+
+/*
+	close log file
+*/
+
+void pmk_log_close(void) {
+	fflush(pmk_log_fp);
+	fclose(pmk_log_fp);
+}
+
+/*
+	log formatted line
+
+	fmt : format string
+*/
+
+bool pmk_log(const char *fmt, ...) {
+	va_list	plst;
+	char	buf[256];
+
+	va_start(plst, fmt);
+	vsnprintf(buf, sizeof(buf), fmt, plst);
+	va_end(plst);
+
+	if (pmk_log_fp != NULL) {
+		fprintf(pmk_log_fp, buf);
+		fprintf(stdout, buf);
+		return(TRUE);
+	} else {
+		errorf("Unable to log.");
+		return(FALSE);
+	}
+}
