@@ -1,0 +1,59 @@
+.Dd April 27, 2003
+.Dt PMKFILE 5
+.Os
+.Sh NAME
+.Nm pmkfile
+.Nd pmk specification file
+.Sh SYNOPSIS
+.Nm
+.Sh DESCRIPTION
+.Nm
+is file containing specifications that help configuring a package build on a given platform.
+.Sh SYNTAX
+.Nm
+can contain comments, blank lines and commands.
+.Pp
+A command has the following format :
+.Bd -literal -offset -indent
+ .<command>[(<label>)]
+ [list of definition lines]
+ .END
+.Ed
+.Pp
+A definition line has the following format :
+.Bd -literal -offset -indent
+<key name>=<key value>
+.Ed
+.Pp
+Example :
+.Bd -literal -offset -indent
+ .CHECK_INCLUDE(string)
+ REQUIRED=TRUE
+ INCLUDE=string.h
+ .END
+.Ed
+.Sh COMMANDS
+.Bd -literal -offset
+DEFINE : define data, has no label.
+
+TARGET : define target templates, no label.
+
+CHECK_BINARY : check if a binary is in the path.
+keys : REQUIRED, FILENAME.
+
+CHECK_CONFIG : check using a *-config tool.
+keys : REQUIRED, CFGTOOL[, VERSION].
+
+CHECK_INCLUDE : check C include header and optionally a function.
+keys : REQUIRED, INCLUDE[, FUNCTION].
+
+CHECK_LIB : check a library and optionally a function.
+keys : REQUIRED, LIBNAME[, FUNCTION].
+.Ed
+.Sh SEE ALSO
+.Xr pmk 1
+.Sh AUTHOR
+.An Damien Couderc
+.Sh HISTORY
+The idea to replace configure script was existing since a long time. 
+But the projet was initiated in the begining of March 2003.
