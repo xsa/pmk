@@ -1,43 +1,68 @@
-common :
-- tutorial
-- add a test for pmkinstall ?
-
-pmk :
-+ make dir creation better in process_template().
-+ update pmk.1
-+ update pmkfile.5
-+ define CFLAGS, CXXFLAGS, CPPFLAGS, LIBS, LDFLAGS and DEBUG with values from make !
-~ compatibility with autoconf (progressing) :
-	~ support for DEFS (-D options to pass to the compiler)
-	+ missing stuff noticed with dillo conversion
-	- support for LDFLAGS (misc linker options) ?
-	- support for CPPFLAGS (misc linker options) ?
-	- VPATH ?
-- cache ? (hash table with binary location, ...)
-- more C++ support !
-- verify in CHECK_BINARY that program has executable right ?
-- convert gdata.labl to pmk objects ?
-- checks hash_add() in autoconf.c (void func => bool func)
-
-pmksetup :
-! clean temporary files on error
-- missing checks :
-        - ECHO_N, ECHO_C, ECHO_T in a specific proc for autoconf variables.
-        - check install binary and use pmkinstall instead if not compatible.
-	- char unsigned (pmk ?)
-	- long double (pmk ?)
-	- better check for install ?
-	- others ?
-	
-pmkscan :
-- add more entries in pmkscan.dat
-- improve engine to detect types
-
-pmkinstall :
-- rewrite
-
-pmkpkg :
-- make specs, this tool should handle install and deinstall operations
+			 _______________________
+			/			\
+			|	TODO list	|
+			\_______________________/
 
 
+#######################################
+
+Format:
+Who	Status	Description
+
+Status flags:
+	- to do
+	+ done
+	~ in progress
+	! high priority
+	. low priority
+
+#######################################
+
+
+common:
+-----------------------------------------------------------------------
+	-	tutorial
+	-	add a test for pmkinstall ?
+
+
+pmk:
+-----------------------------------------------------------------------
+	~	compatibility with autoconf (progressing) :
+			~ support for DEFS (-D options to pass to the compiler)
+			- support for LDFLAGS (misc linker options) ?
+			- support for CPPFLAGS (misc linker options) ?
+			- VPATH ?
+	-	cache ? (hash table with binary location, ...)
+	-	more C++ support !
+	-	verify in CHECK_BINARY that program has executable right ?
+	-	convert gdata.labl to pmk objects ?
+	-	checks hash_add() in autoconf.c (void func => bool func)
+
+
+pmksetup:
+-----------------------------------------------------------------------
+	!	clean temporary files on error
+	-	missing checks :
+			- ECHO_N, ECHO_C, ECHO_T in a specific proc for autoconf variables.
+		        . check install binary and use pmkinstall instead if not compatible.
+			- char unsigned (pmk ?)
+			- long double (pmk ?)
+			- better check for install ?
+			- others ?
+
+
+pmkscan
+-----------------------------------------------------------------------
+	-	add more entries in pmkscan.dat
+	-	improve engine to detect types
+
+
+pmkinstall
+-----------------------------------------------------------------------
+damien	~	full rewrite
+
+
+pmkpkg
+-----------------------------------------------------------------------
+	- make specs, this tool should handle install and deinstall operations
 
