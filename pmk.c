@@ -226,7 +226,7 @@ bool process_template(char *template, htable *ht) {
 	process a command
 */
 
-bool process_cmd(pmkcmd *cmd, htable *ht) {
+bool process_cmd(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 	char	*aidx;
 	int	idx;
 	bool	rval = FALSE;
@@ -236,7 +236,7 @@ bool process_cmd(pmkcmd *cmd, htable *ht) {
 		/* getting index of function in functab */
 		idx = atoi(aidx);
 		/* launching cmd function */
-		rval = (*functab[idx].fnp)(cmd, ht);
+		rval = (*functab[idx].fnp)(cmd, ht, gdata);
 	}
 
 	return(rval);
@@ -424,7 +424,7 @@ bool parse_opt(char *line, htable *ht) {
 	returns a boolean
 */
 
-bool parse(FILE *fd) {
+bool parse(FILE *fd, pmkdata *gdata) {
 	char		buf[MAX_LINE_LEN];
 	bool		process = FALSE;
 	pmkcmd		cmd;
@@ -459,7 +459,7 @@ bool parse(FILE *fd) {
 					if (strcmp(buf, PMK_END_COMMAND) == 0) {
 						/* found end of command */
 						process = FALSE;
-						if (process_cmd(&cmd, tabopts) == FALSE) {
+						if (process_cmd(&cmd, tabopts, gdata) == FALSE) {
 							/* command processing failed */
 							hash_destroy(tabopts);
 							return(FALSE);
@@ -537,6 +537,7 @@ int main(int argc, char *argv[]) {
 		chr;
 	bool	go_exit = FALSE,
 		pmkfile_set = FALSE;
+	pmkdata	gdata;
 	dynary	*da;
 
 	while (go_exit == FALSE) {
@@ -619,7 +620,7 @@ int main(int argc, char *argv[]) {
 
 	gdata.htab = hash_init(MAX_DATA_KEY);
 
-	if (parse(fd) == FALSE) {
+	if (parse(fd, &gdata) == FALSE) {
 		/* an error occured while parsing */
 		rval = 1;
 	} else {

@@ -113,12 +113,12 @@ bool str_to_dynary(char *str, char sep, dynary *da) {
 	define variables
 */
 
-bool pmk_define(pmkcmd *cmd, htable *ht) {
+bool pmk_define(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 	int	n;
 
 	pmk_log("* Parsing define\n");
 
-	n = hash_merge(gdata.htab, ht);
+	n = hash_merge(gdata->htab, ht);
 	pmk_log("\tAdded %d definitions.\n", n);
 	
 	return(TRUE);
@@ -128,7 +128,7 @@ bool pmk_define(pmkcmd *cmd, htable *ht) {
 	set target files (templates) to process
 */
 
-bool pmk_target(pmkcmd *cmd, htable *ht) {
+bool pmk_target(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 	char	*list;
 	int	i = 0;
 	dynary	*da;
@@ -147,7 +147,7 @@ bool pmk_target(pmkcmd *cmd, htable *ht) {
 		pmk_log("\tAdded '%s'\n", da_idx(da, i));
 	}
 
-	gdata.tlist = da;
+	gdata->tlist = da;
 
 	return(TRUE);
 }
@@ -156,7 +156,7 @@ bool pmk_target(pmkcmd *cmd, htable *ht) {
 	check binary
 */
 
-bool pmk_check_binary(pmkcmd *cmd, htable *ht) {
+bool pmk_check_binary(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 	char	*filename;
 	bool	required = TRUE;
 
@@ -175,7 +175,7 @@ bool pmk_check_binary(pmkcmd *cmd, htable *ht) {
 	check include file
 */
 
-bool pmk_check_include(pmkcmd *cmd, htable *ht) {
+bool pmk_check_include(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 	char	*incfile,
 		*incfunc,
 		incpath[MAXPATHLEN],
@@ -232,7 +232,7 @@ bool pmk_check_include(pmkcmd *cmd, htable *ht) {
 	check library
 */
 
-bool pmk_check_lib(pmkcmd *cmd, htable *ht) {
+bool pmk_check_lib(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 	char	*libname,
 		*libvers;
 	bool	required = TRUE;
@@ -253,7 +253,7 @@ bool pmk_check_lib(pmkcmd *cmd, htable *ht) {
 	check with *-config utility
 */
 
-bool pmk_check_config(pmkcmd *cmd, htable *ht) {
+bool pmk_check_config(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 	FILE	*rpipe;
 	char	version[16],
 		cfgcmd[MAXPATHLEN],
