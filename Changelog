@@ -3,6 +3,7 @@
  * rewritten pkg_recurse() to use pkg_cell_add().
  * updated test/pkgconfig_test.c in sync pkgconfig support changes.
  * wished happy new year :)
+ * introduced internal pkgconfig support in CHECK_PKG_CONFIG.
 
 31 Dec 2003 mipsator
  * added str_to_dynary_adv() to handle numerous separators.
