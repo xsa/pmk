@@ -36,13 +36,9 @@ all: $(PREMAKE) $(SETUP)
 	$(CC) $(CFLAGS) -c $<
 
 $(PREMAKE): $(P_OBJS)
-	@echo ""
-	@echo "Building ${PREMAKE}"
 	$(CC) -o $(PREMAKE) $(LDFLAGS) $(P_OBJS)
 
 $(SETUP): $(S_OBJS)
-	@echo ""
-	@echo "Building ${SETUP}"
 	$(CC) -o $(SETUP) $(LDFLAGS) $(S_OBJS)
 
 install: pmk pmksetup
@@ -55,8 +51,6 @@ install: pmk pmksetup
 	$(INSTALL) -m 444 $(SETUP).8 $(PREFIX)/man/man8/
 
 clean:
-	@echo ""
-	@echo "Cleaning ..."
 	rm -f $(P_OBJS) $(S_OBJS) $(PREMAKE) $(SETUP) *.core
 
 deinstall:

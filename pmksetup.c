@@ -46,11 +46,11 @@
 
 /* XXX override PREMAKE_CONFIG_PATH for test purpose */
 #ifdef PMKSETUP_DEBUG
-#	undef PREMAKE_CONFIG_PATH
-#	define PREMAKE_CONFIG_PATH	"samples/pmk.conf.sample"
-#	define PREMAKE_CONFIG_TMP	"/tmp/pmk.notrandom"
+	#undef PREMAKE_CONFIG_PATH
+	#define PREMAKE_CONFIG_PATH	"samples/pmk.conf.sample"
+	#define PREMAKE_CONFIG_TMP	"/tmp/pmk.notrandom"
 #else
-#	define PREMAKE_CONFIG_TMP	"/tmp/pmk.XXXXXXXX"
+	#define PREMAKE_CONFIG_TMP	"/tmp/pmk.XXXXXXXX"
 #endif
 
 char	sfn[MAXPATHLEN];	/* scratch file name */		
