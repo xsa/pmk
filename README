@@ -22,6 +22,10 @@ installation that needs root privileges and that allows all users to
 access pmk. The second one is the "user mode" that installs binaries in
 $HOME/bin/ and data in $HOME/.pmk/ of the user doing the installation.
 
+Note: If you got pmkcfg.sh from cvs, it won't have the exec bit set.
+Therefore you will have to 'chmod u+x pmkcfg.sh' before configuring pmk as
+described below:
+
 - There are two targets to configure pmk before building it.
 
  Configuring with root mode:
