@@ -1,6 +1,6 @@
 common :
 - tutorial
-- improve USER_TEST to make USER_MODE (aka non root pmk).
++ improve USER_TEST to make USER_MODE (aka non root pmk).
 
 pmk :
 + update pmk.1
@@ -12,10 +12,9 @@ pmk :
 	- VPATH ?
 - cache ? (hash table with binary location, ...)
 - more C++ support
-+ CHECK_VARIABLE
 - verify in CHECK_BINARY that program has executable right ?
 - convert gdata.labl to pmk objects
-- make checks on hash_add() in autoconf.c (void func => bool func)
+- checks hash_add() in autoconf.c (void func => bool func)
 
 pmksetup :
 - missing checks :

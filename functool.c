@@ -532,6 +532,7 @@ char *parse_idtf(char *pstr, char *pbuf, size_t size) {
 */
 
 char *process_string(char *pstr, htable *pht) {
+	bool	 bs = false;
 	char	 buf[OPT_VALUE_LEN],
 		 var[OPT_NAME_LEN],
 		*pvar,
@@ -542,32 +543,61 @@ char *process_string(char *pstr, htable *pht) {
 	pbuf = buf;
 
 	while ((*pstr != CHAR_EOS) && (size > 0)) {
-		if (*pstr == '$') {
-			/* found variable */
-			pstr++;
-			pstr = parse_idtf(pstr, var, size);
-			if (pstr == NULL) {
-/*				debugf("parse_idtf returned null."); XXX */
-				return(NULL);
-			} else {
-				/* check if identifier exists */
-				pvar = hash_get(pht, var);
-				if (pvar != NULL) {
-					/* identifier found, append value */
-					while ((*pvar != CHAR_EOS) && (size > 0)) {
-						*pbuf = *pvar;
-						pbuf++;
-						pvar++;
-						size--;
+		switch(*pstr) {
+			case '\\' :
+				bs = true;
+				pstr++;
+				break;
+
+			case '$' :
+				if (bs == false) {
+					/* found variable */
+					pstr++;
+					pstr = parse_idtf(pstr, var, size);
+					if (pstr == NULL) {
+/*						debugf("parse_idtf returned null."); XXX */
+						return(NULL);
+					} else {
+						/* check if identifier exists */
+						pvar = hash_get(pht, var);
+						if (pvar != NULL) {
+							/* identifier found, append value */
+							while ((*pvar != CHAR_EOS) && (size > 0)) {
+								*pbuf = *pvar;
+								pbuf++;
+								pvar++;
+								size--;
+							}
+						}
 					}
+				} else {
+					/* copy character */
+					*pbuf = *pstr;
+					pbuf++;
+					pstr++;
+					size--;
+					bs = false;
 				}
-			}
-		} else {
-			/* copy character */
-			*pbuf = *pstr;
-			pbuf++;
-			pstr++;
-			size--;
+				break;
+
+			default :
+				if (bs == true) {
+					*pbuf = '\\';
+					pbuf++;
+					pstr++;
+					size--;
+					if (size == 0) {
+/*						debugf("overflow."); XXX */
+						return(NULL);
+					}
+					bs = false;
+				}
+				/* copy character */
+				*pbuf = *pstr;
+				pbuf++;
+				pstr++;
+				size--;
+				break;
 		}
 	}
 

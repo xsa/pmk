@@ -66,14 +66,6 @@
 #	define MAXPATHLEN 512
 #endif
 
-#ifdef USER_TEST
-#	define SYSCONFDIR	"./"
-#endif
-
-#ifndef SYSCONFDIR
-#	define SYSCONFDIR	"/etc"
-#endif
-
 #ifndef TRUE
 #	define TRUE	1
 #	define FALSE	0
@@ -89,7 +81,7 @@
 #define PREMAKE_CONFIG		"pmk.conf"
 #define PREMAKE_LOG		"pmk.log"
 
-#define PREMAKE_CONFIG_PATH	SYSCONFDIR "/" PREMAKE_CONFIG 
+#define PREMAKE_CONFIG_PATH	CONFDIR "/" PREMAKE_CONFIG 
 
 /*
 	pmk.conf keys

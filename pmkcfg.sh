@@ -31,12 +31,20 @@
 # defines
 #
 
-testfile="cfgtest.c"
-testbin="cfgtest"
+prefix="/usr/local"
+sysdir="/etc"
+sconf="$sysdir/pmk"
+
+um_prfx='$(HOME)'
+
+testfile="./cfgtest.c"
+testbin="./cfgtest"
 
 template="compat/compat.h.in"
 compat="compat/compat.h"
-temporary="compat/compat.tmp"
+maketmpl="./Makefile.pmk"
+makefile="./Makefile"
+temporary="./pmkcfg.tmp"
 
 #
 # functions
@@ -56,10 +64,10 @@ int main() {
 EOF
 
 	if $CC -o $testbin $testfile >/dev/null 2>&1; then
-		do_sed "def" "$include"
+		templ_sed "def" "$include"
 		echo "yes"
 	else
-		do_sed "udef" "$include"
+		templ_sed "udef" "$include"
 		echo "no"
 	fi
 	rm -f $testfile $testbin
@@ -81,10 +89,10 @@ int main() {
 EOF
 
 	if $CC -o $testbin $testfile >/dev/null 2>&1; then
-		do_sed "def" "$function"
+		templ_sed "def" "$function"
 		echo "yes"
 	else
-		do_sed "udef" "$function"
+		templ_sed "udef" "$function"
 		echo "no"
 	fi
 	rm -f $testfile $testbin
@@ -107,17 +115,16 @@ int main() {
 EOF
 
 	if $CC -o $testbin $testfile >/dev/null 2>&1; then
-		do_sed "def" "$type"
+		templ_sed "def" "$type"
 		echo "yes"
 	else
-		do_sed "udef" "$type"
+		templ_sed "udef" "$type"
 		echo "no"
 	fi
 	rm -f $testfile $testbin
 }
 
-
-do_sed() {
+templ_sed() {
 	sed_uc=`echo "$2" | tr [a-z] [A-Z] | tr . _`
 	case $1 in
 		def)	sed_str="#define HAVE_$sed_uc 1";;
@@ -126,17 +133,49 @@ do_sed() {
 	sed_tag="@DEF__$sed_uc@"
 
 	cp $compat $temporary
-	cat $temporary | sed -e "s/$sed_tag/$sed_str/" > $compat
+	cat $temporary | sed "s/$sed_tag/$sed_str/" > $compat
 	rm -f $temporary
 }
 
+mkf_sed() {
+	sed_var="$1"
+	sed_val="$2"
+
+	cp $makefile $temporary
+	cat $temporary | sed "s,@$sed_var@,$sed_val," > $makefile
+	rm -f $temporary
+}
 
 #
 # init
 #
 
 cp $template $compat
+cp $maketmpl $makefile
 
+if [ "$1" = 'usermode' ]; then
+	echo 'USERMODE ON.'
+
+	mkf_sed 'USERMODE' '-DUSERMODE'
+	mkf_sed 'BASE' "$um_prfx"
+	mkf_sed 'CONFDIR' '$(BASE)/.pmk'
+	mkf_sed 'BINDIR' '$(BASE)/bin'
+	mkf_sed 'SBINDIR' '$(BASE)/bin'
+	mkf_sed 'DATADIR' '$(CONFDIR)'
+	mkf_sed 'MANDIR' '$(CONFDIR)'
+else
+	echo "USERMODE OFF."
+
+	mkf_sed 'USERMODE' ''
+	mkf_sed 'BASE' "$prefix"
+	mkf_sed 'CONFDIR' '$(SYSCONFDIR)/pmk'
+	mkf_sed 'BINDIR' '$(BASE)/bin'
+	mkf_sed 'SBINDIR' '$(BASE)/sbin'
+	mkf_sed 'DATADIR' '$(BASE)/share/$(PREMAKE)'
+	mkf_sed 'MANDIR' '$(BASE)/man'
+fi
+
+mkf_sed 'SYSCONFDIR' "$sysdir"
 
 #
 # strlcpy check
