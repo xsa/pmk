@@ -577,7 +577,7 @@ void char_replace(char *buf, const char search, const char replace) {
  * Simple formated verbose function
  */
 void verbosef(const char *fmt, ...) {
-	char	buf[256];
+	char	buf[MAX_ERR_MSG_LEN];
 	va_list	plst;
 
 	if (verbose_flag == 1) {
