@@ -128,7 +128,13 @@ void	prscell_destroy(prscell *pcell) {
 }
 
 /*
-	get quoted string
+	get quoted string content
+
+	pstr : current parsing cursor
+	buffer : storage buffer
+	size : size of buffer
+
+	return : new parsing cursor
 */
 
 char *parse_quoted(char *pstr, char *buffer, size_t size) {
@@ -170,6 +176,12 @@ char *parse_quoted(char *pstr, char *buffer, size_t size) {
 /*
 	get list
 
+	pstr : current parsing cursor
+	buffer : storage buffer
+	size : size of buffer
+
+	return : new parsing cursor
+
 	NOTE: code is especially redundant as it will create pmk object later.
 */
 
@@ -199,23 +211,36 @@ char *parse_list(char *pstr, char *buffer, size_t size) {
 }
 
 /*
-	get word XXX
+	get word
+
+	pstr : current parsing cursor
+	buffer : storage buffer
+	size : size of buffer
+
+	return : new parsing cursor
 */
 
 char *parse_word(char *pstr, char *buffer, size_t size) {
 	char	*rptr;
 
 	switch (*pstr) {
+		/* found a quoted string */
 		case '"' :
 			pstr++;
 			rptr = parse_quoted(pstr, buffer, size);
 			break;
 
+		/* found a list */
 		case '(' :
 			pstr++;
 			rptr = parse_list(pstr, buffer, size);
 			break;
 
+/* XXX for future support of variables
+		case '$' :
+			XXX TODO variable support code
+			break;
+*/
 		default :
 			while ((isalnum(*pstr) != 0) || (*pstr == '_')) {
 				if (size > 1) {
@@ -237,6 +262,10 @@ char *parse_word(char *pstr, char *buffer, size_t size) {
 
 /*
 	skip blank character(s)
+
+	pstr : current parsing cursor
+
+	return : new parsing cursor
 */
 
 char *skip_blank(char *pstr) {
@@ -253,7 +282,7 @@ char *skip_blank(char *pstr) {
 	command : pmkcmd structure where to store the command and label
 	pgd : global data structure (for pmkfile name)
 
-	returns a boolean
+	return : boolean
 */
 
 bool parse_cell(char *line, prscell *pcell) {
@@ -366,7 +395,7 @@ bool parse_cell(char *line, prscell *pcell) {
 	pgd : global data structure (for pmkfile name)
 	display : enable error messages if true
 
-	returns a boolean
+	return : boolean
 */
 
 bool parse_opt(char *line, htable *ht) {
@@ -452,7 +481,7 @@ bool parse_opt(char *line, htable *ht) {
 	fd : file descriptor
 	gdata : pmkdata struct
 
-	returns a boolean
+	return : boolean
 */
 
 bool parse(FILE *fp, prsdata *pdata) {
