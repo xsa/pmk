@@ -55,6 +55,9 @@
 #define CC_TEST_BIN	TMPDIR "/cc_test_bin"
 #define CC_TEST_FORMAT	"%s -o %s %s >%s 2>&1"
 
+#define DEF_VERSION	"#define CC_V\t%s"
+#define DEF_NOVERSION	"#undef CC_V"
+
 /* shared libs compiler flags */
 
 #define SCF_GNU		"-fPIC"
@@ -71,27 +74,26 @@
 	"/* %s */\n" \
 	"#ifdef %s\n" \
 	"#define CC_ID\t\"%s\"\n" \
-	"#define CC_V\t%s\n" \
+	"%s\n" \
 	"#endif\n" \
 	"\n"
 
-/*  */
+/* footer of test code */
 #define COMP_TEST_FOOTER \
 	"/* unknown compiler found */\n" \
 	"#ifndef CC_ID\n" \
 	"#define CC_ID\t\"unknown\"\n" \
 	"#endif\n" \
 	"\n" \
-	"/* no version */\n" \
-	"#ifndef CC_V\n" \
-	"#define CC_V\t0\n" \
-	"#endif\n" \
-	"\n" \
 	"int main() {\n" \
 	"/* compiler id */\n" \
 	"\tprintf(\"%%s\\n\", CC_ID);\n" \
 	"/* compiler version */\n" \
+	"#ifdef CC_V\n" \
 	"\tprintf(\"%%d\\n\", CC_V);\n" \
+	"#else\n" \
+	"\tprintf(\"unknown\\n\");\n" \
+	"#endif\n" \
 	"\treturn(0);\n" \
 	"}\n"
 
