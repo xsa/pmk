@@ -66,6 +66,11 @@ typedef struct {
 	hnode	*nodetab; /* array of hnode */
 } htable;
 
+typedef struct {
+	char	key[MAX_HASH_KEY_LEN],
+		value[MAX_HASH_VALUE_LEN];
+} hpair;
+
 
 int	hash_compute(char *, int);
 htable	*hash_init(int);

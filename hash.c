@@ -110,6 +110,12 @@ htable *hash_init(int table_size) {
 }
 
 /*
+	resizing hash table
+
+	ht : hash table to resize
+	newsize : new size
+
+	returns 1 on success else 0
 */
 
 int hash_resize(htable *ht, int newsize) {
@@ -234,10 +240,13 @@ int hash_add(htable *pht, char *key, char *value) {
 	}
 
 	
-	/* if okay put key & value in a new cell */
 	phc = (hcell *) malloc(sizeof(hcell));
-	strlcpy(phc->key, key, MAX_HASH_KEY_LEN);
-	strlcpy(phc->value, value, MAX_HASH_VALUE_LEN);
+	if (phc == NULL)
+		return(rval);
+
+	/* if okay put key & value in a new cell */
+	strlcpy(phc->key, key, MAX_HASH_KEY_LEN); /* XXX test ? */
+	strlcpy(phc->value, value, MAX_HASH_VALUE_LEN); /* XXX test ? */
 
 	phn = &pht->nodetab[hash];
 	rval = hash_add_cell(phn, phc);
@@ -298,6 +307,42 @@ int hash_add_cell(hnode *phn, hcell *phc) {
 			}
 		}
 	}
+}
+
+/*
+	add an array into the hash table
+
+	ht : storage hash table
+	ary : array to add
+	size : size of the array
+
+	returns 1 on succes else 0
+*/
+
+int hash_add_array(htable *pht, hpair *php, int size) {
+	htable	*pmht;
+	int	i,
+		error = 0,
+		rval = 0;
+
+	pmht = hash_init(size);
+	if (pmht == NULL)
+		return(0);
+
+	for (i = 0 ; (i < size) && (error == 0) ; i ++) {
+		if (hash_add(pmht, php[i].key, php[i].value) == HASH_ADD_FAIL)
+			error = 1;
+	}
+
+	if (error == 0) {
+		hash_merge(pht, pmht);
+	} else {
+		rval = 1;
+	}
+
+	hash_destroy(pmht);
+
+	return(rval);
 }
 
 /*

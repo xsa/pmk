@@ -22,6 +22,7 @@ int main() {
 		*val,
 		**keys = NULL;
 	htable	*hp;
+	hpair	ahp[3];
 
 	printf("Testing init\n");
 	hp = hash_init(TAB_SIZE / 2);
@@ -50,15 +51,17 @@ int main() {
 
 
 	printf("Adding 3 test keys\n");
-	hash_add(hp, "test1", "test value");
-	hash_add(hp, "test2", "test value");
-	hash_add(hp, "test3", "test value");
+	for (i = 0 ; i < 3 ; i++) {
+		snprintf(ahp[i].key, sizeof(ahp[i].key), "test%d", i + 1);
+		snprintf(ahp[i].value, sizeof(ahp[i].value), "%s", "test value");
+	}
+	hash_add_array(hp, ahp, 3);
 
 	keys = hash_keys(hp);
 	n = hash_nbkey(hp);
 	printf("Displaying %d keys :\n", n);
 	for(i = 0 ; i < n ; i++) {
-		printf("\t%s\n", keys[i]);
+		printf("\t%s => %s\n", keys[i], hash_get(hp, keys[i]));
 	}
 
 	printf("Removing 3 test keys\n");
