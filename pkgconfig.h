@@ -87,9 +87,9 @@ typedef struct {
 
 /* functions protos */
 
-pkgcell		*pkgcell_init();
+pkgcell		*pkgcell_init(void);
 void		 pkgcell_destroy(pkgcell *);
-pkgdata		*pkgdata_init();
+pkgdata		*pkgdata_init(void);
 void		 pkgdata_destroy(pkgdata *);
 
 bool		 scan_dir(char *, pkgdata *);
@@ -97,13 +97,14 @@ bool		 pkg_collect(char *, pkgdata *);
 bool		 parse_keyword(pkgcell *, char *, char *);
 char		*process_variables(char *, htable *);
 pkgcell		*parse_pc_file(char *);
-pkgcell		*pkg_cell_add(pkgdata *ppd, char *mod);
+pkgcell		*pkg_cell_add(pkgdata *, char *);
 bool		 pkg_recurse(pkgdata *, char *);
+char		*pkg_single_append(char *, char *);
 char		*pkg_get_cflags(pkgdata *);
 char		*pkg_get_cflags_adv(pkgdata *, unsigned int);
 char		*pkg_get_libs(pkgdata *);
 char		*pkg_get_libs_adv(pkgdata *, unsigned int);
-bool		 pkg_mod_exists(pkgdata *ppd, char *mod);
+bool		 pkg_mod_exists(pkgdata *, char *);
 
 int		 compare_version(char *, char *);
 

@@ -1,3 +1,7 @@
+22 Dec 2004 mipsator
+ * fixed a lot of compiler warnings (almost all about comparison between
+   signed and unsigned) that were revealed with 'aggressive' options.
+
 20 Dec 2004 mipsator
  * reworked CHECK_LIB in the same spirit as CHECK_HEADER.
  * replaced remaining copy_text_file() by fcopy().

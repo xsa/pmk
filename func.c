@@ -240,11 +240,11 @@ bool pmk_elcond(pmkcmd *cmd, prsnode *pnode, pmkdata *pgd) {
 */
 
 bool pmk_switches(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
-	char	*value;
-	hkeys	*phk;
-	int	 i,
-		 n = 0;
-	pmkobj	*po;
+	char		*value;
+	hkeys		*phk;
+	pmkobj		*po;
+	unsigned int	 i,
+			 n = 0;
 
 	pmk_log("\n* Parsing switches\n");
 
@@ -1229,7 +1229,7 @@ bool pmk_check_pkg_config(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 
 		/* set config tool filename */
 		if (cfgtcell_get_binary(pgd->cfgt, target, pc_cmd, sizeof(pc_cmd)) == false) {
-			if (snprintf(pc_cmd, sizeof(pc_cmd), "%s-config", target) >= sizeof(pc_cmd)) {
+			if (snprintf(pc_cmd, sizeof(pc_cmd), "%s-config", target) >= (int) sizeof(pc_cmd)) {
 				errorf("overflow in snprintf().");
 				return(false);
 			}
@@ -1848,7 +1848,7 @@ bool pmk_setparam_detect(pmkcmd *cmd, prsopt *popt, pmkdata *pgd) {
 				pld = check_lang_comp(pstr);
 				if (pld != NULL) {
 					/* check if an override exists for compiler flags */
-					if (snprintf(buf, sizeof(buf), "%s_%s", pld->slflg, cinfo.c_id) >= sizeof(buf)) {
+					if (snprintf(buf, sizeof(buf), "%s_%s", pld->slflg, cinfo.c_id) >= (int)sizeof(buf)) {
 						errorf("overflow.\n");
 						return(false);
 					}
@@ -1872,7 +1872,7 @@ bool pmk_setparam_detect(pmkcmd *cmd, prsopt *popt, pmkdata *pgd) {
 						return(false);
 
 					/* check if an override exists for linking flags */
-					if (snprintf(buf, sizeof(buf), "%s_%s", SL_LDFLAG_VARNAME, cinfo.c_id) >= sizeof(buf)) {
+					if (snprintf(buf, sizeof(buf), "%s_%s", SL_LDFLAG_VARNAME, cinfo.c_id) >= (int) sizeof(buf)) {
 						errorf("overflow.\n");
 						return(false);
 					}
@@ -1965,7 +1965,7 @@ bool pmk_set_variable(pmkcmd *cmd, prsopt *popt, pmkdata *pgd) {
 				errorf("unable to build define name for '%s'.", popt->key);
 				return(false);
 			}
-			if (snprintf(buffer, sizeof(buffer), "#define %s \"%s\"", popt->key, value) >= sizeof(buffer)) {
+			if (snprintf(buffer, sizeof(buffer), "#define %s \"%s\"", popt->key, value) >= (int) sizeof(buffer)) {
 				errorf("buffer overflow for define value of '%s'.", popt->key);
 				return(false);
 			}

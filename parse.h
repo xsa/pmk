@@ -160,7 +160,7 @@ htable	*keyword_hash(prskw [], int);
 char	*skip_blank(char *pstr);
 void	 skip_useless(prseng *);
 char	*parse_identifier(char *, char *, size_t);
-char	*parse_obsolete(char *, char *, size_t);
+char	*parse_label(char *, char *, size_t);
 char	*parse_bool(char *, pmkobj *, size_t);
 char	*parse_quoted(char *, pmkobj *, size_t);
 char	*parse_list(char *, pmkobj *, size_t);

@@ -85,8 +85,10 @@ int main(int argc, char *argv[]) {
 			 error = 0;
 	prsopt		 *ppo;
 	
-	extern int	 optind,
-			 errno;
+	extern int	 optind;
+#ifndef errno
+	extern int	 errno
+#endif
 
 
 #ifndef PMK_USERMODE
@@ -356,10 +358,10 @@ bool gather_data(htable *pht) {
  * 	pht: hash table
  */
 void write_new_data(htable *pht) {
-	char	*val;
-	int	 i;
-	hkeys	*phk;
-	prsopt	*ppo;
+	char		*val;
+	hkeys		*phk;
+	prsopt		*ppo;
+	unsigned int	 i;
 
 	phk = hash_keys(pht);
 	if (phk != NULL) {
@@ -618,11 +620,11 @@ bool get_env_vars(htable *pht) {
  *	return: boolean
  */
 bool get_binaries(htable *pht) {
-	char	 fbin[MAXPATHLEN],	/* full binary path */
-		*pstr;
-	dynary	*stpath;
-	int	 i;
-	prsopt	*ppo;
+	char		 fbin[MAXPATHLEN],	/* full binary path */
+			*pstr;
+	dynary		*stpath;
+	prsopt		*ppo;
+	unsigned int	 i;
 
         /*
          * splitting the PATH variable and storing in a
@@ -822,14 +824,14 @@ bool check_libpath(htable *pht) {
  */
 
 bool get_cpu_data(htable *pht) {
-	char	*uname_m;
-	char	*pstr;
-	hkeys	*phk;
-	htable	*spht;
-	int	 i;
-	pmkobj	*po;
-	prsdata	*pdata;
-	prsopt	*ppo;
+	char		*uname_m;
+	char		*pstr;
+	hkeys		*phk;
+	htable		*spht;
+	pmkobj		*po;
+	prsdata		*pdata;
+	prsopt		*ppo;
+	unsigned int	 i;
 
 
 	ppo = hash_get(pht, PMKCONF_OS_ARCH);

@@ -99,7 +99,7 @@ bool get_line(FILE *fd, char *line, size_t lsize) {
 bool env_to_opt(char *env_name, pmkcmdopt *opt) {
 	bool	 rval;
 	char	*env_val;
-	int	 s;
+	size_t	 s;
 
 	env_val = getenv(env_name);
 	if (env_val == NULL) {

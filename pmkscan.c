@@ -185,13 +185,13 @@ char *regex_check(char *pattern, char *line) {
 */
 
 bool idtf_check(char *idtf, htable *ht_fam, htable *phtgen, htable *pht_md) {
-	char	 buf[TMP_BUF_LEN],
-		*pval,
-		*p;
-	dynary	*da;
-	int	 i;
-	pmkobj	*po;
-	potype	 pot;
+	char		 buf[TMP_BUF_LEN],
+			*pval,
+			*p;
+	dynary		*da;
+	pmkobj		*po;
+	potype		 pot;
+	unsigned int	 i;
 
 	/* check if data exist for this identifier */
 	po = hash_get(ht_fam, idtf);
@@ -312,10 +312,10 @@ bool parse_c_file(char *filename, scandata *sdata, htable *phtgen, htable *pht_m
 */
 
 bool output_file(char *ofile, htable *pht) {
-	FILE	*fp;
-	char	*value;
-	hkeys	*phk;
-	int	 i;
+	FILE		*fp;
+	char		*value;
+	hkeys		*phk;
+	unsigned int	 i;
 
 	phk = hash_keys(pht);
 	if (phk != NULL) {

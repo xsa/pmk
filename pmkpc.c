@@ -125,7 +125,7 @@ void optcell_destroy(optcell *poc) {
 	return : boolean
 */
 
-bool pcgetopt(int ac, char *av[], optcell *poc) {
+bool pcgetopt(unsigned int ac, char *av[], optcell *poc) {
 	static char	 buf[PMKPC_MAX_OPT_SIZE];
 	char		*opt,
 			*pstr;
@@ -289,11 +289,11 @@ void clean(pcdata *p_cd) {
 */
 
 void usage(void) {
-	int	i;
-	char	option[MAXPATHLEN];
-	size_t	alen,	/* alignement length */
-		olen,	/* option length */
-		cursor;
+	char		option[MAXPATHLEN];
+	size_t		alen,	/* alignement length */
+			olen,	/* option length */
+			cursor;
+	unsigned int	i;
 
 	alen = strlen(PMKPC_USAGE_ALIGN);
 
@@ -386,7 +386,7 @@ int main(int argc, char *argv[]) {
 		exit(EXIT_FAILURE);
 	}
 
-	while (poc->idx != argc) {
+	while (poc->idx != (unsigned int) argc) {
 		if (pcgetopt(argc, argv, poc) == true) {
 #ifdef PMKPC_DEBUG
 debugf("{main} id = %d", poc->id);
@@ -692,7 +692,7 @@ debugf("module not found");
 
 			/* set config tool filename */
 			if (cfgtcell_get_binary(pcd, mod, pc_cmd, sizeof(pc_cmd)) == false) {
-				if (snprintf(pc_cmd, sizeof(pc_cmd), "%s-config", mod) >= sizeof(pc_cmd)) {
+				if (snprintf(pc_cmd, sizeof(pc_cmd), "%s-config", mod) >= (int) sizeof(pc_cmd)) {
 					errorf("overflow in snprintf while building configure tool name.");
 					exit(EXIT_FAILURE);
 				}

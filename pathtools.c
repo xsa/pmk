@@ -61,7 +61,7 @@
 */
 
 bool chkpath(char *path, char *buffer) {
-	bool	 exit = false,
+	bool	 bexit = false,
 		 dot = false,
 		 dotdot = false,
 		 sep = false;
@@ -72,7 +72,7 @@ bool chkpath(char *path, char *buffer) {
 	pstr = path;
 	pbuf = buffer;
 
-	while ((exit == false) && (s > 0)) {
+	while ((bexit == false) && (s > 0)) {
 		switch (*pstr) {
 			case CHAR_DOT :
 				/* found a dot */
@@ -89,7 +89,7 @@ bool chkpath(char *path, char *buffer) {
 				break;
 
 			case CHAR_EOS :
-				exit = true;
+				bexit = true;
 				/* process end of line as a separator too */
 
 			case CHAR_SEP :
@@ -132,6 +132,7 @@ bool chkpath(char *path, char *buffer) {
 					/* if previous har was a separator the drop it */
 				}
 				break;
+
 			default :
 				/* dot already found ? */
 				if (dot == true) {
@@ -190,7 +191,7 @@ bool chkpath(char *path, char *buffer) {
 */
 
 bool relpath(char *from, char *to, char *buffer) {
-	bool	exit = false;
+	bool	bexit = false;
 	char	from_buf[MAXPATHLEN],
 		to_buf[MAXPATHLEN];
 
@@ -209,12 +210,12 @@ bool relpath(char *from, char *to, char *buffer) {
 	buffer[0] = CHAR_EOS;
 
 	/* loop until common base is dropped */
-	while (exit == false) {
+	while (bexit == false) {
 		if ((*from == *to) && (*from != CHAR_EOS)) {
 			from++;
 			to++;
 		} else {
-			exit = true;
+			bexit = true;
 		}
 	}
 
@@ -306,7 +307,7 @@ bool uabspath(char *base, char *upath, char *buffer) {
 */
 
 bool makepath(char *path, mode_t mode) {
-	bool		 exit = false;
+	bool		 bexit = false;
 	char		 save,
 			*pstr,
 			*copy;
@@ -321,7 +322,7 @@ bool makepath(char *path, mode_t mode) {
 	copy = strdup(path);
 	pstr = copy;
 	pstr++; /* skip leading separator */
-	while (exit != true) {
+	while (bexit != true) {
 		if ((*pstr == CHAR_SEP) || (*pstr == CHAR_EOS)) {
 			/* separator found, replacing to make  */
 			save = *pstr;
@@ -337,7 +338,7 @@ bool makepath(char *path, mode_t mode) {
 
 			/* put separator back */
 			if (save == CHAR_EOS) {
-				exit = true;
+				bexit = true;
 			} else {
 				*pstr = save;
 			}
