@@ -1226,8 +1226,8 @@ bool pmk_check_variable(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 
 		value = po_get_str(hash_get(ht, "VALUE"));
 		if (value == NULL) {
-// XXX !!!			record_val(gdata->htab, var, "");
-// XXX ???			record_def(gdata->htab, var, true);
+/* XXX !!!			record_val(gdata->htab, var, ""); */
+/* XXX ???			record_def(gdata->htab, var, true); */
 			label_set(gdata->labl, cmd->label, true);
 
 			rval = true;
@@ -1236,8 +1236,8 @@ bool pmk_check_variable(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 
 			if (strncmp(value, varval, sizeof(varval)) == 0) {
 				pmk_log("yes.\n");
-// XXX !!!				record_val(gdata->htab, var, "");
-// XXX ???				record_def(gdata->htab, var, true);
+/* XXX !!!				record_val(gdata->htab, var, ""); */
+/* XXX ???				record_def(gdata->htab, var, true); */
 				label_set(gdata->labl, cmd->label, true);
 
 				rval = true;
