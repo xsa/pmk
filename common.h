@@ -37,7 +37,15 @@
 #ifndef _PMK_COMMON_H_
 #define _PMK_COMMON_H_
 
+#include <sys/stat.h>
+#include <fcntl.h>
+
 #include "pmk.h"
+
+
+#ifndef S_BLKSIZE
+#define S_BLKSIZE	512	/* standard block size */
+#endif
 
 #define MAXTOKENS	128	/* max slots in the paths array */
 
@@ -78,5 +86,6 @@ void	 pmk_log_close(void);
 bool	 pmk_log(const char *, ...);
 
 bool	 copy_text_file(char *, char *);
+bool	 fcopy(char *, char *, mode_t);
 
 #endif /* _PMK_COMMON_H_ */

@@ -474,3 +474,71 @@ bool copy_text_file(char *src_file, char *dst_file) {
 
 	return(rval);
 }
+
+/*
+	copy file
+
+	src : file to copy
+	dst : destination file
+	mode : destination perms
+
+	return : boolean
+*/
+
+bool fcopy(char *src, char *dst, mode_t mode) {
+	static char	cbuf[S_BLKSIZE];
+	bool		do_loop = true,
+			rval = true;
+	int		src_fd,
+			dst_fd;
+	ssize_t		rsz;
+
+	/* try to open both source and destination files */
+	src_fd = open(src, O_RDONLY, 0);
+	if (src_fd == -1) {
+		errorf("Cannot open %s.", src);
+		return(false);
+	}
+/*debugf("mode = %o", mode);*/
+	dst_fd = open(dst, O_WRONLY | O_CREAT | O_TRUNC, mode);
+	if (dst_fd == -1) {
+		errorf("Cannot open %s.", dst);
+		return(false);
+	}
+
+	while (do_loop == true) {
+		/* reading data */
+		rsz = read(src_fd, cbuf, sizeof(cbuf));
+		switch(rsz) {
+			case -1:
+				/* read error */
+				errorf("Failed to read %s", src);
+				do_loop = false;
+				rval = false;
+				break;
+
+			case 0:
+				/* no more data to copy */
+				do_loop = false;
+				break;
+
+			default:
+				/* data read, trying to write */
+				if (write(dst_fd, cbuf, rsz) != rsz) {
+					/* write failed */
+					errorf("Failed to write %s", dst);
+					do_loop = false;
+					rval = false;
+				}
+				break;
+		}
+	}
+
+	close(src_fd);
+	close(dst_fd);
+
+	return(true);
+}
+
+
+
