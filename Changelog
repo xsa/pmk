@@ -3,6 +3,7 @@
 	DEBUG with values gathered from make.
  * changed target of get_make_var() from test to all.
  * enabled pmkinstall in Makefile and Makefile.pmk including man page.
+ * added pmkinstall man page.
 
 04 Nov 2003 mipsator
  * added makepath() in pathtools.
