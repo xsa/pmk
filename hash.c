@@ -150,7 +150,11 @@ int hash_destroy(htable *pht) {
 	key : key string
 	value : value string
 
-	returns 1 on succes
+	returns an error code :
+		HASH_ADD_FAIL : addition failed.
+		HASH_ADD_OKAY : added (no collision).
+		HASH_ADD_COLL : added (collision, key chained).
+		HASH_ADD_UPDT : key already exists, change value.
 */
 
 int hash_add(htable *pht, char *key, char *value) {
