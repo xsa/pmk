@@ -36,6 +36,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdarg.h>
 
 #include "compat/pmk_ctype.h"
 #include "compat/pmk_string.h"
@@ -617,4 +618,33 @@ bool process_required(pmkdata *pgd, pmkcmd *pcmd, bool required,
 	return(invert_bool(required));
 }
 
+/*
+	XXX
+*/
+
+bool c_file_builder(char *fnbuf, size_t fbsz, char *tmpl, ...) {
+	FILE	*tfp;
+	int	 r;
+	va_list	 ap;
+
+	/* open temporary file */
+	tfp = tmps_open(TEST_FILE_NAME, "w", fnbuf, fbsz, strlen(C_FILE_EXT));
+	if (tfp == NULL) {
+		/* verbose(VERBOSE_LEVEL_MAX, "c_file_builder: tmps_open() failed"); */
+		return(false); /* failed to open */
+	}
+
+	va_start(ap, tmpl);
+	r = vfprintf(tfp, tmpl, ap);
+	va_end(ap);
+
+	fclose(tfp);
+
+	/* vprintf failed */
+	if (r == -1)
+		return(false);
+
+	/* everything is okay, tchuss */
+	return(true);
+}
 

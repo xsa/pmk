@@ -44,9 +44,21 @@
 			"#include <%s>\n" \
 			"int main() {return(0);}"
 
+/* args: header_name macro_name */
+#define INC_MACRO_TEST_CODE	"#include <stdio.h>\n" \
+				"#include <%s>\n" \
+				"int main() {\n" \
+				"#ifdef %s\n" \
+				"return(0);\n" \
+				"#else\n" \
+				"break_build_process();\n" \
+				"#endif\n" \
+				"}"
+
+/* args: header_name func_name */
 #define INC_FUNC_TEST_CODE	"#include <stdio.h>\n" \
 				"#include <%s>\n" \
-				"void (*pmk_funcp)() = %s;\n" \
+				"void (*pmk_funcp)() = (void *) %s;\n" \
 				"int main() {\n" \
 				"return(0);}"
 
@@ -134,6 +146,7 @@
 #define KW_OPT_FUNCTION		"FUNCTION"
 #define KW_OPT_HEADER		"HEADER"
 #define KW_OPT_LIBS		"LIBS"
+#define KW_OPT_MACRO		"MACRO"
 #define KW_OPT_MAJOR		"MAJOR"
 #define	KW_OPT_MEMBER		"MEMBER"
 #define KW_OPT_MINOR		"MINOR"

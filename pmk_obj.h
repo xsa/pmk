@@ -48,11 +48,11 @@ typedef struct {
 } pmkobj;
 
 /* define pmk object types */
-#define PO_NULL		0
-#define PO_BOOL		1
-#define PO_STRING	2
-#define PO_LIST		3
-#define PO_HASH		4
+#define PO_NULL		0x00
+#define PO_BOOL		0x01
+#define PO_STRING	0x02
+#define PO_LIST		0x04
+#define PO_HASH		0x08
 
 
 pmkobj	*po_mk_bool(bool);

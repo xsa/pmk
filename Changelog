@@ -1,3 +1,7 @@
+19 Dec 2004 mipsator
+ * added c_file_builder() to reduce redundant code.
+ * added MACRO option in CHECK_HEADER to detect compiler macros in headers.
+
 11 Dec 2004 mipsator
  * added detection of 'id' and 'sudo' in pmksetup, idea from Sean Chittenden.
 

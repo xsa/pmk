@@ -52,6 +52,9 @@
 
 #define CHAR_VERSION_SEPARATOR	'.'
 
+#define C_FILE_EXT	".c"
+#define TEST_FILE_NAME	TMPDIR "/pmk_XXXXXXXX" C_FILE_EXT
+
 
 typedef struct {
 	char	name[LANG_NAME_LEN],
@@ -83,5 +86,6 @@ lgdata	*get_lang(htable *, pmkdata *);
 char	*get_comp_path(htable *, char *);
 bool	 check_cfgt_data(pmkdata *);
 bool	 process_required(pmkdata *, pmkcmd *, bool , char *, char *);
+bool	 c_file_builder(char *, size_t, char *, ...);
 
 #endif /* _PMK_FUNCTOOL_H_ */
