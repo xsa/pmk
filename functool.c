@@ -128,7 +128,7 @@ bool get_file_dir_path(char *filename, char *path, char *storage, int size) {
 	dynary	*bplst;
 
 	/* fill dynary with path */
-	bplst= str_to_dynary(path, CHAR_LIST_SEPARATOR);
+	bplst= str_to_dynary(path, PATH_STR_DELIMITER);
 	if (bplst == NULL) {
 		errorf("failed to put a path into a dynamic array.");
 		return(false);
