@@ -5,7 +5,7 @@ pmk :
 ~ finish pmk(1)
 ~ pmkfile(5)
 ~ compatibility with autoconf (progressing)
-- add support for CPP in pmk_check_include() and pmk_check_lib().
++ add support for CPP in pmk_check_include() and pmk_check_lib().
 - set CPPFLAGS
 - add CHECK_TYPE aka pmk_check_type()
 - set LDFLAGS ?

@@ -83,8 +83,8 @@ typedef struct {
 
 /* command type */
 typedef struct {
-	char		name[MAX_CMD_NAME_LEN],
-			label[MAX_LABEL_NAME_LEN];
+	char	*name,
+		*label;
 } pmkcmd;
 
 /* pmk data */
