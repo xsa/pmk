@@ -43,7 +43,7 @@ pmksetup:
 -----------------------------------------------------------------------
 	!	clean temporary files on error
 	-	missing checks :
-			- ECHO_N, ECHO_C, ECHO_T in a specific proc for autoconf variables.
+xavier			- ECHO_N, ECHO_C, ECHO_T in a specific proc for autoconf variables.
 		        . check install binary and use pmkinstall instead if not compatible.
 			- char unsigned (pmk ?)
 			- long double (pmk ?)
@@ -59,17 +59,17 @@ pmkscan
 
 pmkinstall
 -----------------------------------------------------------------------
-damien	~	full rewrite
+damien	~!	full rewrite
 		+ copy done
 		~ mode option (almost done)
 		- dir creation
-		- owner
-		- group
+		+ owner
+		+ group
 		- strip
 		- backup ?
 
 
 pmkpkg
 -----------------------------------------------------------------------
-damien	~ make specs, this tool should handle install and deinstall operations
+damien	~.	make specs, this tool should handle install and deinstall operations
 
