@@ -6,7 +6,7 @@ common :
 
 pmk :
 + update pmk.1
-+ update pmkfile.5 (VARNAME in CHECK_BINARY)
+? update pmkfile.5 (VARNAME in CHECK_BINARY)
 ~ compatibility with autoconf (progressing) :
 	- support for DEFS (-D options to pass to the compiler)
 	- support for LDFLAGS (misc linker options)
@@ -14,20 +14,21 @@ pmk :
 	- VPATH ?
 ! cache ? (hash table with binary location, ...)
 - more C++ support
-~ global LANG
+! finish global LANG
 ~ replace po_get_data
-- CHECK_VAR ? (cinepaint)
+- CHECK_VARIABLE ? (cinepaint)
 - verify in CHECK_BINARY that program has executable right ?
 
 pmksetup :
-~ pmk.conf(5)
+! pmk.conf(5) (new format with object)
 - missing checks :
 	+ endian type (HW_ENDIAN = BIG_ENDIAN, LITTLE_ENDIAN)
 	- char unsigned (pmk ?)
 	- long double (pmk ?)
 	- better check for install ?
 	- others ?
-! use main parser
++ use main parser
+! use objects in pmk.conf
 	
 pmkscan :
 - add more entries in pmkscan.dat
