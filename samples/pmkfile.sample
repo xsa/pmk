@@ -3,9 +3,9 @@
 
 # settings
 SETTINGS {
+ AC_COMPAT="samples/ac_config.h"
  LANG="C"
  TARGET=("Makefile.sample.pmk","config_sample.h.pmk","subdir/Makefile.subdir.pmk")
- AC_COMPAT="samples/ac_config.h"
 }
 
 # put some defines

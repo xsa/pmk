@@ -171,77 +171,51 @@ bool pmk_define(pmkcmd *cmd, prsnode *pnode, pmkdata *gdata) {
 
 /*
 	set target files (templates) to process
+	NOTE : now OBSOLETE with new format, kept for compatibility
 */
 
 bool pmk_target(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
-	dynary	*da;
-	int	 i = 0,
-		 n;
 	pmkobj	*po;
+	prsopt	 opt;
 
-	pmk_log("* Collecting targets\n");
+	pmk_log("* Parsing target\n");
 
+	strlcpy(opt.key, "TARGET", sizeof(opt.key));
+
+	/* check if TARGET has been provided */
 	po = hash_get(ht, "LIST");
-	if (po == NULL) {
-		errorf("LIST not assigned in TARGET.");
-		return(false);
-	}
-
-	da = po_get_list(po);
-	if (da == NULL) {
+	if (po != NULL) {
+		opt.value = po;
+	} else {
 		errorf("syntax error in LIST.");
 		return(false);
 	}
 
-	n = da_usize(da);
-	for (i=0 ; i < n ; i++) {
-		pmk_log("\tAdded '%s'.\n", da_idx(da, i));
-	}
-
-	gdata->tlist = da;
-
-	pmk_log("\tTotal %d target(s) added.\n", n);
-
-	return(true);
+	return(pmk_set_parameter(cmd, &opt, gdata));
 }
 
 /*
 	gnu autoconf compatibility
+	NOTE : now OBSOLETE with new format, kept for compatibility
 */
 
 bool pmk_ac_compat(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
-	char	*acfile,
-		*pstr;
+	char	*acfile;
+	prsopt	 opt;
 
-/* XXX must check if valid
-	pstr = (char *) hash_get(gdata->htab, "SYSCONFDIR");
-	hash_add(gdata->htab, "sysconfdir", strdup(pstr));
-*/
+	pmk_log("* Parsing ac_compat\n");
 
-	/* if a file is given then it will be parsed later */
+	strlcpy(opt.key, "AC_COMPAT", sizeof(opt.key));
+
+	/* check if FILENAME has been provided */
 	acfile= po_get_str(hash_get(ht, "FILENAME"));
 	if (acfile != NULL) {
-		gdata->ac_file = strdup(acfile);
+		opt.value = po_mk_str(acfile);
+	} else {
+		opt.value = po_mk_str("");
 	}
 
-	/* compatibility tags */
-	pstr = (char *) hash_get(gdata->htab, "PREFIX");
-	hash_add(gdata->htab, "prefix", strdup(pstr));
-	
-	hash_add(gdata->htab, "exec_prefix", strdup("${prefix}"));
-	hash_add(gdata->htab, "bindir", strdup("${exec_prefix}/bin"));
-	hash_add(gdata->htab, "sbindir", strdup("${exec_prefix}/sbin"));
-	hash_add(gdata->htab, "libexecdir", strdup("${exec_prefix}/libexec"));
-	hash_add(gdata->htab, "libdir", strdup("${exec_prefix}/lib"));
-	hash_add(gdata->htab, "datadir", strdup("${prefix}/share"));
-	hash_add(gdata->htab, "includedir", strdup("${prefix}/include"));
-	hash_add(gdata->htab, "mandir", strdup("${prefix}/man"));
-	hash_add(gdata->htab, "infodir", strdup("${prefix}/info"));
-
-	pstr = (char *) hash_get(gdata->htab, "BIN_INSTALL");
-	hash_add(gdata->htab, "INSTALL", strdup(pstr));
-
-	return(true);
+	return(pmk_set_parameter(cmd, &opt, gdata));
 }
 
 /*
@@ -1083,6 +1057,7 @@ bool pmk_set_parameter(pmkcmd *cmd, prsopt *popt, pmkdata *gdata) {
 	int	 i = 0,
 		 n;
 
+	/* gnu autoconf compatibility */
 	if (strncmp(popt->key, "AC_COMPAT", sizeof(popt->key)) == 0) {
 		pmk_log("\tSetting autoconf compatibility :\n");
 
@@ -1120,6 +1095,7 @@ bool pmk_set_parameter(pmkcmd *cmd, prsopt *popt, pmkdata *gdata) {
 		return(true);
 	}
 
+	/* global language */
 	if (strncmp(popt->key, "LANG", sizeof(popt->key)) == 0) {
 		pmk_log("\tSetting global language.\n");
 
@@ -1140,6 +1116,7 @@ bool pmk_set_parameter(pmkcmd *cmd, prsopt *popt, pmkdata *gdata) {
 		return(rval);
 	}
 
+	/* set target files */
 	if (strncmp(popt->key, "TARGET", sizeof(popt->key)) == 0) {
 		pmk_log("\tCollecting targets :\n");
 
@@ -1161,6 +1138,7 @@ bool pmk_set_parameter(pmkcmd *cmd, prsopt *popt, pmkdata *gdata) {
 		return(true);
 	}
 
+	/* found unknown setting */
 	pmk_log("\tunknown '%s' setting.\n", popt->key);
 	return(false);
 }
