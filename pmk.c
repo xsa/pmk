@@ -69,12 +69,14 @@ int		 cur_line = 0;
 */
 
 bool process_opt(htable *pht, prsopt *popt) {
-	if (hash_add(pht, popt->key, strdup(po_get_str(popt->value))) == HASH_ADD_FAIL) {
-		errorf("hash failure.");
-		return(false);
-	} else {
-		return(true);
+	if ((popt->opchar != CHAR_COMMENT) && (popt->opchar != CHAR_EOS)) {
+		/* add options that are not comment neither blank lines */
+		if (hash_add(pht, popt->key, strdup(po_get_str(popt->value))) == HASH_ADD_FAIL) {
+			errorf("hash failure.");
+			return(false);
+		}
 	}
+	return(true);
 }
 
 /*
@@ -471,34 +473,34 @@ int main(int argc, char *argv[]) {
 
 	if (enable_sw != NULL) {
 		/* command line switches to enable */
-		da = da_init();
-		if (str_to_dynary(enable_sw, ',', da) == true) {
+		da = str_to_dynary(enable_sw, ',');
+		if (da != NULL) {
 			pstr = da_pop(da);	
 			while (pstr != NULL) {
-				hash_add(gdata.labl, pstr, strdup("TRUE"));
+				hash_add(gdata.labl, pstr, strdup("TRUE")); /* XXX BOOL */
 				ovrsw++; /* increment number of overriden switches */
 				free(pstr);
 				pstr = da_pop(da);	
 			}
+			da_destroy(da);
 		}
-		da_destroy(da);
 	}
 
 	if (disable_sw != NULL) {
 		/* command line switches to disable */
-		da = da_init();
-		str_to_dynary(disable_sw, ',', da); /* XXX check */
-		do {
-			pstr = da_pop(da);
-			if (pstr != NULL) {
-				hash_add(gdata.labl, pstr, strdup("FALSE")); /* XXX  check */
-				ovrsw++; /* increment number of overriden switches */
-				free(pstr);
-			}
-		} while (pstr != NULL);
-		da_destroy(da);
+		da = str_to_dynary(disable_sw, ',');
+		if (da != NULL) {
+			do {
+				pstr = da_pop(da);
+				if (pstr != NULL) {
+					hash_add(gdata.labl, pstr, strdup("FALSE")); /* XXX BOOL check */
+					ovrsw++; /* increment number of overriden switches */
+					free(pstr);
+				}
+			} while (pstr != NULL);
+			da_destroy(da);
+		}
 	}
-
 
 	if (ovrfile_set == true) {
 		/* read override file */

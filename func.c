@@ -266,11 +266,11 @@ bool pmk_switches(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 */
 
 bool pmk_check_binary(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
+	bool	 required;
 	char	*filename,
 		*varname,
 		*bpath,
 		 binpath[MAXPATHLEN];
-	bool	 required;
 
 	pmk_log("* Checking binary [%s]\n", cmd->label);
 	required = require_check(ht);
@@ -286,10 +286,15 @@ bool pmk_check_binary(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 		varname = str_to_def(filename);
 	}
 
-	bpath = (char *) hash_get(gdata->htab, "BIN_PATH");
+	bpath = hash_get(gdata->htab, PMKCONF_PATH_BIN);
 	if (bpath == NULL) {
-		errorf("BIN_PATH not available.");
-		return(false);
+		/* OBSOLETE, check for BIN_PATH for compatibility with 6.0 */
+		bpath = hash_get(gdata->htab, PREMAKE_KEY_BINPATH);
+		if (bpath == NULL) {
+			errorf("BIN_PATH not available.");
+			return(false);
+		}
+		pmk_log("\tWARNING : BIN_PATH is obsolete, update pmk.conf with pmksetup.\n");
 	}
 
 	if (depend_check(ht, gdata) == false) {
@@ -403,6 +408,31 @@ bool pmk_check_include(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 		pmk_log("\tUse %s language with %s compiler.\n", pld->name, pld->comp);
 	}
 
+	/* use each element of INC_PATH with -I */
+	pstr = (char *) hash_get(gdata->htab, PMKCONF_PATH_INC);
+	if (pstr == NULL) {
+		/* OBSOLETE, check for BIN_PATH for compatibility with 6.0 */
+		pstr = (char *) hash_get(gdata->htab, PREMAKE_KEY_INCPATH);
+		if (pstr == NULL) {
+			strlcpy(inc_path, "", sizeof(inc_path));
+		} else {
+			pmk_log("\tWARNING : INC_PATH is obsolete, update pmk.conf with pmksetup.\n");
+		}
+	} else {
+		r = sizeof(inc_path);
+		da = str_to_dynary(pstr, CHAR_LIST_SEPARATOR);
+		if (da == NULL) {
+			errorf("ARG XXX TODO");  /* XXX TODO PATH CHECK HERE */
+			return(false);
+		}
+
+		for (i=0 ; i < da_usize(da) ; i++) {
+			strlcat(inc_path, " -I", r); /* XXX check */
+			strlcat(inc_path, da_idx(da, i), r);
+		}
+		da_destroy(da);
+	}
+
 	/* fill test file */
 	tfp = fopen(TEST_FILE_NAME, "w");
 	if (tfp != NULL) {
@@ -420,21 +450,6 @@ bool pmk_check_include(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 	} else {
 		errorf("cannot open test file.");
 		return(false);
-	}
-
-	/* use each element of INC_PATH with -I */
-	pstr = (char *) hash_get(gdata->htab, "INC_PATH");
-	if (pstr == NULL) {
-		strlcpy(inc_path, "", sizeof(inc_path));
-	} else {
-		da = da_init();
-		r = sizeof(inc_path);
-		str_to_dynary(pstr, CHAR_LIST_SEPARATOR, da);
-		for (i=0 ; i < da_usize(da) ; i++) {
-			strlcat(inc_path, " -I", r); /* XXX check */
-			strlcat(inc_path, da_idx(da, i), r);
-		}
-		da_destroy(da);
 	}
 
 	snprintf(cfgcmd, sizeof(cfgcmd), "%s %s -o %s %s > /dev/null 2>&1",
@@ -541,6 +556,31 @@ bool pmk_check_lib(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 		pmk_log("\tUse %s language with %s compiler.\n", pld->name, pld->comp);
 	}
 
+	/* use each element of LIB_PATH with -L */
+	pstr = (char *) hash_get(gdata->htab, PMKCONF_PATH_LIB);
+	if (pstr == NULL) {
+		/* OBSOLETE, check for BIN_PATH for compatibility with 6.0 */
+		pstr = (char *) hash_get(gdata->htab, PREMAKE_KEY_LIBPATH);
+		if (pstr == NULL) {
+			strlcpy(lib_buf, "", sizeof(lib_buf));
+		} else {
+			pmk_log("\tWARNING : LIB_PATH is obsolete, update pmk.conf with pmksetup.\n");
+		}
+	} else {
+		r = sizeof(lib_buf);
+		da = str_to_dynary(pstr, CHAR_LIST_SEPARATOR); /* XXX TODO PATH */
+		if (da == NULL) {
+			errorf("ARG XXX TODO");  /* XXX TODO PATH CHECK HERE */
+			return(false);
+		}
+
+		for (i=0 ; i < da_usize(da) ; i++) {
+			strlcat(lib_buf, " -L", r);
+			strlcat(lib_buf, da_idx(da, i), r);
+		}
+		da_destroy(da);
+	}
+
 	tfp = fopen(TEST_FILE_NAME, "w");
 	if (tfp != NULL) {
 		if (libfunc == NULL) {
@@ -558,20 +598,6 @@ bool pmk_check_lib(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 		return(false);
 	}
 
-	/* use each element of LIB_PATH with -L */
-	pstr = (char *) hash_get(gdata->htab, "LIB_PATH");
-	if (pstr == NULL) {
-		strlcpy(lib_buf, "", sizeof(lib_buf));
-	} else {
-		da = da_init();
-		r = sizeof(lib_buf);
-		str_to_dynary(pstr, CHAR_LIST_SEPARATOR, da);
-		for (i=0 ; i < da_usize(da) ; i++) {
-			strlcat(lib_buf, " -L", r);
-			strlcat(lib_buf, da_idx(da, i), r);
-		}
-		da_destroy(da);
-	}
 	snprintf(cfgcmd, sizeof(cfgcmd), "%s %s -o %s -l%s %s >/dev/null 2>&1",
 						ccpath, lib_buf, BIN_TEST_NAME,
 						libname, TEST_FILE_NAME);
@@ -643,10 +669,15 @@ bool pmk_check_config(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 		return(false);
 	}
 
-	bpath = (char *) hash_get(gdata->htab, "BIN_PATH");
+	bpath = hash_get(gdata->htab, PMKCONF_PATH_BIN);
 	if (bpath == NULL) {
-		errorf("BIN_PATH not available.");
-		return(false);
+		/* OBSOLETE, check for BIN_PATH for compatibility with 6.0 */
+		bpath = hash_get(gdata->htab, PREMAKE_KEY_BINPATH);
+		if (bpath == NULL) {
+			errorf("BIN_PATH not available.");
+			return(false);
+		}
+		pmk_log("\tWARNING : BIN_PATH is obsolete, update pmk.conf with pmksetup.\n");
 	}
 
 	/* check for alternative variable for CFLAGS */
@@ -810,10 +841,15 @@ bool pmk_check_pkg_config(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 		return(false);
 	}
 
-	bpath = (char *) hash_get(gdata->htab, "BIN_PATH");
+	bpath = hash_get(gdata->htab, PMKCONF_PATH_BIN);
 	if (bpath == NULL) {
-		errorf("BIN_PATH not available.");
-		return(false);
+		/* OBSOLETE, check for BIN_PATH for compatibility with 6.0 */
+		bpath = hash_get(gdata->htab, PREMAKE_KEY_BINPATH);
+		if (bpath == NULL) {
+			errorf("BIN_PATH not available.");
+			return(false);
+		}
+		pmk_log("\tWARNING : BIN_PATH is obsolete, update pmk.conf with pmksetup.\n");
 	}
 
 	/* check for alternative variable for CFLAGS */

@@ -129,25 +129,14 @@ bool check_version(char *vref, char *vers) {
 		 cmp;
 
 	/* need to check da_* returns */
-	vr = da_init();
+	vr = str_to_dynary(vref, '.');
 	if (vr == NULL) {
-		errorf("cannot initialize dynary.");
-		return(false);
-	}
-	if (str_to_dynary(vref, '.', vr) == false) {
 		errorf("cannot parse reference version '%s'.", vref);
-		da_destroy(vr);
 		return(false);
 	}
-	vc = da_init();
+	vc = str_to_dynary(vers, '.');
 	if (vc == NULL) {
-		errorf("cannot initialize dynary.");
-		return(false);
-	}
-	if (str_to_dynary(vers, '.', vc) == false) {
 		errorf("cannot parse comparison version '%s'.", vers);
-		da_destroy(vr);
-		da_destroy(vc);
 		return(false);
 	}
 
@@ -157,7 +146,7 @@ bool check_version(char *vref, char *vers) {
 
 		if (sr != NULL && sc != NULL) {
 			/* check both version */
-			ref = atoi(sr); /* XXX should consider using strtol */
+			ref = atoi(sr); /* XXX TODO should consider using strtol */
 			cmp = atoi(sc);
 
 			if (ref > cmp) {
@@ -206,15 +195,9 @@ bool get_file_path(char *filename, char *path, char *storage, int size) {
 	bool	 rval = false;
 	dynary	*bplst;
 
-	/* init dynary */
-	bplst = da_init();
-	if (bplst == NULL) {
-		errorf("Cannot init dynamic array.");
-		return(false);
-	}
-
 	/* fill dynary with path */
-	if (str_to_dynary(path, CHAR_LIST_SEPARATOR, bplst) == false) {
+	bplst= str_to_dynary(path, CHAR_LIST_SEPARATOR);
+	if (bplst == NULL) {
 		errorf("Failed to put a path into a dynamic array.");
 		return(false);
 	}

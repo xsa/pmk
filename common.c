@@ -177,19 +177,30 @@ bool get_make_var(char *varname, char *result, int rsize) {
 }
 
 /*
-	split a string in a dynamic array
+	split a string into a dynamic array
 
 	str : string to split
 	sep : separator
-	da : dynamic array
 
-	return true on success
+	return : dynary or NULL 
 */
 
-bool str_to_dynary(char *str, char sep, dynary *da) {
+dynary *str_to_dynary(char *str, char sep) {
 	char	 buf[MAXPATHLEN],
 		*pbuf;
+	dynary	*da;
 	int	 s;
+
+	if (str == NULL) {
+		/* protect against NULL */
+		return(NULL);
+	}
+
+	/* init dynary */
+	da = da_init();
+	if (da == NULL) {
+		return(NULL);
+	}
 
 	s = sizeof(buf);
 	pbuf = buf;
@@ -197,7 +208,8 @@ bool str_to_dynary(char *str, char sep, dynary *da) {
 		if (*str == sep) {
 			*pbuf = CHAR_EOS;
 			if (da_push(da, strdup(buf)) == false) {
-				return(false);
+				da_destroy(da);
+				return(NULL);
 			}
 			pbuf = buf;
 			s = sizeof(buf);
@@ -207,7 +219,8 @@ bool str_to_dynary(char *str, char sep, dynary *da) {
 			s--;
 			if (s == 0) {
 				/* not enough space in buffer */
-				return(false);
+				da_destroy(da);
+				return(NULL);
 			}
 		}
 		str++;
@@ -215,10 +228,11 @@ bool str_to_dynary(char *str, char sep, dynary *da) {
 
 	*pbuf = CHAR_EOS;
 	if (da_push(da, strdup(buf)) == false) {
-		return(false);
+		da_destroy(da);
+		return(NULL);
 	}
 
-	return(true);
+	return(da);
 }
 
 /*
