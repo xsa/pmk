@@ -36,13 +36,9 @@
 #include "hash.h"	 
 #include "premake.h"
 
-#define MAX_CONF_OPT	256	/* XXX temp maximum hash entries */
-#define STR_DELIMITER	":"	/* string delimiter of the $PATH variable */    
-#define MAXBINS		5	/* max slots in the binaries array */
-
-/* special characters for pmk.conf */
-#define PMKSETUP_ASSIGN_CHAR	'='
-#define PMKSETUP_STATIC_CHAR	':'
+#define MAX_CONF_OPT		256	/* XXX temp maximum hash entries */
+#define PATH_STR_DELIMITER	':'	/* string delimiter of the $PATH variable */    
+#define MAXBINS			5	/* max slots in the binaries array */
 
 
 /* _must be_ binaries to search for */
@@ -61,5 +57,7 @@ int	close_tmp_config(void);
 int	get_env_vars(htable *);
 int	get_binaries(htable *);
 int	copy_config(const char *, const char *);
+void	char_replace(char *, const char, const char);
+void	usage(void);
 
 #endif	/* _PMKSETUP_H_ */

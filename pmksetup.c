@@ -43,6 +43,7 @@
 #include <unistd.h>
 
 #include "common.h"
+#include "dynarray.h"
 #include "pmksetup.h"
 #include "premake.h"
 
@@ -52,13 +53,19 @@
 #define	MAX_LINE_BUF		MAX_LINE_LEN
 
 
+int	verbose_flag = 0;	/* -V option at the cmd-line */ 
 char	sfn[MAXPATHLEN];	/* scratch file name */		
 FILE	*sfp;			/* scratch file pointer */
 
 
-int main(void) {
+
+/*
+ * Main program for pmksetup(8)
+ */
+int main(int argc, char *argv[]) {
 	FILE		*config;
-	int		linenum = 0,
+	int		ch,
+			linenum = 0,
 			error = 0;
 	size_t		len;	
 	uid_t		uid;
@@ -67,6 +74,10 @@ int main(void) {
 			filename[MAXPATHLEN];
  	cfg_opt		options;	
 	htable		*ht;
+	
+	extern int	optind;
+	extern char	*optarg;
+	
 
 
 	/* pmksetup(8) must be run as root */
@@ -74,19 +85,52 @@ int main(void) {
 		errorf("you must be root.");
 		exit(1);
 	} 
+
+	
+	while ((ch = getopt(argc, argv, "vV")) != -1)
+		switch(ch) {
+			case 'v' :
+				fprintf(stderr, "%s\n", PREMAKE_VERSION);
+				exit(0);
+			case 'V' :
+				if (0 == verbose_flag) {
+					verbose_flag = 1;
+				}
+				break;
+			case '?' :
+			default :
+				usage();
+		}
+	argc -= optind;
+	argv += optind;
+
 	
 	if (snprintf(filename, sizeof(filename), "%s", PREMAKE_CONFIG_PATH) != -1) { 
 		
 		if ((config = fopen(filename, "r")) != NULL) {
-			
+			if (verbose_flag == 1)
+				debugf("Opening configuration file: %s",
+					PREMAKE_CONFIG_PATH);
+		
 			if ((ht = hash_init(MAX_CONF_OPT)) == NULL) {
 				errorf("cannot create hash table");
 				exit(1);
-			} 
+			}
+
+			if (verbose_flag == 1) {
+				debugf("");
+				debugf("Looking for default parameters...");
+			}
+
 			if ((open_tmp_config() == -1) ||
 					(get_env_vars(ht) == -1) ||
 					(get_binaries(ht) == -1))
 				exit(1);
+
+			if (verbose_flag == 1) {
+				debugf("");
+				debugf("Creating temporary configuration file");	
+			}	
 
 			/* parsing the configuration file */
 			while (fgets(line, sizeof(line), config) != NULL) {
@@ -113,15 +157,15 @@ int main(void) {
 							if ((v = hash_get(ht, options.key)) != NULL) {
 								/* checking the VAR<->VALUE separator */
 								switch (options.opchar) {
-									case PMKSETUP_ASSIGN_CHAR :
+									case CHAR_ASSIGN_UPDATE :
 										/* get newer value */
 										fprintf(sfp, "%s%c%s\n", options.key, 
-												PMKSETUP_ASSIGN_CHAR, v);
+												CHAR_ASSIGN_UPDATE, v);
 										break;
-									case PMKSETUP_STATIC_CHAR :
+									case CHAR_ASSIGN_STATIC :
 										/* static definition, stay unchanged */ 
 										fprintf(sfp, "%s%c%s\n", options.key,
-												PMKSETUP_STATIC_CHAR, options.val);
+												CHAR_ASSIGN_STATIC, options.val);
 										break;
 									default :
 										error = 1;
@@ -141,6 +185,9 @@ int main(void) {
 
 		if (error == 0) {
 			/* copying the temporary config to the system one */
+			if (verbose_flag == 1)
+				debugf("Copying temporary configuration to %s", 
+					PREMAKE_CONFIG_PATH);
 			if (copy_config(sfn, PREMAKE_CONFIG_PATH) == -1)
 				exit(1);
 		}
@@ -232,6 +279,12 @@ int get_env_vars(htable *ht) {
 		return(-1);
 	}
 
+	if (verbose_flag == 1) {
+		debugf("[System Variables]");
+		debugf("\t%s => %s", PREMAKE_KEY_OSNAME, utsname.sysname);
+		debugf("\t%s => %s", PREMAKE_KEY_OSVERS, utsname.release);
+		debugf("\t%s => %s", PREMAKE_KEY_OSARCH, utsname.machine);
+	} 
 	/* XXX should think about a better way to do it though */
 	hash_add(ht, PREMAKE_KEY_OSNAME, utsname.sysname);
 	hash_add(ht, PREMAKE_KEY_OSVERS, utsname.release);
@@ -252,27 +305,50 @@ int get_binaries(htable *ht) {
 	int	i;
 	char	*bin_path,
 		fbin[MAXPATHLEN];	/* full binary path */
-	mpath   stpath;
+	dynary	*stpath;
 
 	if ((bin_path = getenv("PATH")) == NULL) {
 		errorf("could not get the PATH environment variable");
 		return(-1);
 	}
 
+	/* 
+	 * replace the string separator in the PATH 
+	 * to fit to our standards
+	 */
+	char_replace(bin_path, PATH_STR_DELIMITER, CHAR_LIST_SEPARATOR); 
+
+	if (verbose_flag == 1) {
+		debugf("");
+		debugf("[Environment Variables]");
+		debugf("\t%s => %s", PREMAKE_KEY_BINPATH, bin_path);
+	}
+
 	hash_add(ht, PREMAKE_KEY_BINPATH, bin_path);
 
         /*
-         *splitting the PATH variable and storing in a struct
-         * for later use by find_file
+         * splitting the PATH variable and storing in a 
+         * dynamic array for later use by find_file
          */
-	if ((strsplit(bin_path, &stpath, STR_DELIMITER)) == -1) {
+	if ((stpath = da_init()) == NULL) {
+		errorf("cannot initalize the dynamic array"); 
+		return(-1);
+	}
+	if (str_to_dynary(bin_path, CHAR_LIST_SEPARATOR, stpath) == 0) {
 		errorf("could not split the PATH environment variable correctly");
 		return(-1);
 	}
 
+	if(verbose_flag == 1) {
+		debugf("");
+		debugf("[Binaries Paths]"); 
+	}
+
 	for (i = 0; i < MAXBINS; i++) {
-		if (find_file(&stpath, binaries[i][0], fbin, MAXPATHLEN) == 0) {
-			fprintf(stderr, "Looking for %s => %s ... found\n", binaries[i][0], fbin);
+		if (find_file_bis(stpath, binaries[i][0], fbin, MAXPATHLEN) == 1) {
+			if (verbose_flag == 1) 
+				debugf("\tFound '%s'\t(%s)", binaries[i][0], fbin);
+
 			hash_add(ht, binaries[i][1], fbin);
 		} else {
 			errorf("%s not found", binaries[i][0]);
@@ -327,4 +403,38 @@ int copy_config(const char *tmp_config, const char *config) {
 	fclose(fp_c);
 
 	return(rval);
+}
+
+
+/*
+ * Replace a character in a string
+ *
+ *	buf: string we want to modify
+ *	search: the char with want to replace
+ *	replace: the new char which will replace 'search'
+ */ 
+void char_replace(char *buf, const char search, const char replace) {
+	int	i = 0;
+	char	c;
+
+	while ((c = buf[i]) != CHAR_EOS) {
+		if (c == search)
+			c = replace;
+		buf[i] = c;
+		i++;
+	}
+}
+
+
+/*
+ * pmksetup(8) usage
+ */
+void usage(void) {
+	extern char	*__progname;
+
+	fprintf(stderr, "Usage: %s [-v] [-V]\n", __progname);
+	fprintf(stderr, "Options:\n");
+	fprintf(stderr, "  -v   Display version number\n");
+	fprintf(stderr, "  -V	Verbose, display debugging messages\n");
+	exit(1);
 }
