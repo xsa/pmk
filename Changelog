@@ -1,3 +1,10 @@
+05 Aug 2004 mipsator
+ * fixed makefile template of c++ lib sample.
+
+04 Aug 2004 mipsator
+ * sprinkle some -fPICs in c++ lib sample for AMD64 platform.
+ * spacing nitpicking in pmkcomp.dat.
+
 02 Aug 2004 mipsator
  * fixed pmk_set_variable() to check type of value to prevent coredump
    on syntax error (noticed by Han Boetes).

@@ -4,7 +4,7 @@ CXX=		@BIN_CXX@
 AR=		@BIN_AR@
 RANLIB=		@BIN_RANLIB@
 
-CXXFLAGS=	@CXXFLAGS@ -fPIC
+CXXFLAGS=	@CXXFLAGS@
 
 ARFLAGS=	cr
 SLCXXFLAGS=	@SLCXXFLAGS@
@@ -25,7 +25,7 @@ L_OBJS=		$(LIBNAME).o
 
 all: show $(LIB_STATIC) $(LIB_SHARED) $(NAME) run_$(NAME) clean
 
-.c.o:
+.cc.o:
 	@echo ""
 	@echo "-> Building object file"
 	$(CXX) $(CXXFLAGS) $(SLCXXFLAGS) -c $<
@@ -56,7 +56,7 @@ $(LIB_SHARED): $(L_OBJS)
 	@echo ""
 	@echo "-> Building shared lib"
 	@echo ""
-	$(CXX) $(SLCXXFLAGS) $(SLLDFLAGS) -o $@ $(L_OBJS)
+	$(CXX) $(SLLDFLAGS) -o $@ $(L_OBJS)
 	cp $(LIB_SHARED) $(LIB_SHARED_V)
 
 $(NAME):
