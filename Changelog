@@ -1,3 +1,7 @@
+02 Oct 2003 mipsator
+ * renamed pmk_check_include() by pmk_check_header().
+ * removed a useless free() in single_append().
+
 01 Oct 2003 mipsator
  * added premk-cvs@lists.sourceforge.net to get commit messages.
  * updated pmkfile man page.

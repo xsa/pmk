@@ -110,7 +110,7 @@ bool func_wrapper(prscell *pcell, pmkdata *pgd) {
 			rval = pmk_check_binary(&cmd, pcell->data, pgd);
 			break;
 		case PMK_TOK_CHKINC :
-			rval = pmk_check_include(&cmd, pcell->data, pgd);
+			rval = pmk_check_header(&cmd, pcell->data, pgd);
 			break;
 		case PMK_TOK_CHKLIB :
 			rval = pmk_check_lib(&cmd, pcell->data, pgd);
@@ -392,7 +392,7 @@ bool pmk_check_binary(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 	check include file
 */
 
-bool pmk_check_include(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
+bool pmk_check_header(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 	FILE	*tfp;
 	bool	 required,
 		 rval;
