@@ -245,6 +245,14 @@ bool parse(FILE *fd) {
 	return(TRUE);
 }
 
+/*
+	usage
+*/
+
+void usage(void) {
+	/* does nothing yet ... */
+	/* ... or maybe just makes xsa happy ;) */
+}
 
 /*
 	main
