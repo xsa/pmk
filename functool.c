@@ -31,6 +31,7 @@
  */
 
 
+#include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -182,14 +183,69 @@ bool get_file_path(char *filename, char *path, char *storage, int size) {
 }
 
 /*
+	generate semi-definition from a string
+	XXX
 */
 
 char *str_to_def(char *str) {
-	char	*newstr;
+	char	*newstr,
+		*p;
 
-	newstr = strdup(str);
+	newstr = strdup(str); /* XXX check */
+	p = newstr;
 
-	/* XXX parse line */
+	while (*p != CHAR_EOS) {
+		switch (*p) {
+			case '-' :
+			case '.' :
+			case '/' :
+				*p = '_';
+				break;
+			default :
+				*p = (char) toupper((int) *p);
+				break;
+		}
+		p++;
+	}
 
 	return(newstr);
+}
+
+/*
+*/
+
+bool record_def(htable *ht, char *name, bool status) {
+	char	*semidef,
+		def_str[MAX_HASH_KEY_LEN],
+		have_str[MAX_HASH_VALUE_LEN],
+		def_val[MAX_HASH_VALUE_LEN];
+
+	semidef = str_to_def(name);
+	snprintf(def_str, sizeof(def_str), "DEF__%s", semidef);
+	snprintf(have_str, sizeof(have_str), "HAVE_%s", semidef);
+
+	if (status == true) {
+		snprintf(def_val, sizeof(def_val), "#define %s 1", have_str); /* XXX check size */
+	} else {
+		snprintf(def_val, sizeof(def_val), "#undef %s", have_str); /* XXX check size */
+	}
+	hash_add(ht, def_str, def_val);
+	/*debugf("%s => %s", def_str, def_val);*/
+
+	free(semidef);
+	return(true); /* XXX */
+}
+
+/*
+*/
+
+bool record_val(htable *ht, char *name, char*value) {
+	char	*semidef;
+
+	semidef = str_to_def(name);
+	hash_add(ht, semidef, value);
+	/*debugf("%s => %s", semidef, value);*/
+
+	free(semidef);
+	return(true); /* XXX */
 }
