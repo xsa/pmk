@@ -168,6 +168,10 @@
 
 #define DEFINE_DEFAULT		"1"
 
+
+/* error messages */
+#define ERR_MSG_CC_CMD		"failed to build compiler command line."
+
 /* structures */
 typedef struct {
 	char	kw[CMD_LEN];
