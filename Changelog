@@ -5,6 +5,7 @@
  * moved defines from source to header in pathtools.
  * added support for -d option (directory creation) of pmkinstall.
  * updated makefiles to include pathtools for pmkinstall.
+ * added some code for strip support in pmkinstall.
 
 24 Nov 2003 mipsator
  * started to rewrite pmkinstall from scratch (much easier than making
