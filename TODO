@@ -27,8 +27,7 @@ mreindl	~.	latex version of tutorial
 	~.	improve test_pmkinstall to check more modes
 	-.	add test target in tests/Makefile
 	+	update README and INSTALL
-	~	new samples:
-			-	prog c++
+	~	new samples
 
 
 pmk:
