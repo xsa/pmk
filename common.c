@@ -284,29 +284,25 @@ bool find_file(dynary *da, char *fname, char *fpath, int fplen) {
 	for (i = 0 ; (i < da_size(da)) && (found == false) ; i++) {
 		path = da_idx(da, i);
 		dp = opendir(path);
-		if (dp == NULL) {
-			errorf("could not open directory: %s", path);
-			return(false);
-		}
-		exit = false;
-		while (exit == false) {
-			de = readdir(dp);
-			if (de != NULL) {
-				if (strncmp(de->d_name, fname, strlen(fname)) == 0) {
-					if (snprintf(fpath, fplen, "%s/%s", path, fname) < fplen) {
-						/* fpath set */
-						found = true;
+		
+		if (dp != NULL) {
+			exit = false;
+			while (exit == false) {
+				de = readdir(dp);
+				if (de != NULL) {
+					if (strncmp(de->d_name, fname, strlen(fname)) == 0) {
+						if (snprintf(fpath, fplen, "%s/%s", path, fname) < fplen)
+							/* fpath set */
+							found = true;
+						exit = true;
 					}
+				} else
+					/* no more entry */
 					exit = true;
-				}
-			} else {
-				/* no more entry */
-				exit = true;
 			}
+			closedir(dp);
 		}
-		closedir(dp);
 	}
-
 	return(found);
 }
 
