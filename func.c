@@ -32,8 +32,33 @@
 
 
 #include <stdio.h>
+#include <string.h>
 
 #include "func.h"
+
+
+/*
+	check boolean string
+
+	str : string to check
+
+	returns TRUE is str is "TRUE" else returns FALSE
+
+	NOTE : strncmp checks only on a length of 6 because
+		lenght of "TRUE" is 5 and "FALSE" is 6 chr.
+		If str is longer we don't need to check as
+		we are sure that the result is FALSE.
+
+*/
+
+bool check_bool_str(char *str) {
+	if (strncmp(str, "TRUE", 6) == 0) {
+		return(TRUE);
+	} else {
+		return(FALSE);
+	}
+
+}
 
 
 bool pmk_define(pmkcmd *cmd, htable *ht) {

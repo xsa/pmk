@@ -217,16 +217,40 @@ bool parse_cmd(char *line, pmkcmd *command) {
 */
 
 bool parse_opt(char *line, htable *ht) {
-	char	buf[16],
+	char	buf[MAXPATHLEN],
 		tkey[MAX_OPT_NAME_LEN],
 		tval[MAX_OPT_VALUE_LEN];
+	int	i = 0,
+		j = 0;
+	bool	keyfound = FALSE;
 
-	snprintf(buf, sizeof(buf), "%%%i[^=]=%%%i[^$]", MAX_OPT_NAME_LEN, MAX_OPT_VALUE_LEN);
-	if (sscanf(line, buf, tkey, tval) != 2) {
+	while (line[i] != '\0' && i < MAXPATHLEN) {
+		if (keyfound == FALSE) {
+			if (line[i] == PMK_KEY_CHAR) {
+				buf[j] = '\0';
+				strncpy(tkey, buf, MAX_OPT_NAME_LEN);
+				/* XXX check if lenght is ok
+					strlcpy ?*/
+				keyfound = TRUE;
+				j = 0;
+			} else {
+				buf[j] = line[i];
+				j++;
+			}
+		} else {
+			buf[j] = line[i];
+			j++;
+		}
+		i++;
+	}
+	
+	if (keyfound == FALSE) {
 			err_line = cur_line;
 			snprintf(err_msg, sizeof(err_msg), "Malformed option");
 			return(FALSE);
 	} else {
+		strncmp(tval, buf, MAX_OPT_VALUE_LEN);
+		/* XXX check length ? */
 		hash_add(ht, tkey, tval);
 
 		return(TRUE);
