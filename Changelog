@@ -1,4 +1,5 @@
 06 May 2003 mipsator
+ * use depend_check() in check functions.
  * rewritten depend_check().
  * added require_check().
 
