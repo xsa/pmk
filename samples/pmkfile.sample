@@ -40,7 +40,7 @@ CHECK_LIB(lib_curses) {
 	REQUIRED = FALSE
 	DEPEND = ("use_curses","lib_termcap")
 	NAME = "curses"
-	FUNCTION = "getwin"
+	FUNCTION = ("getwin", "getstr")
 }
 
 # check availability of sys/param.h header
