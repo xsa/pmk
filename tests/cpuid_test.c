@@ -24,13 +24,9 @@ int main(void) {
 	char		*pstr;
 	hkeys		*phk;
 	htable		*pht;
-	int		 ui,
-			 i;
 	prsdata		*pdata;
-	uint32_t	 cpuidflag,
-			 cputype;
 	struct utsname	 utsname;
-	uint32_t	 buffer[13];
+	unsigned int	 i;
 
 	if (uname(&utsname) == -1) {
 		printf("uname failed.\n");
