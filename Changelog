@@ -1,3 +1,6 @@
+16 May 2004 mipsator
+ * fixed some XXX remaining in parse.c and pmkinstall.c.
+
 11 May 2004 mipsator
  * fixed samples to run properly.
  * added missing error messages.
