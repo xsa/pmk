@@ -43,6 +43,8 @@
 
 
 #include <sys/param.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -111,7 +113,7 @@ bool chkpath(char *path, char *buffer) {
 						}
 
 						/* now searching previous dir */
-						while ((*pbuf != '/') && (pbuf > buffer)) {
+						while ((*pbuf != CHAR_SEP) && (pbuf > buffer)) {
 							pbuf--;
 							s++;
 						}
@@ -223,20 +225,20 @@ bool relpath(char *from, char *to, char *buffer) {
 
 	/* go back on the last '/' if needed */
 	if ((*from != CHAR_EOS) && (*to != CHAR_EOS)) {
-		while (*from != '/') {
+		while (*from != CHAR_SEP) {
 			from--;
 			to--;
 		}
 	}
 
 	/* ignore leading '/' for to */
-	if (*to == '/') {
+	if (*to == CHAR_SEP) {
 		to++;
 	}
 
 	/* count directories */
 	while (*from != CHAR_EOS) {
-		if (*from == '/') {
+		if (*from == CHAR_SEP) {
 			/* one more */
 			strlcat(buffer, "../", MAXPATHLEN);
 		}
@@ -297,4 +299,56 @@ bool uabspath(char *base, char *upath, char *buffer) {
 		/* upath is relative, we can call abspath */
 		return(abspath(base, upath, buffer));
 	}
+}
+
+/*
+	build path if it does not exists
+
+	path : path to build
+
+	return : boolean
+*/
+
+bool makepath(char *path) {
+	bool		 exit = false;
+	char		 save,
+			*pstr,
+			*copy;
+	struct stat	 sb;
+
+	if (*path != CHAR_SEP) {
+		/* path is not absolute */
+		return(false);
+	}
+
+	/* work on a copy */
+	copy = strdup(path);
+	pstr = copy;
+	pstr++; /* skip leading separator */
+	while (exit != true) {
+		if ((*pstr == CHAR_SEP) || (*pstr == CHAR_EOS)) {
+			/* separator found, replacing to make  */
+			save = *pstr;
+			*pstr = CHAR_EOS;
+
+			/* check if the path already exists */
+			if (stat(copy, &sb) != 0) {
+				if (mkdir(copy, S_IRWXU) != 0) {
+					free(copy);
+					return(false);
+				}
+			}
+
+			/* put separator back */
+			if (save == CHAR_EOS) {
+				exit = true;
+			} else {
+				*pstr = save;
+			}
+		}
+		pstr++;
+	}
+
+	free(copy);
+	return(true);
 }
