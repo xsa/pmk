@@ -8,6 +8,8 @@ $Id$
 
 			    PMK tutorial
 
+
+
 1) Introduction
    ------------
 
@@ -15,6 +17,7 @@ As make is using a makefile, the pmk binary is using a pmkfile. This
 file contains a set of commands that perform checks of source
 dependencies. Following to that, template files are processed to build
 final after tags substitutions.
+
 
 
 2) The settings
@@ -30,6 +33,7 @@ SETTINGS {
 
 The TARGET option is taking a list as value. The list is delimited by
 parenthesis. As you can see Makefile.in will be the template name.
+
 
 
 3) Defining some variables
@@ -54,7 +58,7 @@ Lets say that we have a hello.c file that need for example the string
 header. For that we use the CHECK_HEADER command like following:
 
 CHECK_HEADER(header_misc_code) {
-	NAME = "misc_code.h"
+	NAME = "string.h"
 }
 
 The NAME option gives the header to check. Lets see what gives our
@@ -65,8 +69,8 @@ echo "VERSION=@VERSION@" >> Makefile.in
 
 You can now type 'pmk'. The resulting output should like this:
 
--------------------------------------------
-[SNIP]
+__[OUTPUT]____________________________________________________[BEGIN]__
+
 Processing commands :
 
 * Parsing settings
@@ -85,17 +89,63 @@ Processing commands :
 
 Process templates :
 Created '/home/mips/tmp/Makefile'.
--------------------------------------------
 
-And the generated Makefile should be:
+__[OUTPUT]______________________________________________________[END]__
 
--------------------------------------------
+And the generated Makefile should looks like:
+
+__[OUTPUT]____________________________________________________[BEGIN]__
 PACKAGE=hello
 VERSION=0.1
--------------------------------------------
+__[OUTPUT]______________________________________________________[END]__
 
 
-5) Playing with pkg-config support
+
+5) Using external libraries
+   ------------------------
+
+Our hello program also need the curses library. To check if this
+library is present we will use the following command:
+
+CHECK_LIB(lib_curses) {
+	NAME = "curses"
+}
+
+Which gives as result:
+
+__[OUTPUT]____________________________________________________[BEGIN]__
+
+* Checking library [lib_curses]
+        Use C language with CC compiler.
+        Store library flags in 'LIBS'.
+        Found library 'curses' : yes.
+
+__[OUTPUT]______________________________________________________[END]__
+
+We could also check for a specific fonction in the library:
+
+CHECK_LIB(lib_curses) {
+	NAME = "curses"
+	FUNCTION = "getwin"
+}
+
+So you'll get the following:
+
+__[OUTPUT]____________________________________________________[BEGIN]__
+
+* Checking library [lib_curses]
+        Use C language with CC compiler.
+        Store library flags in 'LIBS'.
+        Found function 'getwin' in 'curses' : yes.
+
+__[OUTPUT]______________________________________________________[END]__
+
+The linker flags are automatically set in the default LIBS variable.
+We'll see later how to use an alternate variable.
+
+
+
+6) Playing with pkg-config support
    -------------------------------
 
 Let's say that our package has the gtkhello.c source that build a gtk
@@ -105,50 +155,46 @@ pkg-config or secondly by checking the library.
 
 We are going to learn how to check gtk via pkgconfig support:
 
-CHECK_PKG_CONFIG(gtk_data) {
+CHECK_PKG_CONFIG(pc_gtk) {
 	NAME = "gtk+"
 }
 
 If gtk is present you should get the following output when running pmk:
 
--------------------------------------------
-[SNIP]
+__[OUTPUT]____________________________________________________[BEGIN]__
 
-* Checking pkg-config module [gtk_data]
+* Checking pkg-config module [pc_gtk]
         Found package 'gtk+' : yes.
         Stored compiler flags in 'CFLAGS'.
         Stored library flags in 'LIBS'.
 
-[SNIP]
--------------------------------------------
+__[OUTPUT]______________________________________________________[END]__
 
 We could also check for a minimal version of gtk needed by the program.
 For example we could look for at least 1.2 version of gtk:
 
-CHECK_PKG_CONFIG(gtk_data) {
+CHECK_PKG_CONFIG(pc_gtk) {
 	NAME = "gtk+"
 	VERSION = "1.2"
 }
 
 And the related output:
 
--------------------------------------------
-[SNIP]
+__[OUTPUT]____________________________________________________[BEGIN]__
 
-* Checking pkg-config module [gtk_data]
+* Checking pkg-config module [pc_gtk]
         Found package 'gtk+' : yes.
         Found version >= 1.2 : yes (1.2.10).
         Stored compiler flags in 'CFLAGS'.
         Stored library flags in 'LIBS'.
 
-[SNIP]
--------------------------------------------
+__[OUTPUT]______________________________________________________[END]__
 
 As you can see the compiler and linker flags are automatically stored
 in the default CFLAGS and LIBS variables. Your can provide alternate
 variables with the CFLAGS and LIBS options like following:
 
-CHECK_PKG_CONFIG(gtk_data) {
+CHECK_PKG_CONFIG(pc_gtk) {
 	NAME = "gtk+"
 	VERSION = "1.2"
 	CFLAGS = "GTK_CFLAGS"
@@ -158,17 +204,15 @@ CHECK_PKG_CONFIG(gtk_data) {
 
 And you'll get:
 
--------------------------------------------
-[SNIP]
+__[OUTPUT]____________________________________________________[BEGIN]__
 
-* Checking pkg-config module [gtk_data]
+* Checking pkg-config module [pc_gtk]
         Found package 'gtk+' : yes.
         Found version >= 1.2 : yes (1.2.10).
         Stored compiler flags in 'GTK_CFLAGS'.
         Stored library flags in 'GTK_LIBS'.
 
-[SNIP]
--------------------------------------------
+__[OUTPUT]______________________________________________________[END]__
 
 Notice that the storage variables have changed in the output.
 
