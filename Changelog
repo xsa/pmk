@@ -1,3 +1,7 @@
+02 Jan 2004 xsa
+ * added PC_PATH_LIB to pmk.conf (look if PREFIX/lib/pkgconfig exists).
+ * updated pmk.conf.5 accordinally.
+
 02 Jan 2004 mipsator
  * added diverting from CHECK_PKG_CONFIG to CHECK_CONFIG.
  * added data file for specific config tool options.

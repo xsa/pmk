@@ -126,6 +126,8 @@
 #define PMKCONF_PATH_INC	"PATH_INC"
 #define PMKCONF_PATH_LIB	"PATH_LIB"
 
+#define PMKCONF_PC_PATH_LIB	"PC_PATH_LIB"
+
 #define PMKCONF_OS_NAME		"OS_NAME"
 #define PMKCONF_OS_VERS		"OS_VERSION"
 #define PMKCONF_OS_ARCH		"OS_ARCH"
@@ -140,6 +142,7 @@
 
 /* specific values */
 #define PMKVAL_BIN_PKGCONFIG	"pkg-config"
+#define PMKVAL_LIB_PKGCONFIG	"/lib/pkgconfig" /* preceeded by PREFIX */
 
 /* prefix character used for comments */
 #define CHAR_COMMENT		'#'
