@@ -519,9 +519,12 @@ bool pmk_check_header(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 		return(false);
 	}
 
-	snprintf_b(cfgcmd, sizeof(cfgcmd), HEADER_CC_FORMAT,
+	if (snprintf_b(cfgcmd, sizeof(cfgcmd), HEADER_CC_FORMAT,
 			ccpath, inc_path, BIN_TEST_NAME, ftmp,
-			pgd->buildlog); /* XXX check ? */
+			pgd->buildlog) == false) {
+		errorf(ERR_MSG_CC_CMD);
+		return(false);
+	}
 
 	/* get result */
 	r = system(cfgcmd);
@@ -560,9 +563,13 @@ bool pmk_check_header(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 			}
 
 
-			snprintf_b(cfgcmd, sizeof(cfgcmd), HEADER_CC_FORMAT,
-					ccpath, inc_path, BIN_TEST_NAME,
-					ftmp, pgd->buildlog); /* XXX check ? */
+			if (snprintf_b(cfgcmd, sizeof(cfgcmd),
+					HEADER_CC_FORMAT, ccpath,
+					inc_path, BIN_TEST_NAME, ftmp,
+					pgd->buildlog) == false) {
+				errorf(ERR_MSG_CC_CMD);
+				return(false);
+			}
 
 			/* get result */
 			r = system(cfgcmd);
@@ -610,10 +617,14 @@ bool pmk_check_header(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 			btmp[strlen(btmp) - 1] = 'o';
 
 			/* build compiler command */
-			snprintf_b(cfgcmd, sizeof(cfgcmd),
+			if (snprintf_b(cfgcmd, sizeof(cfgcmd),
 					HEADER_FUNC_CC_FORMAT, ccpath,
 					inc_path, btmp, ftmp,
-					pgd->buildlog); /* XXX check ? */
+					pgd->buildlog) == false) {
+				errorf(ERR_MSG_CC_CMD);
+				return(false);
+			}
+
 
 			/* get result */
 			r = system(cfgcmd);
@@ -796,9 +807,12 @@ bool pmk_check_lib(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 	}
 
 	/* build compiler command */
-	snprintf_b(cfgcmd, sizeof(cfgcmd), LIB_CC_FORMAT, ccpath,
-			main_libs, BIN_TEST_NAME, libname, ftmp,
-			pgd->buildlog); /* XXX test ? */
+	if (snprintf_b(cfgcmd, sizeof(cfgcmd), LIB_CC_FORMAT, ccpath,
+				main_libs, BIN_TEST_NAME, libname, ftmp,
+				pgd->buildlog) == false) {
+		errorf(ERR_MSG_CC_CMD);
+		return(false);
+	}
 
 	/* get result */
 	r = system(cfgcmd);
@@ -838,9 +852,14 @@ bool pmk_check_lib(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 			}
 
 			/* build compiler command */
-			snprintf_b(cfgcmd, sizeof(cfgcmd), LIB_CC_FORMAT,
-				ccpath, main_libs, BIN_TEST_NAME, libname,
-				ftmp, pgd->buildlog); /* XXX check ? */
+			if (snprintf_b(cfgcmd, sizeof(cfgcmd),
+						LIB_CC_FORMAT, ccpath,
+						main_libs, BIN_TEST_NAME,
+						libname, ftmp,
+						pgd->buildlog) == false) {
+				errorf(ERR_MSG_CC_CMD);
+				return(false);
+			}
 	
 			/* get result */
 			r = system(cfgcmd);
@@ -869,8 +888,10 @@ bool pmk_check_lib(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 			/* process additional defines */
 			process_def_list(pgd->htab, defs);
 
-			snprintf_b(lib_buf, sizeof(lib_buf), "-l%s",
-					libname); /* XXX check ? */
+			if (snprintf_b(lib_buf, sizeof(lib_buf), "-l%s",
+					libname) == false) {
+				errorf("failed to build library name.");
+			}
 
 			/* put result in LIBS or alternative variable */
 			if (single_append(pgd->htab, libs, strdup(lib_buf)) == false) {
@@ -1425,8 +1446,12 @@ bool pmk_check_type(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 	}
 
 	/* build compiler command */
-	snprintf_b(cfgcmd, sizeof(cfgcmd), TYPE_CC_FORMAT,
-		ccpath, BIN_TEST_NAME, ftmp, pgd->buildlog); /* XXX check */
+	if (snprintf_b(cfgcmd, sizeof(cfgcmd), TYPE_CC_FORMAT, ccpath,
+						BIN_TEST_NAME, ftmp,
+						pgd->buildlog) == false) {
+		errorf(ERR_MSG_CC_CMD);
+		return(false);
+	}
 
 	/* get result */
 	r = system(cfgcmd);
