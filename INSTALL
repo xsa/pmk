@@ -5,7 +5,3 @@ To build and install pmk on your system :
 make config
 make
 make install
-
-To test pmk on your system :
-sudo pmksetup -V
-make test_pmk
