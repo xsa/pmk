@@ -36,25 +36,37 @@
 #include <regex.h>
 
 #include "compat/pmk_string.h"
-#include "pmkscan.h"
-#include "premake.h"
 #include "common.h"
 #include "parse.h"
+#include "pmkscan.h"
+#include "premake.h"
 
 
 /*
 	XXX
 */
 
-bool parse_data(prsdata *pdata) {
+bool parse_data(prsdata *pdata, scandata *sdata) {
 	FILE	*fd;
 	bool	 rval;
+	prscell	*pcell;
 
 	fd = fopen("data/pmkscan.dat", "r"); /* XXX ARG !! HARDCODE !! */
 	if (fd == NULL)
 		return(false);
 	rval = parse(fd, pdata); /* XXX check ? */
 	fclose(fd);
+
+	if (rval == true) {
+		pcell = pdata->first;
+		while (pcell != NULL) {
+			if (strncmp(pcell->name, "INCLUDES", sizeof(pcell->name)) == 0) {
+				sdata->includes = pcell->ht;
+			}
+
+			pcell = pcell->next;
+		}
+	}
 
 	return(rval);
 }
@@ -63,9 +75,11 @@ bool parse_data(prsdata *pdata) {
 	parsefile
 */
 
-bool parse_c_file(char *filename) {
+bool parse_c_file(char *filename, scandata *sdata, htable *phtgen) {
 	FILE		*fp;
-	char		 line[TMP_BUF_LEN]; /* XXX better size of buffer ? */
+	char		 line[TMP_BUF_LEN], /* XXX better size of buffer ? */
+			 idtf[TMP_BUF_LEN],
+			*pval;
 	regex_t		 re_inc;
 	regmatch_t	 rm_inc[1];
 
@@ -80,18 +94,24 @@ bool parse_c_file(char *filename) {
 
 	/* main parsing */
 	while (get_line(fp, line, sizeof(line)) == true) {
-		/*
-		if (strstr(line, "#include") != NULL) {
-			printf("Found '%s'\n", line);
-		}
-		*/
 		if (regexec(&re_inc, line, 2, rm_inc, 0) == 0) {
-#ifdef DEBUG
-			printf("rm_so = %d\n", (int) rm_inc[1].rm_so);
-			printf("rm_eo = %d\n", (int) rm_inc[1].rm_eo);
-#endif
+			/* found a include */
 			*(line + rm_inc[1].rm_eo) = CHAR_EOS;
-			printf("Found header '%s'\n", (char *) (line + rm_inc[1].rm_so));
+
+			/* copy header name */
+			strlcpy(idtf, (char *) (line + rm_inc[1].rm_so), sizeof(idtf));
+
+			/* check data for this header */
+			pval = hash_get(sdata->includes, idtf);
+			if (pval != NULL) {
+				if (hash_get(phtgen, idtf) == NULL) {
+#ifdef DEBUG
+					printf("Setting header '%s'\n", idtf);
+#endif
+					/* record header data */
+					hash_add(phtgen, idtf, pval);
+				}
+			}
 		}
 	}
 
@@ -115,9 +135,11 @@ void usage(void) {
 */
 
 int main(int argc, char *argv[]) {
-	int	 i;
-	glob_t	 g;
-	prsdata	*pdata;
+	int		 i;
+	glob_t		 g;
+	htable		*pfdata;
+	prsdata		*pdata;
+	scandata	 sd;
 
 	printf("PMKSCAN version %s", PREMAKE_VERSION);
 #ifdef DEBUG
@@ -133,10 +155,12 @@ int main(int argc, char *argv[]) {
 		exit(1);
 	}
 	
-	if (parse_data(pdata) == false) {
+	if (parse_data(pdata, &sd) == false) {
 		/* XXX TODO error message */
 		exit(1);
 	}
+
+	pfdata = hash_init(256); /* XXX can do better :) */
 
 	printf("Ok\n\n");
 
@@ -160,13 +184,15 @@ int main(int argc, char *argv[]) {
 #ifdef DEBUG
 		printf("[%d] '%s'\n", i, g.gl_pathv[i]);
 #endif
-		parse_c_file(g.gl_pathv[i]);
+		parse_c_file(g.gl_pathv[i], &sd, pfdata);
 	}
 
 	globfree(&g);
 	printf("Parsing Ok\n\n");
 
 	printf("PMKSCAN finished.\n\n");
+
+	hash_destroy(pfdata);
 
 	return(0);
 }
