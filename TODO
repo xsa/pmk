@@ -1,5 +1,6 @@
 common :
 - write specs somewhere in a draft
+- moving man page in a directory
 
 pmk :
 - finish existing checks
