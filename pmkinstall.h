@@ -36,6 +36,9 @@
 #ifndef _PMKINSTALL_H_
 #define _PMKINSTALL_H_
 
+#define STRIP_ENV_NAME	"STRIP"
+
+
 #ifndef blkcnt_t
 typedef int64_t		blkcnt_t;	/* file block counts */
 #endif

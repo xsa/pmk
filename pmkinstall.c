@@ -71,7 +71,26 @@ extern int	 optind;
 
 
 /*
-	symbolic_to_octal_mode()
+	strip
+
+	NOTE: could use BIN_STRIP from pmk.conf
+*/
+
+void strip(char *file) {
+	char	*s_path;
+
+	s_path = getenv(STRIP_ENV_NAME);
+	if (s_path == NULL) {
+		errorf("STRIP env variable not set, skipping.");
+	} else {
+		/* XXX TODO */
+		errorf("-s option has not been implemented yet");
+		errorf("'%s' not stripped.", file);
+	}
+}
+
+/*
+	convert symbolic value to octal
 */
 
 mode_t symbolic_to_octal_mode(char *mstr) {
@@ -151,6 +170,7 @@ mode_t symbolic_to_octal_mode(char *mstr) {
 	}
 /*debugf("perm = %o", perm);*/
 
+	/* apply operator */
 	switch (op) {
 		case '+':
 			mode = mask & perm;
@@ -164,9 +184,7 @@ mode_t symbolic_to_octal_mode(char *mstr) {
 	}
 
 	return(mode);
-
 }
-
 
 /*
 	check_mode
@@ -260,7 +278,6 @@ void usage(void) {
 	exit(1);
 }
 
-
 /*
 	main
 */
@@ -325,8 +342,6 @@ int main(int argc, char *argv[]) {
 				case 's' :
 					/* strip */
 					do_strip = true;
-					/* XXX TODO */
-					errorf("-s option has not been implemented yet");
 					break;
 
 				case 't' :
@@ -351,7 +366,8 @@ int main(int argc, char *argv[]) {
 	argc = argc - optind;
 	argv = argv + optind;
 
-	if ((argc != 2) && (create_dir == false)) {	/* XXX TODO  allow use of more than one source (<2)*/
+	if ((argc != 2) && (create_dir == false)) {
+		/* XXX TODO  allow use of more than one source (<2)*/
 		usage();
 	}
 
@@ -430,6 +446,10 @@ int main(int argc, char *argv[]) {
 
 		/* set dst for further operations */
 		dst = dir;
+	}
+
+	if (do_strip == true) {
+		strip(dst);
 	}
 
 	/* change owner and group */
