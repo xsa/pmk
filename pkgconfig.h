@@ -39,7 +39,9 @@
 
 #define PKGCONFIG_DIR		"/usr/local/lib/pkgconfig" /* XXX XXX XXX hardcode !!!!! should use prefix */
 
-typedef struct s_pkg_data {
+#define PKGCFG_HT_SIZE	512
+
+typedef struct s_pkgcell {
 	char	*name,
 		*descr,
 		*version,
@@ -49,13 +51,27 @@ typedef struct s_pkg_data {
 	htable	*variables;
 } pkgcell;
 
+typedef struct s_pkgdata {
+	htable	*files,
+		*cells;
+	dynary	*mods;
+} pkgdata;
 
 typedef struct s_pkgkw {
 	char		*kw_name;
 	unsigned int	 kw_id;
 } pkgkw;
 
-/* XXX TODO  functions protos */
+
+/* functions protos */
+pkgdata	*pkgdata_init();
+void	 pkgdata_destroy(pkgdata *);
+bool	 scan_dir(char *, pkgdata *);
+bool	 parse_keyword(pkgcell *, char *, char *);
+char	*process_variables(char *, htable *);
+pkgcell	*parse_pc_file(char *);
+bool	 pkg_recurse(pkgdata *, char *);
+bool	 pkg_start_recurse(pkgdata *, char *, pkgcell *);
 
 #endif /* _PMK_PKGCONFIG_H_ */
 
