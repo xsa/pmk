@@ -1,3 +1,7 @@
+18 Jan 2005 mipsator
+ * moved pmksetup into bin instead of sbin.
+ * use lists for install and deinstall.
+
 17 Jan 2005 mipsator
  * merged PRIVSEP branch.
 
