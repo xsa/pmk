@@ -85,6 +85,7 @@
 /* pmk.conf separators */
 #define CHAR_ASSIGN_UPDATE	'='
 #define CHAR_ASSIGN_STATIC	':'
+#define CHAR_LIST_SEPARATOR	','
 
 /* maximal size of an error message */
 #define MAX_ERR_MSG_LEN		256
