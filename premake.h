@@ -47,7 +47,7 @@
 #endif
 
 
-#define PREMAKE_VERSION		"0.1"
+#define PREMAKE_VERSION		"0.2"
 
 #define PREMAKE_FILENAME	"pmkfile"
 #define PREMAKE_CONFIG		"pmk.conf"
