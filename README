@@ -10,6 +10,7 @@ make
 make install
 
 Testing :
+* edit Makefile and uncomment USER_TEST to enable local test
 make clean
 make config
 make
