@@ -1,6 +1,9 @@
 28 Jul 2003 mipsator
  * improved dir_explore().
  * added scanning support for c++ files.
+ * added da_shift() and da_resize() in dynarray.
+ * improved da_pop() and da_push() in dynarray.
+ * changed return type of da_size() and da_usize() in dynarray.
 
 26 Jul 2003 mipsator
  * added dir_recurse() in pmkscan to make it scanning a complete tree.
