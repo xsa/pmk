@@ -48,4 +48,5 @@ SunOS		5.7		sun4u		PMK 0.8.1	OK		Xavier Santolaria       WorkShop Compilers 5.0,
 SunOS		5.8		sun4u		PMK 0.8.1-s2	OK		Martin Reindl		gcc-2.95.3, gmake-3.79.1
 SunOS		5.8		sun4u		PMK 0.8.1-s2	OK		Martin Reindl		Forte Developer 7 C 5.4 2002/03/09
 SunOS		5.10		sun4u		PMK 0.8.1	OK		Martin Reindl		gcc-2.95.3, gmake-3.79.1
+SuSE		8.2		i686		PMK 0.8.1-s7	OK		Xavier Santolaria	gcc-3.3, gmake-3.80, linux-2.4.20
 SuSE		9		i386		PMK 0.8.1	OK		Damien Couderc		gcc-3.3.3, gmake-3.80, linux-2.6.5-smp
