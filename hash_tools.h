@@ -34,50 +34,12 @@
  */
 
 
-#ifndef _PMK_FUNCTOOL_H_
-#define _PMK_FUNCTOOL_H_
-
+#ifndef _HASH_TOOLS_H_
+#define _HASH_TOOLS_H_
 
 #include "hash.h"
-#include "pmk.h"
-#include "premake.h"
 
+char	*process_string(char *, htable *);
+bool	 single_append(htable *, char *, char *);
 
-#define LANG_NAME_LEN	64
-#define COMP_NAME_LEN	64
-#define PRE_NAME_LEN	64
-#define CFLG_NAME_LEN	64
-#define SHFLG_NAME_LEN	64
-
-#define CHAR_VERSION_SEPARATOR	'.'
-
-
-typedef struct {
-	char	name[LANG_NAME_LEN],
-		comp[COMP_NAME_LEN],
-		pre[PRE_NAME_LEN],
-		cflg[CFLG_NAME_LEN],
-		slflg[CFLG_NAME_LEN];
-} lgdata;
-
-
-bool	 check_bool_str(char *);
-bool	 invert_bool(bool);
-char	*bool_to_str(bool);
-bool	 get_file_dir_path(char *, char *, char *, int);
-char	*str_to_def(char *);
-bool	 record_def(htable *, char *, bool);
-bool	 record_val(htable *, char *, char *);
-bool	 label_set(htable *, char *, bool);
-bool	 label_check(htable *, char *);
-bool	 depend_check(htable *, pmkdata *);
-bool	 require_check(htable *);
-lgdata	*check_lang(char *);
-lgdata	*check_lang_comp(char *);
-lgdata	*get_lang(htable *, pmkdata *);
-char	*get_comp_path(htable *, char *);
-char	*parse_idtf(char *, char *, size_t);
-bool	 check_cfgt_data(pmkdata *pgd);
-
-#endif /* _PMK_FUNCTOOL_H_ */
-
+#endif /* _HASH_TOOLS_H_ */

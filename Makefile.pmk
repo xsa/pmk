@@ -59,8 +59,8 @@ TEST_INST=	test_pmkinstall
 TEST_TARGET=	$(TEST_INST)/$(INST).test
 
 P_OBJS=		autoconf.o cfgtool.o common.o compat.o detect.o \
-		dynarray.o func.o functool.o hash.o parse.o pmk_obj.o \
-		pathtools.o pkgconfig.o $(PREMAKE).o
+		dynarray.o func.o functool.o hash.o hash_tools.o parse.o \
+		pmk_obj.o pathtools.o pkgconfig.o $(PREMAKE).o
 
 S_OBJS=		common.o compat.o dynarray.o hash.o parse.o pmk_obj.o \
 		$(SETUP).o

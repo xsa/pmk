@@ -38,14 +38,14 @@ IF(!sw_usermode) {
 }
 
 # checking strlcpy in string.h
-CHECK_INCLUDE(function_strlcpy) {
+CHECK_HEADER(function_strlcpy) {
 	REQUIRED = FALSE
 	NAME = "string.h"
 	FUNCTION = "strlcpy"
 }
 
 # checking strlcat in string.h
-CHECK_INCLUDE(function_strlcat) {
+CHECK_HEADER(function_strlcat) {
 	REQUIRED = FALSE
 	NAME = "string.h"
 	FUNCTION = "strlcat"
@@ -65,26 +65,26 @@ CHECK_TYPE(type_blkcnt_t) {
 }
 
 # checking stdbool.h
-CHECK_INCLUDE(header_stdbool_h) {
+CHECK_HEADER(header_stdbool_h) {
 	REQUIRED = FALSE
 	NAME = "stdbool.h"
 }
 
 # checking libgen.h
-CHECK_INCLUDE(header_libgen_h) {
+CHECK_HEADER(header_libgen_h) {
 	REQUIRED = FALSE
 	NAME = "libgen.h"
 }
 
 # checking isblank in ctype.h
-CHECK_INCLUDE(function_isblank) {
+CHECK_HEADER(function_isblank) {
 	REQUIRED = FALSE
 	NAME = "ctype.h"
 	FUNCTION = "isblank"
 }
 
 # checking mkstemps in unistd.h
-CHECK_INCLUDE(function_mkstemps) {
+CHECK_HEADER(function_mkstemps) {
 	REQUIRED = FALSE
 	NAME = "unistd.h"
 	FUNCTION = "mkstemps"

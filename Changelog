@@ -1,3 +1,7 @@
+26 Jun 2004 mipsator
+ * moved process_string() and single_append() into hash_tools.
+ * updated pmkfile (was using obsolete commands).
+
 16 Jun 2004 mipsator
  * fixed parse_pc_file().
  * fixed process_variables().
