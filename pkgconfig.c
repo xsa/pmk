@@ -181,12 +181,106 @@ bool parse_keyword(pkgcell *ppc, char *kword, char *value) {
 }
 
 /*
+	process string to substitute variables with their values
+
+	pstr : string to process
+	pht : hash table where variables are stored
+
+	return : new string or NULL
+*/
+
+char *process_variables(char *pstr, htable *pht) {
+	bool	 bs = false;
+	char	 buf[OPT_VALUE_LEN],
+		 var[OPT_NAME_LEN],
+		*pvar,
+		*pbuf;
+	size_t	 size;
+
+	size = sizeof(buf);
+	pbuf = buf;
+
+	while ((*pstr != CHAR_EOS) && (size > 0)) {
+		switch(*pstr) {
+			case '\\' :
+				bs = true;
+				pstr++;
+				break;
+
+			case '$' :
+				if (bs == false) {
+					/* found variable */
+					pstr++;
+					/* skip '{' */
+					pstr++;
+					pstr = parse_identifier(pstr, var, size);
+					if (pstr == NULL) {
+/*						debugf("parse_idtf returned null."); XXX */
+						return(NULL);
+					} else {
+						/* check if identifier exists */
+						pvar = hash_get(pht, var);
+						if (pvar != NULL) {
+							/* identifier found, append value */
+							while ((*pvar != CHAR_EOS) && (size > 0)) {
+								*pbuf = *pvar;
+								pbuf++;
+								pvar++;
+								size--;
+							}
+
+							/* skip '}' */
+							pstr++;
+						}
+					}
+				} else {
+					/* copy character */
+					*pbuf = *pstr;
+					pbuf++;
+					pstr++;
+					size--;
+					bs = false;
+				}
+				break;
+
+			default :
+				if (bs == true) {
+					*pbuf = '\\';
+					pbuf++;
+					pstr++;
+					size--;
+					if (size == 0) {
+/*						debugf("overflow."); XXX */
+						return(NULL);
+					}
+					bs = false;
+				}
+				/* copy character */
+				*pbuf = *pstr;
+				pbuf++;
+				pstr++;
+				size--;
+				break;
+		}
+	}
+
+	if (size == 0) {
+/*		debugf("overflow."); XXX */
+		return(NULL);
+	}
+
+	*pbuf = CHAR_EOS;
+	return(strdup(buf));
+}
+
+/*
 	parse pc file
 */
 
 pkgcell *parse_pc_file(char *pcfile) {
 	FILE	*fp;
 	char	*pstr,
+		*pps,
 		 buf[TMP_BUF_LEN],
 		 line[TMP_BUF_LEN];
 	pkgcell	*ppc;
@@ -219,11 +313,14 @@ pkgcell *parse_pc_file(char *pcfile) {
 				/* keyword */
 				pstr++;
 				pstr = skip_blank(pstr);
+
+				/* process variables */
+				pps = process_variables(pstr, ppc->variables);
 #ifdef PKGCFG_DEBUG
-debugf("keyword = '%s', value = '%s'", buf, pstr);
+debugf("keyword = '%s', value = '%s', string = '%s'", buf, pps, pstr);
 #endif
 				/* set variable with parsed data */
-				parse_keyword(ppc, buf, pstr);
+				parse_keyword(ppc, buf, pps); /* XXX check ? */
 				break;
 
 			case '=' :
@@ -231,11 +328,14 @@ debugf("keyword = '%s', value = '%s'", buf, pstr);
 				pstr++;
 				pstr = skip_blank(pstr);
 
+				/* process variables */
+				pps = process_variables(pstr, ppc->variables);
 #ifdef PKGCFG_DEBUG
-debugf("variable = '%s', value = '%s'", buf, pstr);
+debugf("variable = '%s', value = '%s', string = '%s'", buf, pps, pstr);
 #endif
 				/* store variable in hash */
-				hash_update_dup(ppc->variables, buf, pstr); /* XXX check, add only ? */
+				hash_update_dup(ppc->variables, buf, pps); /* XXX check, add only ? */
+
 				break;
 
 			default :
@@ -243,7 +343,6 @@ debugf("variable = '%s', value = '%s'", buf, pstr);
 #ifdef PKGCFG_DEBUG
 debugf("unknown = '%s'", line);
 #endif
-
 				break;
 		}
 	}
@@ -259,6 +358,49 @@ debugf("unknown = '%s'", line);
 void pkg_collect(void) {
 	
 }
+
+/*
+*/
+
+htable *pkg_recurse(htable *mod_tab, char *reqs) {
+	char		*mod,
+			*pcf;
+	dynary		*pda;
+	htable		*pht;
+	pkgcell		*ppc;
+	unsigned int	 i;
+
+	pda = str_to_dynary(reqs, ' ');
+	if (pda == NULL) {
+		/* XXX errof */
+		return(NULL);
+	}
+
+	pht = hash_init(32); /* XXX hardcode !!!! */
+	if (pht == NULL) {
+		/* XXX errof */
+		da_destroy(pda);
+		return(NULL);
+	}
+
+
+	for (i = 0 ; i < da_usize(pda) ; i++) {
+		/* get module name */
+		mod = da_idx(pda, i);
+
+		/* get pc file name */
+		pcf = hash_get(mod_tab, mod);
+
+		/* parse pc file */
+		ppc = parse_pc_file(pcf);
+
+		/* store pkgcell in hash */
+		hash_update(pht, mod, ppc); /* XXX check */
+	}
+
+	return(pht);
+}
+
 
 /*
 */

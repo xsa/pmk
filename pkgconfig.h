@@ -55,5 +55,7 @@ typedef struct s_pkgkw {
 	unsigned int	 kw_id;
 } pkgkw;
 
+/* XXX TODO  functions protos */
+
 #endif /* _PMK_PKGCONFIG_H_ */
 
