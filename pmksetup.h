@@ -45,7 +45,7 @@
 /* pmksetup specific version */
 #define PREMAKE_SUBVER_PMKSETUP	"8"
 
-#define PREMAKE_CONFIG_TMP	PREMAKE_TMP_DIR "/pmk.conf_XXXXXXXX"
+#define PREMAKE_CONFIG_TMP	CONFDIR "/pmk.conf_XXXXXXXX"
 #define PREMAKE_CONFIG_MODE	S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH
 
 
@@ -80,6 +80,7 @@
 #define	ECHO_NL		"\\n"
 #define	ECHO_HT		"\\t"
 
+#define PMKSTP_OPT_STR	"hr:u:vV"	/* "a:hr:u:vV" */
 
 #define EMSG_PRIV_FMT	"Failed to change privilege (%s)"
 

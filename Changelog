@@ -1,3 +1,9 @@
+29 Jan 2005 mipsator
+ * fixed the -v option of pmksetup.
+ * fixed pmksetup behavior when the user has not the required privileges.
+ * moved the configuration directory checking earlier in the program
+   execution.
+
 # PMK 0.9.1 release
 
 26 Jan 2005 mipsator

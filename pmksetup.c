@@ -59,6 +59,8 @@
 #include "pmksetup.h"
 
 
+extern int	 optind;
+
 FILE	*sfp;			/* scratch file pointer */
 char	sfn[MAXPATHLEN];	/* scratch file name */		
 
@@ -784,13 +786,12 @@ bool detection_loop(int argc, char *argv[]) {
 	int		 ch;
 	prsopt		 *ppo;
 	
-	extern int	 optind;
 #ifndef errno
 	extern int	 errno;
 #endif /* errno */
 
-	/*while ((ch = getopt(argc, argv, "a:hr:u:vV")) != -1)*/
-	while ((ch = getopt(argc, argv, "hr:u:vV")) != -1)
+	optind = 1;
+	while ((ch = getopt(argc, argv, PMKSTP_OPT_STR)) != -1) {
 		switch(ch) {
 			case 'r' :
 				/* mark to be deleted in hash */
@@ -842,13 +843,10 @@ bool detection_loop(int argc, char *argv[]) {
 				break;
 
 			case 'v' :
-				fprintf(stderr, "%s\n", PREMAKE_VERSION);
-				return(true);
-				break;
-
 			case 'V' :
-				if (verbose_flag == 0)
-					verbose_flag = 1;
+				/*
+				 * already processed in main()
+				 */
 				break;
 
 			case '?' :
@@ -856,6 +854,8 @@ bool detection_loop(int argc, char *argv[]) {
 				usage();
 				/* NOTREACHED */
 		}
+	}
+
 	argc -= optind;
 	argv += optind;
 
@@ -979,38 +979,29 @@ void parent_loop(pid_t pid) {
 #ifdef PMKSETUP_DEBUG
 	debugf("waitpid() status = %d", WEXITSTATUS(status));
 #endif /* PMKSETUP_DEBUG */
-
-	if (status != 0) {
-		errorf("child failed (status %d)", status);
-		exit(EXIT_FAILURE);
-	}
 #endif /* WITHOUT_FORK */
 
-	if (sfp != NULL) {
-		if (fclose(sfp) != 0) {
-			/* hazardous result => exit */
-			errorf("cannot close temporary file '%s' : %s.",
-						sfp, strerror(errno));
-			exit(EXIT_FAILURE);
-		}
+	if (fclose(sfp) != 0) {
+		/* hazardous result => exit */
+		errorf("cannot close temporary file '%s' : %s.", sfp,
+							strerror(errno));
+		exit(EXIT_FAILURE);
+	}
 
-		/* check if syconfdir exists */
-		if (access(CONFDIR, F_OK) != 0) { /* no race condition, just mkdir() */
-			verbosef("==> Creating '%s' directory.", CONFDIR);
-			if (mkdir(CONFDIR, S_IRWXU | S_IRGRP | S_IXGRP |
-						S_IROTH | S_IXOTH) != 0) {
-				errorf("cannot create '%s' directory : %s.",
-						CONFDIR, strerror(errno));
-				exit(EXIT_FAILURE);
-			}
-		}
-
+#ifdef WITHOUT_FORK
+	/*
+	 * without fork, the child part will exit() if a problem occur
+	 * so we shouldn't need to care about what happens
+	 */
+#else
+	/* if child status is ok, writing changes */
+	if (status == 0) {
+#endif
 		/*
-			check if pmk.conf already exists
-
-			NOTE: no race condition here for access(), BUT
-			BE CAREFUL if changes are to be made.
-		*/ 
+		 * check if pmk.conf already exists
+		 * NOTE: no race condition here for access(), BUT
+		 * BE CAREFUL if changes are to be made.
+		 */ 
 		if (access(PREMAKE_CONFIG_PATH, F_OK) == 0) { /* see above */
 			/* backup configuration file */
 			printf("==> Backing up configuration file: %s\n",
@@ -1025,20 +1016,33 @@ void parent_loop(pid_t pid) {
 		}
 
 		/* copying the temporary config to the system one */
-		printf("==> Saving configuration file: %s\n", PREMAKE_CONFIG_PATH);
-		if (fcopy(sfn, PREMAKE_CONFIG_PATH, PREMAKE_CONFIG_MODE) == false)
+		printf("==> Saving configuration file: %s\n",
+						PREMAKE_CONFIG_PATH);
+		if (fcopy(sfn, PREMAKE_CONFIG_PATH,
+					PREMAKE_CONFIG_MODE) == false) {
+			errorf("failed to copy temporary file '%s'.", sfn);
 			exit(EXIT_FAILURE);
+		}
+#ifndef WITHOUT_FORK
+	}
+#endif
 
 #ifdef PMKSETUP_DEBUG
-		debugf("%s has not been deleted!", sfn);
+	debugf("%s has not been deleted!", sfn);
 #else
-		if (unlink(sfn) == -1) {
-			errorf("cannot remove temporary file: '%s' : %s.",
-						sfn, strerror(errno));
-			error = true;
-		}
-#endif	/* PMKSETUP_DEBUG */
+	if (unlink(sfn) == -1) {
+		errorf("cannot remove temporary file: '%s' : %s.",
+					sfn, strerror(errno));
+		error = true;
 	}
+#endif	/* PMKSETUP_DEBUG */
+
+#ifndef WITHOUT_FORK
+	if (status != 0) {
+		errorf("child failed (status %d)", status);
+		exit(EXIT_FAILURE);
+	}
+#endif /* WITHOUT_FORK */
 
 	if (error == true)
 		exit(EXIT_FAILURE);
@@ -1054,6 +1058,37 @@ int main(int argc, char *argv[]) {
 	pid_t		 pid;
 	uid_t		 uid = 0;
 
+	int		 ch;
+
+	optind = 1;
+	while ((ch = getopt(argc, argv, PMKSTP_OPT_STR)) != -1) {
+		switch(ch) {
+			case 'r' :
+			case 'u' :
+				/*
+				 * ignore this options at this level, it
+				 * will be processed later
+				 */
+				break;
+
+			case 'v' :
+				fprintf(stderr, "%s\n", PREMAKE_VERSION);
+				return(true);
+				break;
+
+			case 'V' :
+				if (verbose_flag == 0)
+					verbose_flag = 1;
+				break;
+
+			case '?' :
+			default :
+				usage();
+				/* NOTREACHED */
+		}
+	}
+
+
 	if (getuid() == 0) {
 #ifdef PMKSETUP_DEBUG
 		debugf("PRIVSEP_USER = '%s'", PRIVSEP_USER);
@@ -1067,12 +1102,23 @@ int main(int argc, char *argv[]) {
 		gid = pw->pw_gid;
 	}
 
+	/* check if syconfdir exists */
+	if (access(CONFDIR, F_OK) != 0) { /* no race condition, just mkdir() */
+		verbosef("==> Creating '%s' directory.", CONFDIR);
+		if (mkdir(CONFDIR, S_IRWXU | S_IRGRP | S_IXGRP |
+						S_IROTH | S_IXOTH) != 0) {
+			errorf("cannot create '%s' directory : %s.",
+						CONFDIR, strerror(errno));
+			exit(EXIT_FAILURE);
+		}
+	}
+
 	sfp = tmp_open(PREMAKE_CONFIG_TMP, "w", sfn, sizeof(sfn));
 	if (sfp == NULL) {
 		errorf("cannot open temporary file '%s' : %s.",
 				sfn, strerror(errno));
 		exit(EXIT_FAILURE);
-	}
+}
 
 #ifndef WITHOUT_FORK
 	/* forking detection code */
