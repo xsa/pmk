@@ -3,6 +3,7 @@
  * updated pmkinstall man page.
  * updated usage() of pmkinstall.
  * fixed Darwin entry in pmkcomp.dat file.
+ * imported the beginning of a tutorial.
 
 08 Feb 2004 mipsator
  * implemented output filtering options in pmkpc.
@@ -17,7 +18,6 @@
  * fixed building of the pmkscan location in usermode.
  * moved sample tests in samples/Makefile.
  * added document headers that were missing in some files.
- * imported a start of tutorial.
 
 # snapshot 0.7.12a
 
