@@ -81,7 +81,8 @@ cmdkw		functab[] = {
 	{"DEFINE", pmk_define},
 	{"CHECK_BINARY", pmk_check_binary},
 	{"CHECK_INCLUDE", pmk_check_include},
-	{"CHECK_LIB", pmk_check_lib}
+	{"CHECK_LIB", pmk_check_lib},
+	{"CHECK_CONFIG", pmk_check_config}
 };
 
 
