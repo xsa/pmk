@@ -448,7 +448,7 @@ bool prs_fill_buf(prseng *peng) {
 	/* ferror ? */
 	if (ferror(peng->fp) != 0) {
 #ifdef PRS_DEBUG
-		debugf("prs_fill_buf(): ferror !"); /* XXX */
+		debugf("prs_fill_buf(): ferror !");
 #endif
 		return(false);
 	}
@@ -610,7 +610,8 @@ char *parse_identifier(char *pstr, char *pbuf, size_t size) {
 		return(NULL);
 
 	*pbuf = CHAR_EOS;
-	
+
+	/* return new cursor */
 	return(pstr);
 }
 
@@ -1428,11 +1429,6 @@ bool parse_cmd_block(prsdata *pdata, prseng *peng, prsnode *pnode, bool chk_deli
 				break;
 
 			default :
-				/* XXX */
-				/*if (chk_delim == true) {                */
-				/*        |+ return() XXX TODO not NULL +|*/
-				/*}                                       */
-
 #ifdef PRS_DEBUG
 				debugf("parse_cmd_block() : parsing command header.");
 #endif

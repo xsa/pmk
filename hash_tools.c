@@ -44,7 +44,13 @@
 
 
 /*
-	XXX TODO descr blah
+	parse string for identifiers
+
+	pstr : string to parse
+	pbuf : resulting string buffer
+	size : size of buffer
+
+	returns : buffer address or NULL
 */
 
 char *parse_idtf(char *pstr, char *pbuf, size_t size) {
@@ -60,6 +66,7 @@ char *parse_idtf(char *pstr, char *pbuf, size_t size) {
 
 	*pbuf = CHAR_EOS;
 	
+	/* return new cursor */
 	return(pstr);
 }
 

@@ -77,7 +77,12 @@ int	nbarch = sizeof(arch_tab) / sizeof(arch_cell);
 
 
 /*
-	XXX
+	seek parse data key
+
+	pdata : parse data structure
+	token : key token to find
+
+	returns : key data or NULL
 */
 
 void *seek_key(prsdata *pdata, int token) {
@@ -142,7 +147,7 @@ prsdata *parse_cpu_data(char *fname) {
 
 	uname_m : uname machine string 
 
-	returns:  cpu architecture string or NULL
+	returns:  cpu architecture string
 */
 
 char *check_cpu_arch(char *uname_m, prsdata *pdata) {
@@ -164,7 +169,9 @@ char *check_cpu_arch(char *uname_m, prsdata *pdata) {
 }
 
 /*
-	XXX
+	convert arch name to id
+
+	arch_name : architecture string
 
 	returns:  architecture identifier
 */
@@ -186,7 +193,10 @@ unsigned char arch_name_to_id(char *arch_name) {
 }
 
 /*
-	XXX
+	architecture wrapper
+
+	pdata : parsing data structure
+	arch_name : architecture name
 
 	returns: hash table with values or NULL
 */
@@ -213,13 +223,20 @@ htable *arch_wrapper(prsdata *pdata, char *arch_name) {
 		if (pcell == NULL)
 			return(NULL);
 
-		x86_get_cpuid_data(pcell); /* XXX check */
+		if (x86_get_cpuid_data(pcell) == false) {
+			errorf("unable to get x86 cpuid data.");
+			return(NULL);
+		}
+		
 		pcell->stdvendor = x86_get_std_cpu_vendor(pdata, pcell->vendor);
-		x86_set_cpu_data(pdata, pcell, pht); /* XXX check */
+		if (x86_set_cpu_data(pdata, pcell, pht) == false) {
+			errorf("failed to record cpu data.");
+			return(NULL);
+		}
 
 		x86_cpu_cell_destroy(pcell);
 #else
-		errorf("architecture mismatch."); /* XXX debug message ? */
+		errorf("architecture mismatch.");
 		return(NULL);
 #endif
 			break;
@@ -286,7 +303,9 @@ int nb_feat_reg2 = sizeof(x86_cpu_feat_reg2) / sizeof(x86_cpu_feature);
 ****/
 
 /*
-	XXX
+	initialise x86 cpu cell
+
+	returns : cpu cell or NULL
 */
 
 x86_cpu_cell *x86_cpu_cell_init(void) {
@@ -309,7 +328,11 @@ x86_cpu_cell *x86_cpu_cell_init(void) {
 }
 
 /*
-	XXX
+	free x86 cpu cell structure
+
+	pcell : structure to free
+
+	returns : -
 */
 
 void x86_cpu_cell_destroy(x86_cpu_cell *pcell) {
@@ -327,7 +350,7 @@ void x86_cpu_cell_destroy(x86_cpu_cell *pcell) {
 
 	pdata : parsung structure
 
-	returns: XXX
+	returns: cpu vendor string
 */
 
 char *x86_get_std_cpu_vendor(prsdata *pdata, char *civendor) {
@@ -356,11 +379,15 @@ char *x86_get_std_cpu_vendor(prsdata *pdata, char *civendor) {
 
 
 /*
-	XXX
+	gather x86 cpuid data
+
+	cell : x86 cpu cell
+
+	returns : true on success else false
 */
 
 bool x86_get_cpuid_data(x86_cpu_cell *cell) {
-	char		 feat_str[512] = ""; /* XXX */
+	char		 feat_str[TMP_BUF_LEN] = "";
 	int		 i;
 	uint32_t	 buffer[13];
 
@@ -382,7 +409,10 @@ bool x86_get_cpuid_data(x86_cpu_cell *cell) {
 	buffer[2] = x86_cpu_reg_ecx;
 	buffer[3] = 0;	/* terminate string */
 
-	cell->vendor = strdup((char *) buffer); /* XXX check */
+	cell->vendor = strdup((char *) buffer);
+	if (cell->vendor == NULL) {
+		return(false);
+	}
 
 	/* get the cpu type */
 	x86_exec_cpuid(1);
@@ -395,21 +425,19 @@ bool x86_get_cpuid_data(x86_cpu_cell *cell) {
 
 	cell->model = (unsigned int) ((x86_cpu_reg_eax & X86_CPU_MASK_MODEL) >> 4);
 
+	/* processing feature register 1 */
 	for (i = 0 ; i < nb_feat_reg1 ; i++) {
-	/* XXX */
 		if ((x86_cpu_reg_edx & x86_cpu_feat_reg1[i].mask) != 0) {
-			strlcat(feat_str, x86_cpu_feat_reg1[i].descr, sizeof(feat_str)); /* XXX check ? */
-			strlcat(feat_str, " ", sizeof(feat_str));
+			strlcat(feat_str, x86_cpu_feat_reg1[i].descr, sizeof(feat_str));
+			strlcat(feat_str, " ", sizeof(feat_str)); /* XXX check ? */
 		}
-	/* XXX */
 	}
+	/* processing feature register 2 */
 	for (i = 0 ; i < nb_feat_reg2 ; i++) {
-	/* XXX */
 		if ((x86_cpu_reg_edx & x86_cpu_feat_reg2[i].mask) != 0) {
-			strlcat(feat_str, x86_cpu_feat_reg2[i].descr, sizeof(feat_str)); /* XXX check ? */
-			strlcat(feat_str, " ", sizeof(feat_str));
+			strlcat(feat_str, x86_cpu_feat_reg2[i].descr, sizeof(feat_str));
+			strlcat(feat_str, " ", sizeof(feat_str)); /* XXX check ? */
 		}
-	/* XXX */
 	}
 	cell->features = strdup(feat_str);
 

@@ -851,7 +851,7 @@ bool get_cpu_data(htable *pht) {
 		return(false);
 	}
 
-	pstr = check_cpu_arch(uname_m, pdata); /* XXX check ? */
+	pstr = check_cpu_arch(uname_m, pdata); /* no check, never NULL */
 	if (record_data(pht, PMKCONF_HW_CPU_ARCH, 'u', pstr) == false)
 		return(false);
 	verbosef("Setting '%s' => '%s'", PMKCONF_HW_CPU_ARCH, pstr);
