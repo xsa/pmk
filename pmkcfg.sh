@@ -1,7 +1,8 @@
 #!/bin/sh
 # $Id$
 
-# Copyright (c) 2003-2004 Damien Couderc, Martin Reindl
+# Copyright (c) 2003-2004 Damien Couderc
+# Copyright (c) 2004 Martin Reindl
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -31,6 +32,30 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+
+#
+# automatically detect and use posix shell
+#
+
+if test "$1" != "autodetected"; then
+	printf "Autodetecting POSIX shell\n"
+
+	posix_sh="/usr/bin/posix/sh"
+	if test ! -x $posix_sh; then
+		posix_sh="/usr/xpg4/bin/sh"
+		if test ! -x "$posix_sh"; then
+			posix_sh="/bin/sh"
+		fi
+	fi
+	printf "Using $posix_sh $0 $@\n\n"
+	$posix_sh $0 "autodetected" "$@"
+	exit $?
+else
+	# skip "autodetected"
+	shift
+fi
+
+
 #
 # defines
 #
@@ -47,10 +72,6 @@ if [ -z "$SYSCONFDIR" ]; then
 	sysdir="/etc"
 else
 	sysdir=$SYSCONFDIR
-fi
-
-if [ -z "$CC" ]; then
-	CC="cc"
 fi
 
 sconf="$sysdir/pmk"
@@ -92,7 +113,7 @@ get_file_name() {
 	filename="$basedir/$basename"
 }
 
-# create new files from templates 
+# create new files from templates
 process_tmpl_list () {
 	newlist=""
 	for f in $*; do
@@ -100,6 +121,29 @@ process_tmpl_list () {
 		newlist="$newlist $filename"
 		cp $f $filename
 	done
+}
+
+check_binary() {
+	binary="$1"
+	printf "Checking binary '%s' : " "$binary"
+
+	plst=`echo $PATH | sed "s/:/ /g"`
+
+	r=1
+	for d in $plst; do
+		if test -x "$d/$binary"; then
+			r=0
+			break
+		fi
+	done
+
+	if test "$r" -eq 0; then
+		echo "yes"
+	else
+		echo "no"
+	fi
+
+	return $r
 }
 
 check_header() {
@@ -118,11 +162,15 @@ EOF
 	if $CC -o $testbin $testfile >/dev/null 2>&1; then
 		sed_define "def" "$header"
 		echo "yes"
+		r=0
 	else
 		sed_define "udef" "$header"
 		echo "no"
+		r=1
 	fi
 	rm -f $testfile $testbin
+
+	return $r
 }
 
 check_header_function() {
@@ -144,11 +192,45 @@ EOF
 	if $CC -o $testobj -c $testfile >/dev/null 2>&1; then
 		sed_define "def" "$function"
 		echo "yes"
+		r=0
 	else
 		sed_define "udef" "$function"
 		echo "no"
+		r=1
 	fi
 	rm -f $testfile $testobj
+
+	return $r
+}
+
+check_lib_function() {
+	lib="$1"
+	function="$2"
+	printf "Checking function '%s' in library 'l%s' : " "$function" "$lib"
+
+	cat > $testfile <<EOF
+#include <stdio.h>
+
+int $function();
+
+int main() {
+	printf("%p", $function);
+	return(0);
+}
+EOF
+
+	if $CC -o $testobj $testfile -l$lib >/dev/null 2>&1; then
+		sed_define "def" "$function"
+		echo "yes"
+		r=0
+	else
+		sed_define "udef" "$function"
+		echo "no"
+		r=1
+	fi
+	rm -f $testfile $testobj
+
+	return $r
 }
 
 check_type() {
@@ -170,11 +252,15 @@ EOF
 	if $CC -o $testbin $testfile >/dev/null 2>&1; then
 		sed_define "def" "$type"
 		echo "yes"
+		r=0
 	else
 		sed_define "udef" "$type"
 		echo "no"
+		r=1
 	fi
 	rm -f $testfile $testbin
+
+	return $r
 }
 
 check_type_header() {
@@ -198,11 +284,15 @@ EOF
 	if $CC -o $testbin $testfile >/dev/null 2>&1; then
 		sed_define "def" "$type"
 		echo "yes"
+		r=0
 	else
 		sed_define "udef" "$type"
 		echo "no"
+		r=1
 	fi
 	rm -f $testfile $testbin
+
+	return $r
 }
 
 sed_define() {
@@ -237,24 +327,21 @@ mkf_sed() {
 #
 
 # parse options
-set -- `getopt p:uh $*`
-if [ $? != 0 ]
-then
-	exit 1
-fi
-while [ $1 != -- ]
-do
-	case $1 in
-	-p)     echo "Setting prefix to '$2'"    
-	base=$2
-	shift;;
-	-u)     usermode=1;;
-	-h)     usage
-	exit 1;;
+while getopts "hp:u" arg; do
+	case $arg in
+		p)	echo "Setting prefix to '$OPTARG'"
+			base="$OPTARG"
+			;;
+
+		u)	usermode=1
+			;;
+
+		h)	usage
+			exit 1
+			;;
 	esac
-	shift
 done
-shift
+shift `expr $OPTIND - 1`
 
 # init templates
 process_tmpl_list "$tmpl_list"
@@ -293,6 +380,45 @@ else
 fi
 
 mkf_sed 'SYSCONFDIR' "$sysdir"
+
+#
+# cc check
+#
+
+
+if [ -z "$CC" ]; then
+	if check_binary cc; then
+		mkf_sed 'CC' 'cc'
+		CC="cc"
+	else
+		printf "Unable to find C compiler"
+		exit 0
+	fi
+else
+	printf "CC defined, skipping C compiler check.\n"
+fi
+
+#
+# cpp check
+#
+
+if check_binary cpp; then
+	mkf_sed 'CPP' 'cpp'
+else
+	printf "Unable to find C preprocessor"
+	exit 0
+fi
+
+#
+# as check
+#
+
+if check_binary as; then
+	mkf_sed 'AS' 'as'
+else
+	printf "Unable to find assembler"
+	exit 0
+fi
 
 #
 # strlcpy check
@@ -341,6 +467,16 @@ check_header_function ctype.h isblank
 #
 
 check_header_function unistd.h mkstemps
+
+#
+# dirname check
+#
+
+if check_lib_function gen dirname; then
+	mkf_sed 'LGEN_FLAGS' "-lgen"
+else
+	mkf_sed 'LGEN_FLAGS' ""
+fi
 
 #
 # end

@@ -95,7 +95,7 @@
 /* minor version */
 #define PREMAKE_VMINOR	"8"
 /* minor subversion, only used for bugfixes  */
-#define PREMAKE_VSUB	"1"
+#define PREMAKE_VSUB	"2"
 
 /* full version */
 #ifndef PREMAKE_VSUB	
@@ -119,7 +119,9 @@
 #define PREMAKE_PKGFILE		"pkgfile"
 #define PREMAKE_LOG		"pmk.log"
 
-#define PREMAKE_CONFIG_PATH	CONFDIR "/" PREMAKE_CONFIG 
+#define PREMAKE_CONFIG_PATH	CONFDIR "/" PREMAKE_CONFIG
+#define PREMAKE_CONFIG_PATH_BAK	PREMAKE_CONFIG_PATH ".bak"
+
 
 #define PREMAKE_TMP_DIR		TMPDIR
 
@@ -129,19 +131,24 @@
 
 /* key names (see also pmksetup.h) */
 #define PMKCONF_BIN_AR		"BIN_AR"
+#define PMKCONF_BIN_AS		"BIN_AS"
 #define PMKCONF_BIN_AWK		"BIN_AWK"
 #define PMKCONF_BIN_CAT		"BIN_CAT"
 #define PMKCONF_BIN_CC		"BIN_CC"
 #define PMKCONF_BIN_CPP		"BIN_CPP"
 #define PMKCONF_BIN_CXX		"BIN_CXX"
+#define PMKCONF_BIN_ECHO	"BIN_ECHO"
 #define PMKCONF_BIN_EGREP	"BIN_EGREP"
 #define PMKCONF_BIN_GREP	"BIN_GREP"
 #define PMKCONF_BIN_INSTALL	"BIN_INSTALL"
+#define PMKCONF_BIN_LEX		"BIN_LEX"
+#define PMKCONF_BIN_LN		"BIN_LN"
 #define PMKCONF_BIN_PKGCONFIG	"BIN_PKGCONFIG"
 #define PMKCONF_BIN_RANLIB	"BIN_RANLIB"
 #define PMKCONF_BIN_SH		"BIN_SH"
 #define PMKCONF_BIN_STRIP	"BIN_STRIP"
 #define PMKCONF_BIN_TAR		"BIN_TAR"
+#define PMKCONF_BIN_YACC	"BIN_YACC"
 
 #define PMKCONF_HW_BYTEORDER	"HW_BYTEORDER"
 

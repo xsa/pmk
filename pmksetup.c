@@ -35,7 +35,7 @@
  */
 
 #include <sys/stat.h>
-/* include it first as if it was <sys/types.h> - this will avoid errors */ 
+/* include it first as if it was <sys/types.h> - this will avoid errors */
 #include "compat/pmk_sys_types.h"
 #include <sys/utsname.h>
 
@@ -74,7 +74,8 @@ int	nbpredef = sizeof(predef) / sizeof(hpair);
  */
 int main(int argc, char *argv[]) {
 	FILE		*config;
-	bool		 process_clopts = false;
+	bool		 process_clopts = false,
+			 cfg_backup = false;
 	htable		*ht;
 	int		 ch,
 			 error = 0;
@@ -134,7 +135,7 @@ int main(int argc, char *argv[]) {
 				break;
 
 			case 'V' :
-				if (0 == verbose_flag)
+				if (verbose_flag == 0)
 					verbose_flag = 1;
 				break;
 
@@ -157,7 +158,7 @@ int main(int argc, char *argv[]) {
 	if (dir_exists(CONFDIR) == -1) {
 		verbosef("==> Creating '%s' directory.", CONFDIR);
 		if (mkdir(CONFDIR, S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH) != 0) {
-			errorf("cannot create '%s' directory : %s.", 
+			errorf("cannot create '%s' directory : %s.",
 				CONFDIR, strerror(errno));
 			exit(EXIT_FAILURE);
 		}
@@ -173,9 +174,12 @@ int main(int argc, char *argv[]) {
 		exit(EXIT_FAILURE);
 
 	/* parse configuration file */
-	if ((config = fopen(PREMAKE_CONFIG_PATH, "r")) != NULL) {
+	config = fopen(PREMAKE_CONFIG_PATH, "r");
+	if (config != NULL) {
+		/* switch backup flag */
+		cfg_backup = true;
+
 		printf("==> Configuration file found: %s\n", PREMAKE_CONFIG_PATH);
-		/* XXX FIXME TODO check ? */
 		if (parse_pmkconf(config, ht, PRS_PMKCONF_SEP, check_opt) == false) {
 			fclose(config);
 			errorf("parsing failed.");
@@ -184,7 +188,7 @@ int main(int argc, char *argv[]) {
 			fclose(config);
 		}
 	} else {
-		printf("==> Configuration file not found, generating one...\n");
+		printf("==> Configuration file not found.\n");
 	}
 
 	printf("==> Merging remaining data...\n");	
@@ -196,8 +200,17 @@ int main(int argc, char *argv[]) {
 	if (close_tmp_config() < 0)
 		exit(EXIT_FAILURE);
 
+	if (cfg_backup == true) {
+		printf("==> Backing up configuration file: %s\n", PREMAKE_CONFIG_PATH_BAK);
+		if (rename(PREMAKE_CONFIG_PATH,PREMAKE_CONFIG_PATH_BAK) != 0) {
+			errorf("configuration file backup failed: %s.", strerror(errno));
+			error = -1;
+		}
+	}
+				
 	if (error == 0)
 		/* copying the temporary config to the system one */
+		printf("==> Saving configuration file: %s\n", PREMAKE_CONFIG_PATH);
 		if (copy_config(sfn, PREMAKE_CONFIG_PATH) == -1)
 			exit(EXIT_FAILURE);
 
@@ -684,7 +697,7 @@ bool byte_order_check(htable *pht) {
 	    ((((char *)&num)[2]) == 0x43) && ((((char *)&num)[3]) == 0x44)) {
 		strlcpy(bo_type, HW_ENDIAN_BIG, sizeof(bo_type));
 	} else {
-		if ( ((((char *)&num)[3]) == 0x41) && ((((char *)&num)[2]) == 0x42) && 
+		if ( ((((char *)&num)[3]) == 0x41) && ((((char *)&num)[2]) == 0x42) &&
 		    ((((char *)&num)[1]) == 0x43) && ((((char *)&num)[0]) == 0x44) ) {
 			strlcpy(bo_type, HW_ENDIAN_LITTLE, sizeof(bo_type));
 		} else {
@@ -719,12 +732,12 @@ int copy_config(const char *tmp_config, const char *config) {
 
 	if ((fp_t = fopen(tmp_config, "r")) == NULL) {
 		errorf("cannot open temporary configuration "
-			"file for reading '%s' : %s.", tmp_config, 
+			"file for reading '%s' : %s.", tmp_config,
 				strerror(errno));
 		return(-1);	
 	}
 	if ((fp_c = fopen(config, "w")) == NULL) {
-		errorf("cannot open '%s' for writing : %s.", 
+		errorf("cannot open '%s' for writing : %s.",
 			config, strerror(errno));
 
 		fclose(fp_t);	
