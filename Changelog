@@ -937,7 +937,7 @@
 # snapshot 0.5.1
 
 17 Jul 2003 mipsator
- * added a check for _Bool type (fix for Tru64 >= 5.x ans solaris 9).
+ * added a check for _Bool type (fix for Tru64 >= 5.x and solaris 9).
 
 16 Jul 2003 mipsator
  * misc changes in pmkscan.c to use regex.
