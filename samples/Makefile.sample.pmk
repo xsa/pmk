@@ -1,6 +1,9 @@
 # $Id$
 # Makefile example
 
+CFLAGS=	@CFLAGS@
+LIBS=	@LIBS@
+
 PACKAGE=@PACKAGE@
 GTK_CONFIG=@GTK_CONFIG@
 

@@ -197,7 +197,8 @@ bool pmk_check_binary(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 	} else {
 		pmk_log("yes.\n");
 		/* define for template */
-		record_val(gdata->htab, filename, binpath);
+		record_def(gdata->htab, filename, true); /* XXX check ?*/
+		record_val(gdata->htab, filename, binpath); /* XXX check ? */
 		label_set(gdata->labl, cmd->label, true);
 		return(true);
 	}
@@ -338,7 +339,7 @@ bool pmk_check_lib(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 		*libfunc,
 		*target,
 		*pstr,
-		lib_path[TMP_BUF_LEN] = "";
+		lib_buf[TMP_BUF_LEN] = "";
 	dynary	*da;
 	int	r, i;
 
@@ -391,20 +392,20 @@ bool pmk_check_lib(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 	/* use each element of LIB_PATH with -L */
 	pstr = hash_get(gdata->htab, "LIB_PATH");
 	if (pstr == NULL) {
-		strlcpy(lib_path, "", sizeof(lib_path));
+		strlcpy(lib_buf, "", sizeof(lib_buf));
 	} else {
 		da = da_init();
-		r = sizeof(lib_path);
+		r = sizeof(lib_buf);
 		str_to_dynary(pstr, CHAR_LIST_SEPARATOR, da);
 		for (i=0 ; i < da_usize(da) ; i++) {
-			strlcat(lib_path, " -L", r);
-			strlcat(lib_path, da_idx(da, i), r);
+			strlcat(lib_buf, " -L", r);
+			strlcat(lib_buf, da_idx(da, i), r);
 		}
 		da_destroy(da);
 	}
 
 	snprintf(cfgcmd, sizeof(cfgcmd), "%s %s -o %s -l%s %s >/dev/null 2>&1",
-						ccpath, lib_path, BIN_TEST_NAME,
+						ccpath, lib_buf, BIN_TEST_NAME,
 						libname, INC_TEST_NAME);
 	/* get result */
 	r = system(cfgcmd);
@@ -413,6 +414,10 @@ bool pmk_check_lib(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 		/* define for template */
 		record_def(gdata->htab, target, true); /* XXX check ?*/
 		record_val(gdata->htab, target, ""); /* XXX check ? */
+		snprintf(lib_buf, sizeof(lib_buf), "-l%s", libname);
+		debugf("lib_buf='%s'", lib_buf); /* XXX DEBUGF */
+		hash_append(gdata->htab, "LIBS", lib_buf, " "); /* XXX check ? */
+		debugf("LIBS+=%s", hash_get(gdata->htab, "LIBS")); /* XXX DEBUGF */
 		label_set(gdata->labl, cmd->label, true);
 		rval = true;
 	} else {
@@ -449,7 +454,7 @@ bool pmk_check_lib(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 
 bool pmk_check_config(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 	FILE	*rpipe;
-	char	version[MAX_VERS_LEN],
+	char	pipebuf[TMP_BUF_LEN],
 		cfgpath[MAXPATHLEN],
 		cfgcmd[MAXPATHLEN],
 		*cfgtool,
@@ -508,12 +513,37 @@ bool pmk_check_config(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 		} else {
 			pmk_log("\tFound version >= %s : ", libvers);
 	
-			get_line(rpipe, version, sizeof(version)); /* XXX check returned value ? */
-			if (check_version(libvers, version) == true) {
-				pmk_log("yes (%s).\n", version);
+			get_line(rpipe, pipebuf, sizeof(pipebuf)); /* XXX check ? */
+			pclose(rpipe);
+			if (check_version(libvers, pipebuf) == true) {
+				pmk_log("yes (%s).\n", pipebuf);
 				rval = true;
+			
+				/* XXX do we keep cfgtool for the tag ? */
+				record_def(gdata->htab, cfgtool, true); /* XXX check ?*/
+				record_val(gdata->htab, cfgtool, ""); /* XXX check ? */
+
+				snprintf(cfgcmd, sizeof(cfgcmd), "%s --cflags", cfgpath);
+				rpipe = popen(cfgcmd, "r");
+				if (rpipe != NULL) {
+					/* put result in CFLAGS */
+					get_line(rpipe, pipebuf, sizeof(pipebuf)); /* XXX check ? */
+					pclose(rpipe);
+					hash_append(gdata->htab, "CFLAGS", pipebuf, " "); /* XXX check ? */
+				}
+
+				snprintf(cfgcmd, sizeof(cfgcmd), "%s --libs", cfgpath);
+				rpipe = popen(cfgcmd, "r");
+				if (rpipe != NULL) {
+					/* put result in LIBS */
+					get_line(rpipe, pipebuf, sizeof(pipebuf)); /* XXX check ? */
+					pclose(rpipe);
+					hash_append(gdata->htab, "LIBS", pipebuf, " "); /* XXX check ? */
+				}
+
+				/* XXX LDFLAGS, CPPFLAGS, LDFLAGS ? */
 			} else {
-				pmk_log("no (%s).\n", version);
+				pmk_log("no (%s).\n", pipebuf);
 				if (required == true) {
 					rval = false;
 				} else {
@@ -521,7 +551,6 @@ bool pmk_check_config(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 					rval = true;
 				}
 			}
-			pclose(rpipe);
 		}
 	}
 
