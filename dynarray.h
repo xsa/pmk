@@ -43,11 +43,13 @@
 typedef struct {
 	int	  nbcell,
 		  nextidx;
-	void	**pary;
+	void	  (*freeobj)(void *),
+		**pary;
 } dynary;
 
 
 dynary	*da_init(void);
+dynary	*da_init_adv(void (*)(void *));
 bool	 da_resize(dynary *, size_t);
 size_t	 da_size(dynary *);
 size_t	 da_usize(dynary *);

@@ -287,7 +287,7 @@ void dir_recurse(dynary *pda, char *path) {
 #ifdef DEBUG
 		debugf("Add directory '%s' into list.", path);
 #endif
-		da_push(pda, po_mk_str(path));
+		da_push(pda, strdup(path));
 
 		/* check directory entries one by one */
 		do {
@@ -375,7 +375,7 @@ void usage(void) {
 */
 
 int main(int argc, char *argv[]) {
-	pmkobj		*po;
+	char		*p;
 	dynary		*pda;
 	htable		*pfdata;
 	prsdata		*pdata;
@@ -423,10 +423,10 @@ int main(int argc, char *argv[]) {
 
 	printf("Start parsing files :\n");
 	do {
-		po = da_pop(pda);
-		dir_explore(pfdata, &sd, po_get_data(po));
-		po_free(po);
-	} while (po != NULL);
+		p = da_pop(pda);
+		dir_explore(pfdata, &sd, p);
+		free(p);
+	} while (p != NULL);
 	printf("Parsing Ok.\n\n");
 
 	printf("Generating scan result ...\n");

@@ -116,7 +116,7 @@ bool pmk_target(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 	
 	for (i=0 ; i < da_usize(da) ; i++) {
 		/* da_idx should not returns null so no check */
-		pmk_log("\tAdded '%s'.\n", po_get_data(da_idx(da, i)));
+		pmk_log("\tAdded '%s'.\n", da_idx(da, i));
 	}
 
 	gdata->tlist = da;
@@ -316,7 +316,7 @@ bool pmk_check_include(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 		str_to_dynary(pstr, CHAR_LIST_SEPARATOR, da);
 		for (i=0 ; i < da_usize(da) ; i++) {
 			strlcat(inc_path, " -I", r);
-			strlcat(inc_path, po_get_data(da_idx(da, i)), r);
+			strlcat(inc_path, da_idx(da, i), r);
 		}
 		da_destroy(da);
 	}
@@ -449,7 +449,7 @@ bool pmk_check_lib(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 		str_to_dynary(pstr, CHAR_LIST_SEPARATOR, da);
 		for (i=0 ; i < da_usize(da) ; i++) {
 			strlcat(lib_buf, " -L", r);
-			strlcat(lib_buf, po_get_data(da_idx(da, i)), r);
+			strlcat(lib_buf, da_idx(da, i), r);
 		}
 		da_destroy(da);
 	}
