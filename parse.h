@@ -34,6 +34,9 @@
 #ifndef _PMK_PARSE_H_
 #define _PMK_PARSE_H_
 
+#include "compat/pmk_stdbool.h"
+#include "pmk_obj.h"
+
 /*
 #define LIST_SUPPORT	1
 */
@@ -55,6 +58,9 @@
 
 #define PMK_BOOL_TRUE		"TRUE"
 #define PMK_BOOL_FALSE		"FALSE"
+
+#define PRS_PMKFILE_SEP		"="
+#define PRS_PMKCONF_SEP		"=:"
 
 #define PRS_ERR_ALLOC		"memory allocation failed."
 #define PRS_ERR_HASH		"hash add failure."
@@ -82,8 +88,9 @@ typedef struct {
 } prskw;
 
 typedef struct {
-	char	 key[OPT_NAME_LEN];
-	pmkobj	*value;
+	char	 key[OPT_NAME_LEN],	/* key name */
+		 opchar;		/* operator */
+	pmkobj	*value;			/* value */
 } prsopt;
 
 typedef struct s_prscell {
@@ -115,6 +122,7 @@ void	 prscell_destroy(prscell *);
 htable	*keyword_hash(prskw [], int);
 char	*skip_blank(char *pstr);
 char	*parse_identifier(char *, char *, size_t);
+char	*parse_obsolete(char *, char *, size_t);
 char	*parse_bool(char *, pmkobj *, size_t);
 char	*parse_quoted(char *, pmkobj *, size_t);
 char	*parse_list(char *, pmkobj *, size_t);
@@ -122,6 +130,6 @@ char	*parse_key(char *, pmkobj *, size_t);
 char	*parse_data(char *, pmkobj *, size_t);
 prscell	*parse_cell(char *, htable *);
 bool	 parse_pmkfile(FILE *, prsdata *, prskw [], size_t);
-bool	 parse_opt(char *, prsopt *);
+bool	 parse_opt(char *, prsopt *, char *);
 
 #endif /* _PMK_PARSE_H_ */
