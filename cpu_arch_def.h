@@ -38,15 +38,21 @@
 #define _CPU_ARCH_DEF_
 
 /* check x86 32 bits architecture */
-#if defined(i386) || defined(__i386) || defined(__i386__) || defined(_M_IX86)
+#if defined(i386) || defined(__i386) || defined(__i386__)
 #define ARCH_X86_32	1
 #endif
 
 /* check x86 64 bits architecture */
-#if defined(__AMD64__) || defined(AMD64) || defined(__amd64__) || \
-	defined(__x86_64__) || defined(_M_AMD64)
+#if defined(__AMD64__) || defined(AMD64) || \
+	defined(__amd64__) || defined(__x86_64__)
 #define ARCH_X86_64	1
 #endif
+
+/* check alpha architecture */
+#if defined(__alpha__) || defined(__alpha)
+#define ARCH_ALPHA	1
+#endif
+
 
 #endif /* _CPU_ARCH_DEF_ */
 

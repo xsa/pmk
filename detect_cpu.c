@@ -1,7 +1,7 @@
 /* $Id$ */
 
 /*
- * Copyright (c) 2004 Damien Couderc
+ * Copyright (c) 2004-2005 Damien Couderc
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -53,10 +53,11 @@
 
 /* config tools data file keyword */
 prskw	kw_pmkcpu[] = {
-	{"LIST_ARCH_EQUIV",	LIST_ARCH_EQUIV,	PRS_KW_CELL},
-	{"LIST_X86_CPU_VENDOR",	LIST_X86_CPU_VENDOR,	PRS_KW_CELL},
-	{"LIST_X86_CPU_MODEL",	LIST_X86_CPU_MODEL,	PRS_KW_CELL},
-	{"LIST_X86_CPU_CLASS",	LIST_X86_CPU_CLASS,	PRS_KW_CELL}
+	{"LIST_ARCH_EQUIV",		LIST_ARCH_EQUIV,	PRS_KW_CELL},
+	{"LIST_X86_CPU_VENDOR",		LIST_X86_CPU_VENDOR,	PRS_KW_CELL},
+	{"LIST_X86_CPU_MODEL",		LIST_X86_CPU_MODEL,	PRS_KW_CELL},
+	{"LIST_X86_CPU_CLASS",		LIST_X86_CPU_CLASS,	PRS_KW_CELL},
+	{"LIST_ALPHA_CPU_CLASS",	LIST_ALPHA_CPU_CLASS,	PRS_KW_CELL}
 };
 int	nbkwc = sizeof(kw_pmkcpu) / sizeof(prskw);
 
@@ -221,26 +222,39 @@ htable *arch_wrapper(prsdata *pdata, char *arch_name) {
 		case PMK_ARCH_X86_32 :
 		case PMK_ARCH_X86_64 :
 #if defined(ARCH_X86_32) || defined(ARCH_X86_64)
-		pcell = x86_cpu_cell_init();
-		if (pcell == NULL)
-			return(NULL);
+			pcell = x86_cpu_cell_init();
+			if (pcell == NULL)
+				return(NULL);
 
-		if (x86_get_cpuid_data(pcell) == false) {
-			errorf("unable to get x86 cpuid data.");
-			return(NULL);
-		}
+			if (x86_get_cpuid_data(pcell) == false) {
+				errorf("unable to get x86 cpuid data.");
+				return(NULL);
+			}
 		
-		pcell->stdvendor = x86_get_std_cpu_vendor(pdata, pcell->vendor);
-		if (x86_set_cpu_data(pdata, pcell, pht) == false) {
-			errorf("failed to record cpu data.");
-			return(NULL);
-		}
+			pcell->stdvendor = x86_get_std_cpu_vendor(pdata,
+							pcell->vendor);
+			if (x86_set_cpu_data(pdata, pcell, pht) == false) {
+				errorf("failed to record cpu data.");
+				return(NULL);
+			}
 
-		x86_cpu_cell_destroy(pcell);
+			x86_cpu_cell_destroy(pcell);
 #else /* ARCH_X86_32 || ARCH_X86_64 */
-		errorf("architecture mismatch.");
-		return(NULL);
+			errorf("architecture mismatch.");
+			return(NULL);
 #endif /* ARCH_X86_32 || ARCH_X86_64 */
+			break;
+
+		case PMK_ARCH_ALPHA :
+#if defined(ARCH_ALPHA)
+			if (alpha_set_cpu_data(pdata, pht) == false) {
+				errorf("failed to record cpu data.");
+				return(NULL);
+			}
+#else /* ARCH_ALPHA */
+			errorf("architecture mismatch.");
+			return(NULL);
+#endif /* ARCH_ALPHA */
 			break;
 	}
 
@@ -604,10 +618,54 @@ bool x86_set_cpu_data(prsdata *pdata, x86_cpu_cell *pcell, htable *pht) {
 		}
 	} else {
 		errorf("failed to find '%s' key\n", LIST_X86_CPU_CLASS);
+		return(false);
 	}
 
 	return(true);
 }
 
 #endif /* ARCH_X86_32 || ARCH_X86_64 */
+
+
+/******************
+ * alpha specific *
+ ******************/
+
+#if defined(ARCH_ALPHA)
+
+/* XXX */
+bool alpha_set_cpu_data(prsdata *pdata, htable *pht) {
+	char		 buffer[16],
+			*pstr;
+	htable		*phtbis;
+	unsigned long	 implver;
+
+/*debugf("alpha_set_cpu_data() : begin");*/
+	phtbis = (htable *) seek_key(pdata, LIST_ALPHA_CPU_CLASS);
+	if (phtbis != NULL) {
+		implver = alpha_exec_implver();
+/*debugf("alpha_set_cpu_data() : implver = '%u'", implver);*/
+
+		if (snprintf_b(buffer, sizeof(buffer), ALPHA_CPU_CLASS_FMT,
+					implver) == false) {
+			/* XXX err msg ? */
+			return(false);
+		}
+/*debugf("alpha_set_cpu_data() : buffer = '%s'", buffer);*/
+		pstr = po_get_str(hash_get(phtbis, buffer));
+		if (pstr == NULL) {
+			pstr = ALPHA_CPU_UNKNOWN;
+		}
+
+		if (hash_update_dup(pht, PMKCONF_HW_ALPHA_CPU_CLASS,
+						pstr) == HASH_ADD_FAIL) {
+			return(false);
+		}
+/*debugf("alpha_set_cpu_data() : end");*/
+	}
+
+	return(true);		
+}
+
+#endif /* ARCH_ALPHA */
 
