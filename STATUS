@@ -15,3 +15,4 @@ OSF1 (tru64)	5.1B		alpha		PMK 0.6		OK (gmake)	Damien Couderc		Compaq C V6.5-207,
 RedHat Ent.	ES2.1		i686		PMK 0.6		OK		Damien Couderc		gcc-2.96, gmake-3.79.1, linux-2.4.9-smp
 Slackware	9.0		i686		PMK 0.6		OK		Damien Couderc		gcc-3.2.2, gmake-3.80, linux-2.4.20
 SuSE		7.1a		ia64		PMK 0.6		OK		Damien Couderc		gcc-2.96, gmake-3.79.1, linux-2.4.4-smp
+SunOS           5.7             sun4u           PMK 0.6         OK              Xavier Santolaria       WorkShop Compilers 5.0, gmake-3.76.1
