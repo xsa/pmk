@@ -376,7 +376,7 @@ unsigned int hash_add_cell(hnode *phn, hcell *phc) {
 		return(HASH_ADD_OKAY);
 	} else {
 		/* collision, hash code already used */
-		np = phn->first;
+		np = phn->first;	
 
 		/* looking for last element */
 		while (1) {

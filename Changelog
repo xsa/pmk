@@ -1,3 +1,8 @@
+16 Jun 2004 mipsator
+ * fixed parse_pc_file().
+ * fixed process_variables().
+ * misc. changes.
+
 22 May 2004 mipsator
  * hunted some more XXX ...
 
@@ -24,7 +29,7 @@
 01 Apr 2004 mipsator
  * imported skeleton of pmkshgen.
  * fixed use of parse_clopt's value in pmk and pmksetup.
- * booleanification of pmksetup.
+ * booleanification of pmksetup.	
  * added handling functions for prsopt structures.
 
 # PMK 0.8.1 release
