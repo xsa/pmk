@@ -52,16 +52,25 @@
 #define PATH_STR_DELIMITER	':'	/* string delimiter of the $PATH variable */    
 
 
-/* Look for location of some predefined binaries */
-#define MAXBINS			7	/* max slots in the binaries array */
+/*
+ * Look for location of some predefined binaries.
+ * Be sure to update this list in premake.h as well.
+ */
+#define MAXBINS			13	/* max slots in the binaries array */
 static  char *binaries[MAXBINS][2] = {
 	{"ar",		PMKCONF_BIN_AR},
+	{"awk",		PMKCONF_BIN_AWK},
 	{"c++",		PMKCONF_BIN_CXX},
 	{"cat",		PMKCONF_BIN_CAT},
+	{"cpp",		PMKCONF_BIN_CPP},
+	{"egrep",	PMKCONF_BIN_EGREP},
 	{"grep",	PMKCONF_BIN_GREP},
 	{"install",	PMKCONF_BIN_INSTALL},
+	{"pkg-config",  PMKCONF_BIN_PKGCONFIG},
 	{"ranlib",	PMKCONF_BIN_RANLIB},
-	{"pkg-config",	PMKCONF_BIN_PKGCONFIG}
+	{"sh",		PMKCONF_BIN_SH},
+	{"strip",	PMKCONF_BIN_STRIP},
+	{"tar",		PMKCONF_BIN_TAR}
 };
 
 
