@@ -97,7 +97,8 @@
 				/* compiler binary source log */
 
 /* file names */
-#define TEST_FILE_NAME	TMPDIR "/pmk_XXXXXXXX.c"
+#define C_FILE_EXT	".c"
+#define TEST_FILE_NAME	TMPDIR "/pmk_XXXXXXXX" C_FILE_EXT
 #define BIN_TEST_NAME	TMPDIR "/pmk_XXXXXXXX_bin"
 
 /* node tokens */

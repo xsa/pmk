@@ -338,6 +338,7 @@ bool pmk_check_header(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 		 rval;
 	char	 inc_path[MAXPATHLEN],
 		 cfgcmd[MAXPATHLEN],
+		 ftmp[MAXPATHLEN],
 		*incfile,
 		*incfunc,
 		*target,
@@ -422,7 +423,7 @@ bool pmk_check_header(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 	}
 
 	/* fill test file */
-	tfp = tmp_open(TEST_FILE_NAME, "w");
+	tfp = tmps_open(TEST_FILE_NAME, "w", ftmp, sizeof(ftmp), sizeof(C_FILE_EXT));
 	if (tfp != NULL) {
 		if (incfunc == NULL) {
 			/* header test */
@@ -442,7 +443,7 @@ bool pmk_check_header(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 
 	/* build compiler command */
 	snprintf(cfgcmd, sizeof(cfgcmd), HEADER_CC_FORMAT,
-		ccpath, inc_path, BIN_TEST_NAME, TEST_FILE_NAME, pgd->buildlog);
+		ccpath, inc_path, BIN_TEST_NAME, ftmp, pgd->buildlog);
 
 	/* get result */
 	r = system(cfgcmd);
@@ -486,9 +487,9 @@ bool pmk_check_header(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 		}
 	}
 
-	if (unlink(TEST_FILE_NAME) == -1) {
+	if (unlink(ftmp) == -1) {
 		/* cannot remove temporary file */
-		fprintf(stderr, "Can not remove %s\n", TEST_FILE_NAME);
+		errorf("Can not remove %s\n", ftmp);
 	}
 
 	/* No need to check return here as binary could not exists */
@@ -507,6 +508,7 @@ bool pmk_check_lib(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 		 rval;
 	char	 cfgcmd[MAXPATHLEN],
 		 lib_buf[TMP_BUF_LEN] = "",
+		 ftmp[MAXPATHLEN],
 		*main_libs,
 		*ccpath,
 		*libname,
@@ -575,7 +577,7 @@ bool pmk_check_lib(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 	/* get actual content of LIBS, no need to check as it is initialised */
 	main_libs = hash_get(pgd->htab, "LIBS");
 
-	tfp = tmp_open(TEST_FILE_NAME, "w");
+	tfp = tmps_open(TEST_FILE_NAME, "w", ftmp, sizeof(ftmp), sizeof(C_FILE_EXT));
 	if (tfp != NULL) {
 		if (libfunc == NULL) {
 			pmk_log("\tFound library '%s' : ", libname);
@@ -594,7 +596,7 @@ bool pmk_check_lib(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 
 	/* build compiler command */
 	snprintf(cfgcmd, sizeof(cfgcmd), LIB_CC_FORMAT,
-		ccpath, main_libs, BIN_TEST_NAME, libname, TEST_FILE_NAME, pgd->buildlog);
+		ccpath, main_libs, BIN_TEST_NAME, libname, ftmp, pgd->buildlog);
 
 	/* get result */
 	r = system(cfgcmd);
@@ -640,9 +642,9 @@ bool pmk_check_lib(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 		}
 	}
 
-	if (unlink(TEST_FILE_NAME) == -1) {
+	if (unlink(ftmp) == -1) {
 		/* cannot remove temporary file */
-		fprintf(stderr, "Can not remove %s\n", TEST_FILE_NAME);
+		errorf("Can not remove %s\n", ftmp);
 	}
 
 	/* No need to check return here as binary could not exists */
@@ -1063,6 +1065,7 @@ bool pmk_check_type(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 	bool	 required,
 		 rval;
 	char	 cfgcmd[MAXPATHLEN],
+		 ftmp[MAXPATHLEN],
 		*type,
 		*header,
 		*member,
@@ -1113,7 +1116,7 @@ bool pmk_check_type(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 		pmk_log("\tUse %s language with %s compiler.\n", pld->name, pld->comp);
 	}
 
-	tfp = tmp_open(TEST_FILE_NAME, "w");
+	tfp = tmps_open(TEST_FILE_NAME, "w", ftmp, sizeof(ftmp), sizeof(C_FILE_EXT));
 	if (tfp != NULL) {
 		if (header == NULL) {
 			/* header provided */
@@ -1141,7 +1144,7 @@ bool pmk_check_type(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 
 	/* build compiler command */
 	snprintf(cfgcmd, sizeof(cfgcmd), TYPE_CC_FORMAT,
-		ccpath, BIN_TEST_NAME, TEST_FILE_NAME, pgd->buildlog);
+		ccpath, BIN_TEST_NAME, ftmp, pgd->buildlog);
 
 	/* get result */
 	r = system(cfgcmd);
@@ -1165,9 +1168,9 @@ bool pmk_check_type(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 		}
 	}
 
-	if (unlink(TEST_FILE_NAME) == -1) {
+	if (unlink(ftmp) == -1) {
 		/* cannot remove temporary file */
-		fprintf(stderr, "Can not remove %s\n", TEST_FILE_NAME);
+		errorf("Can not remove %s\n", ftmp);
 	}
 
 	/* No need to check return here as binary could not exists */

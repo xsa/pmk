@@ -91,6 +91,7 @@ bool	 pmk_log(const char *, ...);
 bool	 copy_text_file(char *, char *);
 bool	 fcopy(char *, char *, mode_t);
 
-FILE	*tmp_open(char *, char *);
+FILE	*tmp_open(char *, char *, char *, size_t);
+FILE	*tmps_open(char *, char *, char *, size_t, int);
 
 #endif /* _PMK_COMMON_H_ */
