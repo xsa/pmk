@@ -4,7 +4,7 @@ common :
 
 pmk :
 + update pmk.1
-! update pmkfile.5
++ update pmkfile.5
 	(VARIABLE in CHECK_CONFIG, CFLAGS in CHECK_HEADER, LIBS in CHECK_LIB)
 ! define CFLAGS, LIBS, LDFLAGS with values from make
 + CHECK_LIB should set LIBS and need a LIBS option
