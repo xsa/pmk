@@ -91,31 +91,26 @@ bool pmk_define(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 */
 
 bool pmk_target(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
-	char	*list;
 	dynary	*da;
 	int	 i = 0;
+	pmkobj	*po;
 
 	pmk_log("* Collecting targets\n");
 
-	list = strdup((char *)po_get_data(hash_get(ht, "LIST")));
-	if (list == NULL) {
+	po = hash_get(ht, "LIST");
+	if (po == NULL) {
 		errorf("LIST not assigned in TARGET.");
 		return(false);
 	}
 
-	da = da_init();
+	da = po_get_list(po);
 	if (da == NULL) {
-		/* XXX */
-		errorf("cannot initialize dynary.");
-		return(false);
-	}
-	if (str_to_dynary(list, CHAR_LIST_SEPARATOR, da) == false) {
-		errorf("cannot set dynary in TARGET");
+		errorf("syntax error in LIST.");
 		return(false);
 	}
 	
 	for (i=0 ; i < da_usize(da) ; i++) {
-		/* da_idx should not returns null so no check */
+		/* da_idx should not returns null so no check <= XXX still true ? */
 		pmk_log("\tAdded '%s'.\n", da_idx(da, i));
 	}
 
