@@ -12,16 +12,9 @@ DEFINE {
 	FULL_NAME = "$PACKAGE-$VERSION"
 }
 
-# checking strlcpy() in string.h
-CHECK_HEADER(function_strlcpy) {
-	REQUIRED = TRUE
-	NAME = "string.h"
-	FUNCTION = "strlcpy"
-}
-
-# checking strlcat() in string.h
+# checking strlcpy() and strlcat() in string.h
 CHECK_HEADER(function_strlcat) {
-	REQUIRED = TRUE
+	REQUIRED = FALSE
 	NAME = "string.h"
-	FUNCTION = "strlcat"
+	FUNCTION = ("strlcpy","strlcat")
 }
