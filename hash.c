@@ -249,8 +249,14 @@ void hash_delete(htable *pht, char *key) {
 			/* found key */
 			if (last == NULL) {
 				/* first cell */
-				pht->nodetab[hash].first = NULL;
-				pht->nodetab[hash].last = NULL;
+				if (phc->next == NULL) {
+					/* only one cell */
+					pht->nodetab[hash].first = NULL;
+					pht->nodetab[hash].last = NULL;
+				} else {
+					/* re-link with next cell */
+					pht->nodetab[hash].first = phc->next;
+				}
 			} else {
 				last->next = phc->next;
 				if (phc->next == NULL) {
