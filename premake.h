@@ -91,17 +91,27 @@
 #endif
 
 /* major version */
-#define PREMAKE_MAJOR		"0"
+#define PREMAKE_VMAJOR	"0"
 /* minor version */
-#define PREMAKE_MINOR		"8"
+#define PREMAKE_VMINOR	"8"
+/* minor subversion, only used for bugfixes  */
+#define PREMAKE_VSUB	"1"
+
+/* full version */
+#ifndef PREMAKE_VSUB	
+#define PREMAKE_VFULL	PREMAKE_VMAJOR "." PREMAKE_VMINOR
+#else
+#define PREMAKE_VFULL	PREMAKE_VMAJOR "." PREMAKE_VMINOR "." PREMAKE_VSUB
+#endif
+
 /* only used for snapshots, comment for release */
-/*#define PREMAKE_SNAP		"0"*/
+/*#define PREMAKE_SNAP		"1"*/
 
 /* build version string */
 #ifndef PREMAKE_SNAP
-#define PREMAKE_VERSION		PREMAKE_MAJOR "." PREMAKE_MINOR
+#define PREMAKE_VERSION		PREMAKE_VFULL
 #else
-#define PREMAKE_VERSION		PREMAKE_MAJOR "." PREMAKE_MINOR "." PREMAKE_SNAP
+#define PREMAKE_VERSION		PREMAKE_VFULL "-s" PREMAKE_SNAP
 #endif
 
 #define PREMAKE_CONFIG		"pmk.conf"
