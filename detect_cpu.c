@@ -179,8 +179,7 @@ char *check_cpu_arch(char *uname_m, prsdata *pdata) {
 */
 
 char *x86_get_std_cpu_vendor(prsdata *pdata, char *civendor) {
-	char		*pstr,
-			*vendor = NULL;
+	char		*vendor = NULL;
 	htable		*pht;
 	prscell		*pcell;
 
@@ -209,9 +208,7 @@ char *x86_get_std_cpu_vendor(prsdata *pdata, char *civendor) {
 */
 
 bool x86_get_cpuid_data(x86_cpu_cell *cell) {
-	char		*pstr;
-	uint32_t	 buffer[13],
-			 cputype;
+	uint32_t	 buffer[13];
 
 	if (x86_check_cpuid_flag() == 0) {
 		/* no cpuid flag => 386 or old 486 */

@@ -74,10 +74,6 @@ else
 	sysdir=$SYSCONFDIR
 fi
 
-if [ -z "$CC" ]; then
-	CC="cc"
-fi
-
 sconf="$sysdir/pmk"
 
 um_prfx='$(HOME)'
@@ -88,7 +84,7 @@ testobj="$testbin.o"
 
 temporary="./pmkcfg.tmp"
 
-tmpl_list="Makefile.pmk compat/compat.h.in"
+tmpl_list="Makefile.pmk compat/compat.h.in tests/Makefile.pmk"
 
 #
 # functions
@@ -125,6 +121,29 @@ process_tmpl_list () {
 		newlist="$newlist $filename"
 		cp $f $filename
 	done
+}
+
+check_binary() {
+	binary="$1"
+	printf "Checking binary '%s' : " "$binary"
+
+	plst=`echo $PATH | sed "s/:/ /g"`
+
+	r=1
+	for d in $plst; do
+		if test -x "$d/$binary"; then
+			r=0
+			break
+		fi
+	done
+
+	if test "$r" -eq 0; then
+		echo "yes"
+	else
+		echo "no"
+	fi
+
+	return $r
 }
 
 check_header() {
@@ -361,6 +380,45 @@ else
 fi
 
 mkf_sed 'SYSCONFDIR' "$sysdir"
+
+#
+# cc check
+#
+
+
+if [ -z "$CC" ]; then
+	if check_binary cc; then
+		mkf_sed 'CC' 'cc'
+		CC="cc"
+	else
+		printf "Unable to find C compiler"
+		exit 0
+	fi
+else
+	printf "CC defined, skipping C compiler check.\n"
+fi
+
+#
+# cpp check
+#
+
+if check_binary cpp; then
+	mkf_sed 'CPP' 'cpp'
+else
+	printf "Unable to find C preprocessor"
+	exit 0
+fi
+
+#
+# as check
+#
+
+if check_binary as; then
+	mkf_sed 'AS' 'as'
+else
+	printf "Unable to find assembler"
+	exit 0
+fi
 
 #
 # strlcpy check
