@@ -32,8 +32,14 @@ mips	+	improve test_pmkinstall to check more modes
 
 pmk:
 -----------------------------------------------------------------------
+	!	set SCFLAGS (cc flags for Position Independant Code)
+			gcc => -fPIC
+			solaris cc & intel cc => -KPIC
+			SCO => -Kpic
+			sunos => -PIC
+			hpux => +Z
 	-	handle compiler detection when needed
-	-	clean detect.*
+	+	clean detect.*
 	~.	compatibility with autoconf (progressing) :
 			~ support for DEFS (-D options to pass to the compiler)
 			- support for LDFLAGS (misc linker options) ?
@@ -48,12 +54,6 @@ pmk:
 
 pmksetup:
 -----------------------------------------------------------------------
-	!	set SCFLAGS (cc flags for Position Independant Code)
-			gcc => -fPIC
-			solaris cc & intel cc => -KPIC
-			SCO => -Kpic
-			sunos => -PIC
-			hpux => +Z
 	!	clean temporary files on error
 	-	missing checks :
 xsa			+ ECHO_N, ECHO_C, ECHO_T in a specific proc for autoconf variables.
