@@ -1,6 +1,9 @@
 01 Oct 2003 mipsator
  * added premk-cvs@lists.sourceforge.net to get commit messages.
  * updated pmkfile man page.
+ * added init_var() in pmk to set specific variables.
+ * added more stuff in ac_set_variables().
+ * added PMKCONF_BIN_CC in premake header.
 
 30 Sep 2003 mipsator
  * changed USERMODE by PMK_USERMODE to avoid conflicts.

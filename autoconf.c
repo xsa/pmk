@@ -248,8 +248,10 @@ void ac_set_variables(htable *pht) {
 	hash_add(pht, "mandir", strdup("${prefix}/man"));
 	hash_add(pht, "infodir", strdup("${prefix}/info"));
 
-	pstr = (char *) hash_get(pht, "BIN_INSTALL");
-	hash_add(pht, "INSTALL", strdup(pstr));
+	hash_add(pht, "INSTALL_DATA", strdup("${INSTALL} -m 644"));
+	hash_add(pht, "INSTALL_PROGRAM", strdup("${INSTALL}"));
+	hash_add(pht, "INSTALL_SCRIPT", strdup("${INSTALL}"));
+	hash_add(pht, "INSTALL_STRIP_PROGRAM", strdup("${SHELL} $(install_sh) -c -s"));
 
 	/* byte order */
 	pstr = (char *) hash_get(pht, PMKCONF_HW_BYTEORDER);
