@@ -1,4 +1,10 @@
-/*	$OpenBSD: dirname.c,v 1.7 2002/05/24 21:22:37 deraadt Exp $	*/
+/* $Id$ */
+
+/*
+	dirname imported from OpenBSD project
+
+	http://www.openbsd.org/
+*/
 
 /*
  * Copyright (c) 1997 Todd C. Miller <Todd.Miller@courtesan.com>
@@ -27,14 +33,12 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef lint
-static char rcsid[] = "$OpenBSD: dirname.c,v 1.7 2002/05/24 21:22:37 deraadt Exp $";
-#endif /* not lint */
 
 #include <errno.h>
 #include <libgen.h>
-#include <string.h>
 #include <sys/param.h>
+
+#include "string.h"
 
 char *
 dirname(path)
