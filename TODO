@@ -15,7 +15,6 @@ pmksetup :
 	- endian type (HW_ENDIAN = BIG_ENDIAN, LITTLE_ENDIAN)
 	- char unsigned (pmk ?)
 	- long double (pmk ?)
-	- "ln -s"
 	- better check for install ?
 	- others ?
 	
