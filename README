@@ -12,22 +12,31 @@ $HOME/.pmk/ of the user that do the install.
 
 There is two targets to configure pmk before building.
 Configuring with root mode :
-make cfgrm
+
+  make cfgrm
 
 Else in user mode :
-make cfgum
+
+  make cfgum
 
 After configuring you can build the package with :
-make
+
+  make
 
 And finish by installing with :
-make install
+
+  make install
 
 Testing :
-make clean
-make test_all
 
-You can send feedback on the following email :
-premk-users@lists.sourceforge.net
+  make clean
+  make test_all
+
+You can send feedback to the following email :
+
+  premk-users@lists.sourceforge.net
+
 Or if you have a sourceforge account on this forum :
-http://sourceforge.net/forum/forum.php?forum_id=258652
+
+  http://sourceforge.net/forum/forum.php?forum_id=258652
+
