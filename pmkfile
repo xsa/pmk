@@ -13,6 +13,7 @@ SWITCHES {
 
 IF(sw_usermode) {
 	DEFINE {
+		MKTARGET = "cfgum"
 		USERMODE = "-DPMK_USERMODE"
 		BASE = "\$(HOME)"
 		CONFDIR = "\$(BASE)/.pmk"
@@ -25,6 +26,7 @@ IF(sw_usermode) {
 
 IF(!sw_usermode) {
 	DEFINE {
+		MKTARGET = "cfgrm"
 		USERMODE = ""
 		BASE = "$PREFIX"
 		CONFDIR = "\$(SYSCONFDIR)/pmk"
