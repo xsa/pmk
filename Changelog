@@ -2,6 +2,7 @@
  * moved compiler detection in SETTINGS section using DETECT option.
  * fixed bad stuff discovered by lint (wasn't changing pmk's behavior).
  * added some data in pmkcomp.dat about shared libs.
+ * updated pmkfile.5 man page.
 
 20 Dec 2003 mipsator
  * avoided use of srandomdev() in mkstemps as it is not portable.

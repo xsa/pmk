@@ -126,6 +126,7 @@ Arguments :
 AC_COMPAT : type is 'quoted', enable autoconf compatibility (empty string or filename).
 LANG : type is 'quoted', global default language.
 TARGET : type is 'list', list of target's filenames.
+DETECT : type is 'list', list of compilers to detect (CC and/or CXX).
 .Ed
 .Pp
 Example :
@@ -134,6 +135,7 @@ SETTINGS {
  AC_COMPAT="config.h"
  LANG="C"
  TARGET=("src/file.c","src/file.h")
+ DETECT=("CC")
 }
 .Ed
 
