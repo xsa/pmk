@@ -3,6 +3,7 @@
  * simplified mkstemps() to remove warnings about the cast.
  * improved a bit comp_test.c to display more info.
  * fixed compiler detection failure.
+ * fixed makefiles for HPUX.
 
 # snapshot 0.7.9
 
