@@ -152,6 +152,10 @@
 #define CHAR_ASSIGN_STATIC	':'
 #define CHAR_LIST_SEPARATOR	','
 
+/* misc boolean stuff */
+#define BOOL_STRING_TRUE	"TRUE"
+#define BOOL_STRING_FALSE	"FALSE"
+
 /* hw values */
 #define HW_ENDIAN_BIG		"BIG_ENDIAN"
 #define HW_ENDIAN_LITTLE	"LITTLE_ENDIAN"

@@ -59,8 +59,17 @@
 #define PMK_CHAR_ASSIGN		'='
 #define PMK_CHAR_ESCAPE		'\\'
 
+#ifndef BOOL_STRING_TRUE
 #define PMK_BOOL_TRUE		"TRUE"
+#else
+#define PMK_BOOL_TRUE		BOOL_STRING_TRUE
+#endif
+
+#ifndef BOOL_STRING_FALSE
 #define PMK_BOOL_FALSE		"FALSE"
+#else
+#define PMK_BOOL_FALSE		BOOL_STRING_FALSE
+#endif
 
 #define PRS_PMKFILE_SEP		"="
 #define PRS_PMKCONF_SEP		"=:"
