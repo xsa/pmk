@@ -65,6 +65,13 @@ bool getline(FILE *fd, char *line, int lsize) {
 }
 
 /*
+	parse a command
+*/
+
+bool parse_cmd() {
+}
+
+/*
 	parse the configuration file
 	fd : file descriptor
 */
@@ -138,7 +145,6 @@ int main(int argc, char *argv[]) {
 	fd = fopen(PREMAKE_FILENAME, "r");
 	if (fd == NULL) {
 		warn("%s", PREMAKE_FILENAME);
-		fclose(fd);
 		exit(1);
 	}
 

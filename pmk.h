@@ -41,13 +41,46 @@
 #define PREMAKE_CONFIG		"pmk.conf"
 #define PREMAKE_LOG		"pmk.log"
 
+/* prefix character used for comments */
 #define CHAR_COMMENT	'#'
+
+/* prefix character used for commands */
 #define CHAR_COMMAND	'.'
+
+/* keyword to mark end of command */
 #define END_COMMAND	".END"
 
-#define MAX_ERR_MSG_LEN		256
-#define MAX_CMD_LEN		512
-#define MAX_LINE_LEN		MAXPATHLEN /* XXX false, should be more */
 
-/* define boolean type */
+/* maximal size of an error message */
+#define MAX_ERR_MSG_LEN		256
+
+/* maximal size of a command */
+#define MAX_CMD_LEN		64
+
+/* maximal size of a command label */
+#define MAX_LABEL_LEN		64
+
+/* maximal sizes for command pair of option (name and value) */
+#define MAX_OPT_NAME_LEN	64
+#define MAX_OPT_VALUE_LEN	MAXPATHLEN /* can contain a path */
+
+/* maximal size of a line */
+#define MAX_LINE_LEN		MAXPATHLEN + MAX_OPT_NAME_LEN
+
+
+/* maximal number of options per command */
+#define MAX_CMD_OPT	32
+
+/* boolean type */
 typedef unsigned char bool;
+/* command option type */
+typedef struct {
+	char	name[MAX_OPT_NAME_LEN],
+		value[MAX_OPT_VALUE_LEN];
+} pmkcmdopt;
+/* command type */
+typedef struct {
+	char		name[MAX_CMD_LEN],
+			label[MAX_LABEL_LEN];
+	pmkcmdopt	opt[MAX_CMD_OPT];
+} pmkcmd;
