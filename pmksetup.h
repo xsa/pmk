@@ -90,16 +90,16 @@ static  char *binaries[MAXBINS][2] = {
 /* Local functions declaration */
 bool	gather_data(htable *);
 bool	check_opt(htable *, prsopt *);
-int	open_tmp_config(void);
-int	close_tmp_config(void);
-int	get_env_vars(htable *);
-int	get_binaries(htable *);
-int	predef_vars(htable *);
-int	check_echo(htable *);
-int	check_libpath(htable *);
-int	dir_exists(const char *);
+bool	open_tmp_config(void);
+bool	close_tmp_config(void);
+bool	get_env_vars(htable *);
+bool	get_binaries(htable *);
+bool	predef_vars(htable *);
+bool	check_echo(htable *);
+bool	check_libpath(htable *);
+bool	dir_exists(const char *);
 bool	byte_order_check(htable *pht);
-int	copy_config(const char *, const char *);
+bool	copy_config(const char *, const char *);
 int	keycomp(const void *, const void *);
 void	char_replace(char *, const char, const char);
 void	write_new_data(htable *);

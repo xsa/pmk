@@ -75,6 +75,7 @@ int	nbpredef = sizeof(predef) / sizeof(hpair);
 int main(int argc, char *argv[]) {
 	FILE		*config;
 	bool		 process_clopts = false;
+	char		*pstr;
 	htable		*ht;
 	int		 ch,
 			 error = 0;
@@ -94,6 +95,7 @@ int main(int argc, char *argv[]) {
 
 	__progname = argv[0];
 
+	/* XXX TODO  prsopt init adv */
 	if ((ht = hash_init(MAX_CONF_OPT)) == NULL) {
 		errorf("cannot create hash table.");
 		exit(EXIT_FAILURE);
@@ -104,6 +106,7 @@ int main(int argc, char *argv[]) {
 		switch(ch) {
 			case 'r' :
 				/* mark to be deleted in hash */
+				/* XXX TODO  prsopt */
 				if (hash_update_dup(ht, optarg, STR_FOR_REMOVE) == HASH_ADD_FAIL) {
 					errorf("hash update failed.");
 					exit(EXIT_FAILURE);
@@ -119,7 +122,14 @@ int main(int argc, char *argv[]) {
 				}
 
 				/* add in hash */
-				if (hash_update_dup(ht, opt.key, opt.value) == HASH_ADD_FAIL) {
+				/* XXX TODO  prsopt */
+				pstr = po_get_str(opt.value);
+				if (pstr == NULL) {
+					errorf("failed to get argument for -a option");
+					exit(EXIT_FAILURE);
+				}
+
+				if (hash_update_dup(ht, opt.key, pstr) == HASH_ADD_FAIL) {
 					errorf("hash update failed.");
 					exit(EXIT_FAILURE);
 				}
@@ -134,7 +144,7 @@ int main(int argc, char *argv[]) {
 				break;
 
 			case 'V' :
-				if (0 == verbose_flag)
+				if (verbose_flag == 0)
 					verbose_flag = 1;
 				break;
 
@@ -154,7 +164,7 @@ int main(int argc, char *argv[]) {
 	printf("\n\n");
 
 	/* check if syconfdir exists */
-	if (dir_exists(CONFDIR) == -1) {
+	if (dir_exists(CONFDIR) == false) {
 		verbosef("==> Creating '%s' directory.", CONFDIR);
 		if (mkdir(CONFDIR, S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH) != 0) {
 			errorf("cannot create '%s' directory : %s.", 
@@ -164,12 +174,12 @@ int main(int argc, char *argv[]) {
 	}
 
 	if (process_clopts == false) {
-		/* standard behavior */
+		/* standard behavior, gathering data */
 		if (gather_data(ht) == false)
 			exit(EXIT_FAILURE);
 	}
 
-	if ((open_tmp_config() == -1))
+	if ((open_tmp_config() == false))
 		exit(EXIT_FAILURE);
 
 	/* parse configuration file */
@@ -198,7 +208,7 @@ int main(int argc, char *argv[]) {
 
 	if (error == 0)
 		/* copying the temporary config to the system one */
-		if (copy_config(sfn, PREMAKE_CONFIG_PATH) == -1)
+		if (copy_config(sfn, PREMAKE_CONFIG_PATH) == false)
 			exit(EXIT_FAILURE);
 
 #ifdef PMKSETUP_DEBUG
@@ -267,6 +277,7 @@ void write_new_data(htable *ht) {
 
 		/* processing remaining keys */
 		for(i = 0 ; i < phk->nkey ; i++) {
+			/* XXX TODO  prsopt */
 			val = (char *) hash_get(ht, phk->keys[i]);
 
 			/* check if this key is marked for being removed */
@@ -321,6 +332,7 @@ bool check_opt(htable *pht, prsopt *popt) {
 		return(true);
 	}
 
+	/* XXX TODO  prsopt */
 	recval = (char *) hash_get(pht, popt->key);
 	if (recval != NULL) {
 		/* checking the VAR<->VALUE separator */
@@ -359,10 +371,9 @@ bool check_opt(htable *pht, prsopt *popt) {
 /*
  * Open temporary configuration file
  *
- *	returns:  0 on success
- *		 -1 on failure
+ *	returns:  boolean
  */
-int open_tmp_config(void) {
+bool open_tmp_config(void) {
 	int	fd = -1;
 
 	/* creating temporary file to build new configuration file */
@@ -371,7 +382,7 @@ int open_tmp_config(void) {
 	if ((fd = mkstemp(sfn)) == -1) {
 		errorf("could not create temporary file '%s' : %s.", 
 			sfn, strerror(errno));
-		return(-1);
+		return(false);
 	}
 	if ((sfp = fdopen(fd, "w")) == NULL) {
 		if (fd != -1) {
@@ -380,9 +391,9 @@ int open_tmp_config(void) {
 		}	
 		errorf("cannot open temporary file '%s' : %s.", 
 			sfn, strerror(errno));
-		return(-1);
+		return(false);
 	}
-	return(0);
+	return(true);
 }
 
 
@@ -392,19 +403,18 @@ int open_tmp_config(void) {
  *	it deletes the temporary file on exit except if the
  *	PMKSETUP_DEBUG mode is on.
  *
- *	returns:  0 on success
- *		 -1 on failure 
+ *	returns:  boolean
  */
-int close_tmp_config(void) {
+bool close_tmp_config(void) {
 	if (sfp) {
 		if (fclose(sfp) < 0) {
 			errorf("cannot close temporary file '%s' : %s.", 
 				sfp, strerror(errno));
-			return(-1);
+			return(false);
 		}
 		sfp = NULL;
 	}        
-	return(0);
+	return(true);
 }
 
 
@@ -413,35 +423,37 @@ int close_tmp_config(void) {
  *
  *	ht: hash table where we have to store the values
  *
- *	returns:  0 on success
- *		 -1 on failure
+ *	returns:  boolean
  */
-int get_env_vars(htable *ht) {
+bool get_env_vars(htable *ht) {
 	struct utsname	 utsname;
 	char		*bin_path;
 
 	if (uname(&utsname) == -1) {
 		errorf("uname : %s.", strerror(errno));
-		return(-1);
+		return(false);
 	}
 
+	/* XXX TODO  prsopt */
 	if (hash_update_dup(ht, PMKCONF_OS_NAME, utsname.sysname) == HASH_ADD_FAIL)
-		return(-1);
+		return(false);
 	verbosef("Setting '%s' => '%s'", PMKCONF_OS_NAME, utsname.sysname);
 
+	/* XXX TODO  prsopt */
 	if (hash_update_dup(ht, PMKCONF_OS_VERS, utsname.release) == HASH_ADD_FAIL)
-		return(-1);
+		return(false);
 	verbosef("Setting '%s' => '%s'", PMKCONF_OS_VERS, utsname.release);	
 	
+	/* XXX TODO  prsopt */
 	if (hash_update_dup(ht, PMKCONF_OS_ARCH, utsname.machine) == HASH_ADD_FAIL)
-		return(-1);
+		return(false);
 	verbosef("Setting '%s' => '%s'", PMKCONF_OS_ARCH, utsname.machine);
 
 
 	/* getting the environment variable PATH */
 	if ((bin_path = getenv("PATH")) == NULL) {
 		errorf("could not get the PATH environment variable.");
-		return(-1);
+		return(false);
 	}
 
 	/* 
@@ -450,11 +462,12 @@ int get_env_vars(htable *ht) {
 	 */
 	char_replace(bin_path, PATH_STR_DELIMITER, CHAR_LIST_SEPARATOR);
 
+	/* XXX TODO  prsopt */
 	if (hash_update_dup(ht, PMKCONF_PATH_BIN, bin_path) == HASH_ADD_FAIL)
-		return(-1);
+		return(false);
 	verbosef("Setting '%s' => '%s'", PMKCONF_PATH_BIN, bin_path);
 
-	return(0);
+	return(true);
 }
 
 
@@ -463,10 +476,9 @@ int get_env_vars(htable *ht) {
  *
  *	ht: hash table where we have to store the values
  *
- *	returns:  0 on success
- *		 -1 on failure
+ *	returns: boolean 
  */ 
-int get_binaries(htable *ht) {
+bool get_binaries(htable *ht) {
 	char	 fbin[MAXPATHLEN];	/* full binary path */
 	dynary	*stpath;
 	int	 i;
@@ -478,34 +490,37 @@ int get_binaries(htable *ht) {
 	stpath = str_to_dynary((char *) hash_get(ht, PMKCONF_PATH_BIN), CHAR_LIST_SEPARATOR);
 	if (stpath == NULL) {
 		errorf("could not split the PATH environment variable correctly.");
-		return(-1);	
+		return(false);	
 	}
 
 	if (find_file(stpath, "cc", fbin, sizeof(fbin)) == true) {
+	/* XXX TODO  prsopt */
 		if (hash_update_dup(ht, "BIN_CC", fbin) == HASH_ADD_FAIL) {
 			da_destroy(stpath);
-			return(-1);
+			return(false);
 		}
 		verbosef("Setting '%s' => '%s'", "BIN_CC", fbin);
 	} else {
 		if (find_file(stpath, "gcc", fbin, sizeof(fbin)) == true) {
+	/* XXX TODO  prsopt */
 			if (hash_update_dup(ht, "BIN_CC", fbin) == HASH_ADD_FAIL) {
 				da_destroy(stpath);
-				return(-1);
+				return(false);
 			}
 			verbosef("Setting '%s' => '%s'", "BIN_CC", fbin);
 		} else {
 			errorf("cannot find a C compiler.");
 			da_destroy(stpath);
-			return(-1);
+			return(false);
 		}
 	}
 
 	for (i = 0; i < MAXBINS; i++) {
 		if (find_file(stpath, binaries[i][0], fbin, sizeof(fbin)) == true) {
+	/* XXX TODO  prsopt */
 			if (hash_update_dup(ht, binaries[i][1], fbin) == HASH_ADD_FAIL) {
 				da_destroy(stpath);
-				return(-1);
+				return(false);
 			}
 			verbosef("Setting '%s' => '%s'", binaries[i][1], fbin);
 		} else {
@@ -513,7 +528,7 @@ int get_binaries(htable *ht) {
 		}
 	}
 	da_destroy(stpath);
-	return(0);
+	return(true);
 }
 
 
@@ -523,30 +538,29 @@ int get_binaries(htable *ht) {
  *
  *	pht: hash table where we have to store the values
  *
- *	returns:  0 on success
- *		 -1 on failure
+ *	returns:  boolean
  */ 
-int predef_vars(htable *pht) {
+bool predef_vars(htable *pht) {
 	int	i;
 
 	for (i = 0 ; i < nbpredef ; i++) {
 		verbosef("Setting '%s' => '%s'", predef[i].key, predef[i].value);
+	/* XXX TODO  prsopt */
 		if (hash_update_dup(pht, predef[i].key, predef[i].value) == HASH_ADD_FAIL) {
 			errorf("failed to add '%s'.", predef[i].key);
-			return(-1);
+			return(false);
 		}
 	}
 
-	return(0);
+	return(true);
 }
 
 /*
  *	pht: hash table where we have to store the values
  *
- *	returns:  0 on success
- *		 -1 on failure
+ *	returns:  boolean
  */
-int check_echo(htable *pht) {
+bool check_echo(htable *pht) {
 	FILE	*echo_pipe = NULL;
 	char	buf[TMP_BUF_LEN],
 		echocmd[MAXPATHLEN];
@@ -557,7 +571,7 @@ int check_echo(htable *pht) {
 
 	if ((echo_pipe = popen(echocmd, "r")) == NULL) {
 		errorf("unable to execute '%s'.", echocmd);
-		return(-1);
+		return(false);
 	}
 
 	s = fread(buf, sizeof(char), sizeof(buf), echo_pipe);
@@ -566,7 +580,7 @@ int check_echo(htable *pht) {
 	if (feof(echo_pipe) == 0) {
 		errorf("pipe not empty.");
 		pclose(echo_pipe);
-		return(-1);
+		return(false);
 	}
 
 	pclose(echo_pipe);
@@ -596,51 +610,56 @@ int check_echo(htable *pht) {
 					echo_t = ECHO_EMPTY;
 				} else {
 					errorf("unable to set ECHO_* variables.");
-					return(-1);
+					return(false);
 				}
 			}
 		}
 	}
 
+	/* XXX TODO  prsopt */
 	if (hash_update_dup(pht, PMKCONF_AC_ECHO_N, echo_n) == HASH_ADD_FAIL)
-		return(-1);
+		return(false);
 	verbosef("Setting '%s' => '%s'", PMKCONF_AC_ECHO_N, echo_n);
 	
+	/* XXX TODO  prsopt */
 	if (hash_update_dup(pht, PMKCONF_AC_ECHO_C, echo_c) == HASH_ADD_FAIL)
-		return(-1);
+		return(false);
 	verbosef("Setting '%s' => '%s'", PMKCONF_AC_ECHO_C, echo_c);
 
+	/* XXX TODO  prsopt */
 	if (hash_update_dup(pht, PMKCONF_AC_ECHO_T, echo_t) == HASH_ADD_FAIL)
-		return(-1);
+		return(false);
 	verbosef("Setting '%s' => '%s'", PMKCONF_AC_ECHO_T, echo_t);
 
-	return(0);
+	return(true);
 }
 
 
 /*
  *	pht: hash table where we have to store the values
  *
- *	returns:  0 on success
- *		 -1 on failure
+ *	returns:  boolean
  */
 
-int check_libpath(htable *pht) {
+bool check_libpath(htable *pht) {
 	char	libpath[MAXPATHLEN];
 
-	strlcpy(libpath, hash_get(pht, PMKCONF_MISC_PREFIX), sizeof(libpath));
+	/* XXX TODO  prsopt */
+	strlcpy(libpath, hash_get(pht, PMKCONF_MISC_PREFIX), sizeof(libpath)); /* XXX check hash_get() return */
 	strlcat(libpath, PMKVAL_LIB_PKGCONFIG, sizeof(libpath));
 
+	/* XXX TODO  prsopt */
 	if (hash_get(pht, PMKCONF_BIN_PKGCONFIG) != NULL) {
 		if (dir_exists(libpath) == 0) {
+	/* XXX TODO  prsopt */
 			if (hash_update_dup(pht, PMKCONF_PC_PATH_LIB, libpath) == HASH_ADD_FAIL)
-				return(-1);
+				return(false);
 			verbosef("Setting '%s' => '%s'", PMKCONF_PC_PATH_LIB, libpath);
 		} else {
 			verbosef("**warning: %s does not exist.", libpath);
 		}
 	}
-	return(0);
+	return(true);
 }
 
 /*
@@ -648,11 +667,10 @@ int check_libpath(htable *pht) {
  *
  *	fdir : directory to search
  *
- *	returns:  0 on success
- *		 -1 on failure 
+ *	returns:  boolean
  */
 
-int dir_exists(const char *fdir) {
+bool dir_exists(const char *fdir) {
         DIR     *dirp;
         size_t  len;
         
@@ -662,10 +680,10 @@ int dir_exists(const char *fdir) {
 		dirp = opendir(fdir);
 		if (dirp != NULL) {
 			closedir(dirp);
-			return(0);
+			return(true);
 		}
 	}
-	return(-1);
+	return(false);
 }
 
 /*
@@ -692,6 +710,7 @@ bool byte_order_check(htable *pht) {
 		}
 	}
 
+	/* XXX TODO  prsopt */
 	if (hash_update_dup(pht, PMKCONF_HW_BYTEORDER, bo_type) == HASH_ADD_FAIL)
 		return(false);
 
@@ -707,13 +726,12 @@ bool byte_order_check(htable *pht) {
  *	tmp_config: temporary configuration file name
  *	config: system configuration file name
  *
- *	returns:  0 on success
- *		 -1 on failure  	
+ *	returns:  boolean
  */
-int copy_config(const char *tmp_config, const char *config) {
+bool copy_config(const char *tmp_config, const char *config) {
 	FILE	*fp_t,
 		*fp_c;
-	int	 rval;
+	bool	 rval;
 	char	 buf[MAX_LINE_BUF];
 
 
@@ -721,14 +739,14 @@ int copy_config(const char *tmp_config, const char *config) {
 		errorf("cannot open temporary configuration "
 			"file for reading '%s' : %s.", tmp_config, 
 				strerror(errno));
-		return(-1);	
+		return(false);	
 	}
 	if ((fp_c = fopen(config, "w")) == NULL) {
 		errorf("cannot open '%s' for writing : %s.", 
 			config, strerror(errno));
 
 		fclose(fp_t);	
-		return(-1);
+		return(false);
 	}
 
 	while(get_line(fp_t, buf, MAX_LINE_BUF) == true) {
@@ -738,9 +756,9 @@ int copy_config(const char *tmp_config, const char *config) {
 	if (feof(fp_t) == 0) {
 		errorf("read failure, cannot copy "
 			"'%s' to '%s'.", tmp_config, config);
-		rval = -1;	
+		rval = false;	
 	} else
-		rval = 0;
+		rval = true;
 
 	fclose(fp_t);
 	fclose(fp_c);

@@ -229,6 +229,26 @@ void prscell_destroy(prscell *pcell) {
 }
 
 /*
+	XXX
+*/
+
+/*prsopt *prsopt_init(void) {                     */
+/*        prsopt	*ppo;                     */
+/*                                                */
+/*        ppo = (prsopt *) malloc(sizeof(prsopt));*/
+/*                                                */
+/*        return(ppo);                            */
+/*}                                               */
+
+/*
+	XXX
+*/
+
+/*void prsopt_destroy(prsopt *) {*/
+/*        free(XXX);             */
+/*}                              */
+
+/*
 	get a line from a file and pre-process it
 
 	fp : file pointer
@@ -914,7 +934,7 @@ bool parse_clopt(char *line, prsopt *popt, char *seplst) {
 #endif
 
 
-	popt->value = (void *) strdup(pstr);
+	popt->value = po_mk_str(pstr);
 #ifdef DEBUG_PRS
 	debugf("value = '%s'", popt->value);
 #endif
