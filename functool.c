@@ -508,22 +508,39 @@ char *parse_idtf(char *pstr, char *pbuf, size_t size) {
 	blah
 */
 
-char *process_string(char *pstr) {
+char *process_string(char *pstr, htable *pht) {
 	char	 buf[OPT_VALUE_LEN],
+		 var[OPT_NAME_LEN],
+		*pvar,
 		*pbuf;
 	size_t	 size;
 
 	size = sizeof(buf);
 	pbuf = buf;
 
-	while ((pstr != CHAR_EOS) && (size > 0)) {
+	while ((*pstr != CHAR_EOS) && (size > 0)) {
 		if (*pstr == '$') {
+			/* found variable */
 			pstr++;
-			pstr = parse_idtf(pstr, pbuf, size);
-			if (pstr == NULL)
-				debugf("parse_idtf returned null.");
+			pstr = parse_idtf(pstr, var, size);
+			if (pstr == NULL) {
+				debugf("parse_idtf returned null."); /* XXX */
 				return(NULL);
+			} else {
+				/* check if identifier exists */
+				pvar = po_get_str(hash_get(pht, var));
+				if (pvar != NULL) {
+					/* identifier found, append value */
+					while ((*pvar != CHAR_EOS) && (size > 0)) {
+						*pbuf = *pvar;
+						pbuf++;
+						pvar++;
+						size--;
+					}
+				}
+			}
 		} else {
+			/* copy character */
 			*pbuf = *pstr;
 			pbuf++;
 			pstr++;
@@ -531,8 +548,10 @@ char *process_string(char *pstr) {
 		}
 	}
 
-	if (size == 0)
+	if (size == 0) {
+		debugf("overflow."); /* XXX */
 		return(NULL);
+	}
 
 	*pbuf = CHAR_EOS;
 

@@ -68,7 +68,7 @@ bool	 require_check(htable *);
 lgdata	*get_lang(htable *, pmkdata *);
 char	*get_comp_path(htable *, char *);
 
-char *process_string(char *);
+char *process_string(char *, htable *);
 char *parse_idtf(char *, char *, size_t);
 
 

@@ -6,6 +6,7 @@
  * adapted pmkscan to new engine.
  * added stuff to parse variables in strings (deactived).
  * misc related stuff.
+ * fixed and enabled variable parsing in pmk_define().
 
 # snapshot 0.6.1
 
