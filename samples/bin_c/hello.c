@@ -4,14 +4,27 @@
 
 #include <stdio.h>
 #include <string.h>
+#include "config.h"
+
+#define FMT_STRLCPY_MSG	"Your system %s have strlcpy() in 'string.h'.\n" 
+#define FMT_STRLCAT_MSG	"Your system %s have strlcat() in 'string.h'.\n" 
+#define MSG_HAS		"does"
+#define MSG_HAS_NOT	"does not"
 
 int main(void) {
 	char	buf[1024];
 
-	strlcpy(buf, "Hello ", sizeof(buf));
-	strlcat(buf, "World !", sizeof(buf));
+#ifdef HAVE_STRLCPY
+	printf(FMT_STRLCPY_MSG, MSG_HAS);
+#else
+	printf(FMT_STRLCPY_MSG, MSG_HAS_NOT);
+#endif
 
-	printf("%s\n", buf);
+#ifdef HAVE_STRLCAT
+	printf(FMT_STRLCAT_MSG, MSG_HAS);
+#else
+	printf(FMT_STRLCAT_MSG, MSG_HAS_NOT);
+#endif
 
 	return(0);
 }

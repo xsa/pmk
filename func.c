@@ -369,20 +369,28 @@ bool pmk_check_binary(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 bool pmk_check_header(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 	FILE	*tfp;
 	bool	 required,
+		 rslt = true,
+		 loop = true,
+		 clean_funcs = false,
+		 check_funcs = false,
 		 rval;
 	char	 inc_path[MAXPATHLEN],
 		 cfgcmd[MAXPATHLEN],
 		 ftmp[MAXPATHLEN],
 		 btmp[MAXPATHLEN],
 		*incfile,
-		*incfunc,
-		*target,
+		*incfunc = NULL,
+		*target = NULL,
 		*ccpath,
 		*cflags,
 		*pstr;
-	dynary	*defs;
-	int	 r;
+	dynary	*funcs = NULL,
+		*defs;
+	int	 i,
+		 n,
+		 r;
 	lgdata	*pld;
+	pmkobj	*po;
 
 	pmk_log("\n* Checking header [%s]\n", cmd->label);
 
@@ -395,17 +403,50 @@ bool pmk_check_header(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 		return(false);
 	}
 
-	/* check if a function must be searched */
-	incfunc = po_get_str(hash_get(ht, KW_OPT_FUNCTION));
-	if (incfunc == NULL) {
+	/* check if a function or more must be searched */
+	po = hash_get(ht, KW_OPT_FUNCTION);
+	if (po == NULL) {
 		target = incfile;
 	} else {
-		target = incfunc;
+		switch (po_get_type(po)) {
+			case PO_STRING:
+				pstr = po_get_str(po);
+				/* pstr should not be NULL */
+
+				funcs = da_init();
+				if (funcs == NULL) {
+					errorf("unable to initialise dynary.");
+					return(false);
+				}
+
+				if (da_push(funcs, pstr) == false) {
+					errorf("unable to add '%s' in function list.", pstr);
+					return(false);
+				}
+
+				clean_funcs = true;
+				break;
+
+			case PO_LIST:
+				funcs = po_get_list(po);
+				/* funcs should not be NULL */
+				break;
+
+			default:
+				errorf("syntax error for '%s': bad type.", KW_OPT_FUNCTION);
+				return(false);
+		}
+		check_funcs = true;
 	}
 
 	if (depend_check(ht, pgd) == false) {
 		pmk_log("\t%s\n", pgd->errmsg);
-		return(process_required(pgd, cmd, required, target, NULL));
+		n = da_usize(funcs);
+		for (i=0 ; i < n ; i++) {
+			pstr = da_idx(funcs, i);
+			record_def_data(pgd->htab, pstr, NULL);
+		}
+		return(process_required(pgd, cmd, required, NULL, NULL));
 	}
 
 	/* get the language used */
@@ -463,78 +504,96 @@ bool pmk_check_header(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 		strlcpy(inc_path, "", sizeof(inc_path));
 	}
 
-	/* fill test file */
-	tfp = tmps_open(TEST_FILE_NAME, "w", ftmp, sizeof(ftmp), strlen(C_FILE_EXT));
-	if (tfp != NULL) {
-		if (incfunc == NULL) {
-			/* header test */
-			pmk_log("\tFound header '%s' : ", incfile);
-			fprintf(tfp, INC_TEST_CODE, incfile);
+	/* XXX loop */
+	/*while ((loop == true) && (rslt == true)) {*/
+	while (loop == true) {
+
+		/* fill test file */
+		tfp = tmps_open(TEST_FILE_NAME, "w", ftmp, sizeof(ftmp), strlen(C_FILE_EXT));
+		if (tfp != NULL) {
+			if (check_funcs == false) {
+				/* header test */
+				pmk_log("\tFound header '%s' : ", incfile);
+				fprintf(tfp, INC_TEST_CODE, incfile);
+			} else {
+				/* header function test */
+				incfunc = da_shift(funcs);
+				target = incfunc;
+				pmk_log("\tFound function '%s' in '%s' : ", incfunc, incfile);
+				fprintf(tfp, INC_FUNC_TEST_CODE, incfile, incfunc);
+			}
+
+			fclose(tfp);
 		} else {
-			/* header function test */
-			pmk_log("\tFound function '%s' in '%s' : ", incfunc, incfile);
-			fprintf(tfp, INC_FUNC_TEST_CODE, incfile, incfunc);
-		}
-
-		fclose(tfp);
-	} else {
-		errorf("cannot open test file.");
-		return(false);
-	}
-
-	/* build compiler command */
-	if (incfunc == NULL) {
-		snprintf(cfgcmd, sizeof(cfgcmd), HEADER_CC_FORMAT,
-			ccpath, inc_path, BIN_TEST_NAME, ftmp, pgd->buildlog);
-	} else {
-		/* compute object file name */
-		strlcpy(btmp, ftmp, sizeof(btmp));
-		btmp[strlen(btmp) - 1] = 'o';
-
-		snprintf(cfgcmd, sizeof(cfgcmd), HEADER_FUNC_CC_FORMAT,
-			ccpath, inc_path, btmp, ftmp, pgd->buildlog);
-	}
-
-	/* get result */
-	r = system(cfgcmd);
-	if (r == 0) {
-		pmk_log("yes.\n");
-		/* define for template */
-		record_def_data(pgd->htab, target, DEFINE_DEFAULT);
-		label_set(pgd->labl, cmd->label, true);
-		/* process additional defines */
-		process_def_list(pgd->htab, defs);
-
-		/* put result in CFLAGS, CXXFLAGS or alternative variable */
-		if (single_append(pgd->htab, cflags, strdup(inc_path)) == false) {
-			errorf("failed to append '%s' in '%s'.", inc_path, cflags);
+			errorf("cannot open test file.");
 			return(false);
 		}
 
-		rval = true;
-	} else {
-		pmk_log("no.\n");
-		rval = process_required(pgd, cmd, required, target, NULL);
-		if (rval == false) {
-			if (incfunc == NULL) {
-				errorf("failed to find header '%s'.", incfile);
-			} else {
-				errorf("failed to find function '%s'.", incfunc);
-			}
+		/* build compiler command */
+		if (incfunc == NULL) {
+			snprintf(cfgcmd, sizeof(cfgcmd), HEADER_CC_FORMAT,
+				ccpath, inc_path, BIN_TEST_NAME, ftmp, pgd->buildlog);
+		} else {
+			/* compute object file name */
+			strlcpy(btmp, ftmp, sizeof(btmp));
+			btmp[strlen(btmp) - 1] = 'o';
+
+			snprintf(cfgcmd, sizeof(cfgcmd), HEADER_FUNC_CC_FORMAT,
+				ccpath, inc_path, btmp, ftmp, pgd->buildlog);
+		}
+
+		/* get result */
+		r = system(cfgcmd);
+		if (r == 0) {
+			pmk_log("yes.\n");
+			/* define for template */
+			record_def_data(pgd->htab, target, DEFINE_DEFAULT);
+		} else {
+			pmk_log("no.\n");
+			record_def_data(pgd->htab, target, NULL);
+			rslt = false;
+		}
+
+		if (unlink(ftmp) == -1) {
+			/* cannot remove temporary file */
+			errorf("cannot remove %s", ftmp);
+		}
+
+		if (incfunc == NULL) {
+			/* No need to check return here as binary could not exists */
+			unlink(BIN_TEST_NAME);
+			/* exit from loop */
+			loop = false;
+		} else {
+			/* No need to check return here as object file could not exists */
+			unlink(btmp);
+			/* check if list is empty */
+			if (da_usize(funcs) == 0)
+				loop = false;
 		}
 	}
 
-	if (unlink(ftmp) == -1) {
-		/* cannot remove temporary file */
-		errorf("cannot remove %s", ftmp);
-	}
+	if (rslt == true) {
+			label_set(pgd->labl, cmd->label, true);
+			/* process additional defines */
+			process_def_list(pgd->htab, defs);
 
-	if (incfunc == NULL) {
-		/* No need to check return here as binary could not exists */
-		unlink(BIN_TEST_NAME);
+			/* put result in CFLAGS, CXXFLAGS or alternative variable */
+			if (single_append(pgd->htab, cflags, strdup(inc_path)) == false) {
+				errorf("failed to append '%s' in '%s'.", inc_path, cflags);
+				return(false);
+			}
+
+			rval = true;
 	} else {
-		/* No need to check return here as object file could not exists */
-		unlink(btmp);
+			rval = process_required(pgd, cmd, required, NULL, NULL);
+			if (rval == false) {
+				if (incfunc == NULL) {
+					errorf("failed to find header '%s'.", incfile);
+				} else {
+					errorf("failed to find function '%s'.", incfunc);
+				}
+			}
 	}
 
 	return(rval);

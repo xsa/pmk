@@ -213,18 +213,18 @@ bool init_var(pmkdata *pgd) {
 	pht = pgd->htab;
 
 	pstr = MK_VAR_CFLAGS;
-	if (get_make_var(pstr, buf, sizeof(buf)) == true) {
-		if (hash_update_dup(pht, pstr, buf) == HASH_ADD_FAIL)
-		return(false);
+	if (get_make_var(pstr, buf, sizeof(buf)) == false) {
+		buf[0] = CHAR_EOS; /* empty string */
 	}
 #ifdef PMK_DEBUG
 debugf("%s = '%s'", pstr, buf);
 #endif
+	if (hash_update_dup(pht, pstr, buf) == HASH_ADD_FAIL)
+		return(false);
 
 	pstr = MK_VAR_CXXFLAGS;
-	if (get_make_var(pstr, buf, sizeof(buf)) == true) {
-		if (hash_update_dup(pht, pstr, buf) == HASH_ADD_FAIL)
-		return(false);
+	if (get_make_var(pstr, buf, sizeof(buf)) == false) {
+		buf[0] = CHAR_EOS; /* empty string */
 	}
 #ifdef PMK_DEBUG
 debugf("%s = '%s'", pstr, buf);
@@ -233,9 +233,8 @@ debugf("%s = '%s'", pstr, buf);
 		return(false);
 
 	pstr = MK_VAR_CPPFLAGS;
-	if (get_make_var(pstr, buf, sizeof(buf)) == true) {
-		if (hash_update_dup(pht, pstr, buf) == HASH_ADD_FAIL)
-			return(false);
+	if (get_make_var(pstr, buf, sizeof(buf)) == false) {
+		buf[0] = CHAR_EOS; /* empty string */
 	}
 #ifdef PMK_DEBUG
 debugf("%s = '%s'", pstr, buf);
@@ -244,9 +243,8 @@ debugf("%s = '%s'", pstr, buf);
 		return(false);
 
 	pstr = MK_VAR_LDFLAGS;
-	if (get_make_var(pstr, buf, sizeof(buf)) == true) {
-		if (hash_update_dup(pht, pstr, buf) == HASH_ADD_FAIL)
-			return(false);
+	if (get_make_var(pstr, buf, sizeof(buf)) == false) {
+		buf[0] = CHAR_EOS; /* empty string */
 	}
 #ifdef PMK_DEBUG
 debugf("%s = '%s'", pstr, buf);
@@ -255,9 +253,8 @@ debugf("%s = '%s'", pstr, buf);
 		return(false);
 
 	pstr = MK_VAR_LIBS;
-	if (get_make_var(pstr, buf, sizeof(buf)) == true) {
-		if (hash_update_dup(pht, pstr, buf) == HASH_ADD_FAIL)
-			return(false);
+	if (get_make_var(pstr, buf, sizeof(buf)) == false) {
+		buf[0] = CHAR_EOS; /* empty string */
 	}
 #ifdef PMK_DEBUG
 debugf("%s = '%s'", pstr, buf);
@@ -266,9 +263,8 @@ debugf("%s = '%s'", pstr, buf);
 		return(false);
 
 	pstr = MK_VAR_DEBUG;
-	if (get_make_var(pstr, buf, sizeof(buf)) == true) {
-		if (hash_update_dup(pht, pstr, buf) == HASH_ADD_FAIL)
-			return(false);
+	if (get_make_var(pstr, buf, sizeof(buf)) == false) {
+		buf[0] = CHAR_EOS; /* empty string */
 	}
 #ifdef PMK_DEBUG
 debugf("%s = '%s'", pstr, buf);

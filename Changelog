@@ -1,3 +1,10 @@
+24 sep 2004 mipsator
+ * CHECK_HEADER is now able to check more than one function (feature
+   asked by Gergely Czuczy).
+ * fixed initialisation of some variables in pmk.c (noticed on irix).
+ * updated samples/bin_c to use config.h and one check for strl*()
+   functions.
+
 23 sep 2004 mipsator
  * returned on getopts use in pmkcfg.sh to handle blanks in arguments.
 
