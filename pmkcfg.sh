@@ -175,7 +175,7 @@ EOF
 check_type_header() {
 	type="$1"
 	header="$2"
-	printf "Checking type '%s' in header '%s': " "$type" "$header"
+	printf "Checking type '%s' in header '%s' : " "$type" "$header"
 
 	cat > $testfile <<EOF
 #include <stdio.h>
