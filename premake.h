@@ -193,6 +193,9 @@
 /* maximal size of a line */
 #define MAX_LINE_LEN		MAXPATHLEN + OPT_NAME_LEN
 
+/* maximal number of key in data hash */
+#define MAX_DATA_KEY		1024
+
 /* size for temporary buffers */
 #define TMP_BUF_LEN		512
 

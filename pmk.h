@@ -55,9 +55,6 @@
 /* maximal number of templates */
 #define MAX_TEMPLATES		32
 
-/* maximal number of key in data hash */
-#define MAX_DATA_KEY		1024
-
 /* maximal number of key in label hash */
 #define MAX_LABEL_KEY		1024
 
