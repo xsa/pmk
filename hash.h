@@ -70,7 +70,8 @@ typedef struct {
 	int	 size,
 		 count,
 		 autogrow;
-	void	 (*freeobj)(void *),
+	void	*(*dupobj)(void *),
+		 (*freeobj)(void *),
 		*(*appdobj)(void *, void *, void *);
 	hnode	*nodetab; /* array of hnode */
 } htable;
@@ -88,11 +89,13 @@ typedef struct {
 
 int	 hash_compute(char *, int);
 htable	*hash_init(int);
-htable	*hash_init_adv(int, void (*)(void *), void *(*)(void *, void *, void *));
+htable	*hash_init_adv(int, void *(*)(void *), void (*)(void *), void *(*)(void *, void *, void *));
 bool	 hash_resize(htable *, int);
 void	 hash_set_grow(htable *);
 int	 hash_destroy(htable *);
 int	 hash_add(htable *, char *, void *);
+int	 hash_update(htable *, char *, void *);
+int	 hash_update_dup(htable *, char *, void *);
 int	 hash_add_cell(hnode *, hcell *);
 bool	 hash_add_array(htable *, hpair *, int);
 bool	 hash_add_array_adv(htable *, hpair *, int, void *(*)(void *));

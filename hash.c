@@ -95,7 +95,7 @@ int hash_compute(char *key, int table_size) {
 */
 
 htable *hash_init(int table_size) {
-	return(hash_init_adv(table_size, free, hash_str_append));
+	return(hash_init_adv(table_size, (void *(*)(void *))strdup, free, hash_str_append));
 }
 
 /*
@@ -112,7 +112,8 @@ htable *hash_init(int table_size) {
 	(see hash_append_str for an example).
 */
 
-htable *hash_init_adv(int table_size, void (*freefunc)(void *),
+htable *hash_init_adv(int table_size, void *(*dupfunc)(void *),
+		void (*freefunc)(void *),
 		void *(*appdfunc)(void *, void *, void *)) {
 	int	 i;
 	htable	*pht;
@@ -143,6 +144,7 @@ htable *hash_init_adv(int table_size, void (*freefunc)(void *),
 	pht->size = table_size;
 	pht->count = 0;
 	pht->autogrow = 0; /* disabled by default */
+	pht->dupobj = dupfunc;
 	pht->freeobj = freefunc;
 	pht->appdobj = appdfunc;
 	pht->nodetab = phn;
@@ -260,6 +262,25 @@ int hash_destroy(htable *pht) {
 */
 
 int hash_add(htable *pht, char *key, void *value) {
+	return(hash_update(pht, key, value));
+}
+
+
+/*
+	update or add a key in the hash table
+
+	pht : hash structure
+	key : key string
+	value : value object
+
+	return : an error code
+		HASH_ADD_FAIL : addition failed.
+		HASH_ADD_OKAY : added (no collision).
+		HASH_ADD_COLL : added (collision, key chained).
+		HASH_ADD_UPDT : key already exists, change value.
+*/
+
+int hash_update(htable *pht, char *key, void *value) {
 	int	 rval,
 		 hash,
 		 size;
@@ -308,6 +329,15 @@ int hash_add(htable *pht, char *key, void *value) {
 
 	return(rval);
 }
+
+/*
+	update or add a key in the hash table but duplicate the value
+*/
+
+int hash_update_dup(htable *pht, char *key, void *value) {
+	return(hash_update(pht, key, pht->dupobj(value)));
+}
+
 
 /*
 	add a new cell in a node

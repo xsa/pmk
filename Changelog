@@ -1,3 +1,13 @@
+29 Dec 2003 mipsator
+ * moved hash_add() as hash_update() and kept hash_add() as an alias.
+ * updated hash_init_adv() to support data duplication.
+ * updated hash_init() in sync with hash_init_adv().
+ * added hash_update_dup() to automatically duplicate given data.
+ * updated use of hash_add() in favor of hash_update() and
+	hash_update_dup() in all files but pmksetup.c (check soon).
+ * commented some code in autoconf.c which seems to be specific to
+	dillo but not to autoconf.
+
 28 Dec 2003 mipsator
  * added check_lang_comp() into functool to get lang info via compiler.
  * added code to set shared lib flags (SLCFLAGS and SLCXXFLAGS).

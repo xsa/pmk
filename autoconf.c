@@ -194,35 +194,35 @@ void ac_process_dyn_var(pmkdata *pgd, char *template) {
 
 	/* init builddir */
 	pstr = hash_get(pht, PMK_DIR_BLD_ROOT_ABS);
-	hash_add(pht, "abs_top_builddir", strdup(pstr));
+	hash_update_dup(pht, "abs_top_builddir", pstr);
 
 	/* set abs_builddir */
 	pstr = hash_get(pht, PMK_DIR_BLD_ABS);
-	hash_add(pht, "abs_builddir", strdup(pstr));
+	hash_update_dup(pht, "abs_builddir", pstr);
 
 	/* compute top_builddir */
 	pstr = hash_get(pht, PMK_DIR_BLD_ROOT_REL);
-	hash_add(pht, "top_builddir", strdup(pstr));
+	hash_update_dup(pht, "top_builddir", pstr);
 
 	/* Mr GNU said : rigorously equal to ".". So i did :) */
 	pstr = hash_get(pht, PMK_DIR_BLD_REL);
-	hash_add(pht, "builddir", strdup(pstr));
+	hash_update_dup(pht, "builddir", pstr);
 
 	/* set absolute srcdir */
 	pstr = hash_get(pht, PMK_DIR_SRC_ROOT_ABS);
-	hash_add(pht, "abs_top_srcdir", strdup(pstr));
+	hash_update_dup(pht, "abs_top_srcdir", pstr);
 
 	/* compute top_srcdir */
 	pstr = hash_get(pht, PMK_DIR_SRC_ROOT_REL);
-	hash_add(pht, "top_srcdir", strdup(pstr));
+	hash_update_dup(pht, "top_srcdir", pstr);
 
 	/* absolute path of template */
 	pstr = hash_get(pht, PMK_DIR_SRC_ABS);
-	hash_add(pht, "abs_srcdir", strdup(pstr));
+	hash_update_dup(pht, "abs_srcdir", pstr);
 
 	/* relative path to template */
 	pstr = hash_get(pht, PMK_DIR_SRC_REL);
-	hash_add(pht, "srcdir", strdup(pstr));
+	hash_update_dup(pht, "srcdir", pstr);
 }
 
 /*
@@ -252,49 +252,49 @@ void ac_set_variables(htable *pht) {
 
 	/* path variables */
 	pstr = (char *) hash_get(pht, "PREFIX");
-	hash_add(pht, "prefix", strdup(pstr));
+	hash_update_dup(pht, "prefix", pstr);
 	
 	pstr = (char *) hash_get(pht, "SYSCONFDIR");
-	hash_add(pht, "sysconfdir", strdup(pstr));
+	hash_update_dup(pht, "sysconfdir", pstr);
 
 	
-	hash_add(pht, "exec_prefix", strdup("${prefix}"));
-	hash_add(pht, "bindir", strdup("${exec_prefix}/bin"));
-	hash_add(pht, "sbindir", strdup("${exec_prefix}/sbin"));
-	hash_add(pht, "libexecdir", strdup("${exec_prefix}/libexec"));
-	hash_add(pht, "libdir", strdup("${exec_prefix}/lib"));
-	hash_add(pht, "datadir", strdup("${prefix}/share"));
-	hash_add(pht, "includedir", strdup("${prefix}/include"));
-	hash_add(pht, "mandir", strdup("${prefix}/man"));
-	hash_add(pht, "infodir", strdup("${prefix}/info"));
-	hash_add(pht, "sharedstatedir", strdup("${prefix}/com"));
-	hash_add(pht, "localstatedir", strdup("${prefix}/var"));
-	hash_add(pht, "oldincludedir", strdup("/usr/include"));
+	hash_update_dup(pht, "exec_prefix", "${prefix}");
+	hash_update_dup(pht, "bindir", "${exec_prefix}/bin");
+	hash_update_dup(pht, "sbindir", "${exec_prefix}/sbin");
+	hash_update_dup(pht, "libexecdir", "${exec_prefix}/libexec");
+	hash_update_dup(pht, "libdir", "${exec_prefix}/lib");
+	hash_update_dup(pht, "datadir", "${prefix}/share");
+	hash_update_dup(pht, "includedir", "${prefix}/include");
+	hash_update_dup(pht, "mandir", "${prefix}/man");
+	hash_update_dup(pht, "infodir", "${prefix}/info");
+	hash_update_dup(pht, "sharedstatedir", "${prefix}/com");
+	hash_update_dup(pht, "localstatedir", "${prefix}/var");
+	hash_update_dup(pht, "oldincludedir", "/usr/include");
 
-	hash_add(pht, "INSTALL_DATA", strdup("${INSTALL} -m 644"));
-	hash_add(pht, "INSTALL_PROGRAM", strdup("${INSTALL}"));
-	hash_add(pht, "INSTALL_SCRIPT", strdup("${INSTALL}"));
-	hash_add(pht, "INSTALL_STRIP_PROGRAM", strdup("${SHELL} $(install_sh) -c -s"));
+	hash_update_dup(pht, "INSTALL_DATA", "${INSTALL} -m 644");
+	hash_update_dup(pht, "INSTALL_PROGRAM", "${INSTALL}");
+	hash_update_dup(pht, "INSTALL_SCRIPT", "${INSTALL}");
+	hash_update_dup(pht, "INSTALL_STRIP_PROGRAM", "${SHELL} $(install_sh) -c -s");
 
 /*
 	well i dunno if the following really needs to be full compatible with autoconf 
 */
 	pstr = (char *) hash_get(pht, "OS_ARCH");
-	hash_add(pht, "host_cpu", strdup(pstr));
-	hash_add(pht, "build_cpu", strdup(pstr)); /* XXX  ouargl cross compiling ... */
-	hash_add(pht, "target_cpu", strdup(pstr)); /* XXX  ouargl cross compiling ... */
+	hash_update_dup(pht, "host_cpu", pstr);
+	hash_update_dup(pht, "build_cpu", pstr); /* XXX  ouargl cross compiling ... */
+	hash_update_dup(pht, "target_cpu", pstr); /* XXX  ouargl cross compiling ... */
 
         pstr = (char *) hash_get(pht, "OS_NAME");
         strlcpy(buf, pstr, sizeof(buf)); /* no need to check here */
         pstr = (char *) hash_get(pht, "OS_VERSION");
         strlcat(buf, pstr, sizeof(buf)); /* XXX check */
-	hash_add(pht, "host_os", strdup(buf));
-	hash_add(pht, "build_os", strdup(buf)); /* XXX  ouargl cross compiling ... */
-	hash_add(pht, "target_os", strdup(buf)); /* XXX  ouargl cross compiling ... */
+	hash_update_dup(pht, "host_os", buf);
+	hash_update_dup(pht, "build_os", buf); /* XXX  ouargl cross compiling ... */
+	hash_update_dup(pht, "target_os", buf); /* XXX  ouargl cross compiling ... */
 
-	hash_add(pht, "host_vendor", strdup("vendorisnotset"));
-	hash_add(pht, "build_vendor", strdup("vendorisnotset"));
-	hash_add(pht, "target_vendor", strdup("vendorisnotset"));
+	hash_update_dup(pht, "host_vendor", "vendorisnotset");
+	hash_update_dup(pht, "build_vendor", "vendorisnotset");
+	hash_update_dup(pht, "target_vendor", "vendorisnotset");
 
         pstr = (char *) hash_get(pht, "host_cpu");
         strlcpy(buf, pstr, sizeof(buf)); /* no need to check here */
@@ -305,62 +305,63 @@ void ac_set_variables(htable *pht) {
         pstr = (char *) hash_get(pht, "host_os");
         strlcat(buf, pstr, sizeof(buf)); /* XXX check */
 
-	hash_add(pht, "host", strdup(buf));
-	hash_add(pht, "build", strdup(buf));
-	hash_add(pht, "target", strdup(buf));
+	hash_update_dup(pht, "host", strdup(buf));
+	hash_update_dup(pht, "build", strdup(buf));
+	hash_update_dup(pht, "target", strdup(buf));
 
-	hash_add(pht, "host_alias", strdup(""));
-	hash_add(pht, "build_alias", strdup(""));
-	hash_add(pht, "target_alias", strdup(""));
+	hash_update_dup(pht, "host_alias", strdup(""));
+	hash_update_dup(pht, "build_alias", strdup(""));
+	hash_update_dup(pht, "target_alias", strdup(""));
 
-	hash_add(pht, "build_triplet", strdup(""));
-	hash_add(pht, "host_triplet", strdup(""));
-	hash_add(pht, "target_triplet", strdup(""));
+	hash_update_dup(pht, "build_triplet", strdup(""));
+	hash_update_dup(pht, "host_triplet", strdup(""));
+	hash_update_dup(pht, "target_triplet", strdup(""));
 
-/*	XXX TODO verify the following */
-	hash_add(pht, "SET_MAKE", strdup(""));
-	hash_add(pht, "AMDEP_TRUE", strdup(""));
-	hash_add(pht, "AMDEP_FALSE", strdup("#"));
-	hash_add(pht, "AMDEPBACKSLASH", strdup("\\"));
-	hash_add(pht, "AMTAR", strdup("echo 'PMK: set as useless'"));
-	hash_add(pht, "ACLOCAL", strdup("echo 'PMK: set as useless'"));
-	hash_add(pht, "AUTOCONF", strdup("echo 'PMK: set as useless'"));
-	hash_add(pht, "AUTOHEADER", strdup("echo 'PMK: set as useless'"));
-	hash_add(pht, "AUTOMAKE", strdup("echo 'PMK: set as useless'"));
-	hash_add(pht, "MAKEINFO", strdup("echo 'PMK: set as useless'"));
-	hash_add(pht, "ECHO_C", strdup("\\c"));
-	hash_add(pht, "ECHO_N", strdup(""));
-	hash_add(pht, "ECHO_T", strdup(""));
-	hash_add(pht, "EXEEXT", strdup("")); /* cygwin shit ! */
-	hash_add(pht, "PACKAGE_BUGREPORT", strdup(""));
-	hash_add(pht, "PACKAGE_NAME", strdup(""));
-	hash_add(pht, "PACKAGE_STRING", strdup(""));
-	hash_add(pht, "PACKAGE_TARNAME", strdup(""));
-	hash_add(pht, "PACKAGE_VERSION", strdup(""));
-	hash_add(pht, "PACKAGE_SEPARATOR", strdup(""));
-	hash_add(pht, "SET_MAKE", strdup(""));
-	hash_add(pht, "CYGPATH_W", strdup(""));
-	hash_add(pht, "DEPDIR", strdup(".deps"));
-	hash_add(pht, "CCDEPMODE", strdup(""));
-	hash_add(pht, "LIBOBJS", strdup(""));
-	hash_add(pht, "LTLIBOBJS", strdup(""));
-	hash_add(pht, "PATH_SEPARATOR", strdup(":")); /* default shell is sh */
+/* XXX TODO use values from pmksetup */
+	hash_update_dup(pht, "ECHO_C", "\\c");
+	hash_update_dup(pht, "ECHO_N", "");
+	hash_update_dup(pht, "ECHO_T", "");
+
+/* XXX TODO verify the following */
+	/*hash_add(pht, "SET_MAKE", strdup(""));                            */
+	/*hash_add(pht, "AMDEP_TRUE", strdup(""));                          */
+	/*hash_add(pht, "AMDEP_FALSE", strdup("#"));                        */
+	/*hash_add(pht, "AMDEPBACKSLASH", strdup("\\"));                    */
+	/*hash_add(pht, "AMTAR", strdup("echo 'PMK: set as useless'"));     */
+	/*hash_add(pht, "ACLOCAL", strdup("echo 'PMK: set as useless'"));   */
+	/*hash_add(pht, "AUTOCONF", strdup("echo 'PMK: set as useless'"));  */
+	/*hash_add(pht, "AUTOHEADER", strdup("echo 'PMK: set as useless'"));*/
+	/*hash_add(pht, "AUTOMAKE", strdup("echo 'PMK: set as useless'"));  */
+	/*hash_add(pht, "MAKEINFO", strdup("echo 'PMK: set as useless'"));  */
+	/*hash_add(pht, "EXEEXT", strdup("")); |+ cygwin shit ! +|          */
+	/*hash_add(pht, "PACKAGE_BUGREPORT", strdup(""));                   */
+	/*hash_add(pht, "PACKAGE_NAME", strdup(""));                        */
+	/*hash_add(pht, "PACKAGE_STRING", strdup(""));                      */
+	/*hash_add(pht, "PACKAGE_TARNAME", strdup(""));                     */
+	/*hash_add(pht, "PACKAGE_VERSION", strdup(""));                     */
+	/*hash_add(pht, "PACKAGE_SEPARATOR", strdup(""));                   */
+	/*hash_add(pht, "CYGPATH_W", strdup(""));                           */
+	/*hash_add(pht, "DEPDIR", strdup(".deps"));                         */
+	/*hash_add(pht, "CCDEPMODE", strdup(""));                           */
+	/*hash_add(pht, "LIBOBJS", strdup(""));                             */
+	/*hash_add(pht, "LTLIBOBJS", strdup(""));                           */
+	/*hash_add(pht, "PATH_SEPARATOR", strdup(":")); |+ default shell is sh +|*/
 
         /* XXX AC_CHECK_PROG stuff, should be moved somewhere */
-        pstr = (char *) hash_get(pht, "CC");
-	hash_add(pht, "ac_ct_CC", strdup(pstr)); /* XXX shit ? */
-        pstr = (char *) hash_get(pht, "RANLIB");
-	hash_add(pht, "ac_ct_RANLIB", strdup(pstr)); /* XXX shit ? */
-        pstr = (char *) hash_get(pht, "STRIP");
-	hash_add(pht, "ac_ct_STRIP", strdup(pstr)); /* XXX shit ? */
+	/*pstr = (char *) hash_get(pht, "CC");                        */
+	/*hash_update_dup(pht, "ac_ct_CC", pstr); |+ XXX shit ? +|    */
+	/*pstr = (char *) hash_get(pht, "RANLIB");                    */
+	/*hash_update_dup(pht, "ac_ct_RANLIB", pstr); |+ XXX shit ? +|*/
+	/*pstr = (char *) hash_get(pht, "STRIP");                     */
+	/*hash_update_dup(pht, "ac_ct_STRIP", pstr); |+ XXX shit ? +| */
 
-	hash_add(pht, "install_sh", strdup("PMK: set as useless")); /* provide our own ? */
-	hash_add(pht, "program_transform_name", strdup("s,x,x,"));
+	hash_update_dup(pht, "install_sh", strdup("pmkinstall")); /* provide our own ? */
+	hash_update_dup(pht, "program_transform_name", strdup("s,x,x,"));
 
 
 	/* byte order */
 	pstr = (char *) hash_get(pht, PMKCONF_HW_BYTEORDER);
 	if (strncmp(pstr, HW_ENDIAN_BIG, sizeof(pstr)) == 0) {
-		hash_add(pht, "WORDS_BIGENDIAN", strdup("1"));
+		hash_update_dup(pht, "WORDS_BIGENDIAN", "1");
 	}
 }

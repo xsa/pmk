@@ -324,7 +324,7 @@ bool record_def(htable *ht, char *name, bool status) {
 			return(false);
 	}
 	
-	if (hash_add(ht, def_str, strdup(def_val)) == HASH_ADD_FAIL)
+	if (hash_update_dup(ht, def_str, def_val) == HASH_ADD_FAIL)
 		return(false);
 
 	free(semidef);
@@ -354,7 +354,7 @@ bool record_val(htable *ht, char *name, char*value) {
 	if (snprintf(have_str, s, "HAVE_%s", semidef) >= s)
 		return(false);
 
-	if (hash_add(ht, have_str, strdup(value)) == HASH_ADD_FAIL)
+	if (hash_update_dup(ht, have_str, value) == HASH_ADD_FAIL)
 		return(false);
 
 	free(semidef);
@@ -372,7 +372,7 @@ bool record_val(htable *ht, char *name, char*value) {
 */
 
 bool label_set(htable *lht, char *name, bool status) {
-	if (hash_add(lht, name, strdup(bool_to_str(status))) == HASH_ADD_FAIL)
+	if (hash_update_dup(lht, name, bool_to_str(status)) == HASH_ADD_FAIL)
 		return(false);
 
 	return(true);

@@ -100,40 +100,40 @@ void process_dyn_var(pmkdata *pgd, char *template) {
 
 	/* compute builddir_abs with relative path */
 	abspath(basedir, rpath, btpath); 
-	hash_add(pht, PMK_DIR_BLD_ABS, strdup(btpath));
+	hash_update_dup(pht, PMK_DIR_BLD_ABS, btpath);
 #ifdef PMK_DEBUG
 	debugf("%s = '%s'", PMK_DIR_BLD_ABS, buf);
 #endif
 
 	/* compute relative path to builddir root */
 	relpath(btpath, basedir, buf);
-	hash_add(pht, PMK_DIR_BLD_ROOT_REL, strdup(buf));
+	hash_update_dup(pht, PMK_DIR_BLD_ROOT_REL, buf);
 #ifdef PMK_DEBUG
 	debugf("%s = '%s'", PMK_DIR_BLD_ROOT_REL, buf);
 #endif
 
 	/* set buildir_rel to '.', useful ? */
-	hash_add(pht, PMK_DIR_BLD_REL, strdup("."));
+	hash_update_dup(pht, PMK_DIR_BLD_REL, ".");
 #ifdef PMK_DEBUG
 	debugf("%s = '%s'", PMK_DIR_BLD_REL, buf);
 #endif
 
 	/* compute and set relative path from basedir to srcdir */
 	relpath(btpath, srcdir, buf);
-	hash_add(pht, PMK_DIR_SRC_ROOT_REL, strdup(buf));
+	hash_update_dup(pht, PMK_DIR_SRC_ROOT_REL, buf);
 #ifdef PMK_DEBUG
 	debugf("%s = '%s'", PMK_DIR_SRC_ROOT_REL, buf);
 #endif
 
 	/* set absolute path of template */
-	hash_add(pht, PMK_DIR_SRC_ABS, strdup(stpath));
+	hash_update_dup(pht, PMK_DIR_SRC_ABS, stpath);
 #ifdef PMK_DEBUG
 	debugf("%s = '%s'", PMK_DIR_SRC_ABS, buf);
 #endif
 
 	/* compute and set relative path from template to builddir */
 	relpath(btpath, stpath, buf);
-	hash_add(pht, PMK_DIR_SRC_REL, strdup(buf));
+	hash_update_dup(pht, PMK_DIR_SRC_REL, buf);
 #ifdef PMK_DEBUG
 	debugf("%s = '%s'", PMK_DIR_SRC_REL, buf);
 #endif
@@ -160,86 +160,86 @@ void init_var(pmkdata *pgd) {
 #ifdef PMK_DEBUG
 debugf("CFLAGS = '%s'", buf);
 #endif
-	hash_add(pht, "CFLAGS", strdup(buf)); /* XXX check ? */
+	hash_update_dup(pht, "CFLAGS", buf); /* XXX check ? */
 
 	get_make_var("CXXFLAGS", buf, sizeof(buf));
 #ifdef PMK_DEBUG
 debugf("CXXFLAGS = '%s'", buf);
 #endif
-	hash_add(pht, "CXXFLAGS", strdup(buf)); /* XXX check ? */
+	hash_update_dup(pht, "CXXFLAGS", buf); /* XXX check ? */
 
 	get_make_var("CPPFLAGS", buf, sizeof(buf));
 #ifdef PMK_DEBUG
 debugf("CPPFLAGS = '%s'", buf);
 #endif
-	hash_add(pht, "CPPFLAGS", strdup(buf)); /* XXX check ? */
+	hash_update_dup(pht, "CPPFLAGS", buf); /* XXX check ? */
 
 	get_make_var("LIBS", buf, sizeof(buf));
 #ifdef PMK_DEBUG
 debugf("LIBS = '%s'", buf);
 #endif
-	hash_add(pht, "LIBS", strdup(buf)); /* XXX check ? */
+	hash_update_dup(pht, "LIBS", buf); /* XXX check ? */
 
 	get_make_var("LDFLAGS", buf, sizeof(buf));
 #ifdef PMK_DEBUG
 debugf("LDFLAGS = '%s'", buf);
 #endif
-	hash_add(pht, "LDFLAGS", strdup(buf)); /* XXX check ? */
+	hash_update_dup(pht, "LDFLAGS", buf); /* XXX check ? */
 
 	get_make_var("DEBUG", buf, sizeof(buf));
 #ifdef PMK_DEBUG
 debugf("DEBUG = '%s'", buf);
 #endif
-	hash_add(pht, "DEBUG", strdup(buf)); /* XXX check ? */
+	hash_update_dup(pht, "DEBUG", buf); /* XXX check ? */
 
 	/* autoconf shit ? */
-	hash_add(pht, "OBJEXT", strdup("o")); /* XXX check ? */
+	hash_update_dup(pht, "OBJEXT", "o"); /* XXX check ? */
 
 
 	pstr = hash_get(pht, PMKCONF_BIN_CC);
 	if (pstr != NULL)
-		hash_add(pht, "CC", strdup(pstr));
+		hash_update_dup(pht, "CC", pstr);
 
 	pstr = hash_get(pht, PMKCONF_BIN_CXX);
 	if (pstr != NULL)
-		hash_add(pht, "CXX", strdup(pstr));
+		hash_update_dup(pht, "CXX", pstr);
 
 	pstr = hash_get(pht, PMKCONF_BIN_CPP);
 	if (pstr != NULL)
-		hash_add(pht, "CPP", strdup(pstr));
+		hash_update_dup(pht, "CPP", pstr);
 
 	pstr = hash_get(pht, PMKCONF_BIN_INSTALL);
         /* append -c for compat with autoconf*/
         snprintf(buf, sizeof(buf), "%s -c", pstr);
 	if (pstr != NULL)
-		hash_add(pht, "INSTALL", strdup(buf));
+		hash_update_dup(pht, "INSTALL", buf);
 
 	pstr = hash_get(pht, PMKCONF_BIN_RANLIB);
 	if (pstr != NULL)
-		hash_add(pht, "RANLIB", strdup(pstr));
+		hash_update_dup(pht, "RANLIB", pstr);
 
 	pstr = hash_get(pht, PMKCONF_BIN_SH);
 	if (pstr != NULL)
-		hash_add(pht, "SHELL", strdup(pstr));
+		hash_update_dup(pht, "SHELL", pstr);
 
 	pstr = hash_get(pht, PMKCONF_BIN_STRIP);
 	if (pstr != NULL)
-		hash_add(pht, "STRIP", strdup(pstr));
+		hash_update_dup(pht, "STRIP", pstr);
 
 	pstr = hash_get(pht, PMKCONF_BIN_AWK);
 	if (pstr != NULL)
-		hash_add(pht, "AWK", strdup(pstr));
+		hash_update_dup(pht, "AWK", pstr);
 
 	pstr = hash_get(pht, PMKCONF_BIN_EGREP);
 	if (pstr != NULL)
-		hash_add(pht, "EGREP", strdup(pstr));
+		hash_update_dup(pht, "EGREP", pstr);
 
 	/* set absolute paths */
-	hash_add(pht, PMK_DIR_SRC_ROOT_ABS, strdup(pgd->srcdir));
+	hash_update_dup(pht, PMK_DIR_SRC_ROOT_ABS, pgd->srcdir);
 #ifdef PMK_DEBUG
 	debugf("%s = '%s'", PMK_DIR_SRC_ROOT_ABS, pgd->srcdir);
 #endif
-	hash_add(pht, PMK_DIR_BLD_ROOT_ABS, strdup(pgd->basedir));
+	hash_update_dup(pht, PMK_DIR_BLD_ROOT_ABS, pgd->basedir);
 #ifdef PMK_DEBUG
 	debugf("%s = '%s'", PMK_DIR_BLD_ROOT_ABS, pgd->basedir);
 #endif
@@ -257,7 +257,7 @@ debugf("DEBUG = '%s'", buf);
 bool process_opt(htable *pht, prsopt *popt) {
 	if ((popt->opchar != CHAR_COMMENT) && (popt->opchar != CHAR_EOS)) {
 		/* add options that are not comment neither blank lines */
-		if (hash_add(pht, popt->key, strdup(po_get_str(popt->value))) == HASH_ADD_FAIL) {
+		if (hash_update_dup(pht, popt->key, po_get_str(popt->value)) == HASH_ADD_FAIL) {
 			errorf("hash failure.");
 			return(false);
 		}
@@ -354,7 +354,7 @@ bool process_template(char *template, pmkdata *pgd) {
 	}
 
 	snprintf(cibuf, sizeof(cibuf), "%s, generated from %s by PMK.", pfn, ptn);
-	hash_add(pht, "configure_input", strdup(cibuf)); /* XXX check ? */
+	hash_update_dup(pht, "configure_input", cibuf); /* XXX check ? */
 	free(ptn);
 	free(pfn);
 
@@ -463,7 +463,7 @@ bool parse_cmdline(char **val, int nbval, pmkdata *pgd) {
 		/* parse option */
 		rval = parse_opt(val[i], &opt, PRS_PMKCONF_SEP);
 		if (rval == true) {
-			if (hash_add(ht, opt.key, opt.value) == HASH_ADD_FAIL) { /* no need to strdup */
+			if (hash_update(ht, opt.key, opt.value) == HASH_ADD_FAIL) { /* no need to strdup */
 				errorf("%s", PRS_ERR_HASH);
 				rval = false;
 			}
@@ -679,7 +679,7 @@ int main(int argc, char *argv[]) {
 		if (da != NULL) {
 			pstr = da_pop(da);	
 			while (pstr != NULL) {
-				hash_add(gdata.labl, pstr, strdup("TRUE")); /* XXX BOOL */
+				hash_update_dup(gdata.labl, pstr, "TRUE"); /* XXX BOOL */
 				ovrsw++; /* increment number of overriden switches */
 				free(pstr);
 				pstr = da_pop(da);	
@@ -695,7 +695,7 @@ int main(int argc, char *argv[]) {
 			do {
 				pstr = da_pop(da);
 				if (pstr != NULL) {
-					hash_add(gdata.labl, pstr, strdup("FALSE")); /* XXX BOOL check */
+					hash_update_dup(gdata.labl, pstr, "FALSE"); /* XXX BOOL check */
 					ovrsw++; /* increment number of overriden switches */
 					free(pstr);
 				}
