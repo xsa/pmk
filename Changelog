@@ -1,3 +1,7 @@
+26 Jan 2004 mipsator
+ * fixed a bug in pmkpc that occurs when using non implemented option
+	in pmkpc (noticed by xixi ;).
+
 25 Jan 2004 mipsator
  * added support for --atleast-pkgconfig-version in pmkpc.
  * added man page for pmkpc.
