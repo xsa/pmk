@@ -1,9 +1,23 @@
+29 Apr 2003 mipsator
+ * improved parse_cmd().
+ * some fixes from Ted Unangst.
+
 # PMK 0.4 released
 
-26 Apr 2003 mipsator
+28 Apr 2003 mipsator
+ * many fixes for 0.4 release ...
+ * fixed find_file() again should be the last time.
+ 
+
+27 Apr 2003 mipsator
+ * moved man pages in man directory.
+ * added pmkfile(5).
+ * fixed parse_conf_line().
  * added BIN_CC in get_binaries and use it in pmk_check_include()
    an pmk_check_lib().
- * added pmkfile(5).
+ * more changes in process_template().
+
+26 Apr 2003 mipsator
  * implemented pmk_check_lib().
  * added check_include_function in pmkcfg.sh .
  * improved str_to_dynary() and parse_conf_line().
