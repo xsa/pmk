@@ -62,7 +62,6 @@ prskw	kw_pmkfile[] = {
 	{"CHECK_PKG_CONFIG",	PMK_TOK_CHKPKG,	PRS_KW_CELL, PRS_TOK_NULL},
 	{"CHECK_TYPE",		PMK_TOK_CHKTYP,	PRS_KW_CELL, PRS_TOK_NULL},
 	{"CHECK_VARIABLE",	PMK_TOK_CHKVAR,	PRS_KW_CELL, PRS_TOK_NULL},
-	{"CHECK_INCLUDE",	PMK_TOK_CHKINC,	PRS_KW_CELL, PRS_TOK_NULL}, /* XXX to be removed */
 	{"BUILD_SHLIB_NAME",	PMK_TOK_BLDSLN,	PRS_KW_CELL, PRS_TOK_NULL}
 };
 
@@ -248,7 +247,7 @@ bool pmk_switches(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 				pmk_log("\tAdded '%s' switch.\n", phk->keys[i]);
 				n++;
 			} else {
-				errorf("hash add failed.");
+				errorf(HASH_ERR_UPDT_ARG, phk->keys[i]);
 				return(false);
 			}
 		} else {
@@ -319,7 +318,7 @@ bool pmk_check_binary(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 
 			/* set path as empty for the key given by varname */
 			if (hash_update_dup(pgd->htab, varname, "") == HASH_ADD_FAIL) {
-				errorf("hash error.");
+				errorf(HASH_ERR_UPDT_ARG, varname);
 				return(false);
 			}
 
@@ -334,7 +333,7 @@ bool pmk_check_binary(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 
 		/* recording path of config tool under the key given by varname */
 		if (hash_update_dup(pgd->htab, varname, binpath) == HASH_ADD_FAIL) {
-			errorf("hash error.");
+			errorf(HASH_ERR_UPDT_ARG, varname);
 			return(false);
 		}
 		label_set(pgd->labl, cmd->label, true);
@@ -410,12 +409,12 @@ bool pmk_check_header(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 	}
 
 	/* check for alternative variable for CFLAGS */
-	cflags = po_get_str(hash_get(ht, "CFLAGS"));
+	cflags = po_get_str(hash_get(ht, PMKVAL_ENV_CFLAGS));
 	if (cflags != NULL) {
 		/* init alternative variable */
                 if (hash_get(pgd->htab, cflags) == NULL) {
                         if (hash_update_dup(pgd->htab, cflags, "") == HASH_ADD_FAIL) {
-        			errorf("hash error.");
+        			errorf(HASH_ERR_UPDT_ARG, cflags);
         			return(false);
                         }
 		}
@@ -592,18 +591,18 @@ bool pmk_check_lib(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 		/* init alternative variable */
                 if (hash_get(pgd->htab, libs) == NULL) {
                         if (hash_update_dup(pgd->htab, libs, "") == HASH_ADD_FAIL) {
-        			errorf("hash error.");
+        			errorf(HASH_ERR_UPDT_ARG, libs);
         			return(false);
                         }
 		}
 	} else {
 		/* use default library variable */
-		libs = "LIBS"; /* XXX TODO use a define */
+		libs = PMKVAL_ENV_LIBS;
 	}
 	pmk_log("\tStore library flags in '%s'.\n", libs);
 
 	/* get actual content of LIBS, no need to check as it is initialised */
-	main_libs = hash_get(pgd->htab, "LIBS"); /* XXX TODO use a define */
+	main_libs = hash_get(pgd->htab, PMKVAL_ENV_LIBS);
 
 	tfp = tmps_open(TEST_FILE_NAME, "w", ftmp, sizeof(ftmp), strlen(C_FILE_EXT));
 	if (tfp != NULL) {
@@ -726,12 +725,12 @@ bool pmk_check_config(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 	}
 
 	/* check for alternative variable for CFLAGS */
-	cflags = po_get_str(hash_get(ht, "CFLAGS"));
+	cflags = po_get_str(hash_get(ht, PMKVAL_ENV_CFLAGS));
 	if (cflags != NULL) {
 		/* init alternative variable */
                 if (hash_get(pgd->htab, cflags) == NULL) {
                         if (hash_update_dup(pgd->htab, cflags, "") == HASH_ADD_FAIL) {
-        			errorf("hash error.");
+        			errorf(HASH_ERR_UPDT_ARG, cflags);
         			return(false);
                         }
 		}
@@ -746,13 +745,13 @@ bool pmk_check_config(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 		/* init alternative variable */
                 if (hash_get(pgd->htab, libs) == NULL) {
                         if (hash_update_dup(pgd->htab, libs, "") == HASH_ADD_FAIL) {
-        			errorf("hash error.");
+        			errorf(HASH_ERR_UPDT_ARG, libs);
         			return(false);
                         }
 		}
 	} else {
 		/* use default library variable */
-		libs = "LIBS"; /* XXX TODO use a define */
+		libs = PMKVAL_ENV_LIBS;
 	}
 
 	if (depend_check(ht, pgd) == false) {
@@ -777,7 +776,7 @@ bool pmk_check_config(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 
 			/* set path as empty for the key given by varname */
 			if (hash_update_dup(pgd->htab, varname, "") == HASH_ADD_FAIL) {
-				errorf("hash error.");
+				errorf(HASH_ERR_UPDT_ARG, varname);
 				return(false);
 			}
 
@@ -788,7 +787,7 @@ bool pmk_check_config(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 		pmk_log("yes.\n");
 		/* recording path of config tool under the key given by varname */
 		if (hash_update_dup(pgd->htab, varname, cfgpath) == HASH_ADD_FAIL) {
-			errorf("hash error.");
+			errorf(HASH_ERR_UPDT_ARG, varname);
 			return(false);
 		}
 	}
@@ -945,12 +944,12 @@ bool pmk_check_pkg_config(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 	}
 
 	/* check for alternative variable for CFLAGS */
-	cflags = po_get_str(hash_get(ht, "CFLAGS"));
+	cflags = po_get_str(hash_get(ht, PMKVAL_ENV_CFLAGS));
 	if (cflags != NULL) {
 		/* init alternative variable */
                 if (hash_get(pgd->htab, cflags) == NULL) {
                         if (hash_update_dup(pgd->htab, cflags, "") == HASH_ADD_FAIL) {
-        			errorf("hash error.");
+        			errorf(HASH_ERR_UPDT_ARG, cflags);
         			return(false);
                         }
 		}
@@ -965,13 +964,13 @@ bool pmk_check_pkg_config(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 		/* init alternative variable */
                 if (hash_get(pgd->htab, libs) == NULL) {
                         if (hash_update_dup(pgd->htab, libs, "") == HASH_ADD_FAIL) {
-        			errorf("hash error.");
+        			errorf(HASH_ERR_UPDT_ARG, libs);
         			return(false);
                         }
 		}
 	} else {
 		/* use default library variable */
-		libs = "LIBS"; /* XXX TODO use a define */
+		libs = PMKVAL_ENV_LIBS;
 	}
 
 	if (depend_check(ht, pgd) == false) {
@@ -1403,7 +1402,7 @@ debugf("value = '%s'", value);
 
 		/* no dup */
 		if (hash_update(pgd->htab, variable, value) == HASH_ADD_FAIL) {
-			/* XXX err msg ? */
+			errorf(HASH_ERR_UPDT_ARG, variable);
 			return(false);
 		}
 		pmk_log("\tSetting %s to '%s'\n", variable, value);
@@ -1430,7 +1429,7 @@ debugf("pstr = '%s'", pstr);
 debugf("value = '%s'", value);
 #endif
 		if (hash_update(pgd->htab, versvar, value) == HASH_ADD_FAIL) {
-			/* XXX err msg ? */
+			errorf(HASH_ERR_UPDT_ARG, versvar);
 			return(false);
 		}
 		pmk_log("\tSetting %s to '%s'\n", versvar, value);
@@ -1454,7 +1453,7 @@ debugf("pstr = '%s'", pstr);
 debugf("value = '%s'", value);
 #endif
 		if (hash_update(pgd->htab, versmaj, value) == HASH_ADD_FAIL) {
-			/* XXX err msg ? */
+			errorf(HASH_ERR_UPDT_ARG, versmaj);
 			return(false);
 		}
 		pmk_log("\tSetting %s to '%s'\n", versmaj, value);
@@ -1535,7 +1534,7 @@ bool pmk_setparam_accompat(pmkcmd *cmd, prsopt *popt, pmkdata *pgd) {
 		pgd->ac_file = strdup(pstr);
 		pmk_log("\t\tSet file to '%s'.\n", pstr);
 		if (hash_update_dup(pgd->htab, AC_VAR_DEF, AC_VALUE_DEF) == HASH_ADD_FAIL) {
-			errorf("failed to add value for '%s' in hash table.", AC_VAR_DEF);
+			errorf(HASH_ERR_UPDT_ARG, AC_VAR_DEF);
 			return(false);
 		}
 		pmk_log("\t\tSet '%s' value to '%s'.\n", AC_VAR_DEF, AC_VALUE_DEF);
@@ -1742,7 +1741,7 @@ bool pmk_set_variable(pmkcmd *cmd, prsopt *popt, pmkdata *pgd) {
 			/* check return for message : defined or redefined */
 			switch (hval) {
 				case HASH_ADD_FAIL:
-					errorf("failed to set '%s' variable.");
+					errorf(HASH_ERR_UPDT_ARG, popt->key);
 					return(false);
 					break;
 

@@ -167,6 +167,9 @@
 #define PMKVAL_BIN_PKGCONFIG	"pkg-config"
 #define PMKVAL_LIB_PKGCONFIG	"/lib/pkgconfig" /* preceeded by PREFIX */
 
+#define PMKVAL_ENV_LIBS		"LIBS"
+#define PMKVAL_ENV_CFLAGS	"CFLAGS"
+
 /* prefix character used for comments */
 #define CHAR_COMMENT		'#'
 

@@ -67,10 +67,10 @@ run_$(NAME):
 	@echo ""
 	@echo "-> Running program"
 	@echo ""
-	@echo "LD_LIBRARY_PATH=. hello"
+	@echo "LD_LIBRARY_PATH=. ./hello"
 	@echo ""
 	@echo "--exec-begin----------------------------"
-	@LD_LIBRARY_PATH=. hello
+	@LD_LIBRARY_PATH=. ./hello
 	@echo "--exec-end------------------------------"
 
 clean:

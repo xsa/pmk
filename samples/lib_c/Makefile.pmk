@@ -70,7 +70,7 @@ run_$(NAME):
 	@echo "LD_LIBRARY_PATH=. hello"
 	@echo ""
 	@echo "--exec-begin----------------------------"
-	@LD_LIBRARY_PATH=. hello
+	@LD_LIBRARY_PATH=. ./hello
 	@echo "--exec-end------------------------------"
 
 clean:
