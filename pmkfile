@@ -1,8 +1,9 @@
 # $Id$
 # pmkfile for pmk
 
+# set target file
 .TARGET {
-LIST="compat/compat.h.in"
+	LIST="compat/compat.h.in"
 }
 
 # checking strlcpy in string.h
