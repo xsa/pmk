@@ -31,34 +31,6 @@
  */
 
 
-/* We include sys/param.h to get MAXPATHLEN.
-   This is known to work under following operanding systems :
-	OpenBSD
-	FreeBSD
-	NetBSD			(not verified)
-	MACOSX
-	Solaris			(not verified)
-	SunOS			(not verified)
-	HPUX			(not verified)
-	AIX			(not verified)
-	IRIX			(not verified)
-	OSF1			(not verified)
-	Ultrix			(not verified)
-	Linux based systems	(not verified)
-	DG-UX			(not verified)
-	4.4BSD			(not verified)
-
-   Some systems does not provide the same location :
-   	Chorus			arpa/ftp.h
-
-
-   Comments about this stuff is welcome. If your system is not
-   supported then take contact with us to fix it.
-*/
-#ifdef MAXPATHLEN_
-#	include <sys/param.h>
-#endif
-
 #include <ctype.h>
 #include <stdarg.h>
 #include <stdio.h>
@@ -168,6 +140,10 @@ bool process_template(char *template, htable *ht) {
 	bool	replace;
 
 	pbf = strdup(template);
+	if (pbf == NULL) {
+		errorf("not enough memory.");
+		return(false);
+	}
 	ptbf = basename(pbf); /* getting filename */
 	if (ptbf == NULL) {
 		errorf("failed to get filename of template.");
@@ -184,6 +160,10 @@ bool process_template(char *template, htable *ht) {
 	}
 
 	ptmp = strdup(template);
+	if (ptmp == NULL) {
+		errorf("not enough memory.");
+		return(false);
+	}
 	path = dirname(ptmp);
 	if (path == NULL) {
 		errorf("failed to get path of the template.");
@@ -338,73 +318,88 @@ bool check_cmd(char *cmdname) {
 */
 
 bool parse_cmd(char *line, pmkcmd *command) {
-	int	i,
-		j;
-	char	buf[MAX_LABEL_NAME_LEN];
-		/* should be big enough to contain command/label name */
+	int	s,
+		so;
+	char	buf[MAX_LABEL_NAME_LEN], /* should be big enough to contain command/label name */
+		*pbf;
 	bool	cmd_found = false,
 		label_found = false;
 
-	i = 1; /* ignore prefix character of the command string */
-	j = 0;
-	while (line[i] != CHAR_EOS && i < MAX_CMD_LEN) {
+	s = MAX_CMD_LEN - 1;
+	line++; /* ignore prefix character of the command string */
+	pbf = buf;
+	while (*line != CHAR_EOS && s != 0) {
 		if (cmd_found == false) {
-			if (line[i] != '(') {
+			if (*line != '(') {
 				/* check uppercase */
-				if (isalpha(line[i]) && islower(line[i])) {
+				if (isalpha(*line) && islower(*line)) {
 					/* my god, found a lowercase in command name ! */
 					errorf_line(pmkfile, cur_line, "Command should be in uppercase");
 					return(false);
 				} else {
 					/* good boy */
-					buf[j] = line[i];
-					j++;
+					*pbf = *line;
+					pbf++;
 				}
 			} else {
 				/* end of command name */
-				buf[j] = CHAR_EOS;
+				*pbf = CHAR_EOS;
 				if (check_cmd(buf) == false) {
 					/* line number and error message already set */
 					return(false);
 				}
-				strlcpy(command->name, buf, MAX_CMD_NAME_LEN);
+				so = sizeof(command->name);
+				if (strlcpy(command->name, buf, so) >= so) {
+					errorf_line(pmkfile, cur_line, "command too long.");
+					return(false);
+				}
 				cmd_found = true;
-				j = 0;
+				pbf = buf;
 			}
 		} else {
-			if (line[i] != ')') {
-				if (isalpha(line[i]) == 0 && line[i] != '_') {
+			if (*line != ')') {
+				if (isalpha(*line) == 0 && *line != '_') {
 					/* invalid character */
 					errorf_line(pmkfile, cur_line, "Invalid label name");
 					return(false);
 					
 				} else {
 					/* needed to take care of quotation marks ? */
-					buf[j] = line[i];
-					j++;
+					*pbf = *line;
+					pbf++;
 				}
 			} else {
-				buf[j] = CHAR_EOS;
-				strlcpy(command->label, buf, MAX_LABEL_NAME_LEN);
+				*pbf = CHAR_EOS;
+				so = sizeof(command->label);
+				if (strlcpy(command->label, buf, so) >= so) {
+					errorf_line(pmkfile, cur_line, "label too long.");
+					return(false);
+				}
 				label_found = true;
-				j = 0; /* useless :) */
+				pbf = buf; /* useless :) */
 			}
 		}
-		i++;
+		line++;
+		s--;
 	}
 
 	if (cmd_found == false) {
-		/* command without label */
-		buf[j] = CHAR_EOS;
-		if (check_cmd(buf) == false) {
-			/* line number and error message already set */
+		if (s != 0) {
+			/* command without label */
+			*pbf = CHAR_EOS;
+			if (check_cmd(buf) == false) {
+				/* line number and error message already set */
+				return(false);
+			}
+			strlcpy(command->name, buf, MAX_CMD_NAME_LEN);
+			strlcpy(command->label, "", MAX_LABEL_NAME_LEN);
+		} else {
+			errorf_line(pmkfile, cur_line, "buffer too small.");
 			return(false);
 		}
-		strlcpy(command->name, buf, MAX_CMD_NAME_LEN);
-		strlcpy(command->label, "", MAX_LABEL_NAME_LEN);
 	} else {
 		if (label_found == true) {
-			if (line[i] != CHAR_EOS) {
+			if (*line != CHAR_EOS) {
 				/* some data remaining after parenthesis */
 				errorf_line(pmkfile, cur_line, "Trailing garbage after label");
 				return(false);
@@ -416,7 +411,7 @@ bool parse_cmd(char *line, pmkcmd *command) {
 		}
 	}
 
-	return true;
+	return(true);
 }
 
 /*

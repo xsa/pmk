@@ -149,18 +149,22 @@ int parse_conf_line(char *line, int linenum, cfg_opt *opts) {
 */
 
 bool env_to_opt(char *env_name, pmkcmdopt *opt) {
-	char	*env_val;
 	bool	rval;
+	char	*env_val;
+	int	s;
 
 	env_val = getenv(env_name);
 	if (env_val == NULL) {
 		/* env variable name not found */
-		strlcpy(opt->value, EMPTY_OPT_VALUE, sizeof(EMPTY_OPT_VALUE)); /* XXX test ? */
 		rval = false;
 	} else {
 		/* okay get it */
-		strlcpy(opt->value, env_val, sizeof(env_val)); /* XXX test ? */
-		rval = true;
+		s = sizeof(opt->value);
+		if (strlcpy(opt->value, env_val, s) < s) {
+			rval = true;
+		} else {
+			rval = false;
+		}
 		
 	}
 	return(rval);

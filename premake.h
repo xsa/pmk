@@ -30,10 +30,40 @@
  *
  */
 
+
 #ifndef _PREMAKE_H_
 #define _PREMAKE_H_
 
 #include "compat/pmk_stdbool.h"
+
+/* We include sys/param.h to get MAXPATHLEN.
+   This is known to work under following operanding systems :
+	OpenBSD
+	FreeBSD
+	NetBSD
+	MACOSX
+	Solaris			(not verified)
+	SunOS
+	HPUX
+	AIX			(not verified)
+	IRIX			(not verified)
+	OSF1
+	Ultrix			(not verified)
+	Linux based systems	(Debian, Mandrake, RedHat, Slackware, Suse)
+	DG-UX			(not verified)
+	4.4BSD			(not verified)
+
+   Some systems does not provide the same location :
+   	Chorus			arpa/ftp.h
+
+
+   Comments about this stuff is welcome. If your system is not
+   supported then take contact with us to fix it.
+*/
+#include <sys/param.h>
+#ifndef MAXPATHLEN
+#	define MAXPATHLEN 512
+#endif
 
 #ifdef USER_TEST
 #	define SYSCONFDIR	"./"
@@ -48,9 +78,6 @@
 #	define FALSE	0
 #endif
 
-#ifndef MAXPATHLEN
-#	define MAXPATHLEN 512
-#endif
 
 #define PREMAKE_MAJOR		"0"
 #define PREMAKE_MINOR		"4"
