@@ -4,6 +4,8 @@
  * error checking when hadh_add() 'ing values. 
 
 04 May 2003 mipsator
+ * finished and tested hash_resize().
+ * added hash_set_grow() to set autogrow mode.
  * added autogrow in htable.
  * added hash_resize(), not tested yet.
  * added hash_add_cell() and make hash_add() and hash_resize() using it.

@@ -96,7 +96,6 @@ htable *hash_init(int table_size) {
 	}
 
 	for(i = 0 ; i < table_size ; i++) {
-		phn[i].nbcoll = -1;
 		phn[i].first = NULL;
 		phn[i].last = NULL;
 	}
@@ -114,9 +113,11 @@ htable *hash_init(int table_size) {
 */
 
 int hash_resize(htable *ht, int newsize) {
-	hcell	*phc;
+	hcell	*phc,
+		*next;
 	hnode	*newhn;
-	int	h,
+	int	c = 0,
+		h,
 		i;
 
 	/* allocate new node table */
@@ -126,7 +127,6 @@ int hash_resize(htable *ht, int newsize) {
 
 	/* init */
 	for (i = 0 ; i < newsize ; i++) {
-		newhn[i].nbcoll = -1; /* XXX */
 		newhn[i].first = NULL;
 		newhn[i].last = NULL;
 	}
@@ -135,11 +135,28 @@ int hash_resize(htable *ht, int newsize) {
 		phc = ht->nodetab[i].first;
 		while (phc != NULL) {
 			h = hash_compute(phc->key, newsize);
-			hash_add_cell(&ht->nodetab[h], phc); /* XXX */
-			phc = phc->next;
+			next = phc->next;
+			hash_add_cell(&newhn[h], phc); /* XXX */
+			phc = next;
+			c++;
 		}
+
 	}
+
+	free(ht->nodetab);
+	ht->nodetab = newhn;
+	ht->size = newsize;
 	return(1); /* XXX */
+}
+
+/*
+	set hash table as automatically resizable
+
+	ht : hash table to set
+*/
+
+void hash_set_grow(htable *ht) {
+	ht->autogrow = 1;
 }
 
 /*
@@ -221,7 +238,6 @@ int hash_add(htable *pht, char *key, char *value) {
 	phc = (hcell *) malloc(sizeof(hcell));
 	strlcpy(phc->key, key, MAX_HASH_KEY_LEN);
 	strlcpy(phc->value, value, MAX_HASH_VALUE_LEN);
-	phc->next = NULL;
 
 	phn = &pht->nodetab[hash];
 	rval = hash_add_cell(phn, phc);
@@ -249,6 +265,7 @@ int hash_add(htable *pht, char *key, char *value) {
 int hash_add_cell(hnode *phn, hcell *phc) {
 	hcell	*np;
 
+	phc->next = NULL;
 	if (phn->first == NULL) {
 		/* hash code unused */
 		phn->first = phc;
