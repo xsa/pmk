@@ -1,3 +1,14 @@
+14 Sep 2003 mipsator
+ * finished global language support.
+ * fixed parsing of bool data in compatibility mode.
+ * added parse_pmkconf(), a common configuration file parser (pmk.conf).
+ * added process_opt() and modified pmk to use parse_pmkconf().
+ * removed read_conf() which is now useless in pmk.
+ * added check_opt() and modified pmksetup to use parse_pmkconf().
+ * removed parse_conf() which is now useless in pmksetup.
+ * updated pmkfile.5 and pmk.conf.5 man pages.
+ * updated override file sample.
+
 13 Sep 2003 mipsator
  * added dumping of pmk.conf in test_pmksetup target of Makefile.
  * added parse_obsolete() for pmk.conf compatibility with old format.

@@ -55,17 +55,17 @@
 /* Look for location of some predefined binaries */
 #define MAXBINS			6	/* max slots in the binaries array */
 static  char *binaries[MAXBINS][2] = {
-	{"ar",		PREMAKE_KEY_BIN_AR},
-	{"c++",		PREMAKE_KEY_BIN_CXX},
-	{"cat",		PREMAKE_KEY_BIN_CAT},
-	{"grep",	PREMAKE_KEY_BIN_GREP},
-	{"install",	PREMAKE_KEY_BIN_INSTALL},
-	{"ranlib",	PREMAKE_KEY_BIN_RANLIB}
+	{"ar",		PMKCONF_BIN_AR},
+	{"c++",		PMKCONF_BIN_CXX},
+	{"cat",		PMKCONF_BIN_CAT},
+	{"grep",	PMKCONF_BIN_GREP},
+	{"install",	PMKCONF_BIN_INSTALL},
+	{"ranlib",	PMKCONF_BIN_RANLIB}
 };
 
 
 /* Local functions declaration */
-int	parse_conf(FILE *, htable *);
+bool	check_opt(htable *, prsopt *);
 int	open_tmp_config(void);
 int	close_tmp_config(void);
 int	get_env_vars(htable *);

@@ -27,23 +27,37 @@
 .Dd April 03, 2003
 .Dt PMK.CONF 5
 .Os
+
 .Sh NAME
 .Nm pmk.conf 
 .Nd premake configuration file
+
 .Sh SYNOPSIS
 .Nm pmk.conf
+
 .Sh DESCRIPTION
 .Nm pmk.conf
 contains a series of assignements that are used by
 .Xr pmk 1
 and created by
 .Xr pmksetup 8 .
+
+.Sh DATA TYPES
+Theses are common types used by pmk, see
+.Xr pmkfile.5
+for a complete description.
+
 .Sh OPERATORS
 .Bl -tag -width Ds
 .It Cm = 
 This operator makes the value dynamic, which means that it will
 be (re)assigned everytime you run 
 .Xr pmksetup 8 .
+.Pp
+For example:
+.Bd -literal -offset -indent 
+BIN_CC = "/usr/bin/cc"
+.Ed
 .It Cm :
 This operator makes the value static, which means that if you want
 to regenerate the 
@@ -53,26 +67,42 @@ the value will be kept and not assigned dynamically by
 .Pp
 For example:
 .Bd -literal -offset -indent 
-BIN_INSTALL:/usr/local/bin/install
+BIN_INSTALL:"/usr/local/bin/install"
 .Ed
 .El
 .Pp
+
+.Sh FAMILY CLASSES
+Assignements can be classed in different families.
+.Bl -tag -width Ds
+.It Cm BIN_*
+This class is used for binary paths.
+.It Cm HW_*
+Hardware related data like for example byte order.
+.It Cm PATH_*
+Specific paths family.
+.It Cm OS_*
+System specific data.
+.It Cm misc
+Some other data (such as PREFIX) cannot fit into previous families.
+.El
+
 .Sh EXAMPLES
 A typical pmk.conf will look something like this:
 .Bd -literal -offset -indent
-OS_NAME=OpenBSD
-OS_VERSION=3.3
-OS_ARCH=i386
+OS_NAME="OpenBSD"
+OS_VERSION="3.3"
+OS_ARCH="i386"
 
-PREFIX=/usr/local
-SYSCONFDIR=/etc
+PREFIX="/usr/local"
+SYSCONFDIR="/etc"
 
-INC_PATH=/usr/include
-LIB_PATH=/usr/lib
+INC_PATH="/usr/include"
+LIB_PATH="/usr/lib"
 
-BIN_AR=/usr/bin/ar
-BIN_INSTALL=/usr/bin/install
-BIN_RANLIB=/usr/bin/ranlib
+BIN_AR="/usr/bin/ar"
+BIN_INSTALL="/usr/bin/install"
+BIN_RANLIB="/usr/bin/ranlib"
 .Ed
 .Pp
 .Sh FILES

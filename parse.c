@@ -633,6 +633,11 @@ char *parse_data(char *pstr, pmkobj *po, size_t size) {
 				return(NULL);
 			}
 
+			rptr = parse_bool(pstr, po, size);
+			if (rptr != NULL) {
+				return(rptr);
+			}
+
 			pstr = parse_obsolete(pstr, buffer, size);
 
 			if (pstr == NULL) {
@@ -984,6 +989,58 @@ bool parse_pmkfile(FILE *fp, prsdata *pdata, prskw kwtab[], size_t size) {
 		/* error occured before EOF */
 		prscell_destroy(pcell);
 		errorf("end of file not reached.");
+		return(false);
+	}
+
+	return(true);
+}
+
+/*
+	parse configuration file
+
+	fp : file to parse 
+	pht : data used by processing function
+	seplst : list of separators
+	func : processing function
+
+	return : boolean
+*/
+
+bool parse_pmkconf(FILE *fp, htable *pht, char *seplst, bool (*func)(htable *, prsopt *)) {
+	char	 buf[MAX_LINE_LEN];
+	int	 ln = 0;
+	prsopt	 opt;
+
+	while (get_line(fp, buf, sizeof(buf)) == true) {
+		switch (buf[0]) {
+			case CHAR_COMMENT :
+				/* ignore comment */
+				break;
+
+			case CHAR_EOS :
+				/* ignore empty line */
+				break;
+
+			default :
+				if (parse_opt(buf, &opt, seplst) == true) {
+					/* parse ok */
+					if (func(pht, &opt) == false) {
+						errorf("line %d : processing failed", ln);
+						return(false);
+					}
+				} else {
+					/* incorrect line */
+					errorf("line %d : %s", ln, parse_err);
+					return(false);
+				}
+				break;
+		}
+		ln++; /* increment line number */
+	}
+
+	if (feof(fp) == 0) {
+		/* error occuered before EOF */
+		errorf_line(PREMAKE_CONFIG_PATH, ln, "end of file not reached.");
 		return(false);
 	}
 
