@@ -22,6 +22,7 @@ Indented lines means subtask.
 
 common:
 -----------------------------------------------------------------------
+	-	track and code missing checks for snprintf and strl*.
 	+R	tutorial
 mreindl	~.	latex version of tutorial
 	~.	improve test_pmkinstall to check more modes
@@ -32,6 +33,7 @@ mreindl	~.	latex version of tutorial
 
 pmk:
 -----------------------------------------------------------------------
+	-	simplify code by using more functions for redundant code.
 	-	update manpage (DEFS and ELSE)
 	+	DEFS support for CHECK_CONFIG and CHECK_PKG_CONFIG
 	+	improve and fix redundancy of record_def() and record_val()
@@ -48,6 +50,7 @@ pmk:
 
 pmksetup:
 -----------------------------------------------------------------------
+	-	use fcopy instead of text copy for the temporary file.
 	-	option to append to variable of pmk.conf
 	!	clean temporary files on error
 	-	missing checks :
@@ -66,6 +69,7 @@ pmkscan
 
 pmkinstall
 -----------------------------------------------------------------------
+	-	fragment main loop in functions, it's too large.
 	-.	backup option ?
 
 
