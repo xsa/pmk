@@ -34,6 +34,7 @@
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 
 #include "functool.h"
 
@@ -403,4 +404,88 @@ bool require_check(htable *pht) {
 	}
 
 	return(check_bool_str(req));
+}
+
+/*
+	parse a config file assuming compatibility with autoconf
+
+	ht : def table
+*/
+
+bool parse_ac_config(htable *ht, char *fpath) {
+	FILE	*fp_in,
+		*fp_out;
+	bool	rval = true;
+	char	buf[TMP_BUF_LEN],
+		ftmp[MAXPATHLEN],
+		*pstr;
+	int	i = 0,
+		s,
+		fe;
+
+	strlcpy(ftmp, "config_tmp", sizeof(ftmp)); /* XXX make it better */
+	fp_out = fopen(ftmp, "w");
+	if (fp_out == NULL)
+		return(false);
+
+	fp_in = fopen(fpath, "r");
+	if (fp_in == NULL) {
+		fclose(fp_out);
+		return(false);
+	}
+
+	while (get_line(fp_in, buf, sizeof(buf)) == true) {
+		pstr = strstr(buf, "#define");
+		if (pstr == NULL) {
+			pstr = strstr(buf, "#undef");
+		}
+
+		if (pstr != NULL) {
+			/* XXX get the def and check gdata about it */
+
+			/* look for the definition name */
+			while (*pstr != CHAR_EOS && isspace(*pstr) != 0) {
+				pstr++;
+			}
+			if (*pstr == CHAR_EOS) {
+				return(false);
+			} else {
+				pstr++;
+			}
+			s = sizeof(buf);
+			while ((*pstr != '_') && (isalpha(*pstr) != 0) && (i < s)) {
+				buf[i] = *pstr;
+				pstr++;
+				i++;
+			}
+			buf[i] = CHAR_EOS;
+
+			/* check the defined value */
+			pstr = hash_get(ht, buf);
+			if (pstr != NULL) {
+				/* XXX to finish */
+			} else {
+				/* XXX to finish */
+			}
+		} else {
+			/* write line as is */
+		}
+	}
+
+	fe = feof(fp_in);
+	fclose(fp_in);
+	fclose(fp_out);
+
+	if (fe == 0) {
+		unlink(ftmp);
+		return(false); /* XXX correct ? */
+	}
+
+	/* erase orig and copy new one */
+	unlink(fpath);
+	rval = copy_text_file(ftmp, fpath);
+
+	unlink(ftmp);
+
+	return(rval);
 }

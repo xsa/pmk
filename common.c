@@ -449,13 +449,15 @@ bool pmk_log(const char *fmt, ...) {
 	dst_file : filename of the copy
 
 	returns true on success
+
+	XXX should raw copy in the future
 */
 
 bool copy_text_file(char *src_file, char *dst_file) {
 	FILE	*fp_src,
 		*fp_dst;
 	bool	rval;
-	char	buf[1024]; /* XXX ? */
+	char	buf[1024]; /* XXX length ? */
 
 	fp_src = fopen(src_file, "r");
 	if (fp_src == NULL) {
@@ -469,18 +471,20 @@ bool copy_text_file(char *src_file, char *dst_file) {
 	}
 
 	while (get_line(fp_src, buf, sizeof(buf)) == 1) {
-		fprintf(fp_dst, "%s\n", buf);
+		fprintf(fp_dst, "%s\n", buf); /* should test fprintf */
 	}
+
+	fclose(fp_dst);
 
 	if (feof(fp_src) == 0) {
 		rval = false;
-		/* XXX delete file_dst ? */
+		/* copy failed to achieve, erase destination file */
+		unlink(dst_file);
 	} else {
 		rval = true;
 	}
 
 	fclose(fp_src);
-	fclose(fp_dst);
 
 	return(rval);
 }
