@@ -21,7 +21,7 @@ HP-UX		B.11.11		parisc		0.9.0		OK		Damien Couderc
 HP-UX		B.11.11		parisc		0.9.1		Failed		Damien Couderc		missing setegid() and seteuid()
 HP-UX		B.11.11		parisc		0.8.1-s7	OK		Martin Reindl		gcc-3.3.3
 IRIX		6.5		IP32		0.8.1-s7	OK		Xavier Santolaria	MIPSpro Compilers 7.30
-Mac OS X	10.3.5		ppc		0.8.1-s7	OK		Xavier Santolaria	gcc-3.3, gmake-3.79.1
+Mac OS X	10.3.8		ppc		0.9.2 (ps)	OK		Martin Reindl		gcc-3.3, gmake-3.79
 Mandrake	10.0		i686		0.9.1		OK		Damien Couderc		
 NetBSD		2.0G		alpha		0.8.1-s7	OK		Martin Reindl		gcc-3.3.3
 NetBSD		1.6		i386		0.9.0		OK		Damien Couderc		gcc-2.95.3
@@ -29,7 +29,7 @@ NetBSD		1.6.1		macppc		0.8.1		OK		Martin Reindl		gcc-2.95.3
 NetBSD		2.0		sgimips		0.8.1-s9	OK		Martin Reindl		gcc-3.3.3
 NetBSD		2.0G		sparc		0.8.1-s7	OK		Martin Reindl		gcc-3.3.3
 NetBSD		1.6ZG		sparc64		0.8.1		OK		Martin Reindl		gcc-3.3.2
-OpenBSD		3.6		alpha		0.8.1-s7	OK		Martin Reindl		gcc-2.95.3
+OpenBSD		3.6 (current)	alpha		0.9.2 (ps)	OK		Martin Reindl		gcc-2.95.3
 OpenBSD		3.6 (current)	amd64		0.9.0 (ps)	OK		Damien Couderc		gcc-3.3.2
 OpenBSD		3.6 (current)	i386		0.9.0 (ps)	OK		Damien Couderc		gcc-3.3.2
 OpenBSD		3.6		hppa		0.8.1-s7	OK		Xavier Santolaria	gcc-3.3.2
