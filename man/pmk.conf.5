@@ -85,7 +85,13 @@ System specific data.
 .It Ev misc
 Some other data (such as PREFIX) cannot fit into previous families.
 .El
-
+.Sh FILES
+.Bl -tag -width "/etc/pmk/pmk.conf" -compact
+.It Pa /etc/pmk/pmk.conf
+default
+.Xr pmk 1
+configuration file
+.El
 .Sh EXAMPLES
 A typical pmk.conf might appear as follows:
 .Bd -literal
@@ -124,13 +130,6 @@ AC_ECHO_N = ""
 AC_ECHO_T = ""
 .Ed
 .Pp
-.Sh FILES
-.Bl -tag -width "/etc/pmk/pmk.conf" -compact
-.It Pa /etc/pmk/pmk.conf
-default
-.Xr pmk 1
-configuration file
-.El
 .Sh SEE ALSO
 .Xr make 1 ,
 .Xr pmk 1 ,
