@@ -1,5 +1,6 @@
 .Dd "March 2003"
 .Dt PMK 1
+.Os
 .Sh NAME
 .Nm pmk
 .Nd configuring tool
@@ -9,7 +10,6 @@
 .Op -f file
 .Op options
 .Sh DESCRIPTION
-.Pp
 .Nm
 is a configuring tool which aims to help building project on different operanding systems.
 .Ss Options :
@@ -23,15 +23,16 @@ is a configuring tool which aims to help building project on different operandin
 \-f \fIfile\fR
 .Dl Use \fIfile\fR instead of \fBpmkfile\fR.
 .Sh FILES
-.Pp
 pmkfile
-.Pp
 pmk.conf
+.Pp
 .Sh SEE ALSO
-pmksetup(1), pmkfile(5), pmk.conf(5)
-.Sh HISTORY
-The idea to replace configure script was existing since a long time. But the projet was initiated in the begining of March 2003
+.Xr pmkfile 5 ,
+.Xr pmk.conf 5 ,
+.Xr pmksetup 8
 .Sh AUTHOR
 .An Damien Couderc
+.Sh HISTORY
+The idea to replace configure script was existing since a long time. But the projet was initiated in the begining of March 2003
 .Sh BUGS
-You fool ?
+You have to found them.
