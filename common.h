@@ -87,8 +87,6 @@ typedef struct {
 
 /* function protos */
 
-FILE	*pmk_log_fp;
-
 bool	 get_line(FILE *, char *, size_t);
 
 bool	 env_to_opt(char *, pmkcmdopt *);

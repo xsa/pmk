@@ -54,6 +54,7 @@
 
 /*#define	MKVAR_DEBUG	1*/
 
+FILE	*pmk_log_fp;
 
 /*
 	get a line from a file and remove newline character
