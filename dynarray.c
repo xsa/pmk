@@ -54,7 +54,7 @@
 /* stuff to support pmk objects */
 #ifdef USE_PMK_OBJ
 #include "pmk_obj.h"
-#define free_obj(obj) obj_free(obj)
+#define free_obj(obj) po_free(obj)
 #else
 #define free_obj(obj) free(obj)
 #endif
