@@ -3,28 +3,28 @@
 CC?=		cc
 INSTALL?=	install
 
-CFLAGS?=
-
-#CFLAGS+=	-Wall
-#CFLAGS+=	-Werror
-#CFLAGS+=	-ansi -pedantic
-
-#optimize building stuff (gcc only)
-#CFLAGS+=	-pipe
-
-# Debug stuff
-#CFLAGS+=	-DPMK_DEBUG
-#CFLAGS+=	-DPMKSETUP_DEBUG
-
-# Here you can change the default location of pmk.conf
-#CFLAGS+=	-DSYSCONFDIR=\"/etc/\"
-
-# Flag for platform testing checks
-
 # Some make programs don't know about += operator.
 # Edit and use the following instead :
-#CFLAGS+=	-DUSER_TEST -DPMK_DEBUG -DPMKSETUP_DEBUG
 
+# Warning options, uncomment as your need
+#WARN=		-Wall
+#WARN=		-Werror
+#WARN=		-ansi -pedantic
+#WARN=		-Wall -Werror -ansi -pedantic
+
+# Debug stuff
+#DBGFLAGS=	-DPMK_DEBUG
+#DBGFLAGS=	-DPMKSETUP_DEBUG
+#DBGFLAGS=	-DPMK_DEBUG -DPMKSETUP_DEBUG 
+
+# Here you can change the default location of pmk.conf
+#SYSCONF=	-DSYSCONFDIR=\"/etc/\"
+
+# Flag for platform testing checks
+#USERFLAGS=	-DUSERTEST
+
+
+PMKCFLAGS= $(WARN) $(DBGFLAGS) $(SYSCONF) $(USERFLAGS) $(CFLAGS)
 
 LDFLAGS?=
 
@@ -49,17 +49,17 @@ S_OBJS=		dynarray.o common.o compat.o hash.o parse.o pmk_obj.o $(SETUP).o
 SC_OBJS=	dynarray.o common.o compat.o hash.o parse.o pmk_obj.o $(SCAN).o
 
 .c.o:
-	$(CC) $(CFLAGS) -c $<
+	$(CC) $(PMKCFLAGS) -c $<
 
 all: $(PREMAKE) $(SETUP) $(SCAN)
 
 # specific object files
 $(SCAN).o:
-	$(CC) $(CFLAGS) -DDATADIR=\"$(DATADIR)\" -c $(SCAN).c
+	$(CC) $(PMKCFLAGS) -DDATADIR=\"$(DATADIR)\" -c $(SCAN).c
 
 # for compatibility with 0.6 pmkfiles, will be removed later
 parse.o:
-	$(CC) $(CFLAGS) -DPRS_OBSOLETE -c parse.c
+	$(CC) $(PMKCFLAGS) -DPRS_OBSOLETE -c parse.c
 
 config:
 	@if ($(PREMAKE) -v >/dev/null 2>&1); then \
