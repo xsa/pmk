@@ -34,10 +34,20 @@
  */
 
 
+#ifndef _PMK_LIBGEN_H_
+#define _PMK_LIBGEN_H_
+
 #include "compat.h"
+
+/*
+	basename() and dirname() functions
+*/
 
 #ifdef HAVE_LIBGEN_H
 #include <libgen.h>
 #else
 #include "libgen.h"
-#endif
+#endif /* HAVE_LIBGEN_H */
+
+#endif /* _PMK_LIBGEN_H_ */
+

@@ -33,10 +33,21 @@
  *
  */
 
+
+#ifndef _PMK_STDBOOL_H_
+#define _PMK_STDBOOL_H_
+
 #include "compat.h"
+
+/*
+	boolean types
+*/
 
 #ifdef HAVE_STDBOOL_H
 #include <stdbool.h>
 #else
 #include "stdbool.h"
-#endif
+#endif /* HAVE_STDBOOL_H */
+
+#endif /* _PMK_STDBOOL_H_ */
+

@@ -34,6 +34,9 @@
  */
 
 
+#ifndef _PMK_CTYPE_H_
+#define _PMK_CTYPE_H_
+
 #include <ctype.h>
 
 #include "compat.h"
@@ -44,5 +47,7 @@
 
 #ifndef HAVE_ISBLANK
 #include "isblank.h"
-#endif
+#endif /* HAVE_ISBLANK */
+
+#endif /* _PMK_CTYPE_H_ */
 
