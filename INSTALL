@@ -6,14 +6,16 @@ To build and install pmk on your system :
 Easy method :
 
 For a global use (with root privileges):
-make clean cfgrm
-make
-make install
+
+  make clean cfgrm
+  make
+  make install
 
 In user mode (without root privileges):
-make clean cfgum
-make
-make install
+
+  make clean cfgum
+  make
+  make install
 
 
 Advanced method :
@@ -27,5 +29,6 @@ The default prefixes are :
 
 Example:
 If you want a global use with /opt as prefix you will use the following :
-sh pmkcfg.sh -p /opt
+
+  sh pmkcfg.sh -p /opt
 
