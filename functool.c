@@ -69,7 +69,7 @@ lgdata	ldata[NBLANG] = {
 */
 
 bool check_bool_str(char *str) {
-	if (strncmp(str, "TRUE", 6) == 0) {
+	if (strncmp(str, BOOL_STRING_TRUE, 6) == 0) {
 		return(true);
 	} else {
 		return(false);
@@ -104,9 +104,9 @@ char *bool_to_str(bool value) {
 	static char	bstr[6];
 
 	if (value == true) {
-		snprintf(bstr, sizeof(bstr), "TRUE");
+		snprintf(bstr, sizeof(bstr), BOOL_STRING_TRUE);
 	} else {
-		snprintf(bstr, sizeof(bstr), "FALSE");
+		snprintf(bstr, sizeof(bstr), BOOL_STRING_FALSE);
 	}
 	return(bstr);
 }
