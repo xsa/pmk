@@ -1,3 +1,6 @@
+02 May 2004 mipsator
+ * fixed a bug recently introduced in CHECK_PKG_CONFIG.
+
 24 Apr 2004 mipsator
  * more stuff related to the pmksetup engine changes.
 

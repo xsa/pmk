@@ -768,7 +768,7 @@ bool check_libpath(htable *pht) {
 
 	/* build the path dynamically */
 	strlcpy(libpath, "$", sizeof(libpath)); /* variable prefix */
-	strlcpy(libpath, PMKCONF_MISC_PREFIX, sizeof(libpath)); /* prefix variable name */
+	strlcat(libpath, PMKCONF_MISC_PREFIX, sizeof(libpath)); /* prefix variable name */
 	strlcat(libpath, PMKVAL_LIB_PKGCONFIG, sizeof(libpath)); /* pkgconfig path suffix */
 
 	if (hash_get(pht, PMKCONF_BIN_PKGCONFIG) != NULL) {
