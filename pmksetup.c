@@ -184,14 +184,14 @@ int main(int argc, char *argv[]) {
 	debugf("%s has not been deleted!", sfn);
 #else
 	if (unlink(sfn) == -1) {
-		errorf("cannot remove temporary file: %s : %s.",
+		errorf("cannot remove temporary file: '%s' : %s.",
 			sfn, strerror(errno));
 		exit(EXIT_FAILURE);	
 	}
 #endif	/* PMKSETUP_DEBUG */
 
 	if (error != 0) {
-		errorf("returned code '%d' during parsing", error);
+		errorf("returned code '%d' during parsing.", error);
 		exit(error);
 	}
 	return(0);
@@ -305,7 +305,7 @@ int open_tmp_config(void) {
 	snprintf(sfn, sizeof(sfn), PREMAKE_CONFIG_TMP);
 
 	if ((fd = mkstemp(sfn)) == -1) {
-		errorf("could not create temporary file: %s : %s.", 
+		errorf("could not create temporary file '%s' : %s.", 
 			sfn, strerror(errno));
 		return(-1);
 	}
@@ -314,7 +314,7 @@ int open_tmp_config(void) {
 			unlink(sfn);
 			close(fd);
 		}	
-		errorf("cannot open temporary file: %s : %s.", 
+		errorf("cannot open temporary file '%s' : %s.", 
 			sfn, strerror(errno));
 		return(-1);
 	}
@@ -334,7 +334,7 @@ int open_tmp_config(void) {
 int close_tmp_config(void) {
 	if (sfp) {
 		if (fclose(sfp) < 0) {
-			errorf("cannot close temporary file: %s : %s.", 
+			errorf("cannot close temporary file '%s' : %s.", 
 				sfp, strerror(errno));
 			return(-1);
 		}
@@ -468,7 +468,7 @@ int predef_vars(htable *pht) {
 	for (i = 0 ; i < nbpredef ; i++) {
 		verbosef("Setting '%s' => '%s'", predef[i].key, predef[i].value);
 		if (hash_update_dup(pht, predef[i].key, predef[i].value) == HASH_ADD_FAIL) {
-			errorf("failed to add %s.", predef[i].key);
+			errorf("failed to add '%s'.", predef[i].key);
 			return(-1);
 		}
 	}
@@ -492,7 +492,7 @@ int check_echo(htable *pht) {
 	snprintf(echocmd, sizeof(echocmd), ECHO_CMD);
 
 	if ((echo_pipe = popen(echocmd, "r")) == NULL) {
-		errorf("unable to execute %s", echocmd);
+		errorf("unable to execute '%s'.", echocmd);
 		return(-1);
 	}
 
@@ -655,12 +655,12 @@ int copy_config(const char *tmp_config, const char *config) {
 
 	if ((fp_t = fopen(tmp_config, "r")) == NULL) {
 		errorf("cannot open temporary configuration "
-			"file for reading: %s : %s.", tmp_config, 
+			"file for reading '%s' : %s.", tmp_config, 
 				strerror(errno));
 		return(-1);	
 	}
 	if ((fp_c = fopen(config, "w")) == NULL) {
-		errorf("cannot open %s for writing: %s.", 
+		errorf("cannot open '%s' for writing : %s.", 
 			config, strerror(errno));
 
 		fclose(fp_t);	
@@ -673,7 +673,7 @@ int copy_config(const char *tmp_config, const char *config) {
 
 	if (feof(fp_t) == 0) {
 		errorf("read failure, cannot copy "
-			"%s to %s.", tmp_config, config);
+			"'%s' to '%s'.", tmp_config, config);
 		rval = -1;	
 	} else
 		rval = 0;
