@@ -31,6 +31,7 @@
  */
 
 
+#include <sys/types.h>
 #include <glob.h>
 #include <regex.h>
 #include <stdio.h>
