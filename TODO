@@ -33,7 +33,7 @@ mreindl	~.	latex version of tutorial
 
 pmk:
 -----------------------------------------------------------------------
-	-	simplify code by using more functions for redundant code.
+	-	simplify code by using more functions for redundant code
 	-	update manpage (DEFS and ELSE)
 	+	DEFS support for CHECK_CONFIG and CHECK_PKG_CONFIG
 	+	improve and fix redundancy of record_def() and record_val()
@@ -50,7 +50,8 @@ pmk:
 
 pmksetup:
 -----------------------------------------------------------------------
-	-	use fcopy instead of text copy for the temporary file.
+	-	cpu identification
+	-	use fcopy instead of text copy for the temporary file
 	-	option to append to variable of pmk.conf
 	!	clean temporary files on error
 	-	missing checks :

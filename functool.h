@@ -38,6 +38,7 @@
 #define _PMK_FUNCTOOL_H_
 
 
+#include "common.h"
 #include "hash_tools.h"
 #include "pmk.h"
 #include "premake.h"
@@ -80,6 +81,7 @@ lgdata	*check_lang(char *);
 lgdata	*check_lang_comp(char *);
 lgdata	*get_lang(htable *, pmkdata *);
 char	*get_comp_path(htable *, char *);
-bool	 check_cfgt_data(pmkdata *pgd);
+bool	 check_cfgt_data(pmkdata *);
+bool	 process_required(pmkdata *, pmkcmd *, bool , char *, char *);
 
 #endif /* _PMK_FUNCTOOL_H_ */

@@ -1,3 +1,6 @@
+27 Aug 2004 mipsator
+ * added process_required() to remove redundant code for required flag.
+
 # snapshot 0.8.1-s6
 
 27 Aug 2004 mipsator
