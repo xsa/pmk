@@ -37,10 +37,14 @@
 
 /* pmkscan specific version */
 #define PREMAKE_SUBVER_PMKSCAN	"1"
+#define PMKSCAN_DATA	"data/pmkscan.dat" /* XXX TODO HARDCODE !!! */
+#define PMKSCAN_OUTPUT	"pmkfile.scan"
+
 
 typedef struct {
 	htable	*functions,
 		*includes;
 } scandata;
+
 
 #endif /* _PMKSCAN_H_ */
