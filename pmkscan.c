@@ -163,6 +163,7 @@ bool output_file(char *ofile, htable *pht) {
 	}
 
 	fclose(fp);
+	free(keys);
 
 	return(true);
 }

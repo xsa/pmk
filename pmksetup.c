@@ -186,6 +186,8 @@ void write_new_data(htable *ht) {
 		val = hash_get(ht, keys[i]);
 		fprintf(sfp, "%s%c%s\n", keys[i], CHAR_ASSIGN_UPDATE, val);
 	}
+
+	free(keys);
 }
 
 

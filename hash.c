@@ -542,6 +542,8 @@ int hash_nbkey(htable *pht) {
 	pht : hash table
 
 	returns an array of keys
+
+	NOTE: don't forget to free the array after use.
 */
 
 char **hash_keys(htable *pht) {
