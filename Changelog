@@ -5,6 +5,7 @@
 	is obsolete but kept for compatibility.
  * added pmk_check_variable() tu support CHECK_VARIABLE.
  * updated pmkfile.5 man page to sync with previous changes.
+ * updated pmkfile sample.
 
 18 Sep 2003 mipsator
  * improved str_to_dynary() to init and return dynary structure.
