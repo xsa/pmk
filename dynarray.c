@@ -51,13 +51,6 @@
 #include "compat/pmk_string.h"
 #include "dynarray.h"
 
-/* stuff to support pmk objects */
-#ifdef USE_PMK_OBJ
-#include "pmk_obj.h"
-#define free_obj(obj) po_free(obj)
-#else
-#define free_obj(obj) free(obj)
-#endif
 
 /*
 	Initialise dynamic array
@@ -66,6 +59,19 @@
 */
 
 dynary *da_init(void) {
+	/* use standard free function */
+	return(da_init_adv(NULL));
+}
+
+/*
+	Initialise dynamic array and provide specific free function
+
+	freefunc : free function
+
+	returns pointer of dynamic array
+*/
+
+dynary *da_init_adv(void (*freefunc)(void *)) {
 	dynary	*ptr = NULL;
 
 	ptr = (dynary *)malloc(sizeof(dynary));
@@ -73,6 +79,11 @@ dynary *da_init(void) {
 		ptr->nbcell = 0;
 		ptr->nextidx = 0;
 		ptr->pary = malloc(DYNARY_AUTO_GROW * sizeof(void *));
+		if (freefunc != NULL) {
+			ptr->freeobj = freefunc;
+		} else {
+			ptr->freeobj = free;
+		}
 	}
 
 	return(ptr);
@@ -252,7 +263,7 @@ void da_destroy(dynary *da) {
 	int	i;
 
 	for (i = 0 ; i < da->nextidx ; i++) {
-		free_obj(da->pary[i]);
+		da->freeobj(da->pary[i]);
 	}
 	free(da->pary);
 	free(da);

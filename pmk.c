@@ -626,7 +626,7 @@ int main(int argc, char *argv[]) {
 			exit(1);
 		}
 		for (i = 0 ; (i < da_usize(da)) && (rval == 0) ; i++) {
-			pstr = po_get_data(da_idx(da, i));
+			pstr = da_idx(da, i);
 			if (pstr != NULL) {
 				abspath(gdata.srcdir, pstr, buf); /* XXX check ??? */
 				if (process_template(buf, &gdata) == false) {

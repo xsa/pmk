@@ -136,8 +136,8 @@ bool check_version(char *vref, char *vers) {
 	}
 
 	while (exit == false) {
-		sr = po_get_data(da_idx(vr, i));
-		sc = po_get_data(da_idx(vc, i));
+		sr = da_idx(vr, i);
+		sc = da_idx(vc, i);
 
 		if (sr != NULL && sc != NULL) {
 			/* check both version */
@@ -393,7 +393,7 @@ bool depend_check(htable *lht, pmkdata *gd) {
 
 	/* check labels one by one */
 	for (i = 0 ; (i < da_usize(da)) && (rval == true) ; i++) {
-		fdep = po_get_data(da_idx(da, i));
+		fdep = da_idx(da, i);
 		if (label_check(gd->labl, fdep) == false) {
 			rval = false;
 			snprintf(gd->errmsg, sizeof(gd->errmsg), "Dependency '%s' failed.", fdep);

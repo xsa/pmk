@@ -251,7 +251,7 @@ char *parse_list(char *pstr, char *buffer, size_t size) {
 #endif
 
 #ifdef LIST_SUPPORT
-				if (da_push(pda, po) == false) {
+				if (da_push(pda, po_get_data(po)) == false) {
 					po_free(po);
 					da_destroy(pda);
 					return(NULL);
@@ -335,7 +335,7 @@ char *parse_list(char *pstr, char *buffer, size_t size) {
 				po = po_mk_string(buffer);
 				free(buffer);
 
-				if (da_push(pda, po) == false) {
+				if (da_push(pda, po_get_data(po)) == false) {
 					da_destroy(pda);
 					return(NULL);
 				}
