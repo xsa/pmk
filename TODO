@@ -80,7 +80,7 @@ pmkpc
 -----------------------------------------------------------------------
 	~	missing options
 			+ PMKPC_OPT_ATLPKGVERS :
-			- PMKPC_OPT_LISTALL :
+			+ PMKPC_OPT_LISTALL :
 			- PMKPC_OPT_UNINST :
 			- PMKPC_OPT_DEBUG :
 			- PMKPC_OPT_CFLAGS_ONLY_PATH	:

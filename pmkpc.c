@@ -193,6 +193,64 @@ debugf("{pcgetopt} idx = %d", idx);
 }
 
 /*
+	list all packages
+*/
+
+bool list_all(pkgdata *ppd) {
+	bool		 rval = true;
+	char		 *mod,
+			 *pcfile,
+			**descr,
+			  fmt[32];
+	hkeys		 *phk;
+	pkgcell		 *ppc;
+	size_t		  len,
+			  maxs = 0;
+	unsigned int	  i;
+
+	phk = hash_keys(ppd->files);
+
+	descr = (char **)malloc(sizeof(char *) * phk->nkey);
+	if (descr == NULL)
+		return(false);
+
+	for(i = 0 ; (i < phk->nkey) && (rval == true) ; i++) {
+		mod = phk->keys[i];
+		len = strlen(mod);
+		if (len > maxs)
+			maxs = len;
+
+		pcfile = hash_get(ppd->files, mod);
+		ppc = parse_pc_file(pcfile);
+		if (ppc == NULL) {
+			/* failed parsing */
+			rval = false;
+		} else {
+			descr[i] = strdup(ppc->descr);
+			pkgcell_destroy(ppc);
+		}
+	}
+
+	/* build format string to align descriptions */
+	snprintf(fmt, sizeof(fmt), "%%-%ds %%s\n", maxs);
+
+	for(i = 0 ; i < phk->nkey ; i++) {
+		if (rval == true) {
+			printf(fmt, phk->keys[i], descr[i]);
+		}
+
+		/* clean no longer used string */
+		free(descr[i]);
+	}
+
+	/* cleaning */
+	hash_free_hkeys(phk);
+	free(descr);
+
+	return(true);
+}
+
+/*
 	clean
 */
 
@@ -249,7 +307,7 @@ void usage(void) {
 }
 
 /*
-	XXX
+	main
 */
 
 int main(int argc, char *argv[]) {
@@ -259,6 +317,7 @@ int main(int argc, char *argv[]) {
 			 opt_modvers = false,
 			 opt_cmp_modvers = false,
 			 opt_exists = false,
+			 opt_listall = false,
 			 opt_cflags = false,
 			 opt_libs = false;
 	cfgtcell	*pcc = NULL;
@@ -358,6 +417,10 @@ debugf("{main} id = %d", poc->id);
 					opt_exists = true;
 					break;
 
+				case PMKPC_OPT_LISTALL :
+					opt_listall = true;
+					break;
+
 				case PMKPC_OPT_HELP :
 					fprintf(stderr, "For detailed help "
 						"please see the pmkpc(1) "
@@ -368,7 +431,6 @@ debugf("{main} id = %d", poc->id);
 					usage();
 					exit(EXIT_FAILURE);
 
-				case PMKPC_OPT_LISTALL :
 				case PMKPC_OPT_UNINST :
 				case PMKPC_OPT_DEBUG :
 				case PMKPC_OPT_CFLAGS_ONLY_PATH	:
@@ -465,7 +527,18 @@ debugf("{main} parsed '%s'", PREMAKE_CONFIG_PATH);
 		exit(EXIT_FAILURE);
 	}
 
-	pkg_collect(pc_path, gdata.ppd); /* nice hardcode isn't it ? :) */
+	/* collect data */
+	pkg_collect(pc_path, gdata.ppd);
+
+	if (opt_listall == true) {
+		/* display all gathered modules */
+		if (list_all(gdata.ppd) == true) {
+			exit(EXIT_SUCCESS);
+		} else {
+			exit(EXIT_FAILURE);
+		}
+	}
+
 
 #ifdef DEBUG_PMKPC
 debugf("{main} usize = '%d'", da_usize(gdata.pda));

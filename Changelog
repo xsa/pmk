@@ -2,6 +2,7 @@
  * added support for --atleast-pkgconfig-version in pmkpc.
  * added man page for pmkpc.
  * added missing checks for hash_update* almost everywhere.
+ * implemented --list-all in pmkpc.
 
 25 Jan 2004 sourceforge
  * repaired developer cvs server

@@ -230,8 +230,7 @@ bool scan_dir(char *dir, pkgdata *ppd) {
 				strlcat(fpath, pstr, sizeof(fpath));
 
 				hash_update_dup(ppd->files, buf, fpath);
-				/* XXX should use hash_add_dup */
-				/* and detect if the package has already been detected */
+				/* XXX detect if the package has already been detected ? */
 
 #ifdef PKGCFG_DEBUG
 debugf("add module '%s' with file '%s'", buf, pstr);
