@@ -8,6 +8,7 @@ CFLAGS+=	-Wall
 #CFLAGS+=	-ansi -pedantic
 
 LDFLAGS?=
+DEBUG?=		-g
 
 #LINT_TARGET=	da_test.c
 
