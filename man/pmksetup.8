@@ -37,9 +37,12 @@
 .Sh SYNOPSIS
 .Nm pmksetup
 .Bk -words
-.Op Fl hvV
+.Op Fl hVv
 .Op Fl r Ar variable
-.Op Fl u Ar variable="value"
+.Xo
+.Oo Fl u
+.Ar variable Ns = Ns Ar value Oc
+.Xc
 .Ek
 .Sh DESCRIPTION
 The
@@ -64,15 +67,15 @@ Remove the given variable from
 .Xr pmk.conf 5
 if its value isn't static.
 Data gathering is skipped by this option.
-.It Fl u Ar variable="value"
+.It Fl u Ar variable Ns = Ns Ar value
 Add or update existing variable from
 .Xr pmk.conf 5
 if its value isn't static.
 Data gathering is skipped by this option.
-.It Fl v
-Display the version number.
 .It Fl V
 Verbose, display debugging messages.
+.It Fl v
+Display the version number.
 .El
 .Sh FILES
 .Bl -tag -width Ds
