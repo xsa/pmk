@@ -4,6 +4,7 @@
  * more autoconf compat.
  * added target for pmkinstall in Makefile.pmk.
  * updated Makefile.
+ * fixed missing '/' in pmkscan.h.
 
 06 Oct 2003 mipsator
  * finished addition of third license clause.
