@@ -1,3 +1,6 @@
+10 Feb 2004 mipsator
+ * Added 2 sections to the tutorial.
+
 09 Feb 2004 mipsator
  * rewritten pmkinstall to permit multiple directory creation.
  * updated pmkinstall man page.
