@@ -66,6 +66,11 @@ char *cxx_file_ext[NB_CXX_FILE_EXT] = {
 	"h++"
 };
 
+
+extern char	*optarg;
+extern int	 optind;
+
+
 /*
 	parse data from PMKSCAN_DATA file
 
