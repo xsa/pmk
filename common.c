@@ -54,6 +54,8 @@
 #include "dynarray.h"
 #include "common.h"
 
+#define MKVAR_FILE	"make_var_result"
+
 
 /*
 	get a line from a file and remove newline character
@@ -151,7 +153,7 @@ bool get_make_var(char *varname, char *result, int rsize) {
 		   /!\ should check content of VARNAME, could result
 		   	in a security breach.
 		*/
-		fprintf(mfp, "all:\n\t@echo \"$(%s)\"", varname);
+		fprintf(mfp, "all:\n\t@echo \"$(%s)\" > %s", varname, MKVAR_FILE);
 		fclose(mfp);
 	} else {
 		fprintf(stderr, "Failed to open %s\n", mfn);
@@ -159,19 +161,34 @@ bool get_make_var(char *varname, char *result, int rsize) {
 	}
 
 	snprintf(varstr, sizeof(varstr), "/usr/bin/make -f %s", mfn);
-	tfp = popen(varstr, "r");
-	if (tfp != NULL) {
-		/* catch output of make */
-		get_line(tfp, result, rsize);
-		fclose(tfp);
+	if (system(varstr) == 0) {
+		tfp = fopen(MKVAR_FILE, "r");
+		if (tfp != NULL) {
+			/* catch output of make */
+			if (get_line(tfp, result, rsize) == false) {
+				errorf("failed to get result from %s", varstr);
+				rval = false;
+			}
+			fclose(tfp);
 
-		rval = true;
+			rval = true;
+		} else {
+			errorf("failed to get result from %s", varstr);
+			rval = false;
+		}
 	} else {
-		fprintf(stderr, "Failed to exec %s\n", varstr);
+		errorf("failed to execute %s", varstr);
 		rval = false;
 	}
 
+
 	if (unlink(mfn) == -1) {
+		/* cannot remove temporary file */
+		fprintf(stderr, "Cannot remove temporary file: %s : %s", 
+			mfn, strerror(errno));
+	}
+
+	if (unlink(MKVAR_FILE) == -1) {
 		/* cannot remove temporary file */
 		fprintf(stderr, "Cannot remove temporary file: %s : %s", 
 			mfn, strerror(errno));
