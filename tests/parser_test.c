@@ -5,14 +5,16 @@
 /* parser engine test */
 
 #include <stdio.h>
-#include "../common.c"
-#include "../dynarray.c"
-#include "../hash.c"
-#include "../pmk_obj.c"
-#include "../func.c"
 #include "../autoconf.c"
-#include "../pathtools.c"
+#include "../common.c"
+#include "../detect.c"
+#include "../dynarray.c"
+#include "../func.c"
 #include "../functool.c"
+#include "../hash.c"
+#include "../pathtools.c"
+#include "../pmk_obj.c"
+#include "../pkgconfig.c"
 
 #define DEBUG_PRS	1
 #include "../parse.c"
