@@ -363,7 +363,7 @@ bool depend_check(htable *ht, char *deplst) {
 	/* check labels one by one */
 	for (i = 0 ; (i < da_usize(da)) && (rval == true) ; i++) {
 		if (label_check(ht, da_idx(da, i)) == false)
-			rval == false;
+			rval = false;
 	}
 	
 	return(rval);
