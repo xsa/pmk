@@ -11,21 +11,27 @@
 .Sh SYNOPSIS
 .Nm
 .Bk -words
-.Op Fl hv
+.Op Fl hmprv
 .Op Ar path
 .Ek
 
 .Sh DESCRIPTION
 .Nm
-is a tool which scans the sources for registered data (see pmkscan.dat)
-and create a
+is a tool which scans the sources with the intention to generate a
 .Xr pmkfile 5
-template (named pmkfile.scan) containing the result of the scan.
+template (named pmkfile.scan), a makefile template (named Makefile.scan)
+or both.
 .Pp
 The options are as follows:
 .Bl -tag -width Ds
 .It Fl h
 Display usage.
+.It Fl m
+Generate a Makefile template.
+.It Fl p
+Generate a pmkfile template.
+.It Fl r
+Recursive scan.
 .It Fl v
 Display the version number.
 .El
