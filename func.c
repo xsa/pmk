@@ -54,146 +54,146 @@
 
 
 /* common required options */
-char	*req_name[] = {
-	KW_OPT_NAME
+kw_t	req_name[] = {
+		{KW_OPT_NAME,	PO_STRING}
 };
 
 /* CHECK_BIN options */
-char	*opt_chkbin[] = {
-	KW_OPT_DEFS,
-	KW_OPT_DEPEND,
-	KW_OPT_REQUIRED,
-	KW_OPT_VARIABLE
+kw_t	opt_chkbin[] = {
+		{KW_OPT_DEFS,		PO_LIST},
+		{KW_OPT_DEPEND,		PO_LIST},
+		{KW_OPT_REQUIRED,	PO_BOOL | PO_STRING},
+		{KW_OPT_VARIABLE,	PO_STRING}
 };
 
 kwopt_t	kw_chkbin = {
 	req_name,
-	sizeof(req_name) / sizeof(char *),
+	sizeof(req_name) / sizeof(kw_t),
 	opt_chkbin,
-	sizeof(opt_chkbin) / sizeof(char *)
+	sizeof(opt_chkbin) / sizeof(kw_t)
 };
 
 /* CHECK_HEADER options */
-char	*opt_chkhdr[] = {
-	"CFLAGS",
-	KW_OPT_DEFS,
-	KW_OPT_DEPEND,
-	"FUNCTION",
-	"LANG",
-	"MACRO",
-	KW_OPT_REQUIRED
+kw_t	opt_chkhdr[] = {
+		{KW_OPT_CFLAGS,		PO_STRING},
+		{KW_OPT_DEFS,		PO_LIST},
+		{KW_OPT_DEPEND,		PO_LIST},
+		{KW_OPT_FUNCTION,	PO_STRING | PO_LIST},
+		{"LANG",		PO_STRING},
+		{KW_OPT_MACRO,		PO_LIST},
+		{KW_OPT_REQUIRED,	PO_BOOL | PO_STRING}
 };
 
 kwopt_t	kw_chkhdr = {
 	req_name,
-	sizeof(req_name) / sizeof(char *),
+	sizeof(req_name) / sizeof(kw_t),
 	opt_chkhdr,
-	sizeof(opt_chkhdr) / sizeof(char *)
+	sizeof(opt_chkhdr) / sizeof(kw_t)
 };
 
 /* CHECK_LIB options */
-char	*opt_chklib[] = {
-	KW_OPT_DEFS,
-	KW_OPT_DEPEND,
-	"FUNCTION",
-	"LANG",
-	"LIBS",
-	"MACRO",
-	KW_OPT_REQUIRED
+kw_t	opt_chklib[] = {
+		{KW_OPT_DEFS,		PO_LIST},
+		{KW_OPT_DEPEND,		PO_LIST},
+		{KW_OPT_FUNCTION,	PO_STRING | PO_LIST},
+		{"LANG",		PO_STRING},
+		{KW_OPT_LIBS,		PO_STRING},
+		{KW_OPT_MACRO,		PO_LIST},
+		{KW_OPT_REQUIRED,	PO_BOOL | PO_STRING}
 };
 
 kwopt_t	kw_chklib = {
 	req_name,
-	sizeof(req_name) / sizeof(char *),
+	sizeof(req_name) / sizeof(kw_t),
 	opt_chklib,
-	sizeof(opt_chklib) / sizeof(char *)
+	sizeof(opt_chklib) / sizeof(kw_t)
 };
 
 /* CHECK_CONFIG options */
-char	*opt_chkcfg[] = {
-	KW_OPT_DEFS,
-	KW_OPT_DEPEND,
-	"CFLAGS",
-	"LIBS",
-	KW_OPT_REQUIRED,
-	KW_OPT_VARIABLE,
-	KW_OPT_VERSION
+kw_t	opt_chkcfg[] = {
+		{KW_OPT_DEFS,		PO_LIST},
+		{KW_OPT_DEPEND,		PO_LIST},
+		{KW_OPT_CFLAGS,		PO_STRING},
+		{KW_OPT_LIBS,		PO_STRING},
+		{KW_OPT_REQUIRED,	PO_BOOL | PO_STRING},
+		{KW_OPT_VARIABLE,	PO_STRING},
+		{KW_OPT_VERSION,	PO_STRING}
 };
 
 kwopt_t	kw_chkcfg = {
 	req_name,
-	sizeof(req_name) / sizeof(char *),
+	sizeof(req_name) / sizeof(kw_t),
 	opt_chkcfg,
-	sizeof(opt_chkcfg) / sizeof(char *)
+	sizeof(opt_chkcfg) / sizeof(kw_t)
 };
 
 /* CHECK_PKG_CONFIG options */
-char	*opt_chkpc[] = {
-	KW_OPT_DEFS,
-	KW_OPT_DEPEND,
-	"CFLAGS",
-	"LIBS",
-	KW_OPT_REQUIRED,
-	KW_OPT_VERSION
+kw_t	opt_chkpc[] = {
+		{KW_OPT_DEFS,		PO_LIST},
+		{KW_OPT_DEPEND,		PO_LIST},
+		{KW_OPT_CFLAGS,		PO_STRING},
+		{KW_OPT_LIBS,		PO_STRING},
+		{KW_OPT_REQUIRED,	PO_BOOL | PO_STRING},
+		{KW_OPT_VERSION,	PO_STRING}
 };
 
 kwopt_t	kw_chkpc = {
 	req_name,
-	sizeof(req_name) / sizeof(char *),
+	sizeof(req_name) / sizeof(kw_t),
 	opt_chkpc,
-	sizeof(opt_chkpc) / sizeof(char *)
+	sizeof(opt_chkpc) / sizeof(kw_t)
 };
 
 /* CHECK_TYPE options */
-char	*opt_chktyp[] = {
-	KW_OPT_DEFS,
-	KW_OPT_DEPEND,
-	KW_OPT_HEADER,
-	"LANG",
-	"MEMBER",
-	KW_OPT_REQUIRED
+kw_t	opt_chktyp[] = {
+		{KW_OPT_DEFS,		PO_LIST},
+		{KW_OPT_DEPEND,		PO_LIST},
+		{KW_OPT_HEADER,		PO_STRING},
+		{"LANG",		PO_STRING},
+		{"MEMBER",		PO_STRING},
+		{KW_OPT_REQUIRED,	PO_BOOL | PO_STRING}
 };
 
 kwopt_t	kw_chktyp = {
 	req_name,
-	sizeof(req_name) / sizeof(char *),
+	sizeof(req_name) / sizeof(kw_t),
 	opt_chktyp,
-	sizeof(opt_chktyp) / sizeof(char *)
+	sizeof(opt_chktyp) / sizeof(kw_t)
 };
 
 /* CHECK_VARIABLE options */
-char	*opt_chkvar[] = {
-	KW_OPT_DEFS,
-	KW_OPT_DEPEND,
-	KW_OPT_REQUIRED,
-	KW_OPT_VALUE
+kw_t	opt_chkvar[] = {
+		{KW_OPT_DEFS,		PO_LIST},
+		{KW_OPT_DEPEND,		PO_LIST},
+		{KW_OPT_REQUIRED,	PO_BOOL | PO_STRING},
+		{KW_OPT_VALUE,		PO_STRING}
 };
 
 kwopt_t	kw_chkvar = {
 	req_name,
-	sizeof(req_name) / sizeof(char *),
+	sizeof(req_name) / sizeof(kw_t),
 	opt_chkvar,
-	sizeof(opt_chkvar) / sizeof(char *)
+	sizeof(opt_chkvar) / sizeof(kw_t)
 };
 
 /* BUILD_SHLIB_NAME options */
 
-char	*req_bldshl[] = {
-	KW_OPT_NAME,
-	KW_OPT_MAJOR,
-	KW_OPT_MINOR
+kw_t	req_bldshl[] = {
+		{KW_OPT_NAME,	PO_STRING},
+		{KW_OPT_MAJOR,	PO_STRING},
+		{KW_OPT_MINOR,	PO_STRING}
 };
 
-char	*opt_bldshl	[] = {
-	KW_SL_VERS_FULL,
-	KW_SL_VERS_NONE
+kw_t	opt_bldshl	[] = {
+		{KW_SL_VERS_FULL,	PO_STRING},
+		{KW_SL_VERS_NONE,	PO_STRING}
 };
 
 kwopt_t	kw_bldshl = {
 	req_bldshl,
-	sizeof(req_bldshl) / sizeof(char *),
+	sizeof(req_bldshl) / sizeof(kw_t),
 	opt_bldshl,
-	sizeof(opt_bldshl) / sizeof(char *)
+	sizeof(opt_bldshl) / sizeof(kw_t)
 };
 
 /* keyword list */

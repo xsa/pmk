@@ -145,6 +145,7 @@
 #define KW_OPT_DEFS		"DEFS"
 #define KW_OPT_FUNCTION		"FUNCTION"
 #define KW_OPT_HEADER		"HEADER"
+#define KW_OPT_CFLAGS		"CFLAGS"
 #define KW_OPT_LIBS		"LIBS"
 #define KW_OPT_MACRO		"MACRO"
 #define KW_OPT_MAJOR		"MAJOR"

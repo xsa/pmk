@@ -1,3 +1,6 @@
+20 Mar 2005 mipsator
+ * improved the parser to allow type checking of options.
+
 17 Mar 2005 mreindl
  * pmkcfg.sh: fall back to 'cc -E' when cpp isn't available and obey $CPP when
    set.
