@@ -441,7 +441,6 @@ fi
 # cc check
 #
 
-
 if [ -z "$CC" ]; then
 	if check_binary cc; then
 		CC="cc"
@@ -457,6 +456,14 @@ fi
 #
 # cpp check
 #
+# 'cc -E' is the C99 standard for preprocessing C-language source files.
+# See: http://www.opengroup.org/onlinepubs/009695399/utilities/c99.html
+#
+# However, the results are unspecified for assembler source files.
+# Gcc has its own conventions for preprocessing assembler files, only the cpp
+# binary preprocesses assembler files at any time. In gcc, 'cc -E' only
+# processes assembler files which end in '.S'. To work around we first look
+# for the cpp binary and fall back to 'cc -E' if not successful.
 
 if [ -z "$CPP" ]; then
 	if check_binary cpp; then
