@@ -161,7 +161,11 @@ char *regex_check(char *pattern, char *line) {
 
 	if (regexec(&re, line, 2, rm, 0) == 0) {
 		/* copy header name */
-		strlcpy(idtf, (char *) (line + rm[1].rm_so), (size_t) (rm[1].rm_eo - rm[1].rm_so + 1));
+		if (strlcpy_b(idtf, (char *) (line + rm[1].rm_so),
+				(size_t) (rm[1].rm_eo - rm[1].rm_so + 1)) == false) {
+			regfree(&re);
+			return(NULL);
+		}
 
 		rval =idtf;
 	} else {
@@ -221,7 +225,7 @@ bool idtf_check(char *idtf, htable *ht_fam, htable *phtgen, htable *pht_md) {
 				case PO_LIST :
 					/* process a list */
 					da = po_get_list(po); /* XXX also pval */
-					strlcpy(buf, "", sizeof(buf));
+					strlcpy(buf, "", sizeof(buf)); /* no check */
 
 					p = hash_get(pht_md, "LANG"); /* XXX check */
 
@@ -235,8 +239,9 @@ bool idtf_check(char *idtf, htable *ht_fam, htable *phtgen, htable *pht_md) {
 						/*if (strncmp(p, "LANG=", 6) == 0) {   */
 						/*        strlcat(buf, p, sizeof(buf));*/
 						/*}                                    */
-						strlcat(buf, pval, sizeof(buf));
-						strlcat(buf, "\n", sizeof(buf));
+						strlcat(buf, pval, sizeof(buf)); /* no check */
+						if (strlcat_b(buf, "\n", sizeof(buf)) == false)
+							return(false);
 					}
 
 					hash_update(phtgen, idtf, po_mk_str(buf));
@@ -372,7 +377,10 @@ void dir_recurse(dynary *pda, char *path) {
 			if (pde != NULL) {
 				/* avoid entries starting by '.' */
 				if (pde->d_name[0] != '.') {
-					snprintf(buf, sizeof(buf), "%s/%s", path, pde->d_name);
+					snprintf(buf, sizeof(buf),
+						"%s/%s", path,
+						pde->d_name); /* XXX check ? */
+
 					/* try to recurse the resulting path */
 					dir_recurse(pda, buf);
 				}
@@ -406,7 +414,10 @@ bool dir_explore(htable *pht, scandata *psd, char *path) {
 
 	/* globbing c files */
 	for (i = 0 ; i < NB_C_FILE_EXT ; i++) {
-		snprintf(buf, sizeof(buf), "%s/*.%s", path, c_file_ext[i]);
+		if (snprintf_b(buf, sizeof(buf), "%s/*.%s",
+					path, c_file_ext[i]) == false)
+			return(false);
+
 		if (i == 0) {
 			r = glob(buf, GLOB_NOSORT, NULL, &g);
 		} else {
@@ -428,7 +439,10 @@ bool dir_explore(htable *pht, scandata *psd, char *path) {
 
 	/* globbing c++ files */
 	for (i = 0 ; i < NB_CXX_FILE_EXT ; i++) {
-		snprintf(buf, sizeof(buf), "%s/*.%s", path, cxx_file_ext[i]);
+		if (snprintf_b(buf, sizeof(buf), "%s/*.%s",
+					path, cxx_file_ext[i]) == false)
+			return(false);
+
 		if (i == 0) {
 			r = glob(buf, GLOB_NOSORT, NULL, &g);
 		} else {
@@ -537,9 +551,12 @@ int main(int argc, char *argv[]) {
 
 	if (argc != 0) {
 		/* use optional path */
-		strlcpy(buf, argv[0], sizeof(buf));
+		if (strlcpy_b(buf, argv[0], sizeof(buf)) == false) {
+			errorf("failed to set buffer.");
+			exit(EXIT_FAILURE);
+		}
 	} else {
-		strlcpy(buf, ".", sizeof(buf));
+		strlcpy(buf, ".", sizeof(buf)); /* should not fail */
 	}
 
 	printf("Ok\n\n");

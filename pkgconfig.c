@@ -226,13 +226,23 @@ bool scan_dir(char *dir, pkgdata *ppd) {
 						&& (pstr[l-1] == 'c')) {
 
 				/* build pkg name */
-				strlcpy(buf, pstr, sizeof(buf));
+				if (strlcpy_b(buf, pstr,
+						sizeof(buf)) == false) {
+					/* XXX err msg ? */
+					closedir(pdir);
+					return(false);
+				}
 				buf[l-3] = CHAR_EOS;
 
 				/* build full path of pc file */
-				strlcpy(fpath, dir, sizeof(fpath));
-				strlcat(fpath, "/", sizeof(fpath));
-				strlcat(fpath, pstr, sizeof(fpath));
+				strlcpy(fpath, dir, sizeof(fpath)); /* no check */
+				strlcat(fpath, "/", sizeof(fpath)); /* no check */
+				if (strlcat_b(fpath, pstr,
+						sizeof(fpath)) == false) {
+					/* XXX err msg ? */
+					closedir(pdir);
+					return(false);
+				}
 
 				hash_update_dup(ppd->files, buf, fpath);
 				/* XXX detect if the package has already been detected ? */
@@ -243,6 +253,8 @@ debugf("add module '%s' with file '%s'", buf, pstr);
 			}
 		}
 	} while (pde != NULL);
+
+	closedir(pdir);
 
 	return(true);
 }
@@ -670,7 +682,9 @@ debugf("single_append '%s', '%s'", ostr, astr);
 		if (buf == NULL)
 			return(NULL);
 
-		snprintf(buf, s, "%s %s", ostr, astr);
+		if (snprintf_b(buf, s, "%s %s", ostr, astr) == false) {
+			return(NULL);
+		}
 
 		free(ostr);
 

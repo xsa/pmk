@@ -76,6 +76,9 @@
 #define PMK_LOG		"pmk" PMK_LOG_EXT
 #define PMK_BUILD_LOG	"pmk_build" PMK_LOG_EXT
 
+/* error messages */
+#define PMK_ERR_OVRFLOW	"buffer overflow."
+#define PMK_ERR_BLDLOG	"failed to set buildlog output."
 
 /* pmk data */
 typedef struct {
