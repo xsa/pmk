@@ -4,6 +4,7 @@
  * set option keywords as defines.
  * modified str_to_def() to use static buffer.
  * added record_def_data() that generate both DEF__* and HAVE_* records.
+ * better handling of the additional defines.
 
 08 Aug 2004 mreindl
  * added -fPIC in SLLDFLAGS for gcc.
