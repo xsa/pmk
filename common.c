@@ -497,7 +497,7 @@ bool copy_text_file(char *src_file, char *dst_file) {
 */
 
 bool fcopy(char *src, char *dst, mode_t mode) {
-	static char	cbuf[S_BLKSIZE];
+	char		cbuf[S_BLKSIZE];
 	bool		do_loop = true,
 			rval = true;
 	int		src_fd,
