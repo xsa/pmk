@@ -51,12 +51,11 @@ typedef struct {
 #define PO_HASH		3
 
 
-pmkobj	*mk_obj_str(char *);
-pmkobj	*mk_obj_list(dynary *);
-pmkobj	*mk_obj_hash(htable *);
-/*pmkobj	*mk_obj_bool(bool);*/
-potype	get_obj_type(pmkobj *);
-void	*get_obj_data(pmkobj *);
-void	 obj_free(pmkobj *);
+pmkobj	*po_mk_str(char *);
+pmkobj	*po_mk_list(dynary *);
+pmkobj	*po_mk_hash(htable *);
+potype	 po_get_type(pmkobj *);
+void	*po_get_data(pmkobj *);
+void	 po_free(pmkobj *);
 
 #endif /* _PMK_OBJECT_H_ */

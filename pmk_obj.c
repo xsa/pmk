@@ -46,7 +46,7 @@
 	return : objet
 */
 
-pmkobj *mk_obj_str(char *str) {
+pmkobj *po_mk_str(char *str) {
 	pmkobj	*p;
 
 	p = (pmkobj *) malloc(sizeof(pmkobj));
@@ -66,7 +66,7 @@ pmkobj *mk_obj_str(char *str) {
 	return : object
 */
 
-pmkobj *mk_obj_list(dynary *pda) {
+pmkobj *po_mk_list(dynary *pda) {
 	pmkobj	*p;
 
 	p = (pmkobj *) malloc(sizeof(pmkobj));
@@ -86,7 +86,7 @@ pmkobj *mk_obj_list(dynary *pda) {
 	return : object
 */
 
-pmkobj *mk_obj_hash(htable *pht) {
+pmkobj *po_mk_hash(htable *pht) {
 	pmkobj	*p;
 
 	p = (pmkobj *) malloc(sizeof(pmkobj));
@@ -102,7 +102,7 @@ pmkobj *mk_obj_hash(htable *pht) {
 	XXX
 */
 
-potype get_obj_type(pmkobj *po) {
+potype po_get_type(pmkobj *po) {
 	if (po != NULL) {
 		return(po->type);
 	} else {
@@ -114,7 +114,7 @@ potype get_obj_type(pmkobj *po) {
 	XXX
 */
 
-void *get_obj_data(pmkobj *po) {
+void *po_get_data(pmkobj *po) {
 	if (po != NULL) {
 		return(po->data);
 	} else {
@@ -126,7 +126,7 @@ void *get_obj_data(pmkobj *po) {
 	XXX
 */
 
-void obj_free(pmkobj *po) {
+void po_free(pmkobj *po) {
 	if (po != NULL) {
 		switch (po->type) {
 			case PO_NULL :
