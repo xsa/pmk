@@ -198,7 +198,7 @@ int hash_destroy(htable *pht) {
 		t = NULL;
 		while (p != NULL) {
 			t = p->next;
-			free(p);
+			hash_free_hcell(p);
 			c++; /* removed one more key */
 			p = t;
 		}
@@ -258,7 +258,7 @@ int hash_add(htable *pht, char *key, void *value) {
 
 	/* if okay put key & value in a new cell */
 	if (strlcpy(phc->key, key, sizeof(phc->key)) >= sizeof(phc->key)) {
-		free(phc);
+		hash_free_hcell(phc);
 		return(HASH_ADD_FAIL);
 	}
 	phc->value = value;
@@ -308,9 +308,9 @@ int hash_add_cell(hnode *phn, hcell *phc) {
 			if (strncmp(phc->key, np->key, sizeof(phc->key)) == 0) {
 				/* key already exists */
 				np->value = phc->value;
-				phc->value = NULL; /* XXX useful ??? */
+				phc->value = NULL; /* XXX useless ??? */
 
-				/* new cell no longer needed */
+				/* new cell no longer needed, free struct only */
 				free(phc);
 
 				return(HASH_ADD_UPDT);
@@ -448,7 +448,7 @@ void hash_delete(htable *pht, char *key) {
 					pht->nodetab[hash].last = last;
 				}
 			}
-			free(phc);
+			hash_free_hcell(phc);
 			phc = NULL;
 
 			pht->count--;
@@ -574,6 +574,7 @@ hkeys *hash_keys(htable *pht) {
 	
 			return(phk);
 		} else {
+			/* free allocated space only */
 			free(phk);
 		}
 	}
