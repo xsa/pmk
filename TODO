@@ -53,7 +53,7 @@ pmksetup:
 			- sparc support
 			- sparc64 support (priviledged)
 			+ alpha support
-			- ia64 support
+			~ ia64 support (cpu class, std vendor ?)
 			! man page update
 	-	cpu optimisation for compiler 
 	-	option to append to variable of pmk.conf
@@ -64,6 +64,8 @@ pmksetup:
 			- long double (pmk ?)
 			- better check for install ?
 			- others ?
+	~	privilege separation (PRIVSEP branch)
+	-	escape comma in PATH_BIN (or wait for PATH_BIN to be converted as a list)
 
 
 pmkscan
