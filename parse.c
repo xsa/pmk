@@ -176,7 +176,7 @@ prscell *prscell_init(int token, int type, int subtoken) {
 				break;
 
 			case PRS_KW_CELL :
-				pht = hash_init_adv(MAX_CMD_OPT, (void (*)(void *))po_free,
+				pht = hash_init_adv(MAX_CMD_OPT, (void *(*)(void *))po_dup, (void (*)(void *))po_free,
 					(void *(*)(void *, void *, void *))po_append);
 				if (pht != NULL) {
 					pcell->data = pht;
@@ -291,13 +291,13 @@ htable *keyword_hash(prskw kwtab[], int nbkw) {
 	int	 i;
 	prskw	*pkw;
 
-	phkw = hash_init_adv(nbkw, free, NULL);
+	phkw = hash_init_adv(nbkw, (void *(*)(void *))strdup, free, NULL);
 	if (phkw != NULL) {
 		/* fill keywords hash */
 		for(i = 0 ; i < nbkw ; i++) {
 			pkw = (prskw *) malloc(sizeof(prskw));
 			bcopy(&kwtab[i], pkw, sizeof(prskw));
-			if (hash_add(phkw, kwtab[i].kw, pkw) == HASH_ADD_FAIL) { /* no need to strdup */
+			if (hash_update(phkw, kwtab[i].kw, pkw) == HASH_ADD_FAIL) { /* no need to strdup */
 				free(pkw);
 				errorf("hash failure");
 				exit(EXIT_FAILURE);
@@ -1018,7 +1018,7 @@ bool parse_command(FILE *fp, prsdata *pdata, prscell *pcell) {
 					debugf("recording '%s' key", opt.key);
 #endif
 
-					if (hash_add(pcell->data, opt.key, opt.value) == HASH_ADD_FAIL) { /* no need to strdup */
+					if (hash_update(pcell->data, opt.key, opt.value) == HASH_ADD_FAIL) { /* no need to strdup */
 						strlcpy(parse_err, PRS_ERR_HASH, sizeof(parse_err));
 						return(false);
 					}

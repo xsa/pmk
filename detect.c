@@ -118,7 +118,7 @@ bool add_compiler(comp_data *pcd, htable *pht) {
 		pcell->slflags = strdup(pstr);
 	}
 
-	hash_add(pcd->cht, pcell->c_id, pcell); /* no need to strdup */
+	hash_update(pcd->cht, pcell->c_id, pcell); /* no need to strdup */
 
 	return(true);
 }

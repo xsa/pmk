@@ -202,7 +202,7 @@ void idtf_check(char *idtf, htable *ht_fam, htable *phtgen, char *langstr) {
 					}
 		
 					/* record header data */
-					hash_add(phtgen, idtf, po_mk_str(pval));
+					hash_update(phtgen, idtf, po_mk_str(pval));
 					free(pval);
 					break;
 
@@ -219,7 +219,7 @@ void idtf_check(char *idtf, htable *ht_fam, htable *phtgen, char *langstr) {
 						strlcat(buf, "\n", sizeof(buf));
 					}
 
-					hash_add(phtgen, idtf, po_mk_str(buf));
+					hash_update(phtgen, idtf, po_mk_str(buf));
 					break;
 
 				default :
