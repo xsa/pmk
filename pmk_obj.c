@@ -39,6 +39,34 @@
 
 
 /*
+	make bool object
+
+	value : boolean to objectify
+
+	return : objet
+*/
+
+pmkobj *po_mk_bool(bool value) {
+	bool	*pb;
+	pmkobj	*po;
+
+	po = (pmkobj *) malloc(sizeof(pmkobj));
+	if (po != NULL) {
+		po->type = PO_BOOL;
+		pb = (bool *) malloc(sizeof(bool));
+		if (pb == NULL) {
+			free(po);
+			return(NULL);
+		}
+
+		*pb = value;
+		po->data = pb;
+	}
+
+	return(po);
+}
+
+/*
 	make string object
 
 	str : string to objectify
@@ -166,6 +194,23 @@ void *po_get_data(pmkobj *po) {
 	return : string or NULL
 */
 
+bool po_get_bool(pmkobj *po) {
+	if (po != NULL) {
+		if (po->type == PO_BOOL) {
+			return(*(bool *) po->data);
+		}
+	}
+	return(NULL);
+}
+
+/*
+	get data from string object
+
+	po : object
+
+	return : string or NULL
+*/
+
 char *po_get_str(pmkobj *po) {
 	if (po != NULL) {
 		if (po->type == PO_STRING) {
@@ -204,6 +249,9 @@ void po_free(pmkobj *po) {
 	if (po != NULL) {
 		switch (po->type) {
 			case PO_NULL :
+				break;
+			case PO_BOOL :
+				free(po->data);
 				break;
 			case PO_STRING :
 				free(po->data);
@@ -258,6 +306,11 @@ pmkobj *po_append(void *orig, void *value, void *misc) {
 	}
 
 	switch (po_orig->type) {
+		case PO_BOOL :
+			/* not supported */
+			return(NULL);
+			break;
+
 		case PO_STRING :
 			/* compute needed space */
 			if (misc != NULL) {
@@ -295,6 +348,7 @@ pmkobj *po_append(void *orig, void *value, void *misc) {
 			free(value);
 			free(pbuf);
 			break;
+
 		case PO_LIST :
 			/* XXX TODO */
 			return(NULL);

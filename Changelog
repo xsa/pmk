@@ -1,3 +1,10 @@
+11 Sep 2003 mipsator
+ * added bool object in pmk objects.
+ * added bool object support in parser.
+ * updated require_check() to support bool object.
+ * updated pmkfile.
+ * fixed pmkfile sample.
+
 10 Sep 2003 mipsator
  * added parse_key() and parse_data() to enforce syntax checking.
  * removed parse_word which became useless.

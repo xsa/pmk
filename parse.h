@@ -53,6 +53,10 @@
 #define PMK_CHAR_ASSIGN		'='
 #define PMK_CHAR_ESCAPE		'\\'
 
+#define PMK_BOOL_TRUE		"TRUE"
+#define PMK_BOOL_FALSE		"FALSE"
+
+#define PRS_ERR_ALLOC		"memory allocation failed."
 #define PRS_ERR_HASH		"hash add failure."
 #define PRS_ERR_DYNARY		"dynary push failure."
 #define PRS_ERR_OVERFLOW	"line too long."
@@ -111,6 +115,7 @@ void	 prscell_destroy(prscell *);
 htable	*keyword_hash(prskw [], int);
 char	*skip_blank(char *pstr);
 char	*parse_identifier(char *, char *, size_t);
+char	*parse_bool(char *, pmkobj *, size_t);
 char	*parse_quoted(char *, pmkobj *, size_t);
 char	*parse_list(char *, pmkobj *, size_t);
 char	*parse_key(char *, pmkobj *, size_t);
