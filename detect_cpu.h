@@ -89,6 +89,7 @@ unsigned char	 arch_name_to_id(char *);
 
 #if defined(ARCH_X86_32) || defined(ARCH_X86_64)
 
+/* register masks */
 #define X86_CPU_MASK_EXTFAM	0x0ff00000
 #define X86_CPU_MASK_EXTMOD	0x000f0000
 #define X86_CPU_MASK_TYPE	0x0000f000
@@ -228,6 +229,45 @@ typedef struct {
 bool alpha_set_cpu_data(prsdata *, htable *);
 
 #endif /* ARCH_ALPHA */
+
+
+/******************
+ * ia64 specific *
+ ******************/
+
+#if defined(ARCH_IA64)
+
+/* register masks */
+#define IA64_CPU_MASK_LEVEL	0x000000000ff
+#define IA64_CPU_MASK_REVISION	0x0000000ff00
+#define IA64_CPU_MASK_MODEL	0x00000ff0000
+#define IA64_CPU_MASK_FAMILY	0x000ff000000
+#define IA64_CPU_MASK_ARCHREV	0x0ff00000000
+
+/* feature register */
+#define IA64_CPU_MASK_FEAT_LB	0x0000000000000001	/* bit  0 */
+#define IA64_CPU_MASK_FEAT_SD	0x0000000000000002	/* bit  1 */
+#define IA64_CPU_MASK_FEAT_AO	0x0000000000000004	/* bit  2 */
+
+
+#define PMKCONF_HW_IA64_CPU_REVISION	"HW_IA64_CPU_REVISION"	/* revision */
+#define PMKCONF_HW_IA64_CPU_MODEL	"HW_IA64_CPU_MODEL"	/* model */
+#define PMKCONF_HW_IA64_CPU_FAMILY	"HW_IA64_CPU_FAMILY"	/* family */
+#define PMKCONF_HW_IA64_CPU_ARCHREV	"HW_IA64_CPU_ARCHREV"	/* architecture revision */
+#define PMKCONF_HW_IA64_CPU_FEATURES	"HW_IA64_CPU_FEATURES"	/* features */
+#define PMKCONF_HW_IA64_CPU_VENDOR	"HW_IA64_CPU_VENDOR"	/* vendor name */
+
+
+typedef struct {
+	uint64_t	 mask;
+	char		*descr;
+} ia64_cpu_feature;
+
+
+bool ia64_get_cpuid_data(prsdata *, htable *);
+
+#endif /* ARCH_IA64 */
+
 
 #endif /* _DETECT_CPU_H_ */
 

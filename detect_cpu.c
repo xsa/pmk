@@ -258,6 +258,16 @@ htable *arch_wrapper(prsdata *pdata, char *arch_name) {
 			return(NULL);
 #endif /* ARCH_ALPHA */
 			break;
+
+		case PMK_ARCH_IA_64 :
+#if defined(ARCH_IA64)
+			ia64_get_cpuid_data(pdata, pht); /* XXX */
+#else /* ARCH_IA64 */
+			errorf("architecture mismatch.");
+			return(NULL);
+#endif /* ARCH_IA64 */
+
+			break;
 	}
 
 	return(pht);
@@ -269,6 +279,7 @@ htable *arch_wrapper(prsdata *pdata, char *arch_name) {
  ****************/
 
 #if defined(ARCH_X86_32) || defined(ARCH_X86_64)
+
 x86_cpu_feature	x86_cpu_feat_reg1[] = {
 	{X86_CPU_MASK_FEAT_FPU,		"FPU"},
 	{X86_CPU_MASK_FEAT_VME,		"VME"},
@@ -645,7 +656,12 @@ alpha_cpu_feature	alpha_cpu_feat[] = {
 };
 int nb_feat = sizeof(alpha_cpu_feat) / sizeof(alpha_cpu_feature);
 
-/* XXX */
+/*
+	set alpha cpu data
+
+	pdata: parsing data structure
+	pht: data storage hash table
+*/
 bool alpha_set_cpu_data(prsdata *pdata, htable *pht) {
 	char		 buffer[16],
 			 feat_str[TMP_BUF_LEN] = "",
@@ -705,4 +721,104 @@ bool alpha_set_cpu_data(prsdata *pdata, htable *pht) {
 }
 
 #endif /* ARCH_ALPHA */
+
+
+/******************
+ * ia64 specific *
+ ******************/
+
+#if defined(ARCH_IA64)
+
+ia64_cpu_feature ia64_cpu_feat[] = {
+	{IA64_CPU_MASK_FEAT_LB,	"LB"},
+	{IA64_CPU_MASK_FEAT_SD,	"SD"},
+	{IA64_CPU_MASK_FEAT_AO,	"AO"}
+};
+size_t nb_feat = sizeof(ia64_cpu_feat) / sizeof(ia64_cpu_feature);
+
+
+/****
+ functions
+****/
+
+/*
+	XXX
+*/
+
+bool ia64_get_cpuid_data(prsdata *pdata, htable *pht) {
+	char		buffer[TMP_BUF_LEN];
+	uint64_t	regbuf[3],
+			level,
+			rslt;
+	unsigned int	i;
+
+	regbuf[0] = ia64_get_cpuid_register(0);
+	regbuf[1] = ia64_get_cpuid_register(1);
+	regbuf[2] = 0;
+	if (hash_update_dup(pht, PMKCONF_HW_IA64_CPU_VENDOR, regbuf) == HASH_ADD_FAIL)
+		return(false);
+	/*printf("cpuid register 0 = %x\n", regbuf[0]);*/
+	/*printf("cpuid register 1 = %x\n", regbuf[1]);*/
+	/*printf("vendor = '%s'\n", regbuf);           */
+
+	regbuf[0] = ia64_get_cpuid_register(3);
+	/*printf("cpuid register 3 = %x\n", regbuf[0]);*/
+
+	level = regbuf[0] & IA64_CPU_MASK_LEVEL;
+	/*printf("level = %x\n", level);*/
+
+	rslt = (regbuf[0] & IA64_CPU_MASK_REVISION) >> 8;
+	if (snprintf_b(buffer, sizeof(buffer), "%u", rslt) == false)
+		return(false);
+	if (hash_update_dup(pht, PMKCONF_HW_IA64_CPU_REVISION, buffer) == HASH_ADD_FAIL)
+		return(false);
+	/*printf("revision = %x\n", rslt);*/
+
+	rslt = (regbuf[0] & IA64_CPU_MASK_MODEL) >> 16;
+	if (snprintf_b(buffer, sizeof(buffer), "%u", rslt) == false)
+		return(false);
+	if (hash_update_dup(pht, PMKCONF_HW_IA64_CPU_MODEL, buffer) == HASH_ADD_FAIL)
+		return(false);
+	/*printf("model = %x\n", rslt);*/
+
+	rslt = (regbuf[0] & IA64_CPU_MASK_FAMILY) >> 24;
+	if (snprintf_b(buffer, sizeof(buffer), "%u", rslt) == false)
+		return(false);
+	if (hash_update_dup(pht, PMKCONF_HW_IA64_CPU_FAMILY, buffer) == HASH_ADD_FAIL)
+		return(false);
+	/*printf("family = %x\n", rslt);*/
+
+	rslt = (regbuf[0] & IA64_CPU_MASK_ARCHREV) >> 32;
+	if (snprintf_b(buffer, sizeof(buffer), "%u", rslt) == false)
+		return(false);
+	if (hash_update_dup(pht, PMKCONF_HW_IA64_CPU_ARCHREV, buffer) == HASH_ADD_FAIL)
+		return(false);
+	/*printf("archrev = %x\n", rslt);*/
+
+	if (level >= 0x04) {
+		/* getting feature register */
+		rslt = ia64_get_cpuid_register(4);
+		/*printf("cpuid register 4 = %x\n", regbuf[0]);*/
+
+		/* processing feature mask */
+		buffer[0] = CHAR_EOS;
+		for (i = 0 ; i < nb_feat ; i++) {
+			if ((rslt & ia64_cpu_feat[i].mask) != 0) {
+				strlcat(buffer, ia64_cpu_feat[i].descr,
+						sizeof(buffer)); /* no check */
+				if (strlcat_b(buffer, " ", sizeof(buffer)) == false)
+					return(false);
+			}
+		}
+		if (hash_update_dup(pht, PMKCONF_HW_IA64_CPU_FEATURES,
+					buffer) == HASH_ADD_FAIL)
+			return(false);
+	}
+
+	return(true);
+}
+
+#endif /* ARCH_IA64 */
+
+
 

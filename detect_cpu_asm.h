@@ -47,15 +47,15 @@
 
 #if defined(ARCH_X86_32) || defined(ARCH_X86_64)
 
-/* declare X86 assembly functions */
-extern uint32_t	 x86_check_cpuid_flag(void);
-extern void	 x86_exec_cpuid(uint32_t);
-
 /* declare X86 assembly variables */
 extern uint32_t	x86_cpu_reg_eax;
 extern uint32_t	x86_cpu_reg_ebx;
 extern uint32_t	x86_cpu_reg_ecx;
 extern uint32_t	x86_cpu_reg_edx;
+
+/* declare X86 assembly functions */
+extern uint32_t	 x86_check_cpuid_flag(void);
+extern void	 x86_exec_cpuid(uint32_t); /* cpuid function */
 
 #endif /* ARCH_X86_32 || ARCH_X86_64 */
 
@@ -64,10 +64,22 @@ extern uint32_t	x86_cpu_reg_edx;
 */
 
 #if defined(ARCH_ALPHA)
+
 uint64_t	alpha_exec_implver(void);
 uint64_t	alpha_exec_amask(void);
 
 #endif /* ARCH_ALPHA */
+
+/*
+	ia64 architecture
+*/
+
+#if defined(ARCH_IA64)
+
+uint64_t	ia64_get_cpuid_register(uint64_t); /* cpuid register */
+
+#endif /* ARCH_IA64 */
+
 
 #endif /* _DETECT_CPU_ASM_H_ */
 

@@ -215,6 +215,10 @@ x86_cpu_reg_edx:
 #endif /* ARCH_X86_32 || ARCH_X86_64 */
 
 
+/*
+ *	ALPHA code
+ */
+
 #if defined(ARCH_ALPHA)
 .text
         .globl alpha_exec_implver
@@ -223,7 +227,7 @@ alpha_exec_implver:
         .frame $30,0,$26,0
 $alpha_exec_implver..ng:
         .prologue 0
-        implver $0
+        implver $0		/* get implver value */
         ret $31,($26),1
         .end alpha_exec_implver
 
@@ -234,9 +238,28 @@ alpha_exec_amask:
         .frame $30,0,$26,0
 $alpha_exec_amask..ng:
         .prologue 0
-        lda $0,-1
-        amask $0,$0
+        lda $0,-1		/* set all bits to 1 */
+        amask $0,$0		/* get amask */
         ret $31,($26),1
         .end alpha_exec_amask
 
 #endif /* ARCH_ALPHA */
+
+/*
+ *	IA64 code
+ */
+
+#if defined(ARCH_IA64)
+.text
+
+	.globl ia64_get_cpuid_register
+	.proc ia64_get_cpuid_register
+ia64_get_cpuid_register:
+	.prologue
+	.body
+	mov r8 = cpuid[r32]	/* return cpuid register value in r8 */
+	br.ret.sptk.many b0
+	.endp ia64_get_cpuid_register
+
+#endif /* ARCH_IA64 */
+
