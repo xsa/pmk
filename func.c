@@ -761,7 +761,7 @@ bool pmk_check_config(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 	} else {
 		pmk_log("yes.\n");
 		/* recording path of config tool */
-		if (hash_update_dup(pgd->htab, varname, cfgpath) == HASH_ADD_FAIL) {
+		if (hash_update_dup(pgd->htab, cfgtool, cfgpath) == HASH_ADD_FAIL) {
 			errorf("hash error.");
 			return(false);
 		}
