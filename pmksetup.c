@@ -874,18 +874,6 @@ bool detection_loop(int argc, char *argv[]) {
 	argc -= optind;
 	argv += optind;
 
-
-	/* check if syconfdir exists */
-	if (dir_exists(CONFDIR) == false) {
-		verbosef("==> Creating '%s' directory.", CONFDIR);
-		if (mkdir(CONFDIR, S_IRWXU | S_IRGRP | S_IXGRP |
-						S_IROTH | S_IXOTH) != 0) {
-			errorf("cannot create '%s' directory : %s.",
-						CONFDIR, strerror(errno));
-			return(false);
-		}
-	}
-
 	if (process_clopts == false) {
 		/* standard behavior, gathering data */
 		if (gather_data(ht) == false)
@@ -996,13 +984,24 @@ void parent_loop(pid_t pid) {
 			exit(EXIT_FAILURE);
 		}
 
+		/* check if syconfdir exists */
+		if (access(CONFDIR, F_OK) != 0) { /* no race condition, just mkdir() */
+			verbosef("==> Creating '%s' directory.", CONFDIR);
+			if (mkdir(CONFDIR, S_IRWXU | S_IRGRP | S_IXGRP |
+						S_IROTH | S_IXOTH) != 0) {
+				errorf("cannot create '%s' directory : %s.",
+						CONFDIR, strerror(errno));
+				exit(EXIT_FAILURE);
+			}
+		}
+
 		/*
 			check if pmk.conf already exists
 
 			NOTE: no race condition here for access(), BUT
 			BE CAREFUL if changes are to be made.
 		*/ 
-		if (access(PREMAKE_CONFIG_PATH, F_OK) == 0) {
+		if (access(PREMAKE_CONFIG_PATH, F_OK) == 0) { /* see above */
 			/* backup configuration file */
 			printf("==> Backing up configuration file: %s\n",
 						PREMAKE_CONFIG_PATH_BAK);
