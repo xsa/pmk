@@ -45,7 +45,7 @@
 
 
 #define NBLANG	2
-langdata	ldata[NBLANG] = {
+lgdata	ldata[NBLANG] = {
 	{"C",	"CC",	"CPPFLAGS",	"CFLAGS"},
 	{"C++",	"CXX",	"CPPFLAGS",	"CXXFLAGS"}
 };
@@ -429,7 +429,7 @@ bool require_check(htable *pht) {
 	XXX BLAH BLAH
 */
 
-langdata *check_lang(htable *pht, pmkdata *pgd) {
+lgdata *get_lang(htable *pht, pmkdata *pgd) {
 	char	*lang;
 	int	i;
 

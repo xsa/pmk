@@ -1,7 +1,13 @@
+05 Jul 2003 mipsator
+ * added c++ in the binary list of pmksetup.
+ * modified get_lang().
+ * added c++ support in pmk_check_include() and pmk_check_library().
+ * updated pmkfile sample to use c++ in one test.
+
 02 Jul 2003 mipsator
  * added get_lang() as preliminary work on C++ support.
  * fixed a memory fault in pmk and corrected a typo
-	(noticed by Ritschard Pierre-Yves)
+	(noticed by Ritschard Pierre-Yves).
 
 # PMK 0.5 released
 

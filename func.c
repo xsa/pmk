@@ -226,15 +226,16 @@ bool pmk_check_include(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 	FILE	*tfp;
 	bool	required,
 		rval;
-	char	*incfile,
+	char	inc_path[TMP_BUF_LEN] = "",
+		cfgcmd[MAXPATHLEN],
+		*incfile,
 		*incfunc,
 		*target,
 		*ccpath,
-		*pstr,
-		inc_path[TMP_BUF_LEN] = "",
-		cfgcmd[MAXPATHLEN];
+		*pstr;
 	dynary	*da;
 	int	r, i;
+	lgdata	*pld;
 
 	pmk_log("* Checking include [%s]\n", cmd->label);
 
@@ -266,6 +267,19 @@ bool pmk_check_include(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 		}
 	}
 
+	/* get the language used */
+	pld = get_lang(ht, gdata);
+
+	/* get the appropriate compiler */
+	snprintf(cfgcmd, sizeof(cfgcmd), "BIN_%s", pld->comp);
+	ccpath = hash_get(gdata->htab, cfgcmd);
+	if (ccpath == NULL) {
+		errorf("cannot get compiler path.");
+		return(false);
+	} else {
+		pmk_log("\tUse %s language with %s compiler\n", pld->name, pld->comp);
+	}
+
 	tfp = fopen(INC_TEST_NAME, "w");
 	if (tfp != NULL) {
 		if (incfunc == NULL) {
@@ -280,12 +294,6 @@ bool pmk_check_include(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 		fclose(tfp);
 	} else {
 		errorf("cannot open test file.");
-		return(false);
-	}
-
-	ccpath = hash_get(gdata->htab, "BIN_CC");
-	if (ccpath == NULL) {
-		errorf("cannot get compiler path.");
 		return(false);
 	}
 
@@ -353,14 +361,15 @@ bool pmk_check_lib(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 	bool	required,
 		rval;
 	char	cfgcmd[MAXPATHLEN],
+		lib_buf[TMP_BUF_LEN] = "",
 		*ccpath,
 		*libname,
 		*libfunc,
 		*target,
-		*pstr,
-		lib_buf[TMP_BUF_LEN] = "";
+		*pstr;
 	dynary	*da;
 	int	r, i;
+	lgdata	*pld;
 
 	pmk_log("* Checking library [%s]\n", cmd->label);
 
@@ -390,6 +399,19 @@ bool pmk_check_lib(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 		}
 	}
 
+	/* get the language used */
+	pld = get_lang(ht, gdata);
+
+	/* get the appropriate compiler */
+	snprintf(cfgcmd, sizeof(cfgcmd), "BIN_%s", pld->comp);
+	ccpath = hash_get(gdata->htab, cfgcmd);
+	if (ccpath == NULL) {
+		errorf("cannot get compiler path.");
+		return(false);
+	} else {
+		pmk_log("\tUse %s language with %s compiler\n", pld->name, pld->comp);
+	}
+
 	tfp = fopen(INC_TEST_NAME, "w");
 	if (tfp != NULL) {
 		if (libfunc == NULL) {
@@ -404,12 +426,6 @@ bool pmk_check_lib(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 		fclose(tfp);
 	} else {
 		errorf("cannot open test file.");
-		return(false);
-	}
-
-	ccpath = hash_get(gdata->htab, "BIN_CC");
-	if (ccpath == NULL) {
-		errorf("cannot get compiler path.");
 		return(false);
 	}
 

@@ -44,12 +44,13 @@
 
 #define MAX_CONF_OPT		256	/* XXX temp maximum hash entries */
 #define PATH_STR_DELIMITER	':'	/* string delimiter of the $PATH variable */    
-#define MAXBINS			5	/* max slots in the binaries array */
 
 
 /* Look for location of some predefined binaries */
+#define MAXBINS			6	/* max slots in the binaries array */
 static  char *binaries[MAXBINS][2] = {
 	{"ar",		PREMAKE_KEY_BIN_AR},
+	{"c++",		PREMAKE_KEY_BIN_CXX},
 	{"cat",		PREMAKE_KEY_BIN_CAT},
 	{"grep",	PREMAKE_KEY_BIN_GREP},
 	{"install",	PREMAKE_KEY_BIN_INSTALL},
