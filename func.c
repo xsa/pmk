@@ -81,7 +81,7 @@ bool pmk_target(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 		return(false);
 	}
 	da = da_init();
-	str_to_dynary(list, ',', da);
+	str_to_dynary(list, CHAR_LIST_SEPARATOR, da);
 	
 	for (i=0 ; i < da_usize(da) ; i++) {
 		/* da_idx should not returns null so no check */
