@@ -1,7 +1,7 @@
 Sys name	Sys Version	OS arch.	PMK Version	PMK Status	Reported by		Misc data
 ~~~~~~~~~~~~~~~ ~~~~~~~~~~~~~~~ ~~~~~~~~~~~~~~~ ~~~~~~~~~~~~~~~ ~~~~~~~~~~~~~~~	~~~~~~~~~~~~~~~~~~~~~~~	~~~~~~~~~~~~~~~~~~~~~~~~
 Cygwin		?		i386		PMK 0.3.2	Fail (build ok)	Damien Couderc		gcc-3.2, gmake-3.79.1
-Debian		3.0		i586		PMK 0.3		OK		Xavier Santolaria	gcc-2.95.4, gmake-3.79.1, linux-2.4.20
+Debian		3.0		i586		PMK 0.3.4	OK		Xavier Santolaria	gcc-2.95.4, gmake-3.79.1, linux-2.4.20
 Debian		3.0		i686		PMK 0.3.1	OK		Damien Couderc		gcc-2.95.4, gmake-3.79.1, linux-2.4.18-smp
 Debian		3.0		ia64		PMK 0.3.1	OK		Damien Couderc		gcc-3.2.2, gmake-3.79.1, linux-2.4.18-smp
 FreeBSD		4.7		i386		PMK 0.3.4	OK		Damien Couderc		gcc-2.95.4
