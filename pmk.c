@@ -41,7 +41,9 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
+
 #include <ctype.h>
+#include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -316,7 +318,7 @@ bool process_template(char *template, pmkdata *pgd) {
 
 	/* get the file name */
 	if (strlcpy(lbuf, ptn, sizeof(lbuf)) >= sizeof(lbuf)) {
-		errorf("buffer overflow");
+		errorf("buffer overflow.");
 		return(false);
 	}
 
@@ -325,7 +327,7 @@ bool process_template(char *template, pmkdata *pgd) {
 	if (ptmp != NULL) {
 		*ptmp = CHAR_EOS;
 	} else {
-		errorf("error while creating name of template");
+		errorf("error while creating name of template.");
 		return(false);
 	}
 
@@ -351,14 +353,16 @@ bool process_template(char *template, pmkdata *pgd) {
 
 	tfd = fopen(template, "r");
 	if (tfd == NULL) {
-		errorf("cannot open %s.", template);
+		errorf("cannot open '%s' : %s.", 
+			template, strerror(errno));
 		return(false);
 	}
 
 	dfd = fopen(fpath, "w");
 	if (dfd == NULL) {
 		fclose(tfd); /* close already opened tfd before leaving */
-		errorf("cannot open %s.", fpath);
+		errorf("cannot open '%s' : %s.", 
+			fpath, strerror(errno));
 		return(false);
 	}
 
@@ -386,7 +390,7 @@ bool process_template(char *template, pmkdata *pgd) {
 				/* get tag identifier */
 				ptmp = parse_identifier(plb, tbuf, sizeof(tbuf));
 				if (ptmp == NULL) {
-					errorf("process_template(), buffer too small", fpath);
+					errorf("process_template(), buffer too small.", fpath);
 					return(false);
 				}
 
@@ -482,7 +486,7 @@ bool parse_cmdline(char **val, int nbval, pmkdata *pgd) {
 		rval = parse_opt(val[i], &opt, PRS_PMKCONF_SEP);
 		if (rval == true) {
 			if (hash_update(ht, opt.key, opt.value) == HASH_ADD_FAIL) { /* no need to strdup */
-				errorf("%s", PRS_ERR_HASH);
+				errorf("%s.", PRS_ERR_HASH);
 				rval = false;
 			}
 		}
@@ -559,7 +563,7 @@ int main(int argc, char *argv[]) {
 
 	/* get current path */
 	if (getcwd(buf, sizeof(buf)) == NULL) {
-		errorf("Unable to get current directory");
+		errorf("unable to get current directory.");
 		exit(EXIT_FAILURE);
 	}
 
@@ -573,7 +577,7 @@ int main(int argc, char *argv[]) {
 					/* XXX check if path is valid */
 
 					if (uabspath(buf, optarg, gdata.basedir) == false) {
-						errorf("Cannot use basedir argument");
+						errorf("cannot use basedir argument.");
 						exit(EXIT_FAILURE);
 					}
 					basedir_set = true;
@@ -593,7 +597,7 @@ int main(int argc, char *argv[]) {
 					/* pmk file path */
 					/* XXX check if path is valid */
 					if (uabspath(buf, optarg, gdata.pmkfile) == false) {
-						errorf("Cannot use file argument");
+						errorf("cannot use file argument.");
 						exit(EXIT_FAILURE);
 					}
 
@@ -615,7 +619,7 @@ int main(int argc, char *argv[]) {
 					/* file path to override pmk.conf */
 					/* XXX check if path is valid */
 					if (uabspath(buf, optarg, gdata.ovrfile) == false) {
-						errorf("Cannot use file argument");
+						errorf("cannot use file argument.");
 						exit(EXIT_FAILURE);
 					}
 
@@ -685,7 +689,7 @@ int main(int argc, char *argv[]) {
 		if (parse_pmkconf(fp, gdata.htab, PRS_PMKCONF_SEP, process_opt) == false) {
 			/* parsing failed */
 			clean(&gdata);
-			errorf("failed to parse '%s'", PREMAKE_CONFIG_PATH);
+			errorf("failed to parse '%s'.", PREMAKE_CONFIG_PATH);
 			exit(EXIT_FAILURE);
 		}
 		fclose(fp);
@@ -693,7 +697,7 @@ int main(int argc, char *argv[]) {
 	} else {
 		/* configuration file not found */
 		clean(&gdata);
-		errorf("cannot parse '%s', run pmksetup", PREMAKE_CONFIG_PATH);
+		errorf("cannot parse '%s', run pmksetup.", PREMAKE_CONFIG_PATH);
 		exit(EXIT_FAILURE);
 	}
 
@@ -738,7 +742,7 @@ int main(int argc, char *argv[]) {
 			if (parse_pmkconf(fp, gdata.htab, PRS_PMKCONF_SEP, process_opt) == false) {
 				/* parsing failed */
 				clean(&gdata);
-				errorf("failed to parse '%s'", gdata.ovrfile);
+				errorf("failed to parse '%s'.", gdata.ovrfile);
 				exit(EXIT_FAILURE);
 			}
 			fclose(fp);
@@ -746,7 +750,8 @@ int main(int argc, char *argv[]) {
 		} else {
 			/* configuration file not found */
 			clean(&gdata);
-			errorf("cannot parse '%s'");
+			errorf("cannot parse '%s' : %s.",
+				gdata.ovrfile, strerror(errno));
 			exit(EXIT_FAILURE);
 		}
 	}
@@ -757,7 +762,7 @@ int main(int argc, char *argv[]) {
 			nbcd = argc;
 		} else {
 			clean(&gdata);
-			errorf("incorrect optional arguments");
+			errorf("incorrect optional arguments.");
 			exit(EXIT_FAILURE);
 		}
 	} else {
@@ -767,7 +772,7 @@ int main(int argc, char *argv[]) {
 	/* open log file */
 	if (pmk_log_open(PREMAKE_LOG) == false) {
 		clean(&gdata);
-		errorf("while opening %s.", PREMAKE_LOG);
+		errorf("while opening '%s'.", PREMAKE_LOG);
 		exit(EXIT_FAILURE);
 	}
 
@@ -788,7 +793,8 @@ int main(int argc, char *argv[]) {
 	fp = fopen(gdata.pmkfile, "r");
 	if (fp == NULL) {
 		clean(&gdata);
-		errorf("while opening %s.", gdata.pmkfile);
+		errorf("cannot open '%s' : %s.", 
+			gdata.pmkfile, strerror(errno));
 		exit(EXIT_FAILURE);
 	}
 
@@ -798,7 +804,7 @@ int main(int argc, char *argv[]) {
 		fflush(fp);
 		fclose(fp);
 		pmk_log_close();
-		errorf("while opening %s.", gdata.pmkfile);
+		errorf("while opening '%s'.", gdata.pmkfile);
 		exit(EXIT_FAILURE);
 	}
 
@@ -824,7 +830,7 @@ int main(int argc, char *argv[]) {
 				abspath(gdata.srcdir, pstr, buf); /* XXX check ??? */
 				if (process_template(buf, &gdata) == false) {
 					/* failure while processing template */
-					errorf("Failed to process '%s'.", buf);
+					errorf("failed to process '%s'.", buf);
 					rval = 1;
 				}
 			}
@@ -834,7 +840,7 @@ int main(int argc, char *argv[]) {
 			pmk_log("\nProcess '%s' for autoconf compatibility.\n", gdata.ac_file);
 			if (ac_parse_config(&gdata) == false) {
 				/* failure while processing autoconf file */
-				errorf("Failed to process autoconf config file.");
+				errorf("failed to process autoconf config file.");
 				rval = 1;
 			}
 		}
