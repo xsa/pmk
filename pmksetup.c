@@ -51,6 +51,7 @@
 #include "compat/pmk_string.h"
 #include "compat/pmk_unistd.h"
 #include "common.h"
+#include "detect_cpu.h"
 #include "dynarray.h"
 #include "parse.h"
 #include "pmksetup.h"
@@ -71,13 +72,6 @@ hpair	predef[] = {
 };
 
 int	nbpredef = sizeof(predef) / sizeof(hpair);
-
-/* config tools data file keyword */
-prskw	kw_pmkcpu[] = {
-	{"ADD_CPU_ARCH",	CPU_ARCH_ADD,		PRS_KW_CELL},
-	{"ADD_X86_CPU_VENDOR",	CPU_X86_VENDOR_ADD,	PRS_KW_CELL}
-};
-int	nbkwc = sizeof(kw_pmkcpu) / sizeof(prskw);
 
 
 /*
@@ -571,7 +565,7 @@ bool close_tmp_config(void) {
 bool get_env_vars(htable *pht) {
 	struct utsname	 utsname;
 	char		*bin_path,
-			*cpu_fam;
+			*cpu_arch;
 
 	if (uname(&utsname) == -1) {
 		errorf("uname : %s.", strerror(errno));
@@ -591,11 +585,11 @@ bool get_env_vars(htable *pht) {
 	verbosef("Setting '%s' => '%s'", PMKCONF_OS_ARCH, utsname.machine);
 
 	/* try to detect cpu family */
-	cpu_fam = check_cpu_family(utsname.machine);
-	if (record_data(pht, PMKCONF_CPU_FAM, 'u', cpu_fam) == false)
+	cpu_arch = check_cpu_data(utsname.machine);
+	if (record_data(pht, PMKCONF_HW_CPU_ARCH, 'u', cpu_arch) == false)
 		return(false);
-	verbosef("Setting '%s' => '%s'", PMKCONF_CPU_FAM, cpu_fam);
-	free(cpu_fam);
+	verbosef("Setting '%s' => '%s'", PMKCONF_HW_CPU_ARCH, cpu_arch);
+	free(cpu_arch);
 
 
 	/* getting the environment variable PATH */
@@ -829,67 +823,17 @@ bool check_libpath(htable *pht) {
  *	returns:  cpu family string or NULL
  */
 
-char *check_cpu_family(char *uname_m) {
-	FILE		*fp;
-	bool		 rval;
-	char		*pstr = NULL;
-	dynary		*da;
-	htable		*pht;
-	int		 i,
-			 n;
-	prscell		*pcell;
-	prsdata		*pdata;
+char *check_cpu_data(char *uname_m) {
+	char	*pstr;
+	prsdata	*pdata;
 
-	/* initialize parsing structure */
-	pdata = prsdata_init();
-	if (pdata == NULL) {
-		errorf("cannot intialize prsdata.");
-		return(NULL);
-	}
+	pdata = parse_cpu_data(PMKCPU_DATA);
 
-	fp = fopen(PMKCPU_DATA, "r");
-	if (fp == NULL) {
-		prsdata_destroy(pdata);
-		errorf("cannot open '%s' : %s.",
-			PMKCPU_DATA, strerror(errno));
-		return(NULL);
-	}
+	pstr = check_cpu_arch(uname_m, pdata); /* check */
 
-	/* parse data file and fill prsdata strucutre */
-	rval = parse_pmkfile(fp, pdata, kw_pmkcpu, nbkwc);
-	fclose(fp);
+	prsdata_destroy(pdata);
 
-	if (rval == true) {
-		pcell = pdata->tree->first;
-		while ((pcell != NULL) && (pstr == NULL)) {
-			if (pcell->token == CPU_ARCH_ADD) {
-				pht = pcell->data;
-
-				da = po_get_list(hash_get(pht, "LIST")); /* XXX check */
-				n = da_usize(da);
-				for (i=0 ; i<n ; i++) {
-					/*
-					 * could handle regex later
-					 *
-
-					if da_idx(da, i) ~ uname_m !XXX!
-						pstr = po_get_str(hash_get(pht, "NAME"));
-						return(pstr);
-					*/
-					if (strncmp(uname_m, da_idx(da, i), sizeof(uname_m)) == 0) {
-						pstr = po_get_str(hash_get(pht, "NAME"));
-					}
-				}
-			}
-
-			pcell = pcell->next;
-		}
-	}
-
-	if (pstr == NULL)
-		pstr = "unknown";
-
-	return(strdup(pstr)); /* XXX */
+	return(pstr);
 }
 
 /*

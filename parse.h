@@ -39,6 +39,7 @@
 
 #include "compat/pmk_stdbool.h"
 #include "pmk_obj.h"
+#include "premake.h"
 
 /*
 #define LIST_SUPPORT	1
