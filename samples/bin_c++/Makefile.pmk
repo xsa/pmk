@@ -1,0 +1,44 @@
+# $Id$
+
+CXX=		@BIN_CXX@
+
+NAME=		hello
+
+all: show $(NAME) run_$(NAME) clean
+
+show:
+	@echo ""
+	@echo "-> Dumping template"
+	@echo ""
+	@echo "Makefile.pmk:"
+	@echo "--dump-begin----------------------------"
+	@cat Makefile.pmk
+	@echo "--dump-end------------------------------"
+	@echo "-> Dumping generated file"
+	@echo ""
+	@echo "Makefile:"
+	@echo "--dump-begin----------------------------"
+	@cat Makefile
+	@echo "--dump-end------------------------------"
+
+$(NAME):
+	@echo ""
+	@echo "-> Building binary"
+	@echo ""
+	$(CXX) $(CXXFLAGS) -o $(NAME) $(NAME).cc
+
+run_$(NAME):
+	@echo ""
+	@echo "-> Running program"
+	@echo ""
+	@echo "--exec-begin----------------------------"
+	@./${NAME}
+	@echo "--exec-end------------------------------"
+
+clean:
+	@echo ""
+	@echo "-> Cleaning ..."
+	@echo ""
+	rm -f $(NAME)
+	rm -f *.log Makefile
+	@echo "Done."

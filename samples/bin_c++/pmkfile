@@ -1,0 +1,13 @@
+# $Id$
+
+# settings
+SETTINGS {
+	LANG = "C++"
+	TARGET = ("Makefile.pmk")
+}
+
+DEFINE {
+	PACKAGE = "hello"
+	VERSION = "1.0"
+	FULL_NAME = "$PACKAGE-$VERSION"
+}
