@@ -80,8 +80,17 @@ prsdata *prsdata_init(void) {
 */
 
 void prsdata_destroy(prsdata *pdata) {
+#ifdef PRS_DEBUG
+	debugf("prsdata_destroy() : cleaning tree");
+#endif
 	prsnode_destroy(pdata->tree);
+#ifdef PRS_DEBUG
+	debugf("prsdata_destroy() : cleaning structure");
+#endif
 	free(pdata);
+#ifdef PRS_DEBUG
+	debugf("prsdata_destroy() : exit");
+#endif
 }
 
 /*

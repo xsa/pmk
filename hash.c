@@ -578,6 +578,9 @@ void *hash_get(htable *pht, char *key) {
 	phc = pht->nodetab[hash].first;
 	while (phc != NULL) {
 		/* hash not empty */
+#ifdef HASH_DEBUG
+		debugf("hash_get : comparing with '%s'", phc->key);
+#endif
 		if (strncmp(key, phc->key, MAX_HASH_KEY_LEN) == 0) {
 			/* found key, return pointer on value */
 			return(phc->value);

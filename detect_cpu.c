@@ -53,11 +53,30 @@
 prskw	kw_pmkcpu[] = {
 	{"ADD_CPU_ARCH",	CPU_ARCH_ADD,		PRS_KW_CELL},
 	{"LIST_X86_CPU_VENDOR",	LIST_X86_CPU_VENDOR,	PRS_KW_CELL},
-	{"LIST_X86_CPU_MODEL",	LIST_X86_CPU_MODEL,	PRS_KW_CELL}
+	{"LIST_X86_CPU_MODEL",	LIST_X86_CPU_MODEL,	PRS_KW_CELL},
+	{"LIST_X86_CPU_CLASS",	LIST_X86_CPU_CLASS,	PRS_KW_CELL}
 };
 int	nbkwc = sizeof(kw_pmkcpu) / sizeof(prskw);
 
 
+/*
+	XXX
+*/
+
+void *seek_key(prsdata *pdata, int token) {
+	prscell		*pcell;
+
+	pcell = pdata->tree->first;
+	while (pcell != NULL) {
+		if (pcell->token == token) {
+			return(pcell->data);
+		}
+
+		pcell = pcell->next;
+	}
+
+	return(NULL);
+}
 
 /*
 	parse cpu data file
@@ -143,9 +162,49 @@ char *check_cpu_arch(char *uname_m, prsdata *pdata) {
 	}
 
 	if (pstr == NULL)
-		pstr = "unknown";
+		pstr = PMK_ARCH_STR_UNKNOWN;
 
-	return(pstr); /* no check needed, NULL will be automatically returned */
+	return(strdup(pstr)); /* no check needed, NULL will be automatically returned */
+}
+
+/*
+	XXX
+
+	returns:  cpu architecture string or NULL
+*/
+
+htable *arch_wrapper(prsdata *pdata, unsigned char arch_id) {
+	htable		*pht;
+#ifdef ARCH_X86
+	x86_cpu_cell	*pcell;
+#endif
+
+	pht = hash_init(16); /* XXX hardcode, check */
+	if (pht == NULL) {
+		printf("DEBUG pht init failed !\n");
+		return(NULL);
+	}
+
+	switch (arch_id) {
+		case PMK_ARCH_X86_32 :
+#ifdef ARCH_X86
+		pcell = x86_cpu_cell_init();
+		if (pcell == NULL)
+			return(NULL);
+
+		x86_get_cpuid_data(pcell); /* XXX check */
+		pcell->stdvendor = x86_get_std_cpu_vendor(pdata, pcell->vendor);
+		x86_set_cpu_data(pdata, pcell, pht); /* XXX check */
+
+		x86_cpu_cell_destroy(pcell);
+#else
+		errorf("architecture mismatch."); /* XXX debug message ? */
+		return(NULL);
+#endif
+			break;
+	}
+
+	return(pht);
 }
 
 
@@ -156,19 +215,44 @@ char *check_cpu_arch(char *uname_m, prsdata *pdata) {
 #ifdef ARCH_X86
 
 /****
- defines
-****/
-
-#define MASK_X86_CPU_EXTFAM	0x0ff00000
-#define MASK_X86_CPU_EXTMOD	0x000f0000
-#define MASK_X86_CPU_TYPE	0x0000f000
-#define MASK_X86_CPU_FAMILY	0x00000f00
-#define MASK_X86_CPU_MODEL	0x000000f0
-
-
-/****
  functions
 ****/
+
+/*
+	XXX
+*/
+
+x86_cpu_cell *x86_cpu_cell_init(void) {
+	x86_cpu_cell	*pcell;
+
+	pcell = (x86_cpu_cell *) malloc(sizeof(x86_cpu_cell));
+	if (pcell == NULL)
+		return(NULL);
+
+	pcell->vendor = NULL;
+	pcell->stdvendor = NULL;
+	pcell->cpuname = NULL;
+	pcell->family = 0;
+	pcell->model = 0;
+	pcell->extfam = 0;
+	pcell->extmod = 0;
+
+	return(pcell);
+}
+
+/*
+	XXX
+*/
+
+void x86_cpu_cell_destroy(x86_cpu_cell *pcell) {
+	if (pcell->vendor != NULL)
+		free(pcell->vendor);
+	if (pcell->stdvendor != NULL)
+		free(pcell->stdvendor);
+	if (pcell->cpuname != NULL)
+		free(pcell->cpuname);
+	free(pcell);
+}
 
 /*
 	get (pmk) vendor identifier based on data from cpuid
@@ -197,9 +281,9 @@ char *x86_get_std_cpu_vendor(prsdata *pdata, char *civendor) {
 
 	/* XXX useless ? */
 	if (vendor == NULL)
-		vendor = "unknown";
+		vendor = PMK_ARCH_STR_UNKNOWN;
 
-	return(vendor); /* no check needed, NULL will be automatically returned */
+	return(strdup(vendor)); /* no check needed, NULL will be automatically returned */
 }
 
 
@@ -213,6 +297,7 @@ bool x86_get_cpuid_data(x86_cpu_cell *cell) {
 	if (x86_check_cpuid_flag() == 0) {
 		/* no cpuid flag => 386 or old 486 */
 		cell->cpuid = false;
+		cell->family = 3; /* fake family */
 		return(true);
 	}
 
@@ -228,18 +313,18 @@ bool x86_get_cpuid_data(x86_cpu_cell *cell) {
 	buffer[2] = x86_cpu_reg_ecx;
 	buffer[3] = 0;	/* terminate string */
 
-	strlcpy(cell->vendor, (char *) &buffer, sizeof(cell->vendor)); /* XXX check */
+	cell->vendor = strdup((char *) buffer); /* XXX check */
 
 	/* get the cpu type */
 	x86_exec_cpuid(1);
 
-	cell->family = (unsigned int) ((x86_cpu_reg_eax & MASK_X86_CPU_FAMILY) >> 8);
+	cell->family = (unsigned int) ((x86_cpu_reg_eax & X86_CPU_MASK_FAMILY) >> 8);
 	if (cell->family == 15) {
 		/* extended family */
-		cell->extfam = (unsigned int) ((x86_cpu_reg_eax & MASK_X86_CPU_EXTFAM) >> 20);
+		cell->extfam = (unsigned int) ((x86_cpu_reg_eax & X86_CPU_MASK_EXTFAM) >> 20);
 	}
 
-	cell->model = (unsigned int) ((x86_cpu_reg_eax & MASK_X86_CPU_MODEL) >> 4);
+	cell->model = (unsigned int) ((x86_cpu_reg_eax & X86_CPU_MASK_MODEL) >> 4);
 
 
 	x86_exec_cpuid(0x80000000);
@@ -264,9 +349,89 @@ bool x86_get_cpuid_data(x86_cpu_cell *cell) {
 		buffer[11] = x86_cpu_reg_edx;
 
 		buffer[12] = 0;	/* terminate string */
-		strlcpy(cell->cpuname, (char *) &buffer, sizeof(cell->cpuname)); /* XXX check */
+		cell->cpuname = strdup((char *) buffer); /* XXX check */
 	} else {
 		cell->cpuname[0] = CHAR_EOS;
+	}
+
+	return(true);
+}
+
+/*
+	XXX
+*/
+
+bool x86_set_cpu_data(prsdata *pdata, x86_cpu_cell *pcell, htable *pht) {
+	char	 buffer[TMP_BUF_LEN],
+		*pstr;
+	htable	*phtbis;
+
+	snprintf(buffer, sizeof(buffer), "%u", pcell->family); /* XXX check */
+	if (hash_update_dup(pht, PMKCONF_HW_X86_CPU_FAMILY, buffer) == HASH_ADD_FAIL) {
+		return(false);
+	}
+
+	snprintf(buffer, sizeof(buffer), "%u", pcell->model); /* XXX check */
+	if (hash_update_dup(pht, PMKCONF_HW_X86_CPU_MODEL, buffer) == HASH_ADD_FAIL) {
+		return(false);
+	}
+
+	snprintf(buffer, sizeof(buffer), "%u", pcell->extfam); /* XXX check */
+	if (hash_update_dup(pht, PMKCONF_HW_X86_CPU_EXTFAM, buffer) == HASH_ADD_FAIL) {
+		return(false);
+	}
+
+	snprintf(buffer, sizeof(buffer), "%u", pcell->extmod); /* XXX check */
+	if (hash_update_dup(pht, PMKCONF_HW_X86_CPU_EXTMOD, buffer) == HASH_ADD_FAIL) {
+		return(false);
+	}
+
+	if (pcell->cpuname == NULL) {
+		if (hash_update_dup(pht, PMKCONF_HW_X86_CPU_NAME,
+				pcell->cpuname) == HASH_ADD_FAIL) {
+			return(false);
+		}
+	} /* else put unknown ? */
+
+	if (pcell->vendor != NULL) {
+		if (hash_update_dup(pht, PMKCONF_HW_X86_CPU_VENDOR,
+				pcell->vendor) == HASH_ADD_FAIL) {
+			return(false);
+		}
+	} /* else put unknown ? */
+
+	if (pcell->stdvendor != NULL) {
+		if (hash_update_dup(pht, PMKCONF_HW_X86_CPU_STD_VENDOR,
+				pcell->stdvendor) == HASH_ADD_FAIL) {
+			return(false);
+		}
+	} /* else put unknown ? */
+
+	phtbis = (htable *) seek_key(pdata, LIST_X86_CPU_CLASS);
+	if (phtbis != NULL) {
+		if (pcell->family < 15) {
+			snprintf(buffer, sizeof(buffer), X86_CPU_CLASS_FAMILY_FMT,
+					pcell->stdvendor, pcell->family);
+/*debugf("key = '%s'", buffer);*/
+			pstr = po_get_str(hash_get(phtbis, buffer)); /* no check needed */
+		} else {
+			snprintf(buffer, sizeof(buffer), X86_CPU_CLASS_EXTFAM_FMT,
+					pcell->stdvendor, pcell->extfam);
+/*debugf("key = '%s'", buffer);*/
+			pstr = po_get_str(hash_get(phtbis, buffer)); /* no check needed */
+		}
+
+		if (pstr == NULL) {
+			/* not found, get default */
+/*debugf("getting default");*/
+			pstr = po_get_str(hash_get(phtbis, "DEFAULT")); /* XXX check */
+		}
+
+		if (hash_update_dup(pht, PMKCONF_HW_X86_CPU_CLASS, pstr) == HASH_ADD_FAIL) {
+			return(false);
+		}
+	} else {
+		printf("DEBUG key not found\n");
 	}
 
 	return(true);

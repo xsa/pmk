@@ -4,6 +4,7 @@
 
 /* CPU ID detection test */
 
+#include <sys/utsname.h>
 #include <sys/types.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -27,7 +28,10 @@
 
 int main(void) {
 	char		*pstr;
-	int		 ui;
+	hkeys	*phk;
+	htable		*pht;
+	int		 ui,
+			 i;
 	prsdata		*pdata;
 	uint32_t	 cpuidflag,
 			 cputype;
@@ -51,39 +55,21 @@ int main(void) {
 	pstr = check_cpu_arch(utsname.machine, pdata); /* check */
 	printf("arch = '%s'\n", pstr);
 
-#ifdef ARCH_X86
-	printf("ARCH_X86 is defined.\n");
+	pht = arch_wrapper(pdata, PMK_ARCH_X86_32);
+	if (pht != NULL) {
+		phk = hash_keys(pht);
+		if (phk != NULL) {
+			for(i = 0 ; i < phk->nkey ; i++) {
+				/*pstr = po_get_str(hash_get(pht, phk->keys[i]));*/
+				pstr = hash_get(pht, phk->keys[i]);
+				printf("%s = '%s'\n", phk->keys[i], pstr);
+			}
 
-	cpuidflag = x86_check_cpuid_flag();
-	printf("cpuid flag = %x\n", cpuidflag);
-	if (cpuidflag == 0)
-		exit(EXIT_SUCCESS);
-
-	x86_get_cpuid_data(&x86cc);
-
-	printf("cpu vendor = '%s'\n", x86cc.vendor);
-
-
-	pstr = x86_get_std_cpu_vendor(pdata, x86cc.vendor);
-	printf("standard cpu vendor = '%s'\n", pstr);
-
-
-	if (x86cc.cpuname != NULL)
-		printf("cpu name = '%s'\n", x86cc.cpuname);
-
-
-	if (x86cc.family != 15) {
-		printf("family = %d\n", x86cc.family);
-	} else {
-		printf("extended family = %d\n", x86cc.extfam);
+			hash_free_hkeys(phk);
+		}
+		hash_destroy(pht);
 	}
 
-	printf("model = %d\n", x86cc.model);
-
-
-#else
-	printf("Arch not supported.\n");
-#endif
 	prsdata_destroy(pdata);
 
 

@@ -1,3 +1,6 @@
+24 Nov 2004 mipsator
+ * x86 cpu detection engine is complete, need more data now.
+
 21 Nov 2004 mipsator
  * improved tests/Makefile to preprocess assembly files by default.
  * added detection of cc,cpp and as in pmkcfg.sh.
