@@ -57,7 +57,7 @@ can contain comments, blank lines and commands.
 .Pp
 A command has the following format (? character means optional field) :
 .Bd -literal -offset -indent
- .<command><?(label)> {
+ <command><?(label)> {
  <body>
  }
 .Ed
@@ -81,7 +81,7 @@ The key value type can be 'word', 'quoted' or 'list'. The right type will depend
 .Pp
 Example :
 .Bd -literal -offset -indent
- .CHECK_INCLUDE(header_sys_param) {
+CHECK_INCLUDE(header_sys_param) {
  # following options use different uses of blank characters
  # key value is word type
  REQUIRED = TRUE
@@ -89,7 +89,7 @@ Example :
  DEPEND=	("dep_one",dep_two,"dep_three")
  # key value is quoted type
  INCLUDE = "sys/param.h"
- }
+}
 .Ed
 
 .Sh SPECIFIC COMMANDS
@@ -103,40 +103,29 @@ Arguments :
 .Pp
 Example :
 .Bd -literal -offset -indent
- .DEFINE {
+DEFINE {
  PACKAGE=my_prog
  VERSION="0.1"
- }
+}
 .Ed
 
-.It Cm TARGET
-This command defines the target templates where values will be substitued.
+.It Cm SETTINGS
+This command sets pmk parameters. 
 .Pp
 Arguments :
 .Bd -literal -offset -indent
-LIST : type 'list', list of target's filenames.
+AC_COMPAT : type 'quoted', enable autoconf compatibility (empty string or filename).
+LANG : type 'quoted', global default language.
+TARGET : type 'list', list of target's filenames.
 .Ed
 .Pp
 Example :
 .Bd -literal -offset -indent
- .TARGET {
- LIST=("Makefile.in","common.pmk")
- }
-.Ed
-
-.It Cm AC_COMPAT
-This command enable autoconf compatibility.
-.Pp
-Arguments :
-.Bd -literal -offset -indent
-FILENAME : type 'quoted', autoconf config filename.
-.Ed
-.Pp
-Example :
-.Bd -literal -offset -indent
- .AC_COMPAT {
- FILENAME="config.h"
- }
+SETTINGS {
+ AC_COMPAT="config.h"
+ LANG="C"
+ TARGET=("src/file.c","src/file.h")
+}
 .Ed
 
 .It Cm SWITCHES
@@ -146,10 +135,10 @@ Arguments :
 .Pp
 Example :
 .Bd -literal -offset -indent
- .SWITCHES {
+SWITCHES {
  use_curses=TRUE
  use_gtk=FALSE
- }
+}
 .Ed
 .El
 
