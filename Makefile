@@ -38,7 +38,7 @@ SAMPLE=		$(PREMAKE)file.sample
 CONFIG=		$(PREMAKE).conf.sample
 
 P_OBJS=		compat.o common.o hash.o func.o functool.o \
-		dynarray.o autoconf.o pmk.o
+		dynarray.o autoconf.o pathtools.o pmk.o
 S_OBJS=		$(SETUP).o common.o hash.o dynarray.o compat.o
 
 .c.o:
