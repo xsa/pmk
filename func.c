@@ -531,7 +531,7 @@ bool pmk_check_config(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 	libvers = hash_get(ht, "VERSION");
 	if (libvers != NULL) {
 		/* if VERSION is provided then check it */
-		snprintf(cfgcmd, sizeof(cfgcmd), "%s --version", cfgpath);
+		snprintf(cfgcmd, sizeof(cfgcmd), "%s --version 2>/dev/null", cfgpath);
 
 		rpipe = popen(cfgcmd, "r");
 		if (rpipe == NULL) {
@@ -673,7 +673,7 @@ bool pmk_check_pkg_config(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 
 	/* check if package exists */
 	pmk_log("\tFound package '%s' : ", target);
-	snprintf(pc_cmd, sizeof(pc_cmd), "%s --exists %s", pc_path, target);
+	snprintf(pc_cmd, sizeof(pc_cmd), "%s --exists %s 2>/dev/null", pc_path, target);
 	if (system(pc_cmd) != 0) {
 		pmk_log("no.\n");
 		if (required == true) {
@@ -690,7 +690,7 @@ bool pmk_check_pkg_config(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 	libvers = hash_get(ht, "VERSION");
 	if (libvers != NULL) {
 		/* if VERSION is provided then check it */
-		snprintf(pc_cmd, sizeof(pc_cmd), "%s --modversion %s", pc_path, target);
+		snprintf(pc_cmd, sizeof(pc_cmd), "%s --modversion %s 2>/dev/null", pc_path, target);
 
 		rpipe = popen(pc_cmd, "r");
 		if (rpipe == NULL) {

@@ -1,9 +1,14 @@
+# snapshot 0.4.4
+
 10 Jun 2003 mipsator
  * updated TODO
  * modified behavior of pmk_check_binary().
  * added support for alternative CFLAGS and CLIBS in pmk_check_config()
 	and pmk_check_pkg_config().
  * updated pmkfile and makefile samples to use new features.
+ * fixed pmk_check_config() and pmk_check_pkg_config() to avoid display
+ 	of error messages.
+ * updated TODO and STATUS
 
 08 Jun 2003 mipsator
  * added support for pkg-config with CHECK_PKG_CONFIG.
