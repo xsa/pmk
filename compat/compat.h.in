@@ -40,16 +40,19 @@
 	you should not have to modify it.
 */
 
-/* availability of strlcpy */
+/* strlcpy */
 @DEF__STRLCPY@
 
-/* availability of strlcat */
+/* strlcat */
 @DEF__STRLCAT@
 
-/* availability of stdbool.h (ISO C99) */
+/* _Bool type (ISO C99) */
+@DEF___BOOL@
+
+/* stdbool.h (ISO C99) */
 @DEF__STDBOOL_H@
 
-/* availability of libgen.h (dirname and filename) */
+/* libgen.h (dirname and filename) */
 @DEF__LIBGEN_H@
 
 #endif /* _PMK_COMPAT_H_ */

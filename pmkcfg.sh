@@ -90,6 +90,33 @@ EOF
 	rm -f $testfile $testbin
 }
 
+check_type() {
+	type="$1"
+	printf "Checking '%s' type : " "$type"
+
+	cat > $testfile <<EOF
+#include <stdio.h>
+
+int main() {
+        if (($type *) 0)
+                return(0);
+        if (sizeof($type))
+                return(0);
+        return(0);
+}
+EOF
+
+	if $CC -o $testbin $testfile >/dev/null 2>&1; then
+		do_sed "def" "$type"
+		echo "yes"
+	else
+		do_sed "udef" "$type"
+		echo "no"
+	fi
+	rm -f $testfile $testbin
+}
+
+
 do_sed() {
 	sed_uc=`echo "$2" | tr [a-z] [A-Z] | tr . _`
 	case $1 in
@@ -122,6 +149,12 @@ check_include_function string.h strlcpy
 #
 
 check_include_function string.h strlcat
+
+#
+# _Bool type check
+#
+
+check_type _Bool
 
 #
 # stdbool.h check
