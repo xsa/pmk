@@ -2,6 +2,7 @@
 
 /*
  * Copyright (c) 2004 Damien Couderc
+ * Copyright (c) 2004 Xavier Santolaria
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -54,30 +55,30 @@ extern char	*optarg;
 extern int	 optind;
 
 pcopt	pcoptions[] = {
-		{"version",			false,	PMKPC_OPT_VERSION},
-		{"atleast-pkgconfig-version",	false,	PMKPC_OPT_ATLPKGVERS}, /* XXX arg */
-		{"exists",			false,	PMKPC_OPT_EXISTS},
-		{"list-all",			false,	PMKPC_OPT_LISTALL},
-		{"uninstalled",			false,	PMKPC_OPT_UNINST},
-		{"debug",			false,	PMKPC_OPT_DEBUG},
-		{"help",			false,	PMKPC_OPT_HELP},
-		{"usage",			false,	PMKPC_OPT_USAGE},
-		{"modversion",			false,	PMKPC_OPT_MODVERS},
-		{"atleast-version",		false,	PMKPC_OPT_ATLVERS}, /* XXX arg */
-		{"exact-version",		false,	PMKPC_OPT_EXTVERS}, /* XXX arg */
-		{"max-version",			false,	PMKPC_OPT_MAXVERS}, /* XXX arg */
-		{"cflags",			false,	PMKPC_OPT_CFLAGS},
-		{"cflags-only-I",		false,	PMKPC_OPT_CFLAGS_ONLY_PATH},
-		{"cflags-only-other",		false,	PMKPC_OPT_CFLAGS_ONLY_OTHER},
-		{"libs",			false,	PMKPC_OPT_LIBS},
-		{"libs_only_l",			false,	PMKPC_OPT_LIBS_ONLY_LIB},
-		{"libs_only_L",			false,	PMKPC_OPT_LIBS_ONLY_PATH},
-		{"libs_only_other",		false,	PMKPC_OPT_LIBS_ONLY_OTHER},
-		{"variable",			false,	PMKPC_OPT_VAR}, /* XXX arg */
-		{"define-variable",		false,	PMKPC_OPT_VAR_DEF}, /* XXX arg */
-		{"print-errors",		false,	PMKPC_OPT_VAR_PRNT},
-		{"silence-errors",		false,	PMKPC_OPT_VAR_SILC},
-		{"errors-to-stdout",		false,	PMKPC_OPT_VAR_STDO},
+		{"version",			false,	PMKPC_OPT_VERSION,		NULL},
+		{"atleast-pkgconfig-version",	false,	PMKPC_OPT_ATLPKGVERS,		PC_USAGE_VERSION},
+		{"exists",			false,	PMKPC_OPT_EXISTS,		NULL},
+		{"list-all",			false,	PMKPC_OPT_LISTALL,		NULL},
+		{"uninstalled",			false,	PMKPC_OPT_UNINST,		NULL},
+		{"debug",			false,	PMKPC_OPT_DEBUG,		NULL},
+		{"help",			false,	PMKPC_OPT_HELP,			NULL},
+		{"usage",			false,	PMKPC_OPT_USAGE,		NULL},
+		{"modversion",			false,	PMKPC_OPT_MODVERS,		NULL},
+		{"atleast-version",		false,	PMKPC_OPT_ATLVERS,		PC_USAGE_VERSION},
+		{"exact-version",		false,	PMKPC_OPT_EXTVERS,		PC_USAGE_VERSION},
+		{"max-version",			false,	PMKPC_OPT_MAXVERS,		PC_USAGE_VERSION},
+		{"cflags",			false,	PMKPC_OPT_CFLAGS,		NULL},
+		{"cflags-only-I",		false,	PMKPC_OPT_CFLAGS_ONLY_PATH,	NULL},
+		{"cflags-only-other",		false,	PMKPC_OPT_CFLAGS_ONLY_OTHER,	NULL},
+		{"libs",			false,	PMKPC_OPT_LIBS, 		NULL},
+		{"libs_only_l",			false,	PMKPC_OPT_LIBS_ONLY_LIB,	NULL},
+		{"libs_only_L",			false,	PMKPC_OPT_LIBS_ONLY_PATH,	NULL},
+		{"libs_only_other",		false,	PMKPC_OPT_LIBS_ONLY_OTHER,	NULL},
+		{"variable",			false,	PMKPC_OPT_VAR,			PC_USAGE_VARNAME},
+		{"define-variable",		false,	PMKPC_OPT_VAR_DEF,		PC_USAGE_VARVAL},
+		{"print-errors",		false,	PMKPC_OPT_VAR_PRNT,		NULL},
+		{"silence-errors",		false,	PMKPC_OPT_VAR_SILC,		NULL},
+		{"errors-to-stdout",		false,	PMKPC_OPT_VAR_STDO,		NULL},
 };
 size_t	nbpcopt = sizeof(pcoptions) / sizeof(pcopt);
 
@@ -193,6 +194,45 @@ void clean(pcdata *p_cd) {
 }
 
 /*
+ 	pmkpc(1) usage
+*/
+
+void usage(void) {
+	int	i;
+	char	option[MAXPATHLEN];
+	size_t	alen,	/* alignement length */
+		olen,	/* option length */
+		cursor;
+
+	alen = strlen(PMKPC_USAGE_ALIGN);
+
+	fprintf(stderr, "%s", PMKPC_USAGE_STR);
+	cursor = strlen(PMKPC_USAGE_STR);
+
+	for (i = 0; i < nbpcopt; i++) {
+		strlcpy(option, PMKPC_USAGE_OPEN_OPT, sizeof(option));
+		strlcat(option, pcoptions[i].name, sizeof(option));
+
+		if (pcoptions[i].usagearg != NULL) {
+			strlcat(option, "=", sizeof(option));
+			strlcat(option, pcoptions[i].usagearg, sizeof(option)); 
+		}
+
+		strlcat(option, PMKPC_USAGE_CLOSE_OPT, sizeof(option));
+		olen = strlen(option);
+		cursor += olen;
+
+		if (cursor > 79) {
+			fprintf(stderr, "\n%s", PMKPC_USAGE_ALIGN);
+			cursor = olen + alen;
+		}
+
+		fprintf(stderr, "%s", option);
+	}
+	fprintf(stderr, "\n");
+}
+
+/*
 	XXX
 */
 
@@ -273,12 +313,15 @@ debugf("{main} id = %d", poc->id);
 					opt_exists = true;
 					break;
 
+				case PMKPC_OPT_USAGE :
+					usage();
+					exit(EXIT_FAILURE);
+
 				case PMKPC_OPT_ATLPKGVERS :
 				case PMKPC_OPT_LISTALL :
 				case PMKPC_OPT_UNINST :
 				case PMKPC_OPT_DEBUG :
 				case PMKPC_OPT_HELP :
-				case PMKPC_OPT_USAGE :
 				case PMKPC_OPT_ATLVERS :
 				case PMKPC_OPT_EXTVERS :
 				case PMKPC_OPT_MAXVERS :
@@ -312,7 +355,7 @@ debugf("{main} id = %d", poc->id);
 			if (mod[0] == '-') {
 				switch (mod[1]) {
 					case '?' :
-						debugf("usage()");
+						usage();
 						exit(EXIT_FAILURE);
 						break;
 					default :
