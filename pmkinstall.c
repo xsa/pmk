@@ -44,7 +44,9 @@
 #include <unistd.h>
 
 #include "compat/pmk_stdbool.h"
+#include "compat/pmk_string.h"
 #include "common.h"
+#include "pathtools.h"
 #include "pmkinstall.h"
 #include "premake.h"
 
@@ -268,12 +270,14 @@ int main(int argc, char *argv[]) {
 	struct passwd	*pp = NULL;
 	bool		 create_dir = false,
 			 do_chown = false,
+			 do_strip = false,
 			 go_exit = false;
 	char		 chr,
 			*gstr = NULL,
 			*ostr = NULL,
 			*src,
-			*dst;
+			*dst,
+			 dir[MAXPATHLEN];
 	gid_t		 gid = (gid_t) -1;
 	mode_t		 mode = DEFAULT_MODE;
 	uid_t		 uid = (uid_t) -1;
@@ -287,6 +291,7 @@ int main(int argc, char *argv[]) {
 				case 'b' :
 					/* backup */
 					/* XXX TODO */
+					errorf("-b option has not been implemented yet");
 					break;
 
 				case 'c' :
@@ -319,7 +324,9 @@ int main(int argc, char *argv[]) {
 
 				case 's' :
 					/* strip */
+					do_strip = true;
 					/* XXX TODO */
+					errorf("-s option has not been implemented yet");
 					break;
 
 				case 't' :
@@ -344,12 +351,7 @@ int main(int argc, char *argv[]) {
 	argc = argc - optind;
 	argv = argv + optind;
 
-	if (create_dir == true) {
-		debugf("the -d option is not yet implemented");
-		exit(1); /* XXX TODO (move)*/
-	}
-
-	if (argc != 2) {	/* XXX TODO  allow use of more than one source (<2)*/
+	if ((argc != 2) && (create_dir == false)) {	/* XXX TODO  allow use of more than one source (<2)*/
 		usage();
 	}
 
@@ -397,15 +399,42 @@ int main(int argc, char *argv[]) {
 		do_chown = true;
 	}
 
-	/* copy */
-	if (fcopy(src, dst, mode) == false) {
-		/* copy failed */
-		exit(1);
+	if (create_dir == false) {
+		/* copy file */
+		if (fcopy(src, dst, mode) == false) {
+			/* copy failed */
+			exit(1);
+		}
+	} else {
+		/* create path */
+/*debugf("create dir '%s'", src);*/
+		if (*src == CHAR_SEP) {
+			/* absolute path, copy */
+			strlcpy(dir, src, sizeof(dir)); /* XXX check */
+		} else {
+			/* relative, getting current directory */
+			if (getcwd(dir, sizeof(dir)) == NULL) {
+				errorf("Unable to get current directory");
+				exit(1);
+			}
+			/* appending path */
+			strlcat(dir, STR_SEP, sizeof(dir));
+			strlcat(dir, src, sizeof(dir)); /* XXX check */
+		}
+/*debugf("dir = '%s'", dir);*/
+
+		if (makepath(dir, S_IRWXU | S_IRWXG | S_IRWXO) == false) {
+			errorf("cannot create directory.");
+			exit(1);
+		}
+
+		/* set dst for further operations */
+		dst = dir;
 	}
 
 	/* change owner and group */
 	if (do_chown == true) {
-/*debugf("doing chown(%s, %d, %d)", dst, uid, gid);*/
+/*debugf("doing chown('%s', %d, %d)", dst, uid, gid);*/
 		if (chown(dst, uid, gid) != 0) {
 			errorf("chown failed."); /* better message with errno */
 			exit(1);
@@ -414,6 +443,7 @@ int main(int argc, char *argv[]) {
 
 	/* change perms (must follow chown that can change perms) */
 	if (chmod(dst, mode) == -1) {
+/*debugf("chmod('%s', %o)", dst, mode);*/
 		errorf("chmod failed.");
 		exit(1);
 	}
