@@ -17,7 +17,6 @@ BASE=		@BASE@
 CONFDIR=	@CONFDIR@
 
 BINDIR=		@BINDIR@
-SBINDIR=	@SBINDIR@
 DATADIR=	@DATADIR@
 MANDIR=		@MANDIR@
 
@@ -60,6 +59,12 @@ SCAN=		$(PREMAKE)scan
 INST=           $(PREMAKE)install
 PKGCFG=		$(PREMAKE)pc
 
+BIN_FILES=	$(PREMAKE) $(SCAN) $(INST) $(PKGCFG) $(SETUP)
+DATA_FILES=	pmkcfgtool.dat pmkcomp.dat pmkcpu.dat pmkscan.dat
+MAN1_FILES=	$(PREMAKE).1 $(SCAN).1 $(INST).1 $(PKGCFG).1
+MAN5_FILES=	$(PREMAKE)file.5 $(PREMAKE).conf.5
+MAN8_FILES=	$(SETUP).8
+
 SAMPLE=		$(PREMAKE)file.sample
 
 SELFINST=	self-$(INST)
@@ -95,11 +100,6 @@ PC_OBJS=	cfgtool.o common.o compat.o dynarray.o hash.o parse.o \
 # main target
 all: $(PREMAKE) $(SETUP) $(SCAN) $(INST) $(PKGCFG)
 
-showmode:
-	@printf "Makefile is configured in '%s' mode.\n" $(MKTARGET)
-
-sm: showmode
-
 $(PREMAKE): $(P_OBJS)
 	$(CC) -o $(PREMAKE) $(LDFLAGS) $(P_OBJS) $(LGEN_FLAGS)
 
@@ -117,64 +117,59 @@ $(PKGCFG): $(PC_OBJS)
 
 install: all
 	$(INSTALL) -d -m 755 $(DESTDIR)$(BINDIR)
-	$(INSTALL) -m 755 $(PREMAKE) $(DESTDIR)$(BINDIR)/$(PREMAKE)
-	$(INSTALL) -m 755 $(SCAN) $(DESTDIR)$(BINDIR)/$(SCAN)
-	$(INSTALL) -m 755 $(INST) $(DESTDIR)$(BINDIR)/$(INST)
-	$(INSTALL) -m 755 $(PKGCFG) $(DESTDIR)$(BINDIR)/$(PKGCFG)
-	$(INSTALL) -d -m 755 $(DESTDIR)$(SBINDIR)
-	$(INSTALL) -m 755 $(SETUP) $(DESTDIR)$(SBINDIR)/$(SETUP)
+	@for f in $(BIN_FILES); do \
+		printf "$(INSTALL) -m 755 $$f $(DESTDIR)$(BINDIR)/$$f\n"; \
+		$(INSTALL) -m 755 $$f $(DESTDIR)$(BINDIR)/$$f; \
+	done
+
 	$(INSTALL) -d -m 755 $(DESTDIR)$(DATADIR)
+	@for f in $(DATA_FILES); do \
+		printf "$(INSTALL) -m 644 data/$$f $(DESTDIR)$(DATADIR)/$$f\n"; \
+		$(INSTALL) -m 644 data/$$f $(DESTDIR)$(DATADIR)/$$f; \
+	done
 	$(INSTALL) -m 644 samples/$(SAMPLE) \
 		$(DESTDIR)$(DATADIR)/$(SAMPLE)
-	$(INSTALL) -m 644 data/pmkcfgtool.dat \
-		$(DESTDIR)$(DATADIR)/pmkcfgtool.dat
-	$(INSTALL) -m 644 data/pmkcomp.dat \
-		$(DESTDIR)$(DATADIR)/pmkcomp.dat
-	$(INSTALL) -m 644 data/pmkcpu.dat \
-		$(DESTDIR)$(DATADIR)/pmkcpu.dat
-	$(INSTALL) -m 644 data/pmkscan.dat \
-		$(DESTDIR)$(DATADIR)/pmkscan.dat
+
 	$(INSTALL) -d -m 755 $(DESTDIR)$(MANDIR)/man1
-	$(INSTALL) -m 444 man/$(PREMAKE).1 \
-		$(DESTDIR)$(MANDIR)/man1/$(PREMAKE).1
-	$(INSTALL) -m 444 man/$(SCAN).1 \
-		$(DESTDIR)$(MANDIR)/man1/$(SCAN).1
-	$(INSTALL) -m 444 man/$(PKGCFG).1 \
-		$(DESTDIR)$(MANDIR)/man1/$(PKGCFG).1
-	$(INSTALL) -m 444 man/$(INST).1 \
-		$(DESTDIR)$(MANDIR)/man1/$(INST).1
+	@for f in $(MAN1_FILES); do \
+		printf "$(INSTALL) -m 644 man/$$f $(DESTDIR)$(MANDIR)/man1/$$f\n"; \
+		$(INSTALL) -m 644 man/$$f $(DESTDIR)$(MANDIR)/man1/$$f; \
+	done
 	$(INSTALL) -d -m 755 $(DESTDIR)$(MANDIR)/man5
-	$(INSTALL) -m 444 man/$(PREMAKE).conf.5 \
-		$(DESTDIR)$(MANDIR)/man5/$(PREMAKE).conf.5
-	$(INSTALL) -m 444 man/$(PREMAKE)file.5 \
-		$(DESTDIR)$(MANDIR)/man5/$(PREMAKE)file.5
+	@for f in $(MAN5_FILES); do \
+		printf "$(INSTALL) -m 644 man/$$f $(DESTDIR)$(MANDIR)/man5/$$f\n"; \
+		$(INSTALL) -m 644 man/$$f $(DESTDIR)$(MANDIR)/man5/$$f; \
+	done
 	$(INSTALL) -d -m 755 $(DESTDIR)$(MANDIR)/man8
-	$(INSTALL) -m 444 man/$(SETUP).8 \
-		$(DESTDIR)$(MANDIR)/man8/$(SETUP).8
+	@for f in $(MAN8_FILES); do \
+		printf "$(INSTALL) -m 644 man/$$f $(DESTDIR)$(MANDIR)/man8/$$f\n"; \
+		$(INSTALL) -m 644 man/$$f $(DESTDIR)$(MANDIR)/man8/$$f; \
+	done
 
-global-deinstall:
-	rm -rf $(DESTDIR)$(DATADIR)
+deinstall:
+	@for f in $(BIN_FILES); do \
+		printf "rm -f $(DESTDIR)$(BINDIR)/$$f\n"; \
+		rm -f $(DESTDIR)$(BINDIR)/$$f; \
+	done
 
-user-deinstall:
-#	nothing
-
-deinstall: @MKTARGET@-deinstall
-	rm -f $(DESTDIR)$(BINDIR)/$(PREMAKE)
-	rm -f $(DESTDIR)$(BINDIR)/$(SCAN)
-	rm -f $(DESTDIR)$(BINDIR)/$(INST)
-	rm -f $(DESTDIR)$(BINDIR)/$(PKGCFG)
-	rm -f $(DESTDIR)$(SBINDIR)/$(SETUP)
+	@for f in $(DATA_FILES); do \
+		printf "rm -f $(DESTDIR)$(DATADIR)/$$f\n"; \
+		rm -f $(DESTDIR)$(DATADIR)/$$f; \
+	done
 	rm -f $(DESTDIR)$(DATADIR)/$(SAMPLE)
-	rm -f $(DESTDIR)$(DATADIR)/pmkscan.dat
-	rm -f $(DESTDIR)$(DATADIR)/pmkcomp.dat
-	rm -f $(DESTDIR)$(DATADIR)/pmkcfgtool.dat
-	rm -f $(DESTDIR)$(MANDIR)/man1/$(PREMAKE).1
-	rm -f $(DESTDIR)$(MANDIR)/man1/$(SCAN).1
-	rm -f $(DESTDIR)$(MANDIR)/man1/$(INST).1
-	rm -f $(DESTDIR)$(MANDIR)/man1/$(PKGCFG).1
-	rm -f $(DESTDIR)$(MANDIR)/man8/$(SETUP).8
-	rm -f $(DESTDIR)$(MANDIR)/man5/$(PREMAKE)file.5
-	rm -f $(DESTDIR)$(MANDIR)/man5/$(PREMAKE).conf.5
+
+	@for f in $(MAN1_FILES); do \
+		printf "rm -f $(DESTDIR)$(MANDIR)/man1/$$f\n"; \
+		rm -f $(DESTDIR)$(MANDIR)/man1/$$f; \
+	done
+	@for f in $(MAN5_FILES); do \
+		printf "rm -f $(DESTDIR)$(MANDIR)/man5/$$f\n"; \
+		rm -f $(DESTDIR)$(MANDIR)/man5/$$f; \
+	done
+	@for f in $(MAN8_FILES); do \
+		printf "rm -f $(DESTDIR)$(MANDIR)/man8/$$f\n"; \
+		rm -f $(DESTDIR)$(MANDIR)/man8/$$f; \
+	done
 
 $(PREMAKE)-clean:
 	rm -f $(P_OBJS) $(PREMAKE)
@@ -195,9 +190,6 @@ clean: $(PREMAKE)-clean $(SETUP)-clean $(SCAN)-clean $(INST)-clean \
 		$(PKGCFG)-clean
 	rm -f *.core
 
-dist-clean: clean
+distclean: clean
 	rm -f compat/compat.h Makefile tests/Makefile
-
-full-clean: dist-clean
-fclean: full-clean
 
