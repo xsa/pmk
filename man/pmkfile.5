@@ -105,19 +105,6 @@ CHECK_INCLUDE(header_sys_param) {
 .Pp
 The following commands have no label.
 .Bl -tag -width Ds
-.It Cm DEFINE
-This command permits to define variables.
-.Pp
-Arguments :
-.Pp
-Example :
-.Bd -literal -offset -indent
-DEFINE {
- PACKAGE="my_prog"
- VERSION="0.1"
-}
-.Ed
-
 .It Cm SETTINGS
 This command sets pmk parameters. 
 .Pp
@@ -136,6 +123,19 @@ SETTINGS {
  LANG="C"
  TARGET=("src/file.c","src/file.h")
  DETECT=("CC")
+}
+.Ed
+
+.It Cm DEFINE
+This command permits to define variables.
+.Pp
+Arguments :
+.Pp
+Example :
+.Bd -literal -offset -indent
+DEFINE {
+ PACKAGE="my_prog"
+ VERSION="0.1"
 }
 .Ed
 
@@ -272,6 +272,33 @@ IF(header_gtk) {
 	DEFINE {
 		HAVE_GTK = "1"
 	}
+}
+.Ed
+.El
+
+.Sh SHARED LIBRARY SUPPORT
+.Bl -tag -width Ds
+.It Cm BUILD_SHLIB_NAME
+This command helps you to build the name of a shared library.
+.Pp
+Arguments:
+.Bd -literal -offset -indent
+NAME : type is 'quoted', name of the library (without leading 'lib').
+MAJOR : type is 'quoted', major number for the version.
+MINOR : type is 'quoted', minor number for the version.
+VERSION_NONE : type is 'quoted', variable name to store library name without version, optional.
+VERSION_MAJ : type is 'quoted', variable name to store library name with major version, optional.
+VERSION_FULL : type is 'quoted', variable name to store library name with full version, optional.
+.Ed
+.Pp
+Example :
+.Bd -literal -offset -indent
+BUILD_SHLIB_NAME {
+	NAME = "test"
+	MAJOR = "0"
+	MINOR = "2"
+	VERSION_NONE = "LIBNAME"
+	VERSION_FULL = "LIBNAMEVERS"
 }
 .Ed
 .El
