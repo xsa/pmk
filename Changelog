@@ -1,3 +1,10 @@
+27 Oct 2003 mipsator
+ * updated Makefile.pmk to build in a test directory.
+ * rewritten ac_parse_config() and fixed AC_COMPAT to be relative to
+	pmkfile location
+ * added defines for pmk's specific directories (builddir, ...).
+ * updated samples of pmkfile and Makefiles.
+
 18 Oct 2003 mipsator
  * fixed computing of top_srcdir.
  * added processing of dynamic variables in pmk.

@@ -55,6 +55,7 @@
 #include "pmk.h"
 #include "parse.h"
 
+/*#define PMK_DEBUG	1*/
 
 extern char	*optarg;
 extern int	 optind;
@@ -92,37 +93,49 @@ void process_dyn_var(htable *pht, pmkdata *pgd, char *template) {
 
 	/* compute builddir_abs with relative path */
 	abspath(basedir, rpath, btpath); 
-	hash_add(pht, "builddir_abs", strdup(btpath));
-/*debugf("builddir_abs : '%s'", btpath);*/
+	hash_add(pht, PMK_DIR_BLD_ABS, strdup(btpath));
+#ifdef PMK_DEBUG
+	debugf("%s = '%s'", PMK_DIR_BLD_ABS, buf);
+#endif
 
 	/* compute relative path to builddir root */
 	relpath(btpath, basedir, buf);
-	hash_add(pht, "builddir_root_rel", strdup(buf));
-/*debugf("builddir_root_rel : '%s'", buf);*/
+	hash_add(pht, PMK_DIR_BLD_ROOT_REL, strdup(buf));
+#ifdef PMK_DEBUG
+	debugf("%s = '%s'", PMK_DIR_BLD_ROOT_REL, buf);
+#endif
 
 	/* set buildir_rel to '.', useful ? */
-	hash_add(pht, "builddir_rel", strdup("."));
-/*debugf("builddir_rel : '.'");*/
+	hash_add(pht, PMK_DIR_BLD_REL, strdup("."));
+#ifdef PMK_DEBUG
+	debugf("%s = '%s'", PMK_DIR_BLD_REL, buf);
+#endif
 
 	/* compute and set relative path from basedir to srcdir */
 	relpath(btpath, srcdir, buf);
-	hash_add(pht, "srcdir_root_rel", strdup(buf));
-/*debugf("srcdir_root_rel : '%s'", buf);*/
+	hash_add(pht, PMK_DIR_SRC_ROOT_REL, strdup(buf));
+#ifdef PMK_DEBUG
+	debugf("%s = '%s'", PMK_DIR_SRC_ROOT_REL, buf);
+#endif
 
 	/* set absolute path of template */
-	hash_add(pht, "srcdir_abs", strdup(stpath));
-/*debugf("srcdir_abs : '%s'", stpath);*/
+	hash_add(pht, PMK_DIR_SRC_ABS, strdup(stpath));
+#ifdef PMK_DEBUG
+	debugf("%s = '%s'", PMK_DIR_SRC_ABS, buf);
+#endif
 
 	/* compute and set relative path from template to builddir */
 	relpath(btpath, stpath, buf);
-	hash_add(pht, "srcdir_rel", strdup(buf));
-/*debugf("srcdir_rel : '%s'", buf);*/
+	hash_add(pht, PMK_DIR_SRC_REL, strdup(buf));
+#ifdef PMK_DEBUG
+	debugf("%s = '%s'", PMK_DIR_SRC_REL, buf);
+#endif
 }
 
 /*
 	init variables
 
-	pht : global data hash table
+	pgd : global data structure
 
         return : -
 
@@ -179,10 +192,14 @@ void init_var(pmkdata *pgd) {
 		hash_add(pht, "EGREP", strdup(pstr));
 
 	/* set absolute paths */
-	hash_add(pht, "srcdir_root_abs", strdup(pgd->srcdir));
-/*debugf("srcdir_root_abs : '%s'", pgd->srcdir);*/
-	hash_add(pht, "builddir_root_abs", strdup(pgd->basedir));
-/*debugf("builddir_root_abs : '%s'", pgd->basedir);*/
+	hash_add(pht, PMK_DIR_SRC_ROOT_ABS, strdup(pgd->srcdir));
+#ifdef PMK_DEBUG
+	debugf("%s = '%s'", PMK_DIR_SRC_ROOT_ABS, pgd->srcdir);
+#endif
+	hash_add(pht, PMK_DIR_BLD_ROOT_ABS, strdup(pgd->basedir));
+#ifdef PMK_DEBUG
+	debugf("%s = '%s'", PMK_DIR_BLD_ROOT_ABS, pgd->basedir);
+#endif
 }
 
 /*
@@ -263,7 +280,7 @@ bool process_template(char *template, pmkdata *pgd) {
 	abspath(pgd->basedir, buf, tpath); /* XXX check ? */
 
 	/* XXX need to do a makepath function ? */
-	mkdir(tpath, S_IRWXU); /* XXX check ? */
+	mkdir(tpath, S_IRWXU); /* XXX check, recursive ? */
 	
 	/* append filename */
 	abspath(tpath, lbuf, fpath);
@@ -722,6 +739,7 @@ int main(int argc, char *argv[]) {
 				abspath(gdata.srcdir, pstr, buf); /* XXX check ??? */
 				if (process_template(buf, &gdata) == false) {
 					/* failure while processing template */
+					errorf("Failed to process '%s'.", buf);
 					rval = 1;
 				}
 			}
@@ -729,7 +747,11 @@ int main(int argc, char *argv[]) {
 
 		if (gdata.ac_file != NULL) {
 			pmk_log("\nProcess '%s' for autoconf compatibility.\n", gdata.ac_file);
-			ac_parse_config(gdata.htab, gdata.ac_file);
+			if (ac_parse_config(&gdata) == false) {
+				/* failure while processing autoconf file */
+				errorf("Failed to process autoconf config file.");
+				rval = 1;
+			}
 		}
 
 		pmk_log("\nEnd of log\n");

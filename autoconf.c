@@ -34,6 +34,8 @@
  */
 
 
+#include <sys/types.h>
+#include <sys/stat.h>
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -56,28 +58,37 @@
 	return : boolean
 */
 
-bool ac_parse_config(htable *ht, char *fpath) {
+bool ac_parse_config(pmkdata *pgd) {
 	FILE	*fp_in,
 		*fp_out;
 	bool	 rval = true;
 	char	 line[TMP_BUF_LEN],
 		 buf[TMP_BUF_LEN],
-		 ftmp[MAXPATHLEN],
+		 fsrc[MAXPATHLEN],
+		 fname[MAXPATHLEN],
+		*fpath,
 		*pstr;
+	htable	*ht;
 	int	 i,
 		 s,
 		 fe;
 
-	if (strlcpy(ftmp, "config_tmp", sizeof(ftmp)) >= sizeof(ftmp)) {
+	ht = pgd->htab;
+	fpath = pgd->ac_file;
+
+	/* compute full path */
+	abspath(pgd->srcdir, fpath, fsrc); /* XXX check ? */
+	abspath(pgd->basedir, fpath, fname); /* XXX check ? */
+
+	fp_in = fopen(fsrc, "r");
+	if (fp_in == NULL) {
 		return(false);
 	}
-	fp_out = fopen(ftmp, "w");
-	if (fp_out == NULL)
-		return(false);
 
-	fp_in = fopen(fpath, "r");
-	if (fp_in == NULL) {
-		fclose(fp_out);
+	/* XXX TODO use a define for the temporary file ? mkstemp ? */
+	fp_out = fopen(PMK_TMP_AC_CONF, "w");
+	if (fp_out == NULL) {
+		fclose(fp_in);
 		return(false);
 	}
 
@@ -130,15 +141,19 @@ bool ac_parse_config(htable *ht, char *fpath) {
 	fclose(fp_out);
 
 	if (fe == 0) {
-		unlink(ftmp);
+		unlink(PMK_TMP_AC_CONF);
 		return(false);
 	}
 
-	/* erase orig and copy new one */
-	unlink(fpath);
-	rval = copy_text_file(ftmp, fpath);
+	/* XXX TODO make path ? */
 
-	unlink(ftmp);
+	/* erase orig and copy new one */
+	unlink(fname);
+	rval = copy_text_file(PMK_TMP_AC_CONF, fname);
+
+	unlink(PMK_TMP_AC_CONF);
+
+	pmk_log("Saved '%s'.\n", fname);
 
 	return(rval);
 }
@@ -186,6 +201,7 @@ void ac_process_dyn_var(htable *pht, pmkdata *pgd, char *template) {
 	relpath(srcdir, abs_ad, ac_dir);
 
 	/* init builddir */
+	/*pstr = hash_get(pht, PMK_DIR_BLD_ROOT_ABS);*/
 	hash_add(pht, "abs_top_builddir", strdup(basedir));
 
 	/* set abs_builddir */

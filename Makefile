@@ -17,6 +17,8 @@ SBINDIR=	$(BASE)/sbin
 DATADIR=	$(BASE)/share/$(PREMAKE)
 MANDIR=		$(BASE)/man
 
+TESTDIR=	test_samples
+
 CFGFLAGS=	-DSYSCONFDIR=\"$(SYSCONFDIR)\" -DCONFDIR=\"$(CONFDIR)\"
 
 # Flag to enable pmk in user mode (check INSTALL file for details).
@@ -171,28 +173,28 @@ test_$(PREMAKE): $(PREMAKE)
 	@echo "----------------------------------------"
 	@echo ""
 	@echo "-> Running pmk"
-	./$(PREMAKE) -b samples -e use_gtk -f samples/pmkfile.sample -o samples/ovrfile.sample
+	./$(PREMAKE) -b $(TESTDIR) -e use_gtk -f samples/pmkfile.sample -o samples/ovrfile.sample
 	@echo ""
 	@echo "-> Dumping generated files"
 	@echo ""
-	@echo "samples/Makefile.sample"
+	@echo "$(TESTDIR)/Makefile.sample"
 	@echo "----------------------------------------"
-	@cat samples/Makefile.sample
-	@echo "----------------------------------------"
-	@echo ""
-	@echo "samples/subdir/Makefile.subdir"
-	@echo "----------------------------------------"
-	@cat samples/subdir/Makefile.subdir
+	@cat $(TESTDIR)/Makefile.sample
 	@echo "----------------------------------------"
 	@echo ""
-	@echo "samples/config_sample.h"
+	@echo "$(TESTDIR)/subdir/Makefile.subdir"
 	@echo "----------------------------------------"
-	@cat samples/config_sample.h
+	@cat $(TESTDIR)/subdir/Makefile.subdir
 	@echo "----------------------------------------"
 	@echo ""
-	@echo "samples/ac_config.h"
+	@echo "$(TESTDIR)/config_sample.h"
 	@echo "----------------------------------------"
-	@cat samples/ac_config.h
+	@cat $(TESTDIR)/config_sample.h
+	@echo "----------------------------------------"
+	@echo ""
+	@echo "$(TESTDIR)/ac_config.h"
+	@echo "----------------------------------------"
+	@cat $(TESTDIR)/ac_config.h
 	@echo "----------------------------------------"
 	@echo ""
 	@echo "=> End of test"
@@ -228,8 +230,11 @@ test_$(SCAN): $(SCAN)
 test_clean:
 	@echo ""
 	@echo "=> Removing generated files"
-	rm -f samples/Makefile.sample samples/config_sample.h samples/ac_config.h
-	rm -f samples/subdir/Makefile.subdir pmkfile.scan pmk.log
+	rm -f $(TESTDIR)/Makefile.sample $(TESTDIR)/config_sample.h
+	rm -f $(TESTDIR)/ac_config.h $(TESTDIR)/subdir/Makefile.subdir
+	rm -rf $(TESTDIR)
+	rm -f samples/ac_config.h pmkfile.scan pmk.log
+
 	@echo ""
 	@echo "=> End of cleaning."
 	@echo ""
