@@ -101,7 +101,7 @@ CHECK_HEADER(function_mkstemps) {
 
 CHECK_LIB(library_gen) {
 	REQUIRED = FALSE
-	NAME = "lgen"
+	NAME = "gen"
 	FUNCTION = "dirname"
 	LIBS = "LGEN_FLAGS"
 }
