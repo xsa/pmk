@@ -35,6 +35,8 @@
 
 
 #include <sys/types.h>
+
+#include <errno.h>
 #include <glob.h>
 #include <regex.h>
 #include <stdio.h>
@@ -97,7 +99,8 @@ bool parse_data_file(prsdata *pdata, scandata *sdata) {
 
 	fd = fopen(PMKSCAN_DATA, "r");
 	if (fd == NULL) {
-		errorf("cannot open '%s'", PMKSCAN_DATA);
+		errorf("cannot open '%s' : %s.", 
+			PMKSCAN_DATA, strerror(errno));
 		return(false);
 	}
 
@@ -248,7 +251,7 @@ bool parse_c_file(char *filename, scandata *sdata, htable *phtgen, char *langstr
 
 	fp = fopen(filename, "r");
 	if (fp == NULL) {
-		errorf("cannot open %s.", filename);
+		errorf("cannot open '%s' : %s.", filename, strerror(errno));
 		return(false);
 	}
 
@@ -297,7 +300,7 @@ bool output_file(char *ofile, htable *pht) {
 
 	fp = fopen(ofile, "w");
 	if (fp == NULL) {
-		errorf("cannot open %s.", ofile);
+		errorf("cannot open '%s' : %s.", ofile, strerror(errno));
 		return(false);
 	}
 
