@@ -1,4 +1,10 @@
-/*	$OpenBSD: basename.c,v 1.8 2002/06/09 05:03:59 deraadt Exp $	*/
+/* $Id$ */
+
+/*
+	basename imported from OpenBSD project
+
+	http://www.openbsd.org/
+*/
 
 /*
  * Copyright (c) 1997 Todd C. Miller <Todd.Miller@courtesan.com>
@@ -27,14 +33,12 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef lint
-static char rcsid[] = "$OpenBSD: basename.c,v 1.8 2002/06/09 05:03:59 deraadt Exp $";
-#endif /* not lint */
 
 #include <errno.h>
 #include <libgen.h>
-#include <string.h>
 #include <sys/param.h>
+
+#include "string.h"
 
 char *
 basename(path)
