@@ -1,5 +1,6 @@
 09 Aug 2003 mipsator
  * more stuff in pmkfile man page.
+ * some changes in pmkscan data file.
 
 08 Aug 2003 mipsator
  * rewritten parse_cell() in the same spirit as parse_opt().
