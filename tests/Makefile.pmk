@@ -4,15 +4,16 @@ CC=		@CC@
 CPP=		@CPP@
 AS=		@AS@
 
-CFLAGS?=	-Wall
-#CFLAGS+=	-Werror
-#CFLAGS+=	-ansi -pedantic
+# Warning options, uncomment as your need
+#WARN=		-Wall
+#WARN=		-Werror
+#WARN=		-ansi -pedantic
+#WARN=		-Wall -Werror -ansi -pedantic
 
 LDFLAGS?=
-DEBUG?=		-g
+#DEBUG?=	-g
 
-#LINT_TARGET=	da_test.c
-
+#CFLAGS=	$(WARN) $(DEBUG)
 
 CI_OBJS=	../common.o ../compat.o ../detect_cpu.o ../detect_cpu_asm.o \
 		../dynarray.o ../hash.o ../parse.o ../pmk_obj.o cpuid_test.o
@@ -29,9 +30,10 @@ H_OBJS=		../compat.o ../hash.o hash_test.o
 
 MK_OBJS=	../common.o ../compat.o ../dynarray.o mkvar_test.o
 
-PRS_OBJS=	../autoconf.o ../common.o ../cfgtool.o ../detect.o ../dynarray.o \
-		../func.o ../functool.o ../hash.o ../hash_tools.o ../parse.o \
-		../pathtools.o ../pmk_obj.o ../pkgconfig.o parser_test.o
+PRS_OBJS=	../autoconf.o ../common.o ../cfgtool.o ../detect.o \
+		../dynarray.o ../func.o ../functool.o ../hash.o \
+		../hash_tools.o ../parse.o ../pathtools.o ../pmk_obj.o \
+		../pkgconfig.o parser_test.o
 
 PTH_OBJS=	../compat.o ../pathtools.o path_test.o
 
@@ -85,12 +87,5 @@ pkgconfig: config $(PC_OBJS)
 
 clean:
 	rm -f $(CI_OBJS) $(C_OBJS) $(DA_OBJS) $(GC_OBJS)
-	rm -f $(H_OBJS) $(MK_OBJS) $(P_OBJS)
+	rm -f $(H_OBJS) $(MK_OBJS) $(PRS_OBJS) $(PTH_OBJS) $(PC_OBJS)
 	rm -f *_test *.core
-
-#lint:
-#.ifdef LINT_TARGET
-#	lint $(LINT_TARGET)
-#.else
-#	@echo "LINT_TARGET not set."
-#.endif
