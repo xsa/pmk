@@ -3,6 +3,7 @@
  * added pmk object support in hash.
  * added pmk object support in dynarray.
  * changes to use pmk objects with hast tables.
+ * removed incorrect code in pmksetup and added use of get_line.
 
 # snapshot 0.5.4
 
