@@ -408,6 +408,7 @@ bool pmk_check_header(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 	if (po == NULL) {
 		target = incfile;
 	} else {
+		/* KW_OPT_FUNCTION provided */
 		switch (po_get_type(po)) {
 			case PO_STRING:
 				pstr = po_get_str(po);
@@ -504,8 +505,7 @@ bool pmk_check_header(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 		strlcpy(inc_path, "", sizeof(inc_path));
 	}
 
-	/* XXX loop */
-	/*while ((loop == true) && (rslt == true)) {*/
+	/* check loop */
 	while (loop == true) {
 
 		/* fill test file */
@@ -596,6 +596,10 @@ bool pmk_check_header(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 			}
 	}
 
+	if (clean_funcs == true) {
+		da_destroy(funcs);
+	}
+
 	return(rval);
 }
 
@@ -606,6 +610,10 @@ bool pmk_check_header(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 bool pmk_check_lib(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 	FILE	*tfp;
 	bool	 required,
+		 rslt = true,
+		 loop = true,
+		 clean_funcs = false,
+		 check_funcs = false,
 		 rval;
 	char	 cfgcmd[MAXPATHLEN],
 		 lib_buf[TMP_BUF_LEN] = "",
@@ -613,12 +621,17 @@ bool pmk_check_lib(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 		*main_libs,
 		*ccpath,
 		*libname,
-		*libfunc,
-		*target,
-		*libs;
-	dynary	*defs;
-	int	 r;
+		*libfunc = NULL,
+		*target = NULL,
+		*libs,
+		*pstr;
+	dynary	*funcs = NULL,
+		*defs;
+	int	 i,
+		 n,
+		 r;
 	lgdata	*pld;
+	pmkobj	*po;
 
 	pmk_log("\n* Checking library [%s]\n", cmd->label);
 
@@ -630,16 +643,50 @@ bool pmk_check_lib(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 		return(false);
 	}
 
-	libfunc = po_get_str(hash_get(ht, KW_OPT_FUNCTION));
-	if (libfunc == NULL) {
+	po = hash_get(ht, KW_OPT_FUNCTION);
+	if (po == NULL) {
 		target = libname;
 	} else {
-		target = libfunc;
+		/* KW_OPT_FUNCTION provided */
+		switch (po_get_type(po)) {
+			case PO_STRING:
+				pstr = po_get_str(po);
+				/* pstr should not be NULL */
+
+				funcs = da_init();
+				if (funcs == NULL) {
+					errorf("unable to initialise dynary.");
+					return(false);
+				}
+
+				if (da_push(funcs, pstr) == false) {
+					errorf("unable to add '%s' in function list.", pstr);
+					return(false);
+				}
+
+				clean_funcs = true;
+				break;
+
+			case PO_LIST:
+				funcs = po_get_list(po);
+				/* funcs should not be NULL */
+				break;
+
+			default:
+				errorf("syntax error for '%s': bad type.", KW_OPT_FUNCTION);
+				return(false);
+		}
+		check_funcs = true;
 	}
 
 	if (depend_check(ht, pgd) == false) {
 		pmk_log("\t%s\n", pgd->errmsg);
-		return(process_required(pgd, cmd, required, target, NULL));
+		n = da_usize(funcs);
+		for (i=0 ; i < n ; i++) {
+			pstr = da_idx(funcs, i);
+			record_def_data(pgd->htab, pstr, NULL);
+		}
+		return(process_required(pgd, cmd, required, NULL, NULL));
 	}
 
 	/* get the language used */
@@ -680,65 +727,88 @@ bool pmk_check_lib(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 	/* get actual content of LIBS, no need to check as it is initialised */
 	main_libs = hash_get(pgd->htab, PMKVAL_ENV_LIBS);
 
-	tfp = tmps_open(TEST_FILE_NAME, "w", ftmp, sizeof(ftmp), strlen(C_FILE_EXT));
-	if (tfp != NULL) {
-		if (libfunc == NULL) {
-			pmk_log("\tFound library '%s' : ", libname);
-			fprintf(tfp, LIB_TEST_CODE);
+	/* check loop */
+	while (loop == true) {
+		tfp = tmps_open(TEST_FILE_NAME, "w", ftmp, sizeof(ftmp), strlen(C_FILE_EXT));
+		if (tfp != NULL) {
+			if (check_funcs == false) {
+				pmk_log("\tFound library '%s' : ", libname);
+				fprintf(tfp, LIB_TEST_CODE);
+			} else {
+				libfunc = da_shift(funcs);
+				target = libfunc;
+				pmk_log("\tFound function '%s' in '%s' : ", libfunc, libname);
+				fprintf(tfp, LIB_FUNC_TEST_CODE, libfunc, libfunc);
+			}
+
+			/* fill test file */
+			fclose(tfp);
 		} else {
-			pmk_log("\tFound function '%s' in '%s' : ", libfunc, libname);
-			fprintf(tfp, LIB_FUNC_TEST_CODE, libfunc, libfunc);
-		}
-
-		/* fill test file */
-		fclose(tfp);
-	} else {
-		errorf("cannot open test file.");
-		return(false);
-	}
-
-	/* build compiler command */
-	snprintf(cfgcmd, sizeof(cfgcmd), LIB_CC_FORMAT,
-		ccpath, main_libs, BIN_TEST_NAME, libname, ftmp, pgd->buildlog);
-
-	/* get result */
-	r = system(cfgcmd);
-	if (r == 0) {
-		pmk_log("yes.\n");
-		/* define for template */
-		record_def_data(pgd->htab, target, DEFINE_DEFAULT);
-		label_set(pgd->labl, cmd->label, true);
-		/* process additional defines */
-		process_def_list(pgd->htab, defs);
-
-		snprintf(lib_buf, sizeof(lib_buf), "-l%s", libname);
-
-		/* put result in LIBS or alternative variable */
-		if (single_append(pgd->htab, libs, strdup(lib_buf)) == false) {
-			errorf("failed to append '%s' in '%s'.", lib_buf, libs);
+			errorf("cannot open test file.");
 			return(false);
 		}
 
-		rval = true;
-	} else {
-		pmk_log("no.\n");
-		rval = process_required(pgd, cmd, required, target, NULL);
-		if (rval == false) {
-			if (libfunc == NULL) {
-				errorf("failed to find library '%s'.", libname);
-			} else {
-				errorf("failed to find function '%s'.", libfunc);
-			}
+		/* build compiler command */
+		snprintf(cfgcmd, sizeof(cfgcmd), LIB_CC_FORMAT,
+			ccpath, main_libs, BIN_TEST_NAME, libname, ftmp, pgd->buildlog);
+	
+		/* get result */
+		r = system(cfgcmd);
+		if (r == 0) {
+			pmk_log("yes.\n");
+			/* define for template */
+			record_def_data(pgd->htab, target, DEFINE_DEFAULT);
+		} else {
+			pmk_log("no.\n");
+			record_def_data(pgd->htab, target, NULL);
+			rslt = false;
+		}
+
+		if (unlink(ftmp) == -1) {
+			/* cannot remove temporary file */
+			errorf("cannot remove %s", ftmp);
+		}
+
+		if (libfunc == NULL) {
+			/* No need to check return here as binary could not exists */
+			unlink(BIN_TEST_NAME);
+			/* exit from loop */
+			loop = false;
+		} else {
+			/* check if list is empty */
+			if (da_usize(funcs) == 0)
+				loop = false;
 		}
 	}
 
-	if (unlink(ftmp) == -1) {
-		/* cannot remove temporary file */
-		errorf("cannot remove %s", ftmp);
+	if (rslt == true) {
+			label_set(pgd->labl, cmd->label, true);
+			/* process additional defines */
+			process_def_list(pgd->htab, defs);
+
+			snprintf(lib_buf, sizeof(lib_buf), "-l%s", libname);
+
+			/* put result in LIBS or alternative variable */
+			if (single_append(pgd->htab, libs, strdup(lib_buf)) == false) {
+				errorf("failed to append '%s' in '%s'.", lib_buf, libs);
+				return(false);
+			}
+
+			rval = true;
+	} else {
+			rval = process_required(pgd, cmd, required, NULL, NULL);
+			if (rval == false) {
+				if (libfunc == NULL) {
+					errorf("failed to find library '%s'.", libname);
+				} else {
+					errorf("failed to find function '%s'.", libfunc);
+				}
+			}
 	}
 
-	/* No need to check return here as binary could not exists */
-	unlink(BIN_TEST_NAME);
+	if (clean_funcs == true) {
+		da_destroy(funcs);
+	}
 
 	return(rval);
 }

@@ -1,3 +1,6 @@
+26 sep 2004 mipsator
+ * improved CHECK_LIB to handle more than one function. 
+
 24 sep 2004 mipsator
  * CHECK_HEADER is now able to check more than one function (feature
    asked by Gergely Czuczy).
