@@ -93,9 +93,9 @@
 /* major version */
 #define PREMAKE_MAJOR		"0"
 /* minor version */
-#define PREMAKE_MINOR		"7"
+#define PREMAKE_MINOR		"8"
 /* only used for snapshots, comment for release */
-#define PREMAKE_SNAP		"13"
+/*#define PREMAKE_SNAP		"0"*/
 
 /* build version string */
 #ifndef PREMAKE_SNAP

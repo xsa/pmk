@@ -1,4 +1,6 @@
-12 Feb 2004 mipsator
+# PMK 0.8 release
+
+14 Feb 2004 mipsator
  * added missing tutorial stuff for release.
 
 13 Feb 2004 mipsator
@@ -404,7 +406,7 @@
 14 Oct 2003 mipsator
  * removed obsolete stuff (mostly compat with 0.6 syntax).
 
-# PMK 0.7 released
+# PMK 0.7 release
 
 12 Oct 2003 mipsator
  * removed stuff not related to autoconf into ac_set_variables().
@@ -617,7 +619,7 @@
  * added switches support.
  * update man pages about switches.
 
-# PMK 0.6 released
+# PMK 0.6 release
 
 23 Aug 2003 mipsator
  * changes for 0.6 release.
@@ -798,7 +800,7 @@
  * fixed a memory fault in pmk and corrected a typo
 	(noticed by Ritschard Pierre-Yves).
 
-# PMK 0.5 released
+# PMK 0.5 release
 
 30 Jun 2003 mipsator
  * changes for 0.5
@@ -1013,7 +1015,7 @@
  * improved parse_cmd().
  * some fixes from Ted Unangst.
 
-# PMK 0.4 released
+# PMK 0.4 release
 
 28 Apr 2003 mipsator
  * many fixes for 0.4 release ...
@@ -1056,4 +1058,4 @@
 
 [... changes since PMK 0.3 ...]
 
-# PMK 0.3 released
+# PMK 0.3 release
