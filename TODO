@@ -33,7 +33,7 @@ common:
 pmk:
 -----------------------------------------------------------------------
 	-	update manpage (pmk.conf)
-	-	check if ~/.pmk.conf is available
+	-.	check if ~/.pmk.conf is available
 	~.	compatibility with autoconf (progressing) :
 			~ support for DEFS (-D options to pass to the compiler)
 			- support for LDFLAGS (misc linker options) ?
@@ -45,13 +45,14 @@ pmk:
 pmksetup:
 -----------------------------------------------------------------------
 	~	cpu identification
-			+ x86* support
+			+ x86_32 support
+			+ x86_64 support
 			- ppc support (priviledged)
 			- sparc support
 			- sparc64 support (priviledged)
 			+ alpha support
 			+ ia64 support
-			! man page update
+			~ man page update
 	-	cpu optimisation for compiler 
 	-	option to append to variable of pmk.conf
 	!	clean temporary files on error
@@ -62,7 +63,7 @@ pmksetup:
 			- better check for install ?
 			- others ?
 	+	privilege separation (PRIVSEP branch)
-	-!	escape comma in PATH_BIN (or wait for PATH_BIN to be converted as a list)
+	~!R	keep ':' as separator in PATH_BIN (add warning to launch pmksetup for refreshing the variable) 
 
 
 pmkscan

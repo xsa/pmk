@@ -2,6 +2,7 @@
  * keep the PATH separator as is instead of replacing it with a comma.
  * added a debug mechanism in pmksetup to work without fork and privsep.
  * fixed keycomp() by reverting changes that broken sorting.
+ * added more information about pmk.conf in its manual page.
 
 20 Jan 2005 mipsator
  * fixed skip_useless() to update frame buffer.
