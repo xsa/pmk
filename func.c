@@ -107,6 +107,10 @@ bool pmk_check_binary(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 	required = check_bool_str(hash_get(ht, "REQUIRED"));
 
 	filename = hash_get(ht, "FILENAME");
+	if (filename == NULL) {
+		errorf("FILENAME not assigned in label '%s'", cmd->label);
+		return(false);
+	}
 
 	bpath = hash_get(gdata->htab, "BIN_PATH");
 	if (bpath == NULL) {
@@ -150,7 +154,7 @@ bool pmk_check_include(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 	/* get include filename */
 	incfile = hash_get(ht, "INCLUDE");
 	if (incfile == NULL) {
-		errorf("INCLUDE not assigned in label %s", cmd->label);
+		errorf("INCLUDE not assigned in label '%s'", cmd->label);
 		return(false);
 	}
 
@@ -212,20 +216,74 @@ bool pmk_check_include(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 */
 
 bool pmk_check_lib(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
-	char	*libname,
-		*libvers;
-	bool	required = true;
+	FILE	*tfp;
+	bool	required,
+		rval;
+	char	cfgcmd[MAXPATHLEN],
+		*libname,
+		*libfunc;
+	int	r;
 
 	pmk_log("* Checking library [%s]\n", cmd->label);
 
 	required = check_bool_str(hash_get(ht, "REQUIRED"));
 
 	libname = hash_get(ht, "LIBNAME");
-	libvers = hash_get(ht, "VERSION");
+	if (libname == NULL) {
+		errorf("LIBNAME not assigned in label '%s'.", cmd->label);
+		return(false);
+	}
 
-	pmk_log("\tFound library '%s %s' : ", libname, libvers);
-	pmk_log("XXX.\n");
-	return(true);
+	libfunc = hash_get(ht, "FUNCTION");
+
+	tfp = fopen(INC_TEST_NAME, "w");
+	if (tfp != NULL) {
+		if (libfunc == NULL) {
+			pmk_log("\tFound library '%s' : ", libname);
+			/* XXX should use LIB_PATH with -L ? */
+			fprintf(tfp, LIB_TEST_CODE);
+		} else {
+			pmk_log("\tFound function '%s' in '%s' : ", libfunc, libname);
+			fprintf(tfp, LIB_FUNC_TEST_CODE, libfunc, libfunc);
+		}
+
+		/* fill test file */
+		fclose(tfp);
+	} else {
+		errorf("cannot open test file.");
+		return(false);
+	}
+
+	snprintf(cfgcmd, sizeof(cfgcmd), "cc -o %s -l%s %s >/dev/null 2>&1", BIN_TEST_NAME, libname, INC_TEST_NAME);
+	/* get result */
+	r = system(cfgcmd);
+	if (r == 0) {
+		pmk_log("yes.\n");
+		/* XXX must define HAVE_... */
+		rval = true;
+	} else {
+		pmk_log("no.\n");
+		if (required == true) {
+			rval = false;
+			if (libfunc == NULL) {
+				errorf("failed to find library '%s'.", libname);
+			} else {
+				errorf("failed to find function '%s'.", libfunc);
+			}
+		} else {
+			rval = true;
+		}
+	}
+
+	if (unlink(INC_TEST_NAME) == -1) {
+		/* cannot remove temporary file */
+		fprintf(stderr, "Can not remove %s\n", INC_TEST_NAME);
+	}
+
+	/* No need to check return here as binary could not exists */
+	unlink(BIN_TEST_NAME);
+
+	return(rval);
 }
 
 /*
@@ -249,7 +307,7 @@ bool pmk_check_config(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 
 	cfgtool = hash_get(ht, "CFGTOOL");
 	if (cfgtool == NULL) {
-		errorf("CFGTOOL not provided.");
+		errorf("CFGTOOL not assigned in label '%s'.", cmd->label);
 		return(false);
 	}
 
@@ -297,11 +355,10 @@ bool pmk_check_config(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 					rval = true;
 				}
 			}
-	
 			pclose(rpipe);
-			return(true);
 		}
 	}
 
 	/* XXX HAVE_... */
+	return(rval);
 }

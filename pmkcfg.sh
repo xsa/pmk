@@ -84,10 +84,10 @@ int main() {
 EOF
 
 	if $CC -o $testbin $testfile >/dev/null 2>&1; then
-		do_sed "$def" "$include"
+		do_sed "$def" "$function"
 		echo "yes"
 	else
-		do_sed "$udef" "$include"
+		do_sed "$udef" "$function"
 		echo "no"
 	fi
 	rm -f $testfile $testbin

@@ -50,6 +50,15 @@
 				"printf(\"%%p\", %s);\n" \
 				"return(0);}"
 
+#define LIB_TEST_CODE	"#include <stdio.h>\n" \
+			"int main() {return(0);}"
+
+#define LIB_FUNC_TEST_CODE	"#include <stdio.h>\n" \
+				"int %s();\n" \
+				"int main() {\n" \
+				"printf(\"%%p\", %s);\n" \
+				"return(0);}"
+
 #define INC_TEST_NAME	"test.c"
 #define BIN_TEST_NAME	"test_bin"
 

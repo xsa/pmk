@@ -10,10 +10,14 @@ PROGNAME=scandisk
 .TARGET
 LIST=samples/Makefile.sample.pmk,samples/Makefile.samplebis.pmk
 .END
-.CHECK_LIB(lib_gtk)
+.CHECK_LIB(lib_termcap)
 REQUIRED=FALSE
-LIBNAME=gtk
-VERSION=1.2
+LIBNAME=termcap
+.END
+.CHECK_LIB(lib_curses)
+REQUIRED=FALSE
+LIBNAME=curses
+FUNCTION=getwin
 .END
 .CHECK_INCLUDE(sys_param)
 REQUIRED=FALSE
