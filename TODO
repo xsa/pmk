@@ -1,7 +1,6 @@
 common :
 - write specs somewhere in a draft
 - improve parser to parse variables
-+ pmk objects.
 
 pmk :
 ~ compatibility with autoconf (progressing)
@@ -20,4 +19,4 @@ pmksetup :
 	
 pmkscan :
 - add more entries in pmkscan.dat
-+ specify language of the scanned file.
+
