@@ -1,16 +1,17 @@
 common :
 - tutorial
+- add a test for pmkinstall ?
 
 pmk :
 + make dir creation better in process_template().
 + update pmk.1
 + update pmkfile.5
-- define CFLAGS, LIBS, LDFLAGS with values from make !
++ define CFLAGS, CXXFLAGS, CPPFLAGS, LIBS, LDFLAGS and DEBUG with values from make !
 ~ compatibility with autoconf (progressing) :
 	~ support for DEFS (-D options to pass to the compiler)
 	+ missing stuff noticed with dillo conversion
-	- support for LDFLAGS (misc linker options)
-	- support for CPPFLAGS (misc linker options)
+	- support for LDFLAGS (misc linker options) ?
+	- support for CPPFLAGS (misc linker options) ?
 	- VPATH ?
 - cache ? (hash table with binary location, ...)
 - more C++ support !
