@@ -295,7 +295,7 @@ htable *keyword_hash(prskw kwtab[], int nbkw) {
 		/* fill keywords hash */
 		for(i = 0 ; i < nbkw ; i++) {
 			pkw = (prskw *) malloc(sizeof(prskw));
-			memmove(pkw, &kwtab[i], sizeof(pkw));
+			memmove(pkw, &kwtab[i], sizeof(prskw));
 			if (hash_update(phkw, kwtab[i].kw, pkw) == HASH_ADD_FAIL) { /* no need to strdup */
 				free(pkw);
 				errorf("hash failure");
