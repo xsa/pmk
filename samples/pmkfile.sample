@@ -17,6 +17,12 @@ LIST=("Makefile.sample.pmk","config_sample.h.pmk","subdir/Makefile.subdir.pmk")
 FILENAME="samples/ac_config.h"
 }
 
+# define switches
+.SWITCHES {
+use_curses=TRUE
+use_gtk=FALSE
+}
+
 # check availability of termcap library
 .CHECK_LIB(lib_termcap) {
 REQUIRED=FALSE
@@ -27,7 +33,7 @@ LIBNAME=termcap
 # this check depends of lib_termcap check for test purposes
 .CHECK_LIB(lib_curses) {
 REQUIRED=FALSE
-DEPEND=(lib_termcap)
+DEPEND=(use_curses,lib_termcap)
 LIBNAME=curses
 FUNCTION=getwin
 }
@@ -49,6 +55,7 @@ FUNCTION=strlcpy
 # try to found gtk-config in path
 .CHECK_BINARY(gtk_config) {
 REQUIRED=FALSE
+DEPEND=(use_gtk)
 FILENAME="gtk-config"
 }
 
@@ -62,6 +69,7 @@ VERSION="1.2"
 # get data for gtk+ via pkg-config
 .CHECK_PKG_CONFIG(gtk_data) {
 REQUIRED=FALSE
+DEPEND=(use_gtk)
 PACKAGE="gtk+"
 VERSION="1.2"
 CFLAGS=GTK_CFLAGS

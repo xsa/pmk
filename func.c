@@ -48,6 +48,7 @@ cmdkw	functab[] = {
 		{"DEFINE", pmk_define},
 		{"TARGET", pmk_target},
 		{"AC_COMPAT", pmk_ac_compat},
+		{"SWITCHES", pmk_switches},
 		{"CHECK_BINARY", pmk_check_binary},
 		{"CHECK_INCLUDE", pmk_check_include},
 		{"CHECK_LIB", pmk_check_lib},
@@ -154,6 +155,37 @@ bool pmk_ac_compat(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
 
 	pstr = (char *) hash_get(gdata->htab, "BIN_INSTALL");
 	hash_add(gdata->htab, "INSTALL", strdup(pstr));
+
+	return(true);
+}
+
+/*
+	check binary
+*/
+
+bool pmk_switches(pmkcmd *cmd, htable *ht, pmkdata *gdata) {
+	char	*value;
+	hkeys	*phk;
+	int	 i,
+		 n = 0;
+
+	pmk_log("* Parsing switches\n");
+
+	phk = hash_keys(ht);
+
+	for(i = 0 ; i < phk->nkey ; i++) {
+		value = po_get_str(hash_get(ht, phk->keys[i]));
+		if (hash_get(gdata->labl, phk->keys[i]) == NULL) {
+			hash_add(gdata->labl, phk->keys[i], value);
+			pmk_log("\tAdded '%s' switch.\n", phk->keys[i]);
+			n++;
+		} else {
+			pmk_log("\tSkipped '%s' switch (overriden).\n", phk->keys[i]);
+		}
+	}
+	pmk_log("\tTotal %d switch(es) added.\n", n);
+
+	hash_free_hkeys(phk);
 
 	return(true);
 }

@@ -37,7 +37,6 @@
 
 
 #include <ctype.h>
-#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -391,7 +390,8 @@ void clean(pmkdata *pgd) {
 */
 
 void usage(void) {
-	fprintf(stderr, "usage: pmk [-vh] [-b path] [-f pmkfile] [-o overridefile] [options]\n");
+	fprintf(stderr, "usage: pmk [-vh] [-e list] [-d list] [-b path]\n");
+	fprintf(stderr, "\t[-f pmkfile] [-o ovrfile] [options]\n");
 }
 
 /*
@@ -405,12 +405,15 @@ int main(int argc, char *argv[]) {
 		 ovrfile_set = false,
 		 basedir_set = false;
 	char	*pstr,
+		*enable_sw = NULL,
+		*disable_sw = NULL,
 		 buf[MAXPATHLEN],
 		 idxstr[4]; /* max 999 cmds, should be enough :) */
 	dynary	*da;
 	int	 rval = 0,
 		 nbpd,
 		 nbcd,
+		 ovrsw = 0,
 		 i,
 		 chr;
 	pmkdata	 gdata;
@@ -420,7 +423,7 @@ int main(int argc, char *argv[]) {
 	getcwd(buf, sizeof(buf));
 
 	while (go_exit == false) {
-		chr = getopt(argc, argv, "b:f:ho:v");
+		chr = getopt(argc, argv, "b:d:e:f:ho:v");
 		if (chr == -1) {
 			go_exit = true;
 		} else {
@@ -433,6 +436,16 @@ int main(int argc, char *argv[]) {
 						exit(1);
 					}
 					basedir_set = true;
+					break;
+
+				case 'e' :
+					/* enable switch(es) */
+					enable_sw = strdup(optarg);
+					break;
+
+				case 'd' :
+					/* disable switch(es) */
+					disable_sw = strdup(optarg);
 					break;
 
 				case 'f' :
@@ -544,6 +557,37 @@ int main(int argc, char *argv[]) {
 		exit(1);
 	}
 
+	if (enable_sw != NULL) {
+		/* command line switches to enable */
+		da = da_init();
+		str_to_dynary(enable_sw, ',', da); /* XXX check */
+		do {
+			pstr = da_pop(da);
+			if (pstr != NULL) {
+				hash_add(gdata.labl, pstr, "TRUE"); /* XXX  check */
+				ovrsw++; /* increment number of overriden switches */
+				free(pstr);
+			}
+		} while (pstr != NULL);
+		da_destroy(da);
+	}
+
+	if (disable_sw != NULL) {
+		/* command line switches to disable */
+		da = da_init();
+		str_to_dynary(disable_sw, ',', da); /* XXX check */
+		do {
+			pstr = da_pop(da);
+			if (pstr != NULL) {
+				hash_add(gdata.labl, pstr, "FALSE"); /* XXX  check */
+				ovrsw++; /* increment number of overriden switches */
+				free(pstr);
+			}
+		} while (pstr != NULL);
+		da_destroy(da);
+	}
+
+
 	if (ovrfile_set == true) {
 		/* read override file */
 		if (read_conf(gdata.htab, gdata.ovrfile) == true) {
@@ -587,7 +631,8 @@ int main(int argc, char *argv[]) {
 	pmk_log("Hashed %d pmk keywords.\n", keyhash->count);
 
 	pmk_log("Loaded %d predefinined variables.\n", nbpd);
-	pmk_log("Loaded %d overrided variables.\n", nbcd);
+	pmk_log("Loaded %d overriden switches.\n", ovrsw);
+	pmk_log("Loaded %d overriden variables.\n", nbcd);
 	pmk_log("Total : %d variables.\n\n", hash_nbkey(gdata.htab));
 
 	pmk_log("Parsing '%s'\n", gdata.pmkfile);

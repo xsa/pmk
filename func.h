@@ -74,6 +74,7 @@ typedef struct {
 bool pmk_define(pmkcmd *, htable *, pmkdata *);
 bool pmk_target(pmkcmd *, htable *, pmkdata *);
 bool pmk_ac_compat(pmkcmd *, htable *, pmkdata *);
+bool pmk_switches(pmkcmd *, htable *, pmkdata *);
 bool pmk_check_binary(pmkcmd *, htable *, pmkdata *);
 bool pmk_check_include(pmkcmd *, htable *, pmkdata *);
 bool pmk_check_lib(pmkcmd *, htable *, pmkdata *);

@@ -140,7 +140,7 @@ test_$(PREMAKE): $(PREMAKE)
 	@echo "----------------------------------------"
 	@echo ""
 	@echo "-> Running pmk"
-	./$(PREMAKE) -b samples -f samples/pmkfile.sample -o samples/ovrfile.sample
+	./$(PREMAKE) -b samples -e use_gtk -f samples/pmkfile.sample -o samples/ovrfile.sample
 	@echo ""
 	@echo "-> Dumping generated files"
 	@echo ""
