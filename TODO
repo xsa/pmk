@@ -2,7 +2,7 @@ common :
 - tutorial
 
 pmk :
-- change ac_process_dyn_var() to use values of process_dyn_var().
++ change ac_process_dyn_var() to use values of process_dyn_var().
 - make dir creation better in process_template().
 + update pmk.1
 + update pmkfile.5
