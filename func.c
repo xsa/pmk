@@ -976,8 +976,8 @@ bool pmk_check_pkg_config(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 	/* try to get pkg-config lib path from pmk.conf */
 	pc_path = hash_get(pgd->htab, PMKCONF_PC_PATH_LIB);
 	if (pc_path == NULL) {
-		errorf("unable to find pkg-config libdir");
-		errorf("pkg-config may not be installed or update pmk.conf");
+		pmk_log("Unable to find pkg-config libdir.\n");
+		pmk_log("WARNING : pkg-config may not be installed or need to update pmk.conf.\n");
 		return(false);
 	}
 #endif
