@@ -7,6 +7,7 @@
 /*#define DEBUG_PRS	1*/
 
 #include <stdio.h>
+#include <stdlib.h>
 
 #include "../compat.c"
 #include "../common.c"
@@ -30,15 +31,21 @@ int main(int argc, char *argv[]) {
 	cc = argv[1];
 	printf("Using compiler : '%s'\n", cc);
 
+	printf("Parsing compiler data.\n");
 	cdata = parse_comp_file("../data/pmkcomp.dat");
 
+	printf("Detecting compiler ...\n");
 	detect_compiler(cc, "/dev/null", cdata, &cinfo);
 
 	pcell = comp_get(cdata, cinfo.c_id);
-
-	printf("Detected compiler : '%s'\n", comp_get_descr(cdata, cinfo.c_id));
-	printf("Compiler version : '%s'\n", cinfo.version);
-
-	return(EXIT_SUCCESS);
+	if (pcell == NULL) {
+		printf("Failed.\n");
+		exit(EXIT_FAILURE);
+	} else {
+		printf("Detected compiler : '%s'\n", comp_get_descr(cdata, cinfo.c_id));
+		printf("Compiler version : '%s'\n", cinfo.version);
+	}
+	
+	return(0);
 }
 
