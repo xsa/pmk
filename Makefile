@@ -4,8 +4,10 @@ CC?=		cc
 INSTALL?=	install
 
 CFLAGS?=
+CFLAGS+=	-Wall
 #CFLAGS+=	-DSYSCONFDIR=\"/etc/\"
 PREFIX?=	/usr/local
+DEBUG?=		-g
 
 PNAME=		pmk
 DATADIR=	$(PREFIX)/share/$(PNAME)
@@ -16,7 +18,7 @@ SRCS=		pmk.c pmk.h
 OBJS=		pmk.o
 
 $(PNAME): $(OBJS)
-	$(CC) -o $(PNAME) $(OBJS) $(CFLAGS)
+	$(CC) $(DEBUG) -o $(PNAME) $(OBJS) $(CFLAGS)
 
 all: $(PNAME)
 
