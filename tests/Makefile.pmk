@@ -41,6 +41,8 @@ PTH_OBJS=	../compat.o ../pathtools.o path_test.o
 PC_OBJS=	../common.o ../compat.o ../dynarray.o ../hash.o ../parse.o \
 		../pkgconfig.o ../pmk_obj.o pkgconfig_test.o
 
+PL_OBJS=	../compat.o ../dynarray.o ../hash.o ../pmk_obj.o \
+		../parse_lang.o ../prseng.o plang_test.o
 
 all: comp cpuid dynary gencomp hash mkvar parser path pkgconfig
 
@@ -83,10 +85,14 @@ parser: config $(PRS_OBJS)
 path: config $(PTH_OBJS)
 	$(CC) $(LDFLAGS) -o path_test $(PTH_OBJS)
 
+plang: config $(PL_OBJS)
+	$(CC) $(LDFLAGS) -o plang_test $(PL_OBJS)
+
 pkgconfig: config $(PC_OBJS)
 	$(CC) $(LDFLAGS) -o pkgconfig_test $(PC_OBJS)
 
 clean:
 	rm -f $(CI_OBJS) $(C_OBJS) $(DA_OBJS) $(GC_OBJS)
-	rm -f $(H_OBJS) $(MK_OBJS) $(PRS_OBJS) $(PTH_OBJS) $(PC_OBJS)
+	rm -f $(H_OBJS) $(MK_OBJS) $(PRS_OBJS) $(PL_OBJS)
+	rm -f $(PTH_OBJS) $(PC_OBJS)
 	rm -f *_test *.core

@@ -1,3 +1,8 @@
+07 Apr 2005 mipsator
+ * imported the more than experimental c file parsing engine. This is still
+   work in progress but is largely useable.
+ * imported tests/plang_test.c to test c file parser.
+
 06 Apr 2005 mipsator
  * imported new main engine of pmkscan to permit generation of pmkfile
    and makefile templates. This does not include the new file parser.
