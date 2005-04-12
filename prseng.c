@@ -38,7 +38,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "compat/pmk_string.h"
 #include "prseng.h"
+
+
+/*#define DEBUG_PRSENG	1*/
 
 
 /**************
@@ -49,7 +53,7 @@
  OUT
 ************************************************************************/
 
-prseng_t *prseng_init(FILE *fp) {
+prseng_t *prseng_init(FILE *fp, void *data) {
 	prseng_t	*ppe;
 	size_t		 s;
 
@@ -69,9 +73,45 @@ prseng_t *prseng_init(FILE *fp) {
 		/* end the string */
 		ppe->buf[s] = CHAR_EOS;
 
+		/* extra data that could be needed */
+		ppe->data = data;
+
 		/* misc init */
 		ppe->fp = fp;
 		ppe->eof = false;
+		ppe->err = false;
+		ppe->str = NULL;
+		ppe->cur = ppe->buf;
+		ppe->linenum = 1;
+		ppe->offset = 0;
+	}
+
+	return(ppe);
+}
+
+
+/******************
+ prseng_init_str()
+
+ DESCR
+ IN
+ OUT
+************************************************************************/
+
+prseng_t *prseng_init_str(char *str, void *data) {
+	prseng_t	*ppe;
+
+	ppe = (prseng_t *) malloc(sizeof(prseng_t));
+	if (ppe != NULL) {
+		/* init the buffer */
+		strlcpy(ppe->buf, str, sizeof(ppe->buf)); /* no check */
+
+		/* extra data that could be needed */
+		ppe->data = data;
+
+		/* misc init */
+		ppe->fp = NULL;
+		ppe->eof = true;
 		ppe->err = false;
 		ppe->cur = ppe->buf;
 		ppe->linenum = 1;
@@ -90,7 +130,7 @@ prseng_t *prseng_init(FILE *fp) {
  OUT
 ************************************************************************/
 
-void prseng_close(prseng_t *ppe) {
+void prseng_destroy(prseng_t *ppe) {
 	free(ppe);
 }
 
@@ -117,36 +157,41 @@ bool prseng_update(prseng_t *ppe) {
 	/* compute offset */
 	ppe->offset = (ppe->cur - ppe->buf) + ppe->offset;
 
-	/* set the reading pointer at desired offset */
-	fseek(ppe->fp, ppe->offset, SEEK_SET);
+	if (ppe->fp != NULL) {
+		/* set the reading pointer at desired offset */
+		fseek(ppe->fp, ppe->offset, SEEK_SET);
 
-	if (feof(ppe->fp) != 0) {
-		ppe->eof = true;
-	}
+		if (feof(ppe->fp) != 0) {
+			ppe->eof = true;
+		}
 
-	/* fill buffer with size - 1 characters */
-	s = fread((void *) ppe->buf, sizeof(char),
+		/* fill buffer with size - 1 characters */
+		s = fread((void *) ppe->buf, sizeof(char),
 				(sizeof(ppe->buf ) - 1), ppe->fp);
 
-	/* ferror ? */
-	if (ferror(ppe->fp) != 0) {
-		ppe->err = true;
-		return(false);
-	}
+		/* ferror ? */
+		if (ferror(ppe->fp) != 0) {
+			ppe->err = true;
+			return(false);
+		}
 
-	/* put EOS right after the last read char */
-	ppe->buf[s] = CHAR_EOS;
+		/* put EOS right after the last read char */
+		ppe->buf[s] = CHAR_EOS;
+
+		/* check if end of file has been reached */
+		if (feof(ppe->fp) != 0) {
+			ppe->eof = true;
+		}
+	} else {
+		strlcpy(ppe->buf, (ppe->str + ppe->offset),
+				sizeof(ppe->buf)); /* no check ? */
+	}
 
 	/* rewind cursor to the beginning of the buffer */
-	ppe->cur = (char *)ppe->buf;
-
-	if (feof(ppe->fp) != 0) {
-		ppe->eof = true;
-	}
+	ppe->cur = ppe->buf;
 
 	/* buffer filled, return pointer to the first character */
 	return(true);
-
 }
 
 
@@ -197,11 +242,18 @@ char prseng_get_char(prseng_t *ppe) {
 ************************************************************************/
 
 bool prseng_next_char(prseng_t *ppe) {
+	if (*ppe->cur == '\n') {
+#ifdef DEBUG_PRSENG
+	debugf("prseng_next_char() : new line = %d", *ppe->linenum);
+#endif
+		ppe->linenum++;
+	}
+
 	/* set the cursor to the next char */
 	ppe->cur++;
 
 #ifdef DEBUG_PRSENG
-	printf("DEBUG new char = %c\n", *ppe->cur);
+	debugf("prseng_next_char() : new char = '%c'.", *ppe->cur);
 #endif
 
 	/* if end of string try to update buffer */

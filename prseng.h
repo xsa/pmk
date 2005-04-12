@@ -56,11 +56,13 @@
 typedef struct {
 	FILE		*fp;			/* file structure pointer */
 	bool		 eof,			/* end of file flag */
-			 err;		/* error flag */
-	char		 buf[PRSENG_BUF_LEN],	/* buffer window */
-			*cur;		/* parsing cursor */
+			 err;			/* error flag */
+	char		*str,			/* string to parse (prseng_init_str) */
+			*cur,			/* parsing cursor */
+			 buf[PRSENG_BUF_LEN];	/* buffer window */
 	unsigned int	 linenum;		/* current line */
 	long		 offset;		/* offset of the buffer window */
+	void		*data;
 } prseng_t;
 
 
@@ -68,8 +70,9 @@ typedef struct {
  function prototypes
 ***********************************************************************/
 
-prseng_t	*prseng_init(FILE *);
-void		 prseng_close(prseng_t *);
+prseng_t	*prseng_init(FILE *, void *);
+prseng_t	*prseng_init_str(char *, void *);
+void		 prseng_destroy(prseng_t *);
 
 bool		 prseng_update(prseng_t *);
 bool		 prseng_eof(prseng_t *);
@@ -83,3 +86,4 @@ bool		 prseng_get_idtf(prseng_t *, char *, size_t, char *);
 
 
 #endif /* _PRSENG_H_ */
+
