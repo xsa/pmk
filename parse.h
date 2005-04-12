@@ -40,12 +40,10 @@
 #include "compat/pmk_stdbool.h"
 #include "pmk_obj.h"
 #include "premake.h"
+#include "prseng.h"
+
 
 #define KW_SIZEOF(s)	sizeof(s) / sizeof(kw_t)
-
-/*
-#define LIST_SUPPORT	1
-*/
 
 
 /***********
@@ -91,6 +89,12 @@
 #define PRS_ERR_PRSFILL		"parsing buffer could not be filled."
 #define PRS_ERR_INV_OPT		"invalid option '%s'."
 #define PRS_ERR_TYP_OPT		"wrong type for option '%s'."
+#define PRS_ERR_PRSENG		"parser engine error."
+
+
+#define PRS_PMK_IDTF_STR	"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_"
+#define PRS_BOOL_IDTF_STR	"AEFLRSTU"	/* letters of TRUE and FALSE */
+
 
 /* keyword types */
 #define PRS_KW_UNKW	0
@@ -105,7 +109,7 @@
 #define MAX_CMD_OPT		32
 
 /* parsing buffer size */
-#define PRS_BUF_LEN            1024
+#define PRS_BUF_LEN		1024
 
 
 /*********************
@@ -163,18 +167,13 @@ typedef struct {
 	prsnode	*tree;			/* parser tree */
 } prsdata;
 
-/* parser engine structure */
+/* misc data structure */
 typedef struct {
-        FILE	*fp;			/* file structure pointer */
-	bool	 eof;			/* end of file flag */
-	char	 prsbuf[PRS_BUF_LEN],	/* buffer window */
-		*prscur;		/* parsing cursor */
+	void	*data;			/* misc_data */
 	htable	*phtkw;			/* command keywords */
-	int	 linenum;		/* current line */
-	long	 offset;		/* offset of the buffer window */
 	kwopt_t	*kwopts;		/* pointer to keyword def */
 	size_t	 nbreq;			/* number of required options */
-} prseng;
+} miscdata_t;
 
 
 /********************
@@ -183,8 +182,6 @@ typedef struct {
 
 prsdata	*prsdata_init(void);
 void	 prsdata_destroy(prsdata *);
-prseng	*prseng_init(void);
-void	 prseng_destroy(prseng *);
 prsnode	*prsnode_init(void);
 void	 prsnode_add(prsnode *, prscell *);
 void	 prsnode_destroy(prsnode *);
@@ -193,32 +190,31 @@ void	 prscell_destroy(prscell *);
 prsopt	*prsopt_init(void);
 prsopt	*prsopt_init_adv(char *, char, char *);
 void	 prsopt_destroy(prsopt *);
-bool	 prs_get_line(FILE *, char *, size_t);
-bool	 prs_fill_buf(prseng *);
 htable	*keyword_hash(prskw [], int);
-char	*skip_blank(char *pstr);
-void	 skip_useless(prseng *);
-char	*parse_identifier(char *, char *, size_t);
-char	*parse_label(char *, char *, size_t);
-char	*parse_bool(char *, pmkobj *, size_t);
-char	*parse_quoted(char *, pmkobj *, size_t);
-char	*parse_list(char *, pmkobj *, size_t);
-char	*parse_key(char *, pmkobj *, size_t);
-bool	 parse_data(prseng *, pmkobj *, size_t);
+bool	 prs_skip_blank(prseng_t *);
+bool	 prs_skip_comment(prseng_t *);
+bool	 prs_skip_useless(prseng_t *);
+bool	 parse_label(prseng_t *, char *, size_t);
+bool	 parse_bool(prseng_t *, pmkobj *, size_t);
+bool	 parse_quoted(prseng_t *, pmkobj *, size_t);
+bool	 parse_list(prseng_t *, pmkobj *, size_t);
+bool	 parse_key(prseng_t *, pmkobj *, size_t);
+bool	 parse_data(prseng_t *, pmkobj *, size_t);
 prscell	*parse_cell(char *, htable *);
-prscell	*parse_cmd_header(prseng *peng, prsnode *pnode);
-bool	 parse_opt(prseng *, prsopt *, char *);
+prscell	*parse_cmd_header(prseng_t *, prsnode *pnode);
+bool	 parse_opt(prseng_t *, prsopt *, char *);
 bool	 parse_clopt(char *, prsopt *, char *);
-bool	 parse_node(prsdata *, prseng *peng, prscell *);
-bool	 parse_command(prsdata *, prseng *peng, prscell *);
+bool	 parse_node(prsdata *, prseng_t *, prscell *);
+bool	 parse_command(prsdata *, prseng_t *, prscell *);
 kw_t	*check_opt_avl(char *, kw_t *, size_t);
 bool	 check_opt_type(kw_t *, pmkobj *);
-bool	 check_option(prseng *, prsopt *, kwopt_t *);
-bool	 process_block_opt(prseng *, prsnode *, prscell *);
-bool	 parse_opt_block(prsdata *, prseng *, prscell *, bool);
-bool	 parse_cmd_block(prsdata *, prseng *, prsnode *, bool);
+bool	 check_option(miscdata_t *, prsopt *);
+bool	 process_block_opt(prseng_t *, prsnode *, prscell *);
+bool	 parse_opt_block(prsdata *, prseng_t *, prscell *, bool);
+bool	 parse_cmd_block(prsdata *, prseng_t *, prsnode *, bool);
 bool	 parse_pmkfile(FILE *, prsdata *, prskw [], size_t);
 bool	 process_opt(htable *, prsopt *);
 bool	 parse_pmkconf(FILE *, htable *, char *, bool (*)(htable *, prsopt *));
 
 #endif /* _PMK_PARSE_H_ */
+
