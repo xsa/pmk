@@ -17,15 +17,16 @@ LDFLAGS=	@LDFLAGS@
 
 
 CI_OBJS=	../common.o ../compat.o ../detect_cpu.o ../detect_cpu_asm.o \
-		../dynarray.o ../hash.o ../parse.o ../pmk_obj.o cpuid_test.o
+		../dynarray.o ../hash.o ../parse.o ../pmk_obj.o ../prseng.o \
+		cpuid_test.o
 
 C_OBJS=		../common.o ../compat.o ../detect.o ../dynarray.o ../hash.o \
-		../parse.o ../pmk_obj.o comp_test.o
+		../parse.o ../pmk_obj.o ../prseng.o comp_test.o
 
 DA_OBJS=	../compat.o ../dynarray.o da_test.o
 
 GC_OBJS=	../common.o ../compat.o ../detect.o ../dynarray.o ../hash.o \
-		../parse.o ../pmk_obj.o gen_comp_test.o
+		../parse.o ../pmk_obj.o ../prseng.o gen_comp_test.o
 
 H_OBJS=		../compat.o ../hash.o hash_test.o
 
@@ -34,12 +35,12 @@ MK_OBJS=	../common.o ../compat.o ../dynarray.o mkvar_test.o
 PRS_OBJS=	../autoconf.o ../common.o ../cfgtool.o ../detect.o \
 		../dynarray.o ../func.o ../functool.o ../hash.o \
 		../hash_tools.o ../parse.o ../pathtools.o ../pmk_obj.o \
-		../pkgconfig.o parser_test.o
+		../pkgconfig.o ../prseng.o parser_test.o
 
 PTH_OBJS=	../compat.o ../pathtools.o path_test.o
 
 PC_OBJS=	../common.o ../compat.o ../dynarray.o ../hash.o ../parse.o \
-		../pkgconfig.o ../pmk_obj.o pkgconfig_test.o
+		../pkgconfig.o ../pmk_obj.o ../prseng.o pkgconfig_test.o
 
 PL_OBJS=	../compat.o ../dynarray.o ../hash.o ../pmk_obj.o \
 		../parse_lang.o ../prseng.o plang_test.o
