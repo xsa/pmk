@@ -1,7 +1,7 @@
 /* $Id$ */
 
 /*
- * Copyright (c) 2003-2004 Damien Couderc
+ * Copyright (c) 2003-2005 Damien Couderc
  * Copyright (c) 2003-2004 Xavier Santolaria
  * All rights reserved.
  *
@@ -9,15 +9,15 @@
  * modification, are permitted provided that the following conditions
  * are met:
  *
- *    - Redistributions of source code must retain the above copyright
- *      notice, this list of conditions and the following disclaimer.
- *    - Redistributions in binary form must reproduce the above
- *      copyright notice, this list of conditions and the following
- *      disclaimer in the documentation and/or other materials provided
- *      with the distribution.
- *    - Neither the name of the copyright holder(s) nor the names of its
- *      contributors may be used to endorse or promote products derived
- *      from this software without specific prior written permission.
+ *	- Redistributions of source code must retain the above copyright
+ *	  notice, this list of conditions and the following disclaimer.
+ *	- Redistributions in binary form must reproduce the above
+ *	  copyright notice, this list of conditions and the following
+ *	  disclaimer in the documentation and/or other materials provided
+ *	  with the distribution.
+ *	- Neither the name of the copyright holder(s) nor the names of its
+ *	  contributors may be used to endorse or promote products derived
+ *	  from this software without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -34,9 +34,6 @@
  *
  */
 
-
-/*#define PMKSETUP_DEBUG 1*/
-/*#define WITHOUT_FORK 1*/
 
 /* include it first as if it was <sys/types.h> - this will avoid errors */
 #include "compat/pmk_sys_types.h"
@@ -59,10 +56,17 @@
 #include "pmksetup.h"
 
 
+/*#define PMKSETUP_DEBUG 1*/
+/*#define WITHOUT_FORK 1*/
+
+/*****************
+ global variables
+************************************************************************/
+
 extern int	 optind;
 
 FILE	*sfp;			/* scratch file pointer */
-char	sfn[MAXPATHLEN];	/* scratch file name */		
+char	sfn[MAXPATHLEN];	/* scratch file name */
 
 htable	*ht;
 int	 verbose_flag = 0;	/* -V option at the cmd-line */
@@ -77,18 +81,27 @@ hpair	predef[] = {
 int	nbpredef = sizeof(predef) / sizeof(hpair);
 
 
-/*
- * Record data
- *
- *	pht: hash table
- *	key: record name
- *	opchar: operation char
- *		PMKSTP_REC_REMV => remove
- *		PMKSTP_REC_UPDT => add/update
- *	value: record data
- *
- *	returns: true on success
- */
+/**********
+ functions
+************************************************************************/
+
+/**************
+ record_data()
+
+ DESCR
+	record data
+
+ IN
+	pht: hash table
+	key: record name
+	opchar: operation char
+		PMKSTP_REC_REMV => remove
+		PMKSTP_REC_UPDT => add/update
+	value: record data
+
+ OUT
+	boolean
+************************************************************************/
 
 bool record_data(htable *pht, char *key, char opchar, char *value) {
 	prsopt	*ppo;
@@ -127,13 +140,19 @@ bool record_data(htable *pht, char *key, char opchar, char *value) {
 	return(true);
 }
 
-/*
- * Gathering of system data, predefinied data, ...
- *
- *	pht: storage hash table
- *
- *	returns: true on success else false
- */
+
+/**************
+ gather_data()
+
+ DESCR
+	Gathering of system data, predefinied data, ...
+
+ IN
+	pht: storage hash table
+
+ OUT
+	boolean
+************************************************************************/
 
 bool gather_data(htable *pht) {
 	printf("==> Looking for default parameters...\n");
@@ -149,7 +168,7 @@ bool gather_data(htable *pht) {
 		errorf("failed to locate binaries.");
 		return(false);
 	}
- 
+
 	/* set predifined variables */
 	if (predef_vars(pht) == false) {
 		errorf("predefined variables.");
@@ -178,13 +197,19 @@ bool gather_data(htable *pht) {
 	return(true);
 }
 
-/*
- * Write remaining data
- *
- * 	pht: hash table
- *
- * 	returns: -
- */
+
+/*****************
+ write_new_data()
+
+ DESCR
+	Write remaining data
+
+ IN
+	pht: hash table
+
+ OUT
+ 	boolean
+************************************************************************/
 
 bool write_new_data(htable *pht) {
 	char		*val;
@@ -238,32 +263,41 @@ bool write_new_data(htable *pht) {
 }
 
 
-/*
- * Compare the keys in the hash to sort them:
- *
- * 	here sorting the keys alphabetically before
- *	writing the new configuration file with write_new_data()
- *
- *	a: first element to compare
- *	b: second element to compare
- *
- *	returns: an integer greater than, equal to, or
- *		less than 0 according as the character a is
- *		greather, equal to, or less than the character b.
- */
+/**********
+ keycomp()
+
+ DESCR
+	Compare the keys in the hash to sort them:
+		here sorting the keys alphabetically before
+		writing the new configuration file with write_new_data()
+
+ IN
+	a: first element to compare
+	b: second element to compare
+
+ OUT
+	an integer greater than, equal to, or less than 0 according as the
+	character a is greather, equal to, or less than the character b.
+************************************************************************/
 
 int keycomp(const void *a, const void *b) {
 	return(strcmp(*(const char **) a, *(const char **) b));
 }
 
-/*
- * Check and process option
- *
- *	pht: htable for comparison
- *	popt: option to process
- *
- *	returns: boolean
- */
+
+/************
+ check_opt()
+
+ DESCR
+	Check and process option
+
+ IN
+	pht: htable for comparison
+	popt: option to process
+
+ OUT
+	boolean
+************************************************************************/
 
 bool check_opt(htable *cht, prsopt *popt) {
 	char	*recval,
@@ -345,13 +379,19 @@ bool check_opt(htable *cht, prsopt *popt) {
 	return(true);
 }
 
-/*
- * Get the environment variables needed for the configuration file
- *
- *	ht: hash table where we have to store the values
- *
- *	return:  boolean
- */
+
+/***************
+ get_env_vars()
+
+ DESCR
+	Get the environment variables needed for the configuration file
+
+ IN
+	ht: hash table where we have to store the values
+
+ OUT
+	boolean
+************************************************************************/
 
 bool get_env_vars(htable *pht) {
 	struct utsname	 utsname;
@@ -368,8 +408,8 @@ bool get_env_vars(htable *pht) {
 
 	if (record_data(pht, PMKCONF_OS_VERS, 'u', utsname.release) == false)
 		return(false);
-	verbosef("Setting '%s' => '%s'", PMKCONF_OS_VERS, utsname.release);	
-	
+	verbosef("Setting '%s' => '%s'", PMKCONF_OS_VERS, utsname.release);
+
 	if (record_data(pht, PMKCONF_OS_ARCH, 'u', utsname.machine) == false)
 		return(false);
 	verbosef("Setting '%s' => '%s'", PMKCONF_OS_ARCH, utsname.machine);
@@ -387,25 +427,32 @@ bool get_env_vars(htable *pht) {
 	return(true);
 }
 
-/*
- * Look for location of some predefined binaries
- *
- *	ht: hash table where we have to store the values
- *
- *	returns: boolean
- */
+
+/***************
+ get_binaries()
+
+ DESCR
+	Look for location of some predefined binaries
+
+ IN
+	ht: hash table where we have to store the values
+
+ OUT
+	boolean
+************************************************************************/
 
 bool get_binaries(htable *pht) {
-	char		 fbin[MAXPATHLEN],	/* full binary path */
-			*pstr;
-	dynary		*stpath;
-	prsopt		*ppo;
+	char			 fbin[MAXPATHLEN],	/* full binary path */
+					*pstr,
+					*pcc;
+	dynary			*stpath;
+	prsopt			*ppo;
 	unsigned int	 i;
 
-        /*
-         * splitting the PATH variable and storing in a
-         * dynamic array for later use by find_file
-         */
+		/*
+		 * splitting the PATH variable and storing in a
+		 * dynamic array for later use by find_file
+		 */
 
 	ppo = hash_get(pht, PMKCONF_PATH_BIN);
 	if (ppo == NULL) {
@@ -422,29 +469,62 @@ bool get_binaries(htable *pht) {
 	stpath = str_to_dynary(pstr , PATH_STR_DELIMITER);
 	if (stpath == NULL) {
 		errorf("could not split the PATH environment variable correctly.");
-		return(false);	
+		return(false);
 	}
 
-	if (find_file(stpath, "cc", fbin, sizeof(fbin)) == true) {
+	/* check standard compilers */
+	pcc = NULL;
+	for (i = 0 ; i < nb_c_compilers ; i++) {
+		if (find_file(stpath, c_compilers[i][0], fbin, sizeof(fbin)) == true) {
+			if (record_data(pht, c_compilers[i][1], 'u', fbin) == false) {
+				da_destroy(stpath);
+				return(false);
+			}
+			verbosef("Setting '%s' => '%s'", c_compilers[i][1], fbin);
+			if (pcc == NULL) {
+				pcc = c_compilers[i][1];
+			}
+		} else {
+			verbosef("Info : '%s' (%s) not found", c_compilers[i][0], c_compilers[i][1]);
+		}
+	}
+
+	/* setting PMKCONF_BIN_CC */
+	if (pcc != NULL) {
+		/* standard compiler found */
+		snprintf(fbin, sizeof(fbin), "$%s", pcc); /* XXX check ? */
 		if (record_data(pht, PMKCONF_BIN_CC, 'u', fbin) == false) {
 			da_destroy(stpath);
 			return(false);
 		}
 		verbosef("Setting '%s' => '%s'", PMKCONF_BIN_CC, fbin);
 	} else {
-		if (find_file(stpath, "gcc", fbin, sizeof(fbin)) == true) {
+		/* try to fallback on cc which is an "historical standard" */
+		if (find_file(stpath, "cc", fbin, sizeof(fbin)) == true) {
 			if (record_data(pht, PMKCONF_BIN_CC, 'u', fbin) == false) {
 				da_destroy(stpath);
 				return(false);
 			}
 			verbosef("Setting '%s' => '%s'", PMKCONF_BIN_CC, fbin);
 		} else {
-			errorf("cannot find a C compiler.");
-			da_destroy(stpath);
-			return(false);
+			/* okay then maybe a fucking non standard "gcc" name ? */
+			if (find_file(stpath, "gcc", fbin, sizeof(fbin)) == true) {
+				if (record_data(pht, PMKCONF_BIN_CC, 'u', fbin) == false) {
+					da_destroy(stpath);
+					return(false);
+				}
+				verbosef("Setting '%s' => '%s'", PMKCONF_BIN_CC, fbin);
+			} else {
+				/* no luck, unable to find the c compiler */
+				errorf("cannot find CC compiler.");
+				da_destroy(stpath);
+				return(false);
+			}
 		}
 	}
 
+
+	/* searching some specific binaries */
 	for (i = 0; i < MAXBINS; i++) {
 		if (find_file(stpath, binaries[i][0], fbin, sizeof(fbin)) == true) {
 			if (record_data(pht, binaries[i][1], 'u', fbin) == false) {
@@ -461,14 +541,19 @@ bool get_binaries(htable *pht) {
 }
 
 
-/*
- * Add to the hash table the predefined variables we
- * cannot get automagically
- *
- *	pht: hash table where we have to store the values
- *
- *	returns:  boolean
- */
+/**************
+ predef_vars()
+
+ DESCR
+	Add to the hash table the predefined variables we cannot get
+	automagically.
+
+ IN
+	pht: hash table where we have to store the values
+
+ OUT
+	boolean
+************************************************************************/
 
 bool predef_vars(htable *pht) {
 	int	i;
@@ -484,13 +569,19 @@ bool predef_vars(htable *pht) {
 	return(true);
 }
 
-/*
- * Check echo output
- *
- *	pht: hash table where we have to store the values
- *
- *	returns:  boolean
- */
+
+/*************
+ check_echo()
+
+ DESCR
+	Check echo output
+
+ IN
+	pht: hash table where we have to store the values
+
+ OUT
+	boolean
+************************************************************************/
 
 bool check_echo(htable *pht) {
 	FILE	*echo_pipe = NULL;
@@ -551,7 +642,7 @@ bool check_echo(htable *pht) {
 	if (record_data(pht, PMKCONF_AC_ECHO_N, 'u', echo_n) == false)
 		return(false);
 	verbosef("Setting '%s' => '%s'", PMKCONF_AC_ECHO_N, echo_n);
-	
+
 	if (record_data(pht, PMKCONF_AC_ECHO_C, 'u', echo_c) == false)
 		return(false);
 	verbosef("Setting '%s' => '%s'", PMKCONF_AC_ECHO_C, echo_c);
@@ -564,16 +655,22 @@ bool check_echo(htable *pht) {
 }
 
 
-/*
- * Check pkgconfig libpath
- *
- *	pht: hash table where we have to store the values
- *
- *	returns:  boolean
- *
- * NOTE: this path must be relative to the real prefix. This means
- * that we can't rely on predefined prefix.
- */
+/****************
+ check_libpath()
+
+ DESCR
+	Check pkgconfig libpath
+
+ IN
+	pht: hash table where we have to store the values
+
+ OUT
+	boolean
+
+ NOTE
+	this path must be relative to the real prefix. This means that we
+	can't rely on predefined prefix.
+************************************************************************/
 
 bool check_libpath(htable *pht) {
 	char	 libpath[MAXPATHLEN];
@@ -606,13 +703,19 @@ bool check_libpath(htable *pht) {
 	return(true);
 }
 
-/*
- * Check the cpu family 
- *
- *	uname_m: uname machine string 
- *
- *	returns:  cpu family string or NULL
- */
+
+/***************
+ get_cpu_data()
+
+ DESCR
+	Check the cpu family
+
+ IN
+	uname_m: uname machine string
+
+ OUT
+	boolean
+************************************************************************/
 
 bool get_cpu_data(htable *pht) {
 	char		*uname_m;
@@ -677,17 +780,23 @@ bool get_cpu_data(htable *pht) {
 	return(true);
 }
 
-/*
- * Check if a directory does exist
- *
- *	fdir: directory to search
- *
- *	returns:  boolean
- */
+
+/*************
+ dir_exists()
+
+ DESCR
+	Check if a directory does exist
+
+ IN
+	fdir: directory to search
+
+ OUT
+	boolean
+************************************************************************/
 
 bool dir_exists(const char *fdir) {
-        DIR     *dirp;
-        size_t  len;
+		DIR	 *dirp;
+		size_t  len;
 
 	len = strlen(fdir);
 
@@ -701,20 +810,26 @@ bool dir_exists(const char *fdir) {
 	return(false);
 }
 
-/*
- * Byte order check
- *
- *	pht: hash table to store value
- *
- *	returns: boolean value
- */
+
+/*******************
+ byte_order_check()
+
+ DESCR
+	Byte order check
+
+ IN
+	pht: hash table to store value
+
+ OUT
+	boolean
+************************************************************************/
 
 bool byte_order_check(htable *pht) {
 	char	bo_type[16];
 	int	num = 0x41424344;
 
 	if (((((char *)&num)[0]) == 0x41) && ((((char *)&num)[1]) == 0x42) &&
-	    ((((char *)&num)[2]) == 0x43) && ((((char *)&num)[3]) == 0x44)) {
+		((((char *)&num)[2]) == 0x43) && ((((char *)&num)[3]) == 0x44)) {
 		strlcpy(bo_type, HW_ENDIAN_BIG,
 				sizeof(bo_type)); /* should not fail */
 	} else {
@@ -738,13 +853,19 @@ bool byte_order_check(htable *pht) {
 	return(true);
 }
 
-/*
- * Simple formated verbose function
- *
- *	fmt: format string
- *
- *	returns: -
- */
+
+/***********
+ verbosef()
+
+ DESCR
+	Simple formated verbose function
+
+ IN
+	fmt: format string
+
+ OUT
+	NONE
+************************************************************************/
 
 void verbosef(const char *fmt, ...) {
 	char	buf[MAX_ERR_MSG_LEN];
@@ -759,24 +880,20 @@ void verbosef(const char *fmt, ...) {
 	}
 }
 
-/*
- * pmksetup(8) usage
- */
 
-void usage(void) {
-	fprintf(stderr, "usage: pmksetup [-hVv] "
-		"[-r variable] [-u variable=value]\n");
-	exit(EXIT_FAILURE);
-}
+/*****************
+ detection_loop()
 
-/*
- * Detection loop
- *
- *	argc:	argument number
- *	argv:	argument array
- *
- *	returns: true on success else false
- */
+ DESCR
+	Detection loop
+
+ IN
+	argc:	argument number
+	argv:	argument array
+
+ OUT
+	boolean
+************************************************************************/
 
 bool detection_loop(int argc, char *argv[]) {
 	FILE		*config;
@@ -785,7 +902,7 @@ bool detection_loop(int argc, char *argv[]) {
 	char		*pstr;
 	int		 ch;
 	prsopt		 *ppo;
-	
+
 #ifndef errno
 	extern int	 errno;
 #endif /* errno */
@@ -826,17 +943,17 @@ bool detection_loop(int argc, char *argv[]) {
 				/* record prsopt structure directly, fast and simple */
 				ppo->opchar = PMKSTP_REC_UPDT;
 				if (hash_update(ht, ppo->key, ppo) == HASH_ADD_FAIL) {
-					prsopt_destroy(ppo);	
-					errorf("hash update failed.");	
+					prsopt_destroy(ppo);
+					errorf("hash update failed.");
 					return(false);
 				}
 
-				/* XXX use record_data => cost much memory and cpu XXX            */
+				/* XXX use record_data => cost much memory and cpu XXX			*/
 				/*if (record_data(ht, ppo->key, PMKSTP_REC_UPDT, pstr) == false) {*/
-				/*        errorf("failed to record '%s'.", ppo->key);             */
-				/*        prsopt_destroy(ppo);                                    */
-				/*        return(false);                                          */
-				/*}                                                               */
+				/*		errorf("failed to record '%s'.", ppo->key);			 */
+				/*		prsopt_destroy(ppo);									*/
+				/*		return(false);										  */
+				/*}															   */
 				/*prsopt_destroy(ppo);						  */
 
 				process_clopts = true;
@@ -899,16 +1016,22 @@ bool detection_loop(int argc, char *argv[]) {
 	return(true);
 }
 
-/*
- * Child main loop
- *
- *	uid:	privsep user id
- *	gid:	privsep user group
- *	argc:	argument number
- *	argv:	argument array
- *
- *	returns: -
- */
+
+/*************
+ child_loop()
+
+ DESCR
+	Child main loop
+
+ IN
+	uid:	privsep user id
+	gid:	privsep user group
+	argc:	argument number
+	argv:	argument array
+
+ OUT
+	NONE
+************************************************************************/
 
 void child_loop(uid_t uid, gid_t gid, int argc, char *argv[]) {
 #ifndef WITHOUT_FORK
@@ -958,16 +1081,22 @@ void child_loop(uid_t uid, gid_t gid, int argc, char *argv[]) {
 
 	/* destroying the hash once we're done with it */
 	hash_destroy(ht);
-		
+
 }
 
-/*
- * Parent main loop
- *
- *	pid: pid of the child
- *
- *	returns: -
- */
+
+/**************
+ parent_loop()
+
+ DESCR
+	Parent main loop
+
+ IN
+	pid: pid of the child
+
+ OUT
+	NONE
+************************************************************************/
 
 void parent_loop(pid_t pid) {
 	bool	error = false;
@@ -1001,7 +1130,7 @@ void parent_loop(pid_t pid) {
 		 * check if pmk.conf already exists
 		 * NOTE: no race condition here for access(), BUT
 		 * BE CAREFUL if changes are to be made.
-		 */ 
+		 */
 		if (access(PREMAKE_CONFIG_PATH, F_OK) == 0) { /* see above */
 			/* backup configuration file */
 			printf("==> Backing up configuration file: %s\n",
@@ -1048,9 +1177,33 @@ void parent_loop(pid_t pid) {
 		exit(EXIT_FAILURE);
 }
 
-/*
- * Main loop
- */
+
+/********
+ usage()
+
+ DESCR
+	pmksetup(8) usage
+
+ IN
+	NONE
+
+ OUT
+	NONE
+************************************************************************/
+
+void usage(void) {
+	fprintf(stderr, "usage: pmksetup [-hVv] "
+		"[-r variable] [-u variable=value]\n");
+	exit(EXIT_FAILURE);
+}
+
+
+/********
+ main ()
+
+ DESCR
+	Main loop
+************************************************************************/
 
 int main(int argc, char *argv[]) {
 	struct passwd	*pw;
