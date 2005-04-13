@@ -75,18 +75,18 @@ TEST_TARGET=	$(TEST_INST)/$(INST).test
 
 P_OBJS=		autoconf.o cfgtool.o common.o compat.o detect.o \
 		dynarray.o func.o functool.o hash.o hash_tools.o parse.o \
-		pmk_obj.o pathtools.o pkgconfig.o $(PREMAKE).o
+		pmk_obj.o pathtools.o pkgconfig.o prseng.o $(PREMAKE).o
 
 S_OBJS=		common.o compat.o dynarray.o hash.o parse.o pmk_obj.o \
-		detect_cpu.o detect_cpu_asm.o $(SETUP).o
+		detect_cpu.o detect_cpu_asm.o prseng.o $(SETUP).o
 
 SC_OBJS=	common.o compat.o dynarray.o hash.o hash_tools.o parse.o \
-                parse_lang.o prseng.o pmk_obj.o $(SCAN).o
+                parse_lang.o pmk_obj.o prseng.o $(SCAN).o
 
 I_OBJS=		common.o compat.o dynarray.o pathtools.o $(INST).o
 
-PC_OBJS=	cfgtool.o common.o compat.o dynarray.o hash.o parse.o \
-		pkgconfig.o pmk_obj.o $(PKGCFG).o
+PC_OBJS=	cfgtool.o common.o compat.o dynarray.o hash.o hash_tools.o \
+		parse.o pkgconfig.o pmk_obj.o prseng.o $(PKGCFG).o
 
 
 .c.o:
