@@ -1,3 +1,7 @@
+13 Apr 2005 mipsator
+ * added missing parts for pmk and pmksetup, tree should be still broken
+   due to the missing parts i did not committed yet.
+
 12 Apr 2005 mipsator
  * updated parse.c to use prseng functions.
  * added detection of C99 and C89 compilers.

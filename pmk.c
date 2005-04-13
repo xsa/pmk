@@ -1,12 +1,7 @@
 /* $Id$ */
 
 /*
- * Credits for patches :
- *	- Pierre-Yves Ritschard
- */
-
-/*
- * Copyright (c) 2003-2004 Damien Couderc
+ * Copyright (c) 2003-2005 Damien Couderc
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,6 +33,11 @@
  *
  */
 
+/*
+ * Credits for patches :
+ *	- Pierre-Yves Ritschard
+ */
+
 
 #include <sys/stat.h>
 /* include it first as if it was <sys/types.h> - this will avoid errors */
@@ -54,10 +54,16 @@
 #include "autoconf.h"
 #include "common.h"
 #include "func.h"
+#include "hash_tools.h"
 #include "pathtools.h"
 #include "pmk.h"
 
 /*#define PMK_DEBUG	1*/
+
+
+/**********
+ variables
+************************************************************************/
 
 extern char	*optarg;
 extern int	 optind;
@@ -67,14 +73,23 @@ extern size_t	 nbkwpf;
 int		 cur_line = 0;
 
 
-/*
+/**********
+ functions
+************************************************************************/
+
+/******************
+ process_dyn_var()
+
+ DESCR
 	init variables
 
+ IN
 	pht : global data structure
 	template : file to process
 
-	return : -
-*/
+ OUT
+	NONE
+************************************************************************/
 
 bool process_dyn_var(pmkdata *pgd, char *template) {
 	char	*srcdir,
@@ -159,9 +174,19 @@ bool process_dyn_var(pmkdata *pgd, char *template) {
 	return(true);
 }
 
-/*
-	init variables
-*/
+
+/***************
+ pmkdata_init()
+
+ DESCR
+	init pmkdata structure
+
+ IN
+	NONE
+
+ OUT
+	pmkdata structure
+************************************************************************/
 
 pmkdata *pmkdata_init(void) {
 	pmkdata	*ppd;
@@ -199,13 +224,19 @@ pmkdata *pmkdata_init(void) {
 	return(ppd);
 }
 
-/*
+
+/***********
+ init_var()
+
+ DESCR
 	init variables
 
+ IN
 	pgd : global data structure
 
-        return : -
-*/
+ OUT
+	NONE
+************************************************************************/
 
 bool init_var(pmkdata *pgd) {
 	char	 buf[TMP_BUF_LEN],
@@ -351,14 +382,20 @@ debugf("%s = '%s'", pstr, buf);
 	return(true);
 }
 
-/*
+
+/*******************
+ process_template()
+
+ DESCR
 	process the target file to replace tags
 
+ IN
 	target : path of the target file
 	pgd : global data structure
 
-	return : boolean
-*/
+ OUT
+	boolean
+************************************************************************/
 
 bool process_template(char *template, pmkdata *pgd) {
 	FILE	*tfd,
@@ -393,7 +430,7 @@ bool process_template(char *template, pmkdata *pgd) {
 		free(ptn);
 		errorf(ERRMSG_MEM);
 		return(false);
-	}	
+	}
 
 	/* get the file name */
 	if (strlcpy_b(lbuf, ptn, sizeof(lbuf)) == false) {
@@ -442,7 +479,7 @@ bool process_template(char *template, pmkdata *pgd) {
 		errorf("cannot build template path '%s'.", tpath);
 		return(false);
 	}
-	
+
 	/* append filename */
 	abspath(tpath, lbuf, fpath);
 
@@ -493,7 +530,7 @@ bool process_template(char *template, pmkdata *pgd) {
 			if (*plb == PMK_TAG_CHAR) {
 				plb++;
 				/* get tag identifier */
-				ptmp = parse_identifier(plb, tbuf, sizeof(tbuf));
+				ptmp = parse_idtf(plb, tbuf, sizeof(tbuf));
 				if (ptmp == NULL) {
 					errorf("process_template(), buffer too small.", fpath);
 					return(false);
@@ -550,32 +587,44 @@ bool process_template(char *template, pmkdata *pgd) {
 	}
 
 	hash_delete(pht, "configure_input");
-		
+
 	return(true);
 }
 
-/*
+
+/**************
+ process_cmd()
+
+ DESCR
 	process the parsed command
 
+ IN
 	pdata : parsed data
 	pgd : global data structure
 
-	return : boolean
-*/
+ OUT
+	boolean
+************************************************************************/
 
 bool process_cmd(prsdata *pdata, pmkdata *pgd) {
 	return(process_node(pdata->tree, pgd));
 }
 
-/*
+
+/****************
+ parse_cmdline()
+
+ DESCR
 	process command line values
 
+ IN
 	val : array of defines
 	nbval : size of the array
 	pgd : global data structure
 
-	return : boolean (true on success)
-*/
+ OUT
+	boolean (true on success)
+************************************************************************/
 
 bool parse_cmdline(char **val, int nbval, pmkdata *pgd) {
 	bool	 rval = true;
@@ -608,13 +657,19 @@ bool parse_cmdline(char **val, int nbval, pmkdata *pgd) {
 	return(rval);
 }
 
-/*
+
+/********
+ clean()
+
+ DESCR
 	clean global data
 
+ IN
 	pgd : global data structure
 
-	return : -
-*/
+ OUT
+	NONE
+************************************************************************/
 
 void clean(pmkdata *pgd) {
 	if (pgd->htab != NULL) {
@@ -640,18 +695,32 @@ void clean(pmkdata *pgd) {
 	}
 }
 
-/*
+
+/********
+ usage()
+
+ DESCR
 	usage
-*/
+
+ IN
+	NONE
+
+ OUT
+	NONE
+************************************************************************/
 
 void usage(void) {
 	fprintf(stderr, "usage: pmk [-vh] [-e list] [-d list] [-b path]\n");
 	fprintf(stderr, "\t[-f pmkfile] [-o ovrfile] [options]\n");
 }
 
-/*
-	main
-*/
+
+/*******
+ main()
+
+ DESCR
+	main loop
+************************************************************************/
 
 int main(int argc, char *argv[]) {
 	FILE		*fp;
@@ -857,13 +926,13 @@ int main(int argc, char *argv[]) {
 		/* command line switches to enable */
 		da = str_to_dynary(enable_sw, CHAR_LIST_SEPARATOR);
 		if (da != NULL) {
-			pstr = da_pop(da);	
+			pstr = da_pop(da);
 			while (pstr != NULL) {
 				if (hash_update_dup(pgd->labl, pstr, BOOL_STRING_TRUE) == HASH_ADD_FAIL)
 					return(false);
 				ovrsw++; /* increment number of overriden switches */
 				free(pstr);
-				pstr = da_pop(da);	
+				pstr = da_pop(da);
 			}
 			da_destroy(da);
 		}

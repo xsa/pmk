@@ -2,7 +2,7 @@
 
 /*
  * Copyright (c) 2003-2004 Xavier Santolaria <xavier@santolaria.net>
- * Copyright (c) 2003-2004 Damien Couderc
+ * Copyright (c) 2003-2005 Damien Couderc
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,6 +42,10 @@
 #include "hash.h"
 #include "premake.h"
 
+
+/**********
+ constants
+************************************************************************/
 
 /* pmksetup specific version */
 #define PREMAKE_SUBVER_PMKSETUP	"9"
@@ -85,11 +89,18 @@
 
 #define EMSG_PRIV_FMT	"Failed to change privilege (%s)"
 
+/* compiler list */
+static char *c_compilers[][2] = {
+	{"c99",		PMKCONF_BIN_C99},
+	{"c89",		PMKCONF_BIN_C89}
+/*    {"cc",	PMKCONF_BIN_CC}*/
+};
+size_t nb_c_compilers = sizeof(c_compilers) / (sizeof(char *) * 2);
+
 /*
  * Look for location of some predefined binaries.
  * Be sure to update this list in premake.h as well.
  */
-
 static  char *binaries[][2] = {
 	{"ar",		PMKCONF_BIN_AR},
 	{"as",		PMKCONF_BIN_AS},
@@ -115,6 +126,9 @@ static  char *binaries[][2] = {
 
 #define MAXBINS	sizeof(binaries) / sizeof(char *) / 2
 
+/*********************
+ functions prototypes
+************************************************************************/
 
 bool	record_data(htable *, char *, char, char *);
 bool	gather_data(htable *);

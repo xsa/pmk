@@ -1,7 +1,7 @@
 /* $Id$ */
 
 /*
- * Copyright (c) 2003-2004 Damien Couderc
+ * Copyright (c) 2003-2005 Damien Couderc
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -133,6 +133,8 @@
 #define PMKCONF_BIN_AS		"BIN_AS"
 #define PMKCONF_BIN_AWK		"BIN_AWK"
 #define PMKCONF_BIN_CAT		"BIN_CAT"
+#define PMKCONF_BIN_C89		"BIN_C89"
+#define PMKCONF_BIN_C99		"BIN_C99"
 #define PMKCONF_BIN_CC		"BIN_CC"
 #define PMKCONF_BIN_CPP		"BIN_CPP"
 #define PMKCONF_BIN_CXX		"BIN_CXX"
@@ -235,5 +237,5 @@
 /* string delimiter PATH variables */
 #define PATH_STR_DELIMITER	':'
 
-
 #endif /* _PREMAKE_H_ */
+

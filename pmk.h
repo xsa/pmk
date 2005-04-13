@@ -1,7 +1,7 @@
 /* $Id$ */
 
 /*
- * Copyright (c) 2003-2004 Damien Couderc
+ * Copyright (c) 2003-2005 Damien Couderc
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,6 +44,10 @@
 #include "premake.h"
 
 
+/**********
+ constants
+************************************************************************/
+
 /* pmk specific version */
 #define PREMAKE_SUBVER_PMK	"7"
 
@@ -80,23 +84,33 @@
 #define PMK_ERR_OVRFLOW	"buffer overflow."
 #define PMK_ERR_BLDLOG	"failed to set buildlog output."
 
+
+/******************
+ types definitions
+************************************************************************/
+
 /* pmk data */
 typedef struct {
 	cfgtdata	*cfgt;
 	char		*ac_file,
-			*lang,
-			 basedir[MAXPATHLEN],
-			 srcdir[MAXPATHLEN],
-			 pmkfile[MAXPATHLEN],
-			 ovrfile[MAXPATHLEN],
-			 buildlog[MAXPATHLEN],
-			 errmsg[MAX_ERR_MSG_LEN];
+				*lang,
+				 basedir[MAXPATHLEN],
+				 srcdir[MAXPATHLEN],
+				 pmkfile[MAXPATHLEN],
+				 ovrfile[MAXPATHLEN],
+				 buildlog[MAXPATHLEN],
+				 errmsg[MAX_ERR_MSG_LEN];
 	dynary		*tlist;
 	htable		*htab,
-			*labl,
-			*slht;
+				*labl,
+				*slht;
 
 } pmkdata;
+
+
+/********************
+ function prototypes
+************************************************************************/
 
 bool	 init_var(pmkdata *);
 bool	 parse_cmdline(char **, int, pmkdata *);
