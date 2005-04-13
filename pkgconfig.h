@@ -40,6 +40,11 @@
 #include "dynarray.h"
 #include "hash.h"
 
+
+/**********
+ constants
+************************************************************************/
+
 #define PMKCFG_ENV_PATH		"PKG_CONFIG_PATH"
 #define PMKCFG_ENV_LIBDIR	"PKG_CONFIG_LIBDIR"
 
@@ -61,7 +66,11 @@
 #define PKGCFG_LIBS_ALL		PKGCFG_LIBS_L | PKGCFG_LIBS_l | PKGCFG_LIBS_o
 
 
-/* packages strucutres */
+/**********
+ constants
+************************************************************************/
+
+/* package structures */
 
 typedef struct {
 	char	*name,
@@ -85,13 +94,16 @@ typedef struct {
 } pkgkw;
 
 
-/* functions protos */
+/********************
+ function prototypes
+************************************************************************/
 
 pkgcell		*pkgcell_init(void);
 void		 pkgcell_destroy(pkgcell *);
 pkgdata		*pkgdata_init(void);
 void		 pkgdata_destroy(pkgdata *);
 
+char		*skip_blank(char *);
 bool		 scan_dir(char *, pkgdata *);
 bool		 pkg_collect(char *, pkgdata *);
 bool		 parse_keyword(pkgcell *, char *, char *);
@@ -106,6 +118,7 @@ char		*pkg_get_libs(pkgdata *);
 char		*pkg_get_libs_adv(pkgdata *, unsigned int);
 bool		 pkg_mod_exists(pkgdata *, char *);
 
-int		 compare_version(char *, char *);
+int			 compare_version(char *, char *);
+
 
 #endif /* _PMK_PKGCONFIG_H_ */
