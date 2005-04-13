@@ -41,10 +41,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "compat/pmk_ctype.h"
 #include "compat/pmk_stdbool.h"
 #include "compat/pmk_string.h"
 #include "common.h"
 #include "hash.h"
+#include "hash_tools.h"
 #include "parse.h"
 #include "pkgconfig.h"
 #include "premake.h"
@@ -57,6 +59,10 @@
  * env PKG_CONFIG_LIBDIR => replace default location (aka prefix/lib/pkgconfig)
  */
 
+/**********
+ constants
+************************************************************************/
+
 #define PKGCFG_HTABLE_SIZE	32
 #define PKGCFG_TOK_ADDCT	1
 
@@ -67,6 +73,10 @@
 #define PKGCFG_KW_LIBS	4
 #define PKGCFG_KW_CFLGS	5
 #define PKGCFG_KW_CFLCT	6
+
+/**********
+ variables
+************************************************************************/
 
 /* pc file keywords */
 pkgkw	kw_pkg[] = {
@@ -82,9 +92,22 @@ pkgkw	kw_pkg[] = {
 size_t	nb_pkgkw = sizeof(kw_pkg) / sizeof(pkgkw);
 
 
-/*
+/**********
+ functions
+************************************************************************/
+
+/***************
+ pkgcell_init()
+
+ DESCR
 	initialize pkgcell structure
-*/
+
+ IN
+	NONE
+
+ OUT
+	pkgcell structure or NULL
+************************************************************************/
 
 pkgcell *pkgcell_init(void) {
 	pkgcell *ppc;
@@ -109,9 +132,19 @@ pkgcell *pkgcell_init(void) {
 	return(ppc);
 }
 
-/*
+
+/******************
+ pkgcell_destroy()
+
+ DESCR
 	free pkgcell structure
-*/
+
+ IN
+	ppc : pkgcell structure
+
+ OUT
+	NONE
+************************************************************************/
 
 void pkgcell_destroy(pkgcell *ppc) {
 	if (ppc->name != NULL)
@@ -127,9 +160,19 @@ void pkgcell_destroy(pkgcell *ppc) {
 	hash_destroy(ppc->variables);
 }
 
-/*
+
+/***************
+ pkgdata_init()
+
+ DESCR
 	initialize pkgdata structure
-*/
+
+ IN
+	NONE
+
+ OUT
+	pkgdata structure or NULL
+************************************************************************/
 
 pkgdata *pkgdata_init(void) {
 	pkgdata	*ppd;
@@ -166,45 +209,82 @@ pkgdata *pkgdata_init(void) {
 	return(ppd);
 }
 
-/*
-	free pkgcell structure
-*/
+
+/******************
+ pkgdata_destroy()
+
+ DESCR
+	free pkgdata structure
+
+ IN
+	ppd : pkgdata structure
+
+ OUT
+	NONE
+************************************************************************/
 
 void pkgdata_destroy(pkgdata *ppd) {
 #ifdef PKGCFG_DEBUG
-debugf("clean pc files hash");
+	debugf("clean pc files hash");
 #endif
 	hash_destroy(ppd->files);
 #ifdef PKGCFG_DEBUG
-debugf("clean cells hash");
+	debugf("clean cells hash");
 #endif
 	hash_destroy(ppd->cells);
 #ifdef PKGCFG_DEBUG
-debugf("clean modules list");
+	debugf("clean modules list");
 #endif
 	da_destroy(ppd->mods);
 #ifdef PKGCFG_DEBUG
-debugf("clean structure");
+	debugf("clean structure");
 #endif
 	free(ppd);
 }
 
-/*
+
+/*************
+ skip_blank()
+
+ DESCR
+	skip blank character(s)
+
+ IN
+	pstr: current parsing cursor
+
+ OUT
+	new parsing cursor
+***********************************************************************/
+
+char *skip_blank(char *pstr) {
+	while (isblank(*pstr) != 0) {
+		pstr++;
+	}
+	return(pstr);
+}
+
+
+/***********
+ scan_dir()
+
+ DESCR
 	scan given directory for pc files
 
+ IN
 	dir : directory to scan
 	ppd : pkgdata structure
 
-	return : boolean
-*/
+ OUT
+	boolean
+************************************************************************/
 
 bool scan_dir(char *dir, pkgdata *ppd) {
 	struct dirent	*pde;
-	DIR		*pdir;
-	char		*pstr,
-			 buf[MAXPATHLEN],
-			 fpath[MAXPATHLEN];
-	size_t		 l;
+	DIR				*pdir;
+	char			*pstr,
+					 buf[MAXPATHLEN],
+					 fpath[MAXPATHLEN];
+	size_t			 l;
 
 	/* open directory */
 	pdir = opendir(dir);
@@ -248,7 +328,7 @@ bool scan_dir(char *dir, pkgdata *ppd) {
 				/* XXX detect if the package has already been detected ? */
 
 #ifdef PKGCFG_DEBUG
-debugf("add module '%s' with file '%s'", buf, pstr);
+				debugf("add module '%s' with file '%s'", buf, pstr);
 #endif
 			}
 		}
@@ -259,25 +339,31 @@ debugf("add module '%s' with file '%s'", buf, pstr);
 	return(true);
 }
 
-/*
+
+/**************
+ pkg_collect()
+
+ DESCR
 	collect packages data
 
+ IN
 	pkglibdir : default packages data directory
 	ppd : pkgdata structure
 
+ OUT
 	return : boolean
-*/
+************************************************************************/
 
 bool pkg_collect(char *pkglibdir, pkgdata *ppd) {
-	char		*pstr;
-	dynary		*pda;
+	char			*pstr;
+	dynary			*pda;
 	unsigned int	 i;
 
 	pstr = getenv(PMKCFG_ENV_PATH);
 	if (pstr != NULL) {
 		/* also scan path provided in env variable */
 		pda = str_to_dynary(pstr, PKGCFG_CHAR_PATH_SEP);
-		
+
 		for (i = 0 ; i < da_usize(pda) ; i++) {
 			pstr = da_idx(pda, i);
 			if (scan_dir(pstr, ppd) == false) {
@@ -299,20 +385,25 @@ bool pkg_collect(char *pkglibdir, pkgdata *ppd) {
 		if (scan_dir(pstr, ppd) == false)
 			return(false);
 	}
-	
+
 	return(true);
 }
 
 
-/*
+/****************
+ parse_keyword()
+
+ DESCR
 	parse keyword and set data
 
+ IN
 	ppc : pkgcell structure
 	kword : keyword
 	value : value to assign
 
-	return : boolean
-*/
+ OUT
+	boolean
+************************************************************************/
 
 bool parse_keyword(pkgcell *ppc, char *kword, char *value) {
 	unsigned int	i;
@@ -377,21 +468,27 @@ bool parse_keyword(pkgcell *ppc, char *kword, char *value) {
 	return(true);
 }
 
-/*
+
+/********************
+ process_variables()
+
+ DESCR
 	process string to substitute variables with their values
 
+ IN
 	pstr : string to process
 	pht : hash table where variables are stored
 
-	return : new string or NULL
-*/
+ OUT
+	new string or NULL
+************************************************************************/
 
 char *process_variables(char *pstr, htable *pht) {
 	bool	 bs = false;
 	char	 buf[OPT_VALUE_LEN],
-		 var[OPT_NAME_LEN],
-		*pvar,
-		*pbuf;
+			 var[OPT_NAME_LEN],
+			*pvar,
+			*pbuf;
 	size_t	 size;
 
 	size = sizeof(buf);
@@ -410,7 +507,7 @@ char *process_variables(char *pstr, htable *pht) {
 					pstr++;
 					/* skip '{' */
 					pstr++;
-					pstr = parse_identifier(pstr, var, sizeof(var));
+					pstr = parse_idtf(pstr, var, sizeof(var));
 					if (pstr == NULL) {
 						/* debugf("parse_idtf returned null."); */
 						return(NULL);
@@ -470,20 +567,26 @@ char *process_variables(char *pstr, htable *pht) {
 	return(strdup(buf));
 }
 
-/*
+
+/****************
+ parse_pc_file()
+
+ DESCR
 	parse pc file
 
+ IN
 	pcfile : file to parse
 
-	return : pkgcell structure or NULL
-*/
+ OUT
+	pkgcell structure or NULL
+************************************************************************/
 
 pkgcell *parse_pc_file(char *pcfile) {
 	FILE	*fp;
 	char	*pstr,
-		*pps,
-		 buf[TMP_BUF_LEN],
-		 line[TMP_BUF_LEN];
+			*pps,
+			 buf[TMP_BUF_LEN],
+			 line[TMP_BUF_LEN];
 	pkgcell	*ppc;
 
 	fp = fopen(pcfile, "r");
@@ -501,7 +604,7 @@ pkgcell *parse_pc_file(char *pcfile) {
 	/* main parsing */
 	while (get_line(fp, line, sizeof(line)) == true) {
 		/* collect identifier */
-		pstr = parse_identifier(line, buf, sizeof(buf));
+		pstr = parse_idtf(line, buf, sizeof(buf));
 
 		switch (*pstr) {
 			case ':' :
@@ -512,7 +615,7 @@ pkgcell *parse_pc_file(char *pcfile) {
 				/* process variables */
 				pps = process_variables(pstr, ppc->variables);
 #ifdef PKGCFG_DEBUG
-debugf("keyword = '%s', value = '%s', string = '%s'", buf, pps, pstr);
+				debugf("keyword = '%s', value = '%s', string = '%s'", buf, pps, pstr);
 #endif
 				/* set variable with parsed data */
 				if (parse_keyword(ppc, buf, pps) == false) {
@@ -530,7 +633,7 @@ debugf("keyword = '%s', value = '%s', string = '%s'", buf, pps, pstr);
 				/* process variables */
 				pps = process_variables(pstr, ppc->variables);
 #ifdef PKGCFG_DEBUG
-debugf("variable = '%s', value = '%s', string = '%s'", buf, pps, pstr);
+				debugf("variable = '%s', value = '%s', string = '%s'", buf, pps, pstr);
 #endif
 				/* store variable in hash */
 				if (hash_update_dup(ppc->variables, buf, pps) == HASH_ADD_FAIL) {
@@ -544,7 +647,7 @@ debugf("variable = '%s', value = '%s', string = '%s'", buf, pps, pstr);
 			default :
 				/* unknown or empty line */
 #ifdef PKGCFG_DEBUG
-debugf("unknown = '%s'", line);
+				debugf("unknown = '%s'", line);
 #endif
 				break;
 		}
@@ -555,14 +658,20 @@ debugf("unknown = '%s'", line);
 	return(ppc);
 }
 
-/*
+
+/***************
+ pkg_cell_add()
+
+ DESCR
 	insert a package cell and return a pointer on it
 
+ IN
 	mod : module name to process
 	ppd : packages data structure
 
-	return : pkgcell structure or NULL
-*/
+ OUT
+	pkgcell structure or NULL
+************************************************************************/
 
 pkgcell *pkg_cell_add(pkgdata *ppd, char *mod) {
 	char		*pcf;
@@ -581,7 +690,7 @@ pkgcell *pkg_cell_add(pkgdata *ppd, char *mod) {
 		return(NULL);
 #ifdef PKGCFG_DEBUG
 	} else {
-debugf("adding pkgcell for '%s'", mod);
+		debugf("adding pkgcell for '%s'", mod);
 #endif
 	}
 
@@ -590,7 +699,7 @@ debugf("adding pkgcell for '%s'", mod);
 
 	if (ppc->requires != NULL) {
 #ifdef PKGCFG_DEBUG
-debugf("pkgcell requires = '%s'", ppc->requires);
+		debugf("pkgcell requires = '%s'", ppc->requires);
 #endif
 		if (pkg_recurse(ppd, ppc->requires) == false) {
 			pkgcell_destroy(ppc);
@@ -601,18 +710,24 @@ debugf("pkgcell requires = '%s'", ppc->requires);
 	return(ppc);
 }
 
-/*
+
+/**************
+ pkg_recurse()
+
+ DESCR
 	recurse packages
 
+ IN
 	ppd : packages data structure
 	reqs : requires string
 
-	return : boolean
-*/
+ OUT
+	boolean
+************************************************************************/
 
 bool pkg_recurse(pkgdata *ppd, char *reqs) {
-	char		*mod;
-	dynary		*pda;
+	char			*mod;
+	dynary			*pda;
 	unsigned int	 i;
 
 #ifdef PKGCFG_DEBUG
@@ -644,18 +759,24 @@ debugf("recursing '%s'", reqs);
 	return(true);
 }
 
-/*
+
+/********************
+ pkg_single_append()
+
+ DESCR
 	append module name if it does not already exists
 
+ IN
 	ostr : modules list string
 	astr : module to append
 
+ OUT
 	return : new list of modules or NULL
-*/
+************************************************************************/
 
 char *pkg_single_append(char *ostr, char *astr) {
 	char	*pstr,
-		*buf;
+			*buf;
 	size_t	 s;
 
 #ifdef PKGCFG_DEBUG
@@ -695,35 +816,47 @@ debugf("single_append '%s', '%s'", ostr, astr);
 	return(buf);
 }
 
-/*
+
+/*****************
+ pkg_get_cflags()
+
+ DESCR
 	get recursed list of cflags
 
+ IN
 	ppd : packages data structure
 
-	return : cflags string
-*/
+ OUT
+	cflags string
+************************************************************************/
 
 char *pkg_get_cflags(pkgdata *ppd) {
 	return(pkg_get_cflags_adv(ppd, PKGCFG_CFLAGS_ALL));
 }
 
-/*
+
+/*********************
+ pkg_get_cflags_adv()
+
+ DESCR
 	get recursed list of cflags with output filtering
 
+ IN
 	ppd : packages data structure
 	opts : output filtering options
 
-	return : cflags string
-*/
+ OUT
+	cflags string
+************************************************************************/
 
 char *pkg_get_cflags_adv(pkgdata *ppd, unsigned int opts) {
-	char		*cflags = "",
-			*pstr;
-	dynary		*pda;
-	pkgcell		*ppc;
+	char			*cflags = "",
+					*pstr;
+	dynary			*pda;
+	pkgcell			*ppc;
 	unsigned int	 i,
-			 j,
-			 o;
+					 j,
+					 o;
 
 	pda = ppd->mods;
 
@@ -754,35 +887,47 @@ char *pkg_get_cflags_adv(pkgdata *ppd, unsigned int opts) {
 	return(cflags);
 }
 
-/*
+
+/***************
+ pkg_get_libs()
+
+ DESCR
 	get recursed list of libs
 
+ IN
 	ppd : packages data structure
 
-	return : libs string
-*/
+ OUT
+	libs string
+************************************************************************/
 
 char *pkg_get_libs(pkgdata *ppd) {
 	return(pkg_get_libs_adv(ppd, PKGCFG_LIBS_ALL));
 }
 
-/*
+
+/*******************
+ pkg_get_libs_adv()
+
+ DESCR
 	get recursed list of libs with output filtering
 
+ IN
 	ppd : packages data structure
 	opts : output filtering options
 
-	return : libs string
-*/
+ OUT
+	libs string
+************************************************************************/
 
 char *pkg_get_libs_adv(pkgdata *ppd, unsigned int opts) {
-	char		*libs = "",
-			*pstr;
-	dynary		*pda;
-	pkgcell		*ppc;
+	char			*libs = "",
+					*pstr;
+	dynary			*pda;
+	pkgcell			*ppc;
 	unsigned int	 i,
-			 j,
-			 o;
+					 j,
+					 o;
 
 	pda = ppd->mods;
 
@@ -827,13 +972,19 @@ char *pkg_get_libs_adv(pkgdata *ppd, unsigned int opts) {
 	return(libs);
 }
 
-/*
+
+/*****************
+ pkg_mod_exists()
+
+ DESCR
 	check if the given module exists
 
+ IN
 	mod : module to check
 
-	return : boolean
-*/
+ OUT
+	boolean
+************************************************************************/
 
 bool pkg_mod_exists(pkgdata *ppd, char *mod) {
 	if (hash_get(ppd->files, mod) == NULL) {
@@ -843,17 +994,22 @@ bool pkg_mod_exists(pkgdata *ppd, char *mod) {
 	}
 }
 
-/*
+
+/******************
+ compare_version()
+
+ DESCR
 	compare two version strings
 
+ IN
 	vref : reference version
 	vcomp : version to check
 
-	return :
-		<0 if vref is greater than vcomp
-		=0 if vref is equal to vcomp
-		>0 if vref is smaller than vcomp
-*/
+ OUT
+	<0 if vref is greater than vcomp
+	=0 if vref is equal to vcomp
+	>0 if vref is smaller than vcomp
+************************************************************************/
 
 int compare_version(char *vref, char *vcomp) {
 	bool		 bexit = false;
@@ -926,4 +1082,3 @@ int compare_version(char *vref, char *vcomp) {
 
 	return(delta);
 }
-
