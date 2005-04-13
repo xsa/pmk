@@ -20,7 +20,7 @@ $(SCAN):
 	@echo ""
 	@echo "-> Running $(SCAN)"
 	@echo ""
-	$(SCAN)
+	$(SCAN) -p
 
 show_scan:
 	@echo ""
