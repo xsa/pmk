@@ -1,3 +1,6 @@
+17 Apr 2005 mipsator
+ * updated parse_lang in sync with latest changes.
+
 13 Apr 2005 mipsator
  * added missing parts for pmk and pmksetup, tree should be still broken
    due to the missing parts i did not committed yet.

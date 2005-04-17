@@ -292,7 +292,7 @@ bool prs_c_dquote_skip(prseng_t *ppe) {
 	/* skip starting double quote */
 	prseng_next_char(ppe);
 
-	while ((prseng_test_char(ppe, '\"') == false) || (escape == true)) {
+	while ((prseng_test_char(ppe, '"') == false) || (escape == true)) {
 		escape = false;
 
 		if (prseng_eof(ppe) == true) {
@@ -373,7 +373,7 @@ bool prs_c_prepro(prs_cmn_t *pcmn, prseng_t *ppe) {
 		/* process directive with a call to pcmn->func_ppro() */
 		prseng_get_idtf(ppe, pp_idtf, sizeof(pp_idtf), PRS_C_IDTF_STR);
 
-		pcmn->func_ppro(pp_idtf, ppe);
+		pcmn->func_ppro(pcmn->data, pp_idtf, ppe);
 	} else {
 		/* skip directive */
 		if (prs_c_line_skip(ppe) == false) {
@@ -432,8 +432,8 @@ bool prs_c_file(prs_cmn_t *pcmn, FILE *fp) {
 				 type[MAX_IDTF_LEN];
 	prseng_t	*ppe;
 
-	/* init prsbuf */
-	ppe = prseng_init(fp); /* XXX check */
+	/* init prseng	 */
+	ppe = prseng_init(fp, NULL); /* XXX check */
 
 	/* while end of file is not reached */
 	while (prseng_eof(ppe) == false) {
@@ -460,7 +460,7 @@ printf("DEBUG b\n");
 #ifdef DEBUG_PRSC
 				printf("possible function call of '%s'\n", idtf);
 #endif
-				pcmn->func_proc(idtf, ppe); /* XXX */
+				pcmn->func_proc(pcmn->data, idtf, ppe); /* XXX */
 
 				idtf_flag = false;
 			}
@@ -481,7 +481,7 @@ printf("DEBUG c\n");
 				printf("possible type identifier '%s'\n", idtf);
 #endif
 				/* XXX TODO processing, call to pcmn->func_type */
-				pcmn->func_type(idtf, ppe); /* XXX */
+				pcmn->func_type(pcmn->data, idtf, ppe); /* XXX */
 
 				idtf_flag = false;
 			}
@@ -494,7 +494,7 @@ printf("DEBUG c\n");
 				printf("possible type identifier '%s'\n", type);
 #endif
 				/* XXX TODO processing, call to pcmn->func_type */
-				pcmn->func_type(idtf, ppe); /* XXX */
+				pcmn->func_type(pcmn->data, idtf, ppe); /* XXX */
 
 				type_flag = false;
 			}
@@ -530,16 +530,17 @@ printf("DEBUG e\n");
 printf("DEBUG f\n");
 #endif
 
+                /* if it's a misc char ... */
 		if (prseng_test_idtf_char(PRS_C_MISC_STR,
-							prseng_get_char(ppe)) == true) {
-				/* clear flags */
-				idtf_flag = false; /* XXX here idtf could contain a constant */
-				type_flag = false; /* XXX could happen to be true ? */
+					prseng_get_char(ppe)) == true) {
+			/* clear flags */
+			idtf_flag = false; /* XXX here idtf could contain a constant */
+			type_flag = false; /* XXX could happen to be true ? */
 
-				/* skip character */
-				prseng_next_char(ppe);
+			/* skip character */
+			prseng_next_char(ppe);
 
-				continue;
+			continue;
 		}
 #ifdef DEBUG_PRSC
 printf("DEBUG g\n");
@@ -576,7 +577,7 @@ printf("DEBUG j\n");
 		/* XXX */
 	}
 
-	prseng_close(ppe);
+	prseng_destroy(ppe);
 
 	return(true);
 }

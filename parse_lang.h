@@ -111,11 +111,14 @@
 ***********************************************************************/
 
 typedef struct {
-	bool	 strict;				/* stop on errors when true */
-	void	 (*func_ppro)(char *, prseng_t *),	/* function called on preprocessor keyword */
-		 (*func_proc)(char *, prseng_t *),	/* function called on procedure identifier */
-		 (*func_type)(char *, prseng_t *),	/* function called on type identifier */
-		*data;					/* data structure provided to the functions */
+	bool	 strict;	/* stop on errors when true */
+				/* function to call on preprocessor keyword */
+	void	 (*func_ppro)(void *, char *, prseng_t *),
+				/* function called on procedure identifier */
+		 (*func_proc)(void *, char *, prseng_t *),
+				/* function called on type identifier */
+		 (*func_type)(void *, char *, prseng_t *),	
+		*data;		/* data structure provided to the functions */
 } prs_cmn_t;
 
 
