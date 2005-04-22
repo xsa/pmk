@@ -42,7 +42,7 @@ PTH_OBJS=	../compat.o ../pathtools.o path_test.o
 PC_OBJS=	../common.o ../compat.o ../dynarray.o ../hash.o ../parse.o \
 		../pkgconfig.o ../pmk_obj.o ../prseng.o pkgconfig_test.o
 
-PL_OBJS=	../compat.o ../dynarray.o ../hash.o ../pmk_obj.o \
+PL_OBJS=	../common.o ../compat.o ../dynarray.o ../hash.o ../pmk_obj.o \
 		../parse_lang.o ../prseng.o plang_test.o
 
 all: comp cpuid dynary gencomp hash mkvar parser path pkgconfig

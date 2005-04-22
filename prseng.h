@@ -54,15 +54,15 @@
 ***********************************************************************/
 
 typedef struct {
-	FILE		*fp;			/* file structure pointer */
-	bool		 eof,			/* end of file flag */
-			 err;			/* error flag */
-	char		*str,			/* string to parse (prseng_init_str) */
-			*cur,			/* parsing cursor */
-			 buf[PRSENG_BUF_LEN];	/* buffer window */
-	unsigned int	 linenum;		/* current line */
-	long		 offset;		/* offset of the buffer window */
-	void		*data;
+	FILE			*fp;					/* file structure pointer */
+	bool			 eof,					/* end of file flag */
+					 err;					/* error flag */
+	char			*str,					/* string to parse (prseng_init_str) */
+					*cur,					/* parsing cursor */
+					 buf[PRSENG_BUF_LEN];	/* buffer window */
+	unsigned int	 linenum;				/* current line */
+	unsigned long	 offset;				/* offset of the buffer window */
+	void			*data;
 } prseng_t;
 
 
@@ -70,19 +70,19 @@ typedef struct {
  function prototypes
 ***********************************************************************/
 
-prseng_t	*prseng_init(FILE *, void *);
-prseng_t	*prseng_init_str(char *, void *);
-void		 prseng_destroy(prseng_t *);
+prseng_t		*prseng_init(FILE *, void *);
+prseng_t		*prseng_init_str(char *, void *);
+void			 prseng_destroy(prseng_t *);
 
-bool		 prseng_update(prseng_t *);
-bool		 prseng_eof(prseng_t *);
+bool			 prseng_update(prseng_t *);
+bool			 prseng_eof(prseng_t *);
 
-char		 prseng_get_char(prseng_t *);
-bool		 prseng_next_char(prseng_t *);
-bool		 prseng_test_char(prseng_t *, char);
+char			 prseng_get_char(prseng_t *);
+bool			 prseng_next_char(prseng_t *);
+bool			 prseng_test_char(prseng_t *, char);
 
-bool		 prseng_test_idtf_char(char *, char);
-bool		 prseng_get_idtf(prseng_t *, char *, size_t, char *);
+bool			 prseng_test_idtf_char(char *, char);
+bool			 prseng_get_idtf(prseng_t *, char *, size_t, char *);
 
 
 #endif /* _PRSENG_H_ */

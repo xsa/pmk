@@ -8,9 +8,7 @@
 
 #include "../parse_lang.h"
 
-#define FNAME	"plang_test.c"
-
-void ppro(char *pstr, prseng_t *ppe) {
+bool ppro(void *data, char *pstr, prseng_t *ppe) {
 	char	iname[MAXPATHLEN],
 		c;
 
@@ -38,31 +36,52 @@ void ppro(char *pstr, prseng_t *ppe) {
 	}
 
 	prs_c_line_skip(ppe);
+
+	return(true);
 }
 
-void proc(char *pstr, prseng_t *ppe) {
+bool proc(void *data, char *pstr, prseng_t *ppe) {
 	printf("PROC: found function call '%s'\n", pstr);
+
+	return(true);
 }
 
-void type(char *pstr, prseng_t *ppe) {
+bool decl(void *data, char *pstr, prseng_t *ppe) {
+	printf("PROC: found function declarator '%s'\n", pstr);
+
+	return(true);
+}
+
+bool type(void *data, char *pstr, prseng_t *ppe) {
 	printf("TYPE: found type '%s'\n", pstr);
+
+	return(true);
 }
 
-int main() {
+int main(int argc, char **argv) {
 	FILE		*fp;
 	prs_cmn_t	 pcmn;
 
-	pcmn.func_ppro = &ppro;
-	pcmn.func_proc = &proc;
-	pcmn.func_type = &type;
-
-	fp = fopen(FNAME, "r");
-	if (fp == NULL) {
-		printf("cannot open '%s'\n", FNAME);
+	if (argc != 2) {
+		printf("Expecting a filename as argument\n	");
+		exit(1); /* XXX */
 	}
 
-	prs_c_file(&pcmn, fp);
+	pcmn.func_ppro = &ppro;
+	pcmn.func_proc = &proc;
+	pcmn.func_decl = &decl;
+	pcmn.func_type = &type;
+	pcmn.data = NULL;
+
+	fp = fopen(argv[1], "r");
+	if (fp == NULL) {
+		printf("cannot open '%s'\n", argv[1]);
+	} else {
+		prs_c_file(&pcmn, fp);
+	}
 
 	fclose(fp);
+
+	return(0);
 }
 

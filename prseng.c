@@ -244,7 +244,7 @@ char prseng_get_char(prseng_t *ppe) {
 bool prseng_next_char(prseng_t *ppe) {
 	if (*ppe->cur == '\n') {
 #ifdef DEBUG_PRSENG
-	debugf("prseng_next_char() : new line = %d", *ppe->linenum);
+	debugf("prseng_next_char() : new line = %d", ppe->linenum);
 #endif
 		ppe->linenum++;
 	}
