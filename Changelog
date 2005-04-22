@@ -1,3 +1,9 @@
+21 Apr 2005 mipsator
+ * modified pmkscan to use parse_lang.
+ * improved the -m option of pmkscan.
+ * fixed/improved stuff in prseng.
+ * updated plang test.
+
 17 Apr 2005 mipsator
  * updated parse_lang in sync with latest changes.
 

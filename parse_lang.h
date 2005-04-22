@@ -111,14 +111,12 @@
 ***********************************************************************/
 
 typedef struct {
-	bool	 strict;	/* stop on errors when true */
-				/* function to call on preprocessor keyword */
-	void	 (*func_ppro)(void *, char *, prseng_t *),
-				/* function called on procedure identifier */
-		 (*func_proc)(void *, char *, prseng_t *),
-				/* function called on type identifier */
-		 (*func_type)(void *, char *, prseng_t *),	
-		*data;		/* data structure provided to the functions */
+	bool	 strict,	/* stop on errors when true */
+			 (*func_ppro)(void *, char *, prseng_t *),	/* function to call on preprocessor keyword */
+			 (*func_proc)(void *, char *, prseng_t *),	/* function called on procedure identifier */
+			 (*func_decl)(void *, char *, prseng_t *),	/* function called on procedure declaration */
+			 (*func_type)(void *, char *, prseng_t *);	/* function called on type identifier */
+	void	*data;		/* data structure provided to the functions */
 } prs_cmn_t;
 
 
@@ -133,6 +131,6 @@ bool	 prs_c_squote_skip(prseng_t *);
 bool	 prs_c_dquote_skip(prseng_t *);
 void	 prs_c_skip(prseng_t *);
 bool	 prs_c_prepro(prs_cmn_t *, prseng_t *);
-bool	 prs_c_is_kw(char *);
+bool	 prs_c_is_kw(char *, char **, size_t);
 bool	 prs_c_file(prs_cmn_t *, FILE *);
 

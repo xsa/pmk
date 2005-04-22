@@ -1,4 +1,4 @@
-/* $Id */
+/* $Id$ */
 
 /*
  * Copyright (c) 2005 Damien Couderc
@@ -40,9 +40,7 @@
 #include "parse_lang.h"
 
 
-/*
-#define DEBUG_PRSC	1
-*/
+/*#define DEBUG_PRSC	1*/
 
 
 /**********
@@ -65,7 +63,7 @@ char	*pp_keywords[] = {
 	RKW_PP_UDEF
 };
 
-/* C language reserved keywords */
+/* C language reserved keywords (without types) */
 char	*c_keywords[] = {
 	RKW_C_BOOL, RKW_C_CMPLX, RKW_C_IMGNR,
 	RKW_C_AUTO,
@@ -86,6 +84,19 @@ char	*c_keywords[] = {
 };
 size_t nb_c_keywords = sizeof(c_keywords) / sizeof(char *);
 
+/* C language reserved keywords */
+char	*c_type_keywords[] = {
+	RKW_C_BOOL, RKW_C_CMPLX, RKW_C_IMGNR,
+	RKW_C_CHAR,
+	RKW_C_DBL,
+	RKW_C_FLOAT,
+	RKW_C_INT,
+	RKW_C_LONG,
+	RKW_C_SHORT,
+	RKW_C_VOID
+};
+size_t nb_c_type_keywords = sizeof(c_type_keywords) / sizeof(char *);
+
 
 /**********
  functions
@@ -95,8 +106,10 @@ size_t nb_c_keywords = sizeof(c_keywords) / sizeof(char *);
  prs_c_skip_to_char()
 
  DESCR
+	skip until a given char
+
  IN
- OUT
+	OUT
 ************************************************************************/
 
 bool prs_c_skip_to_char(prseng_t *ppe, char c) {
@@ -135,8 +148,10 @@ bool prs_c_skip_to_char(prseng_t *ppe, char c) {
  prs_c_line_skip()
 
  DESCR
+	skip until end of file
+
  IN
- OUT
+	OUT
 ************************************************************************/
 
 bool prs_c_line_skip(prseng_t *ppe) {
@@ -178,11 +193,12 @@ bool prs_c_line_skip(prseng_t *ppe) {
 	skip C style comments
 
  IN
- OUT
+	OUT
 ************************************************************************/
 
 bool prs_c_comment_skip(prseng_t *ppe) {
-	bool	flag = false;
+	bool	flag = false,
+			loop = true;
 
 	/* skip '/' character */
 	prseng_next_char(ppe);
@@ -197,18 +213,35 @@ bool prs_c_comment_skip(prseng_t *ppe) {
 			/* skip '*' character */
 			prseng_next_char(ppe);
 
-			/* while not end of file */
-			while ((prseng_eof(ppe) == false) &&
-					((prseng_test_char(ppe, '/') == false) || (flag == false))) {
+			if (prseng_eof(ppe) == true) {
+				/* XXX err msg unexpected eof */
+				return(false);
+			}
+
+			/* loop until end of comment is found */
+			while (loop == true) {
+				if (flag == true) {
+					if (prseng_test_char(ppe, '/') == true) {
+						/* can exit from the loop after skipping this char */
+						loop = false;
+					} else {
+						/* else unset flag */
+						flag = false;
+					}
+				}
+
 				if (prseng_test_char(ppe, '*') == true) {
 					/* set flag to stop if the next char is '/' */
 					flag = true;
-				} else {
-					/* else unset flag */
-					flag = false;
 				}
 
+				/* going to next char */
 				prseng_next_char(ppe);
+
+				if (prseng_eof(ppe) == true) {
+					/* XXX err msg unexpected eof */
+					return(false);
+				}
 			}
 			break;
 
@@ -234,7 +267,7 @@ bool prs_c_comment_skip(prseng_t *ppe) {
 	process simple quotes
 
  IN
- OUT
+	OUT
 ************************************************************************/
 
 bool prs_c_squote_skip(prseng_t *ppe) {
@@ -283,7 +316,7 @@ bool prs_c_squote_skip(prseng_t *ppe) {
  DESCR
 	process double quotes
  IN
- OUT
+	OUT
 ************************************************************************/
 
 bool prs_c_dquote_skip(prseng_t *ppe) {
@@ -294,6 +327,10 @@ bool prs_c_dquote_skip(prseng_t *ppe) {
 
 	while ((prseng_test_char(ppe, '"') == false) || (escape == true)) {
 		escape = false;
+
+#ifdef DEBUG_PRSC
+	debugf("current char = %c", prseng_get_char(ppe));
+#endif
 
 		if (prseng_eof(ppe) == true) {
 			/* XXX msg cannot find ending double quote ! */
@@ -321,17 +358,25 @@ bool prs_c_dquote_skip(prseng_t *ppe) {
 	skip useless stuff like spaces, tabs, newlines and comments
 
  IN
- OUT
+	OUT
 ************************************************************************/
 
-void prs_c_skip(prseng_t *ppe) {
+void prs_c_skip(prseng_t *ppe) { /* XXX bool */
 	bool	do_exit = false;
 
+#ifdef DEBUG_PRSC
+	/*debugf("prs_c_skip() : start");*/
+#endif
 	while (do_exit == false) {
+#ifdef DEBUG_PRSC
+	/*debugf("prs_c_skip() : char number is %d", (int) prseng_get_char(ppe));*/
+#endif
 		switch(prseng_get_char(ppe)) {
 			case ' ' :
 			case '\t' :
 			case '\n' :
+			case '\f' :
+			case 13 :
 				/* skip character */
 				prseng_next_char(ppe);
 				break;
@@ -345,6 +390,9 @@ void prs_c_skip(prseng_t *ppe) {
 				do_exit = true;
 		}
 	}
+#ifdef DEBUG_PRSC
+	/*debugf("prs_c_skip() : stop");*/
+#endif
 }
 
 
@@ -355,7 +403,7 @@ void prs_c_skip(prseng_t *ppe) {
 	handle preprocesor directives
 
  IN
- OUT
+	OUT
 ************************************************************************/
 
 bool prs_c_prepro(prs_cmn_t *pcmn, prseng_t *ppe) {
@@ -395,7 +443,7 @@ bool prs_c_prepro(prs_cmn_t *pcmn, prseng_t *ppe) {
  OUT
 ************************************************************************/
 
-bool prs_c_is_kw(char *idtf) {
+bool prs_c_is_kw(char *idtf, char **kw, size_t nbkw) {
 	size_t	i,
 			s;
 
@@ -403,8 +451,8 @@ bool prs_c_is_kw(char *idtf) {
 	s = strlen(idtf) + 1;
 
 	/* loop into the list of keywords */
-	for (i = 0 ; i < nb_c_keywords ; i++) {
-		if (strncmp(idtf, c_keywords[i], s) == 0) {
+	for (i = 0 ; i < nbkw ; i++) {
+		if (strncmp(idtf, kw[i], s) == 0) {
 			/* and return true if one matches */
 			return(true);
 		}
@@ -422,46 +470,67 @@ bool prs_c_is_kw(char *idtf) {
 	C file parsing main function
 
  IN
- OUT
+	OUT
 ************************************************************************/
 
 bool prs_c_file(prs_cmn_t *pcmn, FILE *fp) {
-	bool		 idtf_flag = false,
-				 type_flag = false;
-	char		 idtf[MAX_IDTF_LEN],
-				 type[MAX_IDTF_LEN];
-	prseng_t	*ppe;
+	bool			 idtf_flag = false,
+					 type_flag = false;
+	char			 idtf[MAX_IDTF_LEN],
+					 type[MAX_IDTF_LEN];
+	prseng_t		*ppe;
 
 	/* init prseng	 */
-	ppe = prseng_init(fp, NULL); /* XXX check */
+	ppe = prseng_init(fp, NULL);
+	if (ppe == NULL) {
+		return(false);
+	}
 
 	/* while end of file is not reached */
 	while (prseng_eof(ppe) == false) {
 #ifdef DEBUG_PRSC
-printf("cursor: '%.16s'\n", ppe->cur);
+		/*debugf("cursor: '%.16s'", ppe->cur);*/
 #endif
 		prs_c_skip(ppe);
 #ifdef DEBUG_PRSC
-		printf("DEBUG a\n");
+		debugf("cursor after skipping useless : '%.16s'", ppe->cur);
 #endif
 
 		if (prseng_test_char(ppe, '#') == true) {
 			/* parse preprocessing directive */
 			prs_c_prepro(pcmn, ppe);
 			continue;
-		}
 #ifdef DEBUG_PRSC
-printf("DEBUG b\n");
+		} else {
+				debugf("cursor is not '#'");
 #endif
+		}
 
 		if (prseng_test_char(ppe, '(') == true) {
 			if (idtf_flag == true) {
-				/* if an identifier flag is on => function call */
+				if (type_flag == true) {
 #ifdef DEBUG_PRSC
-				printf("possible function call of '%s'\n", idtf);
+					debugf("possible function declaration of '%s'", idtf);
 #endif
-				pcmn->func_proc(pcmn->data, idtf, ppe); /* XXX */
+					/* if an identifier flag is on => function call */
+					if (pcmn->func_decl != NULL) {
+						if (pcmn->func_decl(pcmn->data, idtf, ppe) == false) {
+							return(false);
+						}
+					}
 
+				} else {
+#ifdef DEBUG_PRSC
+					debugf("possible function call of '%s'", idtf);
+#endif
+					/* if an identifier flag is on => function call */
+					if (pcmn->func_proc != NULL) {
+						if (pcmn->func_proc(pcmn->data, idtf, ppe) == false) {
+							return(false);
+						}
+					}
+
+				}
 				idtf_flag = false;
 			}
 
@@ -469,32 +538,37 @@ printf("DEBUG b\n");
 			prseng_next_char(ppe);
 
 			continue;
-		}
 #ifdef DEBUG_PRSC
-printf("DEBUG c\n");
+		} else {
+				debugf("cursor is not '('");
 #endif
+		}
 
 		if (prseng_test_char(ppe, '*') == true) {
 			if (idtf_flag == true) {
 				/* if the idtf flag is on => type identifier */
 #ifdef DEBUG_PRSC
-				printf("possible type identifier '%s'\n", idtf);
+				debugf("possible type identifier '%s'", idtf);
 #endif
-				/* XXX TODO processing, call to pcmn->func_type */
-				pcmn->func_type(pcmn->data, idtf, ppe); /* XXX */
+				/* processing, call to pcmn->func_type */
+				pcmn->func_type(pcmn->data, idtf, ppe);
 
 				idtf_flag = false;
 			}
+#ifdef DEBUG_PRSC
+		} else {
+				debugf("cursor is not '*'");
+#endif
 		}
 
 		if (prseng_test_char(ppe, '[') == true) {
 			if (type_flag == true) {
 				/* if a type flag is on => type identifier */
 #ifdef DEBUG_PRSC
-				printf("possible type identifier '%s'\n", type);
+				debugf("possible type identifier '%s'", type);
 #endif
-				/* XXX TODO processing, call to pcmn->func_type */
-				pcmn->func_type(pcmn->data, idtf, ppe); /* XXX */
+				/* processing, call to pcmn->func_type */
+				pcmn->func_type(pcmn->data, idtf, ppe);
 
 				type_flag = false;
 			}
@@ -503,10 +577,11 @@ printf("DEBUG c\n");
 			prseng_next_char(ppe);
 
 			continue;
-		}
 #ifdef DEBUG_PRSC
-printf("DEBUG d\n");
+		} else {
+				debugf("cursor is not '['");
 #endif
+		}
 
 		if (prseng_test_char(ppe, '"') == true) {
 			if (prs_c_dquote_skip(ppe) == false) {
@@ -514,10 +589,11 @@ printf("DEBUG d\n");
 			}
 
 			continue;
-		}
 #ifdef DEBUG_PRSC
-printf("DEBUG e\n");
+		} else {
+				debugf("cursor is not '\"'");
 #endif
+		}
 
 		if (prseng_test_char(ppe, '\'') == true) {
 			if (prs_c_squote_skip(ppe) == false) {
@@ -525,56 +601,66 @@ printf("DEBUG e\n");
 			}
 
 			continue;
-		}
 #ifdef DEBUG_PRSC
-printf("DEBUG f\n");
+		} else {
+				debugf("cursor is not '\''");
 #endif
+		}
 
-                /* if it's a misc char ... */
+		/* if it's a misc char ... */
 		if (prseng_test_idtf_char(PRS_C_MISC_STR,
 					prseng_get_char(ppe)) == true) {
+#ifdef DEBUG_PRSC
+			debugf("cursor '%.16s is a misc char", ppe->cur);
+#endif
 			/* clear flags */
 			idtf_flag = false; /* XXX here idtf could contain a constant */
-			type_flag = false; /* XXX could happen to be true ? */
+			type_flag = false;
 
 			/* skip character */
 			prseng_next_char(ppe);
 
 			continue;
-		}
 #ifdef DEBUG_PRSC
-printf("DEBUG g\n");
+		} else {
+				debugf("cursor is not a misc char");
 #endif
+		}
 
 		if (idtf_flag == true) {
 			/* save previous idtf as it could be a type */
 			strlcpy(type, idtf, sizeof(type)); /* no check needed */
+#ifdef DEBUG_PRSC
+			debugf("save type identifier '%s'", type);
+#endif
 			idtf_flag = false;
 			type_flag = true;
 		}
-#ifdef DEBUG_PRSC
-printf("DEBUG h\n");
-#endif
 
 		prseng_get_idtf(ppe, idtf, sizeof(idtf), PRS_C_IDTF_STR);
 #ifdef DEBUG_PRSC
-	printf("DEBUG i\n");
+			debugf("found identifier '%s'", idtf);
 #endif
+
+		/* check if the identifier is a type keyword */
+		if (prs_c_is_kw(idtf, c_type_keywords, nb_c_type_keywords) == true) {
+			/* if yes then we have to mark this identifier */
+			type_flag = true;
+#ifdef DEBUG_PRSC
+			debugf("skipped type keyword '%s'", idtf);
+#endif
+			continue;
+		}
 
 		/* check if the identifier is a keyword */
-		if (prs_c_is_kw(idtf) == false) {
+		if (prs_c_is_kw(idtf, c_keywords, nb_c_keywords) == false) {
 			/* if not then we have to mark this identifier */
 			idtf_flag = true;
-		} else {
 #ifdef DEBUG_PRSC
-			printf("skipped keyword '%s'\n", idtf);
+		} else {
+			debugf("skipped keyword '%s'", idtf);
 #endif
 		}
-#ifdef DEBUG_PRSC
-printf("DEBUG j\n");
-#endif
-
-		/* XXX */
 	}
 
 	prseng_destroy(ppe);
