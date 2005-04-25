@@ -149,15 +149,21 @@ pkgcell *pkgcell_init(void) {
 void pkgcell_destroy(pkgcell *ppc) {
 	if (ppc->name != NULL)
 		free(ppc->name);
+
 	if (ppc->descr != NULL)
 		free(ppc->descr);
+
 	if (ppc->version != NULL)
 		free(ppc->version);
+
 	if (ppc->requires != NULL)
 		free(ppc->requires);
+
 	da_destroy(ppc->cflags);
 	da_destroy(ppc->libs);
 	hash_destroy(ppc->variables);
+
+	free(ppc);
 }
 
 
@@ -228,14 +234,17 @@ void pkgdata_destroy(pkgdata *ppd) {
 	debugf("clean pc files hash");
 #endif
 	hash_destroy(ppd->files);
+
 #ifdef PKGCFG_DEBUG
 	debugf("clean cells hash");
 #endif
 	hash_destroy(ppd->cells);
+
 #ifdef PKGCFG_DEBUG
 	debugf("clean modules list");
 #endif
 	da_destroy(ppd->mods);
+
 #ifdef PKGCFG_DEBUG
 	debugf("clean structure");
 #endif
@@ -437,12 +446,13 @@ bool parse_keyword(pkgcell *ppc, char *kword, char *value) {
 					break;
 
 				case PKGCFG_KW_REQS :
-					if (*value != CHAR_EOS)
+					if (*value != CHAR_EOS) {
 						ppc->requires = strdup(value);
 						if (ppc->requires == NULL) {
 							errorf(ERRMSG_MEM);
 							return(false);
 						}
+					}
 					break;
 
 				case PKGCFG_KW_CFLGS :
@@ -780,7 +790,7 @@ char *pkg_single_append(char *ostr, char *astr) {
 	size_t	 s;
 
 #ifdef PKGCFG_DEBUG
-debugf("single_append '%s', '%s'", ostr, astr);
+	debugf("single_append '%s', '%s'", ostr, astr);
 #endif
 
 	if (*astr == CHAR_EOS)

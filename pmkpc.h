@@ -38,6 +38,10 @@
 #define _PMKPC_H_
 
 
+/**********
+ constants
+************************************************************************/
+
 /* options id */
 #define PMKPC_OPT_UNKNOWN		0
 #define PMKPC_OPT_VERSION		1
@@ -90,6 +94,11 @@
 #define PC_USAGE_VARNAME	"VARIABLENAME"
 #define PC_USAGE_VARVAL		"VARIABLENAME=VARIABLEVALUE"
 
+
+/*********************************
+ types and structures definitions
+************************************************************************/
+
 typedef struct {
 	char		*name;
 	bool		 arg;
@@ -110,6 +119,10 @@ typedef struct {
 	pkgdata	*ppd;
 } pcdata;
 
+
+/********************
+ function prototypes
+************************************************************************/
 
 bool	 list_all(pkgdata *);
 bool	 pcgetopt(unsigned int, char **, optcell *);

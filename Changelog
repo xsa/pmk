@@ -1,3 +1,7 @@
+25 Apr 2005 mipsator
+ * fixed a bug that prevent --list-all option to work in pmkpc.
+ * added missing variable substitution for library path in pmkpc.
+
 21 Apr 2005 mipsator
  * modified pmkscan to use parse_lang.
  * improved the -m option of pmkscan.
