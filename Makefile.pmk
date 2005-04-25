@@ -81,12 +81,12 @@ S_OBJS=		common.o compat.o dynarray.o hash.o parse.o pmk_obj.o \
 		detect_cpu.o detect_cpu_asm.o $(SETUP).o
 
 SC_OBJS=	common.o compat.o dynarray.o hash.o hash_tools.o parse.o \
-                pmk_obj.o $(SCAN).o
+		pmk_obj.o $(SCAN).o
 
 I_OBJS=		common.o compat.o dynarray.o pathtools.o $(INST).o
 
-PC_OBJS=	cfgtool.o common.o compat.o dynarray.o hash.o parse.o \
-		pkgconfig.o pmk_obj.o $(PKGCFG).o
+PC_OBJS=	cfgtool.o common.o compat.o dynarray.o hash.o hash_tools.o \
+		parse.o pkgconfig.o pmk_obj.o $(PKGCFG).o
 
 
 .c.o:

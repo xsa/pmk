@@ -43,6 +43,7 @@
 #include "cfgtool.h"
 #include "common.h"
 #include "dynarray.h"
+#include "hash_tools.h"
 #include "parse.h"
 #include "pkgconfig.h"
 #include "pmkpc.h"
@@ -355,6 +356,7 @@ int main(int argc, char *argv[]) {
 			*bpath,
 			*opt,
 			*pc_path,
+			*pstr,
 			*mvers = NULL,
 			*pvers = NULL,
 			 cmp_type = CHAR_EOS,
@@ -582,12 +584,13 @@ debugf("{main} parsed '%s'", PREMAKE_CONFIG_PATH);
 	}
 
 	/* try to get pkg-config lib path from pmk.conf */
-	pc_path = hash_get(gdata.pht, PMKCONF_PC_PATH_LIB);
-	if (pc_path == NULL) {
+	pstr = hash_get(gdata.pht, PMKCONF_PC_PATH_LIB);
+	if (pstr == NULL) {
 		clean(&gdata);
 		errorf("unable to find pkg-config libdir.");
 		exit(EXIT_FAILURE);
 	}
+	pc_path = process_string(pstr, gdata.pht);
 
 	/* collect data */
 	pkg_collect(pc_path, gdata.ppd);
