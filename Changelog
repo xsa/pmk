@@ -1,3 +1,10 @@
+# PMK 0.9.3 release
+
+24 Apr 2005 mipsator
+ * fixed a bug introduced in revision 1.29 that prevented --list-all
+   to work correctly.
+ * added variable substitution for the pkgconfig lib path.
+
 # PMK 0.9.2 release
 
 29 Jan 2005 mipsator
