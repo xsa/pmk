@@ -87,20 +87,22 @@ size_t	 nb_cxx_file_ext = sizeof(cxx_file_ext) / sizeof(char *);
 
 scn_ext_t	 file_ext[] = {
 		{"*.asm",	SRC_TYPE_ASM},
-		{"*.C",	SRC_TYPE_C},
-		{"*.c",	SRC_TYPE_C},
+		{"*.C",		SRC_TYPE_C},
+		{"*.c",		SRC_TYPE_C},
 		{"*.cc",	SRC_TYPE_C},
 		{"*.cpp",	SRC_TYPE_CXX},
 		{"*.cxx",	SRC_TYPE_CXX},
 		{"*.c++",	SRC_TYPE_CXX},
-		{"*.H",	SRC_TYPE_C},
-		{"*.h",	SRC_TYPE_C},
+		{"*.H",		SRC_TYPE_C},
+		{"*.h",		SRC_TYPE_C},
 		{"*.hh",	SRC_TYPE_C},
 		{"*.hpp",	SRC_TYPE_CXX},
 		{"*.hxx",	SRC_TYPE_CXX},
 		{"*.h++",	SRC_TYPE_CXX},
-		{"*.S",	SRC_TYPE_ASM},
-		{"*.s",	SRC_TYPE_ASM}
+		{"*.S",		SRC_TYPE_ASM},
+		{"*.s",		SRC_TYPE_ASM},
+		{"*.l", 	SRC_TYPE_LEX},
+		{"*.y", 	SRC_TYPE_YACC}
 };
 size_t	 nb_file_ext = sizeof(file_ext) / sizeof(scn_ext_t);
 
@@ -159,49 +161,74 @@ scn_node_t *scan_node_init(char *fname) {
 				pstr--;
 			}
 		}
-		len++; /* get the size including null char */
+
+		/* get the size including null char */
+		len++;
 		pnode->prefix = (char *) malloc(len);
+		if (pnode->prefix == NULL) {
+			/* XXX msg err ? */
+			return(NULL);
+		}
 		strlcpy(pnode->prefix, fname, len);
 
 		/* init dynamic array of dependencies */
-		pnode->s_deps = da_init();
-		if (pnode->s_deps == NULL) {
+		pnode->system_inc = da_init();
+		if (pnode->system_inc == NULL) {
 			/* failed */
 			scan_node_destroy(pnode);
 			return(NULL);
 		}
 
 		/* init dynamic array of dependencies */
-		pnode->l_deps = da_init();
-		if (pnode->l_deps == NULL) {
+		pnode->local_inc = da_init();
+		if (pnode->local_inc == NULL) {
 			/* failed */
 			scan_node_destroy(pnode);
 			return(NULL);
 		}
 
 		/* init dynamic array of dependencies */
-		pnode->fc_deps = da_init();
-		if (pnode->fc_deps == NULL) {
+		pnode->func_calls = da_init();
+		if (pnode->func_calls == NULL) {
 			/* failed */
 			scan_node_destroy(pnode);
 			return(NULL);
 		}
 
 		/* init dynamic array of dependencies */
-		pnode->fd_deps = da_init();
-		if (pnode->fd_deps == NULL) {
+		pnode->func_decls = da_init();
+		if (pnode->func_decls == NULL) {
 			/* failed */
 			scan_node_destroy(pnode);
 			return(NULL);
 		}
 
 		/* init dynamic array of dependencies */
-		pnode->t_deps = da_init();
-		if (pnode->t_deps == NULL) {
+		pnode->type_idtfs = da_init();
+		if (pnode->type_idtfs == NULL) {
 			/* failed */
 			scan_node_destroy(pnode);
 			return(NULL);
 		}
+
+		/* init dynamic array of dependencies */
+		pnode->src_deps = da_init();
+		if (pnode->src_deps == NULL) {
+			/* failed */
+			scan_node_destroy(pnode);
+			return(NULL);
+		}
+
+		/* init dynamic array of dependencies */
+		pnode->obj_links = da_init();
+		if (pnode->obj_links == NULL) {
+			/* failed */
+			scan_node_destroy(pnode);
+			return(NULL);
+		}
+
+		/* init XXX  */
+		pnode->obj_deps = NULL;
 
 		/* init dependency state */
 		pnode->isdep = false; /* useful ? see scan_file() */
@@ -212,6 +239,8 @@ scn_node_t *scan_node_init(char *fname) {
 		/* init dependency score */
 		pnode->score = 0;
 
+		/* object pointer or null */
+		pnode->obj_name = NULL;
 	}
 
 	/* return initialized structure or NULL */
@@ -240,152 +269,35 @@ void scan_node_destroy(scn_node_t *pnode) {
 		free(pnode->fname);
 	}
 
-	if (pnode->s_deps != NULL) {
-		da_destroy(pnode->s_deps);
+	if (pnode->system_inc != NULL) {
+		da_destroy(pnode->system_inc);
 	}
 
-	if (pnode->l_deps != NULL) {
-		da_destroy(pnode->l_deps);
+	if (pnode->local_inc != NULL) {
+		da_destroy(pnode->local_inc);
 	}
 
-	if (pnode->fc_deps != NULL) {
-		da_destroy(pnode->fc_deps);
+	if (pnode->func_calls != NULL) {
+		da_destroy(pnode->func_calls);
 	}
 
-	if (pnode->fd_deps != NULL) {
-		da_destroy(pnode->fd_deps);
+	if (pnode->func_decls != NULL) {
+		da_destroy(pnode->func_decls);
 	}
 
-	if (pnode->t_deps != NULL) {
-		da_destroy(pnode->t_deps);
+	if (pnode->type_idtfs != NULL) {
+		da_destroy(pnode->type_idtfs);
+	}
+
+	if (pnode->src_deps != NULL) {
+		da_destroy(pnode->src_deps);
+	}
+
+	if (pnode->obj_links != NULL) {
+		da_destroy(pnode->obj_links);
 	}
 
 	free(pnode);
-}
-
-
-/*******************
- scan_object_init()
-
- DESCR
-	initialize scan object
-
- IN
-	oname : object name
-
- OUT
-	scan object structure
-************************************************************************/
-
-scn_obj_t *scan_object_init(char *oname) {
-	scn_obj_t	*pobj;
-
-	pobj = (scn_obj_t *) malloc(sizeof(scn_obj_t));
-	if (pobj != NULL) {
-		/* init dynamic array of dependencies */
-		pobj->deps = da_init();
-		if (pobj->deps == NULL) {
-			/* failed */
-			scan_object_destroy(pobj);
-			return(NULL);
-		}
-
-		pobj->name = strdup(oname);
-		pobj->node = NULL;
-		pobj->type = OBJ_TYPE_UNKNOWN;
-		pobj->is_trgt = false;
-	}
-
-	return(pobj);
-}
-
-
-/**********************
- scan_object_destroy()
-
- DESCR
-	destroy scan object structure
-
- IN
-	pobj : scan object structure
-
- OUT
-	NONE
-************************************************************************/
-
-void scan_object_destroy(scn_obj_t *pobj) {
-	if (pobj->name != NULL) {
-		free(pobj->name);
-	}
-
-	if (pobj->node != NULL) {
-		free(pobj->node);
-	}
-
-	if (pobj->deps != NULL) {
-		da_destroy(pobj->deps);
-	}
-
-	free(pobj);
-}
-
-
-/*******************
- scan_target_init()
-
- DESCR
-	initialize scan target
-
- IN
-	tname : target name
-
- OUT
-	scan target structure
-************************************************************************/
-
-scn_trgt_t *scan_target_init(char *tname) {
-	scn_trgt_t	*ptrgt;
-
-	ptrgt = (scn_trgt_t *) malloc(sizeof(scn_trgt_t));
-	if (ptrgt != NULL) {
-		ptrgt->name = strdup(tname);
-
-		/* init dynamic array of dependencies */
-		ptrgt->deps = da_init();
-		if (ptrgt->deps == NULL) {
-			/* failed */
-			scan_target_destroy(ptrgt);
-			return(NULL);
-		}
-	}
-
-	return(ptrgt);
-}
-
-
-/**********************
- scan_target_destroy()
-
- DESCR
-	destroy scan target structure
-
- IN
-	ptrgt : scan target structure
-
- OUT
-	NONE
-************************************************************************/
-
-void scan_target_destroy(scn_trgt_t *ptrgt) {
-	if (ptrgt->name != NULL) {
-		free(ptrgt->name);
-	}
-
-	if (ptrgt->deps != NULL) {
-		da_destroy(ptrgt->deps);
-	}
-
-	free(ptrgt);
 }
 
 
@@ -409,15 +321,15 @@ scn_glob_t *scan_glob_init(void) {
 	if (pglob != NULL) {
 		pglob->nodes = hash_init_adv(512, NULL,
 			(void (*)(void *))scan_node_destroy, NULL); /* XXX can do better :) */
-		pglob->objects = hash_init_adv(512, NULL,
-			(void (*)(void *))scan_object_destroy, NULL); /* XXX can do better :) */
-		pglob->targets = hash_init_adv(256, NULL,
-			(void (*)(void *))scan_target_destroy, NULL); /* XXX can do better :) */
+		pglob->objects = hash_init(512); /* XXX can do better :) */
+		pglob->targets = hash_init(512); /* XXX can do better :) */
 		pglob->checks = hash_init(256); /* XXX can do better :) */
 
-		pglob->is_asm = false;
-		pglob->is_c = false;
-		pglob->is_cxx = false;
+		pglob->found_asm = false;
+		pglob->found_c = false;
+		pglob->found_cxx = false;
+		pglob->found_lex = false;
+		pglob->found_yacc = false;
 	}
 
 	return(pglob);
@@ -633,6 +545,7 @@ bool gen_checks(scn_glob_t *psg, scandata *psd) {
 		return(false);
 	}
 
+	/* for each node */
 	phk = hash_keys(psg->nodes);
 	for(i = 0 ; i < phk->nkey ; i++) {
 		pn = hash_get(psg->nodes, phk->keys[i]); /* no check needed */
@@ -652,14 +565,14 @@ bool gen_checks(scn_glob_t *psg, scandata *psd) {
 		}
 
 		/* process system includes */
-		for (j = 0 ; j < da_usize(pn->s_deps) ; j++) {
-			pstr = (char *) da_idx(pn->s_deps, j);
+		for (j = 0 ; j < da_usize(pn->system_inc) ; j++) {
+			pstr = (char *) da_idx(pn->system_inc, j);
 			idtf_check(pstr, psd->includes, psg->checks, pht_misc);
 		}
 
 		/* process function calls */
-		for (j = 0 ; j < da_usize(pn->fc_deps) ; j++) {
-			pstr = (char *) da_idx(pn->fc_deps, j);
+		for (j = 0 ; j < da_usize(pn->func_calls) ; j++) {
+			pstr = (char *) da_idx(pn->func_calls, j);
 			idtf_check(pstr, psd->functions, psg->checks, pht_misc);
 		}
 	}
@@ -687,6 +600,7 @@ bool gen_checks(scn_glob_t *psg, scandata *psd) {
 	boolean
 ************************************************************************/
 
+/* XXX TODO : add comments, ad default pmkfile stuff, manage when no checks exists */
 bool scan_build_pmk(char *fname, scn_glob_t *psg, scandata *psd) {
 	FILE			*fp;
 	char			*value;
@@ -747,23 +661,135 @@ bool find_deps(dynary *da_fc, dynary *da_fd) {
 	unsigned int	 i,
 					 j;
 
+	/* for each entry of the first dynary */
 	for (i = 0 ; i < da_usize(da_fc) ; i++) {
 		str_fc = da_idx(da_fc, i);
 		siz = strlen(str_fc) + 1;
 
+		/* compare with each entry of the second dynary */
 		for (j = 0 ; j < da_usize(da_fd) ; j++) {
 			str_fd = da_idx(da_fd, j);
 			if (strncmp(str_fc, str_fd, siz) == 0) {
 #ifdef PMKSCAN_DEBUG
-#endif
 				debugf("found common dep '%s'", str_fc);
+#endif
+				/* and return true if a common dependency is found */
 				return(true);
 			}
 		}
 
 	}
 
+	/* no common stuff found */
 	return(false);
+}
+
+
+/**********
+ da_find()
+
+ DESCR
+	try to find an element in the given dynary
+
+ IN
+ 	da :	dynary structure
+ 	str :	string to find
+
+ OUT
+ 	boolean relative to the result of the search
+
+ NOTE : this only work with dynaries intialised with da_init()
+************************************************************************/
+
+bool da_find(dynary *da, char *str) {
+	bool		 rslt = false;
+	size_t		 i,
+				 s;
+
+	/* compute size of string including the delimiter */
+	s = strlen(str) + 1;
+
+	/* for each item of the dynary */
+	for (i = 0 ; i < da_usize(da) ; i++) {
+		/* check if equal to the string */
+		if (strncmp(str, da_idx(da, i), s) == 0) {
+			/* and set the flag if true */
+			rslt = true;
+			break;
+		}
+	}
+
+	return(rslt);
+}
+
+
+/**************
+ extract_dir()
+
+ DESCR
+	extract the directory portion of the given path
+
+ IN
+	path :		original path
+	dirbuf :	buffer to store the extracted directory
+	blen :		buffer length
+
+ OUT
+	NONE
+************************************************************************/
+
+void extract_dir(char *path, char *dirbuf, size_t blen) {
+	char	 buffer[MAXPATHLEN],
+			*p;
+
+	/*
+		work on a local copy due to implementations of dirname that do
+		not preserve original string
+	*/
+	strlcpy(buffer, path, sizeof(buffer)); /* XXX check */
+
+	/* get directory part */
+	p = dirname(buffer);
+
+	/* if the result start by "./" then skip it */
+	if ((p[0] == '.') && (p[1] == '/')) {
+		p = p + 2;
+	}
+
+	/* copy result in storage location */
+	strlcpy(dirbuf, p, blen); /* XXX check */
+
+	/* if directory is "." then set empty string */
+	if (*dirbuf == '.') {
+		*dirbuf = '\0';
+	}
+}
+
+
+/*************
+ build_path()
+
+ DESCR
+	build a path from given directory and filename
+
+ IN
+	dir :		directory string
+	file :		file name string
+	buffer :	buffer where to store the result
+	blen :		buffer length
+
+ OUT
+	NONE
+************************************************************************/
+
+void build_path(char *dir, char *file, char *buffer, size_t blen) {
+	if (*dir == '\0') {
+		/* directory empty, store only file name */
+		strlcpy(buffer, file, blen);
+	} else {
+		/* join directory and file names with the directory separator */
+		snprintf(buffer, blen, "%s/%s", dir, file);
+	}
 }
 
 
@@ -771,50 +797,52 @@ bool find_deps(dynary *da_fc, dynary *da_fd) {
  recurse_obj_deps()
 
  DESCR
-	gather recursively the target dependencies
+	gather recursively the local include dependencies
 
  IN
-	objects :	scan object list
-	t_deps :	object dependency list of the target
-	oname :		object name being recursively checked
+	nodes :		nodes hash table
+	deps :		dynary structure where to store dependencies
+	nodename :	node name to process recursively
 
  OUT
-	-
+	boolean
 ************************************************************************/
 
-void recurse_obj_deps(htable *objects, dynary *t_deps, char *oname) {
-	bool			 found;
-	char			*odep;
-	scn_obj_t		*pobj;
-	size_t			 s;
-	unsigned int	 i,
-					 j;
+bool recurse_obj_deps(htable *nodes, dynary *deps, char *nodename) {
+	char		 buf[MAXPATHLEN],
+				 dir[MAXPATHLEN];
+	scn_node_t	*pnode;
+	size_t		 i;
 
-	pobj = hash_get(objects, oname);
+	/* check if the node is already listed as target dependency */
+	if (da_find(deps, nodename) == true) {
+		/* yes, skip processing */
+		return(true);
+	}
 
-	/* for every node of the dependency list ... */
-	for (i = 0 ; i < da_usize(pobj->deps) ; i++) {
-		odep = da_idx(pobj->deps, i);
-		s = strlen(odep);
+	/* else add the new dependency */
+	if (da_push(deps, strdup(nodename)) == false) {
+		return(false);
+	}
 
-		/* ... check if it is already listed as target dependency ...*/
-		found = false;
-		for (j = 0 ; j < da_usize(t_deps) ; j++) {
-			if (strncmp(odep, da_idx(t_deps, j), s) == 0) {
-				found = true;
-				break;
-			}
-		}
+	/* get node structure */
+	pnode = hash_get(nodes, nodename); /* should not fail */
 
-		/* ... and if it's not then ... */
-		if (found == false) {
-			/* ... add the new dependency ... */
-			da_push(t_deps, strdup(odep));
+	/* get directory */
+	extract_dir(nodename, dir, sizeof(dir));
 
-			/* ... and recurse it */
-			recurse_obj_deps(objects, t_deps, odep);
+	/* look for all the local dependencies of the current node */
+	for (i = 0 ; i < da_usize(pnode->local_inc) ; i++) {
+		/* build dependency name */
+		build_path(dir, (char *)da_idx(pnode->local_inc, i), buf, sizeof(buf));
+
+		/* ... and recurse it */
+		if (recurse_obj_deps(nodes, deps, buf) == false) {
+			return(false);
 		}
 	}
+
+	return(true);
 }
 
 
@@ -832,18 +860,17 @@ void recurse_obj_deps(htable *objects, dynary *t_deps, char *oname) {
 ************************************************************************/
 
 bool gen_objects(scn_glob_t *psg) {
-	char			 buf[MAXPATHLEN]; /* XXX filename length */
+	char			 buf[MAXPATHLEN], /* XXX filename length */
+					*pstr;
 	hkeys			*phk;
 	scn_node_t		*pnode,
 					*pn;
-	scn_obj_t		*pobj;
 	unsigned int	 i,
 					 j;
 
 	phk = hash_keys(psg->nodes);
 	for(i = 0 ; i < phk->nkey ; i++) {
 		pnode = hash_get(psg->nodes, phk->keys[i]); /* XXX check needed ??? (think no) */
-
 #ifdef PMKSCAN_DEBUG
 		debugf("score of '%s' = %d", phk->keys[i], pnode->score);
 #endif
@@ -855,63 +882,115 @@ bool gen_objects(scn_glob_t *psg) {
 			strlcpy(buf, pnode->prefix, sizeof(buf));
 			strlcat(buf, OBJ_SUFFIX, sizeof(buf));
 
-			pobj = scan_object_init(buf);
-			if (pobj == NULL) {
-				errorf("line %d", __LINE__); /* XXX err */
-				return(false);
-			}
+			/* add object reference */
+			hash_update_dup(psg->objects, buf, pnode->fname); /* XXX check */
 
-			/* record object */
-			if (hash_add(psg->objects, buf, pobj) == HASH_ADD_FAIL) {
-				errorf("line %d", __LINE__); /* XXX err */
-				return(false);
-			}
+			/* XXX */
+			pnode->obj_name = strdup(buf);
 
-			/* node reference and copy type */
-			pobj->pnode = pnode;
-			pobj->type = pnode->type;
+			/* generate object's source dependencies */
+			recurse_obj_deps(psg->nodes, pnode->src_deps, pnode->fname);
 
-			/*
-				check function call dependencies between current node
-				and other nodes
-			*/
-			for(j = 0 ; j < phk->nkey ; j++) {
-				if (i == j) {
-					/* skip checking current node with itself */
-					continue;
-				}
+			/* for each local include */
+			for (j = 0 ; j < da_usize(pnode->local_inc) ; j++) {
+				pstr = da_idx(pnode->local_inc, j);
+				pn = hash_get(psg->nodes, pstr);
 
-				pn = hash_get(psg->nodes, phk->keys[j]); /* no check needed */
-				if (pn->score != 0) {
-					/* keep only object's main file */
-					continue;
-				}
-				if (pn->mainproc == true) {
-					/* keep only object's main file */
-					continue;
-				}
-
-				if (find_deps(pnode->fc_deps, pn->fd_deps) == true) {
-
-					/* build dependency object name */
-					strlcpy(buf, pn->prefix, sizeof(buf));
-					strlcat(buf, OBJ_SUFFIX, sizeof(buf));
+				/* check for common function declarators */
+				if (find_deps(pnode->func_decls, pn->func_decls) == true) {
 #ifdef PMKSCAN_DEBUG
+					debugf("adding object link '%s' dependency to node '%s'", pnode->obj_name, pn->fname);
 #endif
-					debugf("adding '%s' dependency to node '%s'", buf, pobj->name);
-					da_push(pobj->deps, strdup(buf)); /* XXX check ? */
-				}
-			}
 
-			if (pnode->mainproc == true) {
-#ifdef PMKSCAN_DEBUG
-				debugf("node '%s' has main proc", phk->keys[i]);
-#endif
-				/* this objet is the main part of a target */
-				pobj->is_trgt = true;
+					/* and set object link if common declarator is found */
+					if (da_push(pn->obj_links,
+								strdup(pnode->obj_name)) == false) {
+						return(false);
+					}
+				}
 			}
 		}
 	}
+
+	hash_free_hkeys(phk);
+
+	return(true);
+}
+
+
+/*******************
+ recurse_src_deps()
+
+ DESCR
+	generate targets from the objects
+
+ IN
+	psg :	global scanning data
+	deps :	dynary structure where to store object dependencies
+	name :	node name to process
+
+ OUT
+	boolean
+************************************************************************/
+
+bool recurse_src_deps(scn_glob_t *psg, dynary *deps, char *name) {
+	char		*src,
+				*odep;
+	scn_node_t	*pnode,
+				*pn;
+	size_t		 i,
+				 j;
+
+	/* get node structure */
+	pnode = hash_get(psg->nodes, name);
+#ifdef PMKSCAN_DEBUG
+	debugf("recurse_src_deps() : node '%s' START", pnode->fname);
+#endif
+
+	/* for each source dependency */
+	for (i = 0 ; i < da_usize(pnode->src_deps) ; i++) {
+		/* get the node structure */
+		src = da_idx(pnode->src_deps, i);
+		pn = hash_get(psg->nodes, src);
+#ifdef PMKSCAN_DEBUG
+		debugf("recurse_src_deps() : node '%s' : src dep '%s' (%d)", pnode->fname, src, da_usize(pn->obj_links));
+#endif
+
+		/* check each object link */
+		for (j = 0 ; j < da_usize(pn->obj_links) ; j++) {
+			/* get object name */
+			odep = da_idx(pn->obj_links, j);
+#ifdef PMKSCAN_DEBUG
+			debugf("recurse_src_deps() : node '%s' : obj link '%s'", pnode->fname, odep);
+#endif
+
+			/* check if already in the list */
+			if (da_find(deps, odep) == false) {
+				/* and add the object if not already present */
+				if (da_push(deps, strdup(odep)) == false) {
+					/* XXX err msg */
+					return(false);
+				}
+
+#ifdef PMKSCAN_DEBUG
+				debugf("recurse_src_deps() : node '%s' : adding '%s' in deps", pnode->fname, odep);
+#endif
+
+				/* recurse dependencies of this object */
+				src = hash_get(psg->objects, odep);
+#ifdef PMKSCAN_DEBUG
+				debugf("recurse_src_deps() : node '%s' : => '%s'", pnode->fname, src);
+#endif
+				if (recurse_src_deps(psg, deps, src) == false) {
+					/* recurse failed */
+					return(false);
+				}
+			}
+		}
+	}
+#ifdef PMKSCAN_DEBUG
+	debugf("recurse_src_deps() : node '%s' END", pnode->fname);
+#endif
 
 	return(true);
 }
@@ -931,48 +1010,49 @@ bool gen_objects(scn_glob_t *psg) {
 ************************************************************************/
 
 bool gen_targets(scn_glob_t *psg) {
+	char			*nodename;
 	hkeys			*phk;
 	scn_node_t		*pnode;
-	scn_obj_t		*pobj;
-	scn_trgt_t		*ptrgt;
 	unsigned int	 i;
 
 	phk = hash_keys(psg->objects);
 
-	/*
-		check dependencies between each objects
-	*/
-	for (i = 0 ; i < phk->nkey ; i++) {
-#ifdef PMKSCAN_DEBUG
-		debugf("scanning object '%s'", phk->keys[i]);
-#endif
-		pobj = hash_get(psg->objects, phk->keys[i]); /* no check needed */
+	/* for each object */
+	for(i = 0 ; i < phk->nkey ; i++) {
+		/* get it's node structure */
+		nodename = hash_get(psg->objects, phk->keys[i]);
+		pnode = hash_get(psg->nodes, nodename); /* XXX check needed ??? (think no) */
 
-		pnode = pobj->pnode;
-
-		if (pobj->is_trgt == true) {
-#ifdef PMKSCAN_DEBUG
-			debugf("object '%s' is a target", pobj->name);
-#endif
-			/* create new target */
-			ptrgt = scan_target_init(pnode->prefix);
-			if (ptrgt == NULL) {
-				/* XXX err */
+		/* if main procedure has been found then it's a target */
+		if (pnode->mainproc == true) {
+			/* adding in the target list */
+			if (hash_update_dup(psg->targets, pnode->prefix,
+										pnode->fname) == HASH_ADD_FAIL) {
 				return(false);
 			}
 
-			/* record target */
-			hash_add(psg->targets, pnode->prefix, ptrgt); /* XXX check */
+			/* init object deps */
+			pnode->obj_deps = da_init();
+			if (pnode->obj_deps == NULL) {
+				/* XXX err msg */
+				return(false);
+			}
 
-			/* add main object in the deps list */
-			da_push(ptrgt->deps, strdup(pobj->name)); /* XXX check ? */
-
-			/* recursively generate dependencies starting from main object */
-			recurse_obj_deps(psg->objects, ptrgt->deps, pobj->name);
+#ifdef PMKSCAN_DEBUG
+			debugf("START recurse_src_deps() for node '%s'", pnode->fname);
+#endif
+			/* recurse source deps to find object deps */
+			if (recurse_src_deps(psg, pnode->obj_deps, pnode->fname) == false) {
+				/* failed */
+				return(false);
+			}
+#ifdef PMKSCAN_DEBUG
+			debugf("END recurse_src_deps() for node '%s'\n", pnode->fname);
+#endif
 		}
 	}
 
-	return(true);
+	return(false);
 }
 
 
@@ -980,34 +1060,64 @@ bool gen_targets(scn_glob_t *psg) {
  fprintf_width()
 
  DESCR
+	print in a file in a formated width
 
  IN
+	width :		width of a line
+	offset :	actual column offset
+	fp :		file stream
+	str :		string to append
 
  OUT
+	new offset
 
+ NOTE
+	- could support of a left limit for indentation
 ************************************************************************/
 
-size_t fprintf_width(size_t width, size_t offset, FILE *fp, char *str) {
-	char	*fmt;
-	size_t	 s;
+size_t fprintf_width(size_t left, size_t width, size_t offset, FILE *fp, char *str) {
+	unsigned int	 i,
+					 m;
+	size_t			 s,
+					 t;
 
 	/* compute new offset with the string length */
 	s = strlen(str);
-	offset = offset + s;
+	t = offset + s;
 
 	/* check if offset is greater than allowed width */
-	if (offset < width) {
-		/* got enough space on the line */
-		fmt = " %s";
-	} else {
-		/* need to go to on the next line */
-		fmt = " \\\n\t%s";
-		/* update offset counting the 8 characters for the tabulation */
-		offset = 8 + s;
-	}
+	if (t < width) {
+		if (left != offset) {
+			/* not the first append */
+			fprintf(fp, " ");
+			t++;
+		}
 
-	/* print formated string */
-	fprintf(fp, fmt, str);
+		/* got enough space on the line */
+		fprintf(fp, "%s", str);
+
+		offset = t;
+	} else {
+		/* compute number of tabs for the left margin */
+		m = (left / MKF_TAB_WIDTH);
+		if ((left % MKF_TAB_WIDTH) != 0) {
+			m++;
+		}
+
+		/* terminate current line */
+		fprintf(fp, " \\\n");
+		offset = 0;
+
+		/* build left margin */
+		for (i = 0 ; i < m ; i ++) {
+			fprintf(fp, "\t");
+			offset = offset + MKF_TAB_WIDTH;
+		}
+
+		/* print string */
+		fprintf(fp, "%s", str);
+		offset = offset + s;
+	}
 
 	return(offset);
 }
@@ -1027,80 +1137,133 @@ size_t fprintf_width(size_t width, size_t offset, FILE *fp, char *str) {
 	-
 ************************************************************************/
 
-void scan_build_mkf(char *fname, scn_glob_t *psg) {
+bool scan_build_mkf(char *fname, scn_glob_t *psg) {
 	FILE			*fp;
 	char			 buf[256],
 					*pstr;
 	hkeys			*phk_o,
 					*phk_t;
-	size_t			 ofst;
+	size_t			 ofst,
+					 lm;
 	scn_node_t		*pn;
-	scn_obj_t		*po;
-	scn_trgt_t		*pt;
 	unsigned int	 i,
 					 j;
 
-	fp = fopen(fname, "w"); /* XXX check */
+	fp = fopen(fname, "w");
+	if (fp == NULL) {
+		/* XXX err msg */
+		return(false);
+	}
 
-	fprintf(fp, "# makefile template generated by pmkscan\n");
+	/* generating date */
+	/*strftime(buf, sizeof(buf), MKF_TIME_GEN, localtime(time(NULL))); |+ XXX check +|*/
+	snprintf(buf, sizeof(buf), "TODAY");
+
+	/* set header */
+	fprintf(fp, MKF_HEADER_GEN, buf);
 
 	fprintf(fp, "\n# language specific\n");
 	/* assembly stuff */
-	if (psg->is_asm == true) {
+	if (psg->found_asm == true) {
 		fprintf(fp, MKF_HEADER_ASM);
 	}
 	/* C stuff */
-	if (psg->is_c == true) {
+	if (psg->found_c == true) {
 		fprintf(fp, MKF_HEADER_C);
 	}
 	/* C++ stuff */
-	if (psg->is_cxx == true) {
+	if (psg->found_cxx == true) {
 		fprintf(fp, MKF_HEADER_CXX);
 	}
+	/* lex stuff */
+	if (psg->found_lex == true) {
+		fprintf(fp, MKF_HEADER_LEX);
+	}
+	/* yacc stuff */
+	if (psg->found_yacc == true) {
+		fprintf(fp, MKF_HEADER_YACC);
+	}
 
-	/* XXX */
+	fprintf(fp, "\n# misc stuff\n");
+	/* linker stuff */
+	fprintf(fp, MKF_HEADER_LD);
+	/* misc stuff */
+	fprintf(fp, MKF_HEADER_MISC);
+
+	/* suffixes */
+	fprintf(fp, MKF_SUFFIXES);
+
+	/* assembly object build rule */
+	if (psg->found_asm == true) {
+		fprintf(fp, MKF_BLD_ASM_OBJ);
+	}
+
+	/* C object build rule */
+	if (psg->found_c == true) {
+		fprintf(fp, MKF_BLD_C_OBJ);
+	}
+
+	/* C++ object build rule */
+	if (psg->found_cxx == true) {
+		fprintf(fp, MKF_BLD_CXX_OBJ);
+	}
+
+	/*  lex source build rule */
+	if (psg->found_lex == true) {
+		fprintf(fp, MKF_BLD_LEX_SRC);
+	}
+
+	/*  yacc source build rule */
+	if (psg->found_yacc == true) {
+		fprintf(fp, MKF_BLD_YACC_SRC);
+	}
+
+	/* generate object dependency lists */
 	phk_o = hash_keys(psg->objects);
 	/* generate object deps */
 	fprintf(fp, "\n# object dependency lists\n");
-	for(i = 0 ; i < phk_o->nkey ; i++) {
-		pstr = phk_o->keys[i];
-		po = hash_get(psg->objects, pstr);
-		pn = po->pnode;
+	for (i = 0 ; i < phk_o->nkey ; i++) {
+		pstr = hash_get(psg->objects, phk_o->keys[i]);
+		pn = hash_get(psg->nodes, pstr);
 
 		/* object label */
-		str_to_upper(buf, sizeof(buf), pn->prefix);
-		fprintf(fp, MKF_OBJECT_SRCS, buf);
+		snprintf(buf, sizeof(buf), MKF_OBJECT_SRCS, pn->prefix);
+		str_to_upper(buf, sizeof(buf), buf);
+		fprintf(fp, buf);
+
+		lm = strlen(buf);
+		ofst = lm;
 
 		/* append sources */
-		ofst = strlen(buf) + 14; /* XXX */
-		for (j = 0 ; j < da_usize(pn->l_deps) ; j++) {
-			ofst = fprintf_width(MKF_OUTPUT_WIDTH, ofst, fp,
-									(char *) da_idx(pn->l_deps, j));
+		for (j = 0 ; j < da_usize(pn->src_deps) ; j++) {
+			ofst = fprintf_width(lm, MKF_OUTPUT_WIDTH, ofst, fp,
+									(char *) da_idx(pn->src_deps, j));
 		}
-		fprintf_width(MKF_OUTPUT_WIDTH, ofst, fp, pn->fname);
-
 
 		fprintf(fp, MKF_TWICE_JUMP);
 	}
 
-	/* XXX */
+	/* generate target dependency lists */
 	phk_t = hash_keys(psg->targets);
 	if (phk_t != NULL) {
 		/* generate target deps */
 		fprintf(fp, "\n# target dependency lists\n");
 		for(i = 0 ; i < phk_t->nkey ; i++) {
-			pstr = phk_t->keys[i];
-			pt = hash_get(psg->targets, pstr);
+			pstr = hash_get(psg->targets, phk_t->keys[i]);
+			pn = hash_get(psg->nodes, pstr);
 
 			/* target label */
-			str_to_upper(buf, sizeof(buf), pstr);
-			fprintf(fp, MKF_TARGET_OBJS, buf);
+			snprintf(buf, sizeof(buf), MKF_TARGET_OBJS, pn->prefix);
+			str_to_upper(buf, sizeof(buf), buf);
+			fprintf(fp, buf);
 
-			/* XXX TODO append objects */
-			ofst = strlen(buf) + 14; /* XXX */
-			for (j = 0 ; j < da_usize(pt->deps) ; j++) {
-				ofst = fprintf_width(MKF_OUTPUT_WIDTH, ofst, fp,
-										(char *) da_idx(pt->deps, j));
+			lm = strlen(buf);
+			ofst = lm;
+
+			/* append objects */
+			for (j = 0 ; j < da_usize(pn->obj_deps) ; j++) {
+				ofst = fprintf_width(lm, MKF_OUTPUT_WIDTH, ofst, fp,
+										(char *) da_idx(pn->obj_deps, j));
 			}
 
 			fprintf(fp, MKF_TWICE_JUMP);
@@ -1109,27 +1272,42 @@ void scan_build_mkf(char *fname, scn_glob_t *psg) {
 
 	/* main target */
 	fprintf(fp, "\n# main target\n");
-	fprintf(fp, MKF_TARGET_ALL, "");
-	/* XXX TODO list of targets */
+	fprintf(fp, MKF_TARGET_ALL);
+	/* list of targets */
+	if (phk_t != NULL) {
+		lm = strlen(MKF_TARGET_ALL);
+		ofst = lm;
+		for(i = 0 ; i < phk_t->nkey ; i++) {
+			ofst = fprintf_width(lm, MKF_OUTPUT_WIDTH, ofst,
+												fp, phk_t->keys[i]);
+		}
+		fprintf(fp, MKF_TWICE_JUMP);
+	}
+
+	/* main clean target */
+	fprintf(fp, MKF_TARGET_CLEAN);
+	/* list of targets */
+	if (phk_t != NULL) {
+		lm = strlen(MKF_TARGET_CLEAN);
+		ofst = lm;
+		for(i = 0 ; i < phk_t->nkey ; i++) {
+			snprintf(buf, sizeof(buf), "%s_clean", phk_t->keys[i]);
+			ofst = fprintf_width(lm, MKF_OUTPUT_WIDTH, ofst, fp, buf);
+		}
+		fprintf(fp, MKF_TWICE_JUMP);
+	}
+
 	fprintf(fp, MKF_TWICE_JUMP);
 
 	/* generate objects */
 	fprintf(fp, "\n# objects\n");
 	for(i = 0 ; i < phk_o->nkey ; i++) {
-		pstr = phk_o->keys[i];
-		po = hash_get(psg->objects, pstr);
-		pn = po->pnode;
+		pstr = hash_get(psg->objects, phk_o->keys[i]);
+		pn = hash_get(psg->nodes, pstr);
 
 		/* object label */
 		str_to_upper(buf, sizeof(buf), pn->prefix);
 		fprintf(fp, MKF_OBJECT_LABL, pstr, buf);
-
-		/* object build depending on the source type */
-		/* XXX TODO
-		fprintf(fp, MKF_BLD_ASM, XXX);
-		fprintf(fp, MKF_BLD_C, XXX);
-		fprintf(fp, MKF_BLD_CXX, XXX);
-		*/
 
 		fprintf(fp, MKF_TWICE_JUMP);
 	}
@@ -1140,17 +1318,25 @@ void scan_build_mkf(char *fname, scn_glob_t *psg) {
 		for(i = 0 ; i < phk_t->nkey ; i++) {
 			pstr = phk_t->keys[i];
 
+			/* uppercase string */
+			str_to_upper(buf, sizeof(buf), pstr);
+
 			/* build target */
-			fprintf(fp, MKF_TARGET_LABL, pstr, pstr, pstr, pstr);
+			fprintf(fp, MKF_TARGET_LABL, pstr, buf, pstr, buf);
 
 			/* clean target */
-			fprintf(fp, MKF_TARGET_CLN, pstr, pstr, pstr);
+			fprintf(fp, MKF_TARGET_CLN, pstr, buf, pstr);
 		}
 	}
 
 	fprintf(fp, MKF_TARGET_INST);
 
+	hash_free_hkeys(phk_o);
+	hash_free_hkeys(phk_t);
+
 	fclose(fp);
+
+	return(true);
 }
 
 
@@ -1162,13 +1348,15 @@ void scan_build_mkf(char *fname, scn_glob_t *psg) {
  str_to_upper()
 
  DESCR
-	XXX
+	store in the buffer the conversion in upper case of the string
 
  IN
-	XXX
+	buf :	storage buffer
+	siz :	size of buffer
+	str :	string to convert
 
  OUT
-	XXX
+	-
 ************************************************************************/
 
 void str_to_upper(char *buf, size_t siz, char *str) {
@@ -1187,13 +1375,13 @@ void str_to_upper(char *buf, size_t siz, char *str) {
  check_file_ext()
 
  DESCR
-	XXX
+	check the file extension and return the supposed file type
 
  IN
-	XXX
+	fname :	file name
 
  OUT
-	XXX
+	file type
 ************************************************************************/
 
 ftype_t check_file_ext(char *fname) {
@@ -1201,7 +1389,7 @@ ftype_t check_file_ext(char *fname) {
 
 	for (i = 0 ; i < (int) nb_file_ext ; i++) {
 #ifdef PMKSCAN_DEBUG
-	/*debugf("check '%s' extension with file '%s'", file_ext[i].ext, fname);*/
+		/*debugf("check '%s' extension with file '%s'", file_ext[i].ext, fname);*/
 #endif
 		/* check files that match known extension */
 		if (fnmatch(file_ext[i].ext, fname, 0) != FNM_NOMATCH) {
@@ -1229,7 +1417,7 @@ ftype_t check_file_ext(char *fname) {
 	return : found string or NULL
 ************************************************************************/
 
-char *regex_check(char *pattern, char *line) {
+char *regex_check(char *pattern, char *line) { /* XXX remove ? */
 	static char	 idtf[TMP_BUF_LEN];
 	regex_t		 re;
 	regmatch_t	 rm[2];
@@ -1257,13 +1445,15 @@ char *regex_check(char *pattern, char *line) {
  process_ppro()
 
  DESCR
-	XXX
+	called when a preprocessor directive is found
 
  IN
-	XXX
+	data :	parsing data
+	pstr :	directive identifier
+	ppe :	parsing engine structure
 
  OUT
-	XXX
+	boolean
 ************************************************************************/
 
 bool process_ppro(void *data, char *pstr, prseng_t *ppe) {
@@ -1290,7 +1480,7 @@ bool process_ppro(void *data, char *pstr, prseng_t *ppe) {
 				debugf("found local include '%s'", iname);
 #endif
 				/* add include in depedencies */
-				if (da_push(pnode->l_deps, strdup(iname)) == false) {
+				if (da_push(pnode->local_inc, strdup(iname)) == false) {
 					errorf("unable to add '%s' in local deps", iname);
 					return(false);
 				}
@@ -1302,7 +1492,7 @@ bool process_ppro(void *data, char *pstr, prseng_t *ppe) {
 				debugf("found system include '%s'", iname);
 #endif
 				/* add include in depedencies */
-				if (da_push(pnode->s_deps, strdup(iname)) == false) {
+				if (da_push(pnode->system_inc, strdup(iname)) == false) {
 					errorf("unable to add '%s' in sys deps", iname);
 					return(false);
 				}
@@ -1323,13 +1513,15 @@ bool process_ppro(void *data, char *pstr, prseng_t *ppe) {
  process_proc_call()
 
  DESCR
-	XXX
+	called when a procedure call is found
 
  IN
-	XXX
+	data :	parsing data
+	pstr :	function call identifier
+	ppe :	parsing engine structure
 
  OUT
-	XXX
+	boolean
 ************************************************************************/
 
 bool process_proc_call(void *data, char *pstr, prseng_t *ppe) {
@@ -1343,7 +1535,7 @@ bool process_proc_call(void *data, char *pstr, prseng_t *ppe) {
 	debugf("found procedure call of '%s'", pstr);
 #endif
 	/* add function in list */
-	if (da_push(pnode->fc_deps, strdup(pstr)) == false) {
+	if (da_push(pnode->func_calls, strdup(pstr)) == false) {
 		errorf("unable to add '%s' in function call list", pstr);
 		return(false);
 	}
@@ -1356,13 +1548,15 @@ bool process_proc_call(void *data, char *pstr, prseng_t *ppe) {
  process_proc_decl()
 
  DESCR
-	XXX
+	called when a procedure declaration is found
 
  IN
-	XXX
+	data :	parsing data
+	pstr :	function declarator identifier
+	ppe :	parsing engine structure
 
  OUT
-	XXX
+	boolean
 ************************************************************************/
 
 bool process_proc_decl(void *data, char *pstr, prseng_t *ppe) {
@@ -1376,7 +1570,7 @@ bool process_proc_decl(void *data, char *pstr, prseng_t *ppe) {
 	debugf("found procedure declaration of '%s'", pstr);
 #endif
 	/* add function in list */
-	if (da_push(pnode->fd_deps, strdup(pstr)) == false) {
+	if (da_push(pnode->func_decls, strdup(pstr)) == false) {
 		errorf("unable to add '%s' in function declaration list", pstr);
 		return(false);
 	}
@@ -1397,13 +1591,15 @@ bool process_proc_decl(void *data, char *pstr, prseng_t *ppe) {
  process_type()
 
  DESCR
-	XXX
+	called when a type identifier is found
 
  IN
-	XXX
+	data :	parsing data
+	pstr :	type identifier
+	ppe :	parsing engine structure
 
  OUT
-	XXX
+	boolean
 ************************************************************************/
 
 bool process_type(void *data, char *pstr, prseng_t *ppe) {
@@ -1414,7 +1610,7 @@ bool process_type(void *data, char *pstr, prseng_t *ppe) {
 	pnode = psm->pnode;
 
 	/* add type in list */
-	if (da_push(pnode->t_deps, strdup(pstr)) == false) {
+	if (da_push(pnode->type_idtfs, strdup(pstr)) == false) {
 		errorf("unable to add '%s' in type list", pstr);
 		return(false);
 	}
@@ -1427,20 +1623,20 @@ bool process_type(void *data, char *pstr, prseng_t *ppe) {
  parse_file()
 
  DESCR
-	XXX
+	parse a file that has a known type
 
  IN
-	XXX
+	pcmn :	XXX
+	pnode :	XXX
+	fname :	XXX
+	ft :	XXX
 
  OUT
-	XXX
+	boolean
 ************************************************************************/
 
 bool parse_file(prs_cmn_t *pcmn, scn_node_t *pnode, char *fname, ftype_t ft) {
 	FILE			*fp;
-	char			 buf[MAXPATHLEN],
-					 dir[MAXPATHLEN];
-	unsigned int	 i;
 	scn_misc		*psm;
 
 	/* open file */
@@ -1450,33 +1646,41 @@ bool parse_file(prs_cmn_t *pcmn, scn_node_t *pnode, char *fname, ftype_t ft) {
 		return(false);
 	}
 
-	/* init directory and file names */
-	strlcpy(buf, fname, sizeof(buf));
-	strlcpy(dir, dirname(buf), sizeof(dir));
-
 	psm = (scn_misc *) pcmn->data;
 	psm->pnode = pnode;
 
 	switch (ft) {
+		case SRC_TYPE_ASM :
+			*psm->is_asm = true;
+			/* XXX parsing */
+			break;
+
 		case SRC_TYPE_C :
+			*psm->is_c = true;
 			if (prs_c_file(pcmn, fp) == false) {
 				return(false);
 			}
+			break;
+
+		case SRC_TYPE_CXX :
+			*psm->is_cxx = true;
+			/* XXX parsing */
+			break;
+
+		case SRC_TYPE_LEX :
+			*psm->is_lex = true;
+			/* XXX parsing */
+			break;
+
+		case SRC_TYPE_YACC :
+			*psm->is_yacc = true;
+			/* XXX parsing */
 			break;
 
 #ifdef PMKSCAN_DEBUG
 		default :
 			debugf("cannot parse filetype %d", ft);
 #endif
-	}
-
-	for (i = 0 ; i < da_usize(pnode->l_deps) ; i++) {
-		/* scan local include */
-		snprintf(buf, sizeof(buf), "%s/%s", dir, (char *)da_idx(pnode->l_deps, i));
-		if (scan_node_file(pcmn, buf, true) == false) {
-			errorf("failed to scan file '%s'.", da_idx(pnode->l_deps, i));
-			return(false);
-		}
 	}
 
 	/* close file */
@@ -1490,19 +1694,28 @@ bool parse_file(prs_cmn_t *pcmn, scn_node_t *pnode, char *fname, ftype_t ft) {
  scan_node_file()
 
  DESCR
-	XXX
+	scan a node file to extract useful data
 
  IN
-	XXX
+	pcmn :	XXX
+	fname :	XXX
+	isdep :	flag to notice if fname is a dependency or not
 
  OUT
-	XXX
+	boolean
 ************************************************************************/
 
 bool scan_node_file(prs_cmn_t *pcmn, char *fname, bool isdep) {
-	ftype_t		 ft;
-	scn_node_t	*pnode;
-	scn_misc	*psm;
+	char			 buf[MAXPATHLEN],
+					 dir[MAXPATHLEN];
+	ftype_t			 ft;
+	scn_node_t		*pnode;
+	scn_misc		*psm;
+	unsigned int	 i;
+
+#ifdef PMKSCAN_DEBUG
+	debugf("fname = '%s'", fname);
+#endif
 
 	psm = (scn_misc *) pcmn->data;
 
@@ -1532,8 +1745,9 @@ bool scan_node_file(prs_cmn_t *pcmn, char *fname, bool isdep) {
 			errorf("unable to initialize scan node");
 			return(false);
 		}
+
 #ifdef PMKSCAN_DEBUG
-		debugf("pnode->fname = '%s'", pnode->fname); /* XXX */
+		debugf("created node '%s'", fname); /* XXX */
 #endif
 
 		pnode->type = ft;
@@ -1567,6 +1781,19 @@ bool scan_node_file(prs_cmn_t *pcmn, char *fname, bool isdep) {
 		return(false);
 	}
 
+	/* get directory name */
+	extract_dir(fname, dir, sizeof(dir));
+
+	for (i = 0 ; i < da_usize(pnode->local_inc) ; i++) {
+		/* scan local include */
+		build_path(dir, (char *)da_idx(pnode->local_inc, i), buf, sizeof(buf));
+
+		if (scan_node_file(pcmn, buf, true) == false) {
+			errorf("failed to scan file '%s'.", da_idx(pnode->local_inc, i));
+			return(false);
+		}
+	}
+
 	return(true);
 }
 
@@ -1575,13 +1802,15 @@ bool scan_node_file(prs_cmn_t *pcmn, char *fname, bool isdep) {
  scan_dir()
 
  DESCR
-	XXX
+	scan a directory to find and scan known file type
 
  IN
-	XXX
+	pcmn :		XXX
+	dir :		XXX
+	recursive :	XXX
 
  OUT
-	XXX
+	boolean
 ************************************************************************/
 
 bool scan_dir(prs_cmn_t *pcmn, char *dir, bool recursive) {
@@ -1611,7 +1840,7 @@ bool scan_dir(prs_cmn_t *pcmn, char *dir, bool recursive) {
 #endif
 
 		/* build full path */
-		snprintf(buf, sizeof(buf), "%s/%s", dir, fname); /* XXX check ? */
+		build_path(dir, fname, buf, sizeof(buf));
 
 		/* if the entry is a directory ... */
 		if (pde->d_type == DT_DIR) {
@@ -1741,10 +1970,13 @@ int main(int argc, char *argv[]) {
 	}
 
 	/* init XXX */
-	sm.nodes = psg->nodes;
 	sm.pcmn = &pcmn;
-	sm.dir = NULL;
-	sm.pnode = NULL;
+	sm.nodes = psg->nodes;
+	sm.is_asm = &psg->found_asm;
+	sm.is_c = &psg->found_c;
+	sm.is_cxx = &psg->found_cxx;
+	sm.is_lex = &psg->found_lex;
+	sm.is_yacc = &psg->found_yacc;
 
 	/* init common parser structure */
 	pcmn.func_ppro = &process_ppro;
@@ -1783,7 +2015,9 @@ int main(int argc, char *argv[]) {
 
 	/* scanning directory */
 	printf("Starting file parsing :\n");
-	scan_dir(&pcmn, buf, recursive);
+	if (scan_dir(&pcmn, buf, recursive) == false) {
+		exit(EXIT_FAILURE);
+	}
 	printf("Parsing finished.\n\n");
 
 	/* pmkfile stuff */
