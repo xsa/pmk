@@ -1,3 +1,8 @@
+04 May 2005 mipsator
+ * improved target's object dependencies scanning in pmkscan.
+ * removed useless pmkshgen* files as the idea will be implemented in
+   pmkinstall.
+
 25 Apr 2005 mipsator
  * fixed a bug that prevent --list-all option to work in pmkpc.
  * added missing variable substitution for library path in pmkpc.
