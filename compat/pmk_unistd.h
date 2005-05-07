@@ -1,7 +1,7 @@
 /* $Id$ */
 
 /*
- * Copyright (c) 2003 Damien Couderc
+ * Copyright (c) 2003-2005 Damien Couderc
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,14 +39,14 @@
 
 #include <unistd.h>
 
-#include "compat.h"
-
 /*
 	mkstemps() function
 */
 
 #ifndef HAVE_MKSTEMPS
-#include "mkstemps.h"
+
+int	mkstemps(char *, int);
+
 #endif /* HAVE_MKSTEMPS */
 
 #endif /* _PMK_UNISTD_H_ */

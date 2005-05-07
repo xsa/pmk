@@ -1,7 +1,7 @@
 /* $Id$ */
 
 /*
- * Copyright (c) 2003 Damien Couderc
+ * Copyright (c) 2003-2005 Damien Couderc
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,16 +37,19 @@
 #ifndef _PMK_LIBGEN_H_
 #define _PMK_LIBGEN_H_
 
-#include "compat.h"
-
 /*
 	basename() and dirname() functions
 */
 
 #ifdef HAVE_LIBGEN_H
+
 #include <libgen.h>
+
 #else
-#include "libgen.h"
+
+char *basename(const char *);
+char *dirname(const char *);
+
 #endif /* HAVE_LIBGEN_H */
 
 #endif /* _PMK_LIBGEN_H_ */

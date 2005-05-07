@@ -4,7 +4,7 @@
 # set target file
 SETTINGS {
 	LANG="C"
-	TARGET=("compat/compat.h.in","Makefile.pmk","tests/Makefile.pmk")
+	TARGET=("compat/config.h.pmk","Makefile.pmk","tests/Makefile.pmk")
 }
 
 SWITCHES {

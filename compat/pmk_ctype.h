@@ -39,14 +39,17 @@
 
 #include <ctype.h>
 
-#include "compat.h"
+#include "config.h"
+
+
+#ifndef HAVE_ISBLANK
 
 /*
 	isblank() function
 */
 
-#ifndef HAVE_ISBLANK
-#include "isblank.h"
+int isblank(int);
+
 #endif /* HAVE_ISBLANK */
 
 #endif /* _PMK_CTYPE_H_ */
