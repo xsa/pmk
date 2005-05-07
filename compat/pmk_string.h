@@ -1,7 +1,7 @@
 /* $Id$ */
 
 /*
- * Copyright (c) 2003 Damien Couderc
+ * Copyright (c) 2003-2005 Damien Couderc
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,8 +39,11 @@
 
 #include <string.h>
 
-#include "compat.h"
+#include "config.h"
 #include "pmk_stdbool.h"
+
+
+#ifndef HAVE_STRLCPY
 
 /*
 	strlcpy() function
@@ -61,22 +64,25 @@
 		listed here but should be.
 */
 
-#ifndef HAVE_STRLCPY
-#include "strlcpy.h"
-#endif
+size_t strlcpy(char *, const char *, size_t);
+
+#endif /* HAVE_STRLCPY */
+
+
+#ifndef HAVE_STRLCAT
 
 /*
 	strlcat() function
 */
 
-#ifndef HAVE_STRLCAT
-#include "strlcat.h"
-#endif
+size_t strlcat(char *, const char *, size_t);
 
-#endif /* _PMK_STRING_H_ */
+#endif /* HAVE_STRLCAT */
 
 
 bool	snprintf_b(char *, size_t, const char *, ...);
 bool	strlcat_b(char *, const char *, size_t);
 bool	strlcpy_b(char *, const char *, size_t);
+
+#endif /* _PMK_STRING_H_ */
 

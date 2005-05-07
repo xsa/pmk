@@ -87,7 +87,7 @@ testobj="$testbin.o"
 
 temporary="./pmkcfg.tmp"
 
-tmpl_list="Makefile.pmk compat/compat.h.in tests/Makefile.pmk"
+tmpl_list="Makefile.pmk compat/config.h.pmk tests/Makefile.pmk"
 
 #
 # functions

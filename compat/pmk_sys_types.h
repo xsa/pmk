@@ -1,7 +1,7 @@
 /* $Id$ */
 
 /*
- * Copyright (c) 2003-2004 Damien Couderc
+ * Copyright (c) 2003-2005 Damien Couderc
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,8 +37,6 @@
 #define _PMK_SYS_TYPES_H_
 
 #include <sys/types.h>
-
-#include "compat.h"
 
 /*
 	blkcnt_t type
