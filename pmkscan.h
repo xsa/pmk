@@ -110,26 +110,31 @@
 #define MKF_LINE_JUMP	"\n"
 #define MKF_TWICE_JUMP	"\n\n"
 
-#define MKF_SUFFIXES	".SUFFIXES: .o .s .c\n"
+#define MKF_SUFFIXES	"\n.SUFFIXES: .o .s .c\n"
 
-#define MKF_BLD_ASM_OBJ		".s.o:\n" \
+#define MKF_BLD_ASM_OBJ		"\n# assembly suffixes\n" \
+							".s.o:\n" \
 							"\t$(AS) $(ASFLAGS) -c $<\n"
-#define MKF_BLD_C_OBJ		".c.o:\n" \
+#define MKF_BLD_C_OBJ		"\n# C suffixes\n" \
+							".c.o:\n" \
+							"\t$(CC) $(CFLAGS) -c $<\n" \
+							"\n.C.o:\n" \
+							"\t$(CC) $(CFLAGS) -c $<\n" \
+							"\n.cc.o:\n" \
 							"\t$(CC) $(CFLAGS) -c $<\n"
-#define MKF_BLD_CXX_OBJ		".cxx.o:\n" \
+#define MKF_BLD_CXX_OBJ		"\n# C++ suffixes\n" \
+							".cxx.o:\n" \
 							"\t$(CXX) $(CXXFLAGS) -c $<\n" \
-							".C.o:\n" \
-							"\t$(CXX) $(CXXFLAGS) -c $<\n" \
-							".cpp.o:\n" \
-							"\t$(CXX) $(CXXFLAGS) -c $<\n" \
-							".cc.o:\n" \
+							"\n.cpp.o:\n" \
 							"\t$(CXX) $(CXXFLAGS) -c $<\n" \
 
-#define MKF_BLD_YACC_SRC	".y.c:\n" \
+#define MKF_BLD_YACC_SRC	"\n# yacc suffixes\n" \
+							".y.c:\n" \
 							"\t$(YACC) $(YFLAGS) $<\n" \
 							"\tmv y.tab.c $@\n"
 
-#define MKF_BLD_LEX_SRC		".l.c:\n" \
+#define MKF_BLD_LEX_SRC		"\n# lex suffixes\n" \
+							".l.c:\n" \
 							"\t$(LEX) $(LFLAGS) $<\n" \
 							"\tmv lex.yy.c $@\n"
 
@@ -143,8 +148,10 @@
 						"\t$(RM) $(RMFLAGS) $(%s_OBJS)\n" \
 						"\t$(RM) $(RMFLAGS) %s\n\n"
 
-#define MKF_TARGET_ALL		"all: "
-#define MKF_TARGET_CLEAN	"clean: "
+#define MKF_TRGT_ALL_VAR	"ALL_TARGETS=\t"
+#define MKF_TRGT_CLEAN_VAR	"ALL_CLEAN_TARGETS=\t"
+#define MKF_TARGET_ALL		"all: $(ALL_TARGETS)\n\n"
+#define MKF_TARGET_CLEAN	"clean: $(ALL_CLEAN_TARGETS)\n\n"
 #define MKF_TARGET_INST		"install:\n" \
 							"\t# put your install stuff here\n\n" \
 							"deinstall:\n" \

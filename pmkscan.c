@@ -1270,12 +1270,11 @@ bool scan_build_mkf(char *fname, scn_glob_t *psg) {
 		}
 	}
 
-	/* main target */
-	fprintf(fp, "\n# main target\n");
-	fprintf(fp, MKF_TARGET_ALL);
+	/* generate building target list */
+	fprintf(fp, MKF_TRGT_ALL_VAR);
 	/* list of targets */
 	if (phk_t != NULL) {
-		lm = strlen(MKF_TARGET_ALL);
+		lm = strlen(MKF_TRGT_ALL_VAR);
 		ofst = lm;
 		for(i = 0 ; i < phk_t->nkey ; i++) {
 			ofst = fprintf_width(lm, MKF_OUTPUT_WIDTH, ofst,
@@ -1284,11 +1283,11 @@ bool scan_build_mkf(char *fname, scn_glob_t *psg) {
 		fprintf(fp, MKF_TWICE_JUMP);
 	}
 
-	/* main clean target */
-	fprintf(fp, MKF_TARGET_CLEAN);
+	/* generate cleaning target list */
+	fprintf(fp, MKF_TRGT_CLEAN_VAR);
 	/* list of targets */
 	if (phk_t != NULL) {
-		lm = strlen(MKF_TARGET_CLEAN);
+		lm = strlen(MKF_TRGT_CLEAN_VAR);
 		ofst = lm;
 		for(i = 0 ; i < phk_t->nkey ; i++) {
 			snprintf(buf, sizeof(buf), "%s_clean", phk_t->keys[i]);
@@ -1297,24 +1296,30 @@ bool scan_build_mkf(char *fname, scn_glob_t *psg) {
 		fprintf(fp, MKF_TWICE_JUMP);
 	}
 
+
+	fprintf(fp, "\n# main targets\n");
+	fprintf(fp, MKF_TARGET_ALL);
+	fprintf(fp, MKF_TARGET_CLEAN);
+
+
 	fprintf(fp, MKF_TWICE_JUMP);
 
 	/* generate objects */
-	fprintf(fp, "\n# objects\n");
+	fprintf(fp, "\n# object rules\n");
 	for(i = 0 ; i < phk_o->nkey ; i++) {
 		pstr = hash_get(psg->objects, phk_o->keys[i]);
 		pn = hash_get(psg->nodes, pstr);
 
 		/* object label */
 		str_to_upper(buf, sizeof(buf), pn->prefix);
-		fprintf(fp, MKF_OBJECT_LABL, pstr, buf);
+		fprintf(fp, MKF_OBJECT_LABL, phk_o->keys[i], buf);
 
 		fprintf(fp, MKF_TWICE_JUMP);
 	}
 
 	if (phk_t != NULL) {
 		/* generate targets */
-		fprintf(fp, "\n# targets\n");
+		fprintf(fp, "\n# target rules\n");
 		for(i = 0 ; i < phk_t->nkey ; i++) {
 			pstr = phk_t->keys[i];
 

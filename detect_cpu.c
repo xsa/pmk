@@ -45,7 +45,6 @@
 #include "common.h"
 #include "detect_cpu.h"
 #include "detect_cpu_asm.h"
-#include "functool.h"
 
 
 /***************

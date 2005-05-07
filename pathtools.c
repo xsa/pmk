@@ -355,3 +355,4 @@ bool makepath(char *path, mode_t mode) {
 	free(copy);
 	return(true);
 }
+

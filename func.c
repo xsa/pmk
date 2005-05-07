@@ -53,6 +53,10 @@
 /*#define SHLIB_DEBUG 1*/
 
 
+/**************
+ * parser data
+ ***********************************************************************/
+
 /* common required options */
 kw_t	req_name[] = {
 		{KW_OPT_NAME,	PO_STRING}
@@ -216,6 +220,24 @@ prskw	kw_pmkfile[] = {
 size_t	nbkwpf = sizeof(kw_pmkfile) / sizeof(prskw);
 
 
+/*****************
+ * misc functions
+ ***********************************************************************/
+
+/***************
+ func_wrapper()
+
+ DESCR
+	wrapper from token to functions
+
+ IN
+	pcell : cell structure
+	pgd : global data
+
+ OUT
+	boolean
+************************************************************************/
+
 bool func_wrapper(prscell *pcell, pmkdata *pgd) {
 	bool	rval;
 	pmkcmd	cmd;
@@ -277,9 +299,20 @@ bool func_wrapper(prscell *pcell, pmkdata *pgd) {
 	return(rval);
 }
 
-/*
-	process node
-*/
+
+/***************
+ process_node()
+
+ DESCR
+ 	processing of given node
+
+ IN
+	pnode : node structure
+	pgd : global data
+
+ OUT
+	boolean
+************************************************************************/
 
 bool process_node(prsnode *pnode, pmkdata *pgd) {
 	prscell	*pcell;
@@ -297,24 +330,25 @@ bool process_node(prsnode *pnode, pmkdata *pgd) {
 	return(true);
 }
 
-/*
-	node functions
-	
-	these functions have the following parameters:
 
-	cmd : command structure
-	pnode : node structure
-	pgd : global data
+/*****************
+ * node functions
+ *
+ * IN
+ *	cmd : command structure
+ *	pnode : node structure
+ *	pgd : global data
+ *
+ * OUT
+ *	boolean
+ ***********************************************************************/
 
-	returns bool
+/*************
+ pmk_define()
 
-*/
-
-
-/*
+ DESCR
 	define variables
-
-*/
+************************************************************************/
 
 bool pmk_define(pmkcmd *cmd, prsnode *pnode, pmkdata *pgd) {
 	pmk_log("\n* Parsing define\n");
@@ -322,9 +356,13 @@ bool pmk_define(pmkcmd *cmd, prsnode *pnode, pmkdata *pgd) {
 	return(process_node(pnode, pgd));
 }
 
-/*
-	settings
-*/
+
+/***************
+ pmk_settings()
+
+ DESCR
+	pmk settings
+************************************************************************/
 
 bool pmk_settings(pmkcmd *cmd, prsnode *pnode, pmkdata *pgd) {
 	pmk_log("\n* Parsing settings\n");
@@ -332,9 +370,13 @@ bool pmk_settings(pmkcmd *cmd, prsnode *pnode, pmkdata *pgd) {
 	return(process_node(pnode, pgd));
 }
 
-/*
+
+/*************
+ pmk_ifcond()
+
+ DESCR
 	if condition
-*/
+************************************************************************/
 
 bool pmk_ifcond(pmkcmd *cmd, prsnode *pnode, pmkdata *pgd) {
 	if (label_check(pgd->labl, cmd->label) == true) {
@@ -349,9 +391,12 @@ bool pmk_ifcond(pmkcmd *cmd, prsnode *pnode, pmkdata *pgd) {
 }
 
 
-/*
+/*************
+ pmk_elcond()
+
+ DESCR
 	else condition
-*/
+************************************************************************/
 
 bool pmk_elcond(pmkcmd *cmd, prsnode *pnode, pmkdata *pgd) {
 	if (label_check(pgd->labl, cmd->label) == false) {
@@ -366,23 +411,24 @@ bool pmk_elcond(pmkcmd *cmd, prsnode *pnode, pmkdata *pgd) {
 }
 
 
-/*
-	cell functions
-	
-	these functions have the following parameters:
+/*****************
+ * cell functions
+ *
+ * IN
+ *	cmd : command structure
+ *	ht : command options
+ *	pgd : global data
+ *
+ * OUT
+ *	boolean
+ ***********************************************************************/
 
-	cmd : command structure
-	ht : command options
-	pgd : global data
+/***************
+ pmk_switches()
 
-	returns bool
-
-*/
-
-
-/*
+ DESCR
 	switches
-*/
+************************************************************************/
 
 bool pmk_switches(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 	char		*value;
@@ -429,9 +475,13 @@ bool pmk_switches(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 	return(true);
 }
 
-/*
+
+/*******************
+ pmk_check_binary()
+
+ DESCR
 	check binary
-*/
+************************************************************************/
 
 bool pmk_check_binary(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 	bool	 required,
@@ -507,9 +557,13 @@ bool pmk_check_binary(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 	}
 }
 
-/*
+
+/*******************
+ pmk_check_header()
+
+ DESCR
 	check header file
-*/
+************************************************************************/
 
 bool pmk_check_header(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 	bool	 required,
@@ -797,13 +851,13 @@ bool pmk_check_header(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 		label_set(pgd->labl, cmd->label, true);
 		/* process additional defines */
 		process_def_list(pgd->htab, defs);
-	
+
 		/* put result in CFLAGS, CXXFLAGS or alternative variable */
 		if (single_append(pgd->htab, cflags, strdup(inc_path)) == false) {
 			errorf("failed to append '%s' in '%s'.", inc_path, cflags);
 			return(false);
 		}
-	
+
 		rval = true;
 	} else {
 		rval = process_required(pgd, cmd, required, NULL, NULL);
@@ -823,9 +877,13 @@ bool pmk_check_header(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 	return(rval);
 }
 
-/*
+
+/****************
+ pmk_check_lib()
+
+ DESCR
 	check library
-*/
+************************************************************************/
 
 bool pmk_check_lib(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 	bool	 required,
@@ -1005,7 +1063,7 @@ bool pmk_check_lib(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 				errorf(ERR_MSG_CC_CMD);
 				return(false);
 			}
-	
+
 			/* get result */
 			r = system(cfgcmd);
 			if (r == 0) {
@@ -1063,10 +1121,13 @@ bool pmk_check_lib(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 	return(rval);
 }
 
-/*
-	check with *-config utility
 
-*/
+/*******************
+ pmk_check_config()
+
+ DESCR
+	check with *-config utility
+************************************************************************/
 
 bool pmk_check_config(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 	bool		 required = true,
@@ -1280,23 +1341,27 @@ bool pmk_check_config(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 	return(true);
 }
 
-/*
+
+/***********************
+ pmk_check_pkg_config()
+
+ DESCR
 	check pkg-config module using internal support
-*/
+************************************************************************/
 
 bool pmk_check_pkg_config(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 	bool	 required = true,
-		 rval;
+			 rval;
 	char	*target,
-		*pipebuf,
-		*pstr,
-		 pc_cmd[MAXPATHLEN],
-		 pc_buf[MAXPATHLEN],
-		*bpath,
-		*pc_path,
-		*libvers,
-		*cflags,
-		*libs;
+			*pipebuf,
+			*pstr,
+			 pc_cmd[MAXPATHLEN],
+			 pc_buf[MAXPATHLEN],
+			*bpath,
+			*pc_path,
+			*libvers,
+			*cflags,
+			*libs;
 	dynary	*defs;
 	lgdata	*pld;
 	pkgcell	*ppc;
@@ -1443,7 +1508,7 @@ bool pmk_check_pkg_config(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 			return(false);
 		} else {
 			pmk_log("\tFound version >= %s : ", libvers);
-	
+
 			pipebuf = ppc->version;
 			if (compare_version(libvers, pipebuf) < 0) {
 				/* version does not match */
@@ -1506,9 +1571,13 @@ bool pmk_check_pkg_config(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 	return(true);
 }
 
-/*
+
+/*****************
+ pmk_check_type()
+
+ DESCR
 	check type
-*/
+************************************************************************/
 
 bool pmk_check_type(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 	FILE	*tfp;
@@ -1628,9 +1697,13 @@ bool pmk_check_type(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 	return(rval);
 }
 
-/*
+
+/*********************
+ pmk_check_variable()
+
+ DESCR
 	check if variable exists and optionally it's value
-*/
+************************************************************************/
 
 bool pmk_check_variable(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 	bool	 required,
@@ -1700,16 +1773,19 @@ bool pmk_check_variable(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 }
 
 
-/*
+/***********************
+ pmk_build_shlib_name()
+
+ DESCR
 	build name of a shared library
-*/
+************************************************************************/
 
 bool pmk_build_shlib_name(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 	char	*variable,
-		*versvar,
-		*versmaj,
-		*pstr,
-		*value;
+			*versvar,
+			*versmaj,
+			*pstr,
+			*value;
 
 	pmk_log("\n* Building shared library name\n");
 
@@ -1726,11 +1802,11 @@ bool pmk_build_shlib_name(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 	pstr = po_get_str(hash_get(ht, KW_OPT_NAME));
 	if (pstr != NULL) {
 #ifdef SHLIB_DEBUG
-debugf("pstr(name) = '%s'", pstr);
+		debugf("pstr(name) = '%s'", pstr);
 #endif
 		value = process_string(pstr, pgd->htab);
 #ifdef SHLIB_DEBUG
-debugf("value = '%s'", value);
+		debugf("value = '%s'", value);
 #endif
 		hash_update(pgd->slht, SL_KW_LIB_NAME, value);
 	}
@@ -1738,11 +1814,11 @@ debugf("value = '%s'", value);
 	pstr = po_get_str(hash_get(ht, KW_OPT_MAJOR));
 	if (pstr != NULL) {
 #ifdef SHLIB_DEBUG
-debugf("pstr(major) = '%s'", pstr);
+		debugf("pstr(major) = '%s'", pstr);
 #endif
 		value = process_string(pstr, pgd->htab);
 #ifdef SHLIB_DEBUG
-debugf("value = '%s'", value);
+		debugf("value = '%s'", value);
 #endif
 		hash_update(pgd->slht, SL_KW_LIB_MAJ, value); /* no dup */
 	}
@@ -1750,11 +1826,11 @@ debugf("value = '%s'", value);
 	pstr = po_get_str(hash_get(ht, KW_OPT_MINOR));
 	if (pstr != NULL) {
 #ifdef SHLIB_DEBUG
-debugf("pstr(minor) = '%s'", pstr);
+		debugf("pstr(minor) = '%s'", pstr);
 #endif
 		value = process_string(pstr, pgd->htab);
 #ifdef SHLIB_DEBUG
-debugf("value = '%s'", value);
+		debugf("value = '%s'", value);
 #endif
 		hash_update(pgd->slht, SL_KW_LIB_MIN, value); /* no dup */
 	}
@@ -1764,11 +1840,11 @@ debugf("value = '%s'", value);
 	if (variable != NULL) {
 		pstr = hash_get(pgd->slht, SL_KW_LIB_VNONE);
 #ifdef SHLIB_DEBUG
-debugf("pstr = '%s'", pstr);
+		debugf("pstr = '%s'", pstr);
 #endif
 		value = process_string(pstr, pgd->slht);
 #ifdef SHLIB_DEBUG
-debugf("value = '%s'", value);
+		debugf("value = '%s'", value);
 #endif
 
 		/* no dup */
@@ -1778,11 +1854,11 @@ debugf("value = '%s'", value);
 		}
 		pmk_log("\tSetting %s to '%s'\n", variable, value);
 #ifdef SHLIB_DEBUG
-debugf("save in '%s'", variable);
+		debugf("save in '%s'", variable);
 #endif
 	} else {
 #ifdef SHLIB_DEBUG
-debugf("variable not set");
+		debugf("variable not set");
 #endif
 	}
 
@@ -1790,11 +1866,11 @@ debugf("variable not set");
 	if (versvar != NULL) {
 		pstr = hash_get(pgd->slht, SL_KW_LIB_VFULL);
 #ifdef SHLIB_DEBUG
-debugf("pstr = '%s'", pstr);
+		debugf("pstr = '%s'", pstr);
 #endif
 		value = process_string(pstr, pgd->slht);
 #ifdef SHLIB_DEBUG
-debugf("value = '%s'", value);
+		debugf("value = '%s'", value);
 #endif
 		if (hash_update(pgd->htab, versvar, value) == HASH_ADD_FAIL) {
 			errorf(HASH_ERR_UPDT_ARG, versvar);
@@ -1802,11 +1878,11 @@ debugf("value = '%s'", value);
 		}
 		pmk_log("\tSetting %s to '%s'\n", versvar, value);
 #ifdef SHLIB_DEBUG
-debugf("save in '%s'", versvar);
+		debugf("save in '%s'", versvar);
 #endif
 	} else {
 #ifdef SHLIB_DEBUG
-debugf("versvar not set");
+		debugf("versvar not set");
 #endif
 	}
 
@@ -1814,11 +1890,11 @@ debugf("versvar not set");
 	if (versmaj != NULL) {
 		pstr = hash_get(pgd->slht, SL_KW_LIB_VMAJ);
 #ifdef SHLIB_DEBUG
-debugf("pstr = '%s'", pstr);
+		debugf("pstr = '%s'", pstr);
 #endif
 		value = process_string(pstr, pgd->slht);
 #ifdef SHLIB_DEBUG
-debugf("value = '%s'", value);
+		debugf("value = '%s'", value);
 #endif
 		if (hash_update(pgd->htab, versmaj, value) == HASH_ADD_FAIL) {
 			errorf(HASH_ERR_UPDT_ARG, versmaj);
@@ -1826,11 +1902,11 @@ debugf("value = '%s'", value);
 		}
 		pmk_log("\tSetting %s to '%s'\n", versmaj, value);
 #ifdef SHLIB_DEBUG
-debugf("save in '%s'", versmaj);
+		debugf("save in '%s'", versmaj);
 #endif
 	} else {
 #ifdef SHLIB_DEBUG
-debugf("versmaj not set");
+		debugf("versmaj not set");
 #endif
 	}
 
@@ -1838,23 +1914,24 @@ debugf("versmaj not set");
 }
 
 
-/*
-	option functions
-	
-	these functions have the following parameters:
+/*******************
+ * option functions
+ *
+ * IN
+ *	cmd : command structure
+ *	popt : option structure
+ *	pgd : global data
+ *
+ * OUT
+ *	boolean
+ ***********************************************************************/
 
-	cmd : command structure
-	popt : option structure
-	pgd : global data
+/********************
+ pmk_set_parameter()
 
-	returns bool
-
-*/
-
-
-/*
+ DESCR
 	set parameter
-*/
+************************************************************************/
 
 bool pmk_set_parameter(pmkcmd *cmd, prsopt *popt, pmkdata *pgd) {
 	/* gnu autoconf compatibility */
@@ -1882,9 +1959,13 @@ bool pmk_set_parameter(pmkcmd *cmd, prsopt *popt, pmkdata *pgd) {
 	return(false);
 }
 
-/*
+
+/************************
+ pmk_setparam_accompat()
+
+ DESCR
 	set accompat parameter
-*/
+************************************************************************/
 
 bool pmk_setparam_accompat(pmkcmd *cmd, prsopt *popt, pmkdata *pgd) {
 	char	*pstr;
@@ -1920,9 +2001,13 @@ bool pmk_setparam_accompat(pmkcmd *cmd, prsopt *popt, pmkdata *pgd) {
 	return(true);
 }
 
-/*
+
+/*********************
+ pmk_setparam_glang()
+
+ DESCR
 	set global lang parameter
-*/
+************************************************************************/
 
 bool pmk_setparam_glang(pmkcmd *cmd, prsopt *popt, pmkdata *pgd) {
 	bool		 rval = false;
@@ -1953,9 +2038,13 @@ bool pmk_setparam_glang(pmkcmd *cmd, prsopt *popt, pmkdata *pgd) {
 	return(rval);
 }
 
-/*
+
+/**********************
+ pmk_setparam_target()
+
+ DESCR
 	set accompat parameter
-*/
+************************************************************************/
 
 bool pmk_setparam_target(pmkcmd *cmd, prsopt *popt, pmkdata *pgd) {
 	dynary		*da;
@@ -1982,9 +2071,12 @@ bool pmk_setparam_target(pmkcmd *cmd, prsopt *popt, pmkdata *pgd) {
 	return(true);
 }
 
-/*
+/**********************
+ pmk_setparam_detect()
+
+ DESCR
 	set accompat parameter
-*/
+************************************************************************/
 
 bool pmk_setparam_detect(pmkcmd *cmd, prsopt *popt, pmkdata *pgd) {
 	char		*pstr,
@@ -2103,9 +2195,12 @@ bool pmk_setparam_detect(pmkcmd *cmd, prsopt *popt, pmkdata *pgd) {
 	return(true);
 }
 
-/*
+/*******************
+ pmk_set_variable()
+
+ DESCR
 	set variable
-*/
+************************************************************************/
 
 bool pmk_set_variable(pmkcmd *cmd, prsopt *popt, pmkdata *pgd) {
 	char	 buffer[TMP_BUF_LEN], /* XXX */
@@ -2114,9 +2209,9 @@ bool pmk_set_variable(pmkcmd *cmd, prsopt *popt, pmkdata *pgd) {
 		*defname;
 	int	 hval;
 
-/* XXX better way to do (specific hash for override)
+	/* XXX better way to do (specific hash for override)
 	if (hash_get(pgd->htab, popt->key) == NULL) {
-*/
+	*/
 		/* process value string */
 		pstr = po_get_str(popt->value);
 		if (pstr == NULL) {
@@ -2167,10 +2262,10 @@ bool pmk_set_variable(pmkcmd *cmd, prsopt *popt, pmkdata *pgd) {
 			pmk_log("\tFailed processing of '%s'.\n", popt->key);
 			return(false);
 		}
-/*
+	/*
 	} else {
 		pmk_log("\tSkipped '%s' define (overriden).\n", popt->key);
 	}
-*/
+	*/
 	return(true);
 }
