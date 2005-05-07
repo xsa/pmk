@@ -109,7 +109,8 @@ size_t nb_c_type_keywords = sizeof(c_type_keywords) / sizeof(char *);
 	skip until a given char
 
  IN
-	OUT
+ 
+ OUT
 ************************************************************************/
 
 bool prs_c_skip_to_char(prseng_t *ppe, char c) {

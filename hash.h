@@ -92,25 +92,25 @@ typedef struct {
 
 
 unsigned int	 hash_compute(char *, size_t);
-htable		*hash_init(size_t);
-htable		*hash_init_adv(size_t, void *(*)(void *), void (*)(void *), void *(*)(void *, void *, void *));
-bool		 hash_resize(htable *, size_t);
-void		 hash_set_grow(htable *);
-size_t		 hash_destroy(htable *);
+htable			*hash_init(size_t);
+htable			*hash_init_adv(size_t, void *(*)(void *), void (*)(void *), void *(*)(void *, void *, void *));
+bool			 hash_resize(htable *, size_t);
+void			 hash_set_grow(htable *);
+size_t			 hash_destroy(htable *);
 unsigned int	 hash_add(htable *, char *, void *);
 unsigned int	 hash_update(htable *, char *, void *);
 unsigned int	 hash_update_dup(htable *, char *, void *);
 unsigned int	 hash_add_cell(hnode *, hcell *);
-bool		 hash_add_array(htable *, hpair *, size_t);
-bool		 hash_add_array_adv(htable *, hpair *, size_t, void *(*)(void *));
+bool			 hash_add_array(htable *, hpair *, size_t);
+bool			 hash_add_array_adv(htable *, hpair *, size_t, void *(*)(void *));
 unsigned int	 hash_append(htable *, char *, void *, void *);
-void		 hash_delete(htable *, char *);
-void		*hash_get(htable *, char *);
-size_t		 hash_merge(htable *, htable *);
-size_t		 hash_nbkey(htable *);
-hkeys		*hash_keys(htable *);
-void		 hash_free_hcell(htable *, hcell *);
-void		 hash_free_hkeys(hkeys *);
-void		*hash_str_append(void *, void *, void *);
+void			 hash_delete(htable *, char *);
+void			*hash_get(htable *, char *);
+size_t			 hash_merge(htable *, htable *);
+size_t			 hash_nbkey(htable *);
+hkeys			*hash_keys(htable *);
+void			 hash_free_hcell(htable *, hcell *);
+void			 hash_free_hkeys(hkeys *);
+void			*hash_str_append(void *, void *, void *);
 
 #endif /* _PMK_HASH_H_ */
