@@ -236,9 +236,6 @@ size_t strlcpy(char *dst, const char *src, size_t s) {
 #include <errno.h>
 #include <sys/param.h>
 
-#include "pmk_string.h"
-#include "libgen.h"
-
 char *
 basename(path)
 	const char *path;
@@ -313,9 +310,6 @@ basename(path)
 
 #include <errno.h>
 #include <sys/param.h>
-
-#include "pmk_string.h"
-#include "libgen.h"
 
 char *
 dirname(path)
