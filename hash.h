@@ -1,7 +1,7 @@
 /* $Id$ */
 
 /*
- * Copyright (c) 2003-2004 Damien Couderc
+ * Copyright (c) 2003-2005 Damien Couderc
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,6 +34,10 @@
  */
 
 
+/*************
+ * constants *
+ ***********************************************************************/
+
 #ifndef _PMK_HASH_H_
 #define _PMK_HASH_H_
 
@@ -59,25 +63,29 @@
 #define HASH_ERR_UPDT_ARG	"Failed to update hash table key '%s'."
 
 
+/**********************************
+ * type and structure definitions *
+ ***********************************************************************/
+
 typedef struct s_hcell {
-	char		 key[MAX_HASH_KEY_LEN];
-	void		*value;
+	char			 key[MAX_HASH_KEY_LEN];
+	void			*value;
 	struct s_hcell	*next;
 } hcell;
 
 typedef struct {
 	hcell	*first,
-		*last;
+			*last;
 } hnode;
 
 typedef struct {
-	unsigned int	 count,
-			 autogrow;
-	size_t		 size;
-	void		*(*dupobj)(void *),
-			 (*freeobj)(void *),
-			*(*appdobj)(void *, void *, void *);
-	hnode		*nodetab; /* array of hnode */
+	bool			 autogrow;
+	size_t			 count,
+					 size;
+	void			*(*dupobj)(void *),
+					 (*freeobj)(void *),
+					*(*appdobj)(void *, void *, void *);
+	hnode			*nodetab; /* array of hnode */
 } htable;
 
 typedef struct {
@@ -90,6 +98,10 @@ typedef struct {
 	char	**keys;
 } hkeys;
 
+
+/***********************
+ * function prototypes *
+ ***********************************************************************/
 
 unsigned int	 hash_compute(char *, size_t);
 htable			*hash_init(size_t);
@@ -109,6 +121,8 @@ void			*hash_get(htable *, char *);
 size_t			 hash_merge(htable *, htable *);
 size_t			 hash_nbkey(htable *);
 hkeys			*hash_keys(htable *);
+int			 hash_strcmp(const void *, const void *);
+hkeys			*hash_keys_sorted(htable *);
 void			 hash_free_hcell(htable *, hcell *);
 void			 hash_free_hkeys(hkeys *);
 void			*hash_str_append(void *, void *, void *);

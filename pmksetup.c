@@ -59,35 +59,34 @@
 /*#define PMKSETUP_DEBUG 1*/
 /*#define WITHOUT_FORK 1*/
 
-/*****************
- global variables
-************************************************************************/
+/********************
+ * global variables *
+ ***********************************************************************/
 
 extern int	 optind;
 
-FILE	*sfp;			/* scratch file pointer */
-char	sfn[MAXPATHLEN];	/* scratch file name */
+FILE		*sfp;			/* scratch file pointer */
+char		 sfn[MAXPATHLEN];	/* scratch file name */
 
-htable	*ht;
-int	 verbose_flag = 0;	/* -V option at the cmd-line */
+htable		*ht;
+int			 verbose_flag = 0;	/* -V option at the cmd-line */
 
-hpair	predef[] = {
-		{PMKCONF_MISC_SYSCONFDIR,	SYSCONFDIR},
-		{PMKCONF_MISC_PREFIX,		"/usr/local"},
-		{PMKCONF_PATH_INC,		"/usr/include"},
-		{PMKCONF_PATH_LIB,		"/usr/lib"}
+hpair		 predef[] = {
+				{PMKCONF_MISC_SYSCONFDIR,	SYSCONFDIR},
+				{PMKCONF_MISC_PREFIX,		"/usr/local"},
+				{PMKCONF_PATH_INC,		"/usr/include"},
+				{PMKCONF_PATH_LIB,		"/usr/lib"}
 };
+int			 nbpredef = sizeof(predef) / sizeof(hpair);
 
-int	nbpredef = sizeof(predef) / sizeof(hpair);
 
+/*************
+ * functions *
+ ***********************************************************************/
 
-/**********
- functions
-************************************************************************/
-
-/**************
- record_data()
-
+/*****************
+ * record_data() *
+ ***********************************************************************
  DESCR
 	record data
 
@@ -101,7 +100,7 @@ int	nbpredef = sizeof(predef) / sizeof(hpair);
 
  OUT
 	boolean
-************************************************************************/
+ ***********************************************************************/
 
 bool record_data(htable *pht, char *key, char opchar, char *value) {
 	prsopt	*ppo;
@@ -141,9 +140,9 @@ bool record_data(htable *pht, char *key, char opchar, char *value) {
 }
 
 
-/**************
- gather_data()
-
+/*****************
+ * gather_data() *
+ ***********************************************************************
  DESCR
 	Gathering of system data, predefinied data, ...
 
@@ -152,7 +151,7 @@ bool record_data(htable *pht, char *key, char opchar, char *value) {
 
  OUT
 	boolean
-************************************************************************/
+ ***********************************************************************/
 
 bool gather_data(htable *pht) {
 	printf("==> Looking for default parameters...\n");
@@ -198,9 +197,9 @@ bool gather_data(htable *pht) {
 }
 
 
-/*****************
- write_new_data()
-
+/********************
+ * write_new_data() *
+ ***********************************************************************
  DESCR
 	Write remaining data
 
@@ -209,22 +208,19 @@ bool gather_data(htable *pht) {
 
  OUT
  	boolean
-************************************************************************/
+ ***********************************************************************/
 
 bool write_new_data(htable *pht) {
-	char		*val;
-	hkeys		*phk;
-	prsopt		*ppo;
+	char			*val;
+	hkeys			*phk;
+	prsopt			*ppo;
 	unsigned int	 i;
 
-	phk = hash_keys(pht);
+	phk = hash_keys_sorted(pht);
 	if (phk == NULL) {
 		verbosef("Nothing to merge.");
 		return(true);
 	}
-
-	/* sort hash table */
-	qsort(phk->keys, phk->nkey, sizeof(char *), keycomp);
 
 	/* processing remaining keys */
 	for(i = 0 ; i < phk->nkey ; i++) {
@@ -263,31 +259,9 @@ bool write_new_data(htable *pht) {
 }
 
 
-/**********
- keycomp()
-
- DESCR
-	Compare the keys in the hash to sort them:
-		here sorting the keys alphabetically before
-		writing the new configuration file with write_new_data()
-
- IN
-	a: first element to compare
-	b: second element to compare
-
- OUT
-	an integer greater than, equal to, or less than 0 according as the
-	character a is greather, equal to, or less than the character b.
-************************************************************************/
-
-int keycomp(const void *a, const void *b) {
-	return(strcmp(*(const char **) a, *(const char **) b));
-}
-
-
-/************
- check_opt()
-
+/***************
+ * check_opt() *
+ ***********************************************************************
  DESCR
 	Check and process option
 
@@ -297,11 +271,11 @@ int keycomp(const void *a, const void *b) {
 
  OUT
 	boolean
-************************************************************************/
+ ***********************************************************************/
 
 bool check_opt(htable *cht, prsopt *popt) {
 	char	*recval,
-		*optval;
+			*optval;
 	prsopt	*ppo;
 
 	optval = po_get_str(popt->value);
@@ -380,9 +354,9 @@ bool check_opt(htable *cht, prsopt *popt) {
 }
 
 
-/***************
- get_env_vars()
-
+/******************
+ * get_env_vars() *
+ ***********************************************************************
  DESCR
 	Get the environment variables needed for the configuration file
 
@@ -391,11 +365,11 @@ bool check_opt(htable *cht, prsopt *popt) {
 
  OUT
 	boolean
-************************************************************************/
+ ***********************************************************************/
 
 bool get_env_vars(htable *pht) {
 	struct utsname	 utsname;
-	char		*bin_path;
+	char			*bin_path;
 
 	if (uname(&utsname) == -1) {
 		errorf("uname : %s.", strerror(errno));
@@ -428,9 +402,9 @@ bool get_env_vars(htable *pht) {
 }
 
 
-/***************
- get_binaries()
-
+/******************
+ * get_binaries() *
+ ***********************************************************************
  DESCR
 	Look for location of some predefined binaries
 
@@ -439,7 +413,7 @@ bool get_env_vars(htable *pht) {
 
  OUT
 	boolean
-************************************************************************/
+ ***********************************************************************/
 
 bool get_binaries(htable *pht) {
 	char			 fbin[MAXPATHLEN],	/* full binary path */
@@ -541,9 +515,9 @@ bool get_binaries(htable *pht) {
 }
 
 
-/**************
- predef_vars()
-
+/*****************
+ * predef_vars() *
+ ***********************************************************************
  DESCR
 	Add to the hash table the predefined variables we cannot get
 	automagically.
@@ -553,10 +527,10 @@ bool get_binaries(htable *pht) {
 
  OUT
 	boolean
-************************************************************************/
+ ***********************************************************************/
 
 bool predef_vars(htable *pht) {
-	int	i;
+	int	 i;
 
 	for (i = 0 ; i < nbpredef ; i++) {
 		if (record_data(pht, predef[i].key, 'u', predef[i].value) == false) {
@@ -570,9 +544,9 @@ bool predef_vars(htable *pht) {
 }
 
 
-/*************
- check_echo()
-
+/****************
+ * check_echo() *
+ ***********************************************************************
  DESCR
 	Check echo output
 
@@ -581,14 +555,14 @@ bool predef_vars(htable *pht) {
 
  OUT
 	boolean
-************************************************************************/
+ ***********************************************************************/
 
 bool check_echo(htable *pht) {
 	FILE	*echo_pipe = NULL;
-	char	buf[TMP_BUF_LEN],
-		echocmd[TMP_BUF_LEN];
+	char	 buf[TMP_BUF_LEN],
+			 echocmd[TMP_BUF_LEN];
 	char	*echo_n, *echo_c, *echo_t;
-	size_t	s;
+	size_t	 s;
 
 	snprintf(echocmd, sizeof(echocmd), ECHO_CMD); /* should not fail */
 
@@ -655,9 +629,9 @@ bool check_echo(htable *pht) {
 }
 
 
-/****************
- check_libpath()
-
+/*******************
+ * check_libpath() *
+ ***********************************************************************
  DESCR
 	Check pkgconfig libpath
 
@@ -670,7 +644,7 @@ bool check_echo(htable *pht) {
  NOTE
 	this path must be relative to the real prefix. This means that we
 	can't rely on predefined prefix.
-************************************************************************/
+ ***********************************************************************/
 
 bool check_libpath(htable *pht) {
 	char	 libpath[MAXPATHLEN];
@@ -704,9 +678,9 @@ bool check_libpath(htable *pht) {
 }
 
 
-/***************
- get_cpu_data()
-
+/******************
+ * get_cpu_data() *
+ ***********************************************************************
  DESCR
 	Check the cpu family
 
@@ -715,16 +689,16 @@ bool check_libpath(htable *pht) {
 
  OUT
 	boolean
-************************************************************************/
+ ***********************************************************************/
 
 bool get_cpu_data(htable *pht) {
-	char		*uname_m;
-	char		*pstr;
-	hkeys		*phk;
-	htable		*spht;
-	pmkobj		*po;
-	prsdata		*pdata;
-	prsopt		*ppo;
+	char			*uname_m;
+	char			*pstr;
+	hkeys			*phk;
+	htable			*spht;
+	pmkobj			*po;
+	prsdata			*pdata;
+	prsopt			*ppo;
 	unsigned int	 i;
 
 	ppo = hash_get(pht, PMKCONF_OS_ARCH);
@@ -781,9 +755,9 @@ bool get_cpu_data(htable *pht) {
 }
 
 
-/*************
- dir_exists()
-
+/****************
+ * dir_exists() *
+ ***********************************************************************
  DESCR
 	Check if a directory does exist
 
@@ -792,11 +766,11 @@ bool get_cpu_data(htable *pht) {
 
  OUT
 	boolean
-************************************************************************/
+ ***********************************************************************/
 
 bool dir_exists(const char *fdir) {
-		DIR	 *dirp;
-		size_t  len;
+		DIR		*dirp;
+		size_t	 len;
 
 	len = strlen(fdir);
 
@@ -811,9 +785,9 @@ bool dir_exists(const char *fdir) {
 }
 
 
-/*******************
- byte_order_check()
-
+/**********************
+ * byte_order_check() *
+ ***********************************************************************
  DESCR
 	Byte order check
 
@@ -822,7 +796,7 @@ bool dir_exists(const char *fdir) {
 
  OUT
 	boolean
-************************************************************************/
+ ***********************************************************************/
 
 bool byte_order_check(htable *pht) {
 	char	bo_type[16];
@@ -854,9 +828,9 @@ bool byte_order_check(htable *pht) {
 }
 
 
-/***********
- verbosef()
-
+/**************
+ * verbosef() *
+ ***********************************************************************
  DESCR
 	Simple formated verbose function
 
@@ -865,11 +839,11 @@ bool byte_order_check(htable *pht) {
 
  OUT
 	NONE
-************************************************************************/
+ ***********************************************************************/
 
 void verbosef(const char *fmt, ...) {
-	char	buf[MAX_ERR_MSG_LEN];
-	va_list	plst;
+	char	 buf[MAX_ERR_MSG_LEN];
+	va_list	 plst;
 
 	if (verbose_flag == 1) {
 		va_start(plst, fmt);
@@ -881,9 +855,9 @@ void verbosef(const char *fmt, ...) {
 }
 
 
-/*****************
- detection_loop()
-
+/********************
+ * detection_loop() *
+ ***********************************************************************
  DESCR
 	Detection loop
 
@@ -893,16 +867,15 @@ void verbosef(const char *fmt, ...) {
 
  OUT
 	boolean
-************************************************************************/
+ ***********************************************************************/
 
 bool detection_loop(int argc, char *argv[]) {
 	FILE		*config;
 	bool		 process_clopts = false,
-			 cfg_backup = false;
+				 cfg_backup = false;
 	char		*pstr;
-	int		 ch;
-	prsopt		 *ppo;
-
+	int			 ch;
+	prsopt		*ppo;
 #ifndef errno
 	extern int	 errno;
 #endif /* errno */
@@ -1017,9 +990,9 @@ bool detection_loop(int argc, char *argv[]) {
 }
 
 
-/*************
- child_loop()
-
+/****************
+ * child_loop() *
+ ***********************************************************************
  DESCR
 	Child main loop
 
@@ -1031,7 +1004,7 @@ bool detection_loop(int argc, char *argv[]) {
 
  OUT
 	NONE
-************************************************************************/
+ ***********************************************************************/
 
 void child_loop(uid_t uid, gid_t gid, int argc, char *argv[]) {
 #ifndef WITHOUT_FORK
@@ -1085,9 +1058,9 @@ void child_loop(uid_t uid, gid_t gid, int argc, char *argv[]) {
 }
 
 
-/**************
- parent_loop()
-
+/*****************
+ * parent_loop() *
+ ***********************************************************************
  DESCR
 	Parent main loop
 
@@ -1096,12 +1069,12 @@ void child_loop(uid_t uid, gid_t gid, int argc, char *argv[]) {
 
  OUT
 	NONE
-************************************************************************/
+ ***********************************************************************/
 
 void parent_loop(pid_t pid) {
-	bool	error = false;
+	bool	 error = false;
 #ifndef WITHOUT_FORK
-	int	status;
+	int		 status;
 
 	waitpid(pid, &status, WUNTRACED);
 
@@ -1178,9 +1151,9 @@ void parent_loop(pid_t pid) {
 }
 
 
-/********
- usage()
-
+/***********
+ * usage() *
+ ***********************************************************************
  DESCR
 	pmksetup(8) usage
 
@@ -1189,7 +1162,7 @@ void parent_loop(pid_t pid) {
 
  OUT
 	NONE
-************************************************************************/
+ ***********************************************************************/
 
 void usage(void) {
 	fprintf(stderr, "usage: pmksetup [-hVv] "
@@ -1198,20 +1171,19 @@ void usage(void) {
 }
 
 
-/********
- main ()
-
+/**********
+ * main() *
+ ***********************************************************************
  DESCR
 	Main loop
-************************************************************************/
+ ***********************************************************************/
 
 int main(int argc, char *argv[]) {
 	struct passwd	*pw;
-	gid_t		 gid = 0;
-	pid_t		 pid;
-	uid_t		 uid = 0;
-
-	int		 ch;
+	gid_t			 gid = 0;
+	pid_t			 pid;
+	uid_t			 uid = 0;
+	int				 ch;
 
 	optind = 1;
 	while ((ch = getopt(argc, argv, PMKSTP_OPT_STR)) != -1) {
@@ -1271,7 +1243,7 @@ int main(int argc, char *argv[]) {
 		errorf("cannot open temporary file '%s' : %s.",
 				sfn, strerror(errno));
 		exit(EXIT_FAILURE);
-}
+	}
 
 #ifndef WITHOUT_FORK
 	/* forking detection code */
@@ -1301,5 +1273,5 @@ int main(int argc, char *argv[]) {
 #endif /* WITHOUT_FORK */
 
 	return(EXIT_SUCCESS);
-
 }
+
