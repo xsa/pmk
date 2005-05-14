@@ -58,19 +58,24 @@
 #include "common.h"
 #endif
 
-/*
+/******************
+ * hash_compute() *
+ ***********************************************************************
+ DESCR
 	compute hash (perfect hashing)
 
+ IN
 	key : key string
 
-	return : resulting hash
-*/
+ OUT
+	resulting hash
+ ***********************************************************************/
 
 unsigned int hash_compute(char *key, size_t table_size) {
 	unsigned int	len = 0,
-			hash = 0;
+					hash = 0;
 	unsigned char	c;
-	
+
 	c = *key;
 	while (c != '\0') {
 		/* sum all characters with modulo */
@@ -86,40 +91,53 @@ unsigned int hash_compute(char *key, size_t table_size) {
 	return(hash);
 }
 
-/*
+
+/***************
+ * hash_init() *
+ ***********************************************************************
+ DESCR
 	init hash structure of character strings
 
+ IN
 	table_size : number of hash elements
 
-	return : a pointer to the hash structure
-*/
+ OUT
+	 a pointer to the hash structure
+ ***********************************************************************/
 
 htable *hash_init(size_t table_size) {
 	return(hash_init_adv(table_size, (void *(*)(void *))strdup,
-                                                free, hash_str_append));
+											free, hash_str_append));
 }
 
-/*
+
+/*******************
+ * hash_init_adv() *
+ ***********************************************************************
+ DESCR
 	init hash structure of objects
 
+ IN
 	table_size : number of hash elements
 	freefunc : function to free an object
 	appdfunc : function to create appended object
 
-	return : a pointer to the hash structure
+ OUT
+	a pointer to the hash structure
 
-	NOTE : append function will have three arguments (original object,
+ NOTE
+	append function will have three arguments (original object,
 	value to append, misc data) and will return the resulting object
 	(see hash_append_str for an example).
-*/
+ ***********************************************************************/
 
 htable *hash_init_adv(size_t table_size, void *(*dupfunc)(void *),
-		void (*freefunc)(void *),
-		void *(*appdfunc)(void *, void *, void *)) {
+							void (*freefunc)(void *),
+							void *(*appdfunc)(void *, void *, void *)) {
 
-	unsigned int	 i;
-	htable		*pht;
-	hnode		*phn;
+	htable	*pht;
+	hnode	*phn;
+	size_t	 i;
 
 	/* allocate hash table */
 	pht = (htable *) malloc(sizeof(htable));
@@ -145,7 +163,7 @@ htable *hash_init_adv(size_t table_size, void *(*dupfunc)(void *),
 	/* finish init */
 	pht->size = table_size;
 	pht->count = 0;
-	pht->autogrow = 0; /* disabled by default */
+	pht->autogrow = false; /* disabled by default */
 	pht->dupobj = dupfunc;
 	pht->freeobj = freefunc;
 	pht->appdobj = appdfunc;
@@ -154,22 +172,27 @@ htable *hash_init_adv(size_t table_size, void *(*dupfunc)(void *),
 	return(pht);
 }
 
-/*
+/*****************
+ * hash_resize() *
+ ***********************************************************************
+ DESCR
 	resizing hash table
 
+ IN
 	ht : hash table to resize
 	newsize : new size
 
-	return : boolean
-*/
+ OUT
+	boolean
+ ***********************************************************************/
 
 bool hash_resize(htable *ht, size_t newsize) {
-	hcell		*phc,
-			*next;
-	hnode		*newhn;
-	size_t		 c = 0;
-	unsigned int	 h,
-			 i;
+	hcell			*phc,
+					*next;
+	hnode			*newhn;
+	size_t			 c = 0,
+					 i;
+	unsigned int	 h;
 
 	/* allocate new node table */
 	newhn = (hnode *) malloc(sizeof(hnode) * newsize);
@@ -201,23 +224,37 @@ bool hash_resize(htable *ht, size_t newsize) {
 	return(true);
 }
 
-/*
+
+/*******************
+ * hash_set_grow() *
+ ***********************************************************************
+ DESCR
 	set hash table as automatically resizable
 
+ IN
 	ht : hash table to set
-*/
+
+ OUT
+	-
+ ***********************************************************************/
 
 void hash_set_grow(htable *ht) {
-	ht->autogrow = 1;
+	ht->autogrow = true;
 }
 
-/*
+
+/******************
+ * hash_destroy() *
+ ***********************************************************************
+ DESCR
 	destroy hash table
 
+ IN
 	pht : hash table to remove
 
-	return : number of keys deleted
-*/
+ OUT
+	number of keys deleted
+ ***********************************************************************/
 
 size_t hash_destroy(htable *pht) {
 	hcell		*p,
@@ -249,38 +286,48 @@ size_t hash_destroy(htable *pht) {
 	return(c);
 }
 
-/*
+/**************
+ * hash_add() *
+ ***********************************************************************
+ DESCR
 	add a key in the hash table
 
+ IN
 	pht : hash structure
 	key : key string
 	value : value object
 
-	return : an error code
+ OUT
+	return an error code
 		HASH_ADD_FAIL : addition failed.
 		HASH_ADD_OKAY : added (no collision).
 		HASH_ADD_COLL : added (collision, key chained).
 		HASH_ADD_UPDT : key already exists, change value.
-*/
+ ***********************************************************************/
 
 unsigned int hash_add(htable *pht, char *key, void *value) {
 	return(hash_update(pht, key, value));
 }
 
 
-/*
+/*****************
+ * hash_update() *
+ ***********************************************************************
+ DESCR
 	update or add a key in the hash table
 
+ IN
 	pht : hash structure
 	key : key string
 	value : value object
 
-	return : an error code
+ OUT
+	return an error code
 		HASH_ADD_FAIL : addition failed.
 		HASH_ADD_OKAY : added (no collision).
 		HASH_ADD_COLL : added (collision, key chained).
 		HASH_ADD_UPDT : key already exists, change value.
-*/
+ ***********************************************************************/
 
 unsigned int hash_update(htable *pht, char *key, void *value) {
 	unsigned int	 hash,
@@ -296,7 +343,7 @@ unsigned int hash_update(htable *pht, char *key, void *value) {
 	/* test remaing free cells */
 	if (pht->count >= size) {
 		/* number of cell is higher than the supposed table size */
-		if (pht->autogrow == 0) {
+		if (pht->autogrow == false) {
 			/* fixed size */
 			return(HASH_ADD_FAIL);
 		} else {
@@ -308,7 +355,7 @@ unsigned int hash_update(htable *pht, char *key, void *value) {
 		}
 	}
 
-	
+
 	phc = (hcell *) malloc(sizeof(hcell));
 	if (phc == NULL)
 		return(rval);
@@ -332,38 +379,49 @@ unsigned int hash_update(htable *pht, char *key, void *value) {
 	return(rval);
 }
 
-/*
+/*********************
+ * hash_update_dup() *
+ ***********************************************************************
+ DESCR
 	update or add a key in the hash table but duplicate the value
 
+ IN
 	pht : hash structure
 	key : key string
 	value : value object
 
-	return : an error code
+ OUT
+	return an error code
 		HASH_ADD_FAIL : addition failed.
 		HASH_ADD_OKAY : added (no collision).
 		HASH_ADD_COLL : added (collision, key chained).
 		HASH_ADD_UPDT : key already exists, change value.
-*/
+ ***********************************************************************/
 
 unsigned int hash_update_dup(htable *pht, char *key, void *value) {
 	return(hash_update(pht, key, pht->dupobj(value)));
 }
 
 
-/*
+/*******************
+ * hash_add_cell() *
+ ***********************************************************************
+ DESCR
 	add a new cell in a node
 
+ IN
 	phn : storage node
 	phc : cell to add
 
-	return : an error code
+ OUT
+	return an error code
 		HASH_ADD_OKAY : added (no collision).
 		HASH_ADD_COLL : added (collision, key chained).
 		HASH_ADD_UPDT : key already exists, change value.
 
-	NOTE : this function does not increment the cell number of the hash table.
-*/
+ NOTE
+	this function does not increment the cell number of the hash table.
+ ***********************************************************************/
 
 unsigned int hash_add_cell(hnode *phn, hcell *phc) {
 	hcell	*np;
@@ -377,7 +435,7 @@ unsigned int hash_add_cell(hnode *phn, hcell *phc) {
 		return(HASH_ADD_OKAY);
 	} else {
 		/* collision, hash code already used */
-		np = phn->first;	
+		np = phn->first;
 
 		/* looking for last element */
 		while (1) {
@@ -406,30 +464,41 @@ unsigned int hash_add_cell(hnode *phn, hcell *phc) {
 	}
 }
 
-/*
+
+/********************
+ * hash_add_array() *
+ ***********************************************************************
+ DESCR
 	add an array into the hash table
 
+ IN
 	ht : storage hash table
 	ary : array to add
 	size : size of the array
 
-	return : boolean
-*/
+ OUT
+	boolean
+ ***********************************************************************/
 
 bool hash_add_array(htable *pht, hpair *php, size_t size) {
 	return(hash_add_array_adv(pht, php, size, (void *(*)(void *)) strdup));
 }
 
-/*
+/************************
+ * hash_add_array_adv() *
+ ***********************************************************************
+ DESCR
 	add an array into the hash table
 
+ IN
 	ht : storage hash table
 	ary : array to add
 	size : size of the array
 	dup_func : object duplication function
 
-	return : boolean
-*/
+ OUT
+	boolean
+ ***********************************************************************/
 
 bool hash_add_array_adv(htable *pht, hpair *php, size_t size, void *(dupfunc)(void *)) {
 	bool		 error = false,
@@ -457,17 +526,24 @@ bool hash_add_array_adv(htable *pht, hpair *php, size_t size, void *(dupfunc)(vo
 }
 
 
-
-/*
+/*****************
+ * hash_append() *
+ ***********************************************************************
+ DESCR
 	append a value to the existing value
 
+ IN
 	pht : hash structure
 	key : key to be appended
 	value : value to append
 	misc : extra data to transmit to append function
 
-	return : an error code.
-*/
+ OUT
+	return an error code.
+		HASH_ADD_OKAY : added (no collision).
+		HASH_ADD_COLL : added (collision, key chained).
+		HASH_ADD_UPDT : key already exists, change value.
+ ***********************************************************************/
 
 unsigned int hash_append(htable *pht, char *key, void *value, void *misc) {
 	unsigned int	 rval;
@@ -509,12 +585,20 @@ unsigned int hash_append(htable *pht, char *key, void *value, void *misc) {
 	return(rval);
 }
 
-/*
+
+/*****************
+ * hash_delete() *
+ ***********************************************************************
+ DESCR
 	remove a key from the hash table
 
+ IN
 	pht : hash table
 	key : key to search
-*/
+
+ OUT
+	-
+ ***********************************************************************/
 
 void hash_delete(htable *pht, char *key) {
 	hcell		*phc,
@@ -560,14 +644,20 @@ void hash_delete(htable *pht, char *key) {
 	/* key not found */
 }
 
-/*
+
+/**************
+ * hash_get() *
+ ***********************************************************************
+ DESCR
 	get a key from the hash table
 
+ IN
 	pht : hash table
 	key : key to search
 
-	return :  value or NULL
-*/
+ OUT
+	return the value or NULL
+ ***********************************************************************/
 
 void *hash_get(htable *pht, char *key) {
 	hcell		*phc;
@@ -595,14 +685,19 @@ void *hash_get(htable *pht, char *key) {
 	return(NULL);
 }
 
-/*
+/****************
+ * hash_merge() *
+ ***********************************************************************
+ DESCR
 	merge one hash table into another
 
+ IN
 	dst_ht : destination table
 	src_ht : table to merge
 
-	return : number of merged key
-*/
+ OUT
+	number of merged key
+ ***********************************************************************/
 
 size_t hash_merge(htable *dst_ht, htable *src_ht) {
 	hcell		*p;
@@ -632,27 +727,38 @@ size_t hash_merge(htable *dst_ht, htable *src_ht) {
 	return(c);
 }
 
-/*
+/****************
+ * hash_nbkey() *
+ ***********************************************************************
+ DESCR
 	get number of keys
 
+ IN
 	pht : hash table
 
-	return : number of keys
-*/
+ OUT
+	number of keys
+ ***********************************************************************/
 
 size_t hash_nbkey(htable *pht) {
 	return(pht->count);
 }
 
-/*
+/***************
+ * hash_keys() *
+ ***********************************************************************
+ DESCR
 	get the keys of the hash table
 
+ IN
 	pht : hash table
 
-	return : an hkeys structure
+ OUT
+	hkeys structure
 
-	NOTE: don't forget to free the array after use.
-*/
+ NOTE
+	don't forget to free the array after use.
+ ***********************************************************************/
 
 hkeys *hash_keys(htable *pht) {
 	hcell		*p;
@@ -663,7 +769,6 @@ hkeys *hash_keys(htable *pht) {
 	/* init hkeys struct to be returned */
 	phk = (hkeys *)malloc(sizeof(hkeys));
 	if (phk != NULL) {
-
 		if (pht->count == 0)
 			return(NULL);
 
@@ -681,29 +786,80 @@ hkeys *hash_keys(htable *pht) {
 					p = p->next;
 				}
 			}
-	
+
 			return(phk);
 		} else {
 #ifdef HASH_DEBUG
-                        debugf("keys alloc failed");
+			debugf("keys alloc failed");
 #endif
 			/* free allocated space only */
 			free(phk);
 		}
 #ifdef HASH_DEBUG
-        } else {
-                debugf("hkeys struct alloc failed");
+	} else {
+		debugf("hkeys struct alloc failed");
 #endif
 	}
 
 	return(NULL);
 }
 
-/*
+
+/*****************
+ * hash_strcmp() *
+ ***********************************************************************
+ DESCR
+ IN
+ OUT
+ ***********************************************************************/
+
+int hash_strcmp(const void *a, const void *b) {
+	return(strcmp(*(char * const *)a, *(char * const *) b));
+}
+
+/**********************
+ * hash_keys_sorted() *
+ ***********************************************************************
+ DESCR
+	get the sorted list of keys of the hash table
+
+ IN
+	pht : hash table
+
+ OUT
+	return an hkeys structure
+
+ NOTE
+	don't forget to free the array after use
+ ***********************************************************************/
+
+hkeys *hash_keys_sorted(htable *pht) {
+	hkeys	*phk;
+
+	/* build hkey structure */
+	phk = hash_keys(pht);
+
+	if (phk != NULL) {
+		/* sort key names */
+		qsort((void *) phk->keys, phk->nkey, sizeof(char *),
+							hash_strcmp);
+	}
+	return(phk);
+}
+
+
+/*********************
+ * hash_free_hcell() *
+ ***********************************************************************
+ DESCR
 	free memory allocated to the hcell structure
 
+ IN
 	phc : structure to free
-*/
+
+ OUT
+	-
+ ***********************************************************************/
 
 void hash_free_hcell(htable *pht, hcell *phc) {
 	if (phc != NULL) {
@@ -721,11 +877,18 @@ void hash_free_hcell(htable *pht, hcell *phc) {
 	}
 }
 
-/*
+/*********************
+ * hash_free_hkeys() *
+ ***********************************************************************
+ DESCR
 	free memory allocated to the hkeys structure
 
+ IN
 	phk : structure to free
-*/
+
+ OUT
+	-
+ ***********************************************************************/
 
 void hash_free_hkeys(hkeys *phk) {
 	/* doesn't free pointed values */
@@ -733,9 +896,20 @@ void hash_free_hkeys(hkeys *phk) {
 	free(phk);
 }
 
-/*
+/*********************
+ * hash_str_append() *
+ ***********************************************************************
+ DESCR
 	append function for string hash
-*/
+
+ IN
+	orig : XXX
+	value : XXX
+	sep : XXX
+
+ OUT
+	-
+ ***********************************************************************/
 
 void *hash_str_append(void *orig, void *value, void *sep) {
 	char	*pbuf;

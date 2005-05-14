@@ -43,9 +43,9 @@
 #include "premake.h"
 
 
-/**********
- constants
-************************************************************************/
+/*************
+ * constants *
+ ***********************************************************************/
 
 /* pmksetup specific version */
 #define PREMAKE_SUBVER_PMKSETUP	"9"
@@ -126,9 +126,9 @@ static  char *binaries[][2] = {
 
 #define MAXBINS	sizeof(binaries) / sizeof(char *) / 2
 
-/*********************
- functions prototypes
-************************************************************************/
+/************************
+ * functions prototypes *
+ ***********************************************************************/
 
 bool	record_data(htable *, char *, char, char *);
 bool	gather_data(htable *);
@@ -143,7 +143,6 @@ bool	check_libpath(htable *);
 bool	get_cpu_data(htable *);
 bool	dir_exists(const char *);
 bool	byte_order_check(htable *);
-int	keycomp(const void *, const void *);
 bool	write_new_data(htable *);
 void	verbosef(const char *, ...);
 void	usage(void);

@@ -10,13 +10,7 @@ Document revision:
 
 1) Comments
 
-/*
-	This is a function heading comment.
-
-	Here the input arguments.
-
-	return : and here the output.
-*/
+Comments in the code are GREATLY appreciated.
 
 /* simple in-code comment */
 
@@ -25,7 +19,22 @@ Document revision:
 	Other formats are allowed.
 */
 
-Comments in the code are GREATLY appreciated.
+The following is our "standard" fonction header that every new
+function should have :
+
+/*******************
+ * function_name() *
+ ***********************************************************************
+ DESCR
+	The description of the function processus
+
+ IN
+	arg1 : brief description of the named argument
+	arg2 : same as above ... 
+
+ OUT
+	description of what is returned
+ ***********************************************************************/
 
 
 2) Includes

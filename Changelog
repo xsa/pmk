@@ -1,3 +1,11 @@
+14 May 2005 mipsator
+ * added hash_keys_sorted() which returns a sorted list of keys.
+ * update of style for function header comments. 
+
+07 May 2005 mipsator
+ * imported new compatibility layer.
+ * polished pmkscan output.
+
 04 May 2005 mipsator
  * improved target's object dependencies scanning in pmkscan.
  * removed useless pmkshgen* files as the idea will be implemented in
