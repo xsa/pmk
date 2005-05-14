@@ -63,6 +63,13 @@ char	*pp_keywords[] = {
 	RKW_PP_UDEF
 };
 
+/* assembler directives */
+char	*as_keywords[] = {
+	RKW_AS_TSEG,
+	RKW_AS_DSEG
+};
+size_t nb_as_keywords = sizeof(as_keywords) / sizeof(char *);
+
 /* C language reserved keywords (without types) */
 char	*c_keywords[] = {
 	RKW_C_BOOL, RKW_C_CMPLX, RKW_C_IMGNR,
@@ -98,9 +105,127 @@ char	*c_type_keywords[] = {
 size_t nb_c_type_keywords = sizeof(c_type_keywords) / sizeof(char *);
 
 
-/**********
- functions
-***********************************************************************/
+/******************************
+ * assembly parsing functions *
+ **********************************************************************/
+
+/***************
+ prs_asm_file()
+
+ DESCR
+	C file parsing main function
+
+ IN
+	OUT
+************************************************************************/
+
+bool prs_asm_file(prs_cmn_t *pcmn, FILE *fp) {
+	bool			 askw_flag = false;
+	char			 idtf[MAX_IDTF_LEN];
+	unsigned int	 segtype = SEG_TYPE_UNKNW;
+	prseng_t		*ppe;
+
+#ifdef DEBUG_PRSC
+	debugf("prs_asm_file() BEGIN");
+#endif
+
+	/* init prseng	 */
+	ppe = prseng_init(fp, NULL);
+	if (ppe == NULL) {
+		return(false);
+	}
+
+	/* while end of file is not reached */
+	while (prseng_eof(ppe) == false) {
+#ifdef DEBUG_PRSC
+		debugf("cursor: '%.16s'", ppe->cur);
+#endif
+
+		prs_c_skip(ppe);
+#ifdef DEBUG_PRSC
+		debugf("cursor after skipping useless : '%.16s'", ppe->cur);
+#endif
+
+		if (prseng_test_char(ppe, '#') == true) {
+			/* parse preprocessing directive */
+#ifdef DEBUG_PRSC
+			debugf("found preprocessor directive: '%.16s'", ppe->cur);
+#endif
+			prs_c_prepro(pcmn, ppe);
+			continue;
+#ifdef DEBUG_PRSC
+		} else {
+				debugf("cursor is not '#'");
+#endif
+		}
+
+		/* assembler keyword */
+		if (prseng_test_char(ppe, '.') == true) {
+			/* mark as assembler directive */
+			askw_flag = true;
+#ifdef DEBUG_PRSC
+			debugf("found assembler directive '%.16s'.", ppe->cur);
+#endif
+			prseng_next_char(ppe);
+		}
+
+		prseng_get_idtf(ppe, idtf, sizeof(idtf), PRS_C_IDTF_STR);
+#ifdef DEBUG_PRSC
+		debugf("found identifier : '%.16s'", idtf);
+#endif
+
+		if (askw_flag == true) {
+		/* check if the identifier is a keyword */
+			if (strncmp(idtf, RKW_AS_TSEG, strlen(idtf) + 1) == 0) {
+				/* start of text segment */
+				segtype = SEG_TYPE_TEXT;
+#ifdef DEBUG_PRSC
+				debugf("entered text section.");
+#endif
+			}
+
+			if (strncmp(idtf, RKW_AS_DSEG, strlen(idtf) + 1) == 0) {
+				/* start of data segment */
+				segtype = SEG_TYPE_DATA;
+#ifdef DEBUG_PRSC
+				debugf("entered data section.");
+#endif
+			}
+
+			askw_flag = false;
+		} else {
+			if ((segtype == SEG_TYPE_TEXT) &&
+								(prseng_test_char(ppe, ':') == true)) {
+#ifdef DEBUG_PRSC
+				debugf("possible function declaration of '%s'", idtf);
+#endif
+				/* => function call */
+				if (pcmn->func_decl != NULL) {
+					if (pcmn->func_decl(pcmn->data, idtf, ppe) == false) {
+#ifdef DEBUG_PRSC
+						debugf("prs_asm_file() END");
+#endif
+						return(false);
+					}
+				}
+			}
+		}
+
+		/* skip until end of line */
+		prs_c_skip_to_char(ppe, '\n');
+	}
+
+#ifdef DEBUG_PRSC
+	debugf("prs_asm_file() END");
+#endif
+
+	return(true);
+}
+
+
+/********************************
+ * C language parsing functions *
+ **********************************************************************/
 
 /*********************
  prs_c_skip_to_char()
@@ -109,7 +234,7 @@ size_t nb_c_type_keywords = sizeof(c_type_keywords) / sizeof(char *);
 	skip until a given char
 
  IN
- 
+
  OUT
 ************************************************************************/
 
@@ -135,7 +260,7 @@ bool prs_c_skip_to_char(prseng_t *ppe, char c) {
 	}
 
 	if (prseng_test_char(ppe, c) == true) {
-		/* skip newline */
+		/* skip given character */
 		if (prseng_next_char(ppe) == false) {
 			return(false);
 		}
@@ -519,7 +644,6 @@ bool prs_c_file(prs_cmn_t *pcmn, FILE *fp) {
 							return(false);
 						}
 					}
-
 				} else {
 #ifdef DEBUG_PRSC
 					debugf("possible function call of '%s'", idtf);
@@ -530,7 +654,6 @@ bool prs_c_file(prs_cmn_t *pcmn, FILE *fp) {
 							return(false);
 						}
 					}
-
 				}
 				idtf_flag = false;
 			}
@@ -668,4 +791,3 @@ bool prs_c_file(prs_cmn_t *pcmn, FILE *fp) {
 
 	return(true);
 }
-

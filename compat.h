@@ -37,18 +37,11 @@
 #ifndef _PMK_COMPAT_H_
 #define _PMK_COMPAT_H_
 
-#include "compat/config.h"
-
-#include "compat/pmk_ctype.h"
-#include "compat/pmk_libgen.h"
-#include "compat/pmk_stdbool.h"
 #include "compat/pmk_string.h"
-#include "compat/pmk_sys_types.h"
-#include "compat/pmk_unistd.h"
-
 
 bool	snprintf_b(char *, size_t, const char *, ...);
 bool	strlcat_b(char *, const char *, size_t);
 bool	strlcpy_b(char *, const char *, size_t);
 
 #endif /* _PMK_COMPAT_H_ */
+

@@ -58,6 +58,10 @@
 #define RKW_PP_PRGM	"pragma"
 #define RKW_PP_UDEF	"undef"
 
+/* assembler directives */
+#define RKW_AS_TSEG	"text"
+#define RKW_AS_DSEG	"data"
+
 /* C keywords */
 #define RKW_C_BOOL	"_Bool"
 #define RKW_C_CMPLX	"_Complex"
@@ -100,6 +104,12 @@
 
 #define MAX_IDTF_LEN	64	/* maximum length of an identifier *//* XXX enough ??? */
 
+enum {
+	SEG_TYPE_UNKNW = 0,
+	SEG_TYPE_TEXT,
+	SEG_TYPE_DATA
+};
+
 #define PRS_C_IDTF_STR		"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_"
 #define PRS_C_IDTF_FNAME	PRS_C_IDTF_STR "./"
 
@@ -124,6 +134,7 @@ typedef struct {
  function prototypes
 ***********************************************************************/
 
+bool	 prs_asm_file(prs_cmn_t *, FILE *);
 bool	 prs_c_skip_to_char(prseng_t *, char);
 bool	 prs_c_line_skip(prseng_t *);
 bool	 prs_c_comment_skip(prseng_t *);
