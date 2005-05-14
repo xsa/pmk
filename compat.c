@@ -39,6 +39,14 @@
 
 #include "compat.h"
 
+#include "compat/pmk_ctype.h"
+#include "compat/pmk_libgen.h"
+#include "compat/pmk_stdbool.h"
+#include "compat/pmk_string.h"
+#include "compat/pmk_sys_types.h"
+#include "compat/pmk_unistd.h"
+
+
 /********************************
  *	boolean string functions	*
  ***********************************************************************/

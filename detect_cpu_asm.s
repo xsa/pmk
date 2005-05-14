@@ -36,7 +36,6 @@
 
 #include "cpu_arch_def.h"
 
-
 #ifdef ARCH_X86_32
 
 .text

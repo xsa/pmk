@@ -1,6 +1,9 @@
 14 May 2005 mipsator
  * added hash_keys_sorted() which returns a sorted list of keys.
  * update of style for function header comments. 
+ * added parse_asm_file() to parse assembly files.
+ * improvements to pmkscan.
+ * misc change in compat module.
 
 07 May 2005 mipsator
  * imported new compatibility layer.
