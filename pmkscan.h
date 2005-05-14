@@ -121,11 +121,10 @@ enum {
 						"VERSION=\t@VERSION@\n"
 
 #define MKF_HEADER_DIR	"PREFIX=\t@PREFIX@\n" \
-						"BINDIR=\t$(PREFIX)/bin\n" \
-						"SBINDIR=\t$(PREFIX)/sbin\n" \
-						"MANDIR=\t$(PREFIX)/man\n" \
-						"DATADIR=\t$(PREFIX)/share/$(PACKAGE)\n"
-#define MKF_MANX_DIR	"MAN%dDIR=\t@MAN%dDIR\n"
+						"BINDIR=\t@BINDIR@\n" \
+						"SBINDIR=\t@SBINDIR@\n" \
+						"DATADIR=\t@DATADIR@\n"
+#define MKF_MANX_DIR	"MAN%dDIR=\t@MAN%dDIR@\n"
 
 #define MKF_LINE_JUMP	"\n"
 #define MKF_TWICE_JUMP	"\n\n"
