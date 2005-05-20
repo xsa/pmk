@@ -51,26 +51,34 @@
 #include "compat/pmk_string.h"
 #include "pathtools.h"
 
-/*
+
+/*************
+ * chkpath() *
+ ***********************************************************************
+ DESCR
 	check a path and resolve "./", "../" and extra '/' characters
 
+ IN
 	path : path to check
 	buffer : MAXPATHLEN sized buffer that will contain resolved path
 
+ OUT
 	returns bool if check is well done
-*/
+ ***********************************************************************/
 
 bool chkpath(char *path, char *buffer) {
 	bool	 bexit = false,
-		 dot = false,
-		 dotdot = false,
-		 sep = false;
+			 dot = false,
+			 dotdot = false,
+			 sep = false;
 	char	*pstr,
-		*pbuf;
-	int	 s = MAXPATHLEN;
+			*pbuf;
+	int		 s = MAXPATHLEN;
 
 	pstr = path;
 	pbuf = buffer;
+	memset(buffer, '\0', s);
+
 
 	while ((bexit == false) && (s > 0)) {
 		switch (*pstr) {
@@ -113,9 +121,11 @@ bool chkpath(char *path, char *buffer) {
 							s++;
 						}
 
-						/* okay found, now set pointer to next char */
-						pbuf++;
-						s--;
+						/* now set pointer to next char if on a separator */
+						if (*pbuf == CHAR_SEP) {
+							pbuf++;
+							s--;
+						}
 
 						dotdot = false;
 					}
@@ -129,7 +139,7 @@ bool chkpath(char *path, char *buffer) {
 						pbuf++;
 						s--;
 					}
-					/* if previous har was a separator the drop it */
+					/* if previous char was a separator the drop it */
 				}
 				break;
 
@@ -182,18 +192,26 @@ bool chkpath(char *path, char *buffer) {
 	}
 }
 
-/*
+
+/*************
+ * relpath() *
+ ***********************************************************************
+ DESCR
 	provide a relative path
 
+ IN
 	from : source path
 	to : destination path
 	buffer : MAXPATHLEN sized buffer that will contain relative path
-*/
+
+ OUT
+	boolean
+ ***********************************************************************/
 
 bool relpath(char *from, char *to, char *buffer) {
 	bool	bexit = false;
 	char	from_buf[MAXPATHLEN],
-		to_buf[MAXPATHLEN];
+			to_buf[MAXPATHLEN];
 
 	/* check 'from' path */
 	if (chkpath(from, from_buf) != true) {
@@ -253,15 +271,21 @@ bool relpath(char *from, char *to, char *buffer) {
 	return(true);
 }
 
-/*
+
+/*************
+ * abspath() *
+ ***********************************************************************
+ DESCR
 	create a "valid" absolute path
 
+ IN
 	base : absolute base path
 	rel : relative path from the base
 	buffer : MAXPATHLEN buffer that will contain resulting absolute path
 
+ OUT
 	returns true on success
-*/
+ ***********************************************************************/
 
 bool abspath(char *base, char *rel, char *buffer) {
 	char	tmp_buf[MAXPATHLEN]; /* XXX should be greater ? */
@@ -279,16 +303,25 @@ bool abspath(char *base, char *rel, char *buffer) {
 	return(chkpath(tmp_buf, buffer));
 }
 
-/*
+
+/**************
+ * uabspath() *
+ ***********************************************************************
+ DESCR
 	provide an absolute path from a path with unknown type.
 
+ IN
 	base : absolute base path
 	upath : path with unknown type (relative or absolute)
 	buffer : MAXPATHLEN sized buffer
 
-	NOTE : if upath is absolute then buffer is filled with
+ OUT
+	boolean
+
+ NOTE
+	if upath is absolute then buffer is filled with
 	upath else the buffer will contain the computed path.
-*/
+ ***********************************************************************/
 
 bool uabspath(char *base, char *upath, char *buffer) {
 	if (*upath == CHAR_SEP) {
@@ -300,20 +333,26 @@ bool uabspath(char *base, char *upath, char *buffer) {
 	}
 }
 
-/*
+
+/**************
+ * makepath() *
+ ***********************************************************************
+ DESCR
 	build path if it does not exists
 
+ IN
 	path : path to build
 	mode : permissions used to create new directories
 
+ OUT
 	return : boolean
-*/
+ ***********************************************************************/
 
 bool makepath(char *path, mode_t mode) {
 	bool		 bexit = false;
 	char		 save,
-			*pstr,
-			*copy;
+				*pstr,
+				*copy;
 	struct stat	 sb;
 
 	if (*path != CHAR_SEP) {

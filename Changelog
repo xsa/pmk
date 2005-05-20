@@ -1,3 +1,7 @@
+20 May 2005 mipsator
+ * fixed a bug in chkpath() when the parser come to the beginning of
+   the string and that it does not start with a separator.
+
 14 May 2005 mipsator
  * added hash_keys_sorted() which returns a sorted list of keys.
  * update of style for function header comments. 
