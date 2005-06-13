@@ -39,9 +39,19 @@
 
 #include "compat/pmk_stdbool.h"
 
+
+/*************
+ * constants *
+ ************************************************************************/
+
 #ifndef DYNARY_AUTO_GROW
 #define	DYNARY_AUTO_GROW	4
 #endif
+
+
+/**********************************
+ * type and structure definitions *
+ ***********************************************************************/
 
 typedef struct {
 	int	  nbcell,
@@ -50,6 +60,10 @@ typedef struct {
 		**pary;
 } dynary;
 
+
+/************************
+ * functions prototypes *
+ ***********************************************************************/
 
 dynary	*da_init(void);
 dynary	*da_init_adv(void (*)(void *));
@@ -61,5 +75,7 @@ void	*da_pop(dynary *);
 void	*da_shift(dynary *);
 void	*da_idx(dynary *, int);
 void	 da_destroy(dynary *);
+bool	 da_find(dynary *, char *);
 
 #endif /* _PMK_DYNARRAY_H_ */
+

@@ -1,3 +1,6 @@
+13 Jun 2005 mipsator
+ * add da_find() to search a string through a dynary.
+
 20 May 2005 mipsator
  * fixed a bug in chkpath() when the parser come to the beginning of
    the string and that it does not start with a separator.

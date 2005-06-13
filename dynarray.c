@@ -55,24 +55,18 @@
 #include "dynarray.h"
 
 
-/*
-	Initialise dynamic array
-
-	returns pointer of dynamic array
-*/
-
-dynary *da_init(void) {
-	/* use standard free function */
-	return(da_init_adv(NULL));
-}
-
-/*
+/*****************
+ * da_init_adv() *
+ ***********************************************************************
+ DESCR
 	Initialise dynamic array and provide specific free function
 
+ IN
 	freefunc : free function
 
+ OUT
 	returns pointer of dynamic array
-*/
+ ***********************************************************************/
 
 dynary *da_init_adv(void (*freefunc)(void *)) {
 	dynary	*ptr = NULL;
@@ -92,14 +86,65 @@ dynary *da_init_adv(void (*freefunc)(void *)) {
 	return(ptr);
 }
 
-/*
+
+/*************
+ * da_init() *
+ ***********************************************************************
+ DESCR
+	Initialise dynamic array
+
+ IN
+	NONE
+
+ OUT
+	returns pointer of dynamic array
+ ***********************************************************************/
+
+dynary *da_init(void) {
+	/* use standard free function */
+	return(da_init_adv(NULL));
+}
+
+
+/****************
+ * da_destroy() *
+ ***********************************************************************
+ DESCR
+	destroy dynamic array
+
+ IN
+	da : dynamic array to destroy
+
+ OUT
+	NONE
+ ***********************************************************************/
+
+void da_destroy(dynary *da) {
+	int	i;
+
+	if (da != NULL) {
+		for (i = 0 ; i < da->nextidx ; i++) {
+			da->freeobj(da->pary[i]);
+		}
+		free(da->pary);
+		free(da);
+	}
+}
+
+
+/***************
+ * da_resize() *
+ ***********************************************************************
+ DESCR
 	Resize the array to the given size
 
+ IN
 	da : array to resize
 	nsize : new size
 
+ OUT
 	return : boolean
-*/
+ ***********************************************************************/
 
 bool da_resize(dynary *da, size_t nsize) {
 	void	**tary;
@@ -117,40 +162,62 @@ bool da_resize(dynary *da, size_t nsize) {
 	}
 }
 
-/*
+
+/*************
+ * da_size() *
+ ***********************************************************************
+ DESCR
 	Get the size of the array
 
-	returns number of cell of the array
-*/
+ IN
+	NONE
 
-size_t	da_size(dynary *da) {
+ OUT
+	returns number of cell of the array
+ ***********************************************************************/
+
+size_t da_size(dynary *da) {
 	if (da == NULL)
 		abort(); /* shouldn't happen */
 
 	return((size_t) da->nbcell);
 }
 
-/*
+
+/**************
+ * da_usize() *
+ ***********************************************************************
+ DESCR
 	Get the 'used' size of the array
 
-	returns the number of 'used' cells
-*/
+ IN
+	NONE
 
-size_t	da_usize(dynary *da) {
+ OUT
+	returns the number of 'used' cells
+ ***********************************************************************/
+
+size_t da_usize(dynary *da) {
 	if (da == NULL)
 		abort(); /* shouldn't happen */
 
 	return((size_t) da->nextidx);
 }
 
-/*
+
+/*************
+ * da_push() *
+ ***********************************************************************
+ DESCR
 	Add a new value at the end of the array
 
+ IN
 	da : dynamic array
 	pval : string to append
 
+ OUT
 	return : boolean
-*/
+ ***********************************************************************/
 
 bool da_push(dynary *da, void *pval) {
 	size_t	gsize;
@@ -175,13 +242,19 @@ bool da_push(dynary *da, void *pval) {
 	return(true);
 }
 
-/*
+
+/************
+ * da_pop() *
+ ***********************************************************************
+ DESCR
 	Pop the last value of the array
 	
+ IN
 	da : dynamic array
 
+ OUT
 	return : the last element or NULL
-*/
+ ***********************************************************************/
 
 void *da_pop(dynary *da) {
 	void	 *p;
@@ -212,13 +285,19 @@ void *da_pop(dynary *da) {
 	return(p);
 }
 
-/*
+
+/**************
+ * da_shift() *
+ ***********************************************************************
+ DESCR
 	Pop the first value and shift the array
 
+ IN
 	da : dynamic array
 
+ OUT
 	return : the first cell
-*/
+ ***********************************************************************/
 
 void *da_shift(dynary *da) {
 	void	*p;
@@ -257,14 +336,20 @@ void *da_shift(dynary *da) {
 	return(p);
 }
 
-/*
+
+/************
+ * da_idx() *
+ ***********************************************************************
+ DESCR
 	Get a value
 
+ IN
 	da : dynamic array
 	idx : index of the wanted value
 
+ OUT
 	returns value or NULL
-*/
+ ***********************************************************************/
 
 void *da_idx(dynary *da, int idx) {
 	if (da == NULL)
@@ -277,20 +362,41 @@ void *da_idx(dynary *da, int idx) {
 	return(da->pary[idx]);
 }
 
-/*
-	destroy dynamic array
 
-	da : dynamic array to destroy
-*/
+/*************
+ * da_find() *
+ ***********************************************************************
+ DESCR
+	try to find an element in the given dynary
 
-void da_destroy(dynary *da) {
-	int	i;
+ IN
+ 	da :	dynary structure
+ 	str :	string to find
 
-	if (da != NULL) {
-		for (i = 0 ; i < da->nextidx ; i++) {
-			da->freeobj(da->pary[i]);
+ OUT
+ 	boolean relative to the result of the search
+
+ NOTE : this only work with dynaries intialised with da_init()
+ ***********************************************************************/
+
+bool da_find(dynary *da, char *str) {
+	bool		 rslt = false;
+	size_t		 i,
+				 s;
+
+	/* compute size of string including the delimiter */
+	s = strlen(str) + 1;
+
+	/* for each item of the dynary */
+	for (i = 0 ; i < da_usize(da) ; i++) {
+		/* check if equal to the string */
+		if (strncmp(str, da_idx(da, i), s) == 0) {
+			/* and set the flag if true */
+			rslt = true;
+			break;
 		}
-		free(da->pary);
-		free(da);
 	}
+
+	return(rslt);
 }
+
