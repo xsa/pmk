@@ -56,9 +56,8 @@ all: comp cpuid dynary gencomp hash mkvar parser path pkgconfig
 	rm tmp_asm.s
 
 config:
-	@if [ ! -f ../compat/compat.h ]; then \
-		echo "Not configured, run \
-		'cd ../ && make clean config' first."; \
+	@if [ ! -f ../compat/config.h ]; then \
+		echo "Not configured, run pmkcfg.sh first."; \
 		exit 1; \
 	fi
 
