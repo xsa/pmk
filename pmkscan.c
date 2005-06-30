@@ -105,12 +105,73 @@ scn_ext_t	 file_ext[] = {
 };
 size_t	 nb_file_ext = sizeof(file_ext) / sizeof(scn_ext_t);
 
+
 prskw	kw_pmkscan[] = {
-		{"INCLUDES",	PSC_TOK_INCL, PRS_KW_CELL,	NULL},
-		{"FUNCTIONS",	PSC_TOK_FUNC, PRS_KW_CELL,	NULL}
+	{"INCLUDES",	PSC_TOK_INCL,	PRS_KW_CELL,	PRS_TOK_NULL,	NULL},
+	{"FUNCTIONS",	PSC_TOK_FUNC,	PRS_KW_CELL,	PRS_TOK_NULL,	NULL}
+};
+size_t	nbkwps = sizeof(kw_pmkscan) / sizeof(prskw);
+
+
+/* pmkscan script parser options ***************************************/
+
+/* common required options */
+kw_t	req_dir[] = {
+		{KW_OPT_DIR,	PO_STRING}
 };
 
-size_t	nbkwps = sizeof(kw_pmkscan) / sizeof(prskw);
+/* GEN_PMKFILE options */
+kw_t	opt_genpmk[] = {
+		{KW_OPT_DSC,	PO_LIST},
+		{KW_OPT_REC,	PO_BOOL},
+		{KW_OPT_UNI,	PO_BOOL}
+};
+
+kwopt_t	kw_genpmk = {
+	req_dir,
+	sizeof(req_dir) / sizeof(kw_t),
+	opt_genpmk,
+	sizeof(opt_genpmk) / sizeof(kw_t)
+};
+
+/* GEN_MAKEFILE options */
+kw_t	opt_genmkf[] = {
+		{KW_OPT_DSC,	PO_LIST},
+		{KW_OPT_NAM,	PO_STRING},
+		{KW_OPT_REC,	PO_BOOL},
+		{KW_OPT_UNI,	PO_BOOL}
+};
+
+kwopt_t	kw_genmkf = {
+	req_dir,
+	sizeof(req_dir) / sizeof(kw_t),
+	opt_genmkf,
+	sizeof(opt_genmkf) / sizeof(kw_t)
+};
+
+/* GEN_ZONE options */
+kw_t	opt_genzone[] = {
+		{KW_OPT_DSC,	PO_LIST},
+		{KW_OPT_MKF,	PO_BOOL},
+		{KW_OPT_NAM,	PO_STRING},
+		{KW_OPT_PMK,	PO_BOOL},
+		{KW_OPT_REC,	PO_BOOL},
+		{KW_OPT_UNI,	PO_BOOL}
+};
+
+kwopt_t	kw_genzone = {
+	req_dir,
+	sizeof(req_dir) / sizeof(kw_t),
+	opt_genzone,
+	sizeof(opt_genzone) / sizeof(kw_t)
+};
+
+prskw	kw_scanfile[] = {
+	{"GEN_PMKFILE",		PSC_TOK_PMKF,	PRS_KW_CELL,	PRS_TOK_NULL,	&kw_genpmk},
+	{"GEN_MAKEFILE",	PSC_TOK_MAKF,	PRS_KW_CELL,	PRS_TOK_NULL,	&kw_genmkf},
+	{"GEN_ZONE",		PSC_TOK_ZONE,	PRS_KW_CELL,	PRS_TOK_NULL,	&kw_genzone}
+};
+size_t	nbkwsf = sizeof(kw_scanfile) / sizeof(prskw);
 
 extern char	*optarg;
 extern int	 optind;
@@ -316,80 +377,88 @@ void scan_node_destroy(scn_node_t *pnode) {
 
 
 /********************
- * scan_glob_init() *
+ * scan_zone_init() *
  ***********************************************************************
  DESCR
-	initialize global scan structure
+	initialize scan zone structure
 
  IN
-	NONE
+	nodes :	global nodes table
 
  OUT
-	global scan structure
+	scan zone structure
  ***********************************************************************/
 
-scn_glob_t *scan_glob_init(void) {
-	scn_glob_t *pglob;
+scn_zone_t *scan_zone_init(htable *nodes) {
+	scn_zone_t	*pzone;
+	size_t			i;
 
-	pglob = (scn_glob_t *) malloc(sizeof(scn_glob_t));
-	if (pglob != NULL) {
-		pglob->nodes = hash_init_adv(512, NULL,
-			(void (*)(void *))scan_node_destroy, NULL); /* XXX can do better :) */
-		pglob->objects = hash_init(256); /* XXX can do better :) */
-		pglob->targets = hash_init(256); /* XXX can do better :) */
-		pglob->checks = hash_init(128); /* XXX can do better :) */
+	pzone = (scn_zone_t *) malloc(sizeof(scn_zone_t));
+	if (pzone != NULL) {
+		/* set global nodes table */
+		pzone->nodes = nodes;
 
-		pglob->manpgs = da_init();
+		/* init boolean flags */
+		pzone->recursive = false;
+		pzone->unique = false;
+		pzone->gen_pmk = false;
+		pzone->gen_mkf = false;
 
-		pglob->bs.found_src = false;
-		pglob->bs.found_asm = false;
-		pglob->bs.found_c = false;
-		pglob->bs.found_cxx = false;
-		pglob->bs.found_lex = false;
-		pglob->bs.found_yacc = false;
-		pglob->bs.found_manpg = false;
-		pglob->bs.found_data = false;
+		/* discard list */
+		pzone->discard = NULL;
+
+		/* init file type flags */
+		for (i = 0 ; i < sizeof(pzone->found) ; i++) {
+			pzone->found[i] = false;
+		}
+
+		/* init source flag */
+		pzone->found_src = false;
+
+		/* init zone tables */
+		pzone->objects = hash_init(256); /* XXX can do better :) */
+		pzone->targets = hash_init(256); /* XXX can do better :) */
+		pzone->checks = hash_init(128); /* XXX can do better :) */
+
+		/* init man pages dynary */
+		pzone->manpgs = da_init();
 	}
 
-	return(pglob);
+	return(pzone);
 }
 
 
 /***********************
- * scan_glob_destroy() *
+ * scan_zone_destroy() *
  ***********************************************************************
  DESCR
-	destroy global scan structure
+	destroy scan zone structure
 
  IN
-	pglob : global scan structure
+	pzone : scan zone structure
 
  OUT
 	NONE
  ***********************************************************************/
 
-void scan_glob_destroy(scn_glob_t *pglob) {
-	if (pglob->nodes != NULL) {
-		hash_destroy(pglob->nodes);
+void scan_zone_destroy(scn_zone_t *pzone) {
+	if (pzone->objects != NULL) {
+		hash_destroy(pzone->objects);
 	}
 
-	if (pglob->objects != NULL) {
-		hash_destroy(pglob->objects);
+	if (pzone->targets != NULL) {
+		hash_destroy(pzone->targets);
 	}
 
-	if (pglob->targets != NULL) {
-		hash_destroy(pglob->targets);
+	if (pzone->checks != NULL) {
+		hash_destroy(pzone->checks);
 	}
 
-	if (pglob->checks != NULL) {
-		hash_destroy(pglob->checks);
+	if (pzone->manpgs != NULL) {
+		da_destroy(pzone->manpgs);
 	}
 
-	if (pglob->manpgs != NULL) {
-		da_destroy(pglob->manpgs);
-	}
-
-	free(pglob);
+	free(pzone);
 }
 
 
@@ -548,14 +617,14 @@ bool idtf_check(char *idtf, htable *ht_fam, htable *phtgen, htable *pht_md) {
 	build pmkfile using gathered data
 
  IN
-	psg :	global scan structure
+	psz :	scanning zone data
 	pht :	check component hash table
 	psd :	parsing data structure
  OUT
 	boolean
  ***********************************************************************/
 
-bool gen_checks(scn_glob_t *psg, scandata *psd) {
+bool gen_checks(scn_zone_t *psz, scandata *psd) {
 	char			*pstr;
 	hkeys			*phk;
 	scn_node_t		*pn;
@@ -569,9 +638,9 @@ bool gen_checks(scn_glob_t *psg, scandata *psd) {
 	}
 
 	/* for each node */
-	phk = hash_keys(psg->nodes);
+	phk = hash_keys(psz->nodes);
 	for(i = 0 ; i < phk->nkey ; i++) {
-		pn = hash_get(psg->nodes, phk->keys[i]); /* no check needed */
+		pn = hash_get(psz->nodes, phk->keys[i]); /* no check needed */
 
 		/* set current language */
 		switch(pn->type) {
@@ -590,13 +659,13 @@ bool gen_checks(scn_glob_t *psg, scandata *psd) {
 		/* process system includes */
 		for (j = 0 ; j < da_usize(pn->system_inc) ; j++) {
 			pstr = (char *) da_idx(pn->system_inc, j);
-			idtf_check(pstr, psd->includes, psg->checks, pht_misc);
+			idtf_check(pstr, psd->includes, psz->checks, pht_misc);
 		}
 
 		/* process function calls */
 		for (j = 0 ; j < da_usize(pn->func_calls) ; j++) {
 			pstr = (char *) da_idx(pn->func_calls, j);
-			idtf_check(pstr, psd->functions, psg->checks, pht_misc);
+			idtf_check(pstr, psd->functions, psz->checks, pht_misc);
 		}
 	}
 
@@ -617,20 +686,20 @@ bool gen_checks(scn_glob_t *psg, scandata *psd) {
 
  IN
 	fname :	output file name
-	psg :	global scan structure
+	psz :	scanning zone data
 	psd :	parsing data structure
  OUT
 	boolean
  ***********************************************************************/
 
 /* XXX TODO : add comments, add default pmkfile stuff, manage when no checks exists */
-bool scan_build_pmk(char *fname, scn_glob_t *psg, scandata *psd) {
+bool scan_build_pmk(char *fname, scn_zone_t *psz, scandata *psd) {
 	FILE			*fp;
 	char			*value;
 	hkeys			*phk;
 	unsigned int	 i;
 
-	phk = hash_keys(psg->checks);
+	phk = hash_keys(psz->checks);
 	if (phk != NULL) {
 		fp = fopen(fname, "w");
 		if (fp == NULL) {
@@ -642,7 +711,7 @@ bool scan_build_pmk(char *fname, scn_glob_t *psg, scandata *psd) {
 		fprintf(fp, "# pmkfile generated by pmkscan\n\n");
 
 		for(i = 0 ; i < phk->nkey ; i++) {
-			value = hash_get(psg->checks, phk->keys[i]);
+			value = hash_get(psz->checks, phk->keys[i]);
 			fprintf(fp, "%s\n", value);
 		}
 
@@ -821,8 +890,8 @@ bool recurse_obj_deps(htable *nodes, dynary *deps, char *nodename) {
 	/* get node structure */
 	pnode = hash_get(nodes, nodename); /* should not fail */
 	if (pnode == NULL) {
-		debugf("ouargl2 '%s'", nodename);
-		return(true); /* XXX */
+		/*debugf("ouargl2 '%s'", nodename); |+ XXX +|*/
+		return(true);
 	}
 
 	/* get directory */
@@ -850,13 +919,13 @@ bool recurse_obj_deps(htable *nodes, dynary *deps, char *nodename) {
 	generate objects from the nodes
 
  IN
-	psg : global scanning data
+	psz :	scanning zone data
 
  OUT
 	boolean
  ***********************************************************************/
 
-bool gen_objects(scn_glob_t *psg) {
+bool gen_objects(scn_zone_t *psz) {
 	char			 buf[MAXPATHLEN], /* XXX filename length */
 					*pstr;
 	hkeys			*phk;
@@ -865,7 +934,7 @@ bool gen_objects(scn_glob_t *psg) {
 	unsigned int	 i,
 					 j;
 
-	phk = hash_keys(psg->nodes);
+	phk = hash_keys(psz->nodes);
 	if (phk == NULL) {
 		/* no objects to process */
 		printf("No objects to generate.\n");
@@ -873,7 +942,7 @@ bool gen_objects(scn_glob_t *psg) {
 	}
 
 	for(i = 0 ; i < phk->nkey ; i++) {
-		pnode = hash_get(psg->nodes, phk->keys[i]); /* XXX check needed ??? (think no) */
+		pnode = hash_get(psz->nodes, phk->keys[i]); /* XXX check needed ??? (think no) */
 #ifdef PMKSCAN_DEBUG
 		debugf("score of '%s' = %d", phk->keys[i], pnode->score);
 #endif
@@ -886,21 +955,21 @@ bool gen_objects(scn_glob_t *psg) {
 			strlcat(buf, OBJ_SUFFIX, sizeof(buf));
 
 			/* add object reference */
-			hash_update_dup(psg->objects, buf, pnode->fname); /* XXX check */
+			hash_update_dup(psz->objects, buf, pnode->fname); /* XXX check */
 
-			/* XXX */
+			/* set object name */
 			pnode->obj_name = strdup(buf);
 
 			/* generate object's source dependencies */
-			recurse_obj_deps(psg->nodes, pnode->src_deps, pnode->fname);
+			recurse_obj_deps(psz->nodes, pnode->src_deps, pnode->fname);
 
 			/* for each local include */
 			for (j = 0 ; j < da_usize(pnode->local_inc) ; j++) {
 				pstr = da_idx(pnode->local_inc, j);
-				pn = hash_get(psg->nodes, pstr);
+				pn = hash_get(psz->nodes, pstr);
 
 				if (pn == NULL) {
-					debugf("ouargl '%s'", pstr);
+					/*debugf("ouargl '%s'", pstr); |+ XXX +|*/
 					continue;
 				}
 
@@ -922,7 +991,7 @@ bool gen_objects(scn_glob_t *psg) {
 			if (pnode->type == FILE_TYPE_ASM) {
 				/* try to find optionnal header file for assembly functions */
 				for(j = 0 ; j < phk->nkey ; j++) {
-					pn = hash_get(psg->nodes, phk->keys[j]);
+					pn = hash_get(psz->nodes, phk->keys[j]);
 
 					/* check for common function declarators */
 					if (find_deps(pnode->func_decls, pn->func_decls) == true) {
@@ -954,7 +1023,7 @@ bool gen_objects(scn_glob_t *psg) {
 	generate targets from the objects
 
  IN
-	psg :	global scanning data
+	psz :	scanning zone data
 	deps :	dynary structure where to store object dependencies
 	name :	node name to process
 
@@ -962,7 +1031,7 @@ bool gen_objects(scn_glob_t *psg) {
 	boolean
  ***********************************************************************/
 
-bool recurse_src_deps(scn_glob_t *psg, dynary *deps, char *name) {
+bool recurse_src_deps(scn_zone_t *psz, dynary *deps, char *name) {
 	char		*src,
 				*odep;
 	scn_node_t	*pnode,
@@ -971,7 +1040,7 @@ bool recurse_src_deps(scn_glob_t *psg, dynary *deps, char *name) {
 				 j;
 
 	/* get node structure */
-	pnode = hash_get(psg->nodes, name);
+	pnode = hash_get(psz->nodes, name);
 #ifdef PMKSCAN_DEBUG
 	debugf("recurse_src_deps() : node '%s' START", pnode->fname);
 #endif
@@ -980,10 +1049,10 @@ bool recurse_src_deps(scn_glob_t *psg, dynary *deps, char *name) {
 	for (i = 0 ; i < da_usize(pnode->src_deps) ; i++) {
 		/* get the node structure */
 		src = da_idx(pnode->src_deps, i);
-		pn = hash_get(psg->nodes, src);
+		pn = hash_get(psz->nodes, src);
 
 		if (pn == NULL) {
-			debugf("ouargl3 '%s'", src);
+			/*debugf("ouargl3 '%s'", src); |+ XXX +|*/
 			continue; /* XXX */
 		}
 
@@ -1012,11 +1081,11 @@ bool recurse_src_deps(scn_glob_t *psg, dynary *deps, char *name) {
 #endif
 
 				/* recurse dependencies of this object */
-				src = hash_get(psg->objects, odep);
+				src = hash_get(psz->objects, odep);
 #ifdef PMKSCAN_DEBUG
 				debugf("recurse_src_deps() : node '%s' : => '%s'", pnode->fname, src);
 #endif
-				if (recurse_src_deps(psg, deps, src) == false) {
+				if (recurse_src_deps(psz, deps, src) == false) {
 					/* recurse failed */
 					return(false);
 				}
@@ -1038,19 +1107,19 @@ bool recurse_src_deps(scn_glob_t *psg, dynary *deps, char *name) {
 	generate targets from the objects
 
  IN
-	psg :	global scanning data
+	psz :	scanning zone data
 
  OUT
 	boolean
  ***********************************************************************/
 
-bool gen_targets(scn_glob_t *psg) {
+bool gen_targets(scn_zone_t *psz) {
 	char			*nodename;
 	hkeys			*phk;
 	scn_node_t		*pnode;
 	unsigned int	 i;
 
-	phk = hash_keys(psg->objects);
+	phk = hash_keys(psz->objects);
 	if (phk == NULL) {
 		/* no objects, skip */
 		printf("No targets to generate.\n");
@@ -1060,13 +1129,13 @@ bool gen_targets(scn_glob_t *psg) {
 	/* for each object */
 	for(i = 0 ; i < phk->nkey ; i++) {
 		/* get it's node structure */
-		nodename = hash_get(psg->objects, phk->keys[i]);
-		pnode = hash_get(psg->nodes, nodename); /* XXX check needed ??? (think no) */
+		nodename = hash_get(psz->objects, phk->keys[i]);
+		pnode = hash_get(psz->nodes, nodename); /* XXX check needed ??? (think no) */
 
 		/* if main procedure has been found then it's a target */
 		if (pnode->mainproc == true) {
 			/* adding in the target list */
-			if (hash_update_dup(psg->targets, pnode->prefix,
+			if (hash_update_dup(psz->targets, pnode->prefix,
 										pnode->fname) == HASH_ADD_FAIL) {
 				return(false);
 			}
@@ -1082,7 +1151,7 @@ bool gen_targets(scn_glob_t *psg) {
 			debugf("START recurse_src_deps() for node '%s'", pnode->fname);
 #endif
 			/* recurse source deps to find object deps */
-			if (recurse_src_deps(psg, pnode->obj_deps, pnode->fname) == false) {
+			if (recurse_src_deps(psz, pnode->obj_deps, pnode->fname) == false) {
 				/* failed */
 				return(false);
 			}
@@ -1171,13 +1240,13 @@ size_t fprintf_width(size_t left, size_t width, size_t offset, FILE *fp, char *s
 
  IN
 	fp :	file pointer
-	psg :	global scanning data
+	psz :	scanning zone data
 
  OUT
 	NONE
  ***********************************************************************/
 
-void mkf_output_header(FILE *fp, scn_glob_t *psg) {
+void mkf_output_header(FILE *fp, scn_zone_t *psz) {
 	char			 buf[256];
 	time_t			 now;
 	unsigned int	 i;
@@ -1190,41 +1259,41 @@ void mkf_output_header(FILE *fp, scn_glob_t *psg) {
 	fprintf(fp, MKF_HEADER_GEN, buf);
 
 	/* preprocessor */
-	if (psg->bs.found_asm == true) {
+	if (psz->found[FILE_TYPE_ASM] == true) {
 		fprintf(fp, MKF_HEADER_CPP);
 	}
 
 	fprintf(fp, "\n# language specific\n");
 	/* assembly stuff */
-	if (psg->bs.found_asm == true) {
+	if (psz->found[FILE_TYPE_ASM] == true) {
 		fprintf(fp, MKF_HEADER_ASM);
 	}
 	/* C stuff */
-	if (psg->bs.found_c == true) {
+	if (psz->found[FILE_TYPE_C] == true) {
 		fprintf(fp, MKF_HEADER_C);
 	}
 	/* C++ stuff */
-	if (psg->bs.found_cxx == true) {
+	if (psz->found[FILE_TYPE_CXX] == true) {
 		fprintf(fp, MKF_HEADER_CXX);
 	}
 	/* lex stuff */
-	if (psg->bs.found_lex == true) {
+	if (psz->found[FILE_TYPE_LEX] == true) {
 		fprintf(fp, MKF_HEADER_LEX);
 	}
 	/* yacc stuff */
-	if (psg->bs.found_yacc == true) {
+	if (psz->found[FILE_TYPE_YACC] == true) {
 		fprintf(fp, MKF_HEADER_YACC);
 	}
 
 	fprintf(fp, "\n# misc stuff\n");
-	if (psg->bs.found_src == true) {
+	if (psz->found_src == true) {
 		/* linker stuff */
 		fprintf(fp, MKF_HEADER_LD);
 	}
 	/* misc stuff */
 	fprintf(fp, MKF_HEADER_MISC);
 
-	if (psg->bs.found_data == true) {
+	if (psz->found[FILE_TYPE_DATA] == true) {
 		/* package data */
 		fprintf(fp, MKF_HEADER_DATA);
 	}
@@ -1232,7 +1301,7 @@ void mkf_output_header(FILE *fp, scn_glob_t *psg) {
 	/* directories */
 	fprintf(fp, "# specific directories\n");
 	fprintf(fp, MKF_HEADER_DIR);
-	if (psg->bs.found_manpg == true) {
+	if (psz->found[FILE_TYPE_MAN] == true) {
 		/* man pages directories */
 		for (i = 0 ; i < 10 ; i++) {
 			fprintf(fp, MKF_MANX_DIR, i, i);
@@ -1241,33 +1310,33 @@ void mkf_output_header(FILE *fp, scn_glob_t *psg) {
 
 	fprintf(fp, MKF_LINE_JUMP);
 
-	if (psg->bs.found_src == true) {
+	if (psz->found_src == true) {
 		/* suffixes */
 		fprintf(fp, MKF_SUFFIXES);
 	}
 
 	/* assembly object build rule */
-	if (psg->bs.found_asm == true) {
+	if (psz->found[FILE_TYPE_ASM] == true) {
 		fprintf(fp, MKF_BLD_ASM_OBJ);
 	}
 
 	/* C object build rule */
-	if (psg->bs.found_c == true) {
+	if (psz->found[FILE_TYPE_C] == true) {
 		fprintf(fp, MKF_BLD_C_OBJ);
 	}
 
 	/* C++ object build rule */
-	if (psg->bs.found_cxx == true) {
+	if (psz->found[FILE_TYPE_CXX] == true) {
 		fprintf(fp, MKF_BLD_CXX_OBJ);
 	}
 
 	/*  lex source build rule */
-	if (psg->bs.found_lex == true) {
+	if (psz->found[FILE_TYPE_LEX] == true) {
 		fprintf(fp, MKF_BLD_LEX_SRC);
 	}
 
 	/*  yacc source build rule */
-	if (psg->bs.found_yacc == true) {
+	if (psz->found[FILE_TYPE_YACC] == true) {
 		fprintf(fp, MKF_BLD_YACC_SRC);
 	}
 }
@@ -1281,13 +1350,13 @@ void mkf_output_header(FILE *fp, scn_glob_t *psg) {
 
  IN
 	fp :	file pointer
-	psg :	global scanning data
+	psz :	scanning zone data
 
  OUT
 	NONE
  ***********************************************************************/
 
-void mkf_output_srcs(FILE *fp, scn_glob_t *psg) {
+void mkf_output_srcs(FILE *fp, scn_zone_t *psz) {
 	char			 buf[256], /* XXX */
 					*pstr;
 	hkeys			*phk;
@@ -1298,7 +1367,7 @@ void mkf_output_srcs(FILE *fp, scn_glob_t *psg) {
 					 j;
 
 	/* XXX more comments */
-	phk = hash_keys_sorted(psg->objects);
+	phk = hash_keys_sorted(psz->objects);
 	if (phk == NULL) {
 		/* nothing to do */
 		return;
@@ -1306,8 +1375,8 @@ void mkf_output_srcs(FILE *fp, scn_glob_t *psg) {
 
 	fprintf(fp, "\n# object dependency lists\n");
 	for (i = 0 ; i < phk->nkey ; i++) {
-		pstr = hash_get(psg->objects, phk->keys[i]);
-		pn = hash_get(psg->nodes, pstr);
+		pstr = hash_get(psz->objects, phk->keys[i]);
+		pn = hash_get(psz->nodes, pstr);
 
 		/* object label */
 		snprintf(buf, sizeof(buf), MKF_OBJECT_SRCS, pn->prefix);
@@ -1337,13 +1406,13 @@ void mkf_output_srcs(FILE *fp, scn_glob_t *psg) {
 
  IN
 	fp :	file pointer
-	psg :	global scanning data
+	psz :	scanning zone data
 
  OUT
 	NONE
  ***********************************************************************/
 
-void mkf_output_objs(FILE *fp, scn_glob_t *psg) {
+void mkf_output_objs(FILE *fp, scn_zone_t *psz) {
 	char			 buf[256], /* XXX */
 					*pstr;
 	hkeys			*phk;
@@ -1353,13 +1422,13 @@ void mkf_output_objs(FILE *fp, scn_glob_t *psg) {
 					 i,
 					 j;
 
-	phk = hash_keys_sorted(psg->targets);
+	phk = hash_keys_sorted(psz->targets);
 	if (phk != NULL) {
 		/* generate target deps */
 		fprintf(fp, "\n# target dependency lists\n");
 		for (i = 0 ; i < phk->nkey ; i++) {
-			pstr = hash_get(psg->targets, phk->keys[i]);
-			pn = hash_get(psg->nodes, pstr);
+			pstr = hash_get(psz->targets, phk->keys[i]);
+			pn = hash_get(psz->nodes, pstr);
 
 			/* target label */
 			snprintf(buf, sizeof(buf), MKF_TARGET_OBJS, pn->prefix);
@@ -1391,13 +1460,13 @@ void mkf_output_objs(FILE *fp, scn_glob_t *psg) {
 
  IN
 	fp :	file pointer
-	psg :	global scanning data
+	psz :	scanning zone data
 
  OUT
 	NONE
  ***********************************************************************/
 
-void mkf_output_bld_trgs(FILE *fp, scn_glob_t *psg) {
+void mkf_output_bld_trgs(FILE *fp, scn_zone_t *psz) {
 	char			 buf[256];
 	hkeys			*phk;
 	size_t			 ofst,
@@ -1408,7 +1477,7 @@ void mkf_output_bld_trgs(FILE *fp, scn_glob_t *psg) {
 	fprintf(fp, MKF_TRGT_ALL_VAR);
 
 	/* list of targets */
-	phk = hash_keys_sorted(psg->targets);
+	phk = hash_keys_sorted(psz->targets);
 	if (phk != NULL) {
 		lm = strlen(MKF_TRGT_ALL_VAR);
 		ofst = lm;
@@ -1450,13 +1519,13 @@ void mkf_output_bld_trgs(FILE *fp, scn_glob_t *psg) {
 
  IN
 	fp :	file pointer
-	psg :	global scanning data
+	psz :	scanning zone data
 
  OUT
 	NONE
  ***********************************************************************/
 
-void mkf_output_man_trgs(FILE *fp, scn_glob_t *psg) {
+void mkf_output_man_trgs(FILE *fp, scn_zone_t *psz) {
 	char		 buf[256], /* XXX */
 				*pstr;
 	size_t		 ofst,
@@ -1465,7 +1534,7 @@ void mkf_output_man_trgs(FILE *fp, scn_glob_t *psg) {
 				 j,
 				 k;
 
-	if (psg->bs.found_manpg == false) {
+	if (psz->found[FILE_TYPE_MAN] == true) {
 		/* no man page, skip */
 		return;
 	}
@@ -1480,9 +1549,9 @@ void mkf_output_man_trgs(FILE *fp, scn_glob_t *psg) {
 		ofst = lm;
 
 		/* for each man page */
-		for (j = 0 ; j < da_usize(psg->manpgs) ; j++) {
+		for (j = 0 ; j < da_usize(psz->manpgs) ; j++) {
 			/* get the last character */
-			pstr = da_idx(psg->manpgs, j);
+			pstr = da_idx(psz->manpgs, j);
 /*debugf("pstr = '%s'");*/
 			k = strlen(pstr);
 
@@ -1512,20 +1581,20 @@ void mkf_output_man_trgs(FILE *fp, scn_glob_t *psg) {
 
  IN
 	fp :	file pointer
-	psg :	global scanning data
+	psz :	scanning zone data
 
  OUT
 	NONE
  ***********************************************************************/
 
-void mkf_output_obj_rules(FILE *fp, scn_glob_t *psg) {
+void mkf_output_obj_rules(FILE *fp, scn_zone_t *psz) {
 	char			 buf[256], /* XXX */
 					*pstr;
 	hkeys			*phk;
 	scn_node_t		*pn;
 	size_t			 i;
 
-	phk = hash_keys_sorted(psg->objects);
+	phk = hash_keys_sorted(psz->objects);
 	if (phk == NULL) {
 		/* nothing to do */
 		return;
@@ -1533,8 +1602,8 @@ void mkf_output_obj_rules(FILE *fp, scn_glob_t *psg) {
 
 	fprintf(fp, "\n# object rules\n");
 	for (i = 0 ; i < phk->nkey ; i++) {
-		pstr = hash_get(psg->objects, phk->keys[i]);
-		pn = hash_get(psg->nodes, pstr);
+		pstr = hash_get(psz->objects, phk->keys[i]);
+		pn = hash_get(psz->nodes, pstr);
 
 		/* object label */
 		str_to_upper(buf, sizeof(buf), pn->prefix);
@@ -1554,19 +1623,19 @@ void mkf_output_obj_rules(FILE *fp, scn_glob_t *psg) {
 
  IN
 	fp :	file pointer
-	psg :	global scanning data
+	psz :	scanning zone data
 
  OUT
 	NONE
 ************************************************************************/
 
-void mkf_output_trg_rules(FILE *fp, scn_glob_t *psg) {
+void mkf_output_trg_rules(FILE *fp, scn_zone_t *psz) {
 	char			 buf[256], /* XXX */
 					*pstr;
 	hkeys			*phk;
 	size_t			 i;
 
-	phk = hash_keys_sorted(psg->targets);
+	phk = hash_keys_sorted(psz->targets);
 	if (phk == NULL) {
 		/* nothing to do */
 		return;
@@ -1600,20 +1669,20 @@ void mkf_output_trg_rules(FILE *fp, scn_glob_t *psg) {
 
  IN
 	fp :	file pointer
-	psg :	global scanning data
+	psz :	scanning zone data
 
  OUT
 	NONE
  ***********************************************************************/
 
-void mkf_output_man_inst(FILE *fp, scn_glob_t *psg) {
+void mkf_output_man_inst(FILE *fp, scn_zone_t *psz) {
 	unsigned int	 i;
 
-	if (psg->bs.found_manpg == false) {
+	if (psz->found[FILE_TYPE_MAN] == false) {
 		/* no man page, skip */
 		return;
 	}
-	
+
 	fprintf(fp, MKF_INST_MAN_H);
 	/* manual pages to install/deinstall */
 	for (i = 1 ; i <10 ; i++) {
@@ -1640,13 +1709,13 @@ void mkf_output_man_inst(FILE *fp, scn_glob_t *psg) {
 
  IN
 	fname :	file name
-	psg :	global scanning data
+	psz :	scanning zone data
 
  OUT
 	NONE
  ***********************************************************************/
 
-bool scan_build_mkf(char *fname, scn_glob_t *psg) {
+bool scan_build_mkf(char *fname, scn_zone_t *psz) {
 	FILE			*fp;
 	/*char			 buf[256];*/
 
@@ -1658,23 +1727,23 @@ bool scan_build_mkf(char *fname, scn_glob_t *psg) {
 	}
 
 	/* generate header and definitions */
-	mkf_output_header(fp, psg);
+	mkf_output_header(fp, psz);
 
 	/* generate object dependency lists */
-	mkf_output_srcs(fp, psg);
+	mkf_output_srcs(fp, psz);
 
 	/* generate target dependency lists */
-	mkf_output_objs(fp, psg);
+	mkf_output_objs(fp, psz);
 
 	/* generate building and cleaning target list */
-	mkf_output_bld_trgs(fp, psg);
+	mkf_output_bld_trgs(fp, psz);
 
 	/* binaries to install/deinstall */
 	fprintf(fp, MKF_FILE_BIN_VAR);
 	fprintf(fp, MKF_FILE_SBIN_VAR);
 
 	/* manual pages to install/deinstall */
-	mkf_output_man_trgs(fp, psg);
+	mkf_output_man_trgs(fp, psz);
 
 	/* data files */
 	fprintf(fp, MKF_FILE_DATA_VAR);
@@ -1686,7 +1755,7 @@ bool scan_build_mkf(char *fname, scn_glob_t *psg) {
 	fprintf(fp, MKF_INST_BIN);
 	fprintf(fp, MKF_DEINST_BIN);
 
-	mkf_output_man_inst(fp, psg);
+	mkf_output_man_inst(fp, psz);
 
 	fprintf(fp, MKF_INST_DATA);
 	fprintf(fp, MKF_DEINST_DATA);
@@ -1694,11 +1763,10 @@ bool scan_build_mkf(char *fname, scn_glob_t *psg) {
 	fprintf(fp, MKF_TWICE_JUMP);
 
 	/* generate objects */
-	mkf_output_obj_rules(fp, psg);
+	mkf_output_obj_rules(fp, psz);
 
 	/* generate targets */
-	mkf_output_trg_rules(fp, psg);
-	/* XXX */
+	mkf_output_trg_rules(fp, psz);
 
 	fclose(fp);
 
@@ -1825,11 +1893,11 @@ char *regex_check(char *pattern, char *line) { /* XXX remove ? */
 bool process_ppro(void *data, char *pstr, prseng_t *ppe) {
 	char		 iname[MAXPATHLEN],
 				 c;
-	scn_misc	*psm;
 	scn_node_t	*pnode;
+	scn_zone_t	*psz;
 
-	psm = (scn_misc *) data;
-	pnode = psm->pnode;
+	psz = (scn_zone_t *) data;
+	pnode = psz->pnode;
 
 	if (strncmp(pstr, RKW_PP_INCL, strlen(pstr) + 1) == 0) {
 		prs_c_skip(ppe); /* XXX check ? */
@@ -1891,11 +1959,11 @@ bool process_ppro(void *data, char *pstr, prseng_t *ppe) {
  ***********************************************************************/
 
 bool process_proc_call(void *data, char *pstr, prseng_t *ppe) {
-	scn_misc	*psm;
 	scn_node_t	*pnode;
+	scn_zone_t	*psz;
 
-	psm = (scn_misc *) data;
-	pnode = psm->pnode;
+	psz = (scn_zone_t *) data;
+	pnode = psz->pnode;
 
 #ifdef PMKSCAN_DEBUG
 	debugf("found procedure call of '%s'", pstr);
@@ -1926,11 +1994,11 @@ bool process_proc_call(void *data, char *pstr, prseng_t *ppe) {
  ***********************************************************************/
 
 bool process_proc_decl(void *data, char *pstr, prseng_t *ppe) {
-	scn_misc	*psm;
 	scn_node_t	*pnode;
+	scn_zone_t	*psz;
 
-	psm = (scn_misc *) data;
-	pnode = psm->pnode;
+	psz = (scn_zone_t *) data;
+	pnode = psz->pnode;
 
 #ifdef PMKSCAN_DEBUG
 	debugf("found procedure declaration of '%s'", pstr);
@@ -1969,11 +2037,11 @@ bool process_proc_decl(void *data, char *pstr, prseng_t *ppe) {
  ***********************************************************************/
 
 bool process_type(void *data, char *pstr, prseng_t *ppe) {
-	scn_misc	*psm;
 	scn_node_t	*pnode;
+	scn_zone_t	*psz;
 
-	psm = (scn_misc *) data;
-	pnode = psm->pnode;
+	psz = (scn_zone_t *) data;
+	pnode = psz->pnode;
 
 	/* add type in list */
 	if (da_push(pnode->type_idtfs, strdup(pstr)) == false) {
@@ -1992,10 +2060,11 @@ bool process_type(void *data, char *pstr, prseng_t *ppe) {
 	parse a file that has a known type
 
  IN
-	pcmn :	XXX
-	pnode :	XXX
-	fname :	XXX
-	ft :	XXX
+	pcmn :	common parser structure
+	pnode :	scan node structure
+	fname :	file to parse
+	ft :	file type
+	isdep : dependency flag
 
  OUT
 	boolean
@@ -2003,18 +2072,17 @@ bool process_type(void *data, char *pstr, prseng_t *ppe) {
 
 bool parse_file(prs_cmn_t *pcmn, char *fname, ftype_t ft, bool isdep) {
 	FILE			*fp;
-	bswtch_t		*pbs;
 	char			 buf[MAXPATHLEN],
 					 dir[MAXPATHLEN];
 	scn_node_t		*pnode;
-	scn_misc		*psm;
+	scn_zone_t		*psz;
 	unsigned int	 i;
 
 	/* get misc data */
-	psm = (scn_misc *) pcmn->data;
+	psz = (scn_zone_t *) pcmn->data;
 
 	/* check if this node is already existing */
-	pnode = hash_get(psm->nodes, fname);
+	pnode = hash_get(psz->nodes, fname);
 	if (pnode == NULL) {
 #ifdef PMKSCAN_DEBUG
 		debugf("adding node for '%s'", fname); /* XXX */
@@ -2023,7 +2091,7 @@ bool parse_file(prs_cmn_t *pcmn, char *fname, ftype_t ft, bool isdep) {
 		/* open file */
 		fp = fopen(fname, "r");
 		if (fp == NULL) {
-			printf("Warning : cannot open '%s' : %s.\n", fname, strerror(errno));
+			/*printf("Warning : cannot open '%s' : %s.\n", fname, strerror(errno));*/
 			return(true);
 		}
 
@@ -2036,16 +2104,14 @@ bool parse_file(prs_cmn_t *pcmn, char *fname, ftype_t ft, bool isdep) {
 		}
 
 		/* set curret node */
-		psm->pnode = pnode;
-
-		pbs = psm->pbs;
+		psz->pnode = pnode;
 
 		pnode->type = ft;
 
 		switch (ft) {
 			case FILE_TYPE_ASM :
-				pbs->found_asm = true;
-				pbs->found_src = true;
+				psz->found[FILE_TYPE_ASM] = true;
+				psz->found_src = true;
 				if (prs_asm_file(pcmn, fp) == false) {
 					fclose(fp);
 					return(false);
@@ -2053,8 +2119,8 @@ bool parse_file(prs_cmn_t *pcmn, char *fname, ftype_t ft, bool isdep) {
 				break;
 
 			case FILE_TYPE_C :
-				pbs->found_c = true;
-				pbs->found_src = true;
+				psz->found[FILE_TYPE_C] = true;
+				psz->found_src = true;
 				if (prs_c_file(pcmn, fp) == false) {
 					fclose(fp);
 					return(false);
@@ -2081,7 +2147,7 @@ bool parse_file(prs_cmn_t *pcmn, char *fname, ftype_t ft, bool isdep) {
 	}
 
 	/* add the node in the table of nodes */
-	if (hash_add(psm->nodes, fname, pnode) == HASH_ADD_FAIL) {
+	if (hash_add(psz->nodes, fname, pnode) == HASH_ADD_FAIL) {
 		errorf("failed to add node '%s' in the hash table.", pnode->fname);
 		scan_node_destroy(pnode);
 		return(false);
@@ -2113,8 +2179,8 @@ bool parse_file(prs_cmn_t *pcmn, char *fname, ftype_t ft, bool isdep) {
 	scan a node file to extract useful data
 
  IN
-	pcmn :	XXX
-	fname :	XXX
+	pcmn :	common parser structure
+	fname :	file to scan
 	isdep :	flag to notice if fname is a dependency or not
 
  OUT
@@ -2122,16 +2188,14 @@ bool parse_file(prs_cmn_t *pcmn, char *fname, ftype_t ft, bool isdep) {
  ***********************************************************************/
 
 bool scan_node_file(prs_cmn_t *pcmn, char *fname, bool isdep) {
-	bswtch_t		*pbs;
 	ftype_t			 ft;
-	scn_misc		*psm;
+	scn_zone_t		*psz;
 
 #ifdef PMKSCAN_DEBUG
 	debugf("fname = '%s'", fname);
 #endif
 
-	psm = (scn_misc *) pcmn->data;
-	pbs = psm->pbs;
+	psz = (scn_zone_t *) pcmn->data;
 
 	/* find a better fix or way to avoid to do that */
 	if ((fname[0] == '.') && (fname[1] == '/')) {
@@ -2159,15 +2223,17 @@ bool scan_node_file(prs_cmn_t *pcmn, char *fname, bool isdep) {
 
 		case FILE_TYPE_MAN :
 			/* man pages will be processed later */
-			pbs->found_manpg = true;
+			psz->found[FILE_TYPE_MAN] = true;
 			/* XXX */
-			debugf("adding '%s' in psg->manpgs.", fname);
-			da_push(psm->manpgs, strdup(fname));
+#ifdef PMKSCAN_DEBUG
+			debugf("adding '%s' in psz->manpgs.", fname);
+#endif
+			da_push(psz->manpgs, strdup(fname));
 			break;
 
 		case FILE_TYPE_DATA :
 			/* data files will be processed later */
-			/*pbs->found_data = true;*/
+			/*psz->found[FILE_TYPE_DATA] = true;*/
 			break;
 
 		default :
@@ -2176,7 +2242,7 @@ bool scan_node_file(prs_cmn_t *pcmn, char *fname, bool isdep) {
 			/* display a file with unknown type */
 			printf(".");
 	}
-	
+
 	return(true);
 }
 
@@ -2188,9 +2254,9 @@ bool scan_node_file(prs_cmn_t *pcmn, char *fname, bool isdep) {
 	scan a directory to find and scan known file type
 
  IN
-	pcmn :		XXX
-	dir :		XXX
-	recursive :	XXX
+	pcmn :		common parser structure
+	dir :		directory to scan
+	recursive :	recursive flag
 
  OUT
 	boolean
@@ -2202,7 +2268,18 @@ bool scan_dir(prs_cmn_t *pcmn, char *dir, bool recursive) {
 	char			 buf[MAXPATHLEN],
 					*fname;
 	dynary			*da;
+	scn_zone_t		*psz;
 	size_t			 i;
+
+	psz = pcmn->data;
+
+	if ((psz->discard != NULL) && (da_find(psz->discard, dir) == true)) {
+		/* discard directory */
+#ifdef PMKSCAN_DEBUG
+		debugf("discarding '%s'", dir);
+#endif
+		return(true);
+	}
 
 	pd = opendir(dir);
 
@@ -2292,6 +2369,216 @@ bool scan_dir(prs_cmn_t *pcmn, char *dir, bool recursive) {
 }
 
 
+/******************
+ * process_zone() *
+ ***********************************************************************
+ DESCR
+	process a scanning zone
+
+ IN
+	pcmn :		common parser structure
+	psd :		scanning data structure
+
+ OUT
+	boolean (true on success)
+ ***********************************************************************/
+
+bool process_zone(prs_cmn_t *pcmn, scandata *psd) {
+	char		 fbuf[MAXPATHLEN];
+	scn_zone_t	*psz;
+
+	psz = pcmn->data;
+
+	/* scanning directory */
+	printf("Starting file parsing in '%s':\n", psz->directory);
+	if (scan_dir(pcmn, psz->directory, psz->recursive) == false) {
+		exit(EXIT_FAILURE);
+	}
+	printf("Parsing finished.\n\n");
+
+	/* pmkfile stuff */
+	if (psz->gen_pmk == true) {
+		/* compare with known functions in pmkscan db */
+		printf("Processing nodes for check generation ...\n");
+		gen_checks(psz, psd);
+
+		/* build fil name */
+		build_path(psz->directory, PMKSCAN_PMKFILE, fbuf, sizeof(fbuf)); /* XXX check ? */
+
+		/* generate pmkfile */
+		printf("Generating %s ...\n", fbuf);
+		scan_build_pmk(fbuf, psz, psd);
+		printf("Ok\n\n");
+	}
+
+	/* makefile stuff */
+	if (psz->gen_mkf == true) {
+		/* scanning resulting nodes */
+		printf("Processing nodes for object generation ...\n");
+		gen_objects(psz);
+		printf("Ok\n\n");
+
+		/* scanning generated objects */
+		printf("Processing objects for target generation ...\n");
+		gen_targets(psz);
+		printf("Ok\n\n");
+
+		/* build fil name */
+		build_path(psz->directory, PMKSCAN_MKFILE, fbuf, sizeof(fbuf)); /* XXX check ? */
+
+		/* generate makefile */
+		printf("Generating %s ...\n", fbuf);
+		scan_build_mkf(fbuf, psz);
+		printf("Ok\n\n");
+	}
+
+	return(true);
+}
+
+
+/******************
+ * parse_script() *
+ ***********************************************************************
+ DESCR
+	parse script file
+
+ IN
+	cfname :	configuration script filename
+	pcmn :		common parser structure
+	psd :		scanning data structure
+
+ OUT
+	boolean (true on success)
+ ***********************************************************************/
+
+bool parse_script(char *cfname, prs_cmn_t *pcmn, scandata *psd) {
+	FILE		*fd;
+	char		*pdir;
+	htable		*tnodes;
+	pmkobj		*ppo;
+	prscell		*pcell;
+	prsdata		*pdata;
+	scn_zone_t	*psz;
+
+	fd = fopen(cfname, "r");
+	if (fd == NULL) {
+		errorf("cannot open '%s' : %s.", cfname, strerror(errno));
+		return(false);
+	}
+
+	/* initialise parsing data structure */
+	pdata = prsdata_init();
+
+	if (parse_pmkfile(fd, pdata, kw_scanfile, nbkwsf) == false) {
+		fclose(fd);
+		prsdata_destroy(pdata);
+		errorf("parsing of script file failed.");
+		return(false);
+	}
+
+	pcell = pdata->tree->first;
+	while (pcell != NULL) {
+		/* init of nodes table */
+		tnodes = hash_init_adv(512, NULL,
+				(void (*)(void *))scan_node_destroy, NULL);
+
+		/* init zone structure */
+		psz = scan_zone_init(tnodes);
+		if (psz == NULL) {
+			/* XXX err msg */
+			prsdata_destroy(pdata);
+			hash_destroy(tnodes);
+			exit(EXIT_FAILURE);
+		}
+		pcmn->data = psz;
+
+		switch(pcell->token) {
+			case PSC_TOK_PMKF :
+				/* generate pmkfile only */
+				psz->gen_pmk = true;
+				break;
+
+			case PSC_TOK_MAKF :
+				/* generate makefile only */
+				psz->gen_mkf = true;
+
+				/* optional name for makefile template */
+				ppo = hash_get(pcell->data, KW_OPT_NAM);
+				if (ppo != NULL) {
+					/* set makefile name */
+					psz->mkf_name = po_get_str(ppo);
+				}
+				break;
+
+			case PSC_TOK_ZONE :
+				/* mixed zone */
+
+				/* get pmkfile switch */
+				ppo = hash_get(pcell->data, KW_OPT_PMK);
+				if (ppo != NULL) {
+					psz->gen_pmk = po_get_bool(ppo);
+				}
+
+				/* get makefile switch */
+				ppo = hash_get(pcell->data, KW_OPT_MKF);
+				if (ppo != NULL) {
+					psz->gen_mkf = po_get_bool(ppo);
+
+					/* optional name for makefile template */
+					ppo = hash_get(pcell->data, KW_OPT_NAM);
+					if (ppo != NULL) {
+						/* set makefile name */
+						psz->mkf_name = po_get_str(ppo);
+					}
+				}
+				break;
+
+			default :
+				scan_zone_destroy(psz);
+				hash_destroy(tnodes);
+				prsdata_destroy(pdata);
+				errorf("parsing of script file failed.");
+				return(false);
+				break;
+		}
+
+		/* get base directory (REQUIRED) */
+		pdir = po_get_str(hash_get(pcell->data, KW_OPT_DIR));
+		psz->directory = strdup(pdir);
+
+		/* get discard list */
+		ppo = hash_get(pcell->data, KW_OPT_DSC);
+		if (ppo != NULL) {
+			psz->discard = po_get_list(ppo);
+		}
+
+		/* get recursivity switch (OPTIONAL, false by default) */
+		ppo = hash_get(pcell->data, KW_OPT_REC);
+		if (ppo != NULL) {
+			psz->recursive = po_get_bool(ppo);
+		}
+
+		/* get unique file switch (OPTIONAL, false by default) */
+		ppo = hash_get(pcell->data, KW_OPT_UNI);
+		if (ppo != NULL) {
+			psz->unique = po_get_bool(ppo);
+		}
+
+		/* process current zone */
+		process_zone(pcmn, psd);
+
+		scan_zone_destroy(psz);
+		hash_destroy(tnodes);
+
+		pcell = pcell->next;
+	}
+
+	prsdata_destroy(pdata);
+
+	return(true);
+}
+
+
 /***********
  * usage() *
  ***********************************************************************
@@ -2300,12 +2587,13 @@ bool scan_dir(prs_cmn_t *pcmn, char *dir, bool recursive) {
 
  IN
 	NONE
+
  OUT
 	NONE
  ***********************************************************************/
 
 void usage(void) {
-	fprintf(stderr, "usage: pmkscan [-hv] [path]\n");
+	fprintf(stderr, "usage: pmkscan [-f file] [-hmpuv] [path]\n");
 }
 
 
@@ -2318,22 +2606,31 @@ void usage(void) {
 
 int main(int argc, char *argv[]) {
 	bool		 go_exit = false,
+				 use_script = false,
+				 unique_file = false,
 				 recursive = false,
 				 gen_mkf = false,
 				 gen_pmk = false;
-	char		 buf[MAXPATHLEN];
+	char		 buf[MAXPATHLEN],
+				*scfile = NULL;
+	htable		*tnodes;
 	int			 chr;
 	prs_cmn_t	 pcmn;
 	prsdata		*pdata = NULL; /* XXX into global struct ? */
 	scandata	 sd;
-	scn_glob_t	*psg;
-	scn_misc	 sm;
+	scn_zone_t	*psz;
 
 	while (go_exit == false) {
-		chr = getopt(argc, argv, "hmprv");
+		chr = getopt(argc, argv, "f:hmpruv");
 		switch (chr) {
 			case -1 :
 				go_exit = true;
+				break;
+
+			case 'f' :
+				/* use script file */
+				use_script = true;
+				scfile = optarg;
 				break;
 
 			case 'm' :
@@ -2350,6 +2647,11 @@ int main(int argc, char *argv[]) {
 				/* enable pmkfile generation */
 				recursive = true;
 				fprintf(stdout, "recursive option disabled until better support\n");
+				break;
+
+			case 'u' :
+				/* use unique file (with recursive mode) */
+				unique_file = true;
 				break;
 
 			case 'v' :
@@ -2375,26 +2677,14 @@ int main(int argc, char *argv[]) {
 
 	printf("Initializing data ... \n");
 
-	psg = scan_glob_init(); /* XXX check */
-	if (psg == NULL) {
-		/* XXX err msg */
-		exit(EXIT_FAILURE);
-	}
-
-	/* init XXX */
-	sm.pcmn = &pcmn;
-	sm.nodes = psg->nodes;
-	sm.manpgs = psg->manpgs;
-	sm.pbs = &psg->bs;
-
 	/* init common parser structure */
 	pcmn.func_ppro = &process_ppro;
 	pcmn.func_proc = &process_proc_call;
 	pcmn.func_decl = &process_proc_decl;
 	pcmn.func_type = &process_type;
-	pcmn.data = &sm;
+	pcmn.data = NULL; /* will be updated later */
 
-	if (gen_pmk == true) {
+	if ((gen_pmk == true) || (use_script == true)) {
 		/* initialise parsing data structure */
 		pdata = prsdata_init();
 		if (pdata == NULL) {
@@ -2408,6 +2698,31 @@ int main(int argc, char *argv[]) {
 			}
 		}
 	}
+
+	/* if a script file has been provided */
+	if (use_script == true) {
+		printf("Using scanning script '%s'.\n", scfile);
+
+		if (parse_script(scfile, &pcmn, &sd) == false) {
+			exit(EXIT_FAILURE);
+		}
+
+		prsdata_destroy(pdata);
+
+		exit(EXIT_SUCCESS);
+	}
+
+	/* init of nodes table */
+	tnodes = hash_init_adv(512, NULL,
+			(void (*)(void *))scan_node_destroy, NULL);
+
+	/* init zone structure */
+	psz = scan_zone_init(tnodes);
+	if (psz == NULL) {
+		/* XXX err msg */
+		exit(EXIT_FAILURE);
+	}
+	pcmn.data = psz;
 
 	if (argc != 0) {
 		/* use optional path */
@@ -2432,10 +2747,10 @@ int main(int argc, char *argv[]) {
 	/* pmkfile stuff */
 	if (gen_pmk == true) {
 		printf("Processing nodes for check generation ...\n");
-		gen_checks(psg, &sd);
+		gen_checks(psz, &sd);
 
 		printf("Generating %s ...\n", PMKSCAN_PMKFILE);
-		scan_build_pmk(PMKSCAN_PMKFILE, psg, &sd);
+		scan_build_pmk(PMKSCAN_PMKFILE, psz, &sd);
 		printf("Ok\n\n");
 	}
 
@@ -2443,21 +2758,22 @@ int main(int argc, char *argv[]) {
 	if (gen_mkf == true) {
 		/* scanning resulting nodes */
 		printf("Processing nodes for object generation ...\n");
-		gen_objects(psg);
+		gen_objects(psz);
 		printf("Ok\n\n");
 
 		/* scanning generated objects */
 		printf("Processing objects for target generation ...\n");
-		gen_targets(psg);
+		gen_targets(psz);
 		printf("Ok\n\n");
 
 		printf("Generating %s ...\n", PMKSCAN_MKFILE);
-		scan_build_mkf(PMKSCAN_MKFILE, psg);
+		scan_build_mkf(PMKSCAN_MKFILE, psz);
 		printf("Ok\n\n");
 	}
 
 	/* cleaning */
-	scan_glob_destroy(psg);
+	scan_zone_destroy(psz);
+	hash_destroy(tnodes);
 	if (gen_pmk == true) {
 		prsdata_destroy(pdata);
 	}
