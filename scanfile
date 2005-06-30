@@ -1,0 +1,44 @@
+# pmkscan script
+# $Id$
+
+GEN_PMKFILE {
+    DIRECTORY = "."
+    RECURSE = TRUE
+    DISCARD = ("samples", "doc", "data", "man")
+    UNIQUE = TRUE
+}
+
+GEN_MAKEFILE {
+    DIRECTORY = "."
+    RECURSE = TRUE
+    DISCARD = ("samples", "doc", "tests")
+    NAME = "Makefile.pmk"
+    UNIQUE = TRUE
+}
+
+GEN_MAKEFILE {
+    DIRECTORY = "tests"
+    RECURSE = FALSE
+    NAME = "Makefile.pmk"
+    UNIQUE = TRUE
+}
+
+GEN_ZONE(main) {
+    DIRECTORY = "."
+    RECURSE = TRUE
+    DISCARD = ("samples", "doc", "tests")
+    PMKFILE = TRUE
+    MAKEFILE = TRUE
+    NAME = "Makefile.pmk"
+    UNIQUE = TRUE
+}
+
+GEN_ZONE(tests) {
+    DIRECTORY = "tests"
+    RECURSE = TRUE
+    PMKFILE = TRUE
+    MAKEFILE = TRUE
+    NAME = "Makefile.pmk"
+    UNIQUE = TRUE
+}
+
