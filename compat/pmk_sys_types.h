@@ -36,6 +36,7 @@
 #ifndef _PMK_SYS_TYPES_H_
 #define _PMK_SYS_TYPES_H_
 
+#include "config.h"
 #include <sys/types.h>
 
 /*

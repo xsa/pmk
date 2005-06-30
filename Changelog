@@ -1,3 +1,6 @@
+30 Jun 2005 mreindl
+ * include config.h in compat/pmk_sys_types.h.
+
 30 Jun 2005 mipsator
  * added support for a configuration script in pmkscan.
  * added an example of configuration script.
