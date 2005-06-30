@@ -43,7 +43,7 @@
 
 /*************
  * constants *
- ************************************************************************/
+ ***********************************************************************/
 
 /* pmkscan specific version */
 #define PREMAKE_SUBVER_PMKSCAN	"5"
@@ -58,15 +58,37 @@
 #define PMKSCAN_MKFILE	"Makefile.scan"
 
 /* languages, should use lgdata later */
-#define PMKSCAN_LANG_C          "C"
-#define PMKSCAN_LANG_CXX        "C++"
+#define PMKSCAN_LANG_C		"C"
+#define PMKSCAN_LANG_CXX	"C++"
 
 #define PSC_MAIN_C		"main"
 
-#define PSC_TOK_INCL	1
-#define PSC_TOK_FUNC	2
+/* parser tokens *******************************************************/
 
-/* file type */
+/* pmkscan data */
+enum {
+	PSC_TOK_INCL = 1,
+	PSC_TOK_FUNC
+};
+
+/* pmkscan script */
+enum {
+	PSC_TOK_PMKF = 1,
+	PSC_TOK_MAKF,
+	PSC_TOK_ZONE
+};
+
+/* script keywords */
+#define KW_OPT_DIR		"DIRECTORY"
+#define KW_OPT_DSC		"DISCARD"
+#define KW_OPT_MKF		"MAKEFILE"
+#define KW_OPT_NAM		"NAME"
+#define KW_OPT_PMK		"PMKFILE"
+#define KW_OPT_REC		"RECURSE"
+#define KW_OPT_UNI		"UNIQUE"
+
+
+/* file types **********************************************************/
 enum {
 	FILE_TYPE_UNKNOWN = 0,
 	FILE_TYPE_ASM,
@@ -78,10 +100,11 @@ enum {
 	FILE_TYPE_IMG,
 	FILE_TYPE_HTML,
 	FILE_TYPE_TEXT,
-	FILE_TYPE_DATA
+	FILE_TYPE_DATA,
+	NB_FILE_TYPE		/* number of file type */
 };
 
-/* object type */
+/* object type *********************************************************/
 enum {
 	OBJ_TYPE_UNKNOWN = 0,
 	OBJ_TYPE_ASM,
@@ -89,6 +112,7 @@ enum {
 	OBJ_TYPE_CXX
 };
 
+/* misc ****************************************************************/
 #define OBJ_SUFFIX		".o"
 
 #define MKF_OUTPUT_WIDTH	72
@@ -285,36 +309,24 @@ typedef struct {
 	int			 score;			/* hit score */
 } scn_node_t;
 
-/* XXX */
-typedef	struct {
-	bool	 found_src,		/* whether source has been found */
-			 found_asm,		/* whether at least one file is assembly */
-			 found_c,		/* whether at least one file is C */
-			 found_cxx,		/* whether at least one file is C++ */
-			 found_lex,		/* whether at least one file is lex */
-			 found_yacc,	/* whether at least one file is yacc */
-			 found_manpg,	/* whether at least one file is a manual page */
-			 found_data;	/* whether at least one file is a document */
-} bswtch_t;
-
-/* global scanning data */
+/* scanning zone data structure */
 typedef struct {
-	bswtch_t	 bs;
-	dynary		*manpgs;
-	htable		*nodes,
-				*objects,
-				*targets,
-				*checks;
-} scn_glob_t;
-
-/* misc scanning stuff */
-typedef struct {
-	bswtch_t	*pbs;
-	prs_cmn_t	*pcmn;
+	bool		 found[NB_FILE_TYPE],	/* file type flags */
+				 found_src,				/* source file flag */
+				 recursive,				/* recursive scan flag */
+				 unique,				/* unique file flag */
+				 gen_pmk,				/* pmkfile generation flag */
+				 gen_mkf;				/* makefile generation flag */
+	char		*directory,				/* initial directory */
+				*mkf_name;				/* optional makefile name */
+	dynary		*manpgs,				/* man pages dynary */
+				*discard;				/* discard list */
+	htable		*nodes,					/* global nodes table */
+				*objects,				/* zone objects */
+				*targets,				/* zone targets */
+				*checks;				/* zone checks */
 	scn_node_t	*pnode;
-	htable		*nodes;
-	dynary		*manpgs;
-} scn_misc;
+} scn_zone_t;
 
 /* scanning data parsed from dat file */
 typedef struct {
@@ -330,33 +342,33 @@ typedef struct {
 /* init functions */
 scn_node_t	*scan_node_init(char *);
 void		 scan_node_destroy(scn_node_t *);
-scn_glob_t	*scan_glob_init(void);
-void		 scan_glob_destroy(scn_glob_t *);
+scn_zone_t	*scan_zone_init(htable *);
+void		 scan_zone_destroy(scn_zone_t *);
 
 /* pmkfile specific */
 bool		 parse_data_file(prsdata *, scandata *);
 bool		 idtf_check(char *, htable *, htable *, htable *);
-bool		 gen_checks(scn_glob_t *, scandata *);
-bool		 scan_build_pmk(char *fname, scn_glob_t *, scandata *);
+bool		 gen_checks(scn_zone_t *, scandata *);
+bool		 scan_build_pmk(char *fname, scn_zone_t *, scandata *);
 
 /* makefile specific */
 bool		 find_deps(dynary *, dynary *);
 void		 extract_dir(char *, char *, size_t);
 void		 build_path(char *, char *, char *, size_t);
 bool		 recurse_obj_deps(htable *, dynary *, char *);
-bool		 gen_objects(scn_glob_t *);
-bool		 recurse_src_deps(scn_glob_t *, dynary *, char *);
-bool		 gen_targets(scn_glob_t *);
+bool		 gen_objects(scn_zone_t *);
+bool		 recurse_src_deps(scn_zone_t *, dynary *, char *);
+bool		 gen_targets(scn_zone_t *);
 size_t		 fprintf_width(size_t, size_t, size_t, FILE *, char *);
-void		 mkf_output_header(FILE *, scn_glob_t *);
-void		 mkf_output_srcs(FILE *, scn_glob_t *);
-void		 mkf_output_objs(FILE *, scn_glob_t *);
-void		 mkf_output_bld_trgs(FILE *, scn_glob_t *);
-void		 mkf_output_man_trgs(FILE *, scn_glob_t *);
-void		 mkf_output_obj_rules(FILE *, scn_glob_t *);
-void		 mkf_output_trg_rules(FILE *, scn_glob_t *);
-void		 mkf_output_man_inst(FILE *, scn_glob_t *);
-bool		 scan_build_mkf(char *, scn_glob_t *);
+void		 mkf_output_header(FILE *, scn_zone_t *);
+void		 mkf_output_srcs(FILE *, scn_zone_t *);
+void		 mkf_output_objs(FILE *, scn_zone_t *);
+void		 mkf_output_bld_trgs(FILE *, scn_zone_t *);
+void		 mkf_output_man_trgs(FILE *, scn_zone_t *);
+void		 mkf_output_obj_rules(FILE *, scn_zone_t *);
+void		 mkf_output_trg_rules(FILE *, scn_zone_t *);
+void		 mkf_output_man_inst(FILE *, scn_zone_t *);
+bool		 scan_build_mkf(char *, scn_zone_t *);
 
 /* common functions */
 void		 str_to_upper(char *, size_t, char *);
@@ -367,6 +379,8 @@ bool		 process_proc_call(void *, char *, prseng_t *);
 bool		 process_proc_decl(void *, char *, prseng_t *);
 bool		 process_type(void *, char *, prseng_t *);
 bool		 parse_file(prs_cmn_t *, char *, ftype_t, bool);
+bool		 process_zone(prs_cmn_t *, scandata *);
+bool		 parse_script(char *, prs_cmn_t *, scandata *);
 bool		 scan_node_file(prs_cmn_t *, char *, bool);
 bool		 scan_dir(prs_cmn_t *, char *, bool);
 void		 usage(void);
