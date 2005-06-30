@@ -63,7 +63,8 @@ pmkscan
 -----------------------------------------------------------------------
 	-R?	add more entries in pmkscan.dat
 	-R	improve engine to detect types
-	-R	generate makefile template from the scanned sources
+	~R	generate makefile template from the scanned sources
+	-	fix use of d_type in dirent structure which is not posix
 
 pmkinstall
 -----------------------------------------------------------------------
