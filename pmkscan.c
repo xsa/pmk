@@ -2264,6 +2264,7 @@ bool scan_node_file(prs_cmn_t *pcmn, char *fname, bool isdep) {
 
 bool scan_dir(prs_cmn_t *pcmn, char *dir, bool recursive) {
 	struct dirent	*pde;
+	struct stat		 tstat;
 	DIR				*pd;
 	char			 buf[MAXPATHLEN],
 					*fname;
@@ -2309,7 +2310,7 @@ bool scan_dir(prs_cmn_t *pcmn, char *dir, bool recursive) {
 #endif
 
 		if (*fname == '.') {
-			/* skip every entries that stars with a dot */
+			/* skip every entries that starts with a dot */
 #ifdef PMKSCAN_DEBUG
 			debugf("skipping '%s'", fname);
 #endif
@@ -2322,9 +2323,12 @@ bool scan_dir(prs_cmn_t *pcmn, char *dir, bool recursive) {
 		debugf("buf = '%s'", buf);
 #endif
 
+		if (stat(buf, &tstat) == -1) {
+			continue;
+		}
 
 		/* if the entry is a directory ... */
-		if (pde->d_type == DT_DIR) {
+		if (tstat.st_mode == S_IFDIR) {
 			/* ... then display a 'D' ... */
 			printf("D");
 
