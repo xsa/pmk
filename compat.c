@@ -171,7 +171,7 @@ size_t strlcpy(char *dst, const char *src, size_t s) {
 	size_t	len = 0;
 
 	/* loop until we reach the end of the src string */
-	do {
+	while (*src != '\0') {
 		/* if buffer is not full */
 		if (s > 0) {
 			if (s == 1) {
@@ -189,12 +189,17 @@ size_t strlcpy(char *dst, const char *src, size_t s) {
 			len++;
 			/* and dst pointer */
 			dst++;
-			}
 		}
 
 		/* increment src pointer */
 		src++;
-	} until (*src != '\0');
+	}
+
+	/* if the end of the buffer has not been reached */
+	if (s > 0) {
+		/* last character, null terminate */
+		*dst = '\0';
+	}
 
 	return(len);
 }
