@@ -455,8 +455,9 @@ if [ -z "$CC" ]; then
 	fi
 else
 	printf "CC defined, skipping C compiler check.\n"
-	mkf_sed 'CC' "$CC"
 fi
+
+mkf_sed 'CC' "$CC"
 
 #
 # cpp check
@@ -474,8 +475,8 @@ if [ -z "$CPP" ]; then
 	if check_binary cpp; then
 		CPP="cpp"
 	else
-		printf "Using 'cc -E'.\n"
-		CPP="cc -E"
+		printf "Using '$CC -E'.\n"
+		CPP="$CC -E"
 	fi
 else
 	printf "CPP defined, skipping C preprocessor check.\n"
