@@ -1,3 +1,5 @@
+# snapshot 0.9.3-s1
+
 01 Jul 2005 mipsator
  * fixed scan_dir() by replacing use of non portable member of structure
    dirent by the use of stat(). This should fix problems encountered on
