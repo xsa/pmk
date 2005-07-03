@@ -39,6 +39,10 @@
 #include "pmk.h"
 #include "parse.h"
 
+/*************
+ * constants *
+ ***********************************************************************/
+
 /* format string for include check */
 #define INC_TEST_CODE	"#include <stdio.h>\n" \
 			"#include <%s>\n" \
@@ -76,21 +80,21 @@
 			"int main() {\n" \
 			"%s test_type;\n" \
 			"if (sizeof(test_type)) {return(0);}\n" \
-		        "return(0);}"
+			"return(0);}"
 
 #define TYPE_INC_TEST_CODE	"#include <stdio.h>\n" \
 				"#include <%s>\n" \
 				"int main() {\n" \
 				"%s test_type;\n" \
 				"if (sizeof(test_type)) {return(0);}\n" \
-			        "return(0);}"
+				"return(0);}"
 
 /* args: struct_name struct_name member_name*/
 #define TYPE_MEMBER_TEST_CODE	"#include <stdio.h>\n" \
 				"int main() {\n" \
 				"%s test_struct;\n" \
 				"if (sizeof(test_struct.%s)) {return(0);}\n" \
-			        "return(0);}"
+				"return(0);}"
 
 /* args: header struct_name struct_name member_name*/
 #define TYPE_INC_MEMBER_TEST_CODE	"#include <stdio.h>\n" \
@@ -98,7 +102,7 @@
 					"int main() {\n" \
 					"%s test_struct;\n" \
 					"if (sizeof(test_struct.%s)) {return(0);}\n" \
-				        "return(0);}"
+					"return(0);}"
 
 /* compiler command format string */
 				/* compiler cflags binary source log */
@@ -141,12 +145,12 @@
 
 /* option keywords */
 /* common */
-#define KW_OPT_NAME		"NAME"
-#define KW_OPT_DEFS		"DEFS"
+#define KW_OPT_NAME			"NAME"
+#define KW_OPT_DEFS			"DEFS"
 #define KW_OPT_FUNCTION		"FUNCTION"
 #define KW_OPT_HEADER		"HEADER"
 #define KW_OPT_CFLAGS		"CFLAGS"
-#define KW_OPT_LIBS		"LIBS"
+#define KW_OPT_LIBS			"LIBS"
 #define KW_OPT_MACRO		"MACRO"
 #define KW_OPT_MAJOR		"MAJOR"
 #define	KW_OPT_MEMBER		"MEMBER"
@@ -173,11 +177,21 @@
 /* error messages */
 #define ERR_MSG_CC_CMD		"failed to build compiler command line."
 
+
+/**********************************
+ * type and structure definitions *
+ ***********************************************************************/
+
 /* structures */
 typedef struct {
 	char	kw[CMD_LEN];
 	bool	(*fnp)(pmkcmd *, htable *, pmkdata *);
 } cmdkw;
+
+
+/**************
+ * prototypes *
+ ***********************************************************************/
 
 bool	func_wrapper(prscell *, pmkdata *);
 bool	process_node(prsnode *, pmkdata *);
