@@ -422,6 +422,9 @@ scn_zone_t *scan_zone_init(htable *nodes) {
 
 		/* init man pages dynary */
 		pzone->manpgs = da_init();
+
+		/* init data files dynary */
+		pzone->datafiles = da_init();
 	}
 
 	return(pzone);
@@ -456,6 +459,10 @@ void scan_zone_destroy(scn_zone_t *pzone) {
 
 	if (pzone->manpgs != NULL) {
 		da_destroy(pzone->manpgs);
+	}
+
+	if (pzone->datafiles != NULL) {
+		da_destroy(pzone->datafiles);
 	}
 
 	free(pzone);
@@ -1236,7 +1243,7 @@ size_t fprintf_width(size_t left, size_t width, size_t offset, FILE *fp, char *s
  * mkf_output_header() *
  ***********************************************************************
  DESCR
-	output source dependencies of makefile
+	XXX
 
  IN
 	fp :	file pointer
@@ -1346,7 +1353,7 @@ void mkf_output_header(FILE *fp, scn_zone_t *psz) {
  * mkf_output_srcs() *
  ***********************************************************************
  DESCR
-	output source dependencies of makefile
+	XXX
 
  IN
 	fp :	file pointer
@@ -1402,7 +1409,7 @@ void mkf_output_srcs(FILE *fp, scn_zone_t *psz) {
  * mkf_output_objs() *
  ***********************************************************************
  DESCR
-	output object dependencies of makefile
+	XXX
 
  IN
 	fp :	file pointer
@@ -1456,7 +1463,7 @@ void mkf_output_objs(FILE *fp, scn_zone_t *psz) {
  * mkf_output_bld_trgs() *
  ***********************************************************************
  DESCR
-	output object dependencies of makefile
+	XXX
 
  IN
 	fp :	file pointer
@@ -1515,7 +1522,7 @@ void mkf_output_bld_trgs(FILE *fp, scn_zone_t *psz) {
  * mkf_output_man_trgs() *
  ***********************************************************************
  DESCR
-	output object dependencies of makefile
+	XXX
 
  IN
 	fp :	file pointer
@@ -1534,7 +1541,7 @@ void mkf_output_man_trgs(FILE *fp, scn_zone_t *psz) {
 				 j,
 				 k;
 
-	if (psz->found[FILE_TYPE_MAN] == true) {
+	if (psz->found[FILE_TYPE_MAN] == false) {
 		/* no man page, skip */
 		return;
 	}
@@ -1552,17 +1559,16 @@ void mkf_output_man_trgs(FILE *fp, scn_zone_t *psz) {
 		for (j = 0 ; j < da_usize(psz->manpgs) ; j++) {
 			/* get the last character */
 			pstr = da_idx(psz->manpgs, j);
-/*debugf("pstr = '%s'");*/
-			k = strlen(pstr);
+			k = strlen(pstr) - 1;
+/*debugf("man page = '%s', mp_cat = %c, loop_cat = %d", pstr, pstr[k], i);*/
 
 			/*
-				if the numeric conversion of the character is equal
-				to the current man page category
+					if the numeric conversion of the character is equal
+					to the current man page category
 			*/
 			if ((size_t) atoi(&pstr[k]) == i) {
-				/* record it into the list */
-				ofst = fprintf_width(lm, MKF_OUTPUT_WIDTH, ofst,
-														fp, pstr);
+					/* record it into the list */
+					ofst = fprintf_width(lm, MKF_OUTPUT_WIDTH, ofst, fp, pstr);
 			}
 		}
 
@@ -1573,11 +1579,50 @@ void mkf_output_man_trgs(FILE *fp, scn_zone_t *psz) {
 }
 
 
+/*************************
+ * mkf_output_man_trgs() *
+ ***********************************************************************
+ DESCR
+	XXX
+
+ IN
+	fp :	file pointer
+	psz :	scanning zone data
+
+ OUT
+	NONE
+ ***********************************************************************/
+
+void mkf_output_data_trgs(FILE *fp, scn_zone_t *psz) {
+	char		 buf[256], /* XXX */
+				*pstr;
+	size_t		 ofst,
+				 lm,
+				 i;
+
+	/* data files */
+	fprintf(fp, MKF_FILE_DATA_VAR);
+
+	lm = strlen(buf);
+	ofst = lm;
+
+	/* for each man page */
+	for (i = 0 ; i < da_usize(psz->datafiles) ; i++) {
+		pstr = da_idx(psz->datafiles, i);
+
+		/* record it into the list */
+		ofst = fprintf_width(lm, MKF_OUTPUT_WIDTH, ofst, fp, pstr);
+	}
+
+	fprintf(fp, MKF_TWICE_JUMP);
+}
+
+
 /**************************
  * mkf_output_obj_rules() *
  ***********************************************************************
  DESCR
-	output object dependencies of makefile
+	XXX
 
  IN
 	fp :	file pointer
@@ -1619,7 +1664,7 @@ void mkf_output_obj_rules(FILE *fp, scn_zone_t *psz) {
  * mkf_output_trg_rules() *
  ***********************************************************************
  DESCR
-	output object dependencies of makefile
+	XXX
 
  IN
 	fp :	file pointer
@@ -1665,7 +1710,7 @@ void mkf_output_trg_rules(FILE *fp, scn_zone_t *psz) {
  * mkf_output_man_inst() *
  ***********************************************************************
  DESCR
-	output object dependencies of makefile
+	XXX
 
  IN
 	fp :	file pointer
@@ -1746,8 +1791,7 @@ bool scan_build_mkf(char *fname, scn_zone_t *psz) {
 	mkf_output_man_trgs(fp, psz);
 
 	/* data files */
-	fprintf(fp, MKF_FILE_DATA_VAR);
-	fprintf(fp, MKF_TWICE_JUMP);
+	mkf_output_data_trgs(fp, psz);
 
 	fprintf(fp, "\n# generic targets\n");
 	fprintf(fp, MKF_TARGET_ALL);
@@ -2119,6 +2163,7 @@ bool parse_file(prs_cmn_t *pcmn, char *fname, ftype_t ft, bool isdep) {
 				break;
 
 			case FILE_TYPE_C :
+			case FILE_TYPE_CXX :
 				psz->found[FILE_TYPE_C] = true;
 				psz->found_src = true;
 				if (prs_c_file(pcmn, fp) == false) {
@@ -2206,34 +2251,41 @@ bool scan_node_file(prs_cmn_t *pcmn, char *fname, bool isdep) {
 	switch (ft) {
 		case FILE_TYPE_ASM :
 		case FILE_TYPE_C :
+		case FILE_TYPE_CXX :
 			if (parse_file(pcmn, fname, ft, isdep) == false) {
 				/* XXX err msg ? */
 				return(false);
 			}
 			break;
 
-		case FILE_TYPE_CXX :
-			break;
-
 		case FILE_TYPE_LEX :
+			/* XXX TODO */
 			break;
 
 		case FILE_TYPE_YACC :
+			/* XXX TODO */
 			break;
 
 		case FILE_TYPE_MAN :
 			/* man pages will be processed later */
 			psz->found[FILE_TYPE_MAN] = true;
-			/* XXX */
+
+			/* add man page in the list */
+			da_push(psz->manpgs, strdup(fname)); /* XXX check ? */
 #ifdef PMKSCAN_DEBUG
-			debugf("adding '%s' in psz->manpgs.", fname);
+			debugf("added '%s' in psz->manpgs.", fname);
 #endif
-			da_push(psz->manpgs, strdup(fname));
 			break;
 
 		case FILE_TYPE_DATA :
 			/* data files will be processed later */
-			/*psz->found[FILE_TYPE_DATA] = true;*/
+			psz->found[FILE_TYPE_DATA] = true;
+
+			/* add data file in the list */
+			da_push(psz->datafiles, strdup(fname)); /* XXX check ? */
+#ifdef PMKSCAN_DEBUG
+			debugf("added '%s' in psz->datafiles.", fname);
+#endif
 			break;
 
 		default :
@@ -2296,10 +2348,9 @@ bool scan_dir(prs_cmn_t *pcmn, char *dir, bool recursive) {
 		return(false);
 	}
 
-#ifdef PMKSCAN_DEBUG
-	debugf("scanning directory '%s'", dir);
-#endif
-
+/*#ifdef PMKSCAN_DEBUG*/
+	debugf("scanning directory '%s'", dir); /* XXX move to printf (or verbose) */
+/*#endif*/
 
 	/* check each directory's entries */
 	while ((pde = readdir(pd)) && (pde != NULL)) {
@@ -2328,7 +2379,7 @@ bool scan_dir(prs_cmn_t *pcmn, char *dir, bool recursive) {
 		}
 
 		/* if the entry is a directory ... */
-		if (tstat.st_mode == S_IFDIR) {
+		if ((tstat.st_mode & S_IFDIR) != 0) {
 			/* ... then display a 'D' ... */
 			printf("D");
 

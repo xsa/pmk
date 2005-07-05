@@ -1,3 +1,8 @@
+05 Jul 2005 mipsator
+ * finished support for man pages and data files in pmkscan's makefile
+   generation.
+ * fixed recursive scanning of directory in pmkscan.
+
 # snapshot 0.9.3-s1
 
 01 Jul 2005 mipsator
