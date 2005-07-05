@@ -320,6 +320,7 @@ typedef struct {
 	char		*directory,				/* initial directory */
 				*mkf_name;				/* optional makefile name */
 	dynary		*manpgs,				/* man pages dynary */
+				*datafiles,				/* data files dynary */
 				*discard;				/* discard list */
 	htable		*nodes,					/* global nodes table */
 				*objects,				/* zone objects */
@@ -365,6 +366,7 @@ void		 mkf_output_srcs(FILE *, scn_zone_t *);
 void		 mkf_output_objs(FILE *, scn_zone_t *);
 void		 mkf_output_bld_trgs(FILE *, scn_zone_t *);
 void		 mkf_output_man_trgs(FILE *, scn_zone_t *);
+void		 mkf_output_data_trgs(FILE *, scn_zone_t *);
 void		 mkf_output_obj_rules(FILE *, scn_zone_t *);
 void		 mkf_output_trg_rules(FILE *, scn_zone_t *);
 void		 mkf_output_man_inst(FILE *, scn_zone_t *);
