@@ -107,8 +107,10 @@ size_t	 nb_file_ext = sizeof(file_ext) / sizeof(scn_ext_t);
 
 
 prskw	kw_pmkscan[] = {
+	{"FUNCTIONS",	PSC_TOK_FUNC,	PRS_KW_CELL,	PRS_TOK_NULL,	NULL},	/* XXX deprecated ? */
 	{"INCLUDES",	PSC_TOK_INCL,	PRS_KW_CELL,	PRS_TOK_NULL,	NULL},
-	{"FUNCTIONS",	PSC_TOK_FUNC,	PRS_KW_CELL,	PRS_TOK_NULL,	NULL}
+	{"PROCEDURES",	PSC_TOK_FUNC,	PRS_KW_CELL,	PRS_TOK_NULL,	NULL},
+	{"TYPES",		PSC_TOK_TYPE,	PRS_KW_CELL,	PRS_TOK_NULL,	NULL}
 };
 size_t	nbkwps = sizeof(kw_pmkscan) / sizeof(prskw);
 
@@ -499,6 +501,10 @@ bool parse_data_file(prsdata *pdata, scandata *sdata) {
 		return(false);
 	}
 
+	sdata->includes = NULL;
+	sdata->functions = NULL;
+	sdata->types = NULL;
+
 	rval = parse_pmkfile(fd, pdata, kw_pmkscan, nbkwps);
 	fclose(fd);
 
@@ -512,6 +518,10 @@ bool parse_data_file(prsdata *pdata, scandata *sdata) {
 
 				case PSC_TOK_FUNC :
 					sdata->functions = pcell->data;
+					break;
+
+				case PSC_TOK_TYPE :
+					sdata->types = pcell->data;
 					break;
 
 				default :
@@ -663,16 +673,28 @@ bool gen_checks(scn_zone_t *psz, scandata *psd) {
 				hash_delete(pht_misc, "LANG");
 		}
 
-		/* process system includes */
-		for (j = 0 ; j < da_usize(pn->system_inc) ; j++) {
-			pstr = (char *) da_idx(pn->system_inc, j);
-			idtf_check(pstr, psd->includes, psz->checks, pht_misc);
+		if (psd->includes != NULL) {
+			/* process system includes */
+			for (j = 0 ; j < da_usize(pn->system_inc) ; j++) {
+				pstr = (char *) da_idx(pn->system_inc, j);
+				idtf_check(pstr, psd->includes, psz->checks, pht_misc);
+			}
 		}
 
-		/* process function calls */
-		for (j = 0 ; j < da_usize(pn->func_calls) ; j++) {
-			pstr = (char *) da_idx(pn->func_calls, j);
-			idtf_check(pstr, psd->functions, psz->checks, pht_misc);
+		if (psd->functions != NULL) {
+			/* process function calls */
+			for (j = 0 ; j < da_usize(pn->func_calls) ; j++) {
+				pstr = (char *) da_idx(pn->func_calls, j);
+				idtf_check(pstr, psd->functions, psz->checks, pht_misc);
+			}
+		}
+
+		if (psd->types != NULL) {
+			/* process types definitions */
+			for (j = 0 ; j < da_usize(pn->type_idtfs) ; j++) {
+				pstr = (char *) da_idx(pn->type_idtfs, j);
+				idtf_check(pstr, psd->types, psz->checks, pht_misc);
+			}
 		}
 	}
 
