@@ -67,8 +67,9 @@
 
 /* pmkscan data */
 enum {
-	PSC_TOK_INCL = 1,
-	PSC_TOK_FUNC
+	PSC_TOK_FUNC = 1,
+	PSC_TOK_INCL,
+	PSC_TOK_TYPE
 };
 
 /* pmkscan script */
@@ -332,7 +333,8 @@ typedef struct {
 /* scanning data parsed from dat file */
 typedef struct {
 	htable	*functions,
-			*includes;
+			*includes,
+			*types;
 } scandata;
 
 
