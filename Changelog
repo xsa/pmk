@@ -1,3 +1,7 @@
+21 Jul 2005 mipsator
+ * added ISO C99 vsnprintf() implementation (missing wide char support).
+ * rewritten a bit compat.
+
 07 Jul 2005 mipsator
  * added type data support in pmkscan.
 

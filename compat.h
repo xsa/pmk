@@ -39,9 +39,109 @@
 
 #include "compat/pmk_string.h"
 
-bool	snprintf_b(char *, size_t, const char *, ...);
-bool	strlcat_b(char *, const char *, size_t);
-bool	strlcpy_b(char *, const char *, size_t);
+
+/**********************************
+ * constants and type definitions *
+ ***********************************************************************/
+
+enum {
+	PARSE_CHAR,
+	PARSE_FLAGS,		/* +,-, ,#,0 */
+	PARSE_FLD_WIDTH,
+	PARSE_DOT,
+	PARSE_PRECISION,
+	PARSE_LEN_MDFR,		/* hh,h,l,ll,j,z,t,L */
+	PARSE_CONV_SPEC		/* d,i,o,u,x,X,f,F,e,E,g,G,a,A,c,s,p,n,% */
+};
+
+enum {
+	MDFR_NORMAL,
+	MDFR_CHAR,
+	MDFR_SHORT,
+	MDFR_LONG,
+	MDFR_LONG_LONG,
+	MDFR_INTMAX,
+	MDFR_SIZET,
+	MDFR_PTRDIFF,
+	MDFR_LONG_DBL
+};
+
+/* conversion flag masks */
+#define	FLAG_NONE				0x0000
+#define	FLAG_SIGNED				0x0001
+#define	FLAG_LEFT_JUSTIFIED		0x0002
+#define	FLAG_SPACE_PREFIX		0x0004
+#define	FLAG_ALTERNATIVE_FORM	0x0008
+#define	FLAG_ZERO_PADDING		0x0010
+#define	FLAG_PRECISION			0x0020
+#define	FLAG_UPPERCASE			0x0040
+#define	FLAG_EXPONENT			0x0080
+#define	FLAG_G_CONVERSION		0x0100
+#define FLAG_ALL				0xffff
+
+/* base definition */
+#define BASE_OCT	8
+#define BASE_DEC	10
+#define BASE_HEX	16
+
+
+#ifdef HAVE_LONG_LONG
+	typedef long long	signed_t;
+#else /* HAVE_LONG_LONG */
+	typedef long		signed_t;
+#endif /* HAVE_LONG_LONG */
+
+#ifdef HAVE_UNSIGNED_LONG_LONG
+	typedef unsigned long long	unsigned_t;
+#else /* HAVE_UNSIGNED_LONG_LONG */
+	typedef unsigned long		unsigned_t;
+#endif /* HAVE_UNSIGNED_LONG_LONG */
+
+#ifdef HAVE_LONG_DOUBLE
+	typedef long double	float_t;
+#else /* HAVE_LONG_DOUBLE */
+	typedef double		float_t;
+#endif /* HAVE_LONG_DOUBLE */
+
+
+typedef unsigned char	base_t;
+typedef unsigned int	flag_t;
+
+#ifdef HAVE_UNSIGNED_LONG_LONG
+#define BYTESIZE	sizeof(unsigned long long)
+#else /* HAVE_UNSIGNED_LONG_LONG */
+#define BYTESIZE	sizeof(unsigned long)
+#endif /* HAVE_UNSIGNED_LONG_LONG */
+
+#define UPPER_BASE	"0123456789ABCDEF"
+#define LOWER_BASE	"0123456789abcdef"
+
+
+/*
+	compute approximative string size needed for maximum int conversion
+
+	verified with values up to 2^128, 16 bytes values.
+*/
+#define MAXINTLEN	((BYTESIZE * 3) - (BYTESIZE / 2))
+
+#define MKSTEMPS_REPLACE_CHAR	'X'
+
+
+/**************
+ * prototypes *
+ ***********************************************************************/
+
+int		 pmk_vsnprintf(char *, size_t, const char *, va_list);
+size_t	 pmk_strlcpy(char *, const char *, size_t);
+size_t	 pmk_strlcat(char *, const char *, size_t);
+char	*pmk_dirname(char *);
+char	*pmk_basename(char *);
+int		 pmk_isblank(int);
+int		 pmk_mkstemps(char *, int);
+
+bool	 snprintf_b(char *, size_t, const char *, ...);
+bool	 strlcat_b(char *, const char *, size_t);
+bool	 strlcpy_b(char *, const char *, size_t);
 
 #endif /* _PMK_COMPAT_H_ */
 
