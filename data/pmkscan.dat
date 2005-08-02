@@ -4,131 +4,221 @@
 # header list
 INCLUDES {
 	"sys/param.h"=(	"# checking sys/param.h",
-					"CHECK_INCLUDE(header_sys_param_h) {",
-					"REQUIRED=FALSE",
-					"LANG=\"$LANG\"",
-					"INCLUDE=\"sys/param.h\"",
+					"CHECK_HEADER(header_sys_param_h) {",
+					"	REQUIRED=FALSE",
+					"	LANG=\"$LANG\"",
+					"	NAME=\"sys/param.h\"",
 					"}")
 
-	"dirent.h"=(	"# checking dirent.h",
-					"CHECK_INCLUDE(header_dirent_h) {",
-					"REQUIRED=FALSE",
-					"LANG=\"$LANG\"",
-					"INCLUDE=\"dirent.h\"",
-					"}")
+	"dirent.h"=("# checking dirent.h",
+				"CHECK_HEADER(header_dirent_h) {",
+				"	REQUIRED=FALSE",
+				"	LANG=\"$LANG\"",
+				"	NAME=\"dirent.h\"",
+				"}")
 
-	"libgen.h"=(	"# checking libgen.h",
-					"CHECK_INCLUDE(header_libgen_h) {",
-					"REQUIRED=FALSE",
-					"LANG=\"$LANG\"",
-					"INCLUDE=\"libgen.h\"",
-					"}")
+	"libgen.h"=("# checking libgen.h",
+				"CHECK_HEADER(header_libgen_h) {",
+				"	REQUIRED=FALSE",
+				"	LANG=\"$LANG\"",
+				"	NAME=\"libgen.h\"",
+				"}")
 
 	"stdbool.h"=(	"# checking stdbool.h",
-					"CHECK_INCLUDE(header_stdbool_h) {",
-					"REQUIRED=FALSE",
-					"LANG=\"$LANG\"",
-					"INCLUDE=\"stdbool.h\"",
+					"CHECK_HEADER(header_stdbool_h) {",
+					"	REQUIRED=FALSE",
+					"	LANG=\"$LANG\"",
+					"	NAME=\"stdbool.h\"",
 					"}")
 }
 
 # function list
 FUNCTIONS {
+	basename=(	"# checking basename() in lgen",
+				"CHECK_LIB(function_basename_library_gen) {",
+				"	REQUIRED = FALSE",
+				"	NAME = \"gen\"",
+				"	FUNCTION = \"basename\"",
+				"}",
+				"",
+				"# if not found in libgen",
+				"IF(!function_basename_library_gen) {",
+				"	# checking basename in libgen.h",
+				"	CHECK_HEADER(function_basename) {",
+				"		REQUIRED=FALSE",
+				"		LANG=\"$LANG\"",
+				"		NAME=\"libgen.h\"",
+				"		FUNCTION=basename",
+				"	}",
+				"}")
+	
+	dirname=(	"# checking dirname() in lgen",
+				"CHECK_LIB(function_dirname_library_gen) {",
+				"	REQUIRED = FALSE",
+				"	NAME = \"gen\"",
+				"	FUNCTION = \"dirname\"",
+				"}",
+				"",
+				"# if not found in libgen",
+				"IF(!function_dirname_library_gen) {",
+				"	# checking dirname in libgen.h",
+				"	CHECK_HEADER(function_dirname) {",
+				"		REQUIRED=FALSE",
+				"		LANG=\"$LANG\"",
+				"		NAME=\"libgen.h\"",
+				"		FUNCTION=dirname",
+				"	}",
+				"}")
+	
 	isblank=(	"# checking isblank in ctype.h",
-				"CHECK_INCLUDE(function_isblank) {",
-				"REQUIRED=FALSE",
-				"LANG=\"$LANG\"",
-				"INCLUDE=\"ctype.h\"",
-				"FUNCTION=isblank",
+				"CHECK_HEADER(function_isblank) {",
+				"	REQUIRED=FALSE",
+				"	LANG=\"$LANG\"",
+				"	NAME=\"ctype.h\"",
+				"	FUNCTION=isblank",
 				"}")
 				
 	mkstemps=(	"# checking mkstemps in unistd.h",
-				"CHECK_INCLUDE(function_mkstemps) {",
-				"REQUIRED=FALSE",
-				"LANG=\"$LANG\"",
-				"INCLUDE=\"unistd.h\"",
-				"FUNCTION=mkstemps",
+				"CHECK_HEADER(function_mkstemps) {",
+				"	REQUIRED=FALSE",
+				"	LANG=\"$LANG\"",
+				"	NAME=\"unistd.h\"",
+				"	FUNCTION=mkstemps",
 				"}")
 				
 	snprintf=(	"# checking snprintf in stdio.h",
-				"CHECK_INCLUDE(function_snprintf) {",
-				"REQUIRED=FALSE",
-				"LANG=\"$LANG\"",
-				"INCLUDE=\"stdio.h\"",
-				"FUNCTION=snprintf",
+				"CHECK_HEADER(function_snprintf) {",
+				"	REQUIRED=FALSE",
+				"	LANG=\"$LANG\"",
+				"	NAME=\"stdio.h\"",
+				"	FUNCTION=snprintf",
 				"}")
 				
 	strlcat=(	"# checking strlcat in string.h",
-				"CHECK_INCLUDE(function_strlcat) {",
-				"REQUIRED=FALSE",
-				"LANG=\"$LANG\"",
-				"INCLUDE=\"string.h\"",
-				"FUNCTION=strlcat",
+				"CHECK_HEADER(function_strlcat) {",
+				"	REQUIRED=FALSE",
+				"	LANG=\"$LANG\"",
+				"	NAME=\"string.h\"",
+				"	FUNCTION=strlcat",
 				"}")
 				
 	strlcpy=(	"# checking strlcpy in string.h",
-				"CHECK_INCLUDE(function_strlcpy) {",
-				"REQUIRED=FALSE",
-				"LANG=\"$LANG\"",
-				"INCLUDE=\"string.h\"",
-				"FUNCTION=strlcpy",
+				"CHECK_HEADER(function_strlcpy) {",
+				"	REQUIRED=FALSE",
+				"	LANG=\"$LANG\"",
+				"	NAME=\"string.h\"",
+				"	FUNCTION=strlcpy",
 				"}")
 				
-	strdup=(	"# checking strdup in string.h",
-				"CHECK_INCLUDE(function_strdup) {",
-				"REQUIRED=FALSE",
-				"LANG=\"$LANG\"",
-				"INCLUDE=\"string.h\"",
-				"FUNCTION=strdup",
-				"}")
+	strdup=("# checking strdup in string.h",
+			"CHECK_HEADER(function_strdup) {",
+			"	REQUIRED=FALSE",
+			"	LANG=\"$LANG\"",
+			"	NAME=\"string.h\"",
+			"	FUNCTION=strdup",
+			"}")
 				
 	strndup=(	"# checking strndup in string.h",
-				"CHECK_INCLUDE(function_strndup) {",
-				"REQUIRED=FALSE",
-				"LANG=\"$LANG\"",
-				"INCLUDE=\"string.h\"",
-				"FUNCTION=strndup",
+				"CHECK_HEADER(function_strndup) {",
+				"	REQUIRED=FALSE",
+				"	LANG=\"$LANG\"",
+				"	NAME=\"string.h\"",
+				"	FUNCTION=strndup",
 				"}")
 				
 	strndupa=(	"# checking strndupa in string.h",
-				"CHECK_INCLUDE(function_strndupa) {",
-				"REQUIRED=FALSE",
-				"LANG=\"$LANG\"",
-				"INCLUDE=\"string.h\"",
-				"FUNCTION=strndupa",
+				"CHECK_HEADER(function_strndupa) {",
+				"	REQUIRED=FALSE",
+				"	LANG=\"$LANG\"",
+				"	NAME=\"string.h\"",
+				"	FUNCTION=strndupa",
 				"}")
 				
 	vsnprintf=(	"# checking vsnprintf in stdio.h",
-				"CHECK_INCLUDE(function_vsnprintf) {",
-				"REQUIRED=FALSE",
-				"LANG=\"$LANG\"",
-				"INCLUDE=\"stdio.h\"",
-				"FUNCTION=vsnprintf",
+				"CHECK_HEADER(function_vsnprintf) {",
+				"	REQUIRED=FALSE",
+				"	LANG=\"$LANG\"",
+				"	NAME=\"stdio.h\"",
+				"	FUNCTION=vsnprintf",
 				"}")
 				
 	vsyslog=(	"# checking vsyslog in syslog.h",
-				"CHECK_INCLUDE(function_vsyslog) {",
-				"REQUIRED=FALSE",
-				"LANG=\"$LANG\"",
-				"INCLUDE=\"syslog.h\"",
-				"FUNCTION=vsyslog",
+				"CHECK_HEADER(function_vsyslog) {",
+				"	REQUIRED=FALSE",
+				"	LANG=\"$LANG\"",
+				"	NAME=\"syslog.h\"",
+				"	FUNCTION=vsyslog",
 				"}")
 }
 
 # function list
 TYPES {
-	"_Bool"=(		"# checking C99 _Bool type",
-					"CHECK_TYPE(type__bool) {",
-					"REQUIRED = FALSE",
-					"LANG=\"$LANG\"",
-					"NAME = \"_Bool\"",
-					"}")
+	"_Bool"=(	"# checking C99 _Bool type",
+				"CHECK_TYPE(type__bool) {",
+				"	REQUIRED = FALSE",
+				"	LANG=\"$LANG\"",
+				"	NAME = \"_Bool\"",
+				"}")
 
-	"blkcnt_t"=(	"# checking blkcnt_t type",
-					"CHECK_TYPE(type_blkcnt_t) {",
-					"REQUIRED = FALSE",
-					"LANG=\"$LANG\"",
-					"NAME = \"blkcnt_t\"",
-					"HEADER = \"sys/types.h\"",
+	"blkcnt_t"=("# checking blkcnt_t type",
+				"CHECK_TYPE(type_blkcnt_t) {",
+				"	REQUIRED = FALSE",
+				"	LANG=\"$LANG\"",
+				"	NAME = \"blkcnt_t\"",
+				"	HEADER = \"sys/types.h\"",
+				"}")
+					
+	"intmax_t"=("# checking intmax_t type",
+				"CHECK_TYPE(type_intmax_t) {",
+				"	REQUIRED = FALSE",
+				"	LANG=\"$LANG\"",
+				"	NAME = \"intmax_t\"",
+				"	HEADER = \"stdint.h\"",
+				"}")
+					
+	"long long"=(	"# checking long long type",
+					"CHECK_TYPE(type_long_long) {",
+					"	REQUIRED = FALSE",
+					"	LANG=\"$LANG\"",
+					"	NAME = \"long long\"",
 					"}")
+					
+	"long double"=(	"# checking long double type",
+					"CHECK_TYPE(type_long_double) {",
+					"	REQUIRED = FALSE",
+					"	LANG=\"$LANG\"",
+					"	NAME = \"long double\"",
+					"}")
+					
+	"ptrdiff_t"=("# checking ptrdiff_t type",
+				"CHECK_TYPE(type_ptrdiff_t) {",
+				"	REQUIRED = FALSE",
+				"	LANG=\"$LANG\"",
+				"	NAME = \"ptrdiff_t\"",
+				"	HEADER = \"stddef.h\"",
+				"}")
+					
+	"unsigned long long"=(	"# checking unsigned long long type",
+							"CHECK_TYPE(type_unsigned_long_long) {",
+							"	REQUIRED = FALSE",
+							"	LANG=\"$LANG\"",
+							"	NAME = \"unsigned long long\"",
+							"}")
+							
+	"wchar_t"=("# checking wchar_t type",
+				"CHECK_TYPE(type_wchar_t) {",
+				"	REQUIRED = FALSE",
+				"	LANG=\"$LANG\"",
+				"	NAME = \"wchar_t\"",
+				"	HEADER = \"wchar.h\"",
+				"}")
+
+	"wint_t"=("# checking wint_t type",
+				"CHECK_TYPE(type_wint_t) {",
+				"	REQUIRED = FALSE",
+				"	LANG=\"$LANG\"",
+				"	NAME = \"wint_t\"",
+				"	HEADER = \"wchar.h\"",
+				"}")
 }
+
