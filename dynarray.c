@@ -1,12 +1,7 @@
 /* $Id$ */
 
 /*
- * Credits for patches :
- *	- Ted Unangst
- */
-
-/*
- * Copyright (c) 2003 Damien Couderc
+ * Copyright (c) 2003-2005 Damien Couderc
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,6 +31,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
+ */
+
+/*
+ * Credits for patches :
+ *	- Ted Unangst
  */
 
 
@@ -69,21 +69,21 @@
  ***********************************************************************/
 
 dynary *da_init_adv(void (*freefunc)(void *)) {
-	dynary	*ptr = NULL;
+	dynary	*da = NULL;
 
-	ptr = (dynary *)malloc(sizeof(dynary));
-	if (ptr != NULL) {
-		ptr->nbcell = 0;
-		ptr->nextidx = 0;
-		ptr->pary = malloc(DYNARY_AUTO_GROW * sizeof(void *));
+	da = (dynary *)malloc(sizeof(dynary));
+	if (da != NULL) {
+		da->nbcell = 0;
+		da->nextidx = 0;
+		da->pary = malloc(DYNARY_AUTO_GROW * sizeof(void *));
 		if (freefunc != NULL) {
-			ptr->freeobj = freefunc;
+			da->freeobj = freefunc;
 		} else {
-			ptr->freeobj = free;
+			da->freeobj = free;
 		}
 	}
 
-	return(ptr);
+	return(da);
 }
 
 
@@ -101,7 +101,6 @@ dynary *da_init_adv(void (*freefunc)(void *)) {
  ***********************************************************************/
 
 dynary *da_init(void) {
-	/* use standard free function */
 	return(da_init_adv(NULL));
 }
 
@@ -238,7 +237,7 @@ bool da_push(dynary *da, void *pval) {
 	/* insert in last place */
 	da->pary[da->nextidx] = pval;
 	da->nextidx++;
-	
+
 	return(true);
 }
 
@@ -248,7 +247,7 @@ bool da_push(dynary *da, void *pval) {
  ***********************************************************************
  DESCR
 	Pop the last value of the array
-	
+
  IN
 	da : dynamic array
 
@@ -301,7 +300,7 @@ void *da_pop(dynary *da) {
 
 void *da_shift(dynary *da) {
 	void	*p;
-	int	 i;
+	int		 i;
 	size_t	 gsize;
 
 	if (da == NULL)
@@ -398,5 +397,29 @@ bool da_find(dynary *da, char *str) {
 	}
 
 	return(rslt);
+}
+
+
+/*************
+ * da_sort() *
+ ***********************************************************************
+ DESCR
+	sort the dynary
+
+ IN
+ 	da :	dynary structure
+
+ OUT
+	NONE
+
+ NOTE : this only work with dynaries intialised with da_init()
+ ***********************************************************************/
+
+static int da_strcmp(const void *a, const void *b) {
+	return(strcmp(*(char * const *)a, *(char * const *) b));
+}
+
+void da_sort(dynary *da) {
+	qsort((void *) da->pary, da->nextidx, sizeof(char *), da_strcmp);
 }
 

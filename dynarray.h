@@ -1,7 +1,7 @@
 /* $Id$ */
 
 /*
- * Copyright (c) 2003 Damien Couderc
+ * Copyright (c) 2003-2005 Damien Couderc
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -54,10 +54,10 @@
  ***********************************************************************/
 
 typedef struct {
-	int	  nbcell,
-		  nextidx;
+	int		  nbcell,
+			  nextidx;
 	void	  (*freeobj)(void *),
-		**pary;
+			**pary;
 } dynary;
 
 
@@ -76,6 +76,7 @@ void	*da_shift(dynary *);
 void	*da_idx(dynary *, int);
 void	 da_destroy(dynary *);
 bool	 da_find(dynary *, char *);
+void	 da_sort(dynary *);
 
 #endif /* _PMK_DYNARRAY_H_ */
 
