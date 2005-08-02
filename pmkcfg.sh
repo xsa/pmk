@@ -517,6 +517,48 @@ check_type _Bool
 check_type_header blkcnt_t sys/types.h
 
 #
+# long long type check
+#
+
+check_type "long long"
+
+#
+# unsigned long long type check
+#
+
+check_type "unsigned long long"
+
+#
+# long double type check
+#
+
+check_type "long double"
+
+#
+# intmax_t type check
+#
+
+check_type intmax_t stdint.h
+
+#
+# ptrdiff_t type check
+#
+
+check_type ptrdiff_t stddef.h
+
+#
+# wchar_t type check
+#
+
+check_type wchar_t wchar.h
+
+#
+# wint_t type check
+#
+
+check_type wint_t wchar.h
+
+#
 # stdbool.h check
 #
 

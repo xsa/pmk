@@ -3,117 +3,163 @@
 
 # set target file
 SETTINGS {
-	LANG="C"
-	TARGET=("compat/config.h.pmk","Makefile.pmk","tests/Makefile.pmk")
+    LANG="C"
+    TARGET=("compat/config.h.pmk","Makefile.pmk","tests/Makefile.pmk")
 }
 
 SWITCHES {
-	sw_usermode = FALSE
+    sw_usermode = FALSE
 }
 
 IF(sw_usermode) {
-	DEFINE {
-		MKTARGET = "user"
-		BASE = "\$(HOME)"
-		CONFDIR = "\$(BASE)/.pmk"
-		BINDIR = "\$(BASE)/bin"
-		SBINDIR = "\$(BASE)/bin"
-		DATADIR = "\$(CONFDIR)"
-		MANDIR = "\$(BASE)/man"
-	}
+    DEFINE {
+        MKTARGET = "user"
+        BASE = "\$(HOME)"
+        CONFDIR = "\$(BASE)/.pmk"
+        BINDIR = "\$(BASE)/bin"
+        SBINDIR = "\$(BASE)/bin"
+        DATADIR = "\$(CONFDIR)"
+        MANDIR = "\$(BASE)/man"
+    }
 }
 
 IF(!sw_usermode) {
-	DEFINE {
-		MKTARGET = "global"
-		BASE = "$PREFIX"
-		CONFDIR = "\$(SYSCONFDIR)/pmk"
-		BINDIR = "\$(BASE)/bin"
-		SBINDIR = "\$(BASE)/sbin"
-		DATADIR = "\$(BASE)/share/\$(PREMAKE)"
-		MANDIR = "\$(BASE)/man"
-	}
+    DEFINE {
+        MKTARGET = "global"
+        BASE = "$PREFIX"
+        CONFDIR = "\$(SYSCONFDIR)/pmk"
+        BINDIR = "\$(BASE)/bin"
+        SBINDIR = "\$(BASE)/sbin"
+        DATADIR = "\$(BASE)/share/\$(PREMAKE)"
+        MANDIR = "\$(BASE)/man"
+    }
 }
 
 # check alternate privsep user
 CHECK_VARIABLE(var_privsep) {
-	REQUIRED = FALSE
-	NAME = "PRIVSEP_USER"
+    REQUIRED = FALSE
+    NAME = "PRIVSEP_USER"
 }
 
 # if not defined fall to default user
 IF(!var_privsep) {
-	DEFINE {
-		PRIVSEP_USER = "nobody"
-	}
+    DEFINE {
+        PRIVSEP_USER = "nobody"
+    }
 }
 
 CHECK_BINARY(binary_cc) {
-	NAME = "cc"
-	VARIABLE = "CC"
+    NAME = "cc"
+    VARIABLE = "CC"
 }
 
 CHECK_BINARY(binary_cpp) {
-	NAME = "cpp"
-	VARIABLE = "CPP"
+    NAME = "cpp"
+    VARIABLE = "CPP"
 }
 
 CHECK_BINARY(binary_as) {
-	NAME = "as"
-	VARIABLE = "AS"
+    NAME = "as"
+    VARIABLE = "AS"
 }
 
 
 # checking strlcpy() and strlcat() in string.h
 CHECK_HEADER(header_string_h) {
-	REQUIRED = FALSE
-	NAME = "string.h"
-	FUNCTION = ("strlcpy","strlcat")
+    REQUIRED = FALSE
+    NAME = "string.h"
+    FUNCTION = ("strlcpy","strlcat")
 }
 
 # check _Bool type
 CHECK_TYPE(type__bool) {
-	REQUIRED = FALSE
-	NAME = "_Bool"
+    REQUIRED = FALSE
+    NAME = "_Bool"
 }
 
 # check blkcnt_t type
 CHECK_TYPE(type_blkcnt_t) {
-	REQUIRED = FALSE
-	NAME = "blkcnt_t"
-	HEADER = "sys/types.h"
+    REQUIRED = FALSE
+    NAME = "blkcnt_t"
+    HEADER = "sys/types.h"
+}
+
+# check intmax_t type
+CHECK_TYPE(type_intmax_t) {
+    REQUIRED = FALSE
+    NAME = "intmax_t"
+    HEADER = "stdint.h"
+}
+
+# check long double type
+CHECK_TYPE(type_long_double) {
+    REQUIRED = FALSE
+    NAME = "long double"
+}
+
+# check long long type
+CHECK_TYPE(type_long_long) {
+    REQUIRED = FALSE
+    NAME = "long long"
+}
+
+# check ptrdiff_t type
+CHECK_TYPE(type_ptrdiff_t) {
+    REQUIRED = FALSE
+    NAME = "ptrdiff_t"
+    HEADER = "stdint.h"
+}
+
+# check unsigned long long type
+CHECK_TYPE(type_unsigned_long_long) {
+    REQUIRED = FALSE
+    NAME = "unsigned long long"
+}
+
+# check wchar_t type
+CHECK_TYPE(type_wchar_t) {
+    REQUIRED = FALSE
+    NAME = "wchar_t"
+    HEADER = "wchar.h"
+}
+
+# check wint_t type
+CHECK_TYPE(type_wint_t) {
+    REQUIRED = FALSE
+    NAME = "wint_t"
+    HEADER = "wchar.h"
 }
 
 # checking stdbool.h
 CHECK_HEADER(header_stdbool_h) {
-	REQUIRED = FALSE
-	NAME = "stdbool.h"
+    REQUIRED = FALSE
+    NAME = "stdbool.h"
 }
 
 # checking libgen.h
 CHECK_HEADER(header_libgen_h) {
-	REQUIRED = FALSE
-	NAME = "libgen.h"
+    REQUIRED = FALSE
+    NAME = "libgen.h"
 }
 
 # checking isblank in ctype.h
 CHECK_HEADER(function_isblank) {
-	REQUIRED = FALSE
-	NAME = "ctype.h"
-	FUNCTION = "isblank"
+    REQUIRED = FALSE
+    NAME = "ctype.h"
+    FUNCTION = "isblank"
 }
 
 # checking mkstemps in unistd.h
 CHECK_HEADER(function_mkstemps) {
-	REQUIRED = FALSE
-	NAME = "unistd.h"
-	FUNCTION = "mkstemps"
+    REQUIRED = FALSE
+    NAME = "unistd.h"
+    FUNCTION = "mkstemps"
 }
 
 CHECK_LIB(library_gen) {
-	REQUIRED = FALSE
-	NAME = "gen"
-	FUNCTION = "dirname"
-	LIBS = "LGEN_FLAGS"
+    REQUIRED = FALSE
+    NAME = "gen"
+    FUNCTION = "dirname"
+    LIBS = "LGEN_FLAGS"
 }
 
