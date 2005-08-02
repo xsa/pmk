@@ -3,6 +3,8 @@
  * first import of code building functions for further use in pmk.
  * fixed bugs in pathtools.
  * synced pmkcfg.sh and pmkfile with compat.
+ * updated pmkscan data.
+ * cleaned test sources.
 
 21 Jul 2005 mipsator
  * added ISO C99 vsnprintf() implementation (missing wide char support).
