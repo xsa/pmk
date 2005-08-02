@@ -54,31 +54,36 @@
 /*#define AC_DEBUG	1*/
 
 
-/*
+/*********************
+ * ac_parse_config() *
+ ***********************************************************************
+ DESCR
 	parse a config file assuming compatibility with autoconf
 
-	ht : def table
-	fpath : file path
+ IN
+	ht :	def table
+	fpath :	file path
 
-	return : boolean
-*/
+ OUT
+	boolean
+ ***********************************************************************/
 
 bool ac_parse_config(pmkdata *pgd) {
 	FILE	*fp_in,
-		*fp_out;
+			*fp_out;
 	bool	 rval = true;
 	char	 line[TMP_BUF_LEN],
-		 buf[TMP_BUF_LEN],
-		 fsrc[MAXPATHLEN],
-		 fname[MAXPATHLEN],
-		 ftmp[MAXPATHLEN],
-		*fpath,
-		*pstr,
-		*defname;
+			 buf[TMP_BUF_LEN],
+			 fsrc[MAXPATHLEN],
+			 fname[MAXPATHLEN],
+			 ftmp[MAXPATHLEN],
+			*fpath,
+			*pstr,
+			*defname;
 	htable	*ht;
-	int	 i,
-		 s,
-		 fe;
+	int		 i,
+			 s,
+			 fe;
 
 	ht = pgd->htab;
 	fpath = pgd->ac_file;
@@ -212,13 +217,20 @@ bool ac_parse_config(pmkdata *pgd) {
 	return(rval);
 }
 
-/*
+/************************
+ * ac_process_dyn_var() *
+ ***********************************************************************
+ DESCR
 	process special variables
 
-	pht : storage table
-	pgd : global data
-	template : target file
-*/
+ IN
+	pht :		storage table
+	pgd :		global data
+	template :	target file
+
+ OUT
+	boolean
+ ***********************************************************************/
 
 bool ac_process_dyn_var(pmkdata *pgd, char *template) {
 	char	*pstr;
@@ -285,11 +297,18 @@ bool ac_process_dyn_var(pmkdata *pgd, char *template) {
 	return(true);
 }
 
-/*
+/********************
+ * ac_clean_dyn_var *
+ ***********************************************************************
+ DESCR
 	clean dynamic variables
 
+ IN
 	pht : storage table
-*/
+
+ OUT
+	NONE
+ ***********************************************************************/
 
 void ac_clean_dyn_var(htable *pht) {
 	hash_delete(pht, "srcdir");
@@ -302,24 +321,33 @@ void ac_clean_dyn_var(htable *pht) {
 	hash_delete(pht, "abs_top_builddir");
 }
 
-/*
+/**********************
+ * ac_set_variables() *
+ ***********************************************************************
+ DESCR
 	set autoconf specific variables
-*/
+
+ IN
+	pht : storage table
+
+ OUT
+	boolean
+ ***********************************************************************/
 
 bool ac_set_variables(htable *pht) {
 	char	 buf[TMP_BUF_LEN],
-                *pstr;
+			*pstr;
 
 	/* path variables */
 	pstr = (char *) hash_get(pht, "PREFIX");
 	if (hash_update_dup(pht, "prefix", pstr) == HASH_ADD_FAIL)
 		return(false);
-	
+
 	pstr = (char *) hash_get(pht, "SYSCONFDIR");
 	if (hash_update_dup(pht, "sysconfdir", pstr) == HASH_ADD_FAIL)
 		return(false);
 
-	
+
 	if (hash_update_dup(pht, "exec_prefix", "${prefix}") == HASH_ADD_FAIL)
 		return(false);
 	if (hash_update_dup(pht, "bindir", "${exec_prefix}/bin") == HASH_ADD_FAIL)
@@ -366,10 +394,10 @@ bool ac_set_variables(htable *pht) {
 	if (hash_update_dup(pht, "target_cpu", pstr) == HASH_ADD_FAIL)
 		return(false); /* XXX  ouargl cross compiling ... */
 
-        pstr = (char *) hash_get(pht, "OS_NAME");
-        strlcpy(buf, pstr, sizeof(buf)); /* no need to check here */
-        pstr = (char *) hash_get(pht, "OS_VERSION");
-        if (strlcat_b(buf, pstr, sizeof(buf)) ==false)
+	pstr = (char *) hash_get(pht, "OS_NAME");
+	strlcpy(buf, pstr, sizeof(buf)); /* no need to check here */
+	pstr = (char *) hash_get(pht, "OS_VERSION");
+	if (strlcat_b(buf, pstr, sizeof(buf)) ==false)
 		return(false);
 
 	if (hash_update_dup(pht, "host_os", buf) == HASH_ADD_FAIL)

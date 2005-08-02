@@ -56,17 +56,23 @@
 
 FILE	*pmk_log_fp;
 
-/*
+
+/**************
+ * get_line() *
+ ***********************************************************************
+ DESCR
 	get a line from a file and remove newline character
 
+ IN
 	fd : file descriptor
 	line : buffer that will contain the line
 	lsize : size of the buffer
 
+ OUT
 	returns a boolean :
 		- true when a line is available
 		- false when error or eof occured
-*/
+ ***********************************************************************/
 
 bool get_line(FILE *fd, char *line, size_t lsize) {
 	char	*p;
@@ -87,14 +93,20 @@ bool get_line(FILE *fd, char *line, size_t lsize) {
 	}
 }
 
-/*
+
+/****************
+ * env_to_opt() *
+ ***********************************************************************
+ DESCR
 	put env variable in an option
 
-	env_name : variable name
-	opt : option struct
+ IN
+	env_name :	variable name
+	opt :		option struct
 
+ OUT
 	returns true if env_name exists
-*/
+ ***********************************************************************/
 
 bool env_to_opt(char *env_name, pmkcmdopt *opt) {
 	bool	 rval;
@@ -112,20 +124,26 @@ bool env_to_opt(char *env_name, pmkcmdopt *opt) {
 		} else {
 			rval = false;
 		}
-		
+
 	}
 	return(rval);
 }
 
-/*
+
+/******************
+ * get_make_var() *
+ ***********************************************************************
+ DESCR
 	get variable content from make
 
-	varname: name of the variable like for example CC
-	result: storage of result
-	rsize: result size
+ IN
+	varname:	name of the variable like for example CC
+	result:		storage of result
+	rsize:		result size
 
-	return true on success
-*/
+ OUT
+	boolean
+ ***********************************************************************/
 
 bool get_make_var(char *varname, char *result, size_t rsize) {
 	FILE	*mfp,
@@ -210,30 +228,52 @@ debugf(MKVAR_FMT_MK, varname, MKVAR_FILE);
 	return(rval);
 }
 
-/*
+
+/******************
+ * str_to_ulong() *
+ ***********************************************************************
+ DESCR
 	convert a string into an unsigned long
-*/
+
+ IN
+	XXX
+
+ OUT
+	XXX
+ ***********************************************************************/
 
 bool str_to_ulong(char *str, int base, unsigned long *value) {
 	char	*ep;
 
 	*value = strtoul(str, &ep, base);
-	if (*str == '\0' || *ep != '\0')
+	if (*str == '\0' || *ep != '\0') {
 		return(false); /* not a number */
-	if ((errno == ERANGE) && (*value == ULONG_MAX))
+	}
+
+	if ((errno == ERANGE) && (*value == ULONG_MAX)) {
 		return(false); /* out of range */
-	
+	}
+
 	return(true);
 }
 
-/*
+
+/*******************
+ * str_to_dynary() *
+ ***********************************************************************
+ DESCR
 	split a string into a dynamic array (one separator)
 
-	str : string to split
-	sep : separator
+ IN
+	str :	string to split
+	sep :	separator
 
-	return : dynary or NULL
-*/
+ OUT
+	dynary or NULL
+
+ NOTE
+	move to dynary.c ?
+ ***********************************************************************/
 
 dynary *str_to_dynary(char *str, char sep) {
 	static char	buf[2];
@@ -242,14 +282,23 @@ dynary *str_to_dynary(char *str, char sep) {
 	return(str_to_dynary_adv(str, buf));
 }
 
-/*
+
+/***********************
+ * str_to_dynary_adv() *
+ ***********************************************************************
+ DESCR
 	split a string into a dynamic array (list of separators)
 
-	str : string to split
-	sep : separators list
+ IN
+	str :	string to split
+	sep :	separators list
 
-	return : dynary or NULL
-*/
+ OUT
+	dynary or NULL
+
+ NOTE
+	move to dynary.c ?
+ ***********************************************************************/
 
 dynary *str_to_dynary_adv(char *str, char *seplst) {
 	char	 buf[MAXPATHLEN],
@@ -303,16 +352,22 @@ dynary *str_to_dynary_adv(char *str, char *seplst) {
 	return(da);
 }
 
-/*
+
+/*******************
+ * find_file_dir() *
+ ***********************************************************************
+ DESCR
 	find if one dir contain a given file in the specified list of path
 
-	da : path list
-	fname : file to search
-	fpath : storage of the directory
-	fplen : size of the storage
+ IN
+	da :	path list
+	fname :	file to search
+	fpath :	storage of the directory
+	fplen :	size of the storage
 
-	returns true on success
-*/
+ OUT
+	boolean
+ ***********************************************************************/
 
 bool find_file_dir(dynary *da, char *fname, char *fpath, size_t fplen) {
 	char		 tstr[MAXPATHLEN],
@@ -342,16 +397,22 @@ bool find_file_dir(dynary *da, char *fname, char *fpath, size_t fplen) {
 	return(false);
 }
 
-/*
+
+/***************
+ * find_file() *
+ ***********************************************************************
+ DESCR
 	find a file in the specified list of path
 
-	da : path list
-	fname : file to search
-	fpath : storage of the full path
-	fplen : size of the storage
+ IN
+	da :	path list
+	fname :	file to search
+	fpath :	storage of the full path
+	fplen :	size of the storage
 
-	returns true on success
-*/
+ OUT
+	boolean
+ ***********************************************************************/
 
 bool find_file(dynary *da, char *fname, char *fpath, size_t fplen) {
 	bool	rval = false;
@@ -366,16 +427,22 @@ bool find_file(dynary *da, char *fname, char *fpath, size_t fplen) {
 	return(rval);
 }
 
-/*
+
+/*******************
+ * get_file_path() *
+ ***********************************************************************
+ DESCR
 	get path of given filename in given path list
 
-	filename : name of the file to look for
-	path : string of the list of path
-	storage : storage for resulting path
-	size : size of storage
+ IN
+	filename :	name of the file to look for
+	path :		string of the list of path
+	storage :	storage for resulting path
+	size :		size of storage
 
+ OUT
 	returns true if filename is found in one of the list's path
-*/
+ ***********************************************************************/
 
 bool get_file_path(char *filename, char *path, char *storage, size_t size) {
 	bool	 rval = false;
@@ -399,11 +466,19 @@ bool get_file_path(char *filename, char *path, char *storage, size_t size) {
 	return(rval);
 }
 
-/*
+
+/************
+ * errorf() *
+ ***********************************************************************
+ DESCR
 	formated simple error
 
-	fmt : format string followed by arguments
-*/
+ IN
+	fmt :	format string followed by arguments
+
+ OUT
+	NONE
+ ***********************************************************************/
 
 void errorf(const char *fmt, ...) {
 	char	buf[TMP_BUF_LEN];
@@ -416,13 +491,21 @@ void errorf(const char *fmt, ...) {
 	fprintf(stderr, "Error : %s\n", buf);
 }
 
-/*
+
+/*****************
+ * errorf_line() *
+ ***********************************************************************
+ DESCR
 	formated parse error
 
-	filename : parsed file name
-	line : line of error
-	fmt : format string followed by arguments
-*/
+ IN
+	filename :	parsed file name
+	line :		line of error
+	fmt :		format string followed by arguments
+
+ OUT
+	NONE
+ ***********************************************************************/
 
 void errorf_line(char *filename, int line, const char *fmt, ...) {
 	char	buf[TMP_BUF_LEN];
@@ -435,11 +518,19 @@ void errorf_line(char *filename, int line, const char *fmt, ...) {
 	fprintf(stderr, "Error in '%s' line %d : %s\n", filename, line, buf);
 }
 
-/*
+
+/************
+ * debugf() *
+ ***********************************************************************
+ DESCR
 	formated debug message
 
-	fmt : format string followed by arguments
-*/
+ IN
+	fmt :	format string followed by arguments
+
+ OUT
+	NONE
+ ***********************************************************************/
 
 void debugf(const char *fmt, ...) {
 	char	buf[TMP_BUF_LEN];
@@ -452,13 +543,19 @@ void debugf(const char *fmt, ...) {
 	fprintf(stdout, "!DEBUG! %s\n", buf);
 }
 
-/*
+
+/******************
+ * pmk_log_open() *
+ ***********************************************************************
+ DESCR
 	open log file
 
-	logname : log file name
+ IN
+	logname :	log file name
 
+ OUT
 	returns true if opened
-*/
+ ***********************************************************************/
 
 bool pmk_log_open(char *logname) {
 	if (pmk_log_fp != NULL) {
@@ -474,20 +571,38 @@ bool pmk_log_open(char *logname) {
 	}
 }
 
-/*
+
+/*******************
+ * pmk_log_close() *
+ ***********************************************************************
+ DESCR
 	close log file
-*/
+
+ IN
+	NONE
+
+ OUT
+	NONE
+ ***********************************************************************/
 
 void pmk_log_close(void) {
 	fflush(pmk_log_fp);
 	fclose(pmk_log_fp);
 }
 
-/*
+
+/*************
+ * pmk_log() *
+ ***********************************************************************
+ DESCR
 	log formatted line
 
-	fmt : format string
-*/
+ IN
+	fmt :	format string
+
+ OUT
+	boolean
+ ***********************************************************************/
 
 bool pmk_log(const char *fmt, ...) {
 	char	buf[TMP_BUF_LEN];
@@ -507,15 +622,21 @@ bool pmk_log(const char *fmt, ...) {
 	}
 }
 
-/*
+
+/***********
+ * fcopy() *
+ ***********************************************************************
+ DESCR
 	copy file
 
-	src : file to copy
-	dst : destination file
-	mode : destination perms
+ IN
+	src :	file to copy
+	dst :	destination file
+	mode :	destination perms
 
-	return : boolean
-*/
+ OUT
+	boolean
+ ***********************************************************************/
 
 bool fcopy(char *src, char *dst, mode_t mode) {
 	char		cbuf[S_BLKSIZE];
@@ -573,16 +694,22 @@ bool fcopy(char *src, char *dst, mode_t mode) {
 	return(rval);
 }
 
-/*
-	open temporary file
-	
-	tfile : template file name
-	mode : file mode
-	buf : buffer for the randomized file name
-	bsize : buffer size
 
-	return : file structure or NULL
-*/
+/**************
+ * tmp_open() *
+ ***********************************************************************
+ DESCR
+	open temporary file
+
+ IN
+	tfile :	template file name
+	mode :	file mode
+	buf :	buffer for the randomized file name
+	bsize :	buffer size
+
+ OUT
+	file structure or NULL
+ ***********************************************************************/
 
 FILE *tmp_open(char *tfile, char *mode, char *buf, size_t bsize) {
 	int	fd;
@@ -600,17 +727,23 @@ FILE *tmp_open(char *tfile, char *mode, char *buf, size_t bsize) {
 	return(fdopen(fd, mode));
 }
 
-/*
-	open temporary file with suffix
-	
-	tfile : template file name
-	mode : file mode
-	buf : buffer for the randomized file name
-	bsize : buffer size
-	slen : suffix length
 
-	return : file structure or NULL
-*/
+/**************
+ * tmps_open() *
+ ***********************************************************************
+ DESCR
+	open temporary file with suffix
+
+ IN
+	tfile :	template file name
+	mode :	file mode
+	buf :	buffer for the randomized file name
+	bsize :	buffer size
+	slen :	suffix length
+
+ OUT
+	file structure or NULL
+ ***********************************************************************/
 
 FILE *tmps_open(char *tfile, char *mode, char *buf, size_t bsize, size_t slen) {
 	int	fd;

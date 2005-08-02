@@ -43,9 +43,9 @@
 #include "detect.h"
 
 
-/*************
- keyword data
-***********************************************************************/
+/****************
+ * keyword data *
+ ***********************************************************************/
 
 /* ADD_COMPILER options */
 kw_t	req_addcomp[] = {
@@ -92,23 +92,23 @@ prskw	kw_pmkcomp[] = {
 int	nbkwpc = sizeof(kw_pmkcomp) / sizeof(prskw);
 
 
-/**********
- functions
-***********************************************************************/
+/*************
+ * functions *
+ ***********************************************************************/
 
-/****************
- compdata_init()
-
+/*******************
+ * compdata_init() *
+ ***********************************************************************
  DESCR
 	init comp_data structure
 
  IN
-	csize: compilers hash table size 
+	csize: compilers hash table size
 	ssize: systems hash table size
 
  OUT
 	new structure or NULL
-***********************************************************************/
+ ***********************************************************************/
 
 comp_data *compdata_init(size_t csize, size_t ssize) {
 	comp_data	*cdata;
@@ -140,9 +140,9 @@ comp_data *compdata_init(size_t csize, size_t ssize) {
 }
 
 
-/*******************
- compdata_destroy()
-
+/**********************
+ * compdata_destroy() *
+ ***********************************************************************
  DESCR
 	clean comp_data structure
 
@@ -151,7 +151,7 @@ comp_data *compdata_init(size_t csize, size_t ssize) {
 
  OUT
 	NONE
-***********************************************************************/
+ ***********************************************************************/
 
 void compdata_destroy(comp_data *pcd) {
 	hash_destroy(pcd->cht);
@@ -159,9 +159,9 @@ void compdata_destroy(comp_data *pcd) {
 }
 
 
-/*******************
- compcell_destroy()
-
+/**********************
+ * compcell_destroy() *
+ ***********************************************************************
  DESCR
 	clean comp_cell structure
 
@@ -170,7 +170,7 @@ void compdata_destroy(comp_data *pcd) {
 
  OUT
 	NONE
-***********************************************************************/
+ ***********************************************************************/
 
 void compcell_destroy(comp_cell *pcc) {
 	free(pcc->c_id);
@@ -183,9 +183,9 @@ void compcell_destroy(comp_cell *pcc) {
 }
 
 
-/***************
- add_compiler()
-
+/******************
+ * add_compiler() *
+ ***********************************************************************
  DESCR
 	add a new compiler cell
 
@@ -195,7 +195,7 @@ void compcell_destroy(comp_cell *pcc) {
 
  OUT
 	boolean
-***********************************************************************/
+ ***********************************************************************/
 
 bool add_compiler(comp_data *pcd, htable *pht) {
 	comp_cell	*pcell;
@@ -264,9 +264,9 @@ bool add_compiler(comp_data *pcd, htable *pht) {
 }
 
 
-/*************
- add_system()
-
+/****************
+ * add_system() *
+ ***********************************************************************
  DESCR
 	add a new system cell
 
@@ -276,7 +276,7 @@ bool add_compiler(comp_data *pcd, htable *pht) {
 
  OUT
 	boolean
-***********************************************************************/
+ ***********************************************************************/
 
 bool add_system(comp_data *pcd, htable *pht, char *osname) {
 	char		*name,
@@ -307,9 +307,9 @@ bool add_system(comp_data *pcd, htable *pht, char *osname) {
 }
 
 
-/***********
- comp_get()
-
+/**************
+ * comp_get() *
+ ***********************************************************************
  DESCR
 	get compiler data
 
@@ -319,16 +319,16 @@ bool add_system(comp_data *pcd, htable *pht, char *osname) {
 
  OUT
 	compiler cell structure
-***********************************************************************/
+ ***********************************************************************/
 
 comp_cell *comp_get(comp_data *pcd, char *c_id) {
 	return(hash_get(pcd->cht, c_id));
 }
 
 
-/*****************
- comp_get_descr()
-
+/********************
+ * comp_get_descr() *
+ ***********************************************************************
  DESCR
 	get compiler descr
 
@@ -337,7 +337,7 @@ comp_cell *comp_get(comp_data *pcd, char *c_id) {
 	c_id:	compiler id
  OUT
 	compiler description
-***********************************************************************/
+ ***********************************************************************/
 
 char *comp_get_descr(comp_data *pcd, char *c_id) {
 	comp_cell	*pcell;
@@ -348,9 +348,9 @@ char *comp_get_descr(comp_data *pcd, char *c_id) {
 }
 
 
-/**********************
- parse_comp_file_adv()
-
+/*************************
+ * parse_comp_file_adv() *
+ ***********************************************************************
  DESCR
 	parse data from PMKCOMP_DATA file
 
@@ -360,7 +360,7 @@ char *comp_get_descr(comp_data *pcd, char *c_id) {
 
  OUT
 	compiler data structure or NULL
-***********************************************************************/
+ ***********************************************************************/
 
 comp_data *parse_comp_file_adv(char *cdfile, htable *pht) {
 	FILE		*fd;
@@ -426,7 +426,7 @@ comp_data *parse_comp_file_adv(char *cdfile, htable *pht) {
 						}
 					}
 					break;
-			
+
 				default :
 					errorf("parsing of data file failed.");
 					compdata_destroy(cdata);
@@ -451,9 +451,9 @@ comp_data *parse_comp_file_adv(char *cdfile, htable *pht) {
 }
 
 
-/******************
- parse_comp_file()
-
+/*********************
+ * parse_comp_file() *
+ ***********************************************************************
  DESCR
 	parse data from PMKCOMP_DATA file
 
@@ -462,16 +462,16 @@ comp_data *parse_comp_file_adv(char *cdfile, htable *pht) {
 
  OUT
 	compiler data structure or NULL
-***********************************************************************/
+ ***********************************************************************/
 
 comp_data *parse_comp_file(char *cdfile) {
 	return(parse_comp_file_adv(cdfile, NULL));
 }
 
 
-/****************
- gen_test_file()
-
+/*******************
+ * gen_test_file() *
+ ***********************************************************************
  DESCR
 	generate test file
 
@@ -481,7 +481,7 @@ comp_data *parse_comp_file(char *cdfile) {
 
  OUT
 	boolean
-***********************************************************************/
+ ***********************************************************************/
 
 bool gen_test_file(FILE *fp, comp_data *pcd) {
 	comp_cell	*pcell;
@@ -510,9 +510,9 @@ bool gen_test_file(FILE *fp, comp_data *pcd) {
 }
 
 
-/******************
- detect_compiler()
-
+/*********************
+ * detect_compiler() *
+ ***********************************************************************
  DESCR
 	detect compiler
 
@@ -524,7 +524,7 @@ bool gen_test_file(FILE *fp, comp_data *pcd) {
 
  OUT
 	boolean
-***********************************************************************/
+ ***********************************************************************/
 
 bool detect_compiler(char *cpath, char *blog, comp_data *pcd, comp_info *cinfo) {
 	FILE		*tfp,
