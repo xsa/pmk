@@ -9,14 +9,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "../common.h"
-#include "../compat/compat.h"
 #include "../detect_cpu.h"
 #include "../detect_cpu_asm.h"
-#include "../dynarray.h"
 #include "../hash.h"
 #include "../parse.h"
-#include "../pmk_obj.h"
 
 #define PMKCPU_DATA	"../data/pmkcpu.dat"
 

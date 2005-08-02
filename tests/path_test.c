@@ -7,24 +7,27 @@
 #include <sys/param.h>
 #include <stdio.h>
 
-#include "../compat.h"
 #include "../compat/pmk_stdbool.h"
 #include "../pathtools.h"
 
 char	*chk_paths[] = {
-		"/usr/./local/bin/../lib//",
-		"/usr/../../local",
-		"/usr////lib/..",
-		"./youpi/youpla/../paf",
-		"blah/../odidonk",
-		"/var/."
-	},
-	*rel_paths[][2] = {
-		{"/home/me/tmp/src/youpi", "/home/me/tmp/build/"},
-		{"/usr/local/lib/", "/var/named"},
-		{"/","/etc/ppp"},
-		{"/usr/local", "/usr/local"}
-	};
+			"/usr/./local/bin/../lib//",
+			"/usr/../../local",
+			"/usr////lib/..",
+			"./youpi/youpla/../paf",
+			"blah/../odidonk",
+			"/var/.",
+			"../youpla/youpi/",
+			"../youpla/../youpi",
+			"/../",
+			"/..//"
+		 },
+		*rel_paths[][2] = {
+			{"/home/me/tmp/src/youpi", "/home/me/tmp/build/"},
+			{"/usr/local/lib/", "/var/named"},
+			{"/","/etc/ppp"},
+			{"/usr/local", "/usr/local"}
+		 };
 
 
 int main(void) {
@@ -36,8 +39,13 @@ int main(void) {
 
 	printf("* Checking paths :\n");
 	for (i = 0 ; i < s ; i++) {
-		chkpath(chk_paths[i], buf); /* XXX check ? */
-		printf("\t'%s' => '%s'\n", chk_paths[i], buf);
+		printf("Source path = '%s'\n", chk_paths[i]);
+		if (chkpath(chk_paths[i], buf) == false) {
+			printf("\tFailed (%s)\n", buf);
+		} else {
+			printf("\tOk => '%s'\n", buf);
+		}
+		printf("\n");
 	}
 
 	s = (unsigned int) (sizeof(rel_paths) / (sizeof(char *) * 2));

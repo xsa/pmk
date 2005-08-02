@@ -8,8 +8,6 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-#include "../compat/compat.h"
-#include "../compat/pmk_string.h"
 #include "../hash.h"
 
 #define TAB_SIZE 256
@@ -126,7 +124,7 @@ int main(void) {
 	}
 
 	printf("Testing destroy\n");
-	n = hash_destroy(hp);	
+	n = hash_destroy(hp);
 	printf("Removed %d key(s)\n", n);
 
 	return(0);

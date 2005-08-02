@@ -8,27 +8,11 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-#include "../autoconf.h"
-#include "../common.h"
-#include "../compat.c"
-#include "../cfgtool.h"
-#include "../detect.h"
-#include "../dynarray.h"
-#include "../func.h"
-#include "../functool.h"
-#include "../hash.h"
-#include "../hash_tools.h"
 #include "../parse.h"
-#include "../pathtools.h"
-#include "../pmk_obj.h"
-#include "../pkgconfig.h"
+/*#include "../func.c"*/
 
 extern prskw	kw_pmkfile[];
 extern size_t	nbkwpf;
-
-
-bool	process_fake(htable *, prsopt *);
-void	usage(void);
 
 
 /*

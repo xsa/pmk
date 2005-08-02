@@ -9,13 +9,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "../common.h"
-#include "../compat/compat.h"
 #include "../detect.h"
-#include "../dynarray.h"
-#include "../hash.h"
-#include "../parse.h"
-#include "../pmk_obj.h"
 
 int main(int argc, char *argv[]) {
 	char		*cc;
