@@ -666,11 +666,11 @@ bool pmk_check_header(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 	cflags = po_get_str(hash_get(ht, PMKVAL_ENV_CFLAGS));
 	if (cflags != NULL) {
 		/* init alternative variable */
-                if (hash_get(pgd->htab, cflags) == NULL) {
-                        if (hash_update_dup(pgd->htab, cflags, "") == HASH_ADD_FAIL) {
-        			errorf(HASH_ERR_UPDT_ARG, cflags);
-        			return(false);
-                        }
+		if (hash_get(pgd->htab, cflags) == NULL) {
+			if (hash_update_dup(pgd->htab, cflags, "") == HASH_ADD_FAIL) {
+				errorf(HASH_ERR_UPDT_ARG, cflags);
+				return(false);
+			}
 		}
 	} else {
 		/* use default variable of the used language */
@@ -703,7 +703,6 @@ bool pmk_check_header(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 			return(false);
 		}
 	}
-
 
 	/*
 		check header file
@@ -981,11 +980,11 @@ bool pmk_check_lib(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 	libs = po_get_str(hash_get(ht, KW_OPT_LIBS));
 	if (libs != NULL) {
 		/* init alternative variable */
-                if (hash_get(pgd->htab, libs) == NULL) {
-                        if (hash_update_dup(pgd->htab, libs, "") == HASH_ADD_FAIL) {
-        			errorf(HASH_ERR_UPDT_ARG, libs);
-        			return(false);
-                        }
+		if (hash_get(pgd->htab, libs) == NULL) {
+			if (hash_update_dup(pgd->htab, libs, "") == HASH_ADD_FAIL) {
+				errorf(HASH_ERR_UPDT_ARG, libs);
+				return(false);
+			}
 		}
 	} else {
 		/* use default library variable */
@@ -1199,11 +1198,11 @@ bool pmk_check_config(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 	cflags = po_get_str(hash_get(ht, PMKVAL_ENV_CFLAGS));
 	if (cflags != NULL) {
 		/* init alternative variable */
-                if (hash_get(pgd->htab, cflags) == NULL) {
-                        if (hash_update_dup(pgd->htab, cflags, "") == HASH_ADD_FAIL) {
-        			errorf(HASH_ERR_UPDT_ARG, cflags);
-        			return(false);
-                        }
+		if (hash_get(pgd->htab, cflags) == NULL) {
+			if (hash_update_dup(pgd->htab, cflags, "") == HASH_ADD_FAIL) {
+				errorf(HASH_ERR_UPDT_ARG, cflags);
+				return(false);
+			}
 		}
 	} else {
 		/* use default variable of the used language */
@@ -1214,11 +1213,11 @@ bool pmk_check_config(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 	libs = po_get_str(hash_get(ht, KW_OPT_LIBS));
 	if (libs != NULL) {
 		/* init alternative variable */
-                if (hash_get(pgd->htab, libs) == NULL) {
-                        if (hash_update_dup(pgd->htab, libs, "") == HASH_ADD_FAIL) {
-        			errorf(HASH_ERR_UPDT_ARG, libs);
-        			return(false);
-                        }
+		if (hash_get(pgd->htab, libs) == NULL) {
+			if (hash_update_dup(pgd->htab, libs, "") == HASH_ADD_FAIL) {
+				errorf(HASH_ERR_UPDT_ARG, libs);
+				return(false);
+			}
 		}
 	} else {
 		/* use default library variable */
@@ -1410,11 +1409,11 @@ bool pmk_check_pkg_config(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 	cflags = po_get_str(hash_get(ht, PMKVAL_ENV_CFLAGS));
 	if (cflags != NULL) {
 		/* init alternative variable */
-                if (hash_get(pgd->htab, cflags) == NULL) {
-                        if (hash_update_dup(pgd->htab, cflags, "") == HASH_ADD_FAIL) {
-        			errorf(HASH_ERR_UPDT_ARG, cflags);
-        			return(false);
-                        }
+		if (hash_get(pgd->htab, cflags) == NULL) {
+			if (hash_update_dup(pgd->htab, cflags, "") == HASH_ADD_FAIL) {
+				errorf(HASH_ERR_UPDT_ARG, cflags);
+				return(false);
+			}
 		}
 	} else {
 		/* use default variable of the used language */
@@ -1425,11 +1424,11 @@ bool pmk_check_pkg_config(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 	libs = po_get_str(hash_get(ht, KW_OPT_LIBS));
 	if (libs != NULL) {
 		/* init alternative variable */
-                if (hash_get(pgd->htab, libs) == NULL) {
-                        if (hash_update_dup(pgd->htab, libs, "") == HASH_ADD_FAIL) {
-        			errorf(HASH_ERR_UPDT_ARG, libs);
-        			return(false);
-                        }
+		if (hash_get(pgd->htab, libs) == NULL) {
+			if (hash_update_dup(pgd->htab, libs, "") == HASH_ADD_FAIL) {
+				errorf(HASH_ERR_UPDT_ARG, libs);
+				return(false);
+			}
 		}
 	} else {
 		/* use default library variable */
