@@ -36,6 +36,7 @@
 #ifndef _PMK_FUNC_H_
 #define _PMK_FUNC_H_
 
+#include "compat/pmk_stdbool.h"
 #include "pmk.h"
 #include "parse.h"
 
@@ -219,3 +220,4 @@ bool	pmk_setparam_detect(pmkcmd *, prsopt *, pmkdata *);
 bool	pmk_set_variable(pmkcmd *, prsopt *, pmkdata *);
 
 #endif /* _PMK_FUNC_H_ */
+
