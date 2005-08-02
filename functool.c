@@ -48,6 +48,10 @@
 
 /*#define FC_DEBUG	1*/
 
+/*****************
+ * language data *
+ ***********************************************************************/
+
 #define NBLANG	2
 lgdata	ldata[NBLANG] = {
 	{"C",	"CC",	"CPPFLAGS",	"CFLAGS",	"SLCFLAGS"},
@@ -55,19 +59,23 @@ lgdata	ldata[NBLANG] = {
 };
 
 
-/*
+/********************
+ * check_bool_str() *
+ ***********************************************************************
+ DESCR
 	check boolean string
 
-	str : string to check
+ IN
+	str :	string to check
 
-	returns true is str is "true" else returns false
+ OUT
+	boolean
 
-	NOTE : strncmp checks only on a length of 6 because
-		lenght of "true" is 5 and "false" is 6 chr.
-		If str is longer we don't need to check as
-		we are sure that the result is false.
-
-*/
+ NOTE
+	strncmp checks only on a length of 6 because lenght of "true" is 5
+	and "false" is 6 chr. If str is longer we don't need to check as
+	we are sure that the result is false.
+ ***********************************************************************/
 
 bool check_bool_str(char *str) {
 	if (strncmp(str, BOOL_STRING_TRUE, 6) == 0) {
@@ -77,13 +85,19 @@ bool check_bool_str(char *str) {
 	}
 }
 
-/*
+
+/*****************
+ * invert_bool() *
+ ***********************************************************************
+ DESCR
 	invert bool value
 
-	value : input boolean value
+ IN
+	value :	input boolean value
 
-	return : negation of value
-*/
+ OUT
+	negation of value
+ ***********************************************************************/
 
 bool invert_bool(bool value) {
 		if (value == true) {
@@ -93,13 +107,19 @@ bool invert_bool(bool value) {
 		}
 }
 
-/*
+
+/*****************
+ * bool_to_str() *
+ ***********************************************************************
+ DESCR
 	convert boolean into string
 
-	value : boolean value to convert to string
+ IN
+	value :	boolean value to convert to string
 
+ OUT
 	returns the string
-*/
+ ***********************************************************************/
 
 char *bool_to_str(bool value) {
 	static char	bstr[6];
@@ -112,16 +132,22 @@ char *bool_to_str(bool value) {
 	return(bstr);
 }
 
-/*
+
+/***********************
+ * get_file_dir_path() *
+ ***********************************************************************
+ DESCR
 	get directory of given filename in given path list
 
-	filename : name of the file to look for
-	path : string of the list of path
-	storage : storage for resulting directory
-	size : size of storage
+ IN
+	filename :	name of the file to look for
+	path :		string of the list of path
+	storage :	storage for resulting directory
+	size :		size of storage
 
+ OUT
 	returns true if filename is found in one of the list's path
-*/
+ ***********************************************************************/
 
 bool get_file_dir_path(char *filename, char *path, char *storage, int size) {
 	bool	 rval = false;
@@ -145,13 +171,19 @@ bool get_file_dir_path(char *filename, char *path, char *storage, int size) {
 	return(rval);
 }
 
-/*
+
+/****************
+ * str_to_def() *
+ ***********************************************************************
+ DESCR
 	generate semi-definition from a string
 
-	str : string to use
+ IN
+	str :	string to use
 
+ OUT
 	returns semidef string
-*/
+ ***********************************************************************/
 
 char *str_to_def(char *str) {
 	static char	 buffer[TMP_BUF_LEN];
@@ -181,9 +213,19 @@ char *str_to_def(char *str) {
 	return(buffer);
 }
 
-/*
+
+/********************
+ * build_def_name() *
+ ***********************************************************************
+ DESCR
 	build_def
-*/
+
+ IN
+	XXX
+
+ OUT
+	XXX
+ ***********************************************************************/
 
 char *build_def_name(char *name) {
 	static char	 def_str[MAX_HASH_KEY_LEN];
@@ -199,21 +241,27 @@ char *build_def_name(char *name) {
 	return(def_str);
 }
 
-/*
+
+/****************
+ * record_def() *
+ ***********************************************************************
+ DESCR
 	record data definition tag (DEF__*)
 
-	ht : hast table to store the definition
-	name : data name
-	status : status of data
+ IN
+	ht :		hash table to store the definition
+	name :		data name
+	status :	status of data
 
-	returns true on success
-*/
+ OUT
+	boolean
+ ***********************************************************************/
 
 bool record_def(htable *ht, char *name, bool status) {
 	char	*semidef,
-		 def_str[MAX_HASH_KEY_LEN],
-		 have_str[MAX_HASH_VALUE_LEN],
-		 def_val[MAX_HASH_VALUE_LEN];
+			 def_str[MAX_HASH_KEY_LEN],
+			 have_str[MAX_HASH_VALUE_LEN],
+			 def_val[MAX_HASH_VALUE_LEN];
 
 	semidef = str_to_def(name);
 	if (semidef == NULL)
@@ -234,7 +282,7 @@ bool record_def(htable *ht, char *name, bool status) {
 					"#undef %s", have_str) == false)
 			return(false);
 	}
-	
+
 #ifdef FC_DEBUG
 	debugf("record_def() : def_val = '%s'", def_val);
 #endif
@@ -249,21 +297,27 @@ bool record_def(htable *ht, char *name, bool status) {
 	return(true);
 }
 
-/*
+
+/*********************
+ * record_def_data() *
+ ***********************************************************************
+ DESCR
 	record definition data (DEF__* and HAVE_*)
 
-	ht : hast table to store the definition
-	name : tag name
-	value : tag value
+ IN
+	ht :	hash table to store the definition
+	name :	tag name
+	value :	tag value
 
-	returns true on success
-*/
+ OUT
+	boolean
+ ***********************************************************************/
 
 bool record_def_data(htable *ht, char *name, char *value) {
 	char	*semidef,
-		 def_str[MAX_HASH_KEY_LEN],
-		 def_val[MAX_HASH_VALUE_LEN],
-		 have_str[MAX_HASH_VALUE_LEN];
+			 def_str[MAX_HASH_KEY_LEN],
+			 def_val[MAX_HASH_VALUE_LEN],
+			 have_str[MAX_HASH_VALUE_LEN];
 
 	semidef = str_to_def(name);
 	if (semidef == NULL)
@@ -293,7 +347,7 @@ bool record_def_data(htable *ht, char *name, char *value) {
 					"#undef %s", have_str) == false)
 			return(false);
 	}
-	
+
 #ifdef FC_DEBUG
 	debugf("record_def_data() : def_val = '%s'", def_val);
 #endif
@@ -308,20 +362,26 @@ bool record_def_data(htable *ht, char *name, char *value) {
 	return(true);
 }
 
-/*
+
+/****************
+ * record_val() *
+ ***********************************************************************
+ DESCR
 	record data tag
 	XXX TODO to remove
 
-	ht : hast table to store the definition
-	name : data name
-	value : value to store
+ IN
+	ht :	hash table to store the definition
+	name :	data name
+	value :	value to store
 
-	returns true on success
-*/
+ OUT
+	boolean
+ ***********************************************************************/
 
 bool record_val(htable *ht, char *name, char *value) {
 	char	*semidef,
-		 have_str[MAX_HASH_VALUE_LEN];
+			 have_str[MAX_HASH_VALUE_LEN];
 
 	semidef = str_to_def(name);
 	if (semidef == NULL)
@@ -340,19 +400,25 @@ bool record_val(htable *ht, char *name, char *value) {
 	return(true);
 }
 
-/*
+
+/**********************
+ * process_def_list() *
+ ***********************************************************************
+ DESCR
 	process list of defines
 
-	ht : storage hash table
-	da : list of defines
+ IN
+	ht :	storage hash table
+	da :	list of defines
 
-	returns : true on success else false
-*/
+ OUT
+	boolean
+ ***********************************************************************/
 
 bool process_def_list(htable *ht, dynary *da) {
 	char	*name;
-	int	 i,
-		 n;
+	int		 i,
+			 n;
 
 	/* process additional defines */
 	if (da != NULL) {
@@ -369,15 +435,20 @@ bool process_def_list(htable *ht, dynary *da) {
 }
 
 
-/*
+/***************
+ * label_set() *
+ ***********************************************************************
+ DESCR
 	set label
 
-	ht : label has htable
-	name : label name
-	status : label status
+ IN
+	ht :		label hash table
+	name :		label name
+	status :	label status
 
-	returns true on success
-*/
+ OUT
+	boolean
+ ***********************************************************************/
 
 bool label_set(htable *lht, char *name, bool status) {
 	if (hash_update_dup(lht, name, bool_to_str(status)) == HASH_ADD_FAIL)
@@ -386,12 +457,20 @@ bool label_set(htable *lht, char *name, bool status) {
 	return(true);
 }
 
-/*
+
+/*****************
+ * label_check() *
+ ***********************************************************************
+ DESCR
 	check label
 
-	ht : label hash table
-	name : label name
-*/
+ IN
+	ht :	label hash table
+	name :	label name
+
+ OUT
+	boolean
+ ***********************************************************************/
 
 bool label_check(htable *lht, char *name) {
 	bool	 neg = false,
@@ -416,14 +495,20 @@ bool label_check(htable *lht, char *name) {
 	return(rval);
 }
 
-/*
-	check depends
 
-	ht : label hash table
-	deplst : string that contain the list of label dependencies
+/******************
+ * depend_check() *
+ ***********************************************************************
+ DESCR
+	check dependencies
 
-	returns true if all dependencies are true
-*/
+ IN
+	ht :		label hash table
+	deplst :	string that contain the list of label dependencies
+
+ OUT
+	boolean
+ ***********************************************************************/
 
 bool depend_check(htable *lht, pmkdata *gd) {
 	bool		 rval = true;
@@ -462,13 +547,19 @@ bool depend_check(htable *lht, pmkdata *gd) {
 	return(rval);
 }
 
-/*
+
+/*******************
+ * require_check() *
+ ***********************************************************************
+ DESCR
 	check the required flag
 
-	ht : hash table of the command options
+ IN
+	ht :	hash table of the command options
 
+ OUT
 	returns a boolean
-*/
+ ***********************************************************************/
 
 bool require_check(htable *pht) {
 	bool	 rval;
@@ -495,13 +586,19 @@ bool require_check(htable *pht) {
 	return(rval);
 }
 
-/*
+
+/****************
+ * check_lang() *
+ ***********************************************************************
+ DESCR
 	check language
 
-	lang : language to check
+ IN
+	lang :	language to check
 
-	return : language structure or NULL
-*/
+ OUT
+	language structure or NULL
+ ***********************************************************************/
 
 lgdata *check_lang(char *lang) {
 	int	 i;
@@ -515,13 +612,19 @@ lgdata *check_lang(char *lang) {
 	return(NULL);
 }
 
-/*
-	check language with it's compiler (symbolic) name
 
-	comp : compiler (symbolic) name
+/*********************
+ * check_lang_comp() *
+ ***********************************************************************
+ DESCR
+	check language with its compiler (symbolic) name
 
-	return : language structure or NULL
-*/
+ IN
+	comp :	compiler (symbolic) name
+
+ OUT
+	language structure or NULL
+ ***********************************************************************/
 
 lgdata *check_lang_comp(char *comp) {
 	int	 i;
@@ -535,14 +638,20 @@ lgdata *check_lang_comp(char *comp) {
 	return(NULL);
 }
 
-/*
+
+/**************
+ * get_lang() *
+ ***********************************************************************
+ DESCR
 	provide data on language used
 
-	pht : hash table that should contain LANG
-	pgd : global data structure
+ IN
+	pht :	hash table that should contain LANG
+	pgd :	global data structure
 
-	return : lgdata structure or NULL for unknown language
-*/
+ OUT
+	lgdata structure or NULL for unknown language
+ ***********************************************************************/
 
 lgdata *get_lang(htable *pht, pmkdata *pgd) {
 	char	*lang;
@@ -562,14 +671,20 @@ lgdata *get_lang(htable *pht, pmkdata *pgd) {
 	return(check_lang(lang));
 }
 
-/*
+
+/*******************
+ * get_comp_path() *
+ ***********************************************************************
+ DESCR
 	provide compiler path
 
-	pht : main hash table
-	compname : compiler name from lgdata structure
+ IN
+	pht :		main hash table
+	compname :	compiler name from lgdata structure
 
-	return : compiler's path
-*/
+ OUT
+	compiler's path
+ ***********************************************************************/
 
 char *get_comp_path(htable *pht, char *compname) {
 	char	key[OPT_NAME_LEN];
@@ -581,13 +696,18 @@ char *get_comp_path(htable *pht, char *compname) {
 }
 
 
-/*
+/*********************
+ * check_cfgt_data() *
+ ***********************************************************************
+ DESCR
 	check if config tool data is loaded and try to load it if not done
 
-	pgd : global data structure
+ IN
+	pgd :	global data structure
 
-	return : boolean
-*/
+ OUT
+	boolean
+ ***********************************************************************/
 
 bool check_cfgt_data(pmkdata *pgd) {
 	if (pgd->cfgt == NULL) {
@@ -601,17 +721,22 @@ bool check_cfgt_data(pmkdata *pgd) {
 }
 
 
-/*
+/**********************
+ * process_required() *
+ ***********************************************************************
+ DESCR
 	process the required flag on failure
 
-	pgd : global data structure
-	pcmd : command data structure
-	required : required flag
-	key : optional define to record (not processed if NULL)
-	value : optional value to record (see key)
+ IN
+	pgd :		global data structure
+	pcmd :		command data structure
+	required :	required flag
+	key :		optional define to record (not processed if NULL)
+	value :		optional value to record (see key)
 
-	return : true if not required else false
-*/
+ OUT
+	boolean
+ ***********************************************************************/
 
 bool process_required(pmkdata *pgd, pmkcmd *pcmd, bool required,
 					char *key, char *value) {
@@ -619,7 +744,7 @@ bool process_required(pmkdata *pgd, pmkcmd *pcmd, bool required,
 		/* record definition */
 		record_def_data(pgd->htab, key, value);
 	}
-	
+
 	/* set label value */
 	label_set(pgd->labl, pcmd->label, false);
 
@@ -628,15 +753,21 @@ bool process_required(pmkdata *pgd, pmkcmd *pcmd, bool required,
 	return(invert_bool(required));
 }
 
-/*
+
+/********************
+ * c_file_builder() *
+ ***********************************************************************
+ DESCR
 	build c style test file
 
-	fnbuf : file name buffer
-	fbsz : file name buffer size
-	tmpl : content template
+ IN
+	fnbuf :	file name buffer
+	fbsz :	file name buffer size
+	tmpl :	content template
 
-	returns : true on success else false
-*/
+ OUT
+	boolean
+ ***********************************************************************/
 
 bool c_file_builder(char *fnbuf, size_t fbsz, char *tmpl, ...) {
 	FILE	*tfp;
@@ -662,5 +793,158 @@ bool c_file_builder(char *fnbuf, size_t fbsz, char *tmpl, ...) {
 
 	/* everything is okay, tchuss */
 	return(true);
+}
+
+/*******************
+ * code_bld_init() *
+ ***********************************************************************
+ DESCR
+	XXX
+
+ IN
+	XXX
+
+ OUT
+	XXX
+ ***********************************************************************/
+
+void code_bld_init(code_bld_t *pcb) {
+	pcb->header = NULL;
+	pcb->define = NULL;
+	pcb->procedure = NULL;
+	pcb->type = NULL;
+	pcb->member = NULL;
+	pcb->subhdrs = NULL;
+}
+
+
+/********************
+ * c_code_builder() *
+ ***********************************************************************
+ DESCR
+	XXX
+
+ IN
+	XXX
+
+ OUT
+	XXX
+ ***********************************************************************/
+
+bool c_code_builder(char *fnbuf, size_t fbsz, code_bld_t *pcb) {
+	FILE	*fp;
+	size_t	 i;
+
+	/* open temporary file */
+	fp = tmps_open(TEST_FILE_NAME, "w", fnbuf, fbsz, strlen(C_FILE_EXT));
+	if (fp == NULL) {
+		errorf("c_code_builder: tmps_open() failed");
+		return(false); /* failed to open */
+	}
+
+	/* main header */
+	if (pcb->header != NULL) {
+		fprintf(fp, "/* main header to test */\n");
+		fprintf(fp, CODE_C_HDR, pcb->header);
+	}
+
+	/* sub headers */
+	if (pcb->subhdrs != NULL) {
+		fprintf(fp, "/* dependency headers */\n");
+		for (i = 0 ; i < da_usize(pcb->subhdrs) ; i++) {
+			fprintf(fp, da_idx(pcb->subhdrs, i));
+		}
+	}
+
+	/* main proc */
+	fprintf(fp, CODE_C_BEG);
+
+	/* define test */
+	if (pcb->define != NULL) {
+		fprintf(fp, CODE_C_DEF, pcb->define);
+	}
+
+	/* procedure test */
+	if (pcb->procedure != NULL) {
+		fprintf(fp, CODE_C_PROC, pcb->procedure);
+	}
+
+	/* type test */
+	if (pcb->type != NULL) {
+		if (pcb->member == NULL) {
+			/* simple */
+			fprintf(fp, CODE_C_VAR, pcb->type);
+			fprintf(fp, CODE_C_TYPE);
+		} else {
+			/* with member */
+			fprintf(fp, CODE_C_VAR, pcb->type);
+			fprintf(fp, CODE_C_MEMBER, pcb->member);
+		}
+	}
+
+	fprintf(fp, CODE_C_END);
+
+	fclose(fp);
+
+	return(true);
+}
+
+
+/********************
+ * c_object_build() *
+ ***********************************************************************
+ DESCR
+	XXX
+
+ IN
+	XXX
+
+ OUT
+	XXX
+ ***********************************************************************/
+
+bool c_object_build(char *buf, size_t sz, char *comp, char *flags,
+									char *lib, char *flog, bool dolink) {
+	/* start with compiler */
+	strlcpy(buf, comp, sz);
+
+	/* if flags are provided */
+	if (flags != NULL) {
+		strlcat(buf, " ", sz);
+		strlcat(buf, flags, sz);
+	}
+
+	/* append the object name */
+	strlcat(buf, " -o ", sz);
+	strlcat(buf, BIN_TEST_NAME, sz);
+
+	/* if we don't link then append object extension */
+	if (dolink == false) {
+		strlcat(buf, ".o", sz);
+	}
+
+	/* if an optional library has been provided */
+	if (lib != NULL) {
+		strlcat(buf, " -l ", sz);
+		strlcat(buf, lib, sz);
+	}
+
+	/* if we don't link use -c */
+	if (dolink == false) {
+		strlcat(buf, " -c", sz);
+	}
+
+	/* append source filename */
+	strlcat(buf, " ", sz);
+	strlcat(buf, TEST_FILE_NAME, sz);
+
+	/* append log redirection */
+	strlcat(buf, " >>", sz);
+	strlcat(buf, flog, sz);
+	if (strlcat_b(buf, " 2>&1", sz) == false) {
+		return(false);
+	}
+
+	return(true); /* XXX */
 }
 
