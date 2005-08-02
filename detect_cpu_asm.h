@@ -41,9 +41,9 @@
 #include "cpu_arch_def.h"
 
 
-/*
-	x86 architecture
-*/
+/********************
+ * x86 architecture *
+ ***********************************************************************/
 
 #if defined(ARCH_X86_32) || defined(ARCH_X86_64)
 
@@ -59,9 +59,10 @@ extern void	 x86_exec_cpuid(uint32_t); /* cpuid function */
 
 #endif /* ARCH_X86_32 || ARCH_X86_64 */
 
-/*
-	alpha architecture
-*/
+
+/**********************
+ * alpha architecture *
+ ***********************************************************************/
 
 #if defined(ARCH_ALPHA)
 
@@ -70,9 +71,10 @@ uint64_t	alpha_exec_amask(void);
 
 #endif /* ARCH_ALPHA */
 
-/*
-	ia64 architecture
-*/
+
+/*********************
+ * ia64 architecture *
+ ***********************************************************************/
 
 #if defined(ARCH_IA64)
 

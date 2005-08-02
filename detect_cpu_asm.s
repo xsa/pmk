@@ -41,74 +41,74 @@
 .text
 
 /*
- *	X86 32 bits code
+ *  X86 32 bits code
  */
 
 
-	.align	16,0x90
+    .align  16,0x90
 
 
 /*
-	check if cpuid is available
+    check if cpuid is available
 */
 
-	.globl	x86_check_cpuid_flag
+    .globl  x86_check_cpuid_flag
 
 x86_check_cpuid_flag:
-	pushl	%ecx		/* save ecx register */
+    pushl   %ecx        /* save ecx register */
 
-	pushfl
-	popl	%eax		/* get eflags */
+    pushfl
+    popl    %eax        /* get eflags */
 
-	movl	%eax,%ecx	/* save flags */
+    movl    %eax,%ecx   /* save flags */
 
-	xorl	$0x200000,%eax	/* clear CPU ID flag */
+    xorl    $0x200000,%eax  /* clear CPU ID flag */
 
-	pushl	%eax
-	popfl			/* load eflags */
+    pushl   %eax
+    popfl           /* load eflags */
 
-	pushfl
-	popl	%eax		/* get current eflags state */
+    pushfl
+    popl    %eax        /* get current eflags state */
 
-	pushl	%ecx
-	popfl			/* put original state back */
+    pushl   %ecx
+    popfl           /* put original state back */
 
-	popl	%ecx		/* restore ecx register */
+    popl    %ecx        /* restore ecx register */
 
-	andl	$0x200000,%eax	/* keep CPU ID  flag only */
-	rorl	$21,%eax	/* and shift it to bit 0 */
+    andl    $0x200000,%eax  /* keep CPU ID  flag only */
+    rorl    $21,%eax    /* and shift it to bit 0 */
 
-	ret
+    ret
 
 /*
-	exec cpuid function
+    exec cpuid function
 
-	returns: pointer to static buffer
+    returns: pointer to static buffer
 */
 
-	.globl x86_exec_cpuid
+    .globl x86_exec_cpuid
 
 x86_exec_cpuid:
-	/* get function number */
-	movl	4(%esp),%eax
+    /* get function number */
+    movl    4(%esp),%eax
 
-	pushl	%ebx
-	pushl	%ecx
-	pushl	%edx
+    pushl   %ebx
+    pushl   %ecx
+    pushl   %edx
 
-	cpuid
+    cpuid
 
-	/* copy register values */
-	movl	%eax,x86_cpu_reg_eax
-	movl	%ebx,x86_cpu_reg_ebx
-	movl	%ecx,x86_cpu_reg_ecx
-	movl	%edx,x86_cpu_reg_edx
+    /* copy register values */
+    movl    %eax,x86_cpu_reg_eax
+    movl    %ebx,x86_cpu_reg_ebx
+    movl    %ecx,x86_cpu_reg_ecx
+    movl    %edx,x86_cpu_reg_edx
 
-	popl	%edx
-	popl	%ecx
-	popl	%ebx
+    popl    %edx
+    popl    %ecx
+    popl    %ebx
 
-	ret
+    ret
 
 
 #endif /* ARCH_X86_32 */
@@ -118,74 +118,74 @@ x86_exec_cpuid:
 .text
 
 /*
- *	X86 64 bits code
+ *  X86 64 bits code
  */
 
 
-	.align	16,0x90
+    .align  16,0x90
 
 
 /*
-	check if cpuid is available
+    check if cpuid is available
 */
 
-	.globl	x86_check_cpuid_flag
+    .globl  x86_check_cpuid_flag
 
 x86_check_cpuid_flag:
-	pushq	%rcx		/* save rcx register */
+    pushq   %rcx        /* save rcx register */
 
-	pushfq
-	popq	%rax		/* get eflags */
+    pushfq
+    popq    %rax        /* get eflags */
 
-	movq	%rax,%rcx	/* save flags */
+    movq    %rax,%rcx   /* save flags */
 
-	xorq	$0x200000,%rax	/* clear CPU ID flag */
+    xorq    $0x200000,%rax  /* clear CPU ID flag */
 
-	pushq	%rax
-	popfq			/* load eflags */
+    pushq   %rax
+    popfq           /* load eflags */
 
-	pushfq
-	popq	%rax		/* get current eflags state */
+    pushfq
+    popq    %rax        /* get current eflags state */
 
-	pushq	%rcx
-	popfq			/* put original state back */
+    pushq   %rcx
+    popfq           /* put original state back */
 
-	popq	%rcx		/* restore ebx register */
+    popq    %rcx        /* restore ebx register */
 
-	andq	$0x200000,%rax	/* keep CPU ID  flag only */
-	rorq	$21,%rax	/* and shift it to bit 0 */
+    andq    $0x200000,%rax  /* keep CPU ID  flag only */
+    rorq    $21,%rax    /* and shift it to bit 0 */
 
-	ret
+    ret
 
 /*
-	exec cpuid function
+    exec cpuid function
 
-	returns: pointer to static buffer
+    returns: pointer to static buffer
 */
 
-	.globl x86_exec_cpuid
+    .globl x86_exec_cpuid
 
 x86_exec_cpuid:
-	/* get function number (arg0 in rdi register) */
-	movq	%rdi,%rax
+    /* get function number (arg0 in rdi register) */
+    movq    %rdi,%rax
 
-	pushq	%rbx
-	pushq	%rcx
-	pushq	%rdx
+    pushq   %rbx
+    pushq   %rcx
+    pushq   %rdx
 
-	cpuid
+    cpuid
 
-	/* copy register values */
-	movl	%eax,x86_cpu_reg_eax
-	movl	%ebx,x86_cpu_reg_ebx
-	movl	%ecx,x86_cpu_reg_ecx
-	movl	%edx,x86_cpu_reg_edx
+    /* copy register values */
+    movl    %eax,x86_cpu_reg_eax
+    movl    %ebx,x86_cpu_reg_ebx
+    movl    %ecx,x86_cpu_reg_ecx
+    movl    %edx,x86_cpu_reg_edx
 
-	popq	%rdx
-	popq	%rcx
-	popq	%rbx
+    popq    %rdx
+    popq    %rcx
+    popq    %rbx
 
-	ret
+    ret
 
 
 #endif /* ARCH_X86_64 */
@@ -195,27 +195,27 @@ x86_exec_cpuid:
 
 .data
 
-	.globl x86_cpu_reg_eax
+    .globl x86_cpu_reg_eax
 x86_cpu_reg_eax:
-	.long 0
+    .long 0
 
-	.globl x86_cpu_reg_ebx
+    .globl x86_cpu_reg_ebx
 x86_cpu_reg_ebx:
-	.long 0
+    .long 0
 
-	.globl x86_cpu_reg_ecx
+    .globl x86_cpu_reg_ecx
 x86_cpu_reg_ecx:
-	.long 0
+    .long 0
 
-	.globl x86_cpu_reg_edx
+    .globl x86_cpu_reg_edx
 x86_cpu_reg_edx:
-	.long 0
+    .long 0
 
 #endif /* ARCH_X86_32 || ARCH_X86_64 */
 
 
 /*
- *	ALPHA code
+ *  ALPHA code
  */
 
 #if defined(ARCH_ALPHA)
@@ -226,7 +226,7 @@ alpha_exec_implver:
         .frame $30,0,$26,0
 $alpha_exec_implver..ng:
         .prologue 0
-        implver $0		/* get implver value */
+        implver $0      /* get implver value */
         ret $31,($26),1
         .end alpha_exec_implver
 
@@ -237,28 +237,28 @@ alpha_exec_amask:
         .frame $30,0,$26,0
 $alpha_exec_amask..ng:
         .prologue 0
-        lda $0,-1		/* set all bits to 1 */
-        amask $0,$0		/* get amask */
+        lda $0,-1       /* set all bits to 1 */
+        amask $0,$0     /* get amask */
         ret $31,($26),1
         .end alpha_exec_amask
 
 #endif /* ARCH_ALPHA */
 
 /*
- *	IA64 code
+ *  IA64 code
  */
 
 #if defined(ARCH_IA64)
 .text
 
-	.globl ia64_get_cpuid_register
-	.proc ia64_get_cpuid_register
+    .globl ia64_get_cpuid_register
+    .proc ia64_get_cpuid_register
 ia64_get_cpuid_register:
-	.prologue
-	.body
-	mov r8 = cpuid[r32]	/* return cpuid register value in r8 */
-	br.ret.sptk.many b0
-	.endp ia64_get_cpuid_register
+    .prologue
+    .body
+    mov r8 = cpuid[r32] /* return cpuid register value in r8 */
+    br.ret.sptk.many b0
+    .endp ia64_get_cpuid_register
 
 #endif /* ARCH_IA64 */
 
