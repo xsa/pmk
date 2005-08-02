@@ -67,22 +67,27 @@
  ***********************************************************************/
 
 bool chkpath(char *path, char *buffer) {
-	bool	 bexit = false,
+	bool	 loop = true,
 			 dot = false,
 			 dotdot = false,
 			 sep = false;
-	char	*pstr,
-			*pbuf;
+	char	*pbuf;
 	int		 s = MAXPATHLEN;
 
-	pstr = path;
+	if (s < 2) {
+		/* not enough space for at least "." */
+		/* XXX printf("not enough space\n"); */
+		return(false);
+	}
+
 	pbuf = buffer;
-	memset(buffer, '\0', s);
 
-
-	while ((bexit == false) && (s > 0)) {
-		switch (*pstr) {
+	while ((loop == true) && (s > 1)) {
+		switch (*path) {
 			case CHAR_DOT :
+				/* unset separator flag */
+				sep = false;
+
 				/* found a dot */
 				if (dot == false) {
 					dot = true;
@@ -90,106 +95,143 @@ bool chkpath(char *path, char *buffer) {
 					if (dotdot == false) {
 						dotdot = true;
 					} else {
-						/* third dot found ??? */
+						/* third dot found !!! */
+						/* printf("triple dot found\n"); */
 						return(false);
 					}
 				}
 				break;
 
 			case CHAR_EOS :
-				bexit = true;
-				/* process end of line as a separator too */
+				/* exit from loop */
+				loop = false;
+
+				/* but consider end of string as a separator before */
+				/* no break */
 
 			case CHAR_SEP :
 				/* found separator */
 				if (dot == true) {
+					/*
+						if previous directory character sequence is not
+						found then current directory character sequence
+						is ignored
+					*/
 					if (dotdot == true) {
-						/* found "../", going one dir back if possible */
-							
-						pbuf--; /* go back on last char */
-						s++;
+						/* if not at the begining of the buffer */
+						if (pbuf != buffer) {
+							/* if not root look for previous directory */
+							if ((pbuf - buffer) > 1) {
+								/* skip separator */
+								pbuf = pbuf - 2;
+								s = s + 2;
 
-						if (pbuf > buffer) {
-							/* skip trailing '/' if not root */
-							pbuf--;
-							s++;
+								/* look for separator */
+								while ((*pbuf != CHAR_SEP) && (pbuf > buffer)) {
+									pbuf--;
+									s++;
+								}
+
+								/* if separator found go next char */
+								if (*pbuf == CHAR_SEP) {
+									pbuf++;
+									s--;
+								}
+							}
+						} else {
+							/* try to put dotdotsep */
+							if (s > 3) {
+
+								*pbuf = CHAR_DOT;
+								pbuf++;
+								*pbuf = CHAR_DOT;
+								pbuf++;
+								*pbuf = CHAR_SEP;
+								pbuf++;
+								s = s - 3;
+							} else {
+								/* not enough space in buffer */
+								/* XXX printf("not enough space for dotdotsep\n"); */
+								return(false);
+							}
 						}
 
-						/* now searching previous dir */
-						while ((*pbuf != CHAR_SEP) && (pbuf > buffer)) {
-							pbuf--;
-							s++;
-						}
-
-						/* now set pointer to next char if on a separator */
-						if (*pbuf == CHAR_SEP) {
-							pbuf++;
-							s--;
-						}
-
+						/* unset dotdot flag */
 						dotdot = false;
 					}
-					/* if found only "./" then just ignore */
+
+					/* unset dot flag */
 					dot = false;
 				} else {
 					if (sep == false) {
 						/* previous was not a separator so copy it */
-						sep = true;
-						*pbuf = *pstr;
+						*pbuf = *path;
 						pbuf++;
 						s--;
+
+						/* set flag */
+						sep = true;
 					}
-					/* if previous char was a separator the drop it */
 				}
 				break;
 
 			default :
-				/* dot already found ? */
 				if (dot == true) {
-					if (dotdot == true) {
-						/* should have a separator after two dot ??? */
-						return(false);
-					}
+					/* copy char in buffer */
+					*pbuf = CHAR_DOT;
+					pbuf++;
+					s--; /* XXX check */
 
-					/* hidden dir */
-					if (s > 1) {
-						/* got enough space for dot and current char */
+					if (dotdot == true) {
+						/* copy char in buffer */
 						*pbuf = CHAR_DOT;
 						pbuf++;
-						s--;
-					} else {
-						/* not enough space */
-						return(false);
+						s--; /* XXX check */
 					}
-					dot = false;
 				}
 
-				/* copy char */
-				*pbuf = *pstr;
+				/* copy char in buffer */
+				*pbuf = *path;
 				pbuf++;
 				s--;
 
-				if (sep == true) {
-					sep = false;
-				}
-				break;
+				/* unset flags */
+				sep = false;
+				dot = false;
+				dotdot = false; /* XXX let this happen ? ("..string" for example) */
 		}
-		pstr++;
+
+		/* next character */
+		path++;
 	}
 
-	if (sep == true) {
-		/*  skip trailing separator */
-		pbuf--;
-		s++;
-	}
-
-	if (s > 0) {
-		/* NULL terminate the string */
-		*pbuf = CHAR_EOS;
-		return(true);
-	} else {
+	/* if end of string has not been reached */
+	if (loop == true) {
+		/* XXX printf("s = %d, loop == true\n", s);*/
 		return(false);
 	}
+
+	switch(pbuf - buffer) {
+		case 0 :
+			*pbuf = CHAR_DOT;
+			pbuf++;
+			break;
+
+		case 1 :
+			/* don't try to skip trailing separator */
+			break;
+
+		default :
+			if (*(pbuf - 1) == CHAR_SEP) {
+				/* skip trailing character */
+				pbuf--;
+			}
+	}
+
+	/* NULL terminate string */
+	*pbuf = CHAR_EOS;
+
+	return(true);
 }
 
 
