@@ -44,51 +44,61 @@
 #include "premake.h"
 
 
+/*************
+ * constants *
+ ***********************************************************************/
+
 #ifndef S_BLKSIZE
-#define S_BLKSIZE	512	/* standard block size */
+#define S_BLKSIZE		512	/* standard block size */
 #endif
 
-#define MAXTOKENS	128	/* max slots in the paths array */
+#define MAXTOKENS		128	/* max slots in the paths array */
 
-#define MK_FILE_EXT	".mk"
-#define TMP_MK_FILE	TMPDIR "/pmk_XXXXXXXX" MK_FILE_EXT
-#define MKVAR_FILE	"make_var_result"
-#define MKVAR_FMT_MK	"all:\n\t@printf \"%%s\\n\" $(%s) >%s"	
+#define MK_FILE_EXT		".mk"
+#define TMP_MK_FILE		TMPDIR "/pmk_XXXXXXXX" MK_FILE_EXT
+#define MKVAR_FILE		"make_var_result"
+#define MKVAR_FMT_MK	"all:\n\t@printf \"%%s\\n\" $(%s) >%s"
 #define MKVAR_FMT_CMD	"make -f %s >/dev/null 2>&1"
-#define EMPTY_OPT_VALUE ""
+#define EMPTY_OPT_VALUE	""
 
 /*
 #define DEBUGF(fmt, arg...)	fprintf(stderr, "DEBUGF File '%s', Line %d: " fmt "\n", __FILE__, __LINE__, ## arg)
 */
 
+/********************
+ * type definitions *
+ ***********************************************************************/
+
 /* structure to store multiple path */
 typedef struct {
-	int	 pathnum;
+	int		 pathnum;
 	char	*pathlst[MAXTOKENS];
 } mpath;
 
 /* struct to store pmk.conf defines */
 /* WARN opchar has been put first else linux binaries gives segfault !!! */
 typedef struct {
-        char    opchar,
-		key[OPT_NAME_LEN],
-		val[OPT_VALUE_LEN];
+	char	opchar,
+			key[OPT_NAME_LEN],
+			val[OPT_VALUE_LEN];
 } cfg_opt;
 
 /* command option type */
 typedef struct {
 	char	name[OPT_NAME_LEN],
-		value[OPT_VALUE_LEN];
+			value[OPT_VALUE_LEN];
 } pmkcmdopt;
 
 /* command type */
 typedef struct {
-	int	 token;
+	int		 token;
 	char	*label;
 } pmkcmd;
 
 
-/* function protos */
+/**************
+ * prototypes *
+ ***********************************************************************/
 
 bool	 get_line(FILE *, char *, size_t);
 

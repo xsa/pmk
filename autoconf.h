@@ -40,6 +40,11 @@
 #include "hash.h"
 #include "pmk.h"
 
+
+/*************
+ * constants *
+ ***********************************************************************/
+
 #define AC_VAR_DEF	"DEFS"
 
 #define AC_VALUE_DEF	"-DHAVE_CONFIG_H"
@@ -48,6 +53,10 @@
 #define AC_ECHO_C	"ECHO_C"
 #define AC_ECHO_T	"ECHO_T"
 
+
+/**************
+ * prototypes *
+ ***********************************************************************/
 
 bool	ac_parse_config(pmkdata *);
 bool	ac_process_dyn_var(pmkdata *, char *);

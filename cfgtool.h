@@ -40,6 +40,10 @@
 #include "hash.h"
 
 
+/*************
+ * constants *
+ ***********************************************************************/
+
 #define CFGT_TOK_ADDCT	1
 
 #ifndef DATADIR
@@ -63,25 +67,29 @@
 #define CFGTOOL_OPT_LIBS	"--libs"
 
 
-/* config tool structures */
+/********************
+ * type definitions *
+ ***********************************************************************/
 
 typedef struct {
 	char	*name,
-		*binary,
-		*version,
-		*module,
-		*cflags,
-		*libs;
+			*binary,
+			*version,
+			*module,
+			*cflags,
+			*libs;
 } cfgtcell;
 
 
 typedef struct {
 	htable	*by_mod,
-		*by_bin;
+			*by_bin;
 } cfgtdata;
 
 
-/* functions protos */
+/**************
+ * prototypes *
+ ***********************************************************************/
 
 void		 cfgtcell_destroy(cfgtcell *);
 cfgtdata	*cfgtdata_init(void);

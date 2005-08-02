@@ -53,9 +53,18 @@ prskw	kw_pmkcfgtool[] = {
 };
 int	nbkwct = sizeof(kw_pmkcfgtool) / sizeof(prskw);
 
-/*
+/**********************
+ * cfgtcell_destroy() *
+ ***********************************************************************
+ DESCR
 	free cfgtcell structure
-*/
+
+ IN
+	pcc :	configtool cell
+
+ OUT
+	NONE
+ ***********************************************************************/
 
 void cfgtcell_destroy(cfgtcell *pcc) {
 #ifdef CFGT_DEBUG
@@ -74,9 +83,19 @@ debugf("free cfgtcell '%s'", pcc->name);
 	free(pcc);
 }
 
-/*
+
+/*******************
+ * cfgtdata_init() *
+ ***********************************************************************
+ DESCR
 	initialize cfgtdata structure
-*/
+
+ IN
+	NONE
+
+ OUT
+	config data structure
+ ***********************************************************************/
 
 cfgtdata *cfgtdata_init(void) {
 	cfgtdata	*pcd;
@@ -115,9 +134,18 @@ cfgtdata *cfgtdata_init(void) {
 	return(pcd);
 }
 
-/*
+
+/**********************
+ * cfgtdata_destroy() *
+ ***********************************************************************
+ DESCR
 	free cfgtdata structure
-*/
+
+ IN
+	pcd :	config data structure
+
+ OUT
+ ***********************************************************************/
 
 void cfgtdata_destroy(cfgtdata *pcd) {
 #ifdef CFGT_DEBUG
@@ -145,14 +173,20 @@ debugf("WARNING : by_bin doesn't exists !!!");
 	}
 }
 
-/*
+
+/*****************
+ * add_cfgtool() *
+ ***********************************************************************
+ DESCR
 	add a new config tool cell
 
-	pcd : config tool data structure
-	pht : parsed data
+ IN
+	pcd :	config tool data structure
+	pht :	parsed data
 
-	return : boolean
-*/
+ OUT
+	boolean
+ ***********************************************************************/
 
 bool add_cfgtool(cfgtdata *pcd, htable *pht) {
 	cfgtcell	*pcell;
@@ -252,11 +286,19 @@ debugf("added cfgtcell '%s'", pcell->binary);
 	return(true);
 }
 
-/*
+
+/*********************
+ * parse_cfgt_file() *
+ ***********************************************************************
+ DESCR
 	parse data from PMKCFG_DATA file
 
-	return : compiler data structure or NULL
-*/
+ IN
+	NONE
+
+ OUT
+	compiler data structure or NULL
+ ***********************************************************************/
 
 cfgtdata *parse_cfgt_file(void) {
 	FILE		*fp;
@@ -301,7 +343,7 @@ cfgtdata *parse_cfgt_file(void) {
 				case CFGT_TOK_ADDCT :
 					add_cfgtool(pcd, pcell->data);
 					break;
-			
+
 				default :
 					errorf("parsing of data file failed.");
 					hash_destroy(pcd->by_mod);
@@ -329,16 +371,22 @@ cfgtdata *parse_cfgt_file(void) {
 	return(pcd);
 }
 
-/*
+
+/*************************
+ * cfgtcell_get_binary() *
+ ***********************************************************************
+ DESCR
 	get binary name from a given module name
 
+ IN
 	pgd : global data structure
 	mod : module name
 	buf : buffer to store binary name
 	sb : buffer size
 
-	return : boolean
-*/
+ OUT
+	boolean
+ ***********************************************************************/
 
 bool cfgtcell_get_binary(cfgtdata *pcd, char *mod, char *buf, size_t sb) {
 	cfgtcell	*pcc;
@@ -361,14 +409,20 @@ bool cfgtcell_get_binary(cfgtdata *pcd, char *mod, char *buf, size_t sb) {
 	}
 }
 
-/*
+
+/***********************
+ * cfgtcell_get_cell() *
+ ***********************************************************************
+ DESCR
 	get cell relative to a given config tool filename
 
+ IN
 	pgd : global data structure
 	binary : binary name
 
-	return : cfgtcell structure or NULL
-*/
+ OUT
+	cfgtcell structure or NULL
+ ***********************************************************************/
 
 cfgtcell *cfgtcell_get_cell(cfgtdata *pcd, char *binary) {
 	char		*mod;
@@ -388,16 +442,22 @@ cfgtcell *cfgtcell_get_cell(cfgtdata *pcd, char *binary) {
 	}
 }
 
-/*
+
+/********************
+ * ct_get_version() *
+ ***********************************************************************
+ DESCR
 	use config tool to get the version
 
+ IN
 	ctpath : config tool path
 	vstr : option string to get version
 	buffer : storage buffer for the result
 	sbuf : size of buffer
 
-	returns : true on success else false
-*/
+ OUT
+	boolean
+ ***********************************************************************/
 
 bool ct_get_version(char *ctpath, char *vstr, char *buffer, size_t sbuf) {
 	FILE	*rpipe;
@@ -420,16 +480,22 @@ bool ct_get_version(char *ctpath, char *vstr, char *buffer, size_t sbuf) {
 	return(rval);
 }
 
-/*
+
+/*****************
+ * ct_get_data() *
+ ***********************************************************************
+ DESCR
 	use config tool to get data
 
+ IN
 	ctpath : config tool path
 	vstr : option string to get version
 	buffer : storage buffer for the result
 	sbuf : size of buffer
 
-	returns : true on success else false
-*/
+ OUT
+	boolean
+ ***********************************************************************/
 
 bool ct_get_data(char *ctpath, char *ostr, char *mod, char *buffer, size_t sbuf) {
 	FILE	*rpipe;
