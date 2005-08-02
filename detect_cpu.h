@@ -45,7 +45,7 @@
 
 /***************
  * common code *
- ***************/
+ ***********************************************************************/
 
 
 #define LIST_ARCH_EQUIV		1
@@ -89,7 +89,7 @@ unsigned char	 arch_name_to_id(char *);
 
 /****************
  * x86 specific *
- ****************/
+ ***********************************************************************/
 
 #if defined(ARCH_X86_32) || defined(ARCH_X86_64)
 
@@ -201,7 +201,7 @@ bool		 x86_set_cpu_data(prsdata *, x86_cpu_cell *, htable *);
 
 /******************
  * alpha specific *
- ******************/
+ ***********************************************************************/
 
 #if defined(ARCH_ALPHA)
 
@@ -237,7 +237,7 @@ bool alpha_set_cpu_data(prsdata *, htable *);
 
 /******************
  * ia64 specific *
- ******************/
+ ***********************************************************************/
 
 #if defined(ARCH_IA64)
 
@@ -275,7 +275,6 @@ typedef struct {
 bool ia64_get_cpuid_data(prsdata *, htable *);
 
 #endif /* ARCH_IA64 */
-
 
 #endif /* _DETECT_CPU_H_ */
 

@@ -49,7 +49,7 @@
 
 /***************
  * common code *
- ***************/
+ ***********************************************************************/
 
 
 /* config tools data file keyword */
@@ -79,14 +79,19 @@ arch_cell	arch_tab[] = {
 size_t	nbarch = sizeof(arch_tab) / sizeof(arch_cell);
 
 
-/*
+/**************
+ * seek_key() *
+ ***********************************************************************
+ DESCR
 	seek parse data key
 
+ IN
 	pdata : parse data structure
 	token : key token to find
 
-	returns : key data or NULL
-*/
+ OUT
+	key data or NULL
+ ***********************************************************************/
 
 void *seek_key(prsdata *pdata, int token) {
 	prscell		*pcell;
@@ -103,13 +108,19 @@ void *seek_key(prsdata *pdata, int token) {
 	return(NULL);
 }
 
-/*
+
+/********************
+ * parse_cpu_data() *
+ ***********************************************************************
+ DESCR
 	parse cpu data file
 
+ IN
 	fname : data file name
 
-	returns : prsdata structure
-*/
+ OUT
+	prsdata structure
+ ***********************************************************************/
 
 prsdata *parse_cpu_data(char *fname) {
 	FILE		*fp;
@@ -146,13 +157,18 @@ prsdata *parse_cpu_data(char *fname) {
 }
 
 
-/*
-	check the cpu architecture 
+/********************
+ * check_cpu_arch() *
+ ***********************************************************************
+ DESCR
+	check the cpu architecture
 
-	uname_m : uname machine string 
+ IN
+	uname_m : uname machine string
 
-	returns:  cpu architecture string
-*/
+ OUT
+	cpu architecture string
+ ***********************************************************************/
 
 char *check_cpu_arch(char *uname_m, prsdata *pdata) {
 	char		*pstr = NULL;
@@ -172,13 +188,19 @@ char *check_cpu_arch(char *uname_m, prsdata *pdata) {
 	return(strdup(pstr)); /* no check needed, NULL will be automatically returned */
 }
 
-/*
+
+/*********************
+ * arch_name_to_id() *
+ ***********************************************************************
+ DESCR
 	convert arch name to id
 
+ IN
 	arch_name : architecture string
 
-	returns:  architecture identifier
-*/
+ OUT
+	architecture identifier
+ ***********************************************************************/
 
 unsigned char arch_name_to_id(char *arch_name) {
 	unsigned int	i;
@@ -196,14 +218,20 @@ unsigned char arch_name_to_id(char *arch_name) {
 	return(id);
 }
 
-/*
+
+/******************
+ * arch_wrapper() *
+ ***********************************************************************
+ DESCR
 	architecture wrapper
 
+ IN
 	pdata : parsing data structure
 	arch_name : architecture name
 
-	returns: hash table with values or NULL
-*/
+ OUT
+	hash table with values or NULL
+ ***********************************************************************/
 
 htable *arch_wrapper(prsdata *pdata, char *arch_name) {
 	htable		*pht;
@@ -233,7 +261,7 @@ htable *arch_wrapper(prsdata *pdata, char *arch_name) {
 				errorf("unable to get x86 cpuid data.");
 				return(NULL);
 			}
-		
+
 			pcell->stdvendor = x86_get_std_cpu_vendor(pdata,
 							pcell->vendor);
 			if (x86_set_cpu_data(pdata, pcell, pht) == false) {
@@ -280,7 +308,7 @@ htable *arch_wrapper(prsdata *pdata, char *arch_name) {
 
 /****************
  * x86 specific *
- ****************/
+ ***********************************************************************/
 
 #if defined(ARCH_X86_32) || defined(ARCH_X86_64)
 
@@ -342,11 +370,18 @@ size_t nb_feat_extreg = sizeof(x86_cpu_feat_extreg) / sizeof(x86_cpu_feature);
  functions
 ****/
 
-/*
+/***********************
+ * x86_cpu_cell_init() *
+ ***********************************************************************
+ DESCR
 	initialise x86 cpu cell
 
-	returns : cpu cell or NULL
-*/
+ IN
+	NONE
+
+ OUT
+	cpu cell or NULL
+ ***********************************************************************/
 
 x86_cpu_cell *x86_cpu_cell_init(void) {
 	x86_cpu_cell	*pcell;
@@ -367,13 +402,19 @@ x86_cpu_cell *x86_cpu_cell_init(void) {
 	return(pcell);
 }
 
-/*
+
+/**************************
+ * x86_cpu_cell_destroy() *
+ ***********************************************************************
+ DESCR
 	free x86 cpu cell structure
 
-	pcell : structure to free
+ IN
+	pcell :	structure to free
 
-	returns : -
-*/
+ OUT
+	NONE
+ ***********************************************************************/
 
 void x86_cpu_cell_destroy(x86_cpu_cell *pcell) {
 	if (pcell->vendor != NULL)
@@ -385,13 +426,19 @@ void x86_cpu_cell_destroy(x86_cpu_cell *pcell) {
 	free(pcell);
 }
 
-/*
+
+/****************************
+ * x86_get_std_cpu_vendor() *
+ ***********************************************************************
+ DESCR
 	get (pmk) vendor identifier based on data from cpuid
 
-	pdata : parsung structure
+ IN
+	pdata :	parsing structure
 
-	returns: cpu vendor string
-*/
+ OUT
+	cpu vendor string
+ ***********************************************************************/
 
 char *x86_get_std_cpu_vendor(prsdata *pdata, char *civendor) {
 	char		*vendor = NULL;
@@ -418,13 +465,18 @@ char *x86_get_std_cpu_vendor(prsdata *pdata, char *civendor) {
 }
 
 
-/*
+/************************
+ * x86_get_cpuid_data() *
+ ***********************************************************************
+ DESCR
 	gather x86 cpuid data
 
-	cell : x86 cpu cell
+ IN
+	cell :	x86 cpu cell
 
-	returns : true on success else false
-*/
+ OUT
+	boolean
+ ***********************************************************************/
 
 bool x86_get_cpuid_data(x86_cpu_cell *cell) {
 	char		 feat_str[TMP_BUF_LEN] = "";
@@ -539,15 +591,21 @@ bool x86_get_cpuid_data(x86_cpu_cell *cell) {
 	return(true);
 }
 
-/*
+
+/**********************
+ * x86_set_cpu_data() *
+ ***********************************************************************
+ DESCR
 	record cpu data in hash table
 
-	pdata : parsing data
-	pcell : x86 cpu data cell
-	pht : storage hash table
+ IN
+	pdata :	parsing data
+	pcell :	x86 cpu data cell
+	pht :	storage hash table
 
-	returns : true on succes else false
-*/
+ OUT
+	boolean
+ ***********************************************************************/
 
 bool x86_set_cpu_data(prsdata *pdata, x86_cpu_cell *pcell, htable *pht) {
 	char	 buffer[TMP_BUF_LEN],
@@ -650,7 +708,7 @@ bool x86_set_cpu_data(prsdata *pdata, x86_cpu_cell *pcell, htable *pht) {
 
 /******************
  * alpha specific *
- ******************/
+ ***********************************************************************/
 
 #if defined(ARCH_ALPHA)
 
@@ -664,12 +722,21 @@ alpha_cpu_feature	alpha_cpu_feat[] = {
 };
 int nb_feat = sizeof(alpha_cpu_feat) / sizeof(alpha_cpu_feature);
 
-/*
+
+/************************
+ * alpha_set_cpu_data() *
+ ***********************************************************************
+ DESCR
 	set alpha cpu data
 
-	pdata: parsing data structure
-	pht: data storage hash table
-*/
+ IN
+	pdata:	parsing data structure
+	pht:	data storage hash table
+
+ OUT
+	boolean
+ ***********************************************************************/
+
 bool alpha_set_cpu_data(prsdata *pdata, htable *pht) {
 	char		 buffer[16],
 			 feat_str[TMP_BUF_LEN] = "",
@@ -725,15 +792,15 @@ bool alpha_set_cpu_data(prsdata *pdata, htable *pht) {
 
 
 /*debugf("alpha_set_cpu_data() : end");*/
-	return(true);		
+	return(true);
 }
 
 #endif /* ARCH_ALPHA */
 
 
-/******************
+/*****************
  * ia64 specific *
- ******************/
+ ***********************************************************************/
 
 #if defined(ARCH_IA64)
 
@@ -749,14 +816,19 @@ size_t nb_feat = sizeof(ia64_cpu_feat) / sizeof(ia64_cpu_feature);
  functions
 ****/
 
-/*
+/*************************
+ * ia64_get_cpuid_data() *
+ ***********************************************************************
+ DESCR
 	gather and save ia64 cpu data
 
-	pdata: parsing data structure
-	pht: storage hash table
+ IN
+	pdata:	parsing data structure
+	pht:	storage hash table
 
-	returns: true on success else false
-*/
+ OUT
+	boolean
+ ***********************************************************************/
 
 bool ia64_get_cpuid_data(prsdata *pdata, htable *pht) {
 	char		 buffer[TMP_BUF_LEN],
@@ -865,6 +937,4 @@ bool ia64_get_cpuid_data(prsdata *pdata, htable *pht) {
 }
 
 #endif /* ARCH_IA64 */
-
-
 
