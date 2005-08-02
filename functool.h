@@ -37,12 +37,15 @@
 #ifndef _PMK_FUNCTOOL_H_
 #define _PMK_FUNCTOOL_H_
 
-
 #include "common.h"
 #include "hash_tools.h"
 #include "pmk.h"
 #include "premake.h"
 
+
+/*************
+ * constants *
+ **********************************************************************************************/
 
 #define LANG_NAME_LEN	64
 #define COMP_NAME_LEN	64
@@ -58,7 +61,43 @@
 
 #define C_FILE_EXT	".c"
 #define TEST_FILE_NAME	TMPDIR "/pmk_XXXXXXXX" C_FILE_EXT
+#define BIN_TEST_NAME	TMPDIR "/pmk_XXXXXXXX_bin"
 
+
+#define CODE_C_HDR		"#include <%s>\n"
+#define CODE_C_BEG		"/* main procedure */\n" \
+						"int main() {\n"
+#define CODE_C_END		"return(0);\n" \
+						"}\n"
+#define CODE_C_DEF		"/* check define */\n" \
+						"#ifndef %s\n" \
+						"break_build_process();\n" \
+						"#endif\n"
+#define CODE_C_PROC		"/* check procedure */\n" \
+						"void (*pmk_funcp)() = (void *) %s;\n"
+#define CODE_C_VAR		"%s test_var;\n\n"
+#define CODE_C_TYPE		"/* check type */\n" \
+						"if (sizeof(test_var)) {\n" \
+						"\treturn(0);\n" \
+						"}\n"
+#define CODE_C_MEMBER	"/* check structure member */\n" \
+						"if (sizeof(test_var.%s)) {\n" \
+						"\treturn(0);\n" \
+						"}\n"
+
+
+/**********************************
+ * type and structure definitions *
+ ***********************************************************************/
+
+typedef struct {
+	char	*header,
+			*define,
+			*procedure,
+			*type,
+			*member;
+	dynary	*subhdrs;
+} code_bld_t;
 
 typedef struct {
 	char	name[LANG_NAME_LEN],
@@ -68,6 +107,10 @@ typedef struct {
 		slflg[CFLG_NAME_LEN];
 } lgdata;
 
+
+/**************
+ * prototypes *
+ ***********************************************************************/
 
 bool	 check_bool_str(char *);
 bool	 invert_bool(bool);
@@ -91,5 +134,9 @@ char	*get_comp_path(htable *, char *);
 bool	 check_cfgt_data(pmkdata *);
 bool	 process_required(pmkdata *, pmkcmd *, bool , char *, char *);
 bool	 c_file_builder(char *, size_t, char *, ...);
+void	 code_bld_init(code_bld_t *);
+bool	 c_code_builder(char *, size_t, code_bld_t *);
+bool	 c_object_build(char *, size_t, char *, char *, char *, char *, bool);
 
 #endif /* _PMK_FUNCTOOL_H_ */
+

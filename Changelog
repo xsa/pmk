@@ -1,5 +1,6 @@
 02 Aug 2005 mipsator
  * added da_sort() to sort the content of the dynary.
+ * first import of code building functions for further use in pmk.
 
 21 Jul 2005 mipsator
  * added ISO C99 vsnprintf() implementation (missing wide char support).
