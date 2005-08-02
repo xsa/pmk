@@ -121,7 +121,6 @@ void			*hash_get(htable *, char *);
 size_t			 hash_merge(htable *, htable *);
 size_t			 hash_nbkey(htable *);
 hkeys			*hash_keys(htable *);
-int			 hash_strcmp(const void *, const void *);
 hkeys			*hash_keys_sorted(htable *);
 void			 hash_free_hcell(htable *, hcell *);
 void			 hash_free_hkeys(hkeys *);
