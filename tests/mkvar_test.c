@@ -7,8 +7,6 @@
 #include <stdio.h>
 
 #include "../common.h"
-#include "../compat/compat.h"
-#include "../dynarray.h"
 
 int main(void) {
 	char	tmp[256];

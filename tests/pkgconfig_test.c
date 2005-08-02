@@ -10,15 +10,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "../compat/compat.h"
 #include "../compat/pmk_stdbool.h"
-#include "../common.h"
-#include "../dynarray.h"
-#include "../hash.h"
-#include "../parse.h"
 #include "../pkgconfig.h"
-#include "../pmk_obj.h"
-#include "../premake.h"
 
 int main(int argc, char *argv[]) {
 	char	*mod;
