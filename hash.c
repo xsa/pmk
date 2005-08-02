@@ -805,18 +805,6 @@ hkeys *hash_keys(htable *pht) {
 }
 
 
-/*****************
- * hash_strcmp() *
- ***********************************************************************
- DESCR
- IN
- OUT
- ***********************************************************************/
-
-int hash_strcmp(const void *a, const void *b) {
-	return(strcmp(*(char * const *)a, *(char * const *) b));
-}
-
 /**********************
  * hash_keys_sorted() *
  ***********************************************************************
@@ -832,6 +820,10 @@ int hash_strcmp(const void *a, const void *b) {
  NOTE
 	don't forget to free the array after use
  ***********************************************************************/
+
+static int hash_strcmp(const void *a, const void *b) {
+	return(strcmp(*(char * const *)a, *(char * const *) b));
+}
 
 hkeys *hash_keys_sorted(htable *pht) {
 	hkeys	*phk;
