@@ -37,8 +37,8 @@
 #ifndef _PMK_COMPAT_H_
 #define _PMK_COMPAT_H_
 
+#include <stdarg.h>
 #include "compat/pmk_string.h"
-
 
 /**********************************
  * constants and type definitions *
