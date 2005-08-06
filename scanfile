@@ -24,21 +24,21 @@
 #}
 
 GEN_ZONE(main) {
-    DIRECTORY = "."
-    RECURSE = TRUE
-    DISCARD = ("samples", "doc", "tests")
-    PMKFILE = TRUE
-    MAKEFILE = TRUE
-    NAME = "Makefile.pmk"
-    UNIQUE = TRUE
+	DIRECTORY = "."
+	RECURSE = TRUE
+	DISCARD = ("samples", "doc", "tests")
+	PMKFILE = TRUE
+	MAKEFILE = TRUE
+	NAME = "Makefile.pmk"
+	UNIQUE = TRUE
 }
 
 GEN_ZONE(tests) {
-    DIRECTORY = "tests"
-    RECURSE = TRUE
-    PMKFILE = TRUE
-    MAKEFILE = TRUE
-    NAME = "Makefile.pmk"
-    UNIQUE = TRUE
+	DIRECTORY = "./tests"
+	RECURSE = TRUE
+	PMKFILE = TRUE
+	MAKEFILE = TRUE
+	NAME = "Makefile.pmk"
+	UNIQUE = TRUE
 }
 
