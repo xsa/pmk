@@ -39,6 +39,7 @@
 
 #include "config.h"
 
+
 /*
 	boolean types
 */
