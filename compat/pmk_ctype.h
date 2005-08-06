@@ -42,11 +42,11 @@
 #include "config.h"
 
 
-#ifndef HAVE_ISBLANK
-
 /*
 	isblank() function
 */
+
+#ifndef HAVE_ISBLANK
 
 int isblank(int);
 

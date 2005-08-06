@@ -39,6 +39,9 @@
 
 #include <unistd.h>
 
+#include "config.h"
+
+
 /*
 	mkstemps() function
 */

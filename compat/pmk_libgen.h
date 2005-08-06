@@ -37,6 +37,9 @@
 #ifndef _PMK_LIBGEN_H_
 #define _PMK_LIBGEN_H_
 
+#include "config.h"
+
+
 /*
 	basename() and dirname() functions
 */
@@ -45,7 +48,7 @@
 
 #include <libgen.h>
 
-#else
+#else /* HAVE_LIBGEN_H */
 
 char *basename(const char *);
 char *dirname(const char *);
