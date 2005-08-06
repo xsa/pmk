@@ -1,3 +1,8 @@
+06 Aug 2005 mipsator
+ * added latest work done on pmkscan. The makefile generation is almost
+   complete. Some work has to be done on pmkfile generation for the next
+   release.
+
 02 Aug 2005 mipsator
  * added da_sort() to sort the content of the dynary.
  * first import of code building functions for further use in pmk.
