@@ -68,23 +68,6 @@
  ***********************************************************************/
 
 scn_ext_t	 file_ext[] = {
-		{"*.asm",	FILE_TYPE_ASM},
-		{"*.C",		FILE_TYPE_C},
-		{"*.c",		FILE_TYPE_C},
-		{"*.cc",	FILE_TYPE_C},
-		{"*.cpp",	FILE_TYPE_CXX},
-		{"*.cxx",	FILE_TYPE_CXX},
-		{"*.c++",	FILE_TYPE_CXX},
-		{"*.H",		FILE_TYPE_C},
-		{"*.h",		FILE_TYPE_C},
-		{"*.hh",	FILE_TYPE_C},
-		{"*.hpp",	FILE_TYPE_CXX},
-		{"*.hxx",	FILE_TYPE_CXX},
-		{"*.h++",	FILE_TYPE_CXX},
-		{"*.S",		FILE_TYPE_ASM},
-		{"*.s",		FILE_TYPE_ASM},
-		{"*.l", 	FILE_TYPE_LEX},
-		{"*.y", 	FILE_TYPE_YACC},
 		{"*.1",		FILE_TYPE_MAN1},
 		{"*.2",		FILE_TYPE_MAN2},
 		{"*.3",		FILE_TYPE_MAN3},
@@ -94,15 +77,34 @@ scn_ext_t	 file_ext[] = {
 		{"*.7",		FILE_TYPE_MAN7},
 		{"*.8",		FILE_TYPE_MAN8},
 		{"*.9",		FILE_TYPE_MAN9},
-		{"*.xpm",	FILE_TYPE_IMG},
-		{"*.jpg",	FILE_TYPE_IMG},
-		{"*.jpeg",	FILE_TYPE_IMG},
-		{"*.png",	FILE_TYPE_IMG},
+		{"*.asm",	FILE_TYPE_ASM},
+		{"*.C",		FILE_TYPE_C},
+		{"*.c",		FILE_TYPE_C},
+		{"*.cc",	FILE_TYPE_C},
+		{"*.cpp",	FILE_TYPE_CXX},
+		{"*.cxx",	FILE_TYPE_CXX},
+		{"*.c++",	FILE_TYPE_CXX},
+		{"*.dat",	FILE_TYPE_DATA},
 		{"*.gif",	FILE_TYPE_IMG},
+		{"*.H",		FILE_TYPE_C},
+		{"*.h",		FILE_TYPE_C},
+		{"*.hh",	FILE_TYPE_C},
+		{"*.hpp",	FILE_TYPE_CXX},
 		{"*.html",	FILE_TYPE_HTML},
 		{"*.htm",	FILE_TYPE_HTML},
+		{"*.hxx",	FILE_TYPE_CXX},
+		{"*.h++",	FILE_TYPE_CXX},
+		{"*.in",	FILE_TYPE_TEMPL},
+		{"*.jpg",	FILE_TYPE_IMG},
+		{"*.jpeg",	FILE_TYPE_IMG},
+		{"*.l", 	FILE_TYPE_LEX},
+		{"*.pmk",	FILE_TYPE_TEMPL},
+		{"*.png",	FILE_TYPE_IMG},
+		{"*.S",		FILE_TYPE_ASM},
+		{"*.s",		FILE_TYPE_ASM},
 		{"*.txt",	FILE_TYPE_TEXT},
-		{"*.dat",	FILE_TYPE_DATA}
+		{"*.xpm",	FILE_TYPE_IMG},
+		{"*.y", 	FILE_TYPE_YACC}
 };
 size_t	 nb_file_ext = sizeof(file_ext) / sizeof(scn_ext_t);
 
@@ -434,6 +436,9 @@ scn_zone_t *scan_zone_init(htable *nodes) {
 
 		/* init data files dynary */
 		pzone->datafiles = da_init();
+
+		/* init templates dynary */
+		pzone->templates = da_init();
 	}
 
 	return(pzone);
@@ -476,6 +481,10 @@ void scan_zone_destroy(scn_zone_t *pzone) {
 
 	if (pzone->datafiles != NULL) {
 		da_destroy(pzone->datafiles);
+	}
+
+	if (pzone->templates != NULL) {
+		da_destroy(pzone->templates);
 	}
 
 	free(pzone);
@@ -739,7 +748,8 @@ bool scan_build_pmk(char *fname, scn_zone_t *psz, scandata *psd) {
 					*value;
 	hkeys			*phk;
 	time_t			 now;
-	unsigned int	 i;
+	unsigned int	 i,
+					 s;
 
 	phk = hash_keys(psz->checks);
 	if (phk != NULL) {
@@ -759,6 +769,25 @@ bool scan_build_pmk(char *fname, scn_zone_t *psz, scandata *psd) {
 
 		/* put settings */
 		fprintf(fp, PMKF_SETTINGS);
+		/* template list */
+		fprintf(fp, PMKF_TRGT_CMT);
+		if (psz->found[FILE_TYPE_MAN] == false) {
+			/* if no template found, put as a comment */
+			fprintf(fp, "#");
+		}
+		fprintf(fp, PMKF_TRGT_BEG);
+		if (psz->found[FILE_TYPE_MAN] == true) {
+			/* output templates */
+			s = da_usize(psz->templates);
+			for (i = 0 ; i < s ; i++) {
+				fprintf(fp, "\"%s\"", (char *) da_idx(psz->templates, i));
+				if (i != (s - 1)) {
+					fprintf(fp, " , ");
+				}
+			}
+		}
+		fprintf(fp, PMKF_TRGT_END);
+		fprintf(fp, PMKF_BODY_END);
 
 		/* put defines */
 		fprintf(fp, PMKF_DEF_BEG);
@@ -771,7 +800,7 @@ bool scan_build_pmk(char *fname, scn_zone_t *psz, scandata *psd) {
 				}
 			}
 		}
-		fprintf(fp, PMKF_DEF_END);
+		fprintf(fp, PMKF_BODY_END);
 
 		/* put checks */
 		for(i = 0 ; i < phk->nkey ; i++) {
@@ -1757,8 +1786,10 @@ void mkf_output_obj_rules(FILE *fp, scn_zone_t *psz) {
 
 void mkf_output_trg_rules(FILE *fp, scn_zone_t *psz) {
 	char			 buf[MKF_OUTPUT_WIDTH * 2],
-					*pstr;
+					*pstr,
+					*pname;
 	hkeys			*phk;
+	scn_node_t		*pn;
 	size_t			 i;
 
 	phk = hash_keys_sorted(psz->targets);
@@ -1778,6 +1809,25 @@ void mkf_output_trg_rules(FILE *fp, scn_zone_t *psz) {
 
 			/* build target */
 			fprintf(fp, MKF_TARGET_LABL, pstr, buf);
+			pname = hash_get(psz->targets, phk->keys[i]);
+			pn = hash_get(psz->nodes, pname);
+			if (pn != NULL) {
+				/* XXX */
+				switch (pn->type) {
+					/*case FILE_TYPE_ASM : XXX */
+
+					case FILE_TYPE_C :
+						fprintf(fp, MKF_TARGET_C);
+						break;
+
+					case FILE_TYPE_CXX :
+						fprintf(fp, MKF_TARGET_CXX);
+						break;
+
+					default :
+						fprintf(fp, MKF_TARGET_DEF);
+				}
+			}
 
 			/* clean target */
 			fprintf(fp, MKF_TARGET_CLN, pstr, buf, pstr);
@@ -2435,6 +2485,17 @@ bool scan_node_file(prs_cmn_t *pcmn, char *fname, bool isdep) {
 			psc_log("d", "\tRecorded data file '%s'\n", fname);
 			break;
 
+		case FILE_TYPE_TEMPL :
+			/* data files will be processed later */
+			psz->found[FILE_TYPE_TEMPL] = true;
+
+			/* add template file in the list */
+			da_push(psz->templates, strdup(fname)); /* XXX check ? */
+
+			/* display data file as recorded */
+			psc_log("t", "\tRecorded template file '%s'\n", fname);
+			break;
+
 		default :
 			/* skip unsupported file extension */
 
@@ -2616,6 +2677,7 @@ bool process_zone(prs_cmn_t *pcmn, scandata *psd) {
 
 	/* scanning directory */
 	psc_log("Starting file parsing in '%s':\n", NULL, psz->directory);
+	da_push(psz->dirlist, strdup("."));
 	frslt = scan_dir(pcmn, ".", psz->recursive);
 	if (frslt == false) {
 		psc_log("Parsing failed.\n\n", NULL);
