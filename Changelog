@@ -1,3 +1,7 @@
+10 Aug 2005 mipsator
+ * added strdup() in compat.
+ * fragmented a bit vsnprintf() related functions.
+
 09 Aug 2005 mipsator
  * handle template files in pmkscan.
 

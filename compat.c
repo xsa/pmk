@@ -38,6 +38,7 @@
 #include <sys/stat.h>
 #include <sys/time.h>
 #include <fcntl.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -53,6 +54,23 @@
 #include "compat/pmk_unistd.h"
 
 
+/**********
+ * macros *
+ ***********************************************************************/
+
+/* macros for structure */
+#define	SET_FLAG(f)		data.flags = data.flags | f
+#define	UNSET_FLAG(f)	data.flags = data.flags & (FLAG_ALL ^ f);
+#define	F_IS_SET(f)		(data.flags & f) != 0
+#define	F_IS_UNSET(f)	(data.flags & f) == 0
+
+/* macros for pointer of structure */
+#define	SET_PFLAG(f)	pdt->flags = pdt->flags | f
+#define	UNSET_PFLAG(f)	pdt->flags = pdt->flags & (FLAG_ALL ^ f);
+#define	PF_IS_SET(f)	(pdt->flags & f) != 0
+#define	PF_IS_UNSET(f)	(pdt->flags & f) == 0
+
+
 /*************
  * functions *
  ***********************************************************************/
@@ -65,27 +83,26 @@
 	buffer's length
 
  IN
-	buffer :	buffer location
-	len :		buffer size
-	cursor		cursor position
+ 	pdt :		vsnprintf common data structure
 	chr :		char to append
 
  OUT
 	NONE
  ***********************************************************************/
 
-static void fill_buffer(char *buffer, size_t len, size_t *cursor, char chr) {
+static void fill_buffer(vsnp_t *pdt, char chr) {
 #ifdef DEBUG_VSNPRINTF
-printf("cursor = %d, char = '%c'\n", *cursor, chr);
+	printf("cursor = %d, char = '%c'\n", pdt->cur, chr);
 #endif
+
 	/* if buffer is not full */
-	if (*cursor < len) {
+	if (pdt->cur < pdt->len) {
 		/* insert character */
-		buffer[*cursor] = chr;
+		pdt->buf[pdt->cur] = chr;
 	}
 
 	/* increment cursor position */
-	(*cursor)++;
+	pdt->cur++;
 }
 
 
@@ -100,15 +117,14 @@ printf("cursor = %d, char = '%c'\n", *cursor, chr);
 	buffer :	buffer location
 	len :		buffer size
 	value :		unsigned integer to convert
-	base :		base used for conversion
-	flags :		used to know the case for conversion
+ 	pdt :		vsnprintf common data structure
 
  OUT
 	size of the resulting string
  ***********************************************************************/
 
 static size_t build_number(char *buf, size_t len, unsigned_t value,
-											base_t base, flag_t flags) {
+													base_t base, flag_t flags) {
 	char	*basestr;
 	size_t	 vlen = 0;
 
@@ -143,23 +159,14 @@ static size_t build_number(char *buf, size_t len, unsigned_t value,
 	Convert an integer value
 
  IN
-	buffer :	buffer location
-	len :		buffer size
-	cur :		cursor position
+ 	pdt :		vsnprintf common data structure
 	value :		unsigned integer to convert
-	base :		base used for conversion
-	fwidth :	field width
-	prec :		precision
-	flags :		used to know the case for conversion
-	isneg :		negative value flag
 
  OUT
 	NONE
  ***********************************************************************/
 
-static void convert_int(char *buf, size_t len, size_t *cur,
-							unsigned_t value, base_t base,
-							int fwidth,	int prec, flag_t flags, int isneg) {
+static void convert_int(vsnp_t *pdt, unsigned_t value) {
 	char	nbuf[MAXINTLEN+1],
 			sign = ' ';
 	int		vlen,
@@ -168,41 +175,41 @@ static void convert_int(char *buf, size_t len, size_t *cur,
 			have_sign = 0,
 			have_hex_prefix = 0;
 
-	if (isneg != 0) {
+	if (PF_IS_SET(FLAG_NEGATIVE_VALUE)) {
 		/* on negative value set the sign */
 		have_sign = 1;
 		sign = '-';
 	} else {
 		/* else if + flag is set display the positive sign */
-		if ((flags & FLAG_SIGNED) != 0) {
+		if (PF_IS_SET(FLAG_SIGNED)) {
 			have_sign = 1;
 			sign = '+';
 		}
 	}
 
-	vlen = build_number(nbuf, sizeof(nbuf), value, base, flags);
+	vlen = build_number(nbuf, sizeof(nbuf), value, pdt->base, pdt->flags);
 
 	/* compute zero padding */
-	zplen = prec - vlen;
+	zplen = pdt->prec - vlen;
 	if (zplen < 0) {
 		zplen = 0;
 	}
 
 	/* compute space padding */
-	if (prec > vlen) {
-		splen = fwidth - prec;
+	if (pdt->prec > vlen) {
+		splen = pdt->fwidth - pdt->prec;
 	} else {
-		splen = fwidth - vlen;
+		splen = pdt->fwidth - vlen;
 	}
 	if (have_sign != 0) {
 		splen--;
 	}
-	if ((flags & FLAG_ALTERNATIVE_FORM) != 0) {
-		switch (base) {
+	if (PF_IS_SET(FLAG_ALTERNATIVE_FORM)) {
+		switch (pdt->base) {
 			case BASE_OCT :
 				/* octal alternative form */
-				if ((value == 0) && (prec == 0)) {
-					prec = 1;
+				if ((value == 0) && (pdt->prec == 0)) {
+					pdt->prec = 1;
 				}
 				break;
 
@@ -220,44 +227,44 @@ static void convert_int(char *buf, size_t len, size_t *cur,
 	}
 
 	/* right justify space padding */
-	if ((flags & FLAG_LEFT_JUSTIFIED) == 0) {
+	if (PF_IS_UNSET(FLAG_LEFT_JUSTIFIED)) {
 		while (splen > 0) {
-			fill_buffer(buf, len, cur, ' ');
+			fill_buffer(pdt, ' ');
 			splen--;
 		}
 	}
 
 	/* if we have a sign */
 	if (have_sign != 0) {
-		fill_buffer(buf, len, cur, sign);
+		fill_buffer(pdt, sign);
 	}
 
 	/* hex alternative form */
 	if (have_hex_prefix != 0) {
-		fill_buffer(buf, len, cur, '0');
-		if ((flags & FLAG_UPPERCASE) == 0) {
-			fill_buffer(buf, len, cur, 'x');
+		fill_buffer(pdt, '0');
+		if (PF_IS_UNSET(FLAG_UPPERCASE)) {
+			fill_buffer(pdt, 'x');
 		} else {
-			fill_buffer(buf, len, cur, 'X');
+			fill_buffer(pdt, 'X');
 		}
 	}
 
 	/* zero padding */
 	while (zplen > 0) {
-		fill_buffer(buf, len, cur, '0');
+		fill_buffer(pdt, '0');
 		zplen--;
 	}
 
 	/* converted integer */
 	while (vlen > 0) {
-		fill_buffer(buf, len, cur, nbuf[vlen - 1]);
+		fill_buffer(pdt, nbuf[vlen - 1]);
 		vlen--;
 	}
 
 	/* left justify space padding */
-	if ((flags & FLAG_LEFT_JUSTIFIED) != 0) {
+	if (PF_IS_SET(FLAG_LEFT_JUSTIFIED)) {
 		while (splen > 0) {
-			fill_buffer(buf, len, cur, ' ');
+			fill_buffer(pdt, ' ');
 			splen--;
 		}
 	}
@@ -271,61 +278,24 @@ static void convert_int(char *buf, size_t len, size_t *cur,
  	Convert a signed integer
 
  IN
-	buffer :	buffer location
-	len :		buffer size
-	cur :		cursor position
+ 	pdt :		vsnprintf common data structure
 	value :		unsigned integer to convert
-	base :		base used for conversion
-	fwidth :	field width
-	prec :		precision
-	flags :		used to know the case for conversion
 
  OUT
 	NONE
  ***********************************************************************/
 
-static void convert_sint(char *buf, size_t len, size_t *cur, signed_t value,
-						base_t base, int fwidth, int prec, flag_t flags) {
-	int	isneg = 0;
+static void convert_sint(vsnp_t *pdt, signed_t value) {
 
 	/* check if value is negative */
 	if (value < 0) {
 		/* if true set flag */
-		isneg = 1;
+		SET_PFLAG(FLAG_NEGATIVE_VALUE);
 		value = -value;
 	}
 
 	/* call generic conversion procedure */
-	convert_int(buf, len, cur, (unsigned_t) value, base, fwidth, prec,
-														flags, isneg);
-}
-
-
-/******************
- * convert_uint() *
- ***********************************************************************
- DESCR
-	Convert an unsigned integer
-
- IN
-	buffer :	buffer location
-	len :		buffer size
-	cur :		cursor position
-	value :		unsigned integer to convert
-	base :		base used for conversion
-	fwidth :	field width
-	prec :		precision
-	flags :		used to know the case for conversion
-
- OUT
-	NONE
- ***********************************************************************/
-
-static void convert_uint(char *buf, size_t len, size_t *cur, unsigned_t value,
-						base_t base, int fwidth, int prec, flag_t flags) {
-
-	/* call generic conversion procedure */
-	convert_int(buf, len, cur, value, base, fwidth, prec, flags, 0);
+	convert_int(pdt, (unsigned_t) value);
 }
 
 
@@ -337,23 +307,138 @@ static void convert_uint(char *buf, size_t len, size_t *cur, unsigned_t value,
 	conversion identifier.
 
  IN
-	buffer :	buffer location
-	len :		buffer size
-	cur :		cursor position
+ 	pdt :		vsnprintf common data structure
 	ptr :		string to convert
-	prec :		precision AKA max number of characters to copy
-	flags :		used to know the case for conversion
 
  OUT
 	NONE
  ***********************************************************************/
 
-static void convert_str(char *buf, size_t len, size_t *cur, char *ptr,
-											int prec, flag_t flags) {
-	while ((*cur < len) && (prec > 0) && (*ptr != '\0')) {
-		fill_buffer(buf, len, cur, *ptr);
+static void convert_str(vsnp_t *pdt, char *ptr) {
+	while ((pdt->cur < pdt->len) && (pdt->prec > 0) && (*ptr != '\0')) {
+		fill_buffer(pdt, *ptr);
 		ptr++;
-		prec--;
+		pdt->prec--;
+	}
+}
+
+
+/*****************
+ * conv_to_exp() *
+ ***********************************************************************
+ DESCR
+	Convert to exponent form
+
+ IN
+ 	pdt :		vsnprintf common data structure
+	expnt :		exponent value
+
+ OUT
+	exponent presence flag
+ ***********************************************************************/
+
+static int conv_to_exp(vsnp_t *pdt, flt_t *pval, int *pexp) {
+	flt_t	uval;
+	int		expnt,
+			have_exp = 1;
+
+
+	/* work on local variable to save value in case of g conversion */
+	uval = *pval;
+
+	/* init exponent value */
+	expnt = 0;
+
+	/* process value to get only one digit before decimal point */
+	if (uval >= 1) {
+		while (uval > pdt->base) {
+			uval = uval / pdt->base;
+			expnt++;
+		}
+	} else {
+		while (uval < 1) {
+			uval = uval * pdt->base;
+			expnt--;
+		}
+	}
+
+	/* check if exponent is needed for g conversion */
+	if (PF_IS_SET(FLAG_G_CONVERSION)) {
+		if ((expnt >= -4) && (expnt < pdt->prec)) { /* XXX use define for ISOC99 lower limit */
+			/* unset exponent flag */
+			have_exp = 0;
+
+			/* get back to original value */
+			uval = *pval;
+		}
+	}
+
+	/* set values */
+	*pval = uval;
+	*pexp = expnt;
+
+	return(have_exp);
+}
+
+
+/***************
+ * print_exp() *
+ ***********************************************************************
+ DESCR
+	process exponent
+
+ IN
+ 	pdt :		vsnprintf common data structure
+	expnt :		exponent value
+
+ OUT
+	NONE
+ ***********************************************************************/
+
+static void print_exp(vsnp_t *pdt, int expnt) {
+	char	ebuf[MAXINTLEN+1],
+			sign= ' ';
+
+	/* exponent sign */
+	if (expnt < 0) {
+		sign = '-';
+	} else {
+		sign = '+';
+	}
+
+	/* exponent type may vary */
+	ebuf[1] = '0'; /* init */
+	switch (pdt->base) {
+		case BASE_DEC :
+			/* g or G conversion */
+			if (PF_IS_SET(FLAG_UPPERCASE)) {
+				fill_buffer(pdt, 'E');
+			} else {
+				fill_buffer(pdt, 'e');
+			}
+
+			fill_buffer(pdt, sign);
+
+			/* exponent 2 digits */
+			build_number(ebuf, 2, expnt, BASE_DEC, FLAG_NONE);
+			fill_buffer(pdt, ebuf[1]);
+			fill_buffer(pdt, ebuf[0]);
+			break;
+
+		case BASE_HEX :
+			/* a or A conversion */
+			if (PF_IS_SET(FLAG_UPPERCASE)) {
+				fill_buffer(pdt, 'P');
+			} else {
+				fill_buffer(pdt, 'p');
+			}
+
+			fill_buffer(pdt, sign);
+
+			/* exponent 1 digit */
+			build_number(ebuf, 1, expnt, BASE_DEC, FLAG_NONE);
+			fill_buffer(pdt, ebuf[0]);
+			break;
 	}
 }
 
@@ -365,14 +450,8 @@ static void convert_str(char *buf, size_t len, size_t *cur, char *ptr,
 	Convert a floating point number
 
  IN
-	buffer :	buffer location
-	len :		buffer size
-	cur :		cursor position
+ 	pdt :		vsnprintf common data structure
 	value :		unsigned integer to convert
-	base :		base used for conversion
-	fwidth :	field width
-	prec :		precision
-	flags :		used to know the case for conversion
 
  OUT
 	NONE
@@ -382,13 +461,12 @@ static void convert_str(char *buf, size_t len, size_t *cur, char *ptr,
  	-NaN
  ***********************************************************************/
 
-static void convert_float(char *buf, size_t len, size_t *cur, float_t value,
-						base_t base, int fwidth, int prec, flag_t flags) {
+static void convert_float(vsnp_t *pdt, flt_t value) {
 	char	ibuf[MAXINTLEN+1],
 			fbuf[MAXINTLEN+1],
 			sign= ' ';
-	float_t	uval,
-			frac;
+	flt_t	frac,
+			uval;
 	int		expnt = 0,
 			t,
 			explen = 0,
@@ -396,8 +474,8 @@ static void convert_float(char *buf, size_t len, size_t *cur, float_t value,
 			fzplen,
 			izplen,
 			splen,
-			have_sign = 0,
 			have_dot = 0,
+			have_sign = 0,
 			have_exp = 0,
 			have_g_conv,
 			have_alt_form,
@@ -408,22 +486,8 @@ static void convert_float(char *buf, size_t len, size_t *cur, float_t value,
 	size_t	ilen,
 			flen;
 
-	have_g_conv = (int) (flags & FLAG_G_CONVERSION);
-	have_alt_form = (int) (flags & FLAG_ALTERNATIVE_FORM);
-
-	/* XXX INF & NAN
-
-#include <math.h>
-
-	int		ftype;
-
-	ftype = fpclassify(value);
-
-	FP_INFINITE
-	FP_NAN
-
-	XXX INF & NAN */
-
+	have_g_conv = (int) (pdt->flags & FLAG_G_CONVERSION);
+	have_alt_form = (int) (pdt->flags & FLAG_ALTERNATIVE_FORM);
 
 	/* for g conversion without alternative form */
 	if ((have_g_conv != 0) && (have_alt_form == 0)) {
@@ -438,7 +502,7 @@ static void convert_float(char *buf, size_t len, size_t *cur, float_t value,
 		uval = -value;
 	} else {
 		/* else if + flag is set display the positive sign */
-		if ((flags & FLAG_SIGNED) != 0) {
+		if (PF_IS_SET(FLAG_SIGNED)) {
 			have_sign = 1;
 			sign = '+';
 		}
@@ -446,71 +510,42 @@ static void convert_float(char *buf, size_t len, size_t *cur, float_t value,
 		uval = value;
 	}
 
-	/* process eventual exponent */
-	if (((flags & FLAG_EXPONENT) != 0) || (have_g_conv != 0)) {
-		/* save value in frac for g conversion */
-		frac = uval;
-
-		/* set exponent flag */
-		have_exp = 1;
-		expnt = 0;
-
-		/* process value to get only one digit before decimal point */
-		if (uval >= 0) {
-			while (uval > base) {
-				uval = uval / base;
-				expnt++;
-			}
-		} else {
-			while (uval < 0) {
-				uval = uval * base;
-				expnt--;
-			}
-		}
-
-		/* check if exponent is needed for g conversion */
-		if (have_g_conv != 0) {
-			if ((expnt >= -4) && (expnt < prec)) {
-				/* unset exponent flag */
-				have_exp = 0;
-
-				/* get back to saved value */
-				uval = frac;
-			}
-		}
+	if ((PF_IS_SET(FLAG_EXPONENT)) || (have_g_conv != 0)) {
+		/* process eventual exponent */
+		have_exp = conv_to_exp(pdt, &uval, &expnt);
 	}
 
 	/* get integral part of the value */
 	intval = (long) uval;
 
 	/* build integral part number */
-	ilen = build_number(ibuf, sizeof(ibuf), intval, base, flags);
+	ilen = build_number(ibuf, sizeof(ibuf), intval, pdt->base, pdt->flags);
 
 	if (have_g_conv != 0) {
-		prec = prec - ilen;
-		if (prec < 0) {
-			prec = 0;
+		pdt->prec = pdt->prec - ilen;
+		if (pdt->prec < 0) {
+			pdt->prec = 0;
 		}
 	}
 
-	if (prec > 0) {
+	if (pdt->prec > 0) {
 		/* get the fractional part */
-		frac = uval - (float_t) intval;
+		frac = uval - (flt_t) intval;
 
 		/* shift as digits as precision specify */
-		t = prec;
+		t = pdt->prec;
 
 		/* init round limit */
 		lt = 1;
 
 		/* multiply successively by base to obtain the desired precision */
 		while (t > 0) {
-			frac = frac * base;
-			lt = lt * base;
+			frac = frac * pdt->base;
+			lt = lt * pdt->base;
 			t--;
 		}
 
-		/* get integral part */
+		/* get integral part of the result */
 		fracval = (long) frac;
 
 		/* rount value if needed */
@@ -520,22 +555,22 @@ static void convert_float(char *buf, size_t len, size_t *cur, float_t value,
 			/* if the rounded value add a digit (eg 999 -> 1000) */
 			if (fracval == lt) {
 				/* then adjust fractional value */
-				fracval = fracval / base;
+				fracval = fracval / pdt->base;
 			}
 		}
 
 		/* unset signed flag for fractional part */
-		flags = flags & (FLAG_ALL ^ FLAG_SIGNED);
+		UNSET_PFLAG(FLAG_SIGNED);
 
 		/* build fractional part number */
-		flen = build_number(fbuf, sizeof(fbuf), fracval, base, flags);
+		flen = build_number(fbuf, sizeof(fbuf), fracval, pdt->base, pdt->flags);
 	} else {
 		flen = 0;
 		fracval = 0;
 	}
 
 	/* need a dot ? */
-	if ((have_alt_form != 0) || (prec > 0)) {
+	if ((have_alt_form != 0) || (pdt->prec > 0)) {
 		have_dot = 1;
 	}
 
@@ -543,13 +578,13 @@ static void convert_float(char *buf, size_t len, size_t *cur, float_t value,
 	if ((skip_zero != 0) && (fracval == 0)) {
 		have_dot = 0;
 		flen = 0;
-		prec = 0;
+		pdt->prec = 0;
 	}
 
 	/* fractal part len */
-	if (flen < (size_t) prec) {
-		fplen = prec;
-		fzplen = prec - flen;
+	if (flen < (size_t) pdt->prec) {
+		fplen = pdt->prec;
+		fzplen = pdt->prec - flen;
 	} else {
 		fplen = flen;
 		fzplen = 0;
@@ -557,7 +592,7 @@ static void convert_float(char *buf, size_t len, size_t *cur, float_t value,
 
 	/* exponent len */
 	if (have_exp != 0) {
-		switch (base) {
+		switch (pdt->base) {
 			case BASE_DEC :
 				explen = 4;
 				break;
@@ -581,19 +616,19 @@ static void convert_float(char *buf, size_t len, size_t *cur, float_t value,
 		t++;
 	}
 	/* a or A conversion => hex prefix */
-	if (base == BASE_HEX) {
+	if (pdt->base == BASE_HEX) {
 		t= t + 2;
 	}
 
 	/* compute space or zero (integer part) padding */
-	if ((flags & FLAG_ZERO_PADDING) != 0) {
-		izplen = fwidth - t;
+	if (PF_IS_SET(FLAG_ZERO_PADDING)) {
+		izplen = pdt->fwidth - t;
 		if (izplen < 0) {
 			izplen = 0;
 		}
 		splen = 0;
 	} else {
-		splen = fwidth - t;
+		splen = pdt->fwidth - t;
 		if (splen < 0) {
 			splen = 0;
 		}
@@ -601,54 +636,54 @@ static void convert_float(char *buf, size_t len, size_t *cur, float_t value,
 	}
 
 	/* right justify space padding */
-	if ((flags & FLAG_LEFT_JUSTIFIED) == 0) {
+	if (PF_IS_UNSET(FLAG_LEFT_JUSTIFIED)) {
 		while (splen > 0) {
-			fill_buffer(buf, len, cur, ' ');
+			fill_buffer(pdt, ' ');
 			splen--;
 		}
 	}
 
 	/* if we have a sign */
 	if (have_sign != 0) {
-		fill_buffer(buf, len, cur, sign);
+		fill_buffer(pdt, sign);
 	}
 
 	/* hex alternative form */
-	if (base == BASE_HEX) {
-		fill_buffer(buf, len, cur, '0');
-		if ((flags & FLAG_UPPERCASE) == 0) {
-			fill_buffer(buf, len, cur, 'x');
+	if (pdt->base == BASE_HEX) {
+		fill_buffer(pdt, '0');
+		if (PF_IS_UNSET(FLAG_UPPERCASE)) {
+			fill_buffer(pdt, 'x');
 		} else {
-			fill_buffer(buf, len, cur, 'X');
+			fill_buffer(pdt, 'X');
 		}
 	}
 
 	/* zero padding */
 	while (izplen > 0) {
-		fill_buffer(buf, len, cur, '0');
+		fill_buffer(pdt, '0');
 		izplen--;
 	}
 
 	/* integral part */
 	while (ilen > 0) {
-		fill_buffer(buf, len, cur, ibuf[ilen - 1]);
+		fill_buffer(pdt, ibuf[ilen - 1]);
 		ilen--;
 	}
 
 	if (have_dot) {
-		fill_buffer(buf, len, cur, '.');
+		fill_buffer(pdt, '.');
 
-		if (prec > 0) {
+		if (pdt->prec > 0) {
 			/* fractional part */
 			while (flen > 0) {
-				fill_buffer(buf, len, cur, fbuf[flen - 1]);
+				fill_buffer(pdt, fbuf[flen - 1]);
 				flen--;
 			}
 
 			if (skip_zero == 0) {
 				/* zero padding */
 				while (fzplen > 0) {
-					fill_buffer(buf, len, cur, '0');
+					fill_buffer(pdt, '0');
 					fzplen--;
 				}
 			}
@@ -657,48 +692,7 @@ static void convert_float(char *buf, size_t len, size_t *cur, float_t value,
 
 	if (have_exp != 0) {
 		/* exponent part */
-
-		/* exponenet sign */
-		if (expnt < 0) {
-			sign = '-';
-		} else {
-			sign = '+';
-		}
-
-		/* exponent type may vary */
-		ibuf[1] = '0'; /* init */
-		switch (base) {
-			case BASE_DEC :
-				/* g or G conversion */
-				if ((flags & FLAG_UPPERCASE) != 0) {
-					fill_buffer(buf, len, cur, 'E');
-				} else {
-					fill_buffer(buf, len, cur, 'e');
-				}
-
-				fill_buffer(buf, len, cur, sign);
-
-				/* exponent 2 digits */
-				build_number(ibuf, 2, expnt, BASE_DEC, FLAG_NONE);
-				fill_buffer(buf, len, cur, ibuf[1]);
-				fill_buffer(buf, len, cur, ibuf[0]);
-				break;
-
-			case BASE_HEX :
-				/* a or A conversion */
-				if ((flags & FLAG_UPPERCASE) != 0) {
-					fill_buffer(buf, len, cur, 'P');
-				} else {
-					fill_buffer(buf, len, cur, 'p');
-				}
-
-				fill_buffer(buf, len, cur, sign);
-
-				/* exponent 1 digit */
-				build_number(ibuf, 1, expnt, BASE_DEC, FLAG_NONE);
-				fill_buffer(buf, len, cur, ibuf[0]);
-				break;
-		}
+		print_exp(pdt, expnt);
 	}
 }
 
@@ -722,15 +716,11 @@ static void convert_float(char *buf, size_t len, size_t *cur, float_t value,
  ***********************************************************************/
 
 int pmk_vsnprintf(char *buf, size_t len, const char *fmt, va_list args) {
-	base_t				 base = 0;
 	char				*pstr,
 						*pc = NULL;
-	flag_t				 flags = FLAG_NONE;
-	float_t				 flt_val;
+	flt_t				 flt_val;
 	int					*pi = NULL,
 						 state = PARSE_CHAR,
-						 fwidth = 0,
-						 precision = 0,
 						 modifier = 0,
 						 n_modsave = MDFR_NORMAL,
 						 have_n_conv = 0;
@@ -746,10 +736,10 @@ int pmk_vsnprintf(char *buf, size_t len, const char *fmt, va_list args) {
 #endif /* HAVE_PTRDIFF_T */
 	short				*ps = NULL;
 	signed_t			 int_val;
-	size_t				 cursor = 0,
-						*pst = NULL;
+	size_t				*pst = NULL;
 	unsigned_t			 uint_val;
 	void				*ptr;
+	vsnp_t				 data;
 #ifdef HAVE_WCHAR_T
 	wchar_t				*wc;
 #endif /* HAVE_WCHAR_T */
@@ -757,7 +747,12 @@ int pmk_vsnprintf(char *buf, size_t len, const char *fmt, va_list args) {
 	wint_t				 wi;
 #endif /* HAVE_WINT_T */
 
+	/* init common data */
+	data.buf = buf;
+	data.len = len;
+	data.cur = 0;
 
+	/* loop until the end of the format string is reached */
 	while (*fmt != '\0') {
 		switch (state) {
 			case PARSE_CHAR :
@@ -770,14 +765,14 @@ printf("Enter state PARSE_CHAR\n");
 #endif
 
 				if (*fmt == '%') {
-					flags = FLAG_NONE;
-					fwidth = 0; /* -1 ? */
-					precision = -1;
+					data.flags = FLAG_NONE;
+					data.fwidth = 0; /* -1 ? */
+					data.prec = -1;
 					modifier = MDFR_NORMAL;
 					state = PARSE_FLAGS;
 				} else {
 					/* else copy the character in the buffer */
-					fill_buffer(buf, len, &cursor, *fmt);
+					fill_buffer(&data, *fmt);
 				}
 
 				/* next character */
@@ -795,27 +790,27 @@ printf("Enter state PARSE_FLAGS\n");
 
 				switch (*fmt) {
 					case '+' :
-						flags = flags | FLAG_SIGNED;
+						SET_FLAG(FLAG_SIGNED);
 						fmt++;
 						break;
 
 					case '-' :
-						flags = flags | FLAG_LEFT_JUSTIFIED;
+						SET_FLAG(FLAG_LEFT_JUSTIFIED);
 						fmt++;
 						break;
 
 					case ' ' :
-						flags = flags | FLAG_SPACE_PREFIX;
+						SET_FLAG(FLAG_SPACE_PREFIX);
 						fmt++;
 						break;
 
 					case '#' :
-						flags = flags | FLAG_ALTERNATIVE_FORM;
+						SET_FLAG(FLAG_ALTERNATIVE_FORM);
 						fmt++;
 						break;
 
 					case '0' :
-						flags = flags | FLAG_ZERO_PADDING;
+						SET_FLAG(FLAG_ZERO_PADDING);
 						fmt++;
 						break;
 
@@ -836,26 +831,26 @@ printf("Enter state PARSE_FLD_WIDTH\n");
 				/* if we got an asterisk */
 				if (*fmt == '*') {
 					/* then get the field width from arguments */
-					fwidth = va_arg(args, int);
+					data.fwidth = va_arg(args, int);
 					/* if field width is negative */
-					if (fwidth < 0) {
+					if (data.fwidth < 0) {
 						/* take absolute value for the width */
-						fwidth = fwidth * (-1);
+						data.fwidth = data.fwidth * (-1);
 						/* and set left justify flag */
-						flags = flags | FLAG_LEFT_JUSTIFIED;
+						SET_FLAG(FLAG_LEFT_JUSTIFIED);
 					}
 					fmt++;
 				} else {
 					/* else take the width from format string */
 					while ((*fmt >= '0') && (*fmt <= '9')) {
-						fwidth = (fwidth * 10) + (int) (*fmt - '0');
+						data.fwidth = (data.fwidth * 10) + (int) (*fmt - '0');
 						fmt++;
 					}
 				}
 
 				/* ignore 0 flag if - flag is provided */
-				if ((flags & FLAG_LEFT_JUSTIFIED) != 0) {
-					flags = flags & (FLAG_ALL ^ FLAG_ZERO_PADDING);
+				if (F_IS_SET(FLAG_LEFT_JUSTIFIED)) {
+					UNSET_FLAG(FLAG_ZERO_PADDING);
 				}
 
 				state = PARSE_DOT;
@@ -873,7 +868,7 @@ printf("Enter state PARSE_DOT\n");
 				if (*fmt == '.') {
 					/* if yes parse the precision field */
 					fmt++;
-					precision = 0;
+					data.prec = 0;
 					state = PARSE_PRECISION;
 					/*flags = flags & (FLAG_ALL ^ FLAG_ZERO_PADDING);*//* XXX meant for something ??? */
 				} else {
@@ -890,12 +885,12 @@ printf("Enter state PARSE_DOT\n");
 				/* if we got an asterisk */
 				if (*fmt == '*') {
 					/* then get the precision from arguments */
-					precision = va_arg(args, int);
+					data.prec = va_arg(args, int);
 					fmt++;
 				} else {
 					/* else take the precision from format string */
 					while ((*fmt >= '0') && (*fmt <= '9')) {
-						precision = (precision * 10) + (int) (*fmt - '0');
+						data.prec = (data.prec * 10) + (int) (*fmt - '0');
 						fmt++;
 					}
 				}
@@ -997,8 +992,8 @@ printf("Enter state PARSE_CONV_SPEC\n");
 						*/
 
 						/* default precision */
-						if (precision < 0) {
-							precision = 1;
+						if (data.prec < 0) {
+							data.prec = 1;
 						}
 
 						/* process modifier */
@@ -1038,9 +1033,9 @@ printf("Enter state PARSE_CONV_SPEC\n");
 								int_val = (signed_t) va_arg(args, int);
 						}
 
-						base = 10;
+						data.base = 10;
 
-						convert_sint(buf, len, &cursor, int_val, base, fwidth, precision, flags);
+						convert_sint(&data, int_val);
 						break;
 
 					case 'o' :
@@ -1052,12 +1047,12 @@ printf("Enter state PARSE_CONV_SPEC\n");
 						*/
 
 						/* default precision */
-						if (precision < 0) {
-							precision = 1;
+						if (data.prec < 0) {
+							data.prec = 1;
 						}
 
 						/* ignore - flag */
-						flags = flags & (FLAG_ALL ^ FLAG_SIGNED);
+						UNSET_FLAG(FLAG_SIGNED);
 
 						/* process modifier */
 						switch (modifier) {
@@ -1099,23 +1094,23 @@ printf("Enter state PARSE_CONV_SPEC\n");
 						/* set base */
 						switch (*fmt) {
 							case 'o' :
-								base = BASE_OCT;
+								data.base = BASE_OCT;
 								break;
 
 							case 'u' :
-								base = BASE_DEC;
+								data.base = BASE_DEC;
 								break;
 
 							case 'X' :
-								flags = flags | FLAG_UPPERCASE;
+								SET_FLAG(FLAG_UPPERCASE);
 								/* no break */
 
 							case 'x' :
-								base = BASE_HEX;
+								data.base = BASE_HEX;
 								break;
 						}
 
-						convert_uint(buf, len, &cursor, uint_val, base, fwidth, precision, flags);
+						convert_int(&data, uint_val);
 						break;
 
 					case 'F' :
@@ -1126,7 +1121,7 @@ printf("Enter state PARSE_CONV_SPEC\n");
 							float conversion (uppercase)
 						*/
 
-						flags = flags | FLAG_UPPERCASE;
+						SET_FLAG(FLAG_UPPERCASE);
 						/* no break */
 
 					case 'f' :
@@ -1140,62 +1135,62 @@ printf("Enter state PARSE_CONV_SPEC\n");
 						switch (*fmt) {
 							case 'F' :
 							case 'f' :
-								base = BASE_DEC;
+								data.base = BASE_DEC;
 
 								/* default precision */
-								if (precision < 0) {
-									precision = 6;
+								if (data.prec < 0) {
+									data.prec = 6;
 								}
 								break;
 
 							case 'E' :
 							case 'e' :
-								base = BASE_DEC;
+								data.base = BASE_DEC;
 
-								flags = flags | FLAG_EXPONENT;
+								SET_FLAG(FLAG_EXPONENT);
 
 								/* default precision */
-								if (precision < 0) {
-									precision = 6;
+								if (data.prec < 0) {
+									data.prec = 6;
 								}
 								break;
 
 							case 'G' :
 							case 'g' :
-								base = BASE_DEC;
+								data.base = BASE_DEC;
 
-								flags = flags | FLAG_G_CONVERSION;
+								SET_FLAG(FLAG_G_CONVERSION);
 
 								/* default precision */
-								if (precision <= 0) {
-									precision = 6; /* XXX ISO C99 = 1 */
+								if (data.prec <= 0) {
+									data.prec = 6; /* XXX ISO C99 = 1 */
 								}
 								break;
 
 							case 'A' :
 							case 'a' :
-								base = BASE_HEX;
+								data.base = BASE_HEX;
 
-								flags = flags | FLAG_EXPONENT;
+								SET_FLAG(FLAG_EXPONENT);
 
 								/* default precision */
-								if (precision < 0) {
-									precision = 4; /* XXX real default value is ? */
+								if (data.prec < 0) {
+									data.prec = 4; /* XXX real default value is ? */
 								}
 								break;
 						}
 
 #ifdef HAVE_LONG_DOUBLE
 						if (modifier = MDFR_LONG_DBL) {
-							flt_val = (float_t) va_arg(args, long double);
+							flt_val = (flt_t) va_arg(args, long double);
 						} else {
 #endif /* HAVE_LONG_DOUBLE */
-							flt_val = (float_t) va_arg(args, double);
+							flt_val = (flt_t) va_arg(args, double);
 #ifdef HAVE_LONG_DOUBLE
 						}
 #endif /* HAVE_LONG_DOUBLE */
 
-						convert_float(buf, len, &cursor, flt_val, base, fwidth, precision, flags);
+						convert_float(&data, flt_val);
 						break;
 
 					case 'c' :
@@ -1215,7 +1210,7 @@ printf("Enter state PARSE_CONV_SPEC\n");
 							int_val = (signed_t) va_arg(args, int);
 
 #ifdef HAVE_WINT_T
-							fill_buffer(buf, len, &cursor, (char) int_val);
+							fill_buffer(&data, (char) int_val);
 						}
 #endif /* HAVE_WINT_T */
 
@@ -1236,11 +1231,11 @@ printf("Enter state PARSE_CONV_SPEC\n");
 #endif /* HAVE_WCHAR_T */
 							pstr = va_arg(args, char *);
 
-							if (precision <= 0) {
-								precision = len;
+							if (data.prec <= 0) {
+								data.prec = len;
 							}
 
-							convert_str(buf, len, &cursor, pstr, precision, flags);
+							convert_str(&data, pstr);
 #ifdef HAVE_WCHAR_T
 						}
 #endif /* HAVE_WCHAR_T */
@@ -1253,13 +1248,13 @@ printf("Enter state PARSE_CONV_SPEC\n");
 						*/
 						ptr = va_arg(args, void *);
 
-						base = BASE_HEX;
+						data.base = BASE_HEX;
 
 /* XXX ?
-						flags = flags | FLAG_ALTERNATIVE_FORM;
+						SET_FLAG(FLAG_ALTERNATIVE_FORM);
 */
 
-						convert_uint(buf, len, &cursor, (unsigned_t) ptr, base, fwidth, precision, flags);
+						convert_int(&data, (unsigned_t) ptr);
 						break;
 
 					case 'n' :
@@ -1320,7 +1315,7 @@ printf("Enter state PARSE_CONV_SPEC\n");
 
 						/* XXX we allow complete specification, != ISO C99 ? */
 
-						fill_buffer(buf, len, &cursor, *fmt);
+						fill_buffer(&data, *fmt);
 						break;
 				}
 
@@ -1333,8 +1328,8 @@ printf("Enter state PARSE_CONV_SPEC\n");
 	}
 
 	/* NULL terminate the string */
-	if (len > cursor) {
-		buf[cursor] = '\0';
+	if (len > data.cur) {
+		buf[data.cur] = '\0';
 	} else {
 		buf[len - 1] = '\0';
 	}
@@ -1344,45 +1339,45 @@ printf("Enter state PARSE_CONV_SPEC\n");
 		/* process modifier */
 		switch (n_modsave) {
 			case MDFR_LONG :
-				*pl = (long) cursor;
+				*pl = (long) data.cur;
 				break;
 
 #ifdef HAVE_LONG_LONG
 			case MDFR_LONG_LONG :
-				*pll = (long long) cursor;
+				*pll = (long long) data.cur;
 				break;
 #endif /* HAVE_LONG_LONG */
 
 			case MDFR_SHORT :
-				*ps = (short) cursor;
+				*ps = (short) data.cur;
 				break;
 
 			case MDFR_CHAR :
-				*pc = (char) cursor;
+				*pc = (char) data.cur;
 				break;
 
 #ifdef HAVE_INTMAX_T
 			case MDFR_INTMAX :
-				*pimt = (intmax_t) cursor;
+				*pimt = (intmax_t) data.cur;
 				break;
 #endif /* HAVE_INTMAX_T */
 
 			case MDFR_SIZET :
-				*pst = cursor;
+				*pst = data.cur;
 				break;
 
 #ifdef HAVE_PTRDIFF_T
 			case MDFR_PTRDIFF :
-				*ppd = (ptrdiff_t) cursor;
+				*ppd = (ptrdiff_t) data.cur;
 				break;
 #endif /* HAVE_PTRDIFF_T */
 			default :
-				*pi = (int) cursor;
+				*pi = (int) data.cur;
 		}
 	}
 
 	/* return what should have been the string lenght if not limited */
-	return(cursor);
+	return(data.cur);
 }
 
 
