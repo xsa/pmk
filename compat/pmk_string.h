@@ -43,28 +43,24 @@
 #include "pmk_stdbool.h"
 
 
+#ifndef HAVE_STRDUP
+
+/*
+	strdup() function
+*/
+
+char	*strdup(const char *);
+
+#endif /* HAVE_STRDUP */
+
+
 #ifndef HAVE_STRLCPY
 
 /*
 	strlcpy() function
-
-	Systems known to have compatible strlcpy in string.h :
-		OpenBSD		since 2.4
-		FreeBSD		since 3.3
-		NetBSD		since 1.5
-		SCO OpenServer	since 5.0.6
-		SunOs		since 5.8
-		MacOSX
-
-	Systems without strlcpy in string.h :
-		AIX		(4.3)
-		glibc based	(at least before 4 Mar 2002)
-
-	Note: Feel free to send us a notice if your system is not
-		listed here but should be.
 */
 
-size_t strlcpy(char *, const char *, size_t);
+size_t	 strlcpy(char *, const char *, size_t);
 
 #endif /* HAVE_STRLCPY */
 
@@ -75,14 +71,14 @@ size_t strlcpy(char *, const char *, size_t);
 	strlcat() function
 */
 
-size_t strlcat(char *, const char *, size_t);
+size_t	 strlcat(char *, const char *, size_t);
 
 #endif /* HAVE_STRLCAT */
 
 
-bool	snprintf_b(char *, size_t, const char *, ...);
-bool	strlcat_b(char *, const char *, size_t);
-bool	strlcpy_b(char *, const char *, size_t);
+bool	 snprintf_b(char *, size_t, const char *, ...);
+bool	 strlcat_b(char *, const char *, size_t);
+bool	 strlcpy_b(char *, const char *, size_t);
 
 #endif /* _PMK_STRING_H_ */
 

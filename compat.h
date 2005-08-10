@@ -77,6 +77,7 @@ enum {
 #define	FLAG_UPPERCASE			0x0040
 #define	FLAG_EXPONENT			0x0080
 #define	FLAG_G_CONVERSION		0x0100
+#define	FLAG_NEGATIVE_VALUE		0x0200
 #define FLAG_ALL				0xffff
 
 /* base definition */
@@ -98,9 +99,9 @@ enum {
 #endif /* HAVE_UNSIGNED_LONG_LONG */
 
 #ifdef HAVE_LONG_DOUBLE
-	typedef long double	float_t;
+	typedef long double	flt_t;
 #else /* HAVE_LONG_DOUBLE */
-	typedef double		float_t;
+	typedef double		flt_t;
 #endif /* HAVE_LONG_DOUBLE */
 
 
@@ -116,6 +117,11 @@ typedef unsigned int	flag_t;
 #define UPPER_BASE	"0123456789ABCDEF"
 #define LOWER_BASE	"0123456789abcdef"
 
+#define UPPER_INF	"INF"
+#define LOWER_INF	"inf"
+
+#define UPPER_NAN	"NAN"
+#define LOWER_NAN	"nan"
 
 /*
 	compute approximative string size needed for maximum int conversion
@@ -127,11 +133,24 @@ typedef unsigned int	flag_t;
 #define MKSTEMPS_REPLACE_CHAR	'X'
 
 
+/* vsnprintf data structure */
+typedef struct {
+	char	*buf;
+	size_t	 len,
+			 cur;
+	base_t	 base;
+	int		 fwidth,
+			 prec;
+	flag_t	 flags;
+} vsnp_t;
+
+
 /**************
  * prototypes *
  ***********************************************************************/
 
 int		 pmk_vsnprintf(char *, size_t, const char *, va_list);
+char	*pmk_strdup(const char *);
 size_t	 pmk_strlcpy(char *, const char *, size_t);
 size_t	 pmk_strlcat(char *, const char *, size_t);
 char	*pmk_dirname(char *);
