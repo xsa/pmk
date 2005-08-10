@@ -411,6 +411,20 @@ static void convert_float(char *buf, size_t len, size_t *cur, float_t value,
 	have_g_conv = (int) (flags & FLAG_G_CONVERSION);
 	have_alt_form = (int) (flags & FLAG_ALTERNATIVE_FORM);
 
+	/* XXX INF & NAN
+
+#include <math.h>
+
+	int		ftype;
+
+	ftype = fpclassify(value);
+
+	FP_INFINITE
+	FP_NAN
+
+	XXX INF & NAN */
+
+
 	/* for g conversion without alternative form */
 	if ((have_g_conv != 0) && (have_alt_form == 0)) {
 		/* we skip ending zeros */
@@ -1376,6 +1390,34 @@ printf("Enter state PARSE_CONV_SPEC\n");
  * pmk_strlcpy() *
  ***********************************************************************
  DESCR
+	This function duplicate a string.
+
+ IN
+	ostr :	char pointer of source string
+
+ OUT
+	pointer to duplicated string or NULL
+ ***********************************************************************/
+
+char *pmk_strdup(const char *ostr) {
+	char	*pstr;
+	size_t	 len;
+
+	len = strlen(ostr) + 1;
+
+	pstr = (char *) malloc(len);
+	if (pstr != NULL) {
+		memcpy(pstr, ostr, len);
+	}
+
+	return(pstr);
+}
+
+
+/*****************
+ * pmk_strlcpy() *
+ ***********************************************************************
+ DESCR
 	This function copy a given number of characters from a source
 	string to a destination buffer. It also grants that this buffer
 	will be null terminated.
@@ -1733,22 +1775,8 @@ int pmk_mkstemps(char *template, int suffixlen) {
  ***********************************************************************/
 
 /********************
- *	pmk_string.h	*
+ *	pmk_stdio.h	*
  ********************/
-
-#ifndef HAVE_STRLCAT
-size_t strlcat(char *dst, const char *src, size_t s) {
-	return(pmk_strlcat(dst, src, s));
-}
-#endif /* HAVE_STRLCAT */
-
-
-#ifndef HAVE_STRLCPY
-size_t strlcpy(char *dst, const char *src, size_t s) {
-	return(pmk_strlcpy(dst, src, s));
-}
-#endif /* HAVE_STRLCPY */
-
 
 #ifndef HAVE_VSNPRINTF
 int vsnprintf(char *buf, size_t len, const char *fmt, va_list args) {
@@ -1770,6 +1798,31 @@ int snprintf(char *str, size_t size, const char *format, ...) {
 	return(rslt);
 }
 #endif /* HAVE_SNPRINTF */
+
+
+/********************
+ *	pmk_string.h	*
+ ********************/
+
+#ifndef HAVE_STRDUP
+char *strdup(const char *str) {
+	return(pmk_strdup(str));
+}
+#endif /* HAVE_STRDUP */
+
+
+#ifndef HAVE_STRLCAT
+size_t strlcat(char *dst, const char *src, size_t s) {
+	return(pmk_strlcat(dst, src, s));
+}
+#endif /* HAVE_STRLCAT */
+
+
+#ifndef HAVE_STRLCPY
+size_t strlcpy(char *dst, const char *src, size_t s) {
+	return(pmk_strlcpy(dst, src, s));
+}
+#endif /* HAVE_STRLCPY */
 
 
 /********************
