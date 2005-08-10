@@ -70,6 +70,8 @@
 #define	PF_IS_SET(f)	(pdt->flags & f) != 0
 #define	PF_IS_UNSET(f)	(pdt->flags & f) == 0
 
+/*#define DEBUG_VSNPRINTF 1*/
+
 
 /*************
  * functions *
@@ -342,6 +344,9 @@ static int conv_to_exp(vsnp_t *pdt, flt_t *pval, int *pexp) {
 	int		expnt,
 			have_exp = 1;
 
+#ifdef DEBUG_VSNPRINTF
+	printf("conv_to_exp() -> in\n");
+#endif
 
 	/* work on local variable to save value in case of g conversion */
 	uval = *pval;
@@ -350,13 +355,13 @@ static int conv_to_exp(vsnp_t *pdt, flt_t *pval, int *pexp) {
 	expnt = 0;
 
 	/* process value to get only one digit before decimal point */
-	if (uval >= 1) {
+	if (uval >= 0) {
 		while (uval > pdt->base) {
 			uval = uval / pdt->base;
 			expnt++;
 		}
 	} else {
-		while (uval < 1) {
+		while (uval < 0) {
 			uval = uval * pdt->base;
 			expnt--;
 		}
@@ -377,6 +382,10 @@ static int conv_to_exp(vsnp_t *pdt, flt_t *pval, int *pexp) {
 	*pval = uval;
 	*pexp = expnt;
 
+#ifdef DEBUG_VSNPRINTF
+	printf("conv_to_exp() -> out\n");
+#endif
+	
 	return(have_exp);
 }
 
@@ -398,6 +407,10 @@ static int conv_to_exp(vsnp_t *pdt, flt_t *pval, int *pexp) {
 static void print_exp(vsnp_t *pdt, int expnt) {
 	char	ebuf[MAXINTLEN+1],
 			sign= ' ';
+
+#ifdef DEBUG_VSNPRINTF
+	printf("print_exp() -> in\n");
+#endif
 
 	/* exponent sign */
 	if (expnt < 0) {
@@ -440,6 +453,10 @@ static void print_exp(vsnp_t *pdt, int expnt) {
 			fill_buffer(pdt, ebuf[0]);
 			break;
 	}
+
+#ifdef DEBUG_VSNPRINTF
+	printf("print_exp() -> out\n");
+#endif
 }
 
 
@@ -485,6 +502,10 @@ static void convert_float(vsnp_t *pdt, flt_t value) {
 			lt;
 	size_t	ilen,
 			flen;
+
+#ifdef DEBUG_VSNPRINTF
+	printf("convert_float() -> in\n");
+#endif
 
 	have_g_conv = (int) (pdt->flags & FLAG_G_CONVERSION);
 	have_alt_form = (int) (pdt->flags & FLAG_ALTERNATIVE_FORM);
@@ -694,6 +715,10 @@ static void convert_float(vsnp_t *pdt, flt_t value) {
 		/* exponent part */
 		print_exp(pdt, expnt);
 	}
+
+#ifdef DEBUG_VSNPRINTF
+	printf("convert_float() -> out\n");
+#endif
 }
 
 
