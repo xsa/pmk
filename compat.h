@@ -66,6 +66,11 @@ enum {
 	MDFR_LONG_DBL
 };
 
+enum {
+	FLT_IS_NAN,
+	FLT_IS_INF
+};
+
 /* conversion flag masks */
 #define	FLAG_NONE				0x0000
 #define	FLAG_SIGNED				0x0001
