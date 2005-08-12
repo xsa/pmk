@@ -385,7 +385,7 @@ static int conv_to_exp(vsnp_t *pdt, flt_t *pval, int *pexp) {
 #ifdef DEBUG_VSNPRINTF
 	printf("conv_to_exp() -> out\n");
 #endif
-	
+
 	return(have_exp);
 }
 
@@ -460,8 +460,8 @@ static void print_exp(vsnp_t *pdt, int expnt) {
 }
 
 
-/*******************
- * convert_float() *
+/************************
+ * convert_real_float() *
  ***********************************************************************
  DESCR
 	Convert a floating point number
@@ -478,25 +478,25 @@ static void print_exp(vsnp_t *pdt, int expnt) {
  	-NaN
  ***********************************************************************/
 
-static void convert_float(vsnp_t *pdt, flt_t value) {
+static void convert_real_float(vsnp_t *pdt, flt_t value) {
 	char	ibuf[MAXINTLEN+1],
 			fbuf[MAXINTLEN+1],
 			sign= ' ';
 	flt_t	frac,
 			uval;
 	int		expnt = 0,
-			t,
 			explen = 0,
 			fplen,
 			fzplen,
-			izplen,
-			splen,
+			have_alt_form,
 			have_dot = 0,
-			have_sign = 0,
 			have_exp = 0,
 			have_g_conv,
-			have_alt_form,
-			skip_zero = 0;
+			have_sign = 0,
+			izplen,
+			splen,
+			skip_zero = 0,
+			t;
 	long	intval,
 			fracval,
 			lt;
@@ -504,7 +504,7 @@ static void convert_float(vsnp_t *pdt, flt_t value) {
 			flen;
 
 #ifdef DEBUG_VSNPRINTF
-	printf("convert_float() -> in\n");
+	printf("convert_real_float() -> in\n");
 #endif
 
 	have_g_conv = (int) (pdt->flags & FLAG_G_CONVERSION);
@@ -715,6 +715,152 @@ static void convert_float(vsnp_t *pdt, flt_t value) {
 		/* exponent part */
 		print_exp(pdt, expnt);
 	}
+
+	/* left justify space padding */
+	if (PF_IS_SET(FLAG_LEFT_JUSTIFIED)) {
+		while (splen > 0) {
+			fill_buffer(pdt, ' ');
+			splen--;
+		}
+	}
+
+#ifdef DEBUG_VSNPRINTF
+	printf("convert_real_float() -> out\n");
+#endif
+}
+
+
+/***************************
+ * convert_special_float() *
+ ***********************************************************************
+ DESCR
+	Convert a NaN or an infinite float
+
+ IN
+ 	pdt :		vsnprintf common data structure
+	value :		unsigned integer to convert
+	type :		type of special float
+
+ OUT
+	NONE
+ ***********************************************************************/
+
+static void convert_special_float(vsnp_t *pdt, flt_t value, int type) {
+	char	*fstr = NULL,
+			 sign = ' ';
+	int		 have_sign = 0;
+	size_t	 i,
+			 len,
+			 splen;
+
+#ifdef DEBUG_VSNPRINTF
+	printf("convert_special_float() -> in\n");
+#endif
+
+	if (value < 0) {
+		/* on negative value set the sign */
+		have_sign = 1;
+		sign = '-';
+	} else {
+		/* else if + flag is set display the positive sign */
+		if (PF_IS_SET(FLAG_SIGNED)) {
+			have_sign = 1;
+			sign = '+';
+		}
+	}
+
+	/* set special float type string */
+	switch (type) {
+		case FLT_IS_NAN :
+			/* float is NaN */
+			if (PF_IS_SET(FLAG_UPPERCASE)) {
+				fstr = UPPER_NAN;
+			} else {
+				fstr = LOWER_NAN;
+			}
+			break;
+
+		case FLT_IS_INF :
+			/* float is infinite */
+			if (PF_IS_UNSET(FLAG_UPPERCASE)) {
+				fstr = UPPER_INF;
+			} else {
+				fstr = LOWER_INF;
+			}
+			break;
+	}
+
+	/* compute space padding length */
+	len = strlen(fstr);
+	splen = pdt->fwidth - len;
+	if (have_sign != 0) {
+		splen--;
+	}
+
+	/* right justify space padding */
+	if (PF_IS_UNSET(FLAG_LEFT_JUSTIFIED)) {
+		while (splen > 0) {
+			fill_buffer(pdt, ' ');
+			splen--;
+		}
+	}
+
+	/* if we have a sign */
+	if (have_sign != 0) {
+		fill_buffer(pdt, sign);
+	}
+
+	/* special float string */
+	for (i = 0 ; i < len ; i++) {
+		fill_buffer(pdt, fstr[i]);
+	}
+
+	/* left justify space padding */
+	if (PF_IS_SET(FLAG_LEFT_JUSTIFIED)) {
+		while (splen > 0) {
+			fill_buffer(pdt, ' ');
+			splen--;
+		}
+	}
+
+#ifdef DEBUG_VSNPRINTF
+	printf("convert_special_float() -> out\n");
+#endif
+}
+
+
+/*******************
+ * convert_float() *
+ ***********************************************************************
+ DESCR
+	Wrapper of floating point conversion
+
+ IN
+ 	pdt :		vsnprintf common data structure
+	value :		unsigned integer to convert
+
+ OUT
+	NONE
+
+ ***********************************************************************/
+
+static void convert_float(vsnp_t *pdt, flt_t value) {
+#ifdef DEBUG_VSNPRINTF
+	printf("convert_float() -> in\n");
+#endif
+
+	if (isnan(value) != 0) {
+		/* float is NaN */
+		convert_special_float(pdt, value, FLT_IS_NAN);
+	} else {
+		if (isinf(value) != 0) {
+			/* float is infinite */
+			convert_special_float(pdt, value, FLT_IS_INF);
+		}
+	}
+
+	/* process real float */
+	convert_real_float(pdt, value);
 
 #ifdef DEBUG_VSNPRINTF
 	printf("convert_float() -> out\n");
