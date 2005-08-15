@@ -1,3 +1,6 @@
+15 Aug 2005 mipsator
+ * updated pmkcfg.sh and config.h.pmk in sync with compat.
+
 12 Aug 2005 mipsator
  * added support for NaN and infinity in vsnprintf().
 

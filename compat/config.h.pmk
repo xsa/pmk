@@ -44,11 +44,20 @@
 */
 
 
-/* strlcpy */
+/* strlcpy() */
 @DEF__STRLCPY@
 
-/* strlcat */
+/* strlcat() */
 @DEF__STRLCAT@
+
+/* strdup() */
+@DEF__STRDUP@
+
+/* vsnprintf() */
+@DEF__VSNPRINTF@
+
+/* snprintf() */
+@DEF__SNPRINTF@
 
 /* _Bool type (ISO C99) */
 @DEF___BOOL@
