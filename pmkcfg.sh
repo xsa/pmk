@@ -505,6 +505,24 @@ check_header_function string.h strlcpy
 check_header_function string.h strlcat
 
 #
+# strdup() check
+#
+
+check_header_function string.h strdup
+
+#
+# vsnprintf() check
+#
+
+check_header_function stdio.h vsnprintf
+
+#
+# snprintf() check
+#
+
+check_header_function stdio.h snprintf
+
+#
 # _Bool type check
 #
 
