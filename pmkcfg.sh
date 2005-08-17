@@ -56,9 +56,9 @@ else
 fi
 
 
-#
-# defines
-#
+###########
+# defines #
+########################################################################
 
 usermode=0
 privsep_user="nobody"
@@ -89,9 +89,10 @@ temporary="./pmkcfg.tmp"
 
 tmpl_list="Makefile.pmk compat/config.h.pmk tests/Makefile.pmk"
 
-#
-# functions
-#
+
+#############
+# functions	#
+########################################################################
 
 # display usage
 usage() {
@@ -350,9 +351,9 @@ mkf_sed() {
 }
 
 
-#
-# init
-#
+########
+# init #
+########################################################################
 
 # parse options
 while getopts "hp:uU:" arg; do
@@ -415,6 +416,10 @@ mkf_sed 'SYSCONFDIR' "$sysdir"
 mkf_sed 'PRIVSEP_USER' "$privsep_user"
 
 
+#############
+# get flags #
+########################################################################
+
 #
 # gathering CFLAGS
 #
@@ -436,6 +441,11 @@ else
 	printf "LDFLAGS defined, skipping detection.\n"
 	mkf_sed 'LDFLAGS' "$LDFLAGS"
 fi
+
+
+##################
+# check binaries #
+########################################################################
 
 #
 # cc check
@@ -492,35 +502,10 @@ if ! check_binary as; then
 	exit 0
 fi
 
-#
-# strlcpy check
-#
 
-check_header_function string.h strlcpy
-
-#
-# strlcat check
-#
-
-check_header_function string.h strlcat
-
-#
-# strdup() check
-#
-
-check_header_function string.h strdup
-
-#
-# vsnprintf() check
-#
-
-check_header_function stdio.h vsnprintf
-
-#
-# snprintf() check
-#
-
-check_header_function stdio.h snprintf
+###############
+# check types #
+########################################################################
 
 #
 # _Bool type check
@@ -576,6 +561,10 @@ check_type wchar_t wchar.h
 
 check_type wint_t wchar.h
 
+#################
+# check headers #
+########################################################################
+
 #
 # stdbool.h check
 #
@@ -588,20 +577,55 @@ check_header stdbool.h
 
 check_header libgen.h
 
+
+###################
+# check functions #
+########################################################################
+
 #
-# isblank check
+# strlcpy() check
+#
+
+check_header_function string.h strlcpy
+
+#
+# strlcat() check
+#
+
+check_header_function string.h strlcat
+
+#
+# strdup() check
+#
+
+check_header_function string.h strdup
+
+#
+# vsnprintf() check
+#
+
+check_header_function stdio.h vsnprintf
+
+#
+# snprintf() check
+#
+
+check_header_function stdio.h snprintf
+
+#
+# isblank() check
 #
 
 check_header_function ctype.h isblank
 
 #
-# mkstemps check
+# mkstemps() check
 #
 
 check_header_function unistd.h mkstemps
 
 #
-# dirname check
+# dirname() check
 #
 
 if check_lib_function gen dirname; then
@@ -609,6 +633,12 @@ if check_lib_function gen dirname; then
 else
 	mkf_sed 'LGEN_FLAGS' ""
 fi
+
+#
+# basename() check
+#
+
+check_lib_function gen basename
 
 #
 # end

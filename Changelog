@@ -1,5 +1,6 @@
 17 Aug 2005 mipsator
  * fixed %c conversion in vsnprintf().
+ * updated pmkcfg.sh and config.in.pmk in sync with compat.
 
 10 Aug 2005 mipsator
  * added strdup() in compat.
