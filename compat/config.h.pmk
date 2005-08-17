@@ -44,6 +44,53 @@
 */
 
 
+/*********
+ * types *
+ ***********************************************************************/
+
+/* _Bool type (ISO C99) */
+@DEF___BOOL@
+
+/* blkcnt_t type (POSIX 1003.1-2003) */
+@DEF__BLKCNT_T@
+
+/* long long type */
+@DEF__LONG_LONG@
+
+/* unsigned long long type */
+@DEF__UNSIGNED_LONG_LONG@
+
+/* long double type */
+@DEF__LONG_DOUBLE@
+
+/* intmax_t type */
+@DEF__INTMAX_T@
+
+/* ptrdiff_t type */
+@DEF__PTRDIFF_T@
+
+/* wchar_t type */
+@DEF__WCHAR_T@
+
+/* wint_t type */
+@DEF__WINT_T@
+
+
+/***********
+ * headers *
+ ***********************************************************************/
+
+/* stdbool.h (ISO C99) */
+@DEF__STDBOOL_H@
+
+/* libgen.h (dirname and filename) */
+@DEF__LIBGEN_H@
+
+
+/*************
+ * functions *
+ ***********************************************************************/
+
 /* strlcpy() */
 @DEF__STRLCPY@
 
@@ -59,23 +106,18 @@
 /* snprintf() */
 @DEF__SNPRINTF@
 
-/* _Bool type (ISO C99) */
-@DEF___BOOL@
-
-/* blkcnt_t type (POSIX 1003.1-2003) */
-@DEF__BLKCNT_T@
-
-/* stdbool.h (ISO C99) */
-@DEF__STDBOOL_H@
-
-/* libgen.h (dirname and filename) */
-@DEF__LIBGEN_H@
-
-/* isblank */
+/* isblank() */
 @DEF__ISBLANK@
 
-/* mkstemps */
+/* mkstemps() */
 @DEF__MKSTEMPS@
+
+/* basename() */
+@DEF__BASENAME@
+
+/* dirname() */
+@DEF__DIRNAME@
+
 
 #endif /* _PMK_CONFIG_H_ */
 
