@@ -884,6 +884,9 @@ static void convert_float(vsnp_t *pdt, flt_t value) {
  OUT
 	number of characters that would have been written if the buffer had
 	not been size limited
+
+ TODO
+	wide char support
  ***********************************************************************/
 
 int pmk_vsnprintf(char *buf, size_t len, const char *fmt, va_list args) {
@@ -1380,8 +1383,8 @@ printf("Enter state PARSE_CONV_SPEC\n");
 							/* char is promoted to int throught ... */
 							int_val = (signed_t) va_arg(args, int);
 
-#ifdef HAVE_WINT_T
 							fill_buffer(&data, (char) int_val);
+#ifdef HAVE_WINT_T
 						}
 #endif /* HAVE_WINT_T */
 
