@@ -187,7 +187,9 @@ enum {
 						"BINDIR=\t\t@BINDIR@\n" \
 						"SBINDIR=\t@SBINDIR@\n" \
 						"DATADIR=\t@DATADIR@\n"
+#define MKF_MAN_DIR		"MANDIR=\t\t@MANDIR@\n"
 #define MKF_MANX_DIR	"MAN%dDIR=\t@MAN%dDIR@\n"
+#define MKF_SYSCONF_DIR	"SYSCONFDIR=\t@SYSCONFDIR@\n"
 
 #define MKF_LINE_JUMP	"\n"
 #define MKF_TWICE_JUMP	"\n\n"

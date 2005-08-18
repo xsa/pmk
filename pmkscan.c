@@ -855,7 +855,7 @@ bool find_deps(dynary *da_fc, dynary *da_fd) {
 		for (j = 0 ; j < da_usize(da_fd) ; j++) {
 			str_fd = da_idx(da_fd, j);
 			if (strncmp(str_fc, str_fd, siz) == 0) {
-				psc_log(NULL, "\tfound common dependency '%s'", str_fc);
+				psc_log(NULL, "\t\tFound common dependency '%s'\n", str_fc);
 
 				/* and return true if a common dependency is found */
 				return(true);
@@ -935,7 +935,7 @@ void build_path(char *dir, char *file, char *buffer, size_t blen) {
 		snprintf(tmp, sizeof(tmp), "%s/%s", dir, file);
 	}
 
-	/* XXX */
+	/* check resulting path */
 	chkpath(tmp, chk);
 
 	strlcpy(buffer, chk, blen);
@@ -1041,7 +1041,7 @@ bool gen_objects(scn_zone_t *psz) {
 			strlcpy(buf, pnode->prefix, sizeof(buf));
 			strlcat(buf, OBJ_SUFFIX, sizeof(buf));
 
-			psc_log(NULL, "\tProcessing '%s'", buf);
+			psc_log(NULL, "\tProcessing '%s'\n", buf);
 
 			/* add object reference */
 			hash_update_dup(psz->objects, buf, pnode->fname); /* XXX check */
@@ -1401,6 +1401,9 @@ void mkf_output_header(FILE *fp, scn_zone_t *psz) {
 	fprintf(fp, "# specific directories\n");
 	fprintf(fp, MKF_HEADER_DIR);
 	if (psz->found[FILE_TYPE_MAN] == true) {
+		/* main man pages directory */
+		fprintf(fp, MKF_MAN_DIR);
+
 		/* man pages directories */
 		for (i = 1 ; i < 10 ; i++) {
 			/* check if current category is needed */
@@ -1409,6 +1412,9 @@ void mkf_output_header(FILE *fp, scn_zone_t *psz) {
 			}
 		}
 	}
+
+	/* system configuration directory */
+	fprintf(fp, MKF_SYSCONF_DIR);
 
 	fprintf(fp, MKF_LINE_JUMP);
 
