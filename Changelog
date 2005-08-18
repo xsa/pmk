@@ -1,3 +1,6 @@
+18 Aug 2005 mipsator
+ * added MANDIR and SYSCONFDIR support in pmkscan.
+
 17 Aug 2005 mipsator
  * fixed %c conversion in vsnprintf().
  * updated pmkcfg.sh and config.in.pmk in sync with compat.
