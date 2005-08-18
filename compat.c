@@ -1355,7 +1355,7 @@ printf("Enter state PARSE_CONV_SPEC\n");
 						}
 
 #ifdef HAVE_LONG_DOUBLE
-						if (modifier = MDFR_LONG_DBL) {
+						if (modifier == MDFR_LONG_DBL) {
 							flt_val = (flt_t) va_arg(args, long double);
 						} else {
 #endif /* HAVE_LONG_DOUBLE */
