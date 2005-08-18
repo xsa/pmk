@@ -11,7 +11,7 @@ INSTALL=	./pmkinstall
 SYSCONFDIR=	@SYSCONFDIR@
 
 # base path for install
-BASE=		@BASE@
+PREFIX=		@PREFIX@
 
 # configuration file location
 CONFDIR=	@CONFDIR@

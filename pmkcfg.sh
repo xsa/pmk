@@ -325,7 +325,7 @@ EOF
 }
 
 sed_define() {
-	sed_uc=`echo "$2" | tr [a-z] [A-Z] | tr . _`
+	sed_uc=`echo "$2" | tr [a-z] [A-Z] | tr . _ | tr " " _`
 	case $1 in
 		def)	sed_str="#define HAVE_$sed_uc 1";;
 		udef)	sed_str="#undef HAVE_$sed_uc";;
@@ -385,35 +385,37 @@ if [ $usermode = 1 ]; then
 
 	mkf_sed 'USERMODE' '-DPMK_USERMODE'
 	if [ -z "$base" ]; then
-		mkf_sed 'BASE' "$um_prfx"
+		mkf_sed 'PREFIX' "$um_prfx"
 	else
-		mkf_sed 'BASE' "$base"
+		mkf_sed 'PREFIX' "$base"
 	fi
 	mkf_sed 'MKTARGET' 'user'
 	mkf_sed 'CONFDIR' '$(HOME)/.pmk'
-	mkf_sed 'BINDIR' '$(BASE)/bin'
-	mkf_sed 'SBINDIR' '$(BASE)/bin'
+	mkf_sed 'BINDIR' '$(PREFIX)/bin'
+	mkf_sed 'SBINDIR' '$(PREFIX)/bin'
 	mkf_sed 'DATADIR' '$(CONFDIR)'
-	mkf_sed 'MANDIR' '$(BASE)/man'
+	mkf_sed 'MANDIR' '$(PREFIX)/man'
 else
 	echo "USERMODE OFF."
 
 	mkf_sed 'USERMODE' ''
 	if [ -z "$base" ]; then
-		mkf_sed 'BASE' "$prefix"
+		mkf_sed 'PREFIX' "$prefix"
 	else
-		mkf_sed 'BASE' "$base"
+		mkf_sed 'PREFIX' "$base"
 	fi
 	mkf_sed 'MKTARGET' 'global'
 	mkf_sed 'CONFDIR' '$(SYSCONFDIR)/pmk'
-	mkf_sed 'BINDIR' '$(BASE)/bin'
-	mkf_sed 'SBINDIR' '$(BASE)/sbin'
-	mkf_sed 'DATADIR' '$(BASE)/share/$(PREMAKE)'
-	mkf_sed 'MANDIR' '$(BASE)/man'
+	mkf_sed 'BINDIR' '$(PREFIX)/bin'
+	mkf_sed 'SBINDIR' '$(PREFIX)/sbin'
+	mkf_sed 'DATADIR' '$(PREFIX)/share/$(PREMAKE)'
+	mkf_sed 'MANDIR' '$(PREFIX)/man'
 fi
 
 mkf_sed 'SYSCONFDIR' "$sysdir"
 mkf_sed 'PRIVSEP_USER' "$privsep_user"
+mkf_sed 'PACKAGE' "pmk"
+mkf_sed 'VERSION' "0.9.3"
 
 
 #############
@@ -561,6 +563,7 @@ check_type wchar_t wchar.h
 
 check_type wint_t wchar.h
 
+
 #################
 # check headers #
 ########################################################################
@@ -643,3 +646,4 @@ check_lib_function gen basename
 #
 # end
 #
+

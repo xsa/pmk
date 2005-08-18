@@ -1,5 +1,7 @@
 18 Aug 2005 mipsator
  * added MANDIR and SYSCONFDIR support in pmkscan.
+ * tuned pmkcfg.sh to prepare switch from hand made Makefile to
+   pmkscan generated Makefile.
 
 17 Aug 2005 mipsator
  * fixed %c conversion in vsnprintf().
