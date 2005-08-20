@@ -389,12 +389,12 @@ if [ $usermode = 1 ]; then
 	else
 		mkf_sed 'PREFIX' "$base"
 	fi
-	mkf_sed 'MKTARGET' 'user'
 	mkf_sed 'CONFDIR' '$(HOME)/.pmk'
-	mkf_sed 'BINDIR' '$(PREFIX)/bin'
 	mkf_sed 'SBINDIR' '$(PREFIX)/bin'
 	mkf_sed 'DATADIR' '$(CONFDIR)'
-	mkf_sed 'MANDIR' '$(PREFIX)/man'
+	mkf_sed 'MAN1DIR' '$(MANDIR)'
+	mkf_sed 'MAN5DIR' '$(MANDIR)'
+	mkf_sed 'MAN8DIR' '$(MANDIR)'
 else
 	echo "USERMODE OFF."
 
@@ -404,18 +404,21 @@ else
 	else
 		mkf_sed 'PREFIX' "$base"
 	fi
-	mkf_sed 'MKTARGET' 'global'
 	mkf_sed 'CONFDIR' '$(SYSCONFDIR)/pmk'
-	mkf_sed 'BINDIR' '$(PREFIX)/bin'
 	mkf_sed 'SBINDIR' '$(PREFIX)/sbin'
 	mkf_sed 'DATADIR' '$(PREFIX)/share/$(PREMAKE)'
-	mkf_sed 'MANDIR' '$(PREFIX)/man'
+	mkf_sed 'MAN1DIR' '$(MANDIR)/man1'
+	mkf_sed 'MAN5DIR' '$(MANDIR)/man5'
+	mkf_sed 'MAN8DIR' '$(MANDIR)/man8'
 fi
 
+mkf_sed 'BINDIR' '$(PREFIX)/bin'
+mkf_sed 'MANDIR' '$(PREFIX)/man'
 mkf_sed 'SYSCONFDIR' "$sysdir"
 mkf_sed 'PRIVSEP_USER' "$privsep_user"
 mkf_sed 'PACKAGE' "pmk"
 mkf_sed 'VERSION' "0.9.3"
+mkf_sed 'INSTALL' './pmkinstall'
 
 
 #############
