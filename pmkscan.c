@@ -1823,15 +1823,15 @@ void mkf_output_trg_rules(FILE *fp, scn_zone_t *psz) {
 					/*case FILE_TYPE_ASM : XXX */
 
 					case FILE_TYPE_C :
-						fprintf(fp, MKF_TARGET_C);
+						fprintf(fp, MKF_TARGET_C, buf);
 						break;
 
 					case FILE_TYPE_CXX :
-						fprintf(fp, MKF_TARGET_CXX);
+						fprintf(fp, MKF_TARGET_CXX, buf);
 						break;
 
 					default :
-						fprintf(fp, MKF_TARGET_DEF);
+						fprintf(fp, MKF_TARGET_DEF, buf);
 				}
 			}
 
@@ -1871,7 +1871,7 @@ void mkf_output_man_inst(FILE *fp, scn_zone_t *psz) {
 		/* if category has at least one file */
 		if (psz->found[FILE_TYPE_MAN + i] == true) {
 			/* gather list of man categories */
-			fprintf(fp, MKF_INST_MAN_B, i, i, i, i);
+			fprintf(fp, MKF_INST_MAN_B, i, i, i, i, i);
 		}
 	}
 	fprintf(fp, MKF_TWICE_JUMP);
@@ -1882,7 +1882,7 @@ void mkf_output_man_inst(FILE *fp, scn_zone_t *psz) {
 		/* if category has at least one file */
 		if (psz->found[FILE_TYPE_MAN + i] == true) {
 			/* gather list of man categories */
-			fprintf(fp, MKF_DEINST_MAN_B, i, i, i);
+			fprintf(fp, MKF_DEINST_MAN_B, i, i, i, i);
 		}
 	}
 	fprintf(fp, MKF_TWICE_JUMP);

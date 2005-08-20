@@ -141,14 +141,15 @@ enum {
 #define PMKF_TRGT_BEG	"\tTARGET = ("
 #define PMKF_TRGT_END	")\n"
 
-#define PMKF_DEF_BEG	"# main defines (MIGHT NEED MANUAL EDITION)\n" \
+#define PMKF_DEF_BEG	"# main defines (NEED MANUAL EDITION)\n" \
 						"DEFINE {\n" \
 						"\tPACKAGE = \"mypackage\"\n" \
 						"\tVERSION = \"0.0\"\n" \
 						"\tBINDIR = \"\\$(PREFIX)/bin\"\n" \
 						"\tSBINDIR = \"\\$(PREFIX)/sbin\"\n" \
+						"\tMANDIR = \"\\$(PREFIX)//man\n" \
 						"\tDATADIR = \"\\$(PREFIX)/share/\\$(PACKAGE)\"\n"
-#define PMKF_DEF_MAN	"\tMAN%dDIR = \"\\$(PREFIX)/man/man%d\"\n"
+#define PMKF_DEF_MAN	"\tMAN%dDIR = \"\\$(MANDIR)/man%d\"\n"
 #define PMKF_DEF_END	"}\n\n"
 
 #define MKF_OUTPUT_WIDTH	72
@@ -175,9 +176,15 @@ enum {
 						"# LDFLAGS shall contain -lc if used with ld\n" \
 						"LDFLAGS=\t@LDFLAGS@\n\n"
 
-#define MKF_HEADER_CPP	"CPP=\t\t@CPP@\n" \
+#define MKF_HEADER_CPP	"CPP=\t\t@CPP@\n"
 
-#define MKF_HEADER_MISC	"RM=\t\trm\n" \
+#define MKF_HEADER_MISC	"INSTALL=\t@INSTALL@\n" \
+						"INSTALL_BIN=\t$(INSTALL) -m 755\n" \
+						"INSTALL_DATA=\t$(INSTALL) -m 644\n" \
+						"INSTALL_DIR=\t$(INSTALL) -d -m 755\n" \
+						"INSTALL_MAN=\t$(INSTALL) -m 644\n" \
+						"INSTALL_SBIN=\t$(INSTALL) -m 755\n\n" \
+						"RM=\t\trm\n" \
 						"RMFLAGS=\t-rf\n\n"
 
 #define MKF_HEADER_DATA	"PACKAGE=\t@PACKAGE@\n" \
@@ -232,9 +239,9 @@ enum {
 
 #define MKF_TARGET_OBJS		"%s_OBJS=\t"
 #define MKF_TARGET_LABL		"%s: $(%s_OBJS)\n"
-#define MKF_TARGET_DEF		"\t$(LD) $(LDFLAGS) -o $@ $?\n\n"
-#define MKF_TARGET_C		"\t$(CC) $(LDFLAGS) -o $@ $?\n\n"
-#define MKF_TARGET_CXX		"\t$(CXX) $(LDFLAGS) -o $@ $?\n\n"
+#define MKF_TARGET_DEF		"\t$(LD) $(LDFLAGS) -o $@ $(%s_OBJS)\n\n"
+#define MKF_TARGET_C		"\t$(CC) $(LDFLAGS) -o $@ $(%s_OBJS)\n\n"
+#define MKF_TARGET_CXX		"\t$(CXX) $(LDFLAGS) -o $@ $(%s_OBJS)\n\n"
 
 #define MKF_TARGET_CLN		"%s_clean:\n" \
 							"\t$(RM) $(RMFLAGS) $(%s_OBJS)\n" \
@@ -242,7 +249,7 @@ enum {
 
 #define MKF_TRGT_ALL_VAR	"ALL_TARGETS=\t"
 #define MKF_TRGT_CLEAN_VAR	"ALL_CLEAN_TARGETS=\t"
-#define MKF_TRGT_INST_VAR	"INSTALL_TARGETS=\tinstall_dir install_bin " \
+#define MKF_TRGT_INST_VAR	"INSTALL_TARGETS=\tinstall_bin " \
 							"install_sbin install_man install_data\n\n"
 #define MKF_TRGT_DEINST_VAR	"DEINSTALL_TARGETS=\tdeinstall_bin " \
 							"deinstall_sbin deinstall_man deinstall_data\n\n"
@@ -256,62 +263,76 @@ enum {
 #define MKF_TARGET_ALL		"all: $(ALL_TARGETS)\n\n" \
 							"clean: $(ALL_CLEAN_TARGETS)\n\n"
 
-#define MKF_TARGET_INST		"install: $(INSTALL_TARGETS)\n\n" \
+#define MKF_TARGET_INST		"install: all $(INSTALL_TARGETS)\n\n" \
 							"deinstall: $(DEINSTALL_TARGETS)\n\n"
-
-#define MKF_CREATE_DIRS		"install_dir:\n" \
-							"\t$(INSTALL_DIR) $(DESTDIR)$(BINDIR)\n" \
-							"\t$(INSTALL_DIR) $(DESTDIR)$(SBINDIR)\n" \
-							"\t$(INSTALL_DIR) $(DESTDIR)$(MANDIR)\n" \
-							"\t$(INSTALL_DIR) $(DESTDIR)$(DATADIR)\n"
 
 #define MKF_INST_BIN		"install_bin:\n" \
 							"\t# install binaries\n" \
-							"\tfor f in $(BIN_FILES); do \\\n" \
-							"\t\t$(INSTALL_BIN) $$f $(DESTDIR)/$(BINDIR)/$$f; \\\n" \
+							"\t$(INSTALL_DIR) $(DESTDIR)$(BINDIR)\n" \
+							"\t@for f in $(BIN_FILES); do \\\n" \
+							"\t\td=`basename $$f`; \\\n" \
+							"\t\tprintf \"$(INSTALL_BIN) $$f $(DESTDIR)$(BINDIR)/$$d\\n\"; \\\n" \
+							"\t\t$(INSTALL_BIN) $$f $(DESTDIR)$(BINDIR)/$$d; \\\n" \
 							"\tdone\n\n" \
 							"install_sbin:\n" \
 							"\t# install privileged binaries\n" \
-							"\tfor f in $(SBIN_FILES); do \\\n" \
-							"\t\t$(INSTALL_SBIN) $$f $(DESTDIR)/$(SBINDIR)/$$f; \\\n" \
+							"\t$(INSTALL_DIR) $(DESTDIR)$(SBINDIR)\n" \
+							"\t@for f in $(SBIN_FILES); do \\\n" \
+							"\t\td=`basename $$f`; \\\n" \
+							"\t\tprintf \"$(INSTALL_SBIN) $$f $(DESTDIR)$(SBINDIR)/$$d\\n\"; \\\n" \
+							"\t\t$(INSTALL_SBIN) $$f $(DESTDIR)$(SBINDIR)/$$d; \\\n" \
 							"\tdone\n\n"
 
 #define MKF_DEINST_BIN		"deinstall_bin:\n" \
 							"\t# deinstall binaries\n" \
-							"\tfor f in $(BIN_FILES); do \\\n" \
-							"\t\t$(RM) $(RMFLAGS) $(DESTDIR)/$(BINDIR)/$$f; \\\n" \
+							"\t@for f in $(BIN_FILES); do \\\n" \
+							"\t\td=`basename $$f`; \\\n" \
+							"\t\tprintf \"$(RM) $(RMFLAGS) $(DESTDIR)$(BINDIR)/$$d\\n\"; \\\n" \
+							"\t\t$(RM) $(RMFLAGS) $(DESTDIR)$(BINDIR)/$$d; \\\n" \
 							"\tdone\n\n" \
 							"deinstall_sbin:\n" \
 							"\t# deinstall privileged binaries\n" \
-							"\tfor f in $(SBIN_FILES); do \\\n" \
-							"\t\t$(RM) $(RMFLAGS) $(DESTDIR)/$(SBINDIR)/$$f; \\\n" \
+							"\t@for f in $(SBIN_FILES); do \\\n" \
+							"\t\td=`basename $$f`; \\\n" \
+							"\t\tprintf \"$(RM) $(RMFLAGS) $(DESTDIR)$(SBINDIR)/$$d\\n\"; \\\n" \
+							"\t\t$(RM) $(RMFLAGS) $(DESTDIR)$(SBINDIR)/$$d; \\\n" \
 							"\tdone\n\n"
 
 #define MKF_INST_MAN_H		"install_man:\n" \
-							"\t# install manual pages\n"
+							"\t# install manual pages\n" \
+							"\t$(INSTALL_DIR) $(DESTDIR)$(MANDIR)\n"
 #define MKF_INST_MAN_B		"\t# man%d\n" \
-							"\t$(MKDIR) $(MAN%dDIR)\n" \
+							"\t$(INSTALL_DIR) $(DESTDIR)$(MAN%dDIR)\n" \
 							"\t@for f in $(MAN%d_FILES); do \\\n" \
-							"\t\tinstall $$f $(DESTDIR)/$(MAN%dDIR)/$$f; \\\n" \
+							"\t\td=`basename $$f`; \\\n" \
+							"\t\tprintf \"$(INSTALL_DATA) $$f $(DESTDIR)$(MAN%dDIR)/$$d\\n\"; \\\n" \
+							"\t\t$(INSTALL_DATA) $$f $(DESTDIR)/$(MAN%dDIR)/$$d; \\\n" \
 							"\tdone\n"
 
 #define MKF_DEINST_MAN_H	"deinstall_man:\n" \
 							"\t# deinstall manual pages\n"
-#define MKF_DEINST_MAN_B		"\t# man%d\n" \
+#define MKF_DEINST_MAN_B	"\t# man%d\n" \
 							"\t@for f in $(MAN%d_FILES); do \\\n" \
-							"\t\t$(RM) $(RMFLAGS) $(DESTDIR)/$(MAN%dDIR)/$$f; \\\n" \
+							"\t\td=`basename $$f`; \\\n" \
+							"\t\tprintf \"$(RM) $(RMFLAGS) $(DESTDIR)/$(MAN%dDIR)/$$d\\n\"; \\\n" \
+							"\t\t$(RM) $(RMFLAGS) $(DESTDIR)/$(MAN%dDIR)/$$d; \\\n" \
 							"\tdone\n"
 
 #define MKF_INST_DATA		"install_data:\n" \
-							"\t# install privileged binaries\n" \
-							"\tfor f in $(DATA_FILES); do \\\n" \
-							"\t\t$(INSTALL_DATA) $$f $(DESTDIR)/$(DATADIR)/$$f; \\\n" \
+							"\t# install data files\n" \
+							"\t$(INSTALL_DIR) $(DESTDIR)$(DATADIR)\n" \
+							"\t@for f in $(DATA_FILES); do \\\n" \
+							"\t\td=`basename $$f`; \\\n" \
+							"\t\tprintf \"$(INSTALL_DATA) $$f $(DESTDIR)$(DATADIR)/$$d\\n\"; \\\n" \
+							"\t\t$(INSTALL_DATA) $$f $(DESTDIR)$(DATADIR)/$$d; \\\n" \
 							"\tdone\n\n"
 
 #define MKF_DEINST_DATA		"deinstall_data:\n" \
-							"\t# install privileged binaries\n" \
-							"\tfor f in $(DATA_FILES); do \\\n" \
-							"\t\t$(RM) $(RMFLAGS) $(DESTDIR)/$(DATADIR)/$$f; \\\n" \
+							"\t# deinstall data files\n" \
+							"\t@for f in $(DATA_FILES); do \\\n" \
+							"\t\td=`basename $$f`; \\\n" \
+							"\t\tprintf \"$(RM) $(RMFLAGS) $(DESTDIR)$(DATADIR)/$$d\\n\"; \\\n" \
+							"\t\t$(RM) $(RMFLAGS) $(DESTDIR)$(DATADIR)/$$d; \\\n" \
 							"\tdone\n\n"
 
 
