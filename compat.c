@@ -1428,7 +1428,7 @@ printf("Enter state PARSE_CONV_SPEC\n");
 						SET_FLAG(FLAG_ALTERNATIVE_FORM);
 */
 
-						convert_int(&data, (unsigned_t) ptr);
+						convert_int(&data, (unsigned_t) (unsigned int) ptr);
 						break;
 
 					case 'n' :
