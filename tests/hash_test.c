@@ -4,10 +4,11 @@
 
 /* hash table test */
 
-#include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 
+#include "../compat/pmk_stdio.h"
+#include "../compat/pmk_string.h"
 #include "../hash.h"
 
 #define TAB_SIZE 256

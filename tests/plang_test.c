@@ -3,11 +3,19 @@
 /* Public Domain */
 
 /* c parser test */
-#include <stdio.h>
 #include <sys/param.h>
+#include <stdlib.h>
 
+#include "../compat/pmk_stdio.h"
+#include "../compat/pmk_string.h"
 #include "../parse_lang.h"
 
+bool ppro(void *, char *, prseng_t *);
+bool proc(void *, char *, prseng_t *);
+bool decl(void *, char *, prseng_t *);
+bool type(void *, char *, prseng_t *);
+	
+	
 bool ppro(void *data, char *pstr, prseng_t *ppe) {
 	char	iname[MAXPATHLEN],
 		c;
@@ -63,7 +71,7 @@ int main(int argc, char **argv) {
 	prs_cmn_t	 pcmn;
 
 	if (argc != 2) {
-		printf("Expecting a filename as argument\n	");
+		printf("Expecting a filename as argument\n");
 		exit(1); /* XXX */
 	}
 

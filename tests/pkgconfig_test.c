@@ -7,10 +7,11 @@
 /*#define PKGCFG_DEBUG	1*/
 /*#define HASH_DEBUG	1*/
 
-#include <stdio.h>
 #include <stdlib.h>
 
 #include "../compat/pmk_stdbool.h"
+#include "../compat/pmk_stdio.h"
+#include "../common.h"
 #include "../pkgconfig.h"
 
 int main(int argc, char *argv[]) {
