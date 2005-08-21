@@ -39,9 +39,7 @@
 #include <sys/time.h>
 #include <fcntl.h>
 #include <math.h>
-#include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 
 #include "compat.h"
 #include "compat/config.h"
@@ -49,6 +47,7 @@
 #include "compat/pmk_ctype.h"
 #include "compat/pmk_libgen.h"
 #include "compat/pmk_stdbool.h"
+#include "compat/pmk_stdio.h"
 #include "compat/pmk_string.h"
 #include "compat/pmk_sys_types.h"
 #include "compat/pmk_unistd.h"

@@ -1,7 +1,7 @@
 /* $Id$ */
 
 /*
- * Copyright (c) 2003-2004 Damien Couderc
+ * Copyright (c) 2003-2005 Damien Couderc
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,11 +34,11 @@
  */
 
 
-#include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
 
 #include "compat/pmk_ctype.h"
+#include "compat/pmk_stdio.h"
 #include "compat/pmk_string.h"
 #include "compat/pmk_unistd.h"
 #include "functool.h"
@@ -945,6 +945,6 @@ bool c_object_build(char *buf, size_t sz, char *comp, char *flags,
 		return(false);
 	}
 
-	return(true); /* XXX */
+	return(true);
 }
 

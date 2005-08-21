@@ -1,7 +1,7 @@
 /* $Id$ */
 
 /*
- * Copyright (c) 2003-2004 Damien Couderc
+ * Copyright (c) 2003-2005 Damien Couderc
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,9 +34,9 @@
  */
 
 
-#include <stdio.h>
 #include <stdlib.h>
 
+#include "compat/pmk_stdio.h"
 #include "compat/pmk_string.h"
 #include "compat/pmk_unistd.h"
 #include "autoconf.h"
@@ -563,27 +563,27 @@ bool pmk_check_binary(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
  ***********************************************************************/
 
 bool pmk_check_header(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
-	bool	 required,
-			 rslt = true,
-			 clean_funcs = false,
-			 rval;
-	char	 inc_path[MAXPATHLEN],
-			 cfgcmd[MAXPATHLEN],
-			 ftmp[MAXPATHLEN],
-			 btmp[MAXPATHLEN],
-			*incfile,
-			*target = NULL,
-			*ccpath,
-			*cflags,
-			*pstr;
-	dynary	*funcs = NULL,
-			*macros = NULL,
-			*defs;
-	int		 i,
-			 n,
-			 r;
-	lgdata	*pld;
-	pmkobj	*po;
+	bool		 required,
+				 rslt = true,
+				 clean_funcs = false,
+				 rval;
+	char		 inc_path[MAXPATHLEN],
+				 cfgcmd[MAXPATHLEN],
+				 ftmp[MAXPATHLEN],
+				 btmp[MAXPATHLEN],
+				*incfile,
+				*target = NULL,
+				*ccpath,
+				*cflags,
+				*pstr;
+	dynary		*funcs = NULL,
+				*macros = NULL,
+				*defs;
+	int			 i,
+				 n,
+				 r;
+	lgdata		*pld;
+	pmkobj		*po;
 
 	pmk_log("\n* Checking header [%s]\n", cmd->label);
 

@@ -1,7 +1,7 @@
 /* $Id$ */
 
 /*
- * Copyright (c) 2004 Damien Couderc
+ * Copyright (c) 2004-2005 Damien Couderc
  * Copyright (c) 2004 Xavier Santolaria <xavier@santolaria.net>
  * All rights reserved.
  *
@@ -36,9 +36,9 @@
 
 
 #include <errno.h>
-#include <stdio.h>
 #include <stdlib.h>
 
+#include "compat/pmk_stdio.h"
 #include "compat/pmk_string.h"
 #include "cfgtool.h"
 #include "common.h"

@@ -2,7 +2,7 @@
 
 
 /*
- * Copyright (c) 2003-2004 Damien Couderc
+ * Copyright (c) 2003-2005 Damien Couderc
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,10 +44,10 @@
 
 #include <sys/param.h>
 #include <sys/stat.h>
-#include <stdio.h>
 #include <stdlib.h>
 
 #include "compat/pmk_stdbool.h"
+#include "compat/pmk_stdio.h"
 #include "compat/pmk_string.h"
 #include "pathtools.h"
 

@@ -36,7 +36,6 @@
 #ifndef _PMKSCAN_H_
 #define _PMKSCAN_H_
 
-#include <stdio.h>
 #include "dynarray.h"
 #include "hash.h"
 #include "parse_lang.h"

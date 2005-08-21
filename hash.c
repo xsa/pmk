@@ -1,12 +1,7 @@
 /* $Id$ */
 
 /*
- * Credits for patches :
- *	- Marek Habersack
- */
-
-/*
- * Copyright (c) 2003-2004 Damien Couderc
+ * Copyright (c) 2003-2005 Damien Couderc
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,6 +34,11 @@
  */
 
 
+/*
+ * Credits for patches :
+ *	- Marek Habersack
+ */
+
 /*******************************************************************
  *                                                                 *
  * Hash-coding functions                                           *
@@ -46,10 +46,10 @@
  *******************************************************************/
 
 
-#include <stdio.h>
 #include <stdlib.h>
 
 #include "hash.h"
+#include "compat/pmk_stdio.h"
 #include "compat/pmk_string.h"
 
 /*#define HASH_DEBUG 1*/
