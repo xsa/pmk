@@ -23,6 +23,8 @@ CI_OBJS=	../common.o ../compat.o ../detect_cpu.o ../detect_cpu_asm.o \
 C_OBJS=		../common.o ../compat.o ../detect.o ../dynarray.o ../hash.o \
 		../parse.o ../pmk_obj.o ../prseng.o comp_test.o
 
+CPT_OBJS=	../compat.o compat_test.o
+
 DA_OBJS=	../compat.o ../dynarray.o da_test.o
 
 GC_OBJS=	../common.o ../compat.o ../detect.o ../dynarray.o ../hash.o \
@@ -45,7 +47,7 @@ PC_OBJS=	../common.o ../compat.o ../dynarray.o ../hash.o ../parse.o \
 PL_OBJS=	../common.o ../compat.o ../dynarray.o ../hash.o ../pmk_obj.o \
 		../parse_lang.o ../prseng.o plang_test.o
 
-all: comp cpuid dynary gencomp hash mkvar parser path pkgconfig
+all: comp compat cpuid dynary gencomp hash mkvar parser path pkgconfig
 
 .c.o:
 	$(CC) $(CFLAGS) -o $@ -c $<
@@ -63,6 +65,9 @@ config:
 
 comp: config $(C_OBJS)
 	$(CC) $(LDFLAGS) -o comp_test $(C_OBJS)
+
+compat: config $(CPT_OBJS)
+	$(CC) $(LDFLAGS) -o compat_test $(CPT_OBJS)
 
 cpuid: config $(CI_OBJS)
 	$(CC) $(LDFLAGS) -o cpuid_test $(CI_OBJS)
@@ -94,5 +99,5 @@ pkgconfig: config $(PC_OBJS)
 clean:
 	rm -f $(CI_OBJS) $(C_OBJS) $(DA_OBJS) $(GC_OBJS)
 	rm -f $(H_OBJS) $(MK_OBJS) $(PRS_OBJS) $(PL_OBJS)
-	rm -f $(PTH_OBJS) $(PC_OBJS)
+	rm -f $(PTH_OBJS) $(PC_OBJS) $(CPT_OBJS)
 	rm -f *_test *.core
