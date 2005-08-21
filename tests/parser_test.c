@@ -8,11 +8,16 @@
 #include <stdlib.h>
 #include <unistd.h>
 
+#include "../common.h"
+#include "../func.h"
 #include "../parse.h"
-/*#include "../func.c"*/
 
 extern prskw	kw_pmkfile[];
 extern size_t	nbkwpf;
+
+
+bool process_fake(htable *, prsopt *);
+void usage(void);
 
 
 /*
@@ -25,13 +30,6 @@ extern size_t	nbkwpf;
 */
 
 bool process_fake(htable *pht, prsopt *popt) {
-	/*if ((popt->opchar != CHAR_COMMENT) && (popt->opchar != CHAR_EOS)) {                     */
-	/*        |+ add options that are not comment neither blank lines +|                      */
-	/*        if (hash_update_dup(pht, popt->key, po_get_str(popt->value)) == HASH_ADD_FAIL) {*/
-	/*                errorf("hash failure.");                                                */
-	/*                return(false);                                                          */
-	/*        }                                                                               */
-	/*}                                                                                       */
 	return(true);
 }
 
