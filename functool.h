@@ -1,7 +1,7 @@
 /* $Id$ */
 
 /*
- * Copyright (c) 2003-2004 Damien Couderc
+ * Copyright (c) 2003-2005 Damien Couderc
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -54,12 +54,12 @@
 #define SHFLG_NAME_LEN	64
 
 #define KW_OPT_DEPEND	"DEPEND"
-#define KW_OPT_LANG	"LANG"
+#define KW_OPT_LANG		"LANG"
 #define KW_OPT_REQUIRED	"REQUIRED"
 
 #define CHAR_VERSION_SEPARATOR	'.'
 
-#define C_FILE_EXT	".c"
+#define C_FILE_EXT		".c"
 #define TEST_FILE_NAME	TMPDIR "/pmk_XXXXXXXX" C_FILE_EXT
 #define BIN_TEST_NAME	TMPDIR "/pmk_XXXXXXXX_bin"
 
@@ -101,10 +101,10 @@ typedef struct {
 
 typedef struct {
 	char	name[LANG_NAME_LEN],
-		comp[COMP_NAME_LEN],
-		pre[PRE_NAME_LEN],
-		cflg[CFLG_NAME_LEN],
-		slflg[CFLG_NAME_LEN];
+			comp[COMP_NAME_LEN],
+			pre[PRE_NAME_LEN],
+			cflg[CFLG_NAME_LEN],
+			slflg[CFLG_NAME_LEN];
 } lgdata;
 
 

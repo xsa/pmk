@@ -1,7 +1,7 @@
 /* $Id$ */
 
 /*
- * Copyright (c) 2003 Damien Couderc
+ * Copyright (c) 2003-2005 Damien Couderc
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,9 +34,9 @@
  */
 
 
-#include <stdio.h>
 #include <stdlib.h>
 
+#include "compat/pmk_stdio.h"
 #include "compat/pmk_string.h"
 #include "pmk_obj.h"
 

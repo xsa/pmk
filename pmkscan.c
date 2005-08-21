@@ -44,11 +44,11 @@
 #include <glob.h>
 #include <regex.h>
 #include <stdarg.h>
-#include <stdio.h>
 #include <stdlib.h>
 
 #include "compat/pmk_ctype.h"
 #include "compat/pmk_libgen.h"
+#include "compat/pmk_stdio.h"
 #include "compat/pmk_string.h"
 #include "compat/pmk_unistd.h"
 #include "common.h"

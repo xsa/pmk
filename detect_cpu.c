@@ -34,7 +34,6 @@
  */
 
 
-#include <stdio.h>
 #include <stdlib.h>
 /* include it first as if it was <sys/types.h> - this will avoid errors */
 #include "compat/pmk_sys_types.h"
@@ -42,6 +41,7 @@
 #include <errno.h>
 
 #include "compat/pmk_string.h"
+#include "compat/pmk_stdio.h"
 #include "common.h"
 #include "detect_cpu.h"
 #include "detect_cpu_asm.h"

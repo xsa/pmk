@@ -1,12 +1,7 @@
 /* $Id$ */
 
 /*
- * Credits for patches :
- *	- Ted Unangst
- */
-
-/*
- * Copyright (c) 2003-2004 Damien Couderc
+ * Copyright (c) 2003-2005 Damien Couderc
  * Copyright (c) 2003-2004 Xavier Santolaria <xavier@santolaria.net>
  * All rights reserved.
  *
@@ -40,15 +35,20 @@
  */
 
 
+/*
+ * Credits for patches :
+ *	- Ted Unangst
+ */
+
 #include <sys/param.h>
 #include <dirent.h>
 #include <errno.h>
 #include <limits.h>
 #include <stdarg.h>
-#include <stdio.h>
 #include <stdlib.h>
 
 #include "compat/pmk_string.h"
+#include "compat/pmk_stdio.h"
 #include "compat/pmk_unistd.h"
 #include "common.h"
 

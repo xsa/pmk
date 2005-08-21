@@ -34,8 +34,7 @@
  */
 
 
-#include <stdio.h>
-
+#include "compat/pmk_stdio.h"
 #include "compat/pmk_string.h"
 #include "parse_lang.h"
 
