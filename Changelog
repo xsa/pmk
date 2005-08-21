@@ -19,10 +19,15 @@
  * fixed %c conversion in vsnprintf().
  * updated pmkcfg.sh and config.in.pmk in sync with compat.
 
+15 Aug 2005 mipsator
+ * updated pmkcfg.sh and config.h.pmk in sync with compat.
+
+12 Aug 2005 mipsator
+ * added support for NaN and infinity in vsnprintf().
+
 10 Aug 2005 mipsator
  * added strdup() in compat.
- * fragmented a bit vsnp
- rintf() related functions.
+ * fragmented a bit vsnprintf() related functions.
 
 09 Aug 2005 mipsator
  * handle template files in pmkscan.
