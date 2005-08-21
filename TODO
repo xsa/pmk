@@ -23,7 +23,7 @@ Indented lines means subtask.
 common:
 -----------------------------------------------------------------------
 	+?	track and code missing checks for snprintf and strl*
-	~R	tutorial
+	~R	update tutorial
 	~.	improve test_pmkinstall to check more modes
 	+	update README and INSTALL
 	~!	new samples
@@ -33,6 +33,7 @@ common:
 
 pmk:
 -----------------------------------------------------------------------
+	-R	add sub header check for older systems
 	-!	check if ~/.pmk.conf is available
 	~.	compatibility with autoconf (progressing) :
 			~ support for DEFS (-D options to pass to the compiler)
@@ -52,29 +53,18 @@ pmksetup:
 	-	cpu optimisation for compiler 
 	-	option to append to variable of pmk.conf
 	!	clean temporary files on error
-	-.	missing checks :
-			- char unsigned (pmk ?)
-			- long double (pmk ?)
-			- better check for install ?
-			- others ?
-
 
 pmkscan
 -----------------------------------------------------------------------
+	-R!	update man page
 	-R?	add more entries in pmkscan.dat
-	-R	improve engine to detect types
-	~R	generate makefile template from the scanned sources
-	-	fix use of d_type in dirent structure which is not posix
+	+R	improve engine to detect types
+	+R	generate makefile template from the scanned sources
+	+	fix use of d_type in dirent structure which is not posix
 
 pmkinstall
 -----------------------------------------------------------------------
-	+	backup option
 
-
-pmkshgen
------------------------------------------------------------------------
-mips	~...	make specs, this tool should handle install and
-		deinstall operations (post 0.8)
 
 pmkpc
 -----------------------------------------------------------------------
@@ -91,5 +81,5 @@ pmkpc
 
 misc
 -----------------------------------------------------------------------
-	-R	generate template config header from pmkfile (pmkscan ?)
+	-R	generate template config header from pmkscan
 
