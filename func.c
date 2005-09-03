@@ -41,6 +41,7 @@
 #include "compat/pmk_unistd.h"
 #include "autoconf.h"
 #include "cfgtool.h"
+#include "codebuild.h"
 #include "common.h"
 #include "detect.h"
 #include "func.h"
@@ -569,13 +570,10 @@ bool pmk_check_header(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 				 rval;
 	char		 inc_path[MAXPATHLEN],
 				 cfgcmd[MAXPATHLEN],
-				 ftmp[MAXPATHLEN],
-				 btmp[MAXPATHLEN],
-				*incfile,
 				*target = NULL,
-				*ccpath,
-				*cflags,
-				*pstr;
+				*pstr,
+				*lang;
+	code_bld_t	 scb;
 	dynary		*funcs = NULL,
 				*macros = NULL,
 				*defs;
@@ -585,16 +583,20 @@ bool pmk_check_header(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 	lgdata		*pld;
 	pmkobj		*po;
 
+
+	code_bld_init(&scb, pgd->buildlog);
+
 	pmk_log("\n* Checking header [%s]\n", cmd->label);
 
 	required = require_check(ht);
 
 	/* get include filename */
-	incfile = po_get_str(hash_get(ht, KW_OPT_NAME));
-	if (incfile == NULL) {
-		errorf("NAME not assigned in label '%s'", cmd->label);
+	pstr = po_get_str(hash_get(ht, KW_OPT_NAME));
+	if (pstr == NULL) {
+		errorf("%s not assigned in label '%s'", KW_OPT_NAME, cmd->label);
 		return(false);
 	}
+	set_header_name(&scb, pstr);
 
 	/* any macro(s) to check ? */
 	macros = po_get_list(hash_get(ht, KW_OPT_MACRO));
@@ -643,40 +645,48 @@ bool pmk_check_header(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 		return(process_required(pgd, cmd, required, NULL, NULL));
 	}
 
-	/* get the language used */
-	pld = get_lang(ht, pgd);
-	if (pld == NULL) {
-		pmk_log("\tSKIPPED, unknown language.\n");
+	/* get language */
+	lang = get_lang_str(ht, pgd);
+	if (lang == NULL) {
+		errorf("Failed, language has not been set.");
+		return(false);
+	}
+
+	/* init build structure */
+	if (set_language(&scb, lang) == false) {
+		pmk_log("\tSKIPPED, unknown language '%s'.\n", lang);
 		return(invert_bool(required));
 	}
 
 	/* get the appropriate compiler */
-	ccpath = get_comp_path(pgd->htab, pld->comp);
-	if (ccpath == NULL) {
-		pmk_log("\tSKIPPED, cannot get compiler path ('%s').\n", pld->comp);
+	pstr = set_compiler(&scb, pgd->htab);
+	if (pstr == NULL) {
+		pmk_log("\tSKIPPED, cannot get compiler path for language '%s'.\n", lang);
 		return(invert_bool(required));
-	} else {
-		pmk_log("\tUse %s language with %s compiler.\n", pld->name, pld->comp);
 	}
+
+	pmk_log("\tUse %s language with %s compiler.\n", lang, pstr);
 
 	/* look for additional defines */
 	defs = po_get_list(hash_get(ht, KW_OPT_DEFS));
 
 	/* check for alternative variable for CFLAGS */
-	cflags = po_get_str(hash_get(ht, PMKVAL_ENV_CFLAGS));
-	if (cflags != NULL) {
+	pstr = po_get_str(hash_get(ht, PMKVAL_ENV_CFLAGS));
+	if (pstr != NULL) {
 		/* init alternative variable */
-		if (hash_get(pgd->htab, cflags) == NULL) {
-			if (hash_update_dup(pgd->htab, cflags, "") == HASH_ADD_FAIL) {
-				errorf(HASH_ERR_UPDT_ARG, cflags);
+		if (hash_get(pgd->htab, pstr) == NULL) {
+			if (hash_update_dup(pgd->htab, pstr, "") == HASH_ADD_FAIL) {
+				errorf(HASH_ERR_UPDT_ARG, pstr);
 				return(false);
 			}
 		}
+
+		alt_cflags_label(&scb, pstr);
 	} else {
 		/* use default variable of the used language */
-		cflags = pld->cflg;
+		pstr = pld->cflg;
 	}
-	pmk_log("\tStore compiler flags in '%s'.\n", cflags);
+	pmk_log("\tStore compiler flags in '%s'.\n", get_cflags_label(&scb));
 
 	/* use each element of INC_PATH with -I */
 	pstr = (char *) hash_get(pgd->htab, PMKCONF_PATH_INC);
@@ -685,7 +695,7 @@ bool pmk_check_header(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 		return(false);
 	}
 
-	if (get_file_dir_path(incfile, pstr, inc_path, sizeof(inc_path)) == true) {
+	if (get_file_dir_path(scb.header, pstr, inc_path, sizeof(inc_path)) == true) { /* XXX hardcode */
 		pstr = strdup(inc_path);
 		if (pstr == NULL) {
 			errorf(ERRMSG_MEM);
@@ -707,39 +717,34 @@ bool pmk_check_header(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 	/*
 		check header file
 	*/
-	pmk_log("\tFound header '%s' : ", incfile);
+	pmk_log("\tFound header '%s' : ", scb.header); /* XXX hardcode */
 
-	if (c_file_builder(ftmp, sizeof(ftmp),INC_TEST_CODE, incfile) == false) {
+	if (code_builder(&scb) == false) {
 		errorf("cannot build test file.");
 		return(false);
 	}
 
-	if (snprintf_b(cfgcmd, sizeof(cfgcmd), HEADER_CC_FORMAT,
-			ccpath, inc_path, BIN_TEST_NAME, ftmp,
-			pgd->buildlog) == false) {
+	 if (object_builder(cfgcmd, sizeof(cfgcmd), &scb, true) == false) {
 		errorf(ERR_MSG_CC_CMD);
 		return(false);
 	}
+
+/*debugf("cfgcmd = '%s'", cfgcmd);*/
 
 	/* get result */
 	r = system(cfgcmd);
 	if (r == 0) {
 		pmk_log("yes.\n");
 		/* define for template */
-		record_def_data(pgd->htab, incfile, DEFINE_DEFAULT);
+		record_def_data(pgd->htab, scb.header, DEFINE_DEFAULT);
 	} else {
 		pmk_log("no.\n");
-		record_def_data(pgd->htab, incfile, NULL);
+		record_def_data(pgd->htab, scb.header, NULL);
 		rslt = false;
 	}
 
-	if (unlink(ftmp) == -1) {
-		/* cannot remove temporary file */
-		errorf("cannot remove %s", ftmp);
-	}
-
-	/* No need to check return here as binary could not exists */
-	unlink(BIN_TEST_NAME);
+	/* clean files */
+	cb_cleaner(&scb);
 
 
 	/*
@@ -749,19 +754,15 @@ bool pmk_check_header(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 		while ((target = da_shift(macros)) && (target != NULL)) {
 			pmk_log("\tFound macro '%s' : ", target);
 
+			scb.define = target; /* XXX hardcode */
+
 			/* fill test file */
-			if (c_file_builder(ftmp, sizeof(ftmp),
-					INC_MACRO_TEST_CODE, incfile,
-					target) == false) {
+			if (code_builder(&scb) == false) {
 				errorf("cannot build test file.");
 				return(false);
 			}
 
-
-			if (snprintf_b(cfgcmd, sizeof(cfgcmd),
-					HEADER_CC_FORMAT, ccpath,
-					inc_path, BIN_TEST_NAME, ftmp,
-					pgd->buildlog) == false) {
+			 if (object_builder(cfgcmd, sizeof(cfgcmd), &scb, true) == false) {
 				errorf(ERR_MSG_CC_CMD);
 				return(false);
 			}
@@ -771,22 +772,18 @@ bool pmk_check_header(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 			if (r == 0) {
 				pmk_log("yes.\n");
 				/* define for template */
-				record_def_data(pgd->htab, incfile, DEFINE_DEFAULT);
+				record_def_data(pgd->htab, scb.header, DEFINE_DEFAULT); /* XXX hardcode */
 			} else {
 				pmk_log("no.\n");
-				record_def_data(pgd->htab, incfile, NULL);
+				record_def_data(pgd->htab, scb.header, NULL); /* XXX hardcode */
 				rslt = false;
 			}
 
-			if (unlink(ftmp) == -1) {
-				/* cannot remove temporary file */
-				errorf("cannot remove %s", ftmp);
-			}
-
-			/* No need to check return here as binary could not exists */
-			unlink(BIN_TEST_NAME);
+			/* clean files */
+			cb_cleaner(&scb);
 		}
 	}
+	scb.define = NULL; /* XXX hardcode */
 
 
 	/*
@@ -796,26 +793,15 @@ bool pmk_check_header(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 		while ((target = da_shift(funcs)) && (target != NULL)) {
 			pmk_log("\tFound function '%s' : ", target);
 
+			scb.procedure = target; /* XXX hardcode */
+
 			/* fill test file */
-			if (c_file_builder(ftmp, sizeof(ftmp),
-					INC_FUNC_TEST_CODE, incfile,
-					target) == false) {
+			if (code_builder(&scb) == false) {
 				errorf("cannot build test file.");
 				return(false);
 			}
 
-			/* compute object file name */
-			if (strlcpy_b(btmp, ftmp, sizeof(btmp)) == false) {
-				errorf("cannot build objet file name.");
-				return(false);
-			}
-			btmp[strlen(btmp) - 1] = 'o';
-
-			/* build compiler command */
-			if (snprintf_b(cfgcmd, sizeof(cfgcmd),
-					HEADER_FUNC_CC_FORMAT, ccpath,
-					inc_path, btmp, ftmp,
-					pgd->buildlog) == false) {
+			 if (object_builder(cfgcmd, sizeof(cfgcmd), &scb, true) == false) {
 				errorf(ERR_MSG_CC_CMD);
 				return(false);
 			}
@@ -833,13 +819,8 @@ bool pmk_check_header(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 				rslt = false;
 			}
 
-			if (unlink(ftmp) == -1) {
-				/* cannot remove temporary file */
-				errorf("cannot remove %s", ftmp);
-			}
-
-			/* No need to check return here as object file could not exists */
-			unlink(btmp);
+			/* clean files */
+			cb_cleaner(&scb);
 		}
 	}
 
@@ -849,21 +830,14 @@ bool pmk_check_header(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 		process_def_list(pgd->htab, defs);
 
 		/* put result in CFLAGS, CXXFLAGS or alternative variable */
-		if (single_append(pgd->htab, cflags, strdup(inc_path)) == false) {
-			errorf("failed to append '%s' in '%s'.", inc_path, cflags);
+		if (single_append(pgd->htab, get_cflags_label(&scb), strdup(inc_path)) == false) {
+			errorf("failed to append '%s' in '%s'.", inc_path, get_cflags_label(&scb));
 			return(false);
 		}
 
 		rval = true;
 	} else {
 		rval = process_required(pgd, cmd, required, NULL, NULL);
-		/*if (rval == false) {                                             */
-		/*        if (incfunc == NULL) {                                   */
-		/*                errorf("failed to find header '%s'.", incfile);  */
-		/*        } else {                                                 */
-		/*                errorf("failed to find function '%s'.", incfunc);*/
-		/*        }                                                        */
-		/*}                                                                */
 	}
 
 	if (clean_funcs == true) {

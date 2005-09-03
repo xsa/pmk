@@ -672,6 +672,34 @@ lgdata *get_lang(htable *pht, pmkdata *pgd) {
 }
 
 
+/******************
+ * get_lang_str() *
+ ***********************************************************************
+ DESCR
+	provide data on language used
+
+ IN
+	pht :	hash table that should contain LANG
+	pgd :	global data structure
+
+ OUT
+	language string or NULL if language cannot be determined
+ ***********************************************************************/
+
+char *get_lang_str(htable *pht, pmkdata *pgd) {
+	char	*lang;
+
+	/* check first if language has been provided locally */
+	lang = (char *)po_get_data(hash_get(pht, KW_OPT_LANG));
+	if (lang == NULL) {
+		/* get global lang (could be NULL */
+		lang = pgd->lang;
+	}
+
+	return(lang);
+}
+
+
 /*******************
  * get_comp_path() *
  ***********************************************************************
@@ -792,159 +820,6 @@ bool c_file_builder(char *fnbuf, size_t fbsz, char *tmpl, ...) {
 		return(false);
 
 	/* everything is okay, tchuss */
-	return(true);
-}
-
-/*******************
- * code_bld_init() *
- ***********************************************************************
- DESCR
-	XXX
-
- IN
-	XXX
-
- OUT
-	XXX
- ***********************************************************************/
-
-void code_bld_init(code_bld_t *pcb) {
-	pcb->header = NULL;
-	pcb->define = NULL;
-	pcb->procedure = NULL;
-	pcb->type = NULL;
-	pcb->member = NULL;
-	pcb->subhdrs = NULL;
-}
-
-
-/********************
- * c_code_builder() *
- ***********************************************************************
- DESCR
-	XXX
-
- IN
-	XXX
-
- OUT
-	XXX
- ***********************************************************************/
-
-bool c_code_builder(char *fnbuf, size_t fbsz, code_bld_t *pcb) {
-	FILE	*fp;
-	size_t	 i;
-
-	/* open temporary file */
-	fp = tmps_open(TEST_FILE_NAME, "w", fnbuf, fbsz, strlen(C_FILE_EXT));
-	if (fp == NULL) {
-		errorf("c_code_builder: tmps_open() failed");
-		return(false); /* failed to open */
-	}
-
-	/* main header */
-	if (pcb->header != NULL) {
-		fprintf(fp, "/* main header to test */\n");
-		fprintf(fp, CODE_C_HDR, pcb->header);
-	}
-
-	/* sub headers */
-	if (pcb->subhdrs != NULL) {
-		fprintf(fp, "/* dependency headers */\n");
-		for (i = 0 ; i < da_usize(pcb->subhdrs) ; i++) {
-			fprintf(fp, da_idx(pcb->subhdrs, i));
-		}
-	}
-
-	/* main proc */
-	fprintf(fp, CODE_C_BEG);
-
-	/* define test */
-	if (pcb->define != NULL) {
-		fprintf(fp, CODE_C_DEF, pcb->define);
-	}
-
-	/* procedure test */
-	if (pcb->procedure != NULL) {
-		fprintf(fp, CODE_C_PROC, pcb->procedure);
-	}
-
-	/* type test */
-	if (pcb->type != NULL) {
-		if (pcb->member == NULL) {
-			/* simple */
-			fprintf(fp, CODE_C_VAR, pcb->type);
-			fprintf(fp, CODE_C_TYPE);
-		} else {
-			/* with member */
-			fprintf(fp, CODE_C_VAR, pcb->type);
-			fprintf(fp, CODE_C_MEMBER, pcb->member);
-		}
-	}
-
-	fprintf(fp, CODE_C_END);
-
-	fclose(fp);
-
-	return(true);
-}
-
-
-/********************
- * c_object_build() *
- ***********************************************************************
- DESCR
-	XXX
-
- IN
-	XXX
-
- OUT
-	XXX
- ***********************************************************************/
-
-bool c_object_build(char *buf, size_t sz, char *comp, char *flags,
-									char *lib, char *flog, bool dolink) {
-	/* start with compiler */
-	strlcpy(buf, comp, sz);
-
-	/* if flags are provided */
-	if (flags != NULL) {
-		strlcat(buf, " ", sz);
-		strlcat(buf, flags, sz);
-	}
-
-	/* append the object name */
-	strlcat(buf, " -o ", sz);
-	strlcat(buf, BIN_TEST_NAME, sz);
-
-	/* if we don't link then append object extension */
-	if (dolink == false) {
-		strlcat(buf, ".o", sz);
-	}
-
-	/* if an optional library has been provided */
-	if (lib != NULL) {
-		strlcat(buf, " -l ", sz);
-		strlcat(buf, lib, sz);
-	}
-
-	/* if we don't link use -c */
-	if (dolink == false) {
-		strlcat(buf, " -c", sz);
-	}
-
-	/* append source filename */
-	strlcat(buf, " ", sz);
-	strlcat(buf, TEST_FILE_NAME, sz);
-
-	/* append log redirection */
-	strlcat(buf, " >>", sz);
-	strlcat(buf, flog, sz);
-	if (strlcat_b(buf, " 2>&1", sz) == false) {
-		return(false);
-	}
-
 	return(true);
 }
 

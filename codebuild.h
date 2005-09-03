@@ -1,7 +1,7 @@
 /* $Id$ */
 
 /*
- * Copyright (c) 2003-2005 Damien Couderc
+ * Copyright (c) 2005 Damien Couderc
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,12 +34,11 @@
  */
 
 
-#ifndef _PMK_FUNCTOOL_H_
-#define _PMK_FUNCTOOL_H_
+#ifndef _PMK_CODEBUILD_H_
+#define _PMK_CODEBUILD_H_
 
-#include "common.h"
-#include "hash_tools.h"
-#include "pmk.h"
+#include "compat/pmk_stdbool.h"
+#include "dynarray.h"
 #include "premake.h"
 
 
@@ -47,17 +46,20 @@
  * constants *
  **********************************************************************************************/
 
+enum {
+	LANG_UNKNOWN = 0,
+	LANG_C,
+	LANG_CXX
+};
+
+typedef unsigned int	lang_t;
+
+
 #define LANG_NAME_LEN	64
 #define COMP_NAME_LEN	64
 #define PRE_NAME_LEN	64
 #define CFLG_NAME_LEN	64
 #define SHFLG_NAME_LEN	64
-
-#define KW_OPT_DEPEND	"DEPEND"
-#define KW_OPT_LANG		"LANG"
-#define KW_OPT_REQUIRED	"REQUIRED"
-
-#define CHAR_VERSION_SEPARATOR	'.'
 
 #define C_FILE_EXT		".c"
 #define TEST_FILE_NAME	TMPDIR "/pmk_XXXXXXXX" C_FILE_EXT
@@ -92,40 +94,51 @@
 
 typedef struct {
 	char	name[LANG_NAME_LEN],
-			comp[COMP_NAME_LEN],
-			pre[PRE_NAME_LEN],
-			cflg[CFLG_NAME_LEN],
-			slflg[CFLG_NAME_LEN];
-} lgdata;
+			compiler[COMP_NAME_LEN],
+			cflags[CFLG_NAME_LEN],
+			slflags[CFLG_NAME_LEN];
+	lang_t	lang;
+} lgdata_t;
+
+typedef struct {
+	char		 srcfile[MAXPATHLEN],
+				 binfile[MAXPATHLEN],
+				*header,
+				*library,
+				*define,
+				*procedure,
+				*type,
+				*member,
+				*pathcomp,
+				*cflags,
+				*alt_cflags,
+				*alt_libs,
+				*blog;
+	dynary		*subhdrs;
+	lang_t		 lang;
+	lgdata_t	*pld;
+} code_bld_t;
 
 
 /**************
  * prototypes *
  ***********************************************************************/
 
-bool	 check_bool_str(char *);
-bool	 invert_bool(bool);
-char	*bool_to_str(bool);
-bool	 get_file_dir_path(char *, char *, char *, int);
-char	*str_to_def(char *);
-char	*build_def_name(char *);
-bool	 record_def(htable *, char *, bool);
-bool	 record_def_data(htable *, char *, char *);
-bool	 process_def_list(htable *, dynary *);
-bool	 record_have(htable *, char *, char *);
-bool	 record_val(htable *, char *, char *);
-bool	 label_set(htable *, char *, bool);
-bool	 label_check(htable *, char *);
-bool	 depend_check(htable *, pmkdata *);
-bool	 require_check(htable *);
-lgdata	*check_lang(char *);							/* WILL BE OBSOLETE */
-lgdata	*check_lang_comp(char *);						/* WILL BE OBSOLETE */
-lgdata	*get_lang(htable *, pmkdata *);					/* WILL BE OBSOLETE */
-char	*get_lang_str(htable *, pmkdata *);
-char	*get_comp_path(htable *, char *);				/* WILL BE OBSOLETE */
-bool	 check_cfgt_data(pmkdata *);
-bool	 process_required(pmkdata *, pmkcmd *, bool , char *, char *);
-bool	 c_file_builder(char *, size_t, char *, ...);	/* WILL BE OBSOLETE */
+void	 code_bld_init(code_bld_t *, char *);
+void	 set_header_name(code_bld_t *, char *);
+void	 set_library_name(code_bld_t *, char *);
+bool	 set_language(code_bld_t *, char *);
+char	*set_compiler(code_bld_t *, htable *t);
+void	 alt_cflags_label(code_bld_t *, char *);
+void	 alt_libs_label(code_bld_t *, char *);
+char	*get_lang_label(code_bld_t *);
+char	*get_cflags_label(code_bld_t *);
+char	*get_libs_label(code_bld_t *);
+bool	 code_builder(code_bld_t *);
+bool	 c_code_builder(code_bld_t *);
+bool	 object_builder(char *, size_t, code_bld_t *, bool);
+bool	 c_object_builder(char *, size_t, code_bld_t *, bool);
+void	 cb_cleaner(code_bld_t *);
 
-#endif /* _PMK_FUNCTOOL_H_ */
+#endif /* _PMK_CODEBUILD_H_ */
 
