@@ -466,7 +466,7 @@ if [ -z "$CC" ]; then
 		CC="cc"
 	else
 		printf "Unable to find C compiler.\n"
-		exit 0
+		exit 1
 	fi
 else
 	printf "CC defined, skipping C compiler check.\n"
@@ -504,7 +504,7 @@ fi
 
 if ! check_binary as; then
 	printf "Unable to find assembler.\n"
-	exit 0
+	exit 1
 fi
 
 
@@ -649,4 +649,6 @@ check_lib_function gen basename
 #
 # end
 #
+
+exit 0
 
