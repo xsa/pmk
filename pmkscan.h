@@ -146,7 +146,7 @@ enum {
 						"\tVERSION = \"0.0\"\n" \
 						"\tBINDIR = \"\\$(PREFIX)/bin\"\n" \
 						"\tSBINDIR = \"\\$(PREFIX)/sbin\"\n" \
-						"\tMANDIR = \"\\$(PREFIX)//man\n" \
+						"\tMANDIR = \"\\$(PREFIX)/man\"\n" \
 						"\tDATADIR = \"\\$(PREFIX)/share/\\$(PACKAGE)\"\n"
 #define PMKF_DEF_MAN	"\tMAN%dDIR = \"\\$(MANDIR)/man%d\"\n"
 #define PMKF_DEF_END	"}\n\n"
