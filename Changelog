@@ -1,5 +1,6 @@
 24 Sep 2005 mipsator
  * unbreak the pmkfile.
+ * fixed shared library support bug when system is not supported.
 
 03 Sep 2005 mipsator
  * imported primary work on code builder engine.

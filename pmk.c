@@ -221,6 +221,9 @@ pmkdata *pmkdata_init(void) {
 	/* init on demand */
 	ppd->cfgt = NULL;
 
+	/* init shared lib support */
+	ppd->slht = NULL;
+
 	return(ppd);
 }
 
