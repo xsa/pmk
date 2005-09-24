@@ -49,15 +49,15 @@
 
 /* ADD_COMPILER options */
 kw_t	req_addcomp[] = {
-		{CC_KW_ID,	PO_STRING},
-		{CC_KW_DESCR,	PO_STRING},
-		{CC_KW_MACRO,	PO_STRING}
+	{CC_KW_ID,	PO_STRING},
+	{CC_KW_DESCR,	PO_STRING},
+	{CC_KW_MACRO,	PO_STRING}
 };
 
 kw_t	opt_addcomp[] = {
-		{CC_KW_VERSION,		PO_STRING},
-		{CC_KW_SLCFLAGS,	PO_STRING},
-		{CC_KW_SLLDFLAGS,	PO_STRING}
+	{CC_KW_VERSION,		PO_STRING},
+	{CC_KW_SLCFLAGS,	PO_STRING},
+	{CC_KW_SLLDFLAGS,	PO_STRING}
 };
 
 kwopt_t	kw_addcomp = {
@@ -69,12 +69,12 @@ kwopt_t	kw_addcomp = {
 
 /* ADD_SYSTEM options */
 kw_t	req_addsys[] = {
-		{"NAME",		PO_STRING},
-		{"SL_EXT",		PO_STRING},
-		{"SL_VERSION",		PO_STRING},
-		{"SL_LIBNAME",		PO_STRING},
-		{"SL_LIBNAME_VMAJ",	PO_STRING},
-		{"SL_LIBNAME_VFULL",	PO_STRING}
+	{"NAME",		PO_STRING},
+	{"SL_EXT",		PO_STRING},
+	{"SL_VERSION",		PO_STRING},
+	{"SL_LIBNAME",		PO_STRING},
+	{"SL_LIBNAME_VMAJ",	PO_STRING},
+	{"SL_LIBNAME_VFULL",	PO_STRING}
 };
 
 kwopt_t	kw_addsys = {
@@ -200,7 +200,7 @@ void compcell_destroy(comp_cell *pcc) {
 bool add_compiler(comp_data *pcd, htable *pht) {
 	comp_cell	*pcell;
 	char		*pstr,
-			 tstr[TMP_BUF_LEN];
+				 tstr[TMP_BUF_LEN];
 
 	pcell = (comp_cell *) malloc(sizeof(comp_cell));
 	if (pcell == NULL)
@@ -279,22 +279,23 @@ bool add_compiler(comp_data *pcd, htable *pht) {
  ***********************************************************************/
 
 bool add_system(comp_data *pcd, htable *pht, char *osname) {
-	char		*name,
-			*pstr;
-	hkeys		*phk;
+	char			*name,
+					*pstr;
+	hkeys			*phk;
 	unsigned int	 i;
 
 	name = po_get_str(hash_get(pht, "NAME"));
 	if (name == NULL) {
 		return(false);
-	} else {
-		if (strncmp(osname, name, sizeof(osname)) != 0) {
-			/* not the target system, skipping */
-			return(true);
-		} else {
-			hash_delete(pht, "NAME");
-		}
 	}
+
+	if (strncmp(osname, name, sizeof(osname)) != 0) {
+		/* not the target system, skipping */
+		return(true);
+	}
+
+	hash_add(pht, "SLSYSNAME", po_mk_str(strdup(name)));
+	hash_delete(pht, "NAME");
 
 	/* remaining values are system overrides, save it */
 	phk = hash_keys(pht);
