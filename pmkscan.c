@@ -1392,10 +1392,8 @@ void mkf_output_header(FILE *fp, scn_zone_t *psz) {
 	/* misc stuff */
 	fprintf(fp, MKF_HEADER_MISC);
 
-	if (psz->found[FILE_TYPE_DATA] == true) {
-		/* package data */
-		fprintf(fp, MKF_HEADER_DATA);
-	}
+	/* package data */
+	fprintf(fp, MKF_HEADER_DATA);
 
 	/* directories */
 	fprintf(fp, "# specific directories\n");
