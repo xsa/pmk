@@ -43,15 +43,20 @@
 #include "premake.h"
 
 
-/*
+/**************
+ * parse_idtf *
+ ***********************************************************************
+ DESCR
 	parse string for identifiers
 
+ IN
 	pstr : string to parse
 	pbuf : resulting string buffer
 	size : size of buffer
 
-	returns : buffer address or NULL
-*/
+ OUT
+	buffer address or NULL
+ ***********************************************************************/
 
 char *parse_idtf(char *pstr, char *pbuf, size_t size) {
 	while (((isalnum(*pstr) != 0) || (*pstr == '_')) && (size > 0)) {
@@ -65,29 +70,33 @@ char *parse_idtf(char *pstr, char *pbuf, size_t size) {
 		return(NULL);
 
 	*pbuf = CHAR_EOS;
-	
+
 	/* return new cursor */
 	return(pstr);
 }
 
 
-
-/*
+/******************
+ * process_string *
+ ***********************************************************************
+ DESCR
 	process string to substitute variables with their values
 
+ IN
 	pstr : string to process
 	pht : hash table where variables are stored
 
-	return : new string or NULL
-*/
+ OUT
+	new string or NULL
+ ***********************************************************************/
 
 char *process_string(char *pstr, htable *pht) {
 	bool	 bs = false;
 	char	 buf[OPT_VALUE_LEN],
-		 var[OPT_NAME_LEN],
-		*pvar,
-		*pval,
-		*pbuf;
+			 var[OPT_NAME_LEN],
+			*pvar,
+			*pval,
+			*pbuf;
 	size_t	 size;
 
 	size = sizeof(buf);
@@ -168,20 +177,26 @@ char *process_string(char *pstr, htable *pht) {
 	return(strdup(buf));
 }
 
-/*
+
+/*****************
+ * single_append *
+ ***********************************************************************
+ DESCR
 	append only if not already in the string
 
+ IN
 	pht : hash table
 	key : key where to append
 	value : value to append
 
-	return : boolean
-*/
+ OUT
+	boolean
+ ***********************************************************************/
 
 bool single_append(htable *pht, char *key, char *value) {
 	bool	 found = false;
 	char	*cval,
-		*pstr;
+			*pstr;
 	size_t	 s;
 
 	if (value == NULL)
@@ -212,5 +227,4 @@ bool single_append(htable *pht, char *key, char *value) {
 
 	return(true);
 }
-
 
