@@ -13,26 +13,35 @@ SWITCHES {
 
 IF(sw_usermode) {
     DEFINE {
-        MKTARGET = "user"
-        BASE = "\$(HOME)"
-        CONFDIR = "\$(BASE)/.pmk"
-        BINDIR = "\$(BASE)/bin"
-        SBINDIR = "\$(BASE)/bin"
-        DATADIR = "\$(CONFDIR)"
-        MANDIR = "\$(BASE)/man"
+        # override prefix
+        PREFIX = "\\$(HOME)"
+        CONFDIR = "\\$(PREFIX)/.pmk"
+        SBINDIR = "\\$(PREFIX)/bin"
+        DATADIR = "\\$(CONFDIR)"
+        MAN1DIR = "\\$(MANDIR)"
+        MAN5DIR = "\\$(MANDIR)"
+        MAN8DIR = "\\$(MANDIR)"
     }
 }
 
 IF(!sw_usermode) {
     DEFINE {
-        MKTARGET = "global"
-        BASE = "$PREFIX"
-        CONFDIR = "\$(SYSCONFDIR)/pmk"
-        BINDIR = "\$(BASE)/bin"
-        SBINDIR = "\$(BASE)/sbin"
-        DATADIR = "\$(BASE)/share/\$(PREMAKE)"
-        MANDIR = "\$(BASE)/man"
+        CONFDIR = "\\$(SYSCONFDIR)/pmk"
+        SBINDIR = "\\$(PREFIX)/sbin"
+        DATADIR = "\\$(PREFIX)/share/\\$(PREMAKE)"
+        MAN1DIR = "\\$(MANDIR)/man1"
+        MAN5DIR = "\\$(MANDIR)/man5"
+        MAN8DIR = "\\$(MANDIR)/man8"
     }
+}
+
+DEFINE {
+    BINDIR = "\\$(PREFIX)/bin"
+    MANDIR = "\\$(PREFIX)/man"
+    PRIVSEP_USER = "nobody"
+    PACKAGE = "pmk"
+    VERSION = "0.9.3"
+    INSTALL = "./pmkinstall"
 }
 
 # check alternate privsep user
@@ -48,6 +57,12 @@ IF(!var_privsep) {
     }
 }
 
+
+#
+# binary checks
+#
+
+# XXX TODO : check stuff for C99, C89 and CC
 CHECK_BINARY(binary_cc) {
     NAME = "cc"
     VARIABLE = "CC"
@@ -64,12 +79,9 @@ CHECK_BINARY(binary_as) {
 }
 
 
-# checking strlcpy() and strlcat() in string.h
-CHECK_HEADER(header_string_h) {
-    REQUIRED = FALSE
-    NAME = "string.h"
-    FUNCTION = ("strlcpy","strlcat")
-}
+#
+# type checks
+#
 
 # check _Bool type
 CHECK_TYPE(type__bool) {
@@ -84,11 +96,16 @@ CHECK_TYPE(type_blkcnt_t) {
     HEADER = "sys/types.h"
 }
 
-# check intmax_t type
-CHECK_TYPE(type_intmax_t) {
+# check long long type
+CHECK_TYPE(type_long_long) {
     REQUIRED = FALSE
-    NAME = "intmax_t"
-    HEADER = "stdint.h"
+    NAME = "long long"
+}
+
+# check unsigned long long type
+CHECK_TYPE(type_unsigned_long_long) {
+    REQUIRED = FALSE
+    NAME = "unsigned long long"
 }
 
 # check long double type
@@ -97,10 +114,11 @@ CHECK_TYPE(type_long_double) {
     NAME = "long double"
 }
 
-# check long long type
-CHECK_TYPE(type_long_long) {
+# check intmax_t type
+CHECK_TYPE(type_intmax_t) {
     REQUIRED = FALSE
-    NAME = "long long"
+    NAME = "intmax_t"
+    HEADER = "stdint.h"
 }
 
 # check ptrdiff_t type
@@ -108,12 +126,6 @@ CHECK_TYPE(type_ptrdiff_t) {
     REQUIRED = FALSE
     NAME = "ptrdiff_t"
     HEADER = "stdint.h"
-}
-
-# check unsigned long long type
-CHECK_TYPE(type_unsigned_long_long) {
-    REQUIRED = FALSE
-    NAME = "unsigned long long"
 }
 
 # check wchar_t type
@@ -130,6 +142,11 @@ CHECK_TYPE(type_wint_t) {
     HEADER = "wchar.h"
 }
 
+
+#
+# header checks
+#
+
 # checking stdbool.h
 CHECK_HEADER(header_stdbool_h) {
     REQUIRED = FALSE
@@ -140,26 +157,59 @@ CHECK_HEADER(header_stdbool_h) {
 CHECK_HEADER(header_libgen_h) {
     REQUIRED = FALSE
     NAME = "libgen.h"
+    FUNCTION = ("dirname", "basename")
+}
+
+
+#
+# procedure checks
+#
+
+# checking strlcpy() and strlcat() in string.h
+CHECK_HEADER(header_string_h) {
+    REQUIRED = FALSE
+    NAME = "string.h"
+    FUNCTION = ("strlcpy","strlcat")
+}
+
+# checking strdup in string.h
+CHECK_HEADER(function_strdup) {
+    REQUIRED = FALSE
+    NAME = "string.h"
+    FUNCTION = ("strdup")
+}
+
+# checking vsnprintf and snprintf in stdio.h
+CHECK_HEADER(header_stdio_h) {
+    REQUIRED = FALSE
+    NAME = "stdio.h"
+    FUNCTION = ("vsnprintf", "snprintf")
 }
 
 # checking isblank in ctype.h
 CHECK_HEADER(function_isblank) {
     REQUIRED = FALSE
     NAME = "ctype.h"
-    FUNCTION = "isblank"
+    FUNCTION = ("isblank")
 }
 
 # checking mkstemps in unistd.h
 CHECK_HEADER(function_mkstemps) {
     REQUIRED = FALSE
     NAME = "unistd.h"
-    FUNCTION = "mkstemps"
+    FUNCTION = ("mkstemps")
 }
 
+
+#
+# library checks
+#
+
+# check dirname and basename in libgen
 CHECK_LIB(library_gen) {
     REQUIRED = FALSE
     NAME = "gen"
-    FUNCTION = "dirname"
+    FUNCTION = ("dirname", "basename")
     LIBS = "LGEN_FLAGS"
 }
 
