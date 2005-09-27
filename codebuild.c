@@ -38,6 +38,7 @@
 
 #include "compat/pmk_stdio.h"
 #include "compat/pmk_string.h"
+
 #include "codebuild.h"
 #include "common.h"
 
@@ -74,47 +75,13 @@ void code_bld_init(code_bld_t *pcb, char *blog) {
 	pcb->procedure = NULL;
 	pcb->type = NULL;
 	pcb->member = NULL;
+	pcb->pathcomp = NULL;
+	pcb->flags = NULL;
 	pcb->alt_cflags = NULL;
 	pcb->alt_libs = NULL;
 	pcb->subhdrs = NULL;
 
 	pcb->blog = blog;
-}
-
-
-/*********************
- * set_header_name() *
- ***********************************************************************
- DESCR
-	XXX
-
- IN
-	XXX
-
- OUT
-	XXX
- ***********************************************************************/
-
-void set_header_name(code_bld_t *pcb, char *header) {
-	pcb->header = header;
-}
-
-
-/**********************
- * set_library_name() *
- ***********************************************************************
- DESCR
-	XXX
-
- IN
-	XXX
-
- OUT
-	XXX
- ***********************************************************************/
-
-void set_library_name(code_bld_t *pcb, char *library) {
-	pcb->library = library;
 }
 
 
@@ -171,42 +138,6 @@ char *set_compiler(code_bld_t *pcb, htable *pht) {
 	pcb->pathcomp = hash_get(pht, pcb->pld->compiler);
 
 	return(pcb->pathcomp);
-}
-
-
-/**********************
- * alt_cflags_label() *
- ***********************************************************************
- DESCR
-	XXX
-
- IN
-	XXX
-
- OUT
-	XXX
- ***********************************************************************/
-
-void alt_cflags_label(code_bld_t *pcb, char *cflags) {
-	pcb->alt_cflags = cflags;
-}
-
-
-/********************
- * alt_libs_label() *
- ***********************************************************************
- DESCR
-	XXX
-
- IN
-	XXX
-
- OUT
-	XXX
- ***********************************************************************/
-
-void alt_libs_label(code_bld_t *pcb, char *libs) {
-	pcb->alt_libs = libs;
 }
 
 
@@ -278,6 +209,30 @@ char *get_libs_label(code_bld_t *pcb) {
 }
 
 
+/*****************
+ * code_logger() *
+ ***********************************************************************
+ DESCR
+	XXX
+
+ IN
+	XXX
+
+ OUT
+	XXX
+ ***********************************************************************/
+
+
+void code_logger(FILE *tfp, FILE *lfp, const char *fmt, ...) {
+	va_list	plst;
+
+	va_start(plst, fmt);
+	vfprintf(tfp, fmt, plst);
+	vfprintf(lfp, fmt, plst);
+	va_end(plst);
+}
+
+
 /******************
  * code_builder() *
  ***********************************************************************
@@ -316,66 +271,81 @@ bool code_builder(code_bld_t *pcb) {
  ***********************************************************************/
 
 bool c_code_builder(code_bld_t *pcb) {
-	FILE	*fp;
+	FILE	*tfp,
+			*lfp;
 	size_t	 i;
 
 	/* open temporary file */
-	fp = tmps_open(TEST_FILE_NAME, "w", pcb->srcfile, sizeof(pcb->srcfile), strlen(C_FILE_EXT));
-	if (fp == NULL) {
+	tfp = tmps_open(TEST_FILE_NAME, "w", pcb->srcfile, sizeof(pcb->srcfile), strlen(C_FILE_EXT));
+	if (tfp == NULL) {
 		errorf("c_code_builder: tmps_open() failed");
 		return(false); /* failed to open */
 	}
 
-	/* main header */
-	if (pcb->header != NULL) {
-		fprintf(fp, "/* main header to test */\n");
-		fprintf(fp, CODE_C_HDR, pcb->header);
+	lfp = fopen(pcb->blog, "a");
+	if (lfp == NULL) {
+		errorf("c_code_builder: build log fopen() failed");
+		return(false); /* failed to open */
 	}
+
+	fprintf(lfp, "Generated source file:\n");
 
 	/* sub headers */
 	if (pcb->subhdrs != NULL) {
-		fprintf(fp, "/* dependency headers */\n");
+		code_logger(tfp, lfp, "/* dependency headers */\n");
 		for (i = 0 ; i < da_usize(pcb->subhdrs) ; i++) {
-			fprintf(fp, da_idx(pcb->subhdrs, i));
+			code_logger(tfp, lfp, CODE_C_HDR, (char *) da_idx(pcb->subhdrs, i));
 		}
 	}
 
+	/* main header */
+	if (pcb->header != NULL) {
+		code_logger(tfp, lfp, "/* main header to test */\n");
+		code_logger(tfp, lfp, CODE_C_HDR, pcb->header);
+	}
+
 	/* main proc */
-	fprintf(fp, CODE_C_BEG);
+	code_logger(tfp, lfp, CODE_C_BEG);
 
 	/* define test */
 	if (pcb->define != NULL) {
-		fprintf(fp, CODE_C_DEF, pcb->define);
+		code_logger(tfp, lfp, CODE_C_DEF, pcb->define);
 	}
 
 	/* procedure test */
 	if (pcb->procedure != NULL) {
-		fprintf(fp, CODE_C_PROC, pcb->procedure);
+		code_logger(tfp, lfp, CODE_C_PROC, pcb->procedure);
 	}
 
 	/* type test */
 	if (pcb->type != NULL) {
 		if (pcb->member == NULL) {
 			/* simple */
-			fprintf(fp, CODE_C_VAR, pcb->type);
-			fprintf(fp, CODE_C_TYPE);
+			code_logger(tfp, lfp, CODE_C_VAR, pcb->type);
+			code_logger(tfp, lfp, CODE_C_TYPE);
 		} else {
 			/* with member */
-			fprintf(fp, CODE_C_VAR, pcb->type);
-			fprintf(fp, CODE_C_MEMBER, pcb->member);
+			code_logger(tfp, lfp, CODE_C_VAR, pcb->type);
+			code_logger(tfp, lfp, CODE_C_MEMBER, pcb->member);
 		}
 	}
 
-	fprintf(fp, CODE_C_END);
+	code_logger(tfp, lfp, CODE_C_END);
 
-	fclose(fp);
+	fclose(tfp);
+	fclose(lfp);
+
+	if ((ferror(tfp) != 0) || (ferror(lfp) != 0)) {
+		errorf("c_code_builder: output failed");
+		return(false);
+	}
 
 	return(true);
 }
 
 
-/******************
- * object_build() *
+/********************
+ * object_builder() *
  ***********************************************************************
  DESCR
 	XXX
@@ -398,8 +368,8 @@ bool object_builder(char *buf, size_t sz, code_bld_t *pcb, bool dolink) {
 }
 
 
-/********************
- * c_object_build() *
+/**********************
+ * c_object_builder() *
  ***********************************************************************
  DESCR
 	XXX
@@ -413,20 +383,23 @@ bool object_builder(char *buf, size_t sz, code_bld_t *pcb, bool dolink) {
 
 bool c_object_builder(char *buf, size_t sz, code_bld_t *pcb, bool dolink) {
 	/* start with compiler */
+	if (pcb->pathcomp == NULL) {
+		return(false);
+	}
 	strlcpy(buf, pcb->pathcomp, sz);
 
 	/* if flags are provided */
-	if (pcb->cflags != NULL) {
+	if (pcb->flags != NULL) {
 		strlcat(buf, " ", sz);
-		strlcat(buf, pcb->cflags, sz);
+		strlcat(buf, pcb->flags, sz);
 	}
 
 	/* copy template of object name */
-	strlcpy(pcb->binfile, BIN_TEST_NAME, sz);
+	strlcpy(pcb->binfile, BIN_TEST_NAME, sizeof(pcb->binfile));
 
 	/* if we don't link then append object extension */
 	if (dolink == false) {
-		strlcat(pcb->binfile, ".o", sz);
+		strlcat(pcb->binfile, ".o", sizeof(pcb->binfile));
 	}
 
 	/* randomize name */

@@ -38,6 +38,8 @@
 #define _PMK_CODEBUILD_H_
 
 #include "compat/pmk_stdbool.h"
+#include "compat/pmk_stdio.h"
+
 #include "dynarray.h"
 #include "premake.h"
 
@@ -103,19 +105,19 @@ typedef struct {
 typedef struct {
 	char		 srcfile[MAXPATHLEN],
 				 binfile[MAXPATHLEN],
-				*header,
-				*library,
-				*define,
-				*procedure,
-				*type,
-				*member,
-				*pathcomp,
-				*cflags,
-				*alt_cflags,
-				*alt_libs,
-				*blog;
-	dynary		*subhdrs;
-	lang_t		 lang;
+				*header,				/* header filename */
+				*library,				/* library name */
+				*define,				/* macro name */
+				*procedure,				/* procedure name */
+				*type,					/* type name */
+				*member,				/* type member name */
+				*pathcomp,				/* compiler path */
+				*flags,					/* compilation flags */
+				*alt_cflags,			/* alternative compilation flags variable */
+				*alt_libs,				/* alternative linker flags variable */
+				*blog;					/* build log */
+	dynary		*subhdrs;				/* header dependencies */
+	lang_t		 lang;					/* language */
 	lgdata_t	*pld;
 } code_bld_t;
 
@@ -125,15 +127,12 @@ typedef struct {
  ***********************************************************************/
 
 void	 code_bld_init(code_bld_t *, char *);
-void	 set_header_name(code_bld_t *, char *);
-void	 set_library_name(code_bld_t *, char *);
 bool	 set_language(code_bld_t *, char *);
 char	*set_compiler(code_bld_t *, htable *t);
-void	 alt_cflags_label(code_bld_t *, char *);
-void	 alt_libs_label(code_bld_t *, char *);
 char	*get_lang_label(code_bld_t *);
 char	*get_cflags_label(code_bld_t *);
 char	*get_libs_label(code_bld_t *);
+void	 code_logger(FILE *, FILE *, const char *, ...);
 bool	 code_builder(code_bld_t *);
 bool	 c_code_builder(code_bld_t *);
 bool	 object_builder(char *, size_t, code_bld_t *, bool);

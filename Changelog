@@ -1,3 +1,7 @@
+27 Sep 2005 mipsator
+ * polished code builder stuff, now used in check_header, check_lib and
+   check_type.
+
 24 Sep 2005 mipsator
  * unbreak the pmkfile.
  * fixed shared library support bug when system is not supported.

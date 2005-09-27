@@ -64,28 +64,6 @@
 #define BIN_TEST_NAME	TMPDIR "/pmk_XXXXXXXX_bin"
 
 
-#define CODE_C_HDR		"#include <%s>\n"
-#define CODE_C_BEG		"/* main procedure */\n" \
-						"int main() {\n"
-#define CODE_C_END		"return(0);\n" \
-						"}\n"
-#define CODE_C_DEF		"/* check define */\n" \
-						"#ifndef %s\n" \
-						"break_build_process();\n" \
-						"#endif\n"
-#define CODE_C_PROC		"/* check procedure */\n" \
-						"void (*pmk_funcp)() = (void *) %s;\n"
-#define CODE_C_VAR		"%s test_var;\n\n"
-#define CODE_C_TYPE		"/* check type */\n" \
-						"if (sizeof(test_var)) {\n" \
-						"\treturn(0);\n" \
-						"}\n"
-#define CODE_C_MEMBER	"/* check structure member */\n" \
-						"if (sizeof(test_var.%s)) {\n" \
-						"\treturn(0);\n" \
-						"}\n"
-
-
 /**********************************
  * type and structure definitions *
  ***********************************************************************/
@@ -126,6 +104,7 @@ char	*get_comp_path(htable *, char *);				/* WILL BE OBSOLETE */
 bool	 check_cfgt_data(pmkdata *);
 bool	 process_required(pmkdata *, pmkcmd *, bool , char *, char *);
 bool	 c_file_builder(char *, size_t, char *, ...);	/* WILL BE OBSOLETE */
+bool	 obsolete_string_to_list(htable *, char *);
 
 #endif /* _PMK_FUNCTOOL_H_ */
 
