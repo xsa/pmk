@@ -1,7 +1,7 @@
 /* $Id$ */
 
 /*
- * Copyright (c) 2003-2004 Damien Couderc
+ * Copyright (c) 2003-2005 Damien Couderc
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -151,12 +151,14 @@
 #define KW_OPT_FUNCTION		"FUNCTION"
 #define KW_OPT_HEADER		"HEADER"
 #define KW_OPT_CFLAGS		"CFLAGS"
+#define KW_OPT_LANG			"LANG"
 #define KW_OPT_LIBS			"LIBS"
 #define KW_OPT_MACRO		"MACRO"
 #define KW_OPT_MAJOR		"MAJOR"
 #define	KW_OPT_MEMBER		"MEMBER"
 #define KW_OPT_MINOR		"MINOR"
 #define KW_OPT_MODULE		"MODULE"
+#define KW_OPT_SUBHDR		"SUBHDR"
 #define KW_OPT_VERSION		"VERSION"
 #define KW_OPT_VALUE		"VALUE"
 #define KW_OPT_VARIABLE		"VARIABLE"

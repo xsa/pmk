@@ -782,44 +782,55 @@ bool process_required(pmkdata *pgd, pmkcmd *pcmd, bool required,
 }
 
 
-/********************
- * c_file_builder() *
+/*****************************
+ * obsolete_string_to_list() *
  ***********************************************************************
  DESCR
-	build c style test file
+	check if an option has an obsolete type of PO_STRING and replace it
+	by PO_LIST type data. Display a warning if data has obosolete type.
 
  IN
-	fnbuf :	file name buffer
-	fbsz :	file name buffer size
-	tmpl :	content template
+	ht :	options hash table
+	opt :	option name
 
  OUT
-	boolean
+	NONE
  ***********************************************************************/
 
-bool c_file_builder(char *fnbuf, size_t fbsz, char *tmpl, ...) {
-	FILE	*tfp;
-	int	 r;
-	va_list	 ap;
+bool obsolete_string_to_list(htable *ht, char *opt) {
+	char	*pstr;
+	dynary	*da;
+	pmkobj	*po;
 
-	/* open temporary file */
-	tfp = tmps_open(TEST_FILE_NAME, "w", fnbuf, fbsz, strlen(C_FILE_EXT));
-	if (tfp == NULL) {
-		/* verbose(VERBOSE_LEVEL_MAX, "c_file_builder: tmps_open() failed"); */
-		return(false); /* failed to open */
+/*debugf("opt = '%s'", opt);*/
+	po = hash_get(ht, opt);
+	if (po == NULL) {
+		return(false);
 	}
 
-	va_start(ap, tmpl);
-	r = vfprintf(tfp, tmpl, ap);
-	va_end(ap);
+	if (po_get_type(po) == PO_STRING) {
+		/* pstr should not be NULL */
+		pstr = po_get_str(po);
 
-	fclose(tfp);
+		pmk_log("\tWARNING: providing a quoted string to the option '%s' is obsolete.\n", pstr);
+		pmk_log("\t\tCompatibility will be removed in future releases.\n");
 
-	/* vprintf failed */
-	if (r == -1)
-		return(false);
+		da = da_init();
+		if (da == NULL) {
+			errorf("unable to initialise dynary.");
+			return(false);
+		}
 
-	/* everything is okay, tchuss */
+		if (da_push(da, strdup(pstr)) == false) {
+			errorf("unable to add '%s' in function list.", pstr);
+			return(false);
+		}
+
+		po = po_mk_list(da);
+
+		hash_update(ht, opt, po);
+	}
+
 	return(true);
 }
 
