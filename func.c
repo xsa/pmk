@@ -1596,13 +1596,8 @@ bool pmk_check_type(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 
 	if (rslt == true) {
 		scb.type = type;
-		scb.member = member;
 
-		if (scb.member == NULL) {
-			pmk_log("\tFound type '%s' : ", scb.type);
-		} else {
-			pmk_log("\tFound member '%s' in '%s' : ", scb.member, scb.type);
-		}
+		pmk_log("\tFound type '%s' : ", scb.type);
 
 		/* build test source file */
 		if (code_builder(&scb) == false) {
@@ -1630,7 +1625,39 @@ bool pmk_check_type(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 
 		/* clean files */
 		cb_cleaner(&scb);
+	}
 
+	if ((rslt == true) && (member != NULL)) {
+		scb.member = member;
+
+		pmk_log("\tFound member '%s' : ", scb.member);
+
+		/* build test source file */
+		if (code_builder(&scb) == false) {
+			errorf("cannot build test file.");
+			return(false);
+		}
+
+		/* build compiler command */
+		 if (object_builder(cfgcmd, sizeof(cfgcmd), &scb, true) == false) {
+			errorf(ERR_MSG_CC_CMD);
+			return(false);
+		}
+
+		/* get result */
+		r = system(cfgcmd);
+		if (r == 0) {
+			pmk_log("yes.\n");
+			/* define for template */
+			record_def_data(pgd->htab, scb.member, DEFINE_DEFAULT);
+		} else {
+			pmk_log("no.\n");
+			record_def_data(pgd->htab, scb.member, NULL);
+			rslt = false;
+		}
+
+		/* clean files */
+		cb_cleaner(&scb);
 	}
 
 	if (rslt == true) {

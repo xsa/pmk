@@ -1,3 +1,7 @@
+28 Sep 2005 mipsator
+ * splitted member detection in CHECK_TYPE, now type and member are
+   checked separatly.
+
 27 Sep 2005 mipsator
  * polished code builder stuff, now used in check_header, check_lib and
    check_type.
