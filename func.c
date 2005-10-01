@@ -576,6 +576,7 @@ bool pmk_check_header(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 	code_bld_t	 scb;
 	dynary		*funcs,
 				*macros,
+				*shdrs,
 				*defs;
 	int			 i,
 				 n,
@@ -599,7 +600,7 @@ bool pmk_check_header(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 	macros = po_get_list(hash_get(ht, KW_OPT_MACRO));
 
 	/* optional header sub dependencies */
-	scb.subhdrs = po_get_list(hash_get(ht, KW_OPT_SUBHDR));
+	shdrs = po_get_list(hash_get(ht, KW_OPT_SUBHDR));
 
 	/* check if a function or more must be searched */
 	obsolete_string_to_list(ht, KW_OPT_FUNCTION);
@@ -685,7 +686,7 @@ bool pmk_check_header(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 	/*
 		check header file
 	*/
-	pmk_log("\tFound header '%s' : ", scb.header); /* XXX hardcode */
+	pmk_log("\tFound header '%s' : ", scb.header);
 
 	/* build test source file */
 	if (code_builder(&scb) == false) {
@@ -715,6 +716,45 @@ bool pmk_check_header(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 
 	/* clean files */
 	cb_cleaner(&scb);
+
+
+	if ((rslt == false) && (shdrs != NULL)) {
+		/*
+			check header file with sub headers
+		*/
+		pmk_log("\tFound header '%s' using dependency headers : ", scb.header);
+
+		scb.subhdrs = shdrs;
+
+		/* build test source file */
+		if (code_builder(&scb) == false) {
+			errorf("cannot build test file.");
+			return(false);
+		}
+
+		/* build compiler command */
+		 if (object_builder(cfgcmd, sizeof(cfgcmd), &scb, true) == false) {
+			errorf(ERR_MSG_CC_CMD);
+			return(false);
+		}
+
+	/*debugf("cfgcmd = '%s'", cfgcmd);*/
+
+		/* get result */
+		r = system(cfgcmd);
+		if (r == 0) {
+			pmk_log("yes.\n");
+			/* define for template */
+			record_def_data(pgd->htab, scb.header, DEFINE_DEFAULT);
+		} else {
+			pmk_log("no.\n");
+			record_def_data(pgd->htab, scb.header, NULL);
+			rslt = false;
+		}
+
+		/* clean files */
+		cb_cleaner(&scb);
+	}
 
 	/*
 		check macros in header file
@@ -2186,7 +2226,7 @@ bool pmk_setparam_detect(pmkcmd *cmd, prsopt *popt, pmkdata *pgd) {
  ***********************************************************************/
 
 bool pmk_set_variable(pmkcmd *cmd, prsopt *popt, pmkdata *pgd) {
-	char	 buffer[TMP_BUF_LEN], /* XXX */
+	char	 buffer[TMP_BUF_LEN],
 			*pstr,
 			*value,
 			*defname;
