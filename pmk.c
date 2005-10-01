@@ -65,12 +65,12 @@
  variables
 ************************************************************************/
 
-extern char	*optarg;
-extern int	 optind;
+extern char		*optarg;
+extern int		 optind;
 extern prskw	 kw_pmkfile[];
 extern size_t	 nbkwpf;
 
-int		 cur_line = 0;
+int				 cur_line = 0;
 
 
 /**********
@@ -93,12 +93,12 @@ int		 cur_line = 0;
 
 bool process_dyn_var(pmkdata *pgd, char *template) {
 	char	*srcdir,
-		*basedir,
-		*pstr,
-		 buf[MAXPATHLEN],
-		 rpath[MAXPATHLEN],
-		 stpath[MAXPATHLEN],
-		 btpath[MAXPATHLEN];
+			*basedir,
+			*pstr,
+			 buf[MAXPATHLEN],
+			 rpath[MAXPATHLEN],
+			 stpath[MAXPATHLEN],
+			 btpath[MAXPATHLEN];
 	htable	*pht;
 
 	pht = pgd->htab;
@@ -127,46 +127,52 @@ bool process_dyn_var(pmkdata *pgd, char *template) {
 
 	/* compute builddir_abs with relative path */
 	abspath(basedir, rpath, btpath);
-	if (hash_update_dup(pht, PMK_DIR_BLD_ABS, btpath) == HASH_ADD_FAIL)
+	if (hash_update_dup(pht, PMK_DIR_BLD_ABS, btpath) == HASH_ADD_FAIL) {
 		return(false);
+	}
 #ifdef PMK_DEBUG
 	debugf("%s = '%s'", PMK_DIR_BLD_ABS, buf);
 #endif
 
 	/* compute relative path to builddir root */
 	relpath(btpath, basedir, buf);
-	if (hash_update_dup(pht, PMK_DIR_BLD_ROOT_REL, buf) == HASH_ADD_FAIL)
+	if (hash_update_dup(pht, PMK_DIR_BLD_ROOT_REL, buf) == HASH_ADD_FAIL) {
 		return(false);
+	}
 #ifdef PMK_DEBUG
 	debugf("%s = '%s'", PMK_DIR_BLD_ROOT_REL, buf);
 #endif
 
 	/* set buildir_rel to '.', useful ? */
-	if (hash_update_dup(pht, PMK_DIR_BLD_REL, ".") == HASH_ADD_FAIL)
+	if (hash_update_dup(pht, PMK_DIR_BLD_REL, ".") == HASH_ADD_FAIL) {
 		return(false);
+	}
 #ifdef PMK_DEBUG
 	debugf("%s = '%s'", PMK_DIR_BLD_REL, buf);
 #endif
 
 	/* compute and set relative path from basedir to srcdir */
 	relpath(btpath, srcdir, buf);
-	if (hash_update_dup(pht, PMK_DIR_SRC_ROOT_REL, buf) == HASH_ADD_FAIL)
+	if (hash_update_dup(pht, PMK_DIR_SRC_ROOT_REL, buf) == HASH_ADD_FAIL) {
 		return(false);
+	}
 #ifdef PMK_DEBUG
 	debugf("%s = '%s'", PMK_DIR_SRC_ROOT_REL, buf);
 #endif
 
 	/* set absolute path of template */
-	if (hash_update_dup(pht, PMK_DIR_SRC_ABS, stpath) == HASH_ADD_FAIL)
+	if (hash_update_dup(pht, PMK_DIR_SRC_ABS, stpath) == HASH_ADD_FAIL) {
 		return(false);
+	}
 #ifdef PMK_DEBUG
 	debugf("%s = '%s'", PMK_DIR_SRC_ABS, buf);
 #endif
 
 	/* compute and set relative path from template to builddir */
 	relpath(btpath, stpath, buf);
-	if (hash_update_dup(pht, PMK_DIR_SRC_REL, buf) == HASH_ADD_FAIL)
+	if (hash_update_dup(pht, PMK_DIR_SRC_REL, buf) == HASH_ADD_FAIL) {
 		return(false);
+	}
 #ifdef PMK_DEBUG
 	debugf("%s = '%s'", PMK_DIR_SRC_REL, buf);
 #endif
@@ -243,7 +249,7 @@ pmkdata *pmkdata_init(void) {
 
 bool init_var(pmkdata *pgd) {
 	char	 buf[TMP_BUF_LEN],
-                *pstr;
+			*pstr;
 	htable	*pht;
 
 	pht = pgd->htab;
@@ -255,8 +261,9 @@ bool init_var(pmkdata *pgd) {
 #ifdef PMK_DEBUG
 debugf("%s = '%s'", pstr, buf);
 #endif
-	if (hash_update_dup(pht, pstr, buf) == HASH_ADD_FAIL)
+	if (hash_update_dup(pht, pstr, buf) == HASH_ADD_FAIL) {
 		return(false);
+	}
 
 	pstr = MK_VAR_CXXFLAGS;
 	if (get_make_var(pstr, buf, sizeof(buf)) == false) {
@@ -265,8 +272,9 @@ debugf("%s = '%s'", pstr, buf);
 #ifdef PMK_DEBUG
 debugf("%s = '%s'", pstr, buf);
 #endif
-	if (hash_update_dup(pht, pstr, buf) == HASH_ADD_FAIL)
+	if (hash_update_dup(pht, pstr, buf) == HASH_ADD_FAIL) {
 		return(false);
+	}
 
 	pstr = MK_VAR_CPPFLAGS;
 	if (get_make_var(pstr, buf, sizeof(buf)) == false) {
@@ -275,8 +283,9 @@ debugf("%s = '%s'", pstr, buf);
 #ifdef PMK_DEBUG
 debugf("%s = '%s'", pstr, buf);
 #endif
-	if (hash_update_dup(pht, pstr, buf) == HASH_ADD_FAIL)
+	if (hash_update_dup(pht, pstr, buf) == HASH_ADD_FAIL) {
 		return(false);
+	}
 
 	pstr = MK_VAR_LDFLAGS;
 	if (get_make_var(pstr, buf, sizeof(buf)) == false) {
@@ -285,8 +294,9 @@ debugf("%s = '%s'", pstr, buf);
 #ifdef PMK_DEBUG
 debugf("%s = '%s'", pstr, buf);
 #endif
-	if (hash_update_dup(pht, pstr, buf) == HASH_ADD_FAIL)
+	if (hash_update_dup(pht, pstr, buf) == HASH_ADD_FAIL) {
 		return(false);
+	}
 
 	pstr = MK_VAR_LIBS;
 	if (get_make_var(pstr, buf, sizeof(buf)) == false) {
@@ -295,8 +305,9 @@ debugf("%s = '%s'", pstr, buf);
 #ifdef PMK_DEBUG
 debugf("%s = '%s'", pstr, buf);
 #endif
-	if (hash_update_dup(pht, pstr, buf) == HASH_ADD_FAIL)
+	if (hash_update_dup(pht, pstr, buf) == HASH_ADD_FAIL) {
 		return(false);
+	}
 
 	pstr = MK_VAR_DEBUG;
 	if (get_make_var(pstr, buf, sizeof(buf)) == false) {
@@ -402,14 +413,14 @@ debugf("%s = '%s'", pstr, buf);
 
 bool process_template(char *template, pmkdata *pgd) {
 	FILE	*tfd,
-		*dfd;
+			*dfd;
 	bool	 ac_flag;
 	char	*plb,
-		*pbf,
-		*ptn,
-		*tptn,
-		*pfn,
-		*tpfn,
+			*pbf,
+			*ptn,
+			*tptn,
+			*pfn,
+			*tpfn,
 		*ptmp,
 		 lbuf[MAXPATHLEN],
 		 buf[MAXPATHLEN],
@@ -879,12 +890,17 @@ int main(int argc, char *argv[]) {
 	}
 
 	if (buildlog == true) {
+		/* set build log name */
 		if (strlcpy_b(pgd->buildlog, PMK_BUILD_LOG,
 					sizeof(pgd->buildlog)) == false) {
 			errorf(PMK_ERR_BLDLOG);
 			exit(EXIT_FAILURE);
 		}
+
+		/* remove previous build log */
+		unlink(pgd->buildlog);
 	} else {
+		/* redirect build output to /dev/null */
 		if (strlcpy_b(pgd->buildlog, "/dev/null",
 					sizeof(pgd->buildlog)) == false) {
 			errorf(PMK_ERR_BLDLOG);
