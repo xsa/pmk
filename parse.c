@@ -1356,7 +1356,7 @@ bool parse_clopt(char *line, prsopt *popt, char *seplst) {
 		return(false);
 	} else {
 		popt->opchar = c;
-		if (prseng_next_char == false) {
+		if (prseng_next_char(ppe) == false) {
 			return(false);
 		}
 	}
@@ -1364,10 +1364,17 @@ bool parse_clopt(char *line, prsopt *popt, char *seplst) {
 	debugf("assign = '%c'", popt->opchar);
 #endif
 
-	popt->value = po_mk_str(ppe->cur); /* XXX XXX !!!! hardcode !!! */
+	if (parse_key(ppe, &po, OPT_VALUE_LEN) == false) {
+		strlcpy(parse_err, PRS_ERR_SYNTAX, sizeof(parse_err)); /* no check */
+		return(false);
+	} else {
 #ifdef PRS_DEBUG
-	debugf("value = '%s'", popt->value);
+	debugf("value = '%s'", po.data);
 #endif
+
+		popt->value = po_mk_str(po.data);
+		free(po.data);
+	}
 
 	return(true);
 }

@@ -106,6 +106,9 @@ prseng_t *prseng_init_str(char *str, void *data) {
 		/* init the buffer */
 		strlcpy(ppe->buf, str, sizeof(ppe->buf)); /* no check */
 
+		/* keep track of start of line */
+		ppe->str = str;
+
 		/* extra data that could be needed */
 		ppe->data = data;
 
