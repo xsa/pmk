@@ -1,3 +1,7 @@
+02 Oct 2005 mipsator
+ * fixed command line option parsing in pmksetup (broken after 0.9.3 with
+   prseng import).
+
 28 Sep 2005 mipsator
  * splitted member detection in CHECK_TYPE, now type and member are
    checked separatly.
