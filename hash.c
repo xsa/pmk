@@ -331,10 +331,10 @@ unsigned int hash_add(htable *pht, char *key, void *value) {
 
 unsigned int hash_update(htable *pht, char *key, void *value) {
 	unsigned int	 hash,
-			 rval;
-	hnode		*phn;
-	hcell		*phc = NULL;
-	size_t		 size;
+					 rval;
+	hnode			*phn;
+	hcell			*phc = NULL;
+	size_t			 size;
 
 	rval = HASH_ADD_FAIL;
 
