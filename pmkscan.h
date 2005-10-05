@@ -68,7 +68,10 @@
 enum {
 	PSC_TOK_FUNC = 1,
 	PSC_TOK_INCL,
-	PSC_TOK_TYPE
+	PSC_TOK_TYPE,
+	PSC_TOK_ADDHDR,
+	PSC_TOK_ADDLIB,
+	PSC_TOK_ADDTYP
 };
 
 /* pmkscan script */
@@ -78,15 +81,33 @@ enum {
 	PSC_TOK_ZONE
 };
 
+
+/* command keywords */
+#define KW_CMD_ADDHDR	"ADD_HEADER"
+#define KW_CMD_ADDLIB	"ADD_LIBRARY"
+#define KW_CMD_ADDTYP	"ADD_TYPE"
+
+/* command keyword options */
+#define KW_OPT_PRC		"PROCEDURE"
+#define KW_OPT_LIB		"LIBRARY"
+#define KW_OPT_HDR		"HEADER"
+#define KW_OPT_MBR		"MEMBER"
+
 /* script keywords */
+#define KW_CMD_GENPF	"GEN_PMKFILE"
+#define KW_CMD_GENMF	"GEN_MAKEFILE"
+#define KW_CMD_GENZN	"GEN_ZONE"
+
+/* script keyword options */
 #define KW_OPT_DIR		"DIRECTORY"
 #define KW_OPT_DSC		"DISCARD"
 #define KW_OPT_MKF		"MAKEFILE"
-#define KW_OPT_NAM		"NAME"
 #define KW_OPT_PMK		"PMKFILE"
 #define KW_OPT_REC		"RECURSE"
 #define KW_OPT_UNI		"UNIQUE"
 
+/* common options */
+#define KW_OPT_NAM		"NAME"
 
 /* file types **********************************************************/
 enum {
@@ -100,8 +121,8 @@ enum {
 	FILE_TYPE_LEX,
 	/*
 		WARNING : respect the following order as it is used in pmkscan
-		procedures. Common type MAN is first followed by category types
-		from MAN0 to MAN9.
+		procedures. Common type MAN comes first followed by category
+		types from MAN1 to MAN9.
 	*/
 	FILE_TYPE_MAN,
 	FILE_TYPE_MAN1,
@@ -150,6 +171,20 @@ enum {
 						"\tDATADIR = \"\\$(PREFIX)/share/\\$(PACKAGE)\"\n"
 #define PMKF_DEF_MAN	"\tMAN%dDIR = \"\\$(MANDIR)/man%d\"\n"
 #define PMKF_DEF_END	"}\n\n"
+
+#define PMKF_CMD_NOLABEL	"/%s {\n"
+#define PMKF_CMD_LABEL		"%s(%s) {\n"
+#define PMKF_CMD_END		"}\n"
+
+#define PMKF_COMMENT		"# %s\n"
+
+#define PMKF_VAR_BOOL		"\t%s = %s\n"
+
+#define PMKF_VAR_QUOTED		"\t%s = \"%s\"\n"
+
+#define PMKF_VAR_LIST_BEG	"\t%s = ("
+#define PMKF_VAR_LIST_ITEM	"\"%s\", "
+#define PMKF_VAR_LIST_END	"\"%s\")\n"
 
 #define MKF_OUTPUT_WIDTH	72
 #define MKF_TAB_WIDTH		8
@@ -388,14 +423,23 @@ typedef struct {
 	htable		*nodes,					/* global nodes table */
 				*objects,				/* zone objects */
 				*targets,				/* zone targets */
-				*checks;				/* zone checks */
+				*checks;				/* zone old checks */
 	scn_node_t	*pnode;
 } scn_zone_t;
 
+/* check type */
+typedef struct {
+	char	*name,
+			*header,
+			*library,
+			*member;
+	dynary	*procs;
+} check_t;
+
 /* scanning data parsed from dat file */
 typedef struct {
-	htable	*functions,
-			*includes,
+	htable	*headers,
+			*libraries,
 			*types;
 } scandata;
 
@@ -411,10 +455,19 @@ scn_zone_t	*scan_zone_init(htable *);
 void		 scan_zone_destroy(scn_zone_t *);
 
 /* pmkfile specific */
+check_t		*mk_chk_cell(htable *, int);
 bool		 parse_data_file(prsdata *, scandata *);
-bool		 idtf_check(char *, htable *, htable *, htable *);
+void		 build_cmd_begin(char *, size_t, char *, char *);
+void		 build_cmd_end(char *, size_t);
+void		 build_comment(char *, size_t, char *);
+void		 build_boolean(char *, size_t, char *, bool);
+void		 build_quoted(char *, size_t, char *, char *);
+bool		 build_list(char *, size_t, char *, dynary *);
+bool		 set_lang(char *, size_t, ftype_t);
+bool		 check_header(htable *, char *, scandata *, scn_node_t *);
+bool		 check_type(htable *, char *, scandata *, scn_node_t *);
 bool		 gen_checks(scn_zone_t *, scandata *);
-bool		 scan_build_pmk(char *fname, scn_zone_t *, scandata *);
+bool		 scan_build_pmk(char *, scn_zone_t *, scandata *);
 
 /* makefile specific */
 bool		 find_deps(dynary *, dynary *);
