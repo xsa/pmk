@@ -28,12 +28,13 @@ common:
 	+	update README and INSTALL
 	~!	new samples
         	        - add a sample that show architecture data from pmk
-	-R	handle allocation through garbage collector.
+	-.	handle allocation through garbage collector.
+	-R	improve tag generation and substitution.
 
 
 pmk:
 -----------------------------------------------------------------------
-	-R	add sub header check for older systems
+	+R	add sub header check for older systems
 	-!	check if ~/.pmk.conf is available
 	~.	compatibility with autoconf (progressing) :
 			~ support for DEFS (-D options to pass to the compiler)
@@ -57,10 +58,8 @@ pmksetup:
 pmkscan
 -----------------------------------------------------------------------
 	-R!	update man page
-	-R?	add more entries in pmkscan.dat
-	+R	improve engine to detect types
-	+R	generate makefile template from the scanned sources
-	+	fix use of d_type in dirent structure which is not posix
+	-R!	add more entries in pmkscan.dat
+	-R	fix label generation in pmkfile generation
 
 pmkinstall
 -----------------------------------------------------------------------
