@@ -1,7 +1,7 @@
 /* $Id$ */
 
 /*
- * Copyright (c) 2003-2004 Damien Couderc
+ * Copyright (c) 2003-2005 Damien Couderc
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -50,19 +50,19 @@
  * constants *
  ***********************************************************************/
 
-#define PMK_CHAR_COMMENT	'#'
-#define PMK_CHAR_COMMAND	'.'
+#define PMK_CHAR_COMMENT		'#'
+#define PMK_CHAR_COMMAND		'.'
 #define PMK_CHAR_COMMAND_START	'{'
 #define PMK_CHAR_COMMAND_END	'}'
 #define PMK_CHAR_LABEL_START	'('
-#define PMK_CHAR_LABEL_END	')'
+#define PMK_CHAR_LABEL_END		')'
 #define PMK_CHAR_QUOTE_START	'"'
-#define PMK_CHAR_QUOTE_END	PMK_CHAR_QUOTE_START
-#define PMK_CHAR_LIST_START	'('
-#define PMK_CHAR_LIST_END	')'
-#define PMK_CHAR_LIST_SEP	','
-#define PMK_CHAR_ASSIGN		'='
-#define PMK_CHAR_ESCAPE		'\\'
+#define PMK_CHAR_QUOTE_END		PMK_CHAR_QUOTE_START
+#define PMK_CHAR_LIST_START		'('
+#define PMK_CHAR_LIST_END		')'
+#define PMK_CHAR_LIST_SEP		','
+#define PMK_CHAR_ASSIGN			'='
+#define PMK_CHAR_ESCAPE			'\\'
 
 #ifndef BOOL_STRING_TRUE
 #define PMK_BOOL_TRUE		"TRUE"
@@ -132,38 +132,38 @@ typedef struct {
 /* keyword structure */
 typedef struct {
 	char	*kw;		/* keyword string */
-	int	 token,		/* associated token */
-		 type,		/* type */
-		 subtoken;	/* node specific subtoken */
+	int		 token,		/* associated token */
+			 type,		/* type */
+			 subtoken;	/* node specific subtoken */
 	kwopt_t	*kwo;		/* keyword specific options */
 } prskw;
 
 /* parser option structure */
 typedef struct {
 	char	 key[OPT_NAME_LEN],	/* key name */
-		 opchar;		/* operator */
-	pmkobj	*value;			/* value */
+			 opchar;			/* operator */
+	pmkobj	*value;				/* value */
 } prsopt;
 
 /* parser cell structure */
 typedef struct s_prscell {
-	int			 token,			/* item token id */
-				 type;			/* item type */
-	char			 label[LABEL_LEN];	/* command label */
-	void			*data;			/* misc data */
-	struct s_prscell	*next;			/* next item */
+	int					 token,				/* item token id */
+						 type;				/* item type */
+	char				 label[LABEL_LEN];	/* command label */
+	void				*data;				/* misc data */
+	struct s_prscell	*next;				/* next item */
 } prscell;
 
 /* parser node structure */
 typedef struct {
-	int	 token;		/* node specific token */
+	int		 token;		/* node specific token */
 	prscell	*first,		/* first item of this node */
-		*last;		/* last item of this node */
+			*last;		/* last item of this node */
 } prsnode;
 
 /* parser data structure */
 typedef struct {
-	int	 linenum;		/* current line */
+	int		 linenum;		/* current line */
 	prsnode	*tree;			/* parser tree */
 } prsdata;
 
