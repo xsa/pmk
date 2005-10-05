@@ -1,3 +1,7 @@
+05 Oct 2005 mipsator
+ * new engine for pmkfile generation in pmkscan (thought need to have a
+   better engine for label names).
+
 02 Oct 2005 mipsator
  * fixed command line option parsing in pmksetup (broken after 0.9.3 with
    prseng import).
