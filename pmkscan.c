@@ -475,7 +475,8 @@ scn_zone_t *scan_zone_init(htable *nodes) {
 		/* init zone tables */
 		pzone->objects = hash_init(256); /* XXX can do better :) */
 		pzone->targets = hash_init(256); /* XXX can do better :) */
-		pzone->checks = hash_init(128); /* XXX can do better :) */
+		pzone->h_checks = hash_init(128); /* XXX can do better :) */
+		pzone->t_checks = hash_init(128); /* XXX can do better :) */
 
 		/* init directory list to scan */
 		pzone->dirlist = da_init();
@@ -516,8 +517,12 @@ void scan_zone_destroy(scn_zone_t *pzone) {
 		hash_destroy(pzone->targets);
 	}
 
-	if (pzone->checks != NULL) {
-		hash_destroy(pzone->checks);
+	if (pzone->h_checks != NULL) {
+		hash_destroy(pzone->h_checks);
+	}
+
+	if (pzone->t_checks != NULL) {
+		hash_destroy(pzone->t_checks);
 	}
 
 	if (pzone->dirlist != NULL) {
@@ -691,6 +696,60 @@ bool parse_data_file(prsdata *pdata, scandata *sdata) {
 }
 
 
+/*******************
+ * conv_to_label() *
+ ***********************************************************************
+ DESCR
+ 	convert a string to a tag
+
+ IN
+	str :		string to convert
+
+ OUT
+	pointer to the tag buffer
+ ***********************************************************************/
+
+char *conv_to_label(char *fmt, ...) {
+	static char	 buffer[TMP_BUF_LEN];
+	char		*pbuf;
+	size_t		 s;
+	va_list		 plst;
+
+	s = sizeof(buffer);
+	pbuf = buffer;
+
+	/* format initial string in the buffer */
+	va_start(plst, fmt);
+	vsnprintf(buffer, s, fmt, plst);
+	va_end(plst);
+
+
+	/* process the given string */
+	while ((*pbuf != '\0') && (s > 1)) {
+		/* if we got an asterisk (pointer character) */
+		if (*pbuf == '*') {
+			/* then replace by P */
+			*pbuf = 'P';
+		} else {
+			/* check if we have an alphanumeric character */
+			if (isalnum(*pbuf) == 0) {
+				/* no, replace by an underscore */
+				*pbuf = '_';
+			} else {
+				/* yes, convert to uppercase if needed */
+				*pbuf = (char) tolower((int) *pbuf);
+			}
+		}
+
+		/* next character */
+		s--;
+		pbuf++;
+	}
+
+	return(buffer);
+}
+
+
 /*********************
  * build_cmd_begin() *
  ***********************************************************************
@@ -750,8 +809,17 @@ void build_cmd_end(char *buf, size_t siz) {
 	-
  ***********************************************************************/
 
-void build_comment(char *buf, size_t siz, char *comment) {
-	snprintf(buf, siz, PMKF_COMMENT, comment);
+void build_comment(char *buf, size_t siz, char *fmt, ...) {
+	char	 tmp[TMP_BUF_LEN];
+	va_list	 plst;
+
+	/* format initial string in the buffer */
+	va_start(plst, fmt);
+	vsnprintf(tmp, sizeof(tmp), fmt, plst);
+	va_end(plst);
+
+	/* build comment */
+	snprintf(buf, siz, PMKF_COMMENT, tmp);
 }
 
 
@@ -915,8 +983,7 @@ bool set_lang(char *buf, size_t siz, ftype_t ltype) {
 bool check_header(htable *checks, char *header, scandata *psd, scn_node_t *pn) {
 	char	 buffer[TMP_BUF_LEN],
 			 check[TMP_BUF_LEN],
-			 tmp[TMP_BUF_LEN],
-			*func;
+			*pstr;
 	check_t	*chk;
 	dynary	*da;
 	size_t	 i,
@@ -935,48 +1002,29 @@ bool check_header(htable *checks, char *header, scandata *psd, scn_node_t *pn) {
 	}
 
 	/* output comment */
-	snprintf(tmp, sizeof(tmp), "check header %s", chk->name);
-	build_comment(buffer, sizeof(buffer), tmp);
+	build_comment(buffer, sizeof(buffer), "check header %s", chk->name);
 	strlcpy(check, buffer, sizeof(check)); /* no check */
 
-/*debugf("buffer = '%s'", buffer);*/
-/*debugf("1 check = '%s'", check);*/
-
-	/* generate check id and output pmk command */
-	/* id = gen_id(chk->name); *//* XXX tags */
-	snprintf(tmp, sizeof(tmp), "header_%s", chk->name);
-	build_cmd_begin(buffer, sizeof(buffer), "CHECK_HEADER", tmp);
+	/* generate check label and output pmk command */
+	pstr = conv_to_label("header_%s", chk->name);
+	build_cmd_begin(buffer, sizeof(buffer), "CHECK_HEADER", pstr);
 	strlcat(check, buffer, sizeof(check)); /* no check */
-
-/*debugf("buffer = '%s'", buffer);*/
-/*debugf("2 check = '%s'", check);*/
 
 	/* output type name */
 	build_boolean(buffer, sizeof(buffer), "REQUIRED", false);
 	strlcat(check, buffer, sizeof(check)); /* no check */
 
-/*debugf("buffer = '%s'", buffer);*/
-/*debugf("3 check = '%s'", check);*/
-
 	/* output header name */
 	build_quoted(buffer, sizeof(buffer), "NAME", chk->name);
 	strlcat(check, buffer, sizeof(check)); /* no check */
 
-/*debugf("buffer = '%s'", buffer);*/
-/*debugf("4 check = '%s'", check);*/
-
 	/* output language if needed */
 	if (set_lang(check, sizeof(check), pn->type) == false) {
-		debugf("check_header() : set_lang() FAILED");
 		return(false);
 	}
 
-/*debugf("buffer = '%s'", buffer);*/
-/*debugf("5 check = '%s'", check);*/
-
 	da = da_init();
 	if (da == NULL) {
-		debugf("check_header() : da_init() FAILED");
 		return(false);
 	}
 
@@ -984,12 +1032,12 @@ bool check_header(htable *checks, char *header, scandata *psd, scn_node_t *pn) {
 	if (chk->procs != NULL) {
 		s = da_usize(chk->procs);
 		for (i = 0 ; i < s ; i++) {
-			func = da_idx(chk->procs, i);
+			pstr = da_idx(chk->procs, i);
 
 			/* if procedure has been found in parsing */
-			if (da_find(pn->func_calls, func) != NULL) {
+			if (da_find(pn->func_calls, pstr) != NULL) {
 				/* add in the list of function to check */
-				da_push(da, strdup(func));
+				da_push(da, strdup(pstr));
 			}
 		}
 
@@ -999,24 +1047,16 @@ bool check_header(htable *checks, char *header, scandata *psd, scn_node_t *pn) {
 		}
 	}
 
-/*debugf("buffer = '%s'", buffer);*/
-/*debugf("6 check = '%s'", check);*/
-
 	/* clean dynary */
 	da_destroy(da);
 
 	/* output end of command body */
 	build_cmd_end(buffer, sizeof(buffer));
 	if (strlcat_b(check, buffer, sizeof(check)) == false) {
-		debugf("check_header() : strlcat_b() FAILED");
 		return(false);
 	}
 
-/*debugf("buffer = '%s'", buffer);*/
-/*debugf("7 check = '%s'", check);*/
-
-	if (hash_add(checks, header, strdup(check)) == HASH_ADD_FAIL) { /* XXX hash_add_dup */
-		debugf("check_header() : hash_update_dup() FAILED");
+	if (hash_update_dup(checks, header, strdup(check)) == HASH_ADD_FAIL) {
 		return(false);
 	}
 
@@ -1045,7 +1085,7 @@ bool check_header(htable *checks, char *header, scandata *psd, scn_node_t *pn) {
 bool check_type(htable *checks, char *type, scandata *psd, scn_node_t *pn) {
 	char	 buffer[TMP_BUF_LEN],
 			 check[TMP_BUF_LEN],
-			 tmp[TMP_BUF_LEN];
+			*pstr;
 	check_t	*chk;
 
 	if (hash_get(checks, type) != NULL) {
@@ -1057,20 +1097,16 @@ bool check_type(htable *checks, char *type, scandata *psd, scn_node_t *pn) {
 	chk = hash_get(psd->types, type);
 	if (chk == NULL) {
 		/* no record */
-/*debugf("no record for '%s'", type);*/
 		return(true);
 	}
-/*debugf("FOUND record for '%s'", type);*/
 
 	/* output comment */
-	snprintf(tmp, sizeof(tmp), "check type %s", chk->name);
-	build_comment(buffer, sizeof(buffer), tmp);
+	build_comment(buffer, sizeof(buffer), "check type %s", chk->name);
 	strlcpy(check, buffer, sizeof(check)); /* no check */
 
-	/* generate check id and output pmk command */
-	/* id = gen_id(chk->name); *//* tags */
-	snprintf(tmp, sizeof(tmp), "type_%s", chk->name);
-	build_cmd_begin(buffer, sizeof(buffer), "CHECK_TYPE", tmp);
+	/* generate check label and output pmk command */
+	pstr = conv_to_label("type_%s", chk->name);
+	build_cmd_begin(buffer, sizeof(buffer), "CHECK_TYPE", pstr);
 	strlcat(check, buffer, sizeof(check)); /* no check */
 
 	/* output type name */
@@ -1098,7 +1134,7 @@ bool check_type(htable *checks, char *type, scandata *psd, scn_node_t *pn) {
 		return(false);
 	}
 
-	if (hash_add(checks, type, strdup(check)) == HASH_ADD_FAIL) { /* XXX hash_add_dup */
+	if (hash_update_dup(checks, type, strdup(check)) == HASH_ADD_FAIL) {
 		return(false);
 	}
 
@@ -1138,8 +1174,9 @@ bool gen_checks(scn_zone_t *psz, scandata *psd) {
 			for (j = 0 ; j < da_usize(pn->type_idtfs) ; j++) {
 				pstr = (char *) da_idx(pn->type_idtfs, j);
 
-				if (check_type(psz->checks, pstr, psd, pn) == false) {
-					debugf("check_type() FAILED");
+				if (check_type(psz->t_checks, pstr, psd, pn) == false) {
+					errorf("check_type() failed.");
+					return(false);
 				}
 			}
 		}
@@ -1150,8 +1187,9 @@ bool gen_checks(scn_zone_t *psz, scandata *psd) {
 			for (j = 0 ; j < da_usize(pn->system_inc) ; j++) {
 				pstr = (char *) da_idx(pn->system_inc, j);
 
-				if (check_header(psz->checks, pstr, psd, pn) == false) {
-					debugf("check_header() FAILED");
+				if (check_header(psz->h_checks, pstr, psd, pn) == false) {
+					errorf("check_header() failed.");
+					return(false);
 				}
 			}
 		}
@@ -1179,77 +1217,106 @@ bool gen_checks(scn_zone_t *psz, scandata *psd) {
 bool scan_build_pmk(char *fname, scn_zone_t *psz, scandata *psd) {
 	FILE			*fp;
 	char			 buf[MKF_OUTPUT_WIDTH * 2],
+					 buffer[TMP_BUF_LEN],
 					*value;
 	hkeys			*phk;
 	time_t			 now;
-	unsigned int	 i,
-					 s;
+	unsigned int	 i;
 
-	/* if there are checks */
-	phk = hash_keys(psz->checks);
+	/* open output file */
+	fp = fopen(fname, "w");
+	if (fp == NULL) {
+		errorf("cannot open '%s' : %s.", fname, strerror(errno));
+		return(false);
+	}
+
+
+	/* header comment ******************/
+
+	/* generating date */
+	now = time(NULL);
+	strftime(buf, sizeof(buf), STR_TIME_GEN, localtime(&now));
+
+	/* output formatted string */
+	build_comment(buffer, sizeof(buffer), PMKF_HDR_GEN, buf);
+	fprintf(fp, buffer);
+
+	/* settings command ****************/
+
+	/* output command */
+	build_cmd_begin(buffer, sizeof(buffer), "SETTINGS", NULL);
+	fprintf(fp, buffer);
+
+	/* template list comment */
+	build_comment(buffer, sizeof(buffer), PMKF_TRGT_CMT);
+	fprintf(fp, buffer);
+
+	/* genere template list */
+	if (build_list(buffer, sizeof(buffer), "TARGET", psz->templates) == false) {
+		/* list is empty, produce comment */
+		build_comment(buffer, sizeof(buffer), "TARGET = ()\t# TO EDIT");
+	}
+	fprintf(fp, buffer);
+
+	/* end of command */
+	build_cmd_end(buffer, sizeof(buffer));
+	fprintf(fp, buffer);
+
+	/* define command ******************/
+
+	/* warning comment */
+	build_comment(buffer, sizeof(buffer), PMKF_DEF_CMT);
+	fprintf(fp, buffer);
+
+	/* output command */
+	build_cmd_begin(buffer, sizeof(buffer), "DEFINE", NULL);
+	fprintf(fp, buffer);
+
+	/* output default defines */
+	fprintf(fp, PMKF_DEF_STD); /* (XXX TO IMPROVE)  */
+
+	/* output needed man directories */
+	if (psz->found[FILE_TYPE_MAN] == true) {
+		/* man pages directories */
+		for (i = 1 ; i < 10 ; i++) {
+			/* check if current category is needed */
+			if (psz->found[FILE_TYPE_MAN + i] == true) {
+				fprintf(fp, PMKF_DEF_MAN, i, i);
+			}
+		}
+	}
+
+	/* end of command */
+	build_cmd_end(buffer, sizeof(buffer));
+	fprintf(fp, buffer);
+
+
+	/* type checks *********************/
+	phk = hash_keys_sorted(psz->t_checks);
 	if (phk != NULL) {
-		fp = fopen(fname, "w");
-		if (fp == NULL) {
-			errorf("cannot open '%s' : %s.", fname, strerror(errno));
-			hash_free_hkeys(phk);
-			return(false);
-		}
-
-		/* generating date */
-		now = time(NULL);
-		strftime(buf, sizeof(buf), STR_TIME_GEN, localtime(&now));
-
-		/* put header */
-		fprintf(fp, PMKF_HDR_GEN, buf);
-
-		/* put settings */
-		fprintf(fp, PMKF_SETTINGS);
-		/* template list */
-		fprintf(fp, PMKF_TRGT_CMT);
-		if (psz->found[FILE_TYPE_MAN] == false) {
-			/* if no template found, put as a comment */
-			fprintf(fp, "#");
-		}
-		fprintf(fp, PMKF_TRGT_BEG);
-		if (psz->found[FILE_TYPE_MAN] == true) {
-			/* output templates */
-			s = da_usize(psz->templates);
-			for (i = 0 ; i < s ; i++) {
-				fprintf(fp, "\"%s\"", (char *) da_idx(psz->templates, i));
-				if (i != (s - 1)) {
-					fprintf(fp, " , ");
-				}
-			}
-		}
-		fprintf(fp, PMKF_TRGT_END);
-		fprintf(fp, PMKF_BODY_END);
-
-		/* put defines */
-		fprintf(fp, PMKF_DEF_BEG);
-		if (psz->found[FILE_TYPE_MAN] == true) {
-			/* man pages directories */
-			for (i = 1 ; i < 10 ; i++) {
-				/* check if current category is needed */
-				if (psz->found[FILE_TYPE_MAN + i] == true) {
-					fprintf(fp, PMKF_DEF_MAN, i, i);
-				}
-			}
-		}
-		fprintf(fp, PMKF_BODY_END);
-
-		/* put checks */
+		/* output every checks */
 		for(i = 0 ; i < phk->nkey ; i++) {
-			value = hash_get(psz->checks, phk->keys[i]);
+			value = hash_get(psz->t_checks, phk->keys[i]);
 			fprintf(fp, "%s\n", value);
 		}
 
 		hash_free_hkeys(phk);
-		fclose(fp);
-
-		psc_log("Saved as '%s'\n", NULL, fname);
-	} else {
-		psc_log("No sources found, skipped.\n", NULL);
 	}
+
+	/* header checks *******************/
+	phk = hash_keys_sorted(psz->h_checks);
+	if (phk != NULL) {
+		/* output every checks */
+		for(i = 0 ; i < phk->nkey ; i++) {
+			value = hash_get(psz->h_checks, phk->keys[i]);
+			fprintf(fp, "%s\n", value);
+		}
+
+		hash_free_hkeys(phk);
+	}
+
+	fclose(fp);
+	psc_log("Saved as '%s'\n", NULL, fname);
 
 	return(true);
 }

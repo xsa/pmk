@@ -1,3 +1,6 @@
+06 Oct 2005 mipsator
+ * added conv_to_label() to fix label generation in pmkscan.
+
 05 Oct 2005 mipsator
  * new engine for pmkfile generation in pmkscan (thought need to have a
    better engine for label names).
