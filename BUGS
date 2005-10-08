@@ -18,8 +18,22 @@ HP-UX :
  - S_BLKSIZE doesn't exist.
  - install is not bsd compatible.
 
+Debian/KFreeBSD :
+  - this system could have the same problem than Debian/KNetBSD.
+
+
+Debian/KNetBSD :
+  - the uname utility is returning the 'NetBSD' string when asking for
+    the operating system name. As this behavior is resulting from the
+    fact that Linux distributions return the kernel name instead of the
+    system name we are not able to differenciate between it from a real
+    NetBSD system. That said, we do not support this system until we
+    known how to deal with it.
+
+
 Tru64 :
  - int64_t doesn't exist.
 
 SunOS:
  - S_BLKSIZE doesn't exist.
+

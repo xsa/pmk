@@ -6,25 +6,49 @@ $Id$
 -----------------------------------------------------------------------
 
 
-Installing PMK
---------------
+Quick install
+-------------
 
-To build and install pmk on your system use one of the two following
-methods:
+There are two basic ways of using pmk. The first one is the common
+installation that needs root privileges and that allows all users to
+access pmk. The second one is the "user mode" that installs binaries in
+$HOME/bin/ and data in $HOME/.pmk/ of the user doing the installation.
 
-1) The pmkcfg.sh configuration script:
+There are two targets to configure pmk before building it:
+
+ Configuring with root mode:
+
   sh pmkcfg.sh
-  make
-  make install
 
-2) Using previously installed pmk binary:
-  pmk
+ Else in user mode:
+
+  sh pmkcfg.sh -u
+
+ After configuring you can build the package with:
+
   make
+
+ And finish by installing it with:
+
   make install
 
 
 For each new release of pmk we _highly_ recommend you to run pmksetup
 before any use of the new pmk binary.
+
+
+Installing PMK using previously installed binaries
+--------------------------------------------------
+
+The package also contains a pmkfile that can be used as an alternative
+to the bootstrap script.
+
+For a standard install, see the following steps:
+  pmk
+  make
+  make install
+
+As stated above don't forget to run pmksetup after install.
 
 
 More about pmkcfg.sh
