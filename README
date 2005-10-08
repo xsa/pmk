@@ -9,59 +9,49 @@ $Id$
 Introduction
 ------------
 
-The pmk project tries to provide an alternative to GNU autoconf, GNU
-libtool and pkg-config. It also provides a basic BSD install like tool
-and a source scanner to help building of pmkfiles.
+The Pre Make Kit project is a toolkit providing a collection of tools
+aimed to ease a lot of stages in project development. It provides a
+scanner that generate template source components such as configuration
+file or makefile. It also provides a dependency checker that sets up
+templates files depending on the system components (such as auto* tools
+or similar projects). For portability purpose, a BSD like install
+program is also part of the kit.
+
+The project aims the following goals :
+- opensource (BSD licensed)
+- portability (ISO C, POSIX, compatibility layer)
+- speed and memory lighweight (compiled C binaries)
+- security (replace scripts by data files, priviledge separation)
+- simplicity of use (generation tools, few basic instructions)
+- dependency low cost (only needs a POSIX shell and a C compiler)
+
+The provided tools are:
+- pmksetup: static data gathering tool
+- pmk: dependency checker
+- pmkscan: source scanner and build file generator
+- pmkinstall: BSD like install program
+- pmkpc: pkg-config compatible tool
 
 
 1) Installation Steps
 ---------------------
 
-There are two basic ways of using pmk. The first one is the common
-installation that needs root privileges and that allows all users to
-access pmk. The second one is the "user mode" that installs binaries in
-$HOME/bin/ and data in $HOME/.pmk/ of the user doing the installation.
-
-There are two targets to configure pmk before building it:
-
- Configuring with root mode:
-
-  sh pmkcfg.sh
-
- Else in user mode:
-
-  sh pmkcfg.sh -u
-
- After configuring you can build the package with:
-
-  make
-
- And finish by installing it with:
-
-  make install
-
-
-For each new release of pmk we _highly_ recommend you to run pmksetup
-before any use of the new pmk binary.
+  See the INSTALL file.
 
 
 2) Testing
 ----------
 
-- Now if you feel like testing the whole suite, look in the sample
-  directory and check the README.sample file.
+  We provide basic tests to have some pragmatic examples of how to use
+  PMK. It is also a good method to test the whole kit. You're invited to
+  look in the samples directory and check the README.sample file.
+
 
 3) Supported Platforms
 ----------------------
 
-- Any POSIX compliant platform should be supported. Actually we try to
-  test our suite on the most different platforms we can.
-  A summary of these tests can be found in the STATUS file. Be sure to
-  also read the BUGS file.
-
-- It seems that Debian/KNetBSD is returning the 'NetBSD' string when
-  using uname to know the operating system name. We didn't took any
-  decision yet about how to deal with this. But as this system is not
-  able to identify itself correctly we do not support it until further
-  decision.
+  Any POSIX compliant platform _should_be_ supported. We provide in the
+  package a list of platform on which PMK has been compiled and tested
+  (see STATUS file). You can also consult the BUGS file to see if your
+  platform has specific problems that avoid PMK to run.
 
