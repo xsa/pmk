@@ -567,9 +567,9 @@ bool pmk_check_binary(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 bool pmk_check_header(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 	bool		 required,
 				 rslt = true,
+				 rbis,
 				 rval;
 	char		 inc_path[MAXPATHLEN] = "",
-				 cfgcmd[MAXPATHLEN] = "",
 				*lang,
 				*pstr,
 				*target = NULL;
@@ -579,8 +579,7 @@ bool pmk_check_header(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 				*shdrs,
 				*defs;
 	int			 i,
-				 n,
-				 r;
+				 n;
 
 	pmk_log("\n* Checking header [%s]\n", cmd->label);
 
@@ -613,27 +612,27 @@ bool pmk_check_header(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 			pstr = da_idx(funcs, i);
 			record_def_data(pgd->htab, pstr, NULL);
 		}
-		return(process_required(pgd, cmd, required, NULL, NULL));
+		return(process_required(pgd, cmd, required, NULL, NULL)); /* XXX */
 	}
 
 	/* get language */
 	lang = get_lang_str(ht, pgd);
 	if (lang == NULL) {
 		errorf("Failed, language has not been set.");
-		return(false);
+		rslt = false;
 	}
 
 	/* init build structure */
 	if (set_language(&scb, lang) == false) {
-		pmk_log("\tSKIPPED, unknown language '%s'.\n", lang);
-		return(invert_bool(required));
+		pmk_log("\tFailed, unknown language '%s'.\n", lang);
+		return(false);
 	}
 
 	/* get the appropriate compiler */
 	pstr = set_compiler(&scb, pgd->htab);
 	if (pstr == NULL) {
-		pmk_log("\tSKIPPED, cannot get compiler path for language '%s'.\n", lang);
-		return(invert_bool(required));
+		pmk_log("\tFailed, cannot get compiler path for language '%s'.\n", lang);
+		return(false);
 	}
 
 	pmk_log("\tUse %s language with %s compiler.\n", lang, pstr);
@@ -683,48 +682,11 @@ bool pmk_check_header(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 	}
 	scb.flags = inc_path;
 
-	/*
-		check header file
-	*/
-	pmk_log("\tFound header '%s' : ", scb.header);
-
-	/* build test source file */
-	if (code_builder(&scb) == false) {
-		errorf("cannot build test file.");
-		return(false);
-	}
-
-	/* build compiler command */
-	 if (object_builder(cfgcmd, sizeof(cfgcmd), &scb, true) == false) {
-		errorf(ERR_MSG_CC_CMD);
-		return(false);
-	}
-
-/*debugf("cfgcmd = '%s'", cfgcmd);*/
-
-	/* get result */
-	r = system(cfgcmd);
-	if (r == 0) {
-		pmk_log("yes.\n");
-		/* define for template */
-		record_def_data(pgd->htab, scb.header, DEFINE_DEFAULT);
-	} else {
-		pmk_log("no.\n");
-		record_def_data(pgd->htab, scb.header, NULL);
-		rslt = false;
-	}
-
-	/* clean files */
-	cb_cleaner(&scb);
-
-
-	if ((rslt == false) && (shdrs != NULL)) {
+	if (rslt == true) {
 		/*
-			check header file with sub headers
+			check header file
 		*/
-		pmk_log("\tFound header '%s' using dependency headers : ", scb.header);
-
-		scb.subhdrs = shdrs;
+		pmk_log("\tFound header '%s' : ", scb.header);
 
 		/* build test source file */
 		if (code_builder(&scb) == false) {
@@ -733,104 +695,169 @@ bool pmk_check_header(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 		}
 
 		/* build compiler command */
-		 if (object_builder(cfgcmd, sizeof(cfgcmd), &scb, true) == false) {
+		 if (cmdline_builder(&scb, true) == false) {
 			errorf(ERR_MSG_CC_CMD);
 			return(false);
 		}
 
-	/*debugf("cfgcmd = '%s'", cfgcmd);*/
-
-		/* get result */
-		r = system(cfgcmd);
-		if (r == 0) {
-			pmk_log("yes.\n");
-			/* define for template */
-			record_def_data(pgd->htab, scb.header, DEFINE_DEFAULT);
-		} else {
-			pmk_log("no.\n");
-			record_def_data(pgd->htab, scb.header, NULL);
-			rslt = false;
-		}
+		/* launch build and get result */
+		rslt = object_builder(&scb);
 
 		/* clean files */
 		cb_cleaner(&scb);
-	}
 
-	/*
-		check macros in header file
-	*/
-	if ((rslt == true) && (macros != NULL)) {
-		while ((target = da_shift(macros)) && (target != NULL)) {
-			pmk_log("\tFound macro '%s' : ", target);
+		/* if result is false and dependency headers are provided */
+		if ((rslt == false) && (shdrs != NULL)) {
+			/* output result of previous test */
+			pmk_log("no.\n");
 
-			scb.define = target;
+			/*
+				check header file with sub headers
+			*/
+			pmk_log("\tFound header '%s' using dependency headers : ", scb.header);
 
-			/* fill test file */
+			scb.subhdrs = shdrs;
+
+			/* build test source file */
 			if (code_builder(&scb) == false) {
 				errorf("cannot build test file.");
 				return(false);
 			}
 
 			/* build compiler command */
-			 if (object_builder(cfgcmd, sizeof(cfgcmd), &scb, true) == false) {
+			 if (cmdline_builder(&scb, true) == false) {
 				errorf(ERR_MSG_CC_CMD);
 				return(false);
 			}
 
-			/* get result */
-			r = system(cfgcmd);
-			if (r == 0) {
-				pmk_log("yes.\n");
-				/* define for template */
-				record_def_data(pgd->htab, target, DEFINE_DEFAULT);
-			} else {
-				pmk_log("no.\n");
-				record_def_data(pgd->htab, target, NULL);
-				rslt = false;
-			}
+			/* launch build and get result */
+			rslt = object_builder(&scb);
 
 			/* clean files */
 			cb_cleaner(&scb);
+
+			/* XXX TODO set sub header flag ? */
+		}
+
+		/* process result */
+		if (rslt == true) {
+			pmk_log("yes.\n");
+		} else {
+			pmk_log("no.\n");
 		}
 	}
-	scb.define = NULL;
+
+	/* process result */
+	if (rslt == true) {
+		/* define for template */
+		record_def_data(pgd->htab, scb.header, DEFINE_DEFAULT);
+	} else {
+		record_def_data(pgd->htab, scb.header, NULL);
+	}
+
+
+	/*
+		check macros in header file
+	*/
+	if (macros != NULL) {
+		while ((target = da_shift(macros)) && (target != NULL)) {
+			/* init rbis */
+			rbis = false;
+
+			/* if header is okay */
+			if (rslt == true) {
+				pmk_log("\tFound macro '%s' : ", target);
+
+				scb.define = target;
+
+				/* fill test file */
+				if (code_builder(&scb) == false) {
+					errorf("cannot build test file.");
+					return(false);
+				}
+
+				/* build compiler command */
+				 if (cmdline_builder(&scb, true) == false) {
+					errorf(ERR_MSG_CC_CMD);
+					return(false);
+				}
+
+				/* launch build and get result */
+				rbis = object_builder(&scb);
+
+				/* clean files */
+				cb_cleaner(&scb);
+
+				/* process result */
+				if (rbis == true) {
+					pmk_log("yes.\n");
+				} else {
+					pmk_log("no.\n");
+					rslt = false;
+				}
+			}
+
+			/* process result */
+			if (rbis == true) {
+				/* define for template */
+				record_def_data(pgd->htab, target, DEFINE_DEFAULT);
+			} else {
+				record_def_data(pgd->htab, target, NULL);
+			}
+		}
+
+		/* reset define */
+		scb.define = NULL;
+	}
 
 
 	/*
 		check functions in header file
 	*/
-	if ((rslt == true) && (funcs != NULL)) {
+	if (funcs != NULL) {
 		while ((target = da_shift(funcs)) && (target != NULL)) {
-			pmk_log("\tFound function '%s' : ", target);
+			/* init rbis */
+			rbis = false;
 
-			scb.procedure = target;
+			/* if header is okay */
+			if (rslt == true) {
+				pmk_log("\tFound function '%s' : ", target);
 
-			/* fill test file */
-			if (code_builder(&scb) == false) {
-				errorf("cannot build test file.");
-				return(false);
+				scb.procedure = target;
+
+				/* fill test file */
+				if (code_builder(&scb) == false) {
+					errorf("cannot build test file.");
+					return(false);
+				}
+
+				 if (cmdline_builder(&scb, true) == false) {
+					errorf(ERR_MSG_CC_CMD);
+					return(false);
+				}
+
+				/* launch build and get result */
+				rbis = object_builder(&scb);
+
+				/* clean files */
+				cb_cleaner(&scb);
+
+				/* process result */
+				if (rbis == true) {
+					pmk_log("yes.\n");
+				} else {
+					pmk_log("no.\n");
+					rslt = false;
+				}
 			}
 
-			 if (object_builder(cfgcmd, sizeof(cfgcmd), &scb, true) == false) {
-				errorf(ERR_MSG_CC_CMD);
-				return(false);
-			}
-
-
-			/* get result */
-			r = system(cfgcmd);
-			if (r == 0) {
-				pmk_log("yes.\n");
+			/* process result */
+			if (rbis == true) {
 				/* define for template */
 				record_def_data(pgd->htab, target, DEFINE_DEFAULT);
 			} else {
-				pmk_log("no.\n");
 				record_def_data(pgd->htab, target, NULL);
-				rslt = false;
 			}
-
-			/* clean files */
-			cb_cleaner(&scb);
 		}
 	}
 
@@ -959,7 +986,7 @@ bool pmk_check_lib(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 	}
 
 	/* build compiler command */
-	 if (object_builder(cfgcmd, sizeof(cfgcmd), &scb, true) == false) {
+	 if (cmdline_builder(&scb, true) == false) {
 		errorf(ERR_MSG_CC_CMD);
 		return(false);
 	}
@@ -998,7 +1025,7 @@ bool pmk_check_lib(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 			}
 
 			/* build compiler command */
-			 if (object_builder(cfgcmd, sizeof(cfgcmd), &scb, true) == false) {
+			 if (cmdline_builder(&scb, true) == false) {
 				errorf(ERR_MSG_CC_CMD);
 				return(false);
 			}
@@ -1512,26 +1539,24 @@ bool pmk_check_type(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 	bool		 required,
 				 rslt = true,
 				 rval;
-	char		 cfgcmd[MAXPATHLEN],
-				 inc_path[MAXPATHLEN] = "",
+	char		 inc_path[MAXPATHLEN] = "",
 				*type,
 				*member,
 				*lang,
 				*pstr;
 	code_bld_t	 scb;
 	dynary		*defs;
-	int			 r;
 
 	pmk_log("\n* Checking type [%s]\n", cmd->label);
 
-	required = require_check(ht);
-
 	code_bld_init(&scb, pgd->buildlog);
+
+	required = require_check(ht);
 
 	/* get type name */
 	type = po_get_str(hash_get(ht, KW_OPT_NAME));
 	if (type == NULL) {
-		errorf("NAME not assigned in label '%s'", cmd->label);
+		errorf("%s not assigned in label '%s'", KW_OPT_NAME, cmd->label);
 		return(false);
 	}
 
@@ -1543,7 +1568,7 @@ bool pmk_check_type(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 
 	if (depend_check(ht, pgd) == false) {
 		pmk_log("\t%s\n", pgd->errmsg);
-		return(process_required(pgd, cmd, required, scb.type, NULL));
+		return(process_required(pgd, cmd, required, scb.type, NULL)); /* XXX */
 	}
 
 	/* get language */
@@ -1555,15 +1580,15 @@ bool pmk_check_type(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 
 	/* init build structure */
 	if (set_language(&scb, lang) == false) {
-		pmk_log("\tSKIPPED, unknown language '%s'.\n", lang);
-		return(invert_bool(required));
+		pmk_log("\tFailed, unknown language '%s'.\n", lang);
+		return(false);
 	}
 
 	/* get the appropriate compiler */
 	pstr = set_compiler(&scb, pgd->htab);
 	if (pstr == NULL) {
-		pmk_log("\tSKIPPED, cannot get compiler path for language '%s'.\n", lang);
-		return(invert_bool(required));
+		pmk_log("\tFailed, cannot get compiler path for language '%s'.\n", lang);
+		return(false);
 	}
 
 	pmk_log("\tUse %s language with %s compiler.\n", lang, pstr);
@@ -1572,66 +1597,72 @@ bool pmk_check_type(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 	defs = po_get_list(hash_get(ht, KW_OPT_DEFS));
 
 	if (scb.header != NULL) {
-		/* use each element of INC_PATH with -I */
-		pstr = (char *) hash_get(pgd->htab, PMKCONF_PATH_INC);
-		if (pstr == NULL) {
-			errorf("%s not available.", PMKCONF_PATH_INC);
-			return(false);
-		}
-
-		if (get_file_dir_path(scb.header, pstr, inc_path, sizeof(inc_path)) == true) {
-			pstr = strdup(inc_path);
+		if (rslt == true) {
+			/* use each element of INC_PATH with -I */
+			pstr = (char *) hash_get(pgd->htab, PMKCONF_PATH_INC);
 			if (pstr == NULL) {
-				errorf(ERRMSG_MEM);
+				errorf("%s not available.", PMKCONF_PATH_INC);
 				return(false);
 			}
-			strlcpy(inc_path, "-I", sizeof(inc_path)); /* no check */
-			if (strlcat_b(inc_path, pstr, sizeof(inc_path)) == false) {
-				errorf("failed to add '%s' in include path.", inc_path);
+
+			if (get_file_dir_path(scb.header, pstr, inc_path, sizeof(inc_path)) == true) {
+				pstr = strdup(inc_path);
+				if (pstr == NULL) {
+					errorf(ERRMSG_MEM);
+					return(false);
+				}
+				strlcpy(inc_path, "-I", sizeof(inc_path)); /* no check */
+				if (strlcat_b(inc_path, pstr, sizeof(inc_path)) == false) {
+					errorf("failed to add '%s' in include path.", inc_path);
+					return(false);
+				}
+			} else {
+				/* include not found, init inc_path with "" */
+				if (strlcpy_b(inc_path, "", sizeof(inc_path)) == false) {
+					errorf("failed to initialise include path.");
+					return(false);
+				}
+			}
+			scb.flags = inc_path;
+
+			/*
+				check header file
+			*/
+			pmk_log("\tFound header '%s' : ", scb.header);
+
+			/* build test source file */
+			if (code_builder(&scb) == false) {
+				errorf("cannot build test file.");
 				return(false);
 			}
-		} else {
-			/* include not found, init inc_path with "" */
-			if (strlcpy_b(inc_path, "", sizeof(inc_path)) == false) {
-				errorf("failed to initialise include path.");
+
+			/* build compiler command */
+			 if (cmdline_builder(&scb, true) == false) {
+				errorf(ERR_MSG_CC_CMD);
 				return(false);
 			}
-		}
-		scb.flags = inc_path;
 
-		/*
-			check header file
-		*/
-		pmk_log("\tFound header '%s' : ", scb.header);
+			/* launch build and get result */
+			rslt = object_builder(&scb);
 
-		/* build test source file */
-		if (code_builder(&scb) == false) {
-			errorf("cannot build test file.");
-			return(false);
-		}
+			/* clean files */
+			cb_cleaner(&scb);
 
-		/* build compiler command */
-		 if (object_builder(cfgcmd, sizeof(cfgcmd), &scb, true) == false) {
-			errorf(ERR_MSG_CC_CMD);
-			return(false);
+			/* process result */
+			if (rslt == true) {
+				pmk_log("yes.\n");
+			} else {
+				pmk_log("no.\n");
+			}
 		}
 
-	/*debugf("cfgcmd = '%s'", cfgcmd);*/
-
-		/* get result */
-		r = system(cfgcmd);
-		if (r == 0) {
-			pmk_log("yes.\n");
+		/* process result */
+		if (rslt == true) {
 			/* define for template */
 			record_def_data(pgd->htab, scb.header, DEFINE_DEFAULT);
 		} else {
-			pmk_log("no.\n");
 			record_def_data(pgd->htab, scb.header, NULL);
-			rslt = false;
 		}
-
-		/* clean files */
-		cb_cleaner(&scb);
 	}
 
 	if (rslt == true) {
@@ -1646,58 +1677,71 @@ bool pmk_check_type(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 		}
 
 		/* build compiler command */
-		 if (object_builder(cfgcmd, sizeof(cfgcmd), &scb, true) == false) {
+		 if (cmdline_builder(&scb, true) == false) {
 			errorf(ERR_MSG_CC_CMD);
 			return(false);
 		}
 
-		/* get result */
-		r = system(cfgcmd);
-		if (r == 0) {
-			pmk_log("yes.\n");
-			/* define for template */
-			record_def_data(pgd->htab, scb.type, DEFINE_DEFAULT);
-		} else {
-			pmk_log("no.\n");
-			record_def_data(pgd->htab, scb.type, NULL);
-			rslt = false;
-		}
+		/* launch build and get result */
+		rslt = object_builder(&scb);
 
 		/* clean files */
 		cb_cleaner(&scb);
+
+		/* process result */
+		if (rslt == true) {
+			pmk_log("yes.\n");
+		} else {
+			pmk_log("no.\n");
+		}
 	}
 
-	if ((rslt == true) && (member != NULL)) {
-		scb.member = member;
+	/* process result */
+	if (rslt == true) {
+		/* define for template */
+		record_def_data(pgd->htab, type, DEFINE_DEFAULT);
+debugf("youpi %s", type);
+	} else {
+		record_def_data(pgd->htab, type, NULL);
+	}
 
-		pmk_log("\tFound member '%s' : ", scb.member);
 
-		/* build test source file */
-		if (code_builder(&scb) == false) {
-			errorf("cannot build test file.");
-			return(false);
+	if (member != NULL) {
+		if (rslt == true) {
+			scb.member = member;
+
+			pmk_log("\tFound member '%s' : ", scb.member);
+
+			/* build test source file */
+			if (code_builder(&scb) == false) {
+				errorf("cannot build test file.");
+				return(false);
+			}
+
+			/* build compiler command */
+			 if (cmdline_builder(&scb, true) == false) {
+				errorf(ERR_MSG_CC_CMD);
+				return(false);
+			}
+
+			/* clean files */
+			cb_cleaner(&scb);
+
+			/* process result */
+			if (rslt == true) {
+				pmk_log("yes.\n");
+			} else {
+				pmk_log("no.\n");
+			}
 		}
 
-		/* build compiler command */
-		 if (object_builder(cfgcmd, sizeof(cfgcmd), &scb, true) == false) {
-			errorf(ERR_MSG_CC_CMD);
-			return(false);
-		}
-
-		/* get result */
-		r = system(cfgcmd);
-		if (r == 0) {
-			pmk_log("yes.\n");
+		/* process result */
+		if (rslt == true) {
 			/* define for template */
-			record_def_data(pgd->htab, scb.member, DEFINE_DEFAULT);
+				record_def_data(pgd->htab, member, DEFINE_DEFAULT);
 		} else {
-			pmk_log("no.\n");
-			record_def_data(pgd->htab, scb.member, NULL);
-			rslt = false;
+				record_def_data(pgd->htab, member, NULL);
 		}
-
-		/* clean files */
-		cb_cleaner(&scb);
 	}
 
 	if (rslt == true) {

@@ -345,7 +345,7 @@ bool c_code_builder(code_bld_t *pcb) {
 
 
 /********************
- * object_builder() *
+ * cmdline_builder() *
  ***********************************************************************
  DESCR
 	XXX
@@ -357,11 +357,11 @@ bool c_code_builder(code_bld_t *pcb) {
 	XXX
  ***********************************************************************/
 
-bool object_builder(char *buf, size_t sz, code_bld_t *pcb, bool dolink) {
+bool cmdline_builder(code_bld_t *pcb, bool dolink) {
 	switch (pcb->lang) {
 		case LANG_C :
 		case LANG_CXX :
-			return(c_object_builder(buf, sz, pcb, dolink));
+			return(c_cmdline_builder(pcb, dolink));
 	}
 
 	return(false);
@@ -369,7 +369,7 @@ bool object_builder(char *buf, size_t sz, code_bld_t *pcb, bool dolink) {
 
 
 /**********************
- * c_object_builder() *
+ * c_cmdline_builder() *
  ***********************************************************************
  DESCR
 	XXX
@@ -381,17 +381,17 @@ bool object_builder(char *buf, size_t sz, code_bld_t *pcb, bool dolink) {
 	XXX
  ***********************************************************************/
 
-bool c_object_builder(char *buf, size_t sz, code_bld_t *pcb, bool dolink) {
+bool c_cmdline_builder(code_bld_t *pcb, bool dolink) {
 	/* start with compiler */
 	if (pcb->pathcomp == NULL) {
 		return(false);
 	}
-	strlcpy(buf, pcb->pathcomp, sz);
+	strlcpy(pcb->bldcmd, pcb->pathcomp, sizeof(pcb->bldcmd));
 
 	/* if flags are provided */
 	if (pcb->flags != NULL) {
-		strlcat(buf, " ", sz);
-		strlcat(buf, pcb->flags, sz);
+		strlcat(pcb->bldcmd, " ", sizeof(pcb->bldcmd));
+		strlcat(pcb->bldcmd, pcb->flags, sizeof(pcb->bldcmd));
 	}
 
 	/* copy template of object name */
@@ -406,32 +406,54 @@ bool c_object_builder(char *buf, size_t sz, code_bld_t *pcb, bool dolink) {
 	mktemp(pcb->binfile);
 
 	/* append the object name */
-	strlcat(buf, " -o ", sz);
-	strlcat(buf, pcb->binfile, sz);
+	strlcat(pcb->bldcmd, " -o ", sizeof(pcb->bldcmd));
+	strlcat(pcb->bldcmd, pcb->binfile, sizeof(pcb->bldcmd));
 
 	/* if an optional library has been provided */
 	if (pcb->library != NULL) {
-		strlcat(buf, " -l ", sz);
-		strlcat(buf, pcb->library, sz);
+		strlcat(pcb->bldcmd, " -l ", sizeof(pcb->bldcmd));
+		strlcat(pcb->bldcmd, pcb->library, sizeof(pcb->bldcmd));
 	}
 
 	/* if we don't link use -c */
 	if (dolink == false) {
-		strlcat(buf, " -c", sz);
+		strlcat(pcb->bldcmd, " -c", sizeof(pcb->bldcmd));
 	}
 
 	/* append source filename */
-	strlcat(buf, " ", sz);
-	strlcat(buf, pcb->srcfile, sz);
+	strlcat(pcb->bldcmd, " ", sizeof(pcb->bldcmd));
+	strlcat(pcb->bldcmd, pcb->srcfile, sizeof(pcb->bldcmd));
 
 	/* append log redirection */
-	strlcat(buf, " >>", sz);
-	strlcat(buf, pcb->blog, sz);
-	if (strlcat_b(buf, " 2>&1", sz) == false) {
+	strlcat(pcb->bldcmd, " >>", sizeof(pcb->bldcmd));
+	strlcat(pcb->bldcmd, pcb->blog, sizeof(pcb->bldcmd));
+	if (strlcat_b(pcb->bldcmd, " 2>&1", sizeof(pcb->bldcmd)) == false) {
 		return(false);
 	}
 
 	return(true);
+}
+
+
+/********************
+ * object_builder() *
+ ***********************************************************************
+ DESCR
+	XXX
+
+ IN
+	XXX
+
+ OUT
+	XXX
+ ***********************************************************************/
+
+bool object_builder(code_bld_t *pcb) {
+	if (system(pcb->bldcmd) == 0) {
+		return(true);
+	} else {
+		return(false);
+	}
 }
 
 
