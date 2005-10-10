@@ -1,3 +1,7 @@
+10 Oct 2005 mipsator
+ * rewritten check_header() and check_type() to guarantee the recording
+   of tags.
+
 06 Oct 2005 mipsator
  * added conv_to_label() to fix label generation in pmkscan.
 

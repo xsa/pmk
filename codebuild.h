@@ -105,6 +105,7 @@ typedef struct {
 typedef struct {
 	char		 srcfile[MAXPATHLEN],
 				 binfile[MAXPATHLEN],
+				 bldcmd[MAXPATHLEN],
 				*header,				/* header filename */
 				*library,				/* library name */
 				*define,				/* macro name */
@@ -135,8 +136,9 @@ char	*get_libs_label(code_bld_t *);
 void	 code_logger(FILE *, FILE *, const char *, ...);
 bool	 code_builder(code_bld_t *);
 bool	 c_code_builder(code_bld_t *);
-bool	 object_builder(char *, size_t, code_bld_t *, bool);
-bool	 c_object_builder(char *, size_t, code_bld_t *, bool);
+bool	 cmdline_builder(code_bld_t *, bool);
+bool	 c_cmdline_builder(code_bld_t *, bool);
+bool	 object_builder(code_bld_t *);
 void	 cb_cleaner(code_bld_t *);
 
 #endif /* _PMK_CODEBUILD_H_ */
