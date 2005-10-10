@@ -166,7 +166,7 @@ enum {
 						"\tDATADIR = \"\\$(PREFIX)/share/\\$(PACKAGE)\"\n"
 #define PMKF_DEF_MAN	"\tMAN%dDIR = \"\\$(MANDIR)/man%d\"\n"
 
-#define PMKF_CMD_NOLABEL	"/%s {\n"
+#define PMKF_CMD_NOLABEL	"%s {\n"
 #define PMKF_CMD_LABEL		"%s(%s) {\n"
 #define PMKF_CMD_END		"}\n"
 
