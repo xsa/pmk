@@ -812,7 +812,7 @@ bool obsolete_string_to_list(htable *ht, char *opt) {
 		/* pstr should not be NULL */
 		pstr = po_get_str(po);
 
-		pmk_log("\tWARNING: providing a quoted string to the option '%s' is obsolete.\n", pstr);
+		pmk_log("\tWARNING: providing a quoted string to the option '%s' is obsolete.\n", opt);
 		pmk_log("\t\tCompatibility will be removed in future releases.\n");
 
 		da = da_init();
