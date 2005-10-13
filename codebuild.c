@@ -34,6 +34,7 @@
  */
 
 
+#include <stdlib.h>
 #include <unistd.h>
 
 #include "compat/pmk_stdio.h"
