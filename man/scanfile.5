@@ -1,0 +1,122 @@
+.\" $Id$
+
+.Dd September 15, 2005
+.Dt SCANFILE 5
+.Os
+
+.Sh NAME
+.Nm scanfile
+.Nd pmkscan specification file
+
+.Sh DESCRIPTION
+.Nm
+is a file containing specifications that defines which sources are to
+be scanned and what to generate from the resulting data.
+
+.Sh SYNTAX
+The syntax is almost the same than for a pmkfile. See 
+.Xr pmk 1
+for more details.
+
+.Sh COMMANDS
+.Pp
+The available commands are the following :
+.Bl -tag -width Ds
+.It Cm GEN_PMKFILE
+This command specify a zone to scan and generate a pmkfile.
+.Pp
+Arguments:
+.Bl -tag -width DIRECTORY -offset indent
+.It Dv DIRECTORY
+type is 'quoted', define the zone directory to scan.
+.It Dv RECURSE
+type is 'bool', enable recursive scanning, default is FALSE.
+.It Dv DISCARD
+type is 'list', list of directories to discard in recursive mode.
+.It Dv UNIQUE
+type is 'bool', enable unique resulting file instead of one for each
+directory. This is actually the default and only one method available
+(work in progress).
+.El
+.Pp
+For example:
+.Bd -literal -offset indent
+GEN_PMKFILE {
+	DIRECTORY = "."
+	RECURSE = TRUE
+	DISCARD = ("samples", "doc", "data", "man")
+	UNIQUE = TRUE
+}
+.Ed
+
+.It Cm GEN_MAKEFILE
+This command specify a zone to scan and generate a makefile.
+.Pp
+Arguments:
+.Bl -tag -width DIRECTORY -offset indent
+.It Dv DIRECTORY
+type is 'quoted', define the zone directory to scan.
+.It Dv RECURSE
+type is 'bool', enable recursive scanning, default is FALSE.
+.It Dv DISCARD
+type is 'list', list of directories to discard in recursive mode.
+.It Dv NAME
+type is 'quoted', give the name of the template makefile to use instead
+of the default one.
+.It Dv UNIQUE
+type is 'bool', enable unique resulting file instead of one for each
+directory. This is actually the default and only one method available
+(work in progress).
+.El
+.Pp
+For example:
+.Bd -literal -offset indent
+GEN_MAKEFILE {
+	DIRECTORY = "."
+	RECURSE = TRUE
+	DISCARD = ("samples", "doc", "tests")
+	NAME = "Makefile.pmk"
+	UNIQUE = TRUE
+}
+.Ed
+
+.It Cm GEN_ZONE
+This command specify a zone to scan and what to generate.
+.Pp
+Arguments:
+.Bl -tag -width DIRECTORY -offset indent
+.It Dv DIRECTORY
+type is 'quoted', define the zone directory to scan.
+.It Dv RECURSE
+type is 'bool', enable recursive scanning, default is FALSE.
+.It Dv DISCARD
+type is 'list', list of directories to discard in recursive mode.
+.It Dv PMKFILE
+type is 'bool', enable generation of a pmkfile
+.It Dv MAKEFILE
+type is 'bool', enable generation of a makefile
+.It Dv NAME
+type is 'quoted', give the name of the template makefile to use instead
+of the default one.
+.It Dv UNIQUE
+type is 'bool', enable unique resulting file instead of one for each
+directory. This is actually the default and only one method available
+(work in progress).
+.El
+.Pp
+For example:
+.Bd -literal -offset indent
+GEN_ZONE(main) {
+	DIRECTORY = "."
+	RECURSE = TRUE
+	DISCARD = ("samples", "doc", "tests")
+	PMKFILE = TRUE
+	MAKEFILE = TRUE
+	NAME = "Makefile.pmk"
+	UNIQUE = TRUE
+}
+.Ed
+
+.Sh SEE ALSO
+.Xr pmkscan 1 ,
+.Xr pmkfile 5
