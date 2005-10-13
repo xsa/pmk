@@ -6,15 +6,15 @@ $Id$
 -----------------------------------------------------------------------
 Format:
 
-Who	Status	Description
+Who Status  Description
 
 Status flags:
-	- to do
-	+ done
-	~ in progress
-	! high priority
-	. low priority
-	R release goal
+	-	to do
+	+	done
+	~	in progress
+	!	high priority
+	.	low priority
+	R	release goal
 
 Indented lines means subtask.
 -----------------------------------------------------------------------
@@ -25,23 +25,23 @@ common:
 	+?	track and code missing checks for snprintf and strl*
 	~R	update tutorial
 	~.	improve test_pmkinstall to check more modes
-	+	update README and INSTALL
+	+ 	update README and INSTALL
 	~!	new samples
-        	        - add a sample that show architecture data from pmk
+					- add a sample that show architecture data from pmk
 	-.	handle allocation through garbage collector.
-	-R	improve tag generation and substitution.
+	-R!	improve tag generation and substitution.
 
 
 pmk:
 -----------------------------------------------------------------------
 	+R	add sub header check for older systems
-	-!	check if ~/.pmk.conf is available
+	-R?	check if ~/.pmk.conf is available
 	~.	compatibility with autoconf (progressing) :
 			~ support for DEFS (-D options to pass to the compiler)
 			- support for LDFLAGS (misc linker options) ?
 			- support for CPPFLAGS (misc linker options) ?
 			- VPATH ?
-	-.	verify in CHECK_BINARY that program has executable right ?
+	-.  verify in CHECK_BINARY that program has executable right ?
 
 
 pmksetup:
@@ -51,15 +51,26 @@ pmksetup:
 			- sparc support
 			- sparc64 support (priviledged)
 			~ man page update
-	-	cpu optimisation for compiler 
+	-	cpu optimisation for compiler
 	-	option to append to variable of pmk.conf
-	!	clean temporary files on error
+	+!	clean temporary files on error
+
 
 pmkscan
 -----------------------------------------------------------------------
-	-R!	update man page
+	+R	fix label generation in pmkfile generation
+	-R?	try opening ./scanfile by default ?
+	-R!	template configuration header generation :
+			-	add CFGNAME option (alternative config template name)
+			-	add ADVTAG option (generate advanced tags, default false ?)
+			-	add tags hash table (in structure, init and destroy)
+			-	add support of tags in chech_header()
+			-	add support of tags in chech_type()
+	-R!	add support for LIBRARY option in check_header()
+	-R!	update pmkscan.1
+	-R!	update and commit (add) scanfile.5
 	-R!	add more entries in pmkscan.dat
-	-R	fix label generation in pmkfile generation
+
 
 pmkinstall
 -----------------------------------------------------------------------
@@ -67,7 +78,7 @@ pmkinstall
 
 pmkpc
 -----------------------------------------------------------------------
-	~	missing options
+	-.	missing options
 			- PMKPC_OPT_UNINST
 			- PMKPC_OPT_DEBUG
 			- PMKPC_OPT_VAR
@@ -78,7 +89,7 @@ pmkpc
 	~	man page
 	-.	special expression ('' quoted), post 0.8
 
+
 misc
 -----------------------------------------------------------------------
-	-R	generate template config header from pmkscan
 
