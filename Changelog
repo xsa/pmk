@@ -1,3 +1,7 @@
+13 Oct 2005 mipsator
+ * polished checks in func.
+ * added scanfile.5 man page.
+
 10 Oct 2005 mipsator
  * rewritten check_header() and check_type() to guarantee the recording
    of tags.

@@ -231,7 +231,7 @@ SBIN_FILES=
 
 MAN1_FILES=	man/pmk.1 man/pmkinstall.1 man/pmkpc.1 man/pmkscan.1
 
-MAN5_FILES=	man/pmk.conf.5 man/pmkfile.5
+MAN5_FILES=	man/pmk.conf.5 man/pmkfile.5 man/scanfile.5
 
 MAN8_FILES=	man/pmksetup.8
 
