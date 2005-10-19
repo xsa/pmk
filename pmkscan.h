@@ -170,7 +170,7 @@ enum {
 #define PMKF_CMD_LABEL		"%s(%s) {\n"
 #define PMKF_CMD_END		"}\n"
 
-#define PMKF_COMMENT		"# %s\n"
+#define PMKF_COMMENT		"# "
 
 #define PMKF_VAR_BOOL		"\t%s = %s\n"
 
@@ -392,6 +392,7 @@ typedef struct {
 				*func_decls,	/* function declaration list */
 				*type_idtfs,	/* type identifier list */
 				*src_deps,		/* source dependency list */
+				*sys_deps,		/* system header dependency list */
 				*obj_links,		/* object link dependencies */
 				*obj_deps;		/* type dependency list */
 	ftype_t		 type;			/* file type */
@@ -418,6 +419,7 @@ typedef struct {
 				*objects,				/* zone objects */
 				*targets,				/* zone targets */
 				*h_checks,				/* zone header checks */
+				*l_checks,				/* zone header checks */
 				*t_checks;				/* zone type checks */
 	scn_node_t	*pnode;
 } scn_zone_t;
@@ -429,6 +431,7 @@ typedef struct {
 			*library,
 			*member;
 	dynary	*procs;
+	ftype_t	 ftype;
 } check_t;
 
 /* scanning data parsed from dat file */
@@ -450,19 +453,26 @@ scn_zone_t	*scan_zone_init(htable *);
 void		 scan_zone_destroy(scn_zone_t *);
 
 /* pmkfile specific */
+check_t		*init_chk_cell(char *);
+void		 destroy_chk_cell(check_t *);
 check_t		*mk_chk_cell(htable *, int);
 bool		 parse_data_file(prsdata *, scandata *);
-char		*conv_to_label(char *, ...);
-void		 build_cmd_begin(char *, size_t, char *, char *);
-void		 build_cmd_end(char *, size_t);
-void		 build_comment(char *, size_t, char *, ...);
-void		 build_boolean(char *, size_t, char *, bool);
-void		 build_quoted(char *, size_t, char *, char *);
-bool		 build_list(char *, size_t, char *, dynary *);
-bool		 set_lang(char *, size_t, ftype_t);
-bool		 check_header(htable *, char *, scandata *, scn_node_t *);
+bool		 recurse_sys_deps(htable *, dynary *, char *);
+bool		 add_library(scn_zone_t *, char *, scandata *, scn_node_t *);
+bool		 check_header(scn_zone_t *, char *, scandata *, scn_node_t *);
 bool		 check_type(htable *, char *, scandata *, scn_node_t *);
 bool		 gen_checks(scn_zone_t *, scandata *);
+char		*conv_to_label(char *, ...);
+void		 build_cmd_begin(FILE *, char *, char *);
+void		 build_cmd_end(FILE *);
+void		 build_comment(FILE *, char *, ...);
+void		 build_boolean(FILE *, char *, bool);
+void		 build_quoted(FILE *, char *, char *);
+bool		 build_list(FILE *, char *, dynary *);
+bool		 set_lang(FILE *, ftype_t);
+bool		 output_header(check_t *, scandata *, FILE *);
+bool		 output_library(check_t *, scandata *, FILE *);
+bool		 output_type(check_t *, scandata *, FILE *);
 bool		 scan_build_pmk(char *, scn_zone_t *, scandata *);
 
 /* makefile specific */

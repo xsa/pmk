@@ -119,6 +119,7 @@ htable *hash_init(size_t table_size) {
 
  IN
 	table_size : number of hash elements
+	dupfunc : function to duplicate an object
 	freefunc : function to free an object
 	appdfunc : function to create appended object
 
