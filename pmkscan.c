@@ -117,7 +117,7 @@ kw_t	req_name[] = {
 /* ADD_HEADER options */
 kw_t	opt_addhdr[] = {
 	{KW_OPT_PRC,	PO_LIST},
-	{KW_OPT_LIB,	PO_LIST}
+	{KW_OPT_LIB,	PO_STRING}
 };
 
 kwopt_t	kw_addhdr = {
@@ -153,10 +153,6 @@ kwopt_t	kw_addtyp = {
 };
 
 prskw	kw_pmkscan[] = {
-	{"FUNCTIONS",	PSC_TOK_FUNC,	PRS_KW_CELL,	PRS_TOK_NULL,	NULL},	/* XXX deprecated ? */
-	{"INCLUDES",	PSC_TOK_INCL,	PRS_KW_CELL,	PRS_TOK_NULL,	NULL},
-	{"PROCEDURES",	PSC_TOK_FUNC,	PRS_KW_CELL,	PRS_TOK_NULL,	NULL},
-	{"TYPES",		PSC_TOK_TYPE,	PRS_KW_CELL,	PRS_TOK_NULL,	NULL},
 	{KW_CMD_ADDHDR,	PSC_TOK_ADDHDR,	PRS_KW_CELL,	PRS_TOK_NULL,	&kw_addhdr},
 	{KW_CMD_ADDLIB,	PSC_TOK_ADDLIB,	PRS_KW_CELL,	PRS_TOK_NULL,	&kw_addlib},
 	{KW_CMD_ADDTYP,	PSC_TOK_ADDTYP,	PRS_KW_CELL,	PRS_TOK_NULL,	&kw_addtyp}
@@ -337,6 +333,14 @@ scn_node_t *scan_node_init(char *fname) {
 		}
 
 		/* init dynamic array of dependencies */
+		pnode->sys_deps = da_init();
+		if (pnode->sys_deps == NULL) {
+			/* failed */
+			scan_node_destroy(pnode);
+			return(NULL);
+		}
+
+		/* init dynamic array of dependencies */
 		pnode->obj_links = da_init();
 		if (pnode->obj_links == NULL) {
 			/* failed */
@@ -425,6 +429,10 @@ void scan_node_destroy(scn_node_t *pnode) {
 		da_destroy(pnode->src_deps);
 	}
 
+	if (pnode->sys_deps != NULL) {
+		da_destroy(pnode->sys_deps);
+	}
+
 	if (pnode->obj_links != NULL) {
 		da_destroy(pnode->obj_links);
 	}
@@ -475,8 +483,9 @@ scn_zone_t *scan_zone_init(htable *nodes) {
 		/* init zone tables */
 		pzone->objects = hash_init(256); /* XXX can do better :) */
 		pzone->targets = hash_init(256); /* XXX can do better :) */
-		pzone->h_checks = hash_init(128); /* XXX can do better :) */
-		pzone->t_checks = hash_init(128); /* XXX can do better :) */
+		pzone->h_checks = hash_init_adv(128, NULL, (void (*)(void *)) destroy_chk_cell, NULL); /* XXX can do better :) */
+		pzone->l_checks = hash_init_adv(128, NULL, (void (*)(void *)) destroy_chk_cell, NULL); /* XXX can do better :) */
+		pzone->t_checks = hash_init_adv(128, NULL, (void (*)(void *)) destroy_chk_cell, NULL); /* XXX can do better :) */
 
 		/* init directory list to scan */
 		pzone->dirlist = da_init();
@@ -521,6 +530,10 @@ void scan_zone_destroy(scn_zone_t *pzone) {
 		hash_destroy(pzone->h_checks);
 	}
 
+	if (pzone->l_checks != NULL) {
+		hash_destroy(pzone->l_checks);
+	}
+
 	if (pzone->t_checks != NULL) {
 		hash_destroy(pzone->t_checks);
 	}
@@ -548,6 +561,71 @@ void scan_zone_destroy(scn_zone_t *pzone) {
 /******************************
  * pmkfile specific functions *
  ***********************************************************************/
+
+/*******************
+ * init_chk_cell() *
+ ***********************************************************************
+ DESCR
+	initialize check cell
+
+ IN
+	NONE
+
+ OUT
+	pointer to new cell or NULL
+ ***********************************************************************/
+
+check_t *init_chk_cell(char *name) {
+	check_t	*pchk;
+
+	pchk = (check_t *) malloc(sizeof(check_t));
+	if (pchk == NULL) {
+		return(NULL);
+	}
+
+	/* set check name */
+	pchk->name = strdup(name);
+	if (pchk->name == NULL) {
+		free(pchk);
+		return(NULL);
+	}
+
+	/* init procedure list */
+	pchk->procs = da_init();
+	if (pchk->procs == NULL) {
+		free(pchk->name);
+		free(pchk);
+		return(NULL);
+	}
+
+	/* init misc */
+	pchk->header = NULL;
+	pchk->library = NULL;
+	pchk->member = NULL;
+
+	return(pchk);
+}
+
+
+/**********************
+ * destroy_chk_cell() *
+ ***********************************************************************
+ DESCR
+	destroy allocated check cell
+
+ IN
+	pchk :	check cell structure
+
+ OUT
+	NONE
+ ***********************************************************************/
+
+void destroy_chk_cell(check_t *pchk) {
+	free(pchk->name);
+	da_destroy(pchk->procs);
+	free(pchk);
+}
+
 
 /*****************
  * mk_chk_cell() *
@@ -696,6 +774,326 @@ bool parse_data_file(prsdata *pdata, scandata *sdata) {
 }
 
 
+/**********************
+ * recurse_sys_deps() *
+ ***********************************************************************
+ DESCR
+	gather recursively the system include dependencies
+
+ IN
+	nodes :		nodes hash table
+	deps :		dynary structure where to store dependencies
+	nodename :	node name to process recursively
+
+ OUT
+	boolean
+ ***********************************************************************/
+
+bool recurse_sys_deps(htable *nodes, dynary *deps, char *nodename) {
+	char		 dir[MAXPATHLEN],
+				*pstr;
+	scn_node_t	*pnode;
+	size_t		 i;
+
+	/* get node structure */
+	pnode = hash_get(nodes, nodename); /* should not fail */
+	if (pnode == NULL) {
+#ifdef PMKSCAN_DEBUG
+		debugf("recurse_sys_deps() : node '%s' missing.", nodename);
+#endif /* PMKSCAN_DEBUG */
+		return(true);
+	}
+
+	/* process all system headers linked to this node */
+	for (i = 0 ; i < da_usize(pnode->system_inc) ; i++) {
+		pstr = (char *) da_idx(pnode->system_inc, i);
+
+		/* check if the system header is already listed as a dependency */
+		if (da_find(deps, pstr) == false) {
+			/* no, add it into the list */
+			if (da_push(deps, strdup(pstr)) == false) {
+				return(false);
+			}
+		}
+	}
+
+	/* get directory */
+	extract_dir(nodename, dir, sizeof(dir));
+
+	/* look for all the local dependencies of the current node */
+	for (i = 0 ; i < da_usize(pnode->local_inc) ; i++) {
+		/* and recurse */
+		if (recurse_sys_deps(nodes, deps, (char *) da_idx(pnode->local_inc, i)) == false) {
+			return(false);
+		}
+	}
+
+	return(true);
+}
+
+
+/*****************
+ * add_library() *
+ ***********************************************************************
+ DESCR
+	generate a library check if a record exists for the given library
+
+ IN
+ 	checks :	checks hash table
+	library :	library to add
+	psd :		scandata structure
+	pn: 		node structure
+
+ OUT
+	boolean
+ ***********************************************************************/
+
+bool add_library(scn_zone_t *psz, char *library, scandata *psd, scn_node_t *pn) {
+	char	*pstr;
+	check_t	*pchk,
+			*pcrec;
+	size_t	 i,
+			 s;
+
+	/* try to retrieve a check record for the given header */
+	pcrec = hash_get(psd->libraries, library);
+	if (pcrec == NULL) {
+		/* no record, skipping */
+		return(true);
+	}
+
+	pchk = hash_get(psz->l_checks, library);
+	if (pchk == NULL) {
+		/* add new check */
+		pchk = init_chk_cell(library);
+		if (pchk == NULL) {
+			/* allocation failed */
+			/* XXX err msg ? */
+			return(false);
+		}
+
+		if (hash_update(psz->l_checks, library, pchk) == HASH_ADD_FAIL) {
+			return(false);
+		}
+	}
+
+	/* look for related procedures */
+	if (pcrec->procs != NULL) {
+		s = da_usize(pcrec->procs);
+		for (i = 0 ; i < s ; i++) {
+			pstr = da_idx(pcrec->procs, i);
+
+			/* if procedure has been found in parsing */
+			if (da_find(pn->func_calls, pstr) != NULL) {
+
+				/* if it has not been added in the check yet */
+				if (da_find(pchk->procs, pstr) == NULL) {
+					/* add in the list of function to check */
+					da_push(pchk->procs, strdup(pstr));
+
+					psc_log(NULL, "Node '%s': found procedure '%s'\n", pn->fname, pstr);
+				}
+			}
+		}
+	}
+
+	return(true);
+}
+
+
+/******************
+ * check_header() *
+ ***********************************************************************
+ DESCR
+	generate an header check if a record exists for the given header
+
+ IN
+ 	checks :	checks hash table
+	header :	header to process
+	psd :		scandata structure
+	pn: 		node structure
+
+ OUT
+	boolean
+
+ TODO
+	add check if LIBRARY is specified
+ ***********************************************************************/
+
+bool check_header(scn_zone_t *psz, char *header, scandata *psd, scn_node_t *pn) {
+	char	*pstr;
+	check_t	*pchk,
+			*pcrec;
+	size_t	 i,
+			 s;
+
+	/* try to retrieve a check record for the given header */
+	pcrec = hash_get(psd->headers, header);
+	if (pcrec == NULL) {
+		/* no record, skipping */
+		return(true);
+	}
+
+	pchk = hash_get(psz->h_checks, header);
+	if (pchk == NULL) {
+		/* add new check */
+		pchk = init_chk_cell(header);
+		if (pchk == NULL) {
+			/* allocation failed */
+			/* XXX err msg ? */
+			return(false);
+		}
+
+		if (hash_update(psz->h_checks, header, pchk) == HASH_ADD_FAIL) {
+			return(false);
+		}
+	}
+
+	/* look for related procedures */
+	if (pcrec->procs != NULL) {
+		s = da_usize(pcrec->procs);
+		for (i = 0 ; i < s ; i++) {
+			pstr = da_idx(pcrec->procs, i);
+
+			/* if procedure has been found in parsing */
+			if (da_find(pn->func_calls, pstr) != NULL) {
+
+				/* if it has not been added in the check yet */
+				if (da_find(pchk->procs, pstr) == NULL) {
+					/* add in the list of function to check */
+					da_push(pchk->procs, strdup(pstr));
+
+					psc_log(NULL, "Node '%s': found procedure '%s'\n", pn->fname, pstr);
+				}
+			}
+		}
+	}
+
+	if (pcrec->library != NULL) {
+		if (add_library(psz, pcrec->library, psd, pn) == false) {
+			return(false);
+		}
+	}
+
+	return(true);
+}
+
+
+/****************
+ * check_type() *
+ ***********************************************************************
+ DESCR
+	generate a type check if a record exists for the given type
+
+ IN
+ 	checks :	checks hash table
+	type :		type to process
+	psd :		scandata structure
+	pn: 		node structure
+
+ OUT
+	boolean
+
+ TODO
+	handle member ?
+ ***********************************************************************/
+
+bool check_type(htable *checks, char *type, scandata *psd, scn_node_t *pn) {
+	check_t	*pchk,
+			*pcrec;
+
+	if (hash_get(checks, type) != NULL) {
+		/* check already exists */
+		return(true);
+	}
+
+	/* try to retrieve a check record for the given header */
+	pcrec = hash_get(psd->types, type);
+	if (pcrec == NULL) {
+		/* no record */
+		return(true);
+	}
+
+	/* add new check */
+	pchk = init_chk_cell(type);
+	if (pchk == NULL) {
+		/* allocation failed */
+		/* XXX err msg ? */
+		return(false);
+	}
+
+	if (pcrec->header != NULL) {
+		pchk->header = pcrec->header; /* XXX strdup ? */
+	}
+
+	if (hash_update(checks, type, pchk) == HASH_ADD_FAIL) {
+		return(false);
+	}
+
+	return(true);
+}
+
+
+/****************
+ * gen_checks() *
+ ***********************************************************************
+ DESCR
+	build pmkfile using gathered data
+
+ IN
+	psz :	scanning zone data
+	pht :	check component hash table
+	psd :	parsing data structure
+ OUT
+	boolean
+ ***********************************************************************/
+
+bool gen_checks(scn_zone_t *psz, scandata *psd) {
+	char			*pstr;
+	hkeys			*phk;
+	scn_node_t		*pn;
+	unsigned int	 i,
+					 j;
+
+	/* for each node */
+	phk = hash_keys(psz->nodes);
+	for(i = 0 ; i < phk->nkey ; i++) {
+		pn = hash_get(psz->nodes, phk->keys[i]); /* no check needed */
+
+		/* check types */
+		if (psd->types != NULL) {
+			/* process types */
+			for (j = 0 ; j < da_usize(pn->type_idtfs) ; j++) {
+				pstr = (char *) da_idx(pn->type_idtfs, j);
+
+				if (check_type(psz->t_checks, pstr, psd, pn) == false) {
+					errorf("check_type() failed.");
+					return(false);
+				}
+			}
+		}
+
+		/* check headers */
+		if (psd->headers != NULL) {
+			/* generate system dependencies */
+			recurse_sys_deps(psz->nodes, pn->sys_deps, pn->fname);
+
+			/* process system dependencies */
+			for (j = 0 ; j < da_usize(pn->sys_deps) ; j++) {
+				pstr = (char *) da_idx(pn->sys_deps, j);
+
+				if (check_header(psz, pstr, psd, pn) == false) {
+					errorf("check_header() failed.");
+					return(false);
+				}
+			}
+		}
+	}
+
+	return(true);
+}
+
+
 /*******************
  * conv_to_label() *
  ***********************************************************************
@@ -766,11 +1164,11 @@ char *conv_to_label(char *fmt, ...) {
 	-
  ***********************************************************************/
 
-void build_cmd_begin(char *buf, size_t siz, char *cmd, char *label) {
+void build_cmd_begin(FILE *fp, char *cmd, char *label) {
 	if (label == NULL) {
-		snprintf(buf, siz, PMKF_CMD_NOLABEL, cmd);
+		fprintf(fp, PMKF_CMD_NOLABEL, cmd);
 	} else {
-		snprintf(buf, siz, PMKF_CMD_LABEL, cmd, label);
+		fprintf(fp, PMKF_CMD_LABEL, cmd, label);
 	}
 }
 
@@ -789,8 +1187,8 @@ void build_cmd_begin(char *buf, size_t siz, char *cmd, char *label) {
 	-
  ***********************************************************************/
 
-void build_cmd_end(char *buf, size_t siz) {
-	snprintf(buf, siz, PMKF_CMD_END);
+void build_cmd_end(FILE *fp) {
+	fprintf(fp, PMKF_CMD_END);
 }
 
 
@@ -809,17 +1207,19 @@ void build_cmd_end(char *buf, size_t siz) {
 	-
  ***********************************************************************/
 
-void build_comment(char *buf, size_t siz, char *fmt, ...) {
-	char	 tmp[TMP_BUF_LEN];
+void build_comment(FILE *fp, char *fmt, ...) {
 	va_list	 plst;
 
-	/* format initial string in the buffer */
+	/* build comment */
+	fprintf(fp, PMKF_COMMENT);
+
+	/* format string */
 	va_start(plst, fmt);
-	vsnprintf(tmp, sizeof(tmp), fmt, plst);
+	vfprintf(fp, fmt, plst);
 	va_end(plst);
 
-	/* build comment */
-	snprintf(buf, siz, PMKF_COMMENT, tmp);
+	fprintf(fp, "\n");
+
 }
 
 
@@ -839,8 +1239,8 @@ void build_comment(char *buf, size_t siz, char *fmt, ...) {
 	-
  ***********************************************************************/
 
-void build_quoted(char *buf, size_t siz, char *vname, char *qstr) {
-	snprintf(buf, siz, PMKF_VAR_QUOTED, vname, qstr);
+void build_quoted(FILE *fp, char *vname, char *qstr) {
+	fprintf(fp, PMKF_VAR_QUOTED, vname, qstr);
 }
 
 
@@ -860,7 +1260,7 @@ void build_quoted(char *buf, size_t siz, char *vname, char *qstr) {
 	-
  ***********************************************************************/
 
-void build_boolean(char *buf, size_t siz, char *vname, bool bval) {
+void build_boolean(FILE *fp, char *vname, bool bval) {
 	char	*str;
 
 	if (bval == true) {
@@ -869,7 +1269,7 @@ void build_boolean(char *buf, size_t siz, char *vname, bool bval) {
 		str = "FALSE";
 	}
 
-	snprintf(buf, siz, PMKF_VAR_BOOL, vname, str);
+	fprintf(fp, PMKF_VAR_BOOL, vname, str);
 }
 
 
@@ -889,8 +1289,7 @@ void build_boolean(char *buf, size_t siz, char *vname, bool bval) {
 	-
  ***********************************************************************/
 
-bool build_list(char *buf, size_t siz, char *vname, dynary *list) {
-	char	 tmp[TMP_BUF_LEN];
+bool build_list(FILE *fp, char *vname, dynary *list) {
 	size_t	 i,
 			 s;
 
@@ -902,18 +1301,16 @@ bool build_list(char *buf, size_t siz, char *vname, dynary *list) {
 		return(false);
 	}
 
-	snprintf(buf, siz, PMKF_VAR_LIST_BEG, vname);
+	fprintf(fp, PMKF_VAR_LIST_BEG, vname);
 
 	/* process all items but the last */
 	s--;
 	for (i = 0 ; i < s ; i++) {
-		snprintf(tmp, sizeof(tmp), PMKF_VAR_LIST_ITEM, (char *) da_idx(list, i));
-		strlcat(buf, tmp, siz);
+		fprintf(fp, PMKF_VAR_LIST_ITEM, (char *) da_idx(list, i));
 	}
 
 	/* process last item */
-	snprintf(tmp, sizeof(tmp), PMKF_VAR_LIST_END, (char *) da_idx(list, s));
-	strlcat(buf, tmp, siz);
+	fprintf(fp, PMKF_VAR_LIST_END, (char *) da_idx(list, s));
 
 	return(true);
 }
@@ -933,9 +1330,8 @@ bool build_list(char *buf, size_t siz, char *vname, dynary *list) {
 	boolean
  ***********************************************************************/
 
-bool set_lang(char *buf, size_t siz, ftype_t ltype) {
-	char	 tmp[TMP_BUF_LEN],
-			*lang;
+bool set_lang(FILE *fp, ftype_t ltype) {
+	char	*lang;
 
 	/* set current language */
 	switch(ltype) {
@@ -953,127 +1349,126 @@ bool set_lang(char *buf, size_t siz, ftype_t ltype) {
 
 	if (lang != NULL) {
 		/* output language name */
-		build_quoted(tmp, sizeof(tmp), "LANG", lang);
-		return(strlcat_b(buf, tmp, siz));
+		build_quoted(fp, "LANG", lang);
 	}
 
 	return(true);
 }
-
 
 
 /******************
- * check_header() *
+ * ouput_header() *
  ***********************************************************************
  DESCR
-	generate an header check if a record exists for the given header
+	XXX
 
  IN
-	psd :		scandata structure
-	fcalls :	scanned function calls hash table
+ 	checks :	checks hash table
 	header :	header to process
+	psd :		scandata structure
+	pn: 		node structure
 
  OUT
 	boolean
-
- TODO
-	add check if LIBRARY is specified
  ***********************************************************************/
 
-bool check_header(htable *checks, char *header, scandata *psd, scn_node_t *pn) {
-	char	 buffer[TMP_BUF_LEN],
-			 check[TMP_BUF_LEN],
-			*pstr;
-	check_t	*chk;
-	dynary	*da;
-	size_t	 i,
-			 s;
-
-	if (hash_get(checks, header) != NULL) {
-		/* check already exists */
-		return(true);
-	}
-
-	/* try to retrieve a check record for the given header */
-	chk = hash_get(psd->headers, header);
-	if (chk == NULL) {
-		/* no record */
-		return(true);
-	}
+bool output_header(check_t *pchk, scandata *psd, FILE *fp) {
+	char	*pstr;
 
 	/* output comment */
-	build_comment(buffer, sizeof(buffer), "check header %s", chk->name);
-	strlcpy(check, buffer, sizeof(check)); /* no check */
+	build_comment(fp, "check header %s", pchk->name);
 
 	/* generate check label and output pmk command */
-	pstr = conv_to_label("header_%s", chk->name);
-	build_cmd_begin(buffer, sizeof(buffer), "CHECK_HEADER", pstr);
-	strlcat(check, buffer, sizeof(check)); /* no check */
+	pstr = conv_to_label("header_%s", pchk->name);
+	build_cmd_begin(fp, "CHECK_HEADER", pstr);
 
 	/* output type name */
-	build_boolean(buffer, sizeof(buffer), "REQUIRED", false);
-	strlcat(check, buffer, sizeof(check)); /* no check */
+	build_boolean(fp, "REQUIRED", false);
 
 	/* output header name */
-	build_quoted(buffer, sizeof(buffer), "NAME", chk->name);
-	strlcat(check, buffer, sizeof(check)); /* no check */
+	build_quoted(fp, "NAME", pchk->name);
 
 	/* output language if needed */
-	if (set_lang(check, sizeof(check), pn->type) == false) {
+/*
+	if (set_lang(fp, pchk->ftype) == false) {
 		return(false);
 	}
+*/
 
-	da = da_init();
-	if (da == NULL) {
-		return(false);
-	}
-
-	/* look for related procedures */
-	if (chk->procs != NULL) {
-		s = da_usize(chk->procs);
-		for (i = 0 ; i < s ; i++) {
-			pstr = da_idx(chk->procs, i);
-
-			/* if procedure has been found in parsing */
-			if (da_find(pn->func_calls, pstr) != NULL) {
-				/* add in the list of function to check */
-				da_push(da, strdup(pstr));
-			}
-		}
-
-		/* output list (already handle empty list) */
-		if (build_list(buffer, sizeof(buffer), "FUNCTION", da) == true) {
-			strlcat(check, buffer, sizeof(check)); /* no check */
-		}
-	}
-
-	/* clean dynary */
-	da_destroy(da);
+	/* output list (already handle empty list) */
+	build_list(fp, "FUNCTION", pchk->procs);
 
 	/* output end of command body */
-	build_cmd_end(buffer, sizeof(buffer));
-	if (strlcat_b(check, buffer, sizeof(check)) == false) {
-		return(false);
-	}
+	build_cmd_end(fp);
 
-	if (hash_update_dup(checks, header, strdup(check)) == HASH_ADD_FAIL) {
-		return(false);
-	}
+	fprintf(fp, "\n");
 
 	return(true);
 }
 
 
-/****************
- * check_type() *
+/*******************
+ * ouput_library() *
  ***********************************************************************
  DESCR
-	generate a type check if a record exists for the given type
+	XXX
 
  IN
-	psd :	scandata structure
-	hdrs :	scanned headers hash table
-	type :	type to process
+ 	checks :	checks hash table
+	header :	header to process
+	psd :		scandata structure
+	pn: 		node structure
+
+ OUT
+	boolean
+ ***********************************************************************/
+
+bool output_library(check_t *pchk, scandata *psd, FILE *fp) {
+	char	*pstr;
+
+	/* output comment */
+	build_comment(fp, "check library %s", pchk->name);
+
+	/* generate check label and output pmk command */
+	pstr = conv_to_label("library_%s", pchk->name);
+	build_cmd_begin(fp, "CHECK_LIB", pstr);
+
+	/* output type name */
+	build_boolean(fp, "REQUIRED", false);
+
+	/* output header name */
+	build_quoted(fp, "NAME", pchk->name);
+
+	/* output language if needed */
+/*
+	if (set_lang(fp, pchk->ftype) == false) {
+		return(false);
+	}
+*/
+
+	/* output list (already handle empty list) */
+	build_list(fp, "FUNCTION", pchk->procs);
+
+	/* output end of command body */
+	build_cmd_end(fp);
+
+	fprintf(fp, "\n");
+
+	return(true);
+}
+
+
+/*****************
+ * output_type() *
+ ***********************************************************************
+ DESCR
+	XXX
+
+ IN
+ 	checks :	checks hash table
+	type :		type to process
+	psd :		scandata structure
+	pn: 		node structure
 
  OUT
 	boolean
@@ -1082,125 +1477,45 @@ bool check_header(htable *checks, char *header, scandata *psd, scn_node_t *pn) {
 	handle member ?
  ***********************************************************************/
 
-bool check_type(htable *checks, char *type, scandata *psd, scn_node_t *pn) {
-	char	 buffer[TMP_BUF_LEN],
-			 check[TMP_BUF_LEN],
-			*pstr;
-	check_t	*chk;
-
-	if (hash_get(checks, type) != NULL) {
-		/* check already exists */
-		return(true);
-	}
-
-	/* try to retrieve a check record for the given header */
-	chk = hash_get(psd->types, type);
-	if (chk == NULL) {
-		/* no record */
-		return(true);
-	}
+bool output_type(check_t *pchk, scandata *psd, FILE *fp) {
+	char	*pstr;
 
 	/* output comment */
-	build_comment(buffer, sizeof(buffer), "check type %s", chk->name);
-	strlcpy(check, buffer, sizeof(check)); /* no check */
+	build_comment(fp, "check type %s", pchk->name);
 
 	/* generate check label and output pmk command */
-	pstr = conv_to_label("type_%s", chk->name);
-	build_cmd_begin(buffer, sizeof(buffer), "CHECK_TYPE", pstr);
-	strlcat(check, buffer, sizeof(check)); /* no check */
+	pstr = conv_to_label("type_%s", pchk->name);
+	build_cmd_begin(fp, "CHECK_TYPE", pstr);
 
 	/* output type name */
-	build_boolean(buffer, sizeof(buffer), "REQUIRED", false);
-	strlcat(check, buffer, sizeof(check)); /* no check */
+	build_boolean(fp, "REQUIRED", false);
 
 	/* output type name */
-	build_quoted(buffer, sizeof(buffer), "NAME", chk->name);
-	strlcat(check, buffer, sizeof(check)); /* no check */
+	build_quoted(fp, "NAME", pchk->name);
 
 	/* output language if needed */
-	if (set_lang(check, sizeof(check), pn->type) == false) {
+/*
+	if (set_lang(fp, pchk->ftype) == false) {
 		return(false);
 	}
+*/
 
-	if (chk->header != NULL) {
+	if (pchk->header != NULL) {
 		/* output header name */
-		build_quoted(buffer, sizeof(buffer), "HEADER", chk->header);
-		strlcat(check, buffer, sizeof(check)); /* no check */
+		build_quoted(fp, "HEADER", pchk->header);
 	}
 
 	/* output end of command body */
-	build_cmd_end(buffer, sizeof(buffer));
-	if (strlcat_b(check, buffer, sizeof(check)) == false) {
-		return(false);
-	}
+	build_cmd_end(fp);
 
-	if (hash_update_dup(checks, type, strdup(check)) == HASH_ADD_FAIL) {
-		return(false);
-	}
+	fprintf(fp, "\n");
 
 	return(true);
 }
 
 
-/****************
- * gen_checks() *
- ***********************************************************************
- DESCR
-	build pmkfile using gathered data
-
- IN
-	psz :	scanning zone data
-	pht :	check component hash table
-	psd :	parsing data structure
- OUT
-	boolean
- ***********************************************************************/
-
-bool gen_checks(scn_zone_t *psz, scandata *psd) {
-	char			*pstr;
-	hkeys			*phk;
-	scn_node_t		*pn;
-	unsigned int	 i,
-					 j;
-
-	/* for each node */
-	phk = hash_keys(psz->nodes);
-	for(i = 0 ; i < phk->nkey ; i++) {
-		pn = hash_get(psz->nodes, phk->keys[i]); /* no check needed */
-
-		/* check types */
-		if (psd->types != NULL) {
-			/* process types */
-			for (j = 0 ; j < da_usize(pn->type_idtfs) ; j++) {
-				pstr = (char *) da_idx(pn->type_idtfs, j);
-
-				if (check_type(psz->t_checks, pstr, psd, pn) == false) {
-					errorf("check_type() failed.");
-					return(false);
-				}
-			}
-		}
-
-		/* check headers */
-		if (psd->headers != NULL) {
-			/* process system includes */
-			for (j = 0 ; j < da_usize(pn->system_inc) ; j++) {
-				pstr = (char *) da_idx(pn->system_inc, j);
-
-				if (check_header(psz->h_checks, pstr, psd, pn) == false) {
-					errorf("check_header() failed.");
-					return(false);
-				}
-			}
-		}
-	}
-
-	return(true);
-}
-
-
-/*********************
- * scan_output_pmk() *
+/********************
+ * scan_build_pmk() *
  ***********************************************************************
  DESCR
 	build pmkfile using gathered data
@@ -1216,9 +1531,8 @@ bool gen_checks(scn_zone_t *psz, scandata *psd) {
 
 bool scan_build_pmk(char *fname, scn_zone_t *psz, scandata *psd) {
 	FILE			*fp;
-	char			 buf[MKF_OUTPUT_WIDTH * 2],
-					 buffer[TMP_BUF_LEN],
-					*value;
+	char			 buf[MKF_OUTPUT_WIDTH * 2];
+	check_t			*pchk;
 	hkeys			*phk;
 	time_t			 now;
 	unsigned int	 i;
@@ -1238,39 +1552,34 @@ bool scan_build_pmk(char *fname, scn_zone_t *psz, scandata *psd) {
 	strftime(buf, sizeof(buf), STR_TIME_GEN, localtime(&now));
 
 	/* output formatted string */
-	build_comment(buffer, sizeof(buffer), PMKF_HDR_GEN, buf);
-	fprintf(fp, buffer);
+	build_comment(fp, PMKF_HDR_GEN, buf);
 
 	/* settings command ****************/
 
 	/* output command */
-	build_cmd_begin(buffer, sizeof(buffer), "SETTINGS", NULL);
-	fprintf(fp, buffer);
+	build_cmd_begin(fp, "SETTINGS", NULL);
 
 	/* template list comment */
-	build_comment(buffer, sizeof(buffer), PMKF_TRGT_CMT);
-	fprintf(fp, buffer);
+	build_comment(fp, PMKF_TRGT_CMT);
 
 	/* genere template list */
-	if (build_list(buffer, sizeof(buffer), "TARGET", psz->templates) == false) {
+	if (build_list(fp, "TARGET", psz->templates) == false) {
 		/* list is empty, produce comment */
-		build_comment(buffer, sizeof(buffer), "TARGET = ()\t# TO EDIT");
+		build_comment(fp, "TARGET = ()\t# TO EDIT");
 	}
-	fprintf(fp, buffer);
 
 	/* end of command */
-	build_cmd_end(buffer, sizeof(buffer));
-	fprintf(fp, buffer);
+	build_cmd_end(fp);
+
+	fprintf(fp, "\n");
 
 	/* define command ******************/
 
 	/* warning comment */
-	build_comment(buffer, sizeof(buffer), PMKF_DEF_CMT);
-	fprintf(fp, buffer);
+	build_comment(fp, PMKF_DEF_CMT);
 
 	/* output command */
-	build_cmd_begin(buffer, sizeof(buffer), "DEFINE", NULL);
-	fprintf(fp, buffer);
+	build_cmd_begin(fp, "DEFINE", NULL);
 
 	/* output default defines */
 	fprintf(fp, PMKF_DEF_STD); /* (XXX TO IMPROVE)  */
@@ -1287,17 +1596,17 @@ bool scan_build_pmk(char *fname, scn_zone_t *psz, scandata *psd) {
 	}
 
 	/* end of command */
-	build_cmd_end(buffer, sizeof(buffer));
-	fprintf(fp, buffer);
+	build_cmd_end(fp);
 
+	fprintf(fp, "\n");
 
 	/* type checks *********************/
 	phk = hash_keys_sorted(psz->t_checks);
 	if (phk != NULL) {
-		/* output every checks */
+		/* output every type checks */
 		for(i = 0 ; i < phk->nkey ; i++) {
-			value = hash_get(psz->t_checks, phk->keys[i]);
-			fprintf(fp, "%s\n", value);
+			pchk = hash_get(psz->t_checks, phk->keys[i]);
+			output_type(pchk, psd, fp);
 		}
 
 		hash_free_hkeys(phk);
@@ -1306,10 +1615,22 @@ bool scan_build_pmk(char *fname, scn_zone_t *psz, scandata *psd) {
 	/* header checks *******************/
 	phk = hash_keys_sorted(psz->h_checks);
 	if (phk != NULL) {
-		/* output every checks */
+		/* output every header checks */
 		for(i = 0 ; i < phk->nkey ; i++) {
-			value = hash_get(psz->h_checks, phk->keys[i]);
-			fprintf(fp, "%s\n", value);
+			pchk = hash_get(psz->h_checks, phk->keys[i]);
+			output_header(pchk, psd, fp);
+		}
+
+		hash_free_hkeys(phk);
+	}
+
+	/* library checks ******************/
+	phk = hash_keys_sorted(psz->l_checks);
+	if (phk != NULL) {
+		/* output every library checks */
+		for(i = 0 ; i < phk->nkey ; i++) {
+			pchk = hash_get(psz->l_checks, phk->keys[i]);
+			output_library(pchk, psd, fp);
 		}
 
 		hash_free_hkeys(phk);
@@ -1489,7 +1810,7 @@ bool recurse_obj_deps(htable *nodes, dynary *deps, char *nodename) {
 
 	/* look for all the local dependencies of the current node */
 	for (i = 0 ; i < da_usize(pnode->local_inc) ; i++) {
-		/* and recurse it */
+		/* and recurse */
 		if (recurse_obj_deps(nodes, deps, (char *)da_idx(pnode->local_inc, i)) == false) {
 			return(false);
 		}
@@ -2467,10 +2788,15 @@ bool scan_build_mkf(char *fname, scn_zone_t *psz) {
  * psc_log () *
  ***********************************************************************
  DESCR
+	log on standard output and log file if enabled
 
  IN
+	fmt :	standard output format string
+	fmtl :	log file format string
+	... :	common parameters
 
  OUT
+	NONE
  ***********************************************************************/
 
 void psc_log(char *fmt, char *fmtl, ...) {
@@ -2678,6 +3004,8 @@ bool process_proc_call(void *data, char *pstr, prseng_t *ppe) {
 		return(false);
 	}
 
+	psc_log(NULL, "\t\tFound procedure call '%s'.\n", pstr);
+
 	return(true);
 }
 
@@ -2722,6 +3050,8 @@ bool process_proc_decl(void *data, char *pstr, prseng_t *ppe) {
 		pnode->mainproc = true;
 	}
 
+	psc_log(NULL, "\t\tFound procedure declaration '%s'.\n", pstr);
+
 	return(true);
 }
 
@@ -2753,6 +3083,8 @@ bool process_type(void *data, char *pstr, prseng_t *ppe) {
 		errorf("unable to add '%s' in type list", pstr);
 		return(false);
 	}
+
+	psc_log(NULL, "\t\tFound type '%s'.\n", pstr);
 
 	return(true);
 }
@@ -2823,6 +3155,7 @@ bool parse_file(prs_cmn_t *pcmn, char *fname, ftype_t ft, bool isdep) {
 			case FILE_TYPE_ASM :
 				psz->found[FILE_TYPE_ASM] = true;
 				psz->found_src = true;
+				psc_log(NULL, "\tStart parsing of assembly file '%s'\n", fname);
 				if (prs_asm_file(pcmn, fp) == false) {
 					fclose(fp);
 					return(false);
@@ -2836,6 +3169,12 @@ bool parse_file(prs_cmn_t *pcmn, char *fname, ftype_t ft, bool isdep) {
 			case FILE_TYPE_CXX :
 				psz->found[FILE_TYPE_C] = true;
 				psz->found_src = true;
+				if (ft == FILE_TYPE_C) {
+					psc_log(NULL, "\tStart parsing of C file '%s'\n", fname);
+				} else {
+					psc_log(NULL, "\tStart parsing of C++ file '%s'\n", fname);
+				}
+
 				if (prs_c_file(pcmn, fp) == false) {
 					fclose(fp);
 					return(false);
@@ -3479,7 +3818,7 @@ int main(int argc, char *argv[]) {
 			case 'r' :
 				/* enable pmkfile generation */
 				recursive = true;
-				fprintf(stdout, "recursive option disabled until better support\n");
+				/*fprintf(stdout, "recursive option disabled until better support\n");*/
 				break;
 
 			case 'u' :

@@ -18,7 +18,7 @@ ADD_HEADER {
 ADD_HEADER {
 	NAME = "libgen.h"
 	PROCEDURE = ("basename", "dirname")
-	LIBRARY = ("gen")
+	LIBRARY = "gen"
 }
 
 ADD_HEADER {
