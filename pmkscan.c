@@ -1068,6 +1068,7 @@ bool gen_checks(scn_zone_t *psz, scandata *psd) {
 
 				if (check_type(psz->t_checks, pstr, psd, pn) == false) {
 					errorf("check_type() failed.");
+					hash_free_hkeys(phk);
 					return(false);
 				}
 			}
@@ -1084,11 +1085,13 @@ bool gen_checks(scn_zone_t *psz, scandata *psd) {
 
 				if (check_header(psz, pstr, psd, pn) == false) {
 					errorf("check_header() failed.");
+					hash_free_hkeys(phk);
 					return(false);
 				}
 			}
 		}
 	}
+	hash_free_hkeys(phk);
 
 	return(true);
 }

@@ -48,12 +48,12 @@
 
 #include <stdbool.h>
 
-#else
+#else /* HAVE_STDBOOL_H */
 
 /*
 	Sun Forte 5.4 C compiler and previous versions give out a
 	"warning: _Bool is a keyword in ISO C99"
-	message when we use typedef_. In addition, every Sun Pro C compiler
+	message when we use typedef. In addition, every Sun Pro C compiler
 	which conforms to ANSI C (and therefore sets __STDC__ to 1) shows the
 	same behaviour. We avoid this by defining _Bool in a macro in these
 	cases.
@@ -62,16 +62,26 @@
 #ifndef HAVE__BOOL
 #	if defined __SUNPRO_C && (__SUNPRO_C < 0x550 || __STDC__ == 1)
 #		define _Bool unsigned char
-#	else
+#	else /* __SUNPRO_C && (__SUNPRO_C < 0x550 || __STDC__ == 1) */
 typedef unsigned char _Bool;
-#	endif
-#endif
+#	endif /* __SUNPRO_C && (__SUNPRO_C < 0x550 || __STDC__ == 1) */
+#endif /* HAVE__BOOL */
 
-#define bool _Bool
-#define true    1
-#define false   0
+#ifndef bool
+#define bool	_Bool
+#endif /* bool */
+
+#ifndef true
+#define true	1
+#endif /* true */
+
+#ifndef false
+#define false	0
+#endif /* false */
+
+#ifndef __bool_true_false_are_defined
 #define __bool_true_false_are_defined 1
-
+#endif /* __bool_true_false_are_defined */
 
 #endif /* HAVE_STDBOOL_H */
 
