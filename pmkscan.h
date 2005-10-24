@@ -55,6 +55,7 @@
 #define PMKSCAN_DATA	DATADIR "/pmkscan.dat"
 #define PMKSCAN_PMKFILE	"pmkfile.scan"
 #define PMKSCAN_MKFILE	"Makefile.scan"
+#define PMKSCAN_CONFIG	"scanfile"
 
 /* languages, should use lgdata later */
 #define PMKSCAN_LANG_C		"C"
