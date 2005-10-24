@@ -1,3 +1,11 @@
+24 Oct 2005 mipsator
+ * fixed a bug when generating a pmkfile that has no checks, noticed by
+   veins of skreel.org.
+ * set './scanfile' as default specification file for pmkscan when no
+   option is given at the command line.
+
+# snapshot 0.9.3-s3
+
 23 Oct 2005 mipsator
  * misc changes before new snapshot.
 

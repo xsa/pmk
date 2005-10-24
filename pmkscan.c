@@ -1057,6 +1057,10 @@ bool gen_checks(scn_zone_t *psz, scandata *psd) {
 
 	/* for each node */
 	phk = hash_keys(psz->nodes);
+	if (phk == NULL) {
+		return(true);
+	}
+
 	for(i = 0 ; i < phk->nkey ; i++) {
 		pn = hash_get(psz->nodes, phk->keys[i]); /* no check needed */
 
@@ -3819,14 +3823,13 @@ int main(int argc, char *argv[]) {
 				break;
 
 			case 'r' :
-				/* enable pmkfile generation */
+				/* enable recursive scanning */
 				recursive = true;
-				/*fprintf(stdout, "recursive option disabled until better support\n");*/
 				break;
 
 			case 'u' :
 				/* use unique file (with recursive mode) */
-				unique_file = true;
+				/* unique_file = true; *//* XXX TODO */
 				break;
 
 			case 'v' :
@@ -3858,6 +3861,13 @@ int main(int argc, char *argv[]) {
 	pcmn.func_decl = &process_proc_decl;
 	pcmn.func_type = &process_type;
 	pcmn.data = NULL; /* will be updated later */
+
+	/* if generation options are not set */
+	if ((gen_pmk == false) || (gen_mkf == false)) {
+		/* look for default config file */
+		use_script = true;
+		scfile = PMKSCAN_CONFIG;
+	}
 
 	if ((gen_pmk == true) || (use_script == true)) {
 		/* initialise parsing data structure */
