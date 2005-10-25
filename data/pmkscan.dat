@@ -33,8 +33,7 @@ ADD_HEADER {
 
 ADD_HEADER {
 	NAME = "socket.h"
-	# XXX alternative flags
-	# SUBHRS = ("sys/type.h")
+	SUBHDR = ("sys/type.h")
 	PROCEDURE = ("socket")
 }
 

@@ -41,30 +41,6 @@
 #include "errmsg.h"
 #include "pmk_obj.h"
 
-/* We include sys/param.h to get MAXPATHLEN.
-   This is known to work under following operating systems:
-	OpenBSD
-	FreeBSD
-	NetBSD
-	Mac OS X
-	Solaris
-	SunOS
-	HP-UX
-	AIX
-	IRIX
-	OSF1
-	Ultrix			(not verified)
-	Linux based systems	(Debian, Mandrake, RedHat, Slackware, Suse)
-	DG-UX			(not verified)
-	4.4BSD			(not verified)
-
-   Some systems does not provide the same location :
-   	Chorus			arpa/ftp.h
-
-
-   Comments about this stuff is welcome. If your system is not
-   supported then get in touch with us to fix it.
-*/
 #include <sys/param.h>
 #ifndef MAXPATHLEN
 #	define MAXPATHLEN 512
@@ -99,14 +75,14 @@
 #define PREMAKE_VSUB	"3"
 
 /* full version */
-#ifndef PREMAKE_VSUB	
+#ifndef PREMAKE_VSUB
 #define PREMAKE_VFULL	PREMAKE_VMAJOR "." PREMAKE_VMINOR
 #else
 #define PREMAKE_VFULL	PREMAKE_VMAJOR "." PREMAKE_VMINOR "." PREMAKE_VSUB
 #endif
 
 /* only used for snapshots, comment for release */
-#define PREMAKE_SNAP		"2"
+#define PREMAKE_SNAP		"3"
 
 /* build version string */
 #ifndef PREMAKE_SNAP

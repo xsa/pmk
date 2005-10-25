@@ -1,3 +1,7 @@
+25 Oct 2005 mipsator
+ * added support for sub headers, language label and language option in
+   pmkscan.
+
 24 Oct 2005 mipsator
  * fixed a bug when generating a pmkfile that has no checks, noticed by
    veins of skreel.org.
