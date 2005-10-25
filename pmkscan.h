@@ -61,6 +61,10 @@
 #define PMKSCAN_LANG_C		"C"
 #define PMKSCAN_LANG_CXX	"C++"
 
+/* label language strings */
+#define PMKSCAN_LABEL_C		"c_"
+#define PMKSCAN_LABEL_CXX	"cxx_"
+
 #define PSC_MAIN_C		"main"
 
 /* parser tokens *******************************************************/
@@ -89,10 +93,11 @@ enum {
 #define KW_CMD_ADDTYP	"ADD_TYPE"
 
 /* command keyword options */
-#define KW_OPT_PRC		"PROCEDURE"
-#define KW_OPT_LIB		"LIBRARY"
 #define KW_OPT_HDR		"HEADER"
+#define KW_OPT_LIB		"LIBRARY"
 #define KW_OPT_MBR		"MEMBER"
+#define KW_OPT_PRC		"PROCEDURE"
+#define KW_OPT_SUB		"SUBHDR"
 
 /* script keywords */
 #define KW_CMD_GENPF	"GEN_PMKFILE"
@@ -431,7 +436,8 @@ typedef struct {
 			*header,
 			*library,
 			*member;
-	dynary	*procs;
+	dynary	*procs,
+			*subhdrs;
 	ftype_t	 ftype;
 } check_t;
 
@@ -458,12 +464,12 @@ check_t		*init_chk_cell(char *);
 void		 destroy_chk_cell(check_t *);
 check_t		*mk_chk_cell(htable *, int);
 bool		 parse_data_file(prsdata *, scandata *);
+char		*conv_to_label(ftype_t, char *, ...);
 bool		 recurse_sys_deps(htable *, dynary *, char *);
 bool		 add_library(scn_zone_t *, char *, scandata *, scn_node_t *);
 bool		 check_header(scn_zone_t *, char *, scandata *, scn_node_t *);
 bool		 check_type(htable *, char *, scandata *, scn_node_t *);
 bool		 gen_checks(scn_zone_t *, scandata *);
-char		*conv_to_label(char *, ...);
 void		 build_cmd_begin(FILE *, char *, char *);
 void		 build_cmd_end(FILE *);
 void		 build_comment(FILE *, char *, ...);
@@ -471,9 +477,9 @@ void		 build_boolean(FILE *, char *, bool);
 void		 build_quoted(FILE *, char *, char *);
 bool		 build_list(FILE *, char *, dynary *);
 bool		 set_lang(FILE *, ftype_t);
-bool		 output_header(check_t *, scandata *, FILE *);
-bool		 output_library(check_t *, scandata *, FILE *);
-bool		 output_type(check_t *, scandata *, FILE *);
+bool		 output_header(htable *, char *, scandata *, FILE *);
+bool		 output_library(htable *, char *, scandata *, FILE *);
+bool		 output_type(htable *, char *, scandata *, FILE *);
 bool		 scan_build_pmk(char *, scn_zone_t *, scandata *);
 
 /* makefile specific */

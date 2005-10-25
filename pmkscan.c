@@ -116,8 +116,9 @@ kw_t	req_name[] = {
 
 /* ADD_HEADER options */
 kw_t	opt_addhdr[] = {
+	{KW_OPT_LIB,	PO_STRING},
 	{KW_OPT_PRC,	PO_LIST},
-	{KW_OPT_LIB,	PO_STRING}
+	{KW_OPT_SUB,	PO_LIST}
 };
 
 kwopt_t	kw_addhdr = {
@@ -602,6 +603,7 @@ check_t *init_chk_cell(char *name) {
 	pchk->header = NULL;
 	pchk->library = NULL;
 	pchk->member = NULL;
+	pchk->subhdrs = NULL;
 
 	return(pchk);
 }
@@ -658,6 +660,7 @@ check_t *mk_chk_cell(htable *pht, int token) {
 		pchk->header = NULL;
 		pchk->library = NULL;
 		pchk->member = NULL;
+		pchk->subhdrs = NULL;
 
 		/* specific stuff */
 		switch (token) {
@@ -667,6 +670,9 @@ check_t *mk_chk_cell(htable *pht, int token) {
 
 				/* get eventual related library */
 				pchk->library = po_get_str(hash_get(pht, KW_OPT_LIB));
+
+				/* get eventual sub headers */
+				pchk->subhdrs = po_get_list(hash_get(pht, KW_OPT_SUB));
 				break;
 
 			case PSC_TOK_ADDLIB :
@@ -774,6 +780,71 @@ bool parse_data_file(prsdata *pdata, scandata *sdata) {
 }
 
 
+/*******************
+ * conv_to_label() *
+ ***********************************************************************
+ DESCR
+ 	convert a string to a tag
+
+ IN
+	str :		string to convert
+
+ OUT
+	pointer to the tag buffer
+ ***********************************************************************/
+
+char *conv_to_label(ftype_t ltype, char *fmt, ...) {
+	static char	 buffer[TMP_BUF_LEN];
+	char		*pbuf;
+	size_t		 s;
+	va_list		 plst;
+
+	/* language prefix */
+	switch(ltype) {
+		case FILE_TYPE_C :
+			s = strlcpy(buffer, PMKSCAN_LABEL_C, sizeof(buffer));
+			break;
+
+		case FILE_TYPE_CXX :
+			s = strlcpy(buffer, PMKSCAN_LABEL_CXX, sizeof(buffer));
+			break;
+
+		default :
+			s = 0;
+	}
+
+	/* adjust pointer to end of language prefix */
+	pbuf = buffer + s;
+	s = sizeof(buffer) - s;
+
+	/* produce formatted string in the buffer */
+	va_start(plst, fmt);
+	vsnprintf(pbuf, s, fmt, plst);
+	va_end(plst);
+
+	/* process the given string */
+	while ((*pbuf != '\0') && (s > 1)) {
+		/* check if we have an alphanumeric character */
+		if (isalnum(*pbuf) == 0) {
+			/* no, replace by an underscore */
+			*pbuf = '_';
+		} else {
+			/* yes, convert to uppercase if needed */
+			*pbuf = (char) tolower((int) *pbuf);
+		}
+
+		/* next character */
+		s--;
+		pbuf++;
+	}
+
+	/* end of string */
+	*pbuf = '\0';
+
+	return(buffer);
+}
+
+
 /**********************
  * recurse_sys_deps() *
  ***********************************************************************
@@ -849,7 +920,8 @@ bool recurse_sys_deps(htable *nodes, dynary *deps, char *nodename) {
  ***********************************************************************/
 
 bool add_library(scn_zone_t *psz, char *library, scandata *psd, scn_node_t *pn) {
-	char	*pstr;
+	char	*label,
+			*pstr;
 	check_t	*pchk,
 			*pcrec;
 	size_t	 i,
@@ -862,7 +934,8 @@ bool add_library(scn_zone_t *psz, char *library, scandata *psd, scn_node_t *pn) 
 		return(true);
 	}
 
-	pchk = hash_get(psz->l_checks, library);
+	label = conv_to_label(pn->type, "library_%s", library);
+	pchk = hash_get(psz->l_checks, label);
 	if (pchk == NULL) {
 		/* add new check */
 		pchk = init_chk_cell(library);
@@ -872,9 +945,12 @@ bool add_library(scn_zone_t *psz, char *library, scandata *psd, scn_node_t *pn) 
 			return(false);
 		}
 
-		if (hash_update(psz->l_checks, library, pchk) == HASH_ADD_FAIL) {
+		if (hash_update(psz->l_checks, label, pchk) == HASH_ADD_FAIL) {
 			return(false);
 		}
+
+		/* set language */
+		pchk->ftype = pn->type;
 	}
 
 	/* look for related procedures */
@@ -921,7 +997,8 @@ bool add_library(scn_zone_t *psz, char *library, scandata *psd, scn_node_t *pn) 
  ***********************************************************************/
 
 bool check_header(scn_zone_t *psz, char *header, scandata *psd, scn_node_t *pn) {
-	char	*pstr;
+	char	*label,
+			*pstr;
 	check_t	*pchk,
 			*pcrec;
 	size_t	 i,
@@ -934,7 +1011,8 @@ bool check_header(scn_zone_t *psz, char *header, scandata *psd, scn_node_t *pn) 
 		return(true);
 	}
 
-	pchk = hash_get(psz->h_checks, header);
+	label = conv_to_label(pn->type, "header_%s", header);
+	pchk = hash_get(psz->h_checks, label);
 	if (pchk == NULL) {
 		/* add new check */
 		pchk = init_chk_cell(header);
@@ -944,9 +1022,15 @@ bool check_header(scn_zone_t *psz, char *header, scandata *psd, scn_node_t *pn) 
 			return(false);
 		}
 
-		if (hash_update(psz->h_checks, header, pchk) == HASH_ADD_FAIL) {
+		if (hash_update(psz->h_checks, label, pchk) == HASH_ADD_FAIL) {
 			return(false);
 		}
+
+		/* set language */
+		pchk->ftype = pn->type;
+
+		/* link to eventual sub headers */
+		pchk->subhdrs = pcrec->subhdrs;
 	}
 
 	/* look for related procedures */
@@ -999,10 +1083,12 @@ bool check_header(scn_zone_t *psz, char *header, scandata *psd, scn_node_t *pn) 
  ***********************************************************************/
 
 bool check_type(htable *checks, char *type, scandata *psd, scn_node_t *pn) {
+	char	*label;
 	check_t	*pchk,
 			*pcrec;
 
-	if (hash_get(checks, type) != NULL) {
+	label = conv_to_label(pn->type, "type_%s", type);
+	if (hash_get(checks, label) != NULL) {
 		/* check already exists */
 		return(true);
 	}
@@ -1022,11 +1108,14 @@ bool check_type(htable *checks, char *type, scandata *psd, scn_node_t *pn) {
 		return(false);
 	}
 
+	/* set language */
+	pchk->ftype = pn->type;
+
 	if (pcrec->header != NULL) {
 		pchk->header = pcrec->header; /* XXX strdup ? */
 	}
 
-	if (hash_update(checks, type, pchk) == HASH_ADD_FAIL) {
+	if (hash_update(checks, label, pchk) == HASH_ADD_FAIL) {
 		return(false);
 	}
 
@@ -1101,60 +1190,6 @@ bool gen_checks(scn_zone_t *psz, scandata *psd) {
 }
 
 
-/*******************
- * conv_to_label() *
- ***********************************************************************
- DESCR
- 	convert a string to a tag
-
- IN
-	str :		string to convert
-
- OUT
-	pointer to the tag buffer
- ***********************************************************************/
-
-char *conv_to_label(char *fmt, ...) {
-	static char	 buffer[TMP_BUF_LEN];
-	char		*pbuf;
-	size_t		 s;
-	va_list		 plst;
-
-	s = sizeof(buffer);
-	pbuf = buffer;
-
-	/* format initial string in the buffer */
-	va_start(plst, fmt);
-	vsnprintf(buffer, s, fmt, plst);
-	va_end(plst);
-
-
-	/* process the given string */
-	while ((*pbuf != '\0') && (s > 1)) {
-		/* if we got an asterisk (pointer character) */
-		if (*pbuf == '*') {
-			/* then replace by P */
-			*pbuf = 'P';
-		} else {
-			/* check if we have an alphanumeric character */
-			if (isalnum(*pbuf) == 0) {
-				/* no, replace by an underscore */
-				*pbuf = '_';
-			} else {
-				/* yes, convert to uppercase if needed */
-				*pbuf = (char) tolower((int) *pbuf);
-			}
-		}
-
-		/* next character */
-		s--;
-		pbuf++;
-	}
-
-	return(buffer);
-}
-
-
 /*********************
  * build_cmd_begin() *
  ***********************************************************************
@@ -1162,8 +1197,7 @@ char *conv_to_label(char *fmt, ...) {
 	output body start of a command
 
  IN
-	buf :	storage buffer
-	siz :	size of buffer
+	fp :	file pointer
 	cmd :	command name
 	label :	command label
 
@@ -1187,8 +1221,7 @@ void build_cmd_begin(FILE *fp, char *cmd, char *label) {
 	output body end of a command
 
  IN
-	buf :	storage buffer
-	siz :	size of buffer
+	fp :	file pointer
 
  OUT
 	-
@@ -1206,8 +1239,7 @@ void build_cmd_end(FILE *fp) {
 	output a comment line at the main level (no indent)
 
  IN
-	buf :	storage buffer
-	siz :	size of buffer
+	fp :	file pointer
 	comment :	comment text
 
  OUT
@@ -1237,8 +1269,7 @@ void build_comment(FILE *fp, char *fmt, ...) {
 	output a quoted string assignment
 
  IN
-	buf :	storage buffer
-	siz :	size of buffer
+	fp :	file pointer
 	vname :	variable name
 	qstr :	quoted string content
 
@@ -1258,8 +1289,7 @@ void build_quoted(FILE *fp, char *vname, char *qstr) {
 	output a boolean assignment
 
  IN
-	buf :	storage buffer
-	siz :	size of buffer
+	fp :	file pointer
 	vname :	variable name
 	bval :	boolean value
 
@@ -1287,8 +1317,7 @@ void build_boolean(FILE *fp, char *vname, bool bval) {
 	output a list assignment (if the list is not empty)
 
  IN
-	buf :	storage buffer
-	siz :	size of buffer
+	fp :	file pointer
 	vname :	variable name
 	list :	item list
 
@@ -1299,6 +1328,10 @@ void build_boolean(FILE *fp, char *vname, bool bval) {
 bool build_list(FILE *fp, char *vname, dynary *list) {
 	size_t	 i,
 			 s;
+
+	if (list == NULL) {
+		return(true);
+	}
 
 	/* get number of items */
 	s = da_usize(list);
@@ -1379,15 +1412,21 @@ bool set_lang(FILE *fp, ftype_t ltype) {
 	boolean
  ***********************************************************************/
 
-bool output_header(check_t *pchk, scandata *psd, FILE *fp) {
-	char	*pstr;
+bool output_header(htable *checks, char *cname, scandata *psd, FILE *fp) {
+	char	*lang,
+			*pstr;
+	check_t	*pchk;
+
+	pchk = hash_get(checks, cname);
+	if (pchk == NULL) {
+		return(false);
+	}
 
 	/* output comment */
 	build_comment(fp, "check header %s", pchk->name);
 
-	/* generate check label and output pmk command */
-	pstr = conv_to_label("header_%s", pchk->name);
-	build_cmd_begin(fp, "CHECK_HEADER", pstr);
+	/* output pmk command */
+	build_cmd_begin(fp, "CHECK_HEADER", cname);
 
 	/* output type name */
 	build_boolean(fp, "REQUIRED", false);
@@ -1395,15 +1434,16 @@ bool output_header(check_t *pchk, scandata *psd, FILE *fp) {
 	/* output header name */
 	build_quoted(fp, "NAME", pchk->name);
 
-	/* output language if needed */
-/*
+	/* output language */
 	if (set_lang(fp, pchk->ftype) == false) {
 		return(false);
 	}
-*/
 
 	/* output list (already handle empty list) */
 	build_list(fp, "FUNCTION", pchk->procs);
+
+	/* output list (already handle empty list) */
+	build_list(fp, "SUBHDR", pchk->subhdrs);
 
 	/* output end of command body */
 	build_cmd_end(fp);
@@ -1430,15 +1470,20 @@ bool output_header(check_t *pchk, scandata *psd, FILE *fp) {
 	boolean
  ***********************************************************************/
 
-bool output_library(check_t *pchk, scandata *psd, FILE *fp) {
+bool output_library(htable *checks, char *cname, scandata *psd, FILE *fp) {
 	char	*pstr;
+	check_t	*pchk;
+
+	pchk = hash_get(checks, cname);
+	if (pchk == NULL) {
+		return(false);
+	}
 
 	/* output comment */
 	build_comment(fp, "check library %s", pchk->name);
 
-	/* generate check label and output pmk command */
-	pstr = conv_to_label("library_%s", pchk->name);
-	build_cmd_begin(fp, "CHECK_LIB", pstr);
+	/* output pmk command */
+	build_cmd_begin(fp, "CHECK_LIB", cname);
 
 	/* output type name */
 	build_boolean(fp, "REQUIRED", false);
@@ -1446,12 +1491,10 @@ bool output_library(check_t *pchk, scandata *psd, FILE *fp) {
 	/* output header name */
 	build_quoted(fp, "NAME", pchk->name);
 
-	/* output language if needed */
-/*
+	/* output language */
 	if (set_lang(fp, pchk->ftype) == false) {
 		return(false);
 	}
-*/
 
 	/* output list (already handle empty list) */
 	build_list(fp, "FUNCTION", pchk->procs);
@@ -1484,15 +1527,21 @@ bool output_library(check_t *pchk, scandata *psd, FILE *fp) {
 	handle member ?
  ***********************************************************************/
 
-bool output_type(check_t *pchk, scandata *psd, FILE *fp) {
+
+bool output_type(htable *checks, char *cname, scandata *psd, FILE *fp) {
 	char	*pstr;
+	check_t	*pchk;
+
+	pchk = hash_get(checks, cname);
+	if (pchk == NULL) {
+		return(false);
+	}
 
 	/* output comment */
 	build_comment(fp, "check type %s", pchk->name);
 
-	/* generate check label and output pmk command */
-	pstr = conv_to_label("type_%s", pchk->name);
-	build_cmd_begin(fp, "CHECK_TYPE", pstr);
+	/* output pmk command */
+	build_cmd_begin(fp, "CHECK_TYPE", cname);
 
 	/* output type name */
 	build_boolean(fp, "REQUIRED", false);
@@ -1500,12 +1549,10 @@ bool output_type(check_t *pchk, scandata *psd, FILE *fp) {
 	/* output type name */
 	build_quoted(fp, "NAME", pchk->name);
 
-	/* output language if needed */
-/*
+	/* output language */
 	if (set_lang(fp, pchk->ftype) == false) {
 		return(false);
 	}
-*/
 
 	if (pchk->header != NULL) {
 		/* output header name */
@@ -1612,8 +1659,7 @@ bool scan_build_pmk(char *fname, scn_zone_t *psz, scandata *psd) {
 	if (phk != NULL) {
 		/* output every type checks */
 		for(i = 0 ; i < phk->nkey ; i++) {
-			pchk = hash_get(psz->t_checks, phk->keys[i]);
-			output_type(pchk, psd, fp);
+			output_type(psz->t_checks, phk->keys[i], psd, fp); /* XXX check */
 		}
 
 		hash_free_hkeys(phk);
@@ -1624,8 +1670,7 @@ bool scan_build_pmk(char *fname, scn_zone_t *psz, scandata *psd) {
 	if (phk != NULL) {
 		/* output every header checks */
 		for(i = 0 ; i < phk->nkey ; i++) {
-			pchk = hash_get(psz->h_checks, phk->keys[i]);
-			output_header(pchk, psd, fp);
+			output_header(psz->h_checks, phk->keys[i], psd, fp); /* XXX check */
 		}
 
 		hash_free_hkeys(phk);
@@ -1636,8 +1681,7 @@ bool scan_build_pmk(char *fname, scn_zone_t *psz, scandata *psd) {
 	if (phk != NULL) {
 		/* output every library checks */
 		for(i = 0 ; i < phk->nkey ; i++) {
-			pchk = hash_get(psz->l_checks, phk->keys[i]);
-			output_library(pchk, psd, fp);
+			output_library(psz->l_checks, phk->keys[i], psd, fp); /* XXX check */
 		}
 
 		hash_free_hkeys(phk);
