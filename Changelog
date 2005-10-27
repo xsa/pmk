@@ -1,3 +1,6 @@
+27 Oct 2005 mipsator
+ * started improvements to pmkscan (see TODO).
+
 25 Oct 2005 mipsator
  * added support for sub headers, language label and language option in
    pmkscan.

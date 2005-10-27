@@ -115,7 +115,10 @@ size_t nb_c_type_keywords = sizeof(c_type_keywords) / sizeof(char *);
 	C file parsing main function
 
  IN
-	OUT
+	XXX
+
+ OUT
+	XXX
 ************************************************************************/
 
 bool prs_asm_file(prs_cmn_t *pcmn, FILE *fp) {
@@ -233,8 +236,10 @@ bool prs_asm_file(prs_cmn_t *pcmn, FILE *fp) {
 	skip until a given char
 
  IN
+	XXX
 
  OUT
+	XXX
 ************************************************************************/
 
 bool prs_c_skip_to_char(prseng_t *ppe, char c) {
@@ -276,7 +281,10 @@ bool prs_c_skip_to_char(prseng_t *ppe, char c) {
 	skip until end of file
 
  IN
-	OUT
+	XXX
+
+ OUT
+	XXX
 ************************************************************************/
 
 bool prs_c_line_skip(prseng_t *ppe) {
@@ -318,7 +326,10 @@ bool prs_c_line_skip(prseng_t *ppe) {
 	skip C style comments
 
  IN
-	OUT
+	XXX
+
+ OUT
+	XXX
 ************************************************************************/
 
 bool prs_c_comment_skip(prseng_t *ppe) {
@@ -392,7 +403,10 @@ bool prs_c_comment_skip(prseng_t *ppe) {
 	process simple quotes
 
  IN
-	OUT
+	XXX
+
+ OUT
+	XXX
 ************************************************************************/
 
 bool prs_c_squote_skip(prseng_t *ppe) {
@@ -440,8 +454,12 @@ bool prs_c_squote_skip(prseng_t *ppe) {
 
  DESCR
 	process double quotes
+
  IN
-	OUT
+	XXX
+
+ OUT
+	XXX
 ************************************************************************/
 
 bool prs_c_dquote_skip(prseng_t *ppe) {
@@ -483,7 +501,10 @@ bool prs_c_dquote_skip(prseng_t *ppe) {
 	skip useless stuff like spaces, tabs, newlines and comments
 
  IN
-	OUT
+	XXX
+
+ OUT
+	XXX
 ************************************************************************/
 
 void prs_c_skip(prseng_t *ppe) { /* XXX bool */
@@ -528,7 +549,10 @@ void prs_c_skip(prseng_t *ppe) { /* XXX bool */
 	handle preprocesor directives
 
  IN
-	OUT
+	XXX
+
+ OUT
+	XXX
 ************************************************************************/
 
 bool prs_c_prepro(prs_cmn_t *pcmn, prseng_t *ppe) {
@@ -565,7 +589,10 @@ bool prs_c_prepro(prs_cmn_t *pcmn, prseng_t *ppe) {
 	check if identifier is a keyword
 
  IN
+	XXX
+
  OUT
+	XXX
 ************************************************************************/
 
 bool prs_c_is_kw(char *idtf, char **kw, size_t nbkw) {
@@ -595,7 +622,10 @@ bool prs_c_is_kw(char *idtf, char **kw, size_t nbkw) {
 	C file parsing main function
 
  IN
-	OUT
+	XXX
+
+ OUT
+	XXX
 ************************************************************************/
 
 bool prs_c_file(prs_cmn_t *pcmn, FILE *fp) {
