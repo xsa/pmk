@@ -15,6 +15,7 @@ Status flags:
 	!	high priority
 	.	low priority
 	R	release goal
+	S	snapshot goal
 
 Indented lines means subtask.
 -----------------------------------------------------------------------
@@ -22,22 +23,19 @@ Indented lines means subtask.
 
 common:
 -----------------------------------------------------------------------
-	+?	track and code missing checks for snprintf and strl*
-	~R?	update tutorial
+	~R	update tutorial
 	~.	improve test_pmkinstall to check more modes
-	+ 	update README and INSTALL
 	~!	new samples
 			- add a sample that show architecture data from pmk
-	-.	handle allocation through garbage collector.
-	-R!	improve tag generation and substitution.
+	~R!	improve tag generation and substitution.
 
 
 pmk:
 -----------------------------------------------------------------------
-	+R	add sub header check for older systems
 	-R?	check if ~/.pmk.conf is available
 	~.	compatibility with autoconf (progressing) :
-			~ support for DEFS (-D options to pass to the compiler)
+			~ support for DEFS (-D options to pass to the
+				compiler)
 			- support for LDFLAGS (misc linker options) ?
 			- support for CPPFLAGS (misc linker options) ?
 			- VPATH ?
@@ -53,22 +51,29 @@ pmksetup:
 			~ man page update
 	-	cpu optimisation for compiler
 	-	option to append to variable of pmk.conf
-	+!	clean temporary files on error
+	+!	clean temporary files on error (verify it's ok)
 
 
 pmkscan
 -----------------------------------------------------------------------
-	+R	fix label generation in pmkfile generation
-	-R?	try opening ./scanfile by default ?
-	-R!	template configuration header generation :
-			-	add CFGNAME option (alternative config template name)
-			-	add ADVTAG option (generate advanced tags, default false ?)
-			-	add tags hash table (in structure, init and destroy)
-			-	add support of tags in chech_header()
-			-	add support of tags in chech_type()
-	+R!	add support for LIBRARY option in check_header()
-	-R!	update pmkscan.1
-	~R!	update and commit (add) scanfile.5
+	+S	fix label generation in pmkfile generation
+	+S	try opening ./scanfile by default ?
+	~S!	template configuration header generation :
+			+ add CFGNAME option (alternative config
+				template name, default config.h.scan)
+			+ mark NAME option as obsolete
+			+ add MKFNAME option to replace NAME
+			+ add ADVTAG option (generate advanced tags,
+				default only std autoconf tags ?)
+			+ add tags hash table (in structure, init and
+				destroy)
+			- add support of tags in check_header() (record
+				when found)
+			- add support of tags in check_type() (same as
+				above)
+			- update scanfile.5 (CFGNAME,MKFNAME,ADVTAG)
+	+S	add support for LIBRARY option in check_header()
+	~S!	update pmkscan.1
 	-R!	add more entries in pmkscan.dat
 
 
@@ -86,10 +91,16 @@ pmkpc
 			- PMKPC_OPT_VAR_PRNT
 			- PMKPC_OPT_VAR_SILC
 			- PMKPC_OPT_VAR_STDO
-	~	man page
+	~.	man page
 	-.	special expression ('' quoted), post 0.8
 
 
 misc
 -----------------------------------------------------------------------
+
+
+recursive tasks
+-----------------------------------------------------------------------
+	~R	track and code missing checks for snprintf and strl*
+	~R	update README and INSTALL
 

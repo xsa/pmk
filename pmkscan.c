@@ -170,6 +170,8 @@ kw_t	req_dir[] = {
 
 /* GEN_PMKFILE options */
 kw_t	opt_genpmk[] = {
+	{KW_OPT_ADVTAG,	PO_BOOL},
+	{KW_OPT_CFGALT,	PO_STRING},
 	{KW_OPT_DSC,	PO_LIST},
 	{KW_OPT_REC,	PO_BOOL},
 	{KW_OPT_UNI,	PO_BOOL}
@@ -186,6 +188,7 @@ kwopt_t	kw_genpmk = {
 kw_t	opt_genmkf[] = {
 	{KW_OPT_DSC,	PO_LIST},
 	{KW_OPT_NAM,	PO_STRING},
+	{KW_OPT_MKFALT,	PO_STRING},
 	{KW_OPT_REC,	PO_BOOL},
 	{KW_OPT_UNI,	PO_BOOL}
 };
@@ -199,9 +202,12 @@ kwopt_t	kw_genmkf = {
 
 /* GEN_ZONE options */
 kw_t	opt_genzone[] = {
+	{KW_OPT_ADVTAG,	PO_BOOL},
+	{KW_OPT_CFGALT,	PO_STRING},
 	{KW_OPT_DSC,	PO_LIST},
 	{KW_OPT_MKF,	PO_BOOL},
 	{KW_OPT_NAM,	PO_STRING},
+	{KW_OPT_MKFALT,	PO_STRING},
 	{KW_OPT_PMK,	PO_BOOL},
 	{KW_OPT_REC,	PO_BOOL},
 	{KW_OPT_UNI,	PO_BOOL}
@@ -465,10 +471,13 @@ scn_zone_t *scan_zone_init(htable *nodes) {
 		pzone->nodes = nodes;
 
 		/* init boolean flags */
-		pzone->recursive = false;
-		pzone->unique = false;
+		pzone->advtag = true;
 		pzone->gen_pmk = false;
 		pzone->gen_mkf = false;
+		pzone->recursive = false;
+		pzone->unique = false;
+		pzone->cfg_name = PMKSCAN_CFGFILE;
+		pzone->mkf_name = PMKSCAN_MKFILE;
 
 		/* discard list */
 		pzone->discard = NULL;
@@ -484,6 +493,7 @@ scn_zone_t *scan_zone_init(htable *nodes) {
 		/* init zone tables */
 		pzone->objects = hash_init(256); /* XXX can do better :) */
 		pzone->targets = hash_init(256); /* XXX can do better :) */
+		pzone->tags = hash_init(512); /* XXX can do better :) */
 		pzone->h_checks = hash_init_adv(128, NULL, (void (*)(void *)) destroy_chk_cell, NULL); /* XXX can do better :) */
 		pzone->l_checks = hash_init_adv(128, NULL, (void (*)(void *)) destroy_chk_cell, NULL); /* XXX can do better :) */
 		pzone->t_checks = hash_init_adv(128, NULL, (void (*)(void *)) destroy_chk_cell, NULL); /* XXX can do better :) */
@@ -525,6 +535,10 @@ void scan_zone_destroy(scn_zone_t *pzone) {
 
 	if (pzone->targets != NULL) {
 		hash_destroy(pzone->targets);
+	}
+
+	if (pzone->tags != NULL) {
+		hash_destroy(pzone->tags);
 	}
 
 	if (pzone->h_checks != NULL) {
@@ -1412,9 +1426,7 @@ bool set_lang(FILE *fp, ftype_t ltype) {
 	boolean
  ***********************************************************************/
 
-bool output_header(htable *checks, char *cname, scandata *psd, FILE *fp) {
-	char	*lang,
-			*pstr;
+bool output_header(htable *checks, char *cname, FILE *fp) {
 	check_t	*pchk;
 
 	pchk = hash_get(checks, cname);
@@ -1470,8 +1482,7 @@ bool output_header(htable *checks, char *cname, scandata *psd, FILE *fp) {
 	boolean
  ***********************************************************************/
 
-bool output_library(htable *checks, char *cname, scandata *psd, FILE *fp) {
-	char	*pstr;
+bool output_library(htable *checks, char *cname, FILE *fp) {
 	check_t	*pchk;
 
 	pchk = hash_get(checks, cname);
@@ -1528,8 +1539,7 @@ bool output_library(htable *checks, char *cname, scandata *psd, FILE *fp) {
  ***********************************************************************/
 
 
-bool output_type(htable *checks, char *cname, scandata *psd, FILE *fp) {
-	char	*pstr;
+bool output_type(htable *checks, char *cname, FILE *fp) {
 	check_t	*pchk;
 
 	pchk = hash_get(checks, cname);
@@ -1583,7 +1593,7 @@ bool output_type(htable *checks, char *cname, scandata *psd, FILE *fp) {
 	boolean
  ***********************************************************************/
 
-bool scan_build_pmk(char *fname, scn_zone_t *psz, scandata *psd) {
+bool scan_build_pmk(char *fname, scn_zone_t *psz) {
 	FILE			*fp;
 	char			 buf[MKF_OUTPUT_WIDTH * 2];
 	check_t			*pchk;
@@ -1659,7 +1669,7 @@ bool scan_build_pmk(char *fname, scn_zone_t *psz, scandata *psd) {
 	if (phk != NULL) {
 		/* output every type checks */
 		for(i = 0 ; i < phk->nkey ; i++) {
-			output_type(psz->t_checks, phk->keys[i], psd, fp); /* XXX check */
+			output_type(psz->t_checks, phk->keys[i], fp); /* XXX check */
 		}
 
 		hash_free_hkeys(phk);
@@ -1670,7 +1680,7 @@ bool scan_build_pmk(char *fname, scn_zone_t *psz, scandata *psd) {
 	if (phk != NULL) {
 		/* output every header checks */
 		for(i = 0 ; i < phk->nkey ; i++) {
-			output_header(psz->h_checks, phk->keys[i], psd, fp); /* XXX check */
+			output_header(psz->h_checks, phk->keys[i], fp); /* XXX check */
 		}
 
 		hash_free_hkeys(phk);
@@ -1681,7 +1691,7 @@ bool scan_build_pmk(char *fname, scn_zone_t *psz, scandata *psd) {
 	if (phk != NULL) {
 		/* output every library checks */
 		for(i = 0 ; i < phk->nkey ; i++) {
-			output_library(psz->l_checks, phk->keys[i], psd, fp); /* XXX check */
+			output_library(psz->l_checks, phk->keys[i], fp); /* XXX check */
 		}
 
 		hash_free_hkeys(phk);
@@ -1689,6 +1699,61 @@ bool scan_build_pmk(char *fname, scn_zone_t *psz, scandata *psd) {
 
 	fclose(fp);
 	psc_log("Saved as '%s'\n", NULL, fname);
+
+	return(true);
+}
+
+
+/********************
+ * scan_build_cfg() *
+ ***********************************************************************
+ DESCR
+	build config file using gathered data
+
+ IN
+	fname :	output file name
+	psz :	scanning zone data
+	psd :	parsing data structure
+
+ OUT
+	boolean
+ ***********************************************************************/
+
+bool scan_build_cfg(scn_zone_t *psz) {
+	FILE			*fp;
+	char			 buf[MKF_OUTPUT_WIDTH * 2],
+					*pstr;
+	hkeys			*phk;
+	time_t			 now;
+	unsigned int	 i;
+
+	fp = fopen(psz->cfg_name, "w");
+	if (fp == NULL) {
+		errorf("unable to open file '%s' for writing.", psz->cfg_name);
+		return(false);
+	}
+
+	/* generating date */
+	now = time(NULL);
+	strftime(buf, sizeof(buf), STR_TIME_GEN, localtime(&now));
+
+	fprintf(fp, CFGF_HDR_GEN, buf);
+
+	fprintf(fp, "/* WORK IN PROGRESS (means not done yet) */\n\n");
+
+	phk = hash_keys_sorted(psz->tags);
+	if (phk != NULL) {
+		/* output every tags */
+		for(i = 0 ; i < phk->nkey ; i++) {
+			pstr = hash_get(psz->tags, phk->keys[i]); /* XXX check */
+			fprintf(fp, pstr);
+		}
+
+		hash_free_hkeys(phk);
+	}
+
+	fclose(fp);
+	psc_log("Saved as '%s'\n", NULL, psz->cfg_name);
 
 	return(true);
 }
@@ -2775,12 +2840,12 @@ void mkf_output_man_inst(FILE *fp, scn_zone_t *psz) {
 	NONE
  ***********************************************************************/
 
-bool scan_build_mkf(char *fname, scn_zone_t *psz) {
-	FILE			*fp;
+bool scan_build_mkf(scn_zone_t *psz) {
+	FILE	*fp;
 
-	fp = fopen(fname, "w");
+	fp = fopen(psz->mkf_name, "w");
 	if (fp == NULL) {
-		errorf("unable to open file '%s' for writing.", fname);
+		errorf("unable to open file '%s' for writing.", psz->mkf_name);
 		return(false);
 	}
 
@@ -2826,6 +2891,7 @@ bool scan_build_mkf(char *fname, scn_zone_t *psz) {
 	mkf_output_trg_rules(fp, psz);
 
 	fclose(fp);
+	psc_log("Saved as '%s'\n", NULL, psz->mkf_name);
 
 	return(true);
 }
@@ -3592,8 +3658,16 @@ bool process_zone(prs_cmn_t *pcmn, scandata *psd) {
 
 				/* generate pmkfile */
 				psc_log("Generating %s ...\n", NULL, PMKSCAN_PMKFILE);
-				rslt = scan_build_pmk(PMKSCAN_PMKFILE, psz, psd);
+				rslt = scan_build_pmk(PMKSCAN_PMKFILE, psz);
 				if (rslt == true) {
+					psc_log("Ok\n\n", NULL);
+				} else {
+					psc_log("Failed\n\n", NULL);
+				}
+
+				/* generate config file */
+				psc_log("Generating %s ...\n", NULL, psz->cfg_name);
+				if (scan_build_cfg(psz) == true ) {
 					psc_log("Ok\n\n", NULL);
 				} else {
 					psc_log("Failed\n\n", NULL);
@@ -3624,8 +3698,8 @@ bool process_zone(prs_cmn_t *pcmn, scandata *psd) {
 					psc_log("Ok\n\n", NULL);
 
 					/* generate makefile */
-					psc_log("Generating %s ...\n", NULL, PMKSCAN_MKFILE);
-					if (scan_build_mkf(PMKSCAN_MKFILE, psz) == true ) {
+					psc_log("Generating %s ...\n", NULL, psz->mkf_name);
+					if (scan_build_mkf(psz) == true ) {
 						psc_log("Ok\n\n", NULL);
 					} else {
 						psc_log("Failed\n\n", NULL);
@@ -3667,7 +3741,8 @@ bool process_zone(prs_cmn_t *pcmn, scandata *psd) {
 bool parse_script(char *cfname, prs_cmn_t *pcmn, scandata *psd) {
 	FILE		*fd;
 	bool		 frslt = true;
-	char		*pdir;
+	char		*pdir,
+				*pstr;
 	htable		*tnodes;
 	pmkobj		*ppo;
 	prscell		*pcell;
@@ -3710,17 +3785,36 @@ bool parse_script(char *cfname, prs_cmn_t *pcmn, scandata *psd) {
 			case PSC_TOK_PMKF :
 				/* generate pmkfile only */
 				psz->gen_pmk = true;
+
+				/* alternate name for config file template */
+				ppo = hash_get(pcell->data, KW_OPT_CFGALT);
+				if (ppo != NULL) {
+					pstr = po_get_str(ppo);
+					if (pstr != NULL) {
+						/* set config file name name */
+						psz->cfg_name = pstr;
+					}
+				}
 				break;
 
 			case PSC_TOK_MAKF :
 				/* generate makefile only */
 				psz->gen_mkf = true;
 
-				/* optional name for makefile template */
-				ppo = hash_get(pcell->data, KW_OPT_NAM);
+				/* alternate name for makefile template */
+				ppo = hash_get(pcell->data, KW_OPT_NAM); /* check old option */
 				if (ppo != NULL) {
-					/* set makefile name */
-					psz->mkf_name = po_get_str(ppo);
+					/* obsolete option message */
+					fprintf(stderr, "Warning: %s is obsolete, use %s instead.\n", KW_OPT_NAM, KW_OPT_MKFALT);
+				} else {
+					ppo = hash_get(pcell->data, KW_OPT_MKFALT); /* check new option */
+				}
+				if (ppo != NULL) {
+					pstr = po_get_str(ppo);
+					if (pstr != NULL) {
+						/* set makefile name */
+						psz->mkf_name = po_get_str(ppo);
+					}
 				}
 				break;
 
@@ -3731,6 +3825,16 @@ bool parse_script(char *cfname, prs_cmn_t *pcmn, scandata *psd) {
 				ppo = hash_get(pcell->data, KW_OPT_PMK);
 				if (ppo != NULL) {
 					psz->gen_pmk = po_get_bool(ppo);
+
+					/* alternate name for config file template */
+					ppo = hash_get(pcell->data, KW_OPT_CFGALT);
+					if (ppo != NULL) {
+						pstr = po_get_str(ppo);
+						if (pstr != NULL) {
+							/* set config file name name */
+							psz->cfg_name = pstr;
+						}
+					}
 				}
 
 				/* get makefile switch */
@@ -3738,11 +3842,20 @@ bool parse_script(char *cfname, prs_cmn_t *pcmn, scandata *psd) {
 				if (ppo != NULL) {
 					psz->gen_mkf = po_get_bool(ppo);
 
-					/* optional name for makefile template */
-					ppo = hash_get(pcell->data, KW_OPT_NAM);
+					/* alternate name for makefile template */
+					ppo = hash_get(pcell->data, KW_OPT_NAM); /* check old option */
 					if (ppo != NULL) {
-						/* set makefile name */
-						psz->mkf_name = po_get_str(ppo);
+						/* obsolete option message */
+						fprintf(stderr, "Warning: %s is obsolete, use %s instead.\n", KW_OPT_NAM, KW_OPT_MKFALT);
+					} else {
+						ppo = hash_get(pcell->data, KW_OPT_MKFALT); /* check new option */
+					}
+					if (ppo != NULL) {
+						pstr = po_get_str(ppo);
+						if (pstr != NULL) {
+							/* set makefile name */
+							psz->mkf_name = po_get_str(ppo);
+						}
 					}
 				}
 				break;
@@ -3906,8 +4019,8 @@ int main(int argc, char *argv[]) {
 	pcmn.func_type = &process_type;
 	pcmn.data = NULL; /* will be updated later */
 
-	/* if generation options are not set */
-	if ((gen_pmk == false) || (gen_mkf == false)) {
+	/* if generation options and scanfile are not set */
+	if ((gen_pmk == false) && (gen_mkf == false) && (use_script == false)) {
 		/* look for default config file */
 		use_script = true;
 		scfile = PMKSCAN_CONFIG;
@@ -3979,7 +4092,11 @@ int main(int argc, char *argv[]) {
 		gen_checks(psz, &sd); /* XXX check */
 
 		psc_log("Generating %s ...\n", NULL, PMKSCAN_PMKFILE);
-		scan_build_pmk(PMKSCAN_PMKFILE, psz, &sd); /* XXX check */
+		scan_build_pmk(PMKSCAN_PMKFILE, psz); /* XXX check */
+		psc_log("Ok\n\n", NULL);
+
+		psc_log("Generating %s ...\n", NULL, PMKSCAN_CFGFILE);
+		scan_build_cfg(psz); /* XXX check */
 		psc_log("Ok\n\n", NULL);
 	}
 
@@ -3996,7 +4113,7 @@ int main(int argc, char *argv[]) {
 		psc_log("Ok\n\n", NULL);
 
 		psc_log("Generating %s ...\n", NULL, PMKSCAN_MKFILE);
-		scan_build_mkf(PMKSCAN_MKFILE, psz); /* XXX check */
+		scan_build_mkf(psz); /* XXX check */
 		psc_log("Ok\n\n", NULL);
 	}
 
