@@ -173,6 +173,7 @@ kw_t	opt_genpmk[] = {
 	{KW_OPT_ADVTAG,	PO_BOOL},
 	{KW_OPT_CFGALT,	PO_STRING},
 	{KW_OPT_DSC,	PO_LIST},
+	{KW_OPT_EXTTAG,	PO_LIST},
 	{KW_OPT_REC,	PO_BOOL},
 	{KW_OPT_UNI,	PO_BOOL}
 };
@@ -187,6 +188,7 @@ kwopt_t	kw_genpmk = {
 /* GEN_MAKEFILE options */
 kw_t	opt_genmkf[] = {
 	{KW_OPT_DSC,	PO_LIST},
+	{KW_OPT_EXTTAG,	PO_LIST},
 	{KW_OPT_NAM,	PO_STRING},
 	{KW_OPT_MKFALT,	PO_STRING},
 	{KW_OPT_REC,	PO_BOOL},
@@ -205,6 +207,7 @@ kw_t	opt_genzone[] = {
 	{KW_OPT_ADVTAG,	PO_BOOL},
 	{KW_OPT_CFGALT,	PO_STRING},
 	{KW_OPT_DSC,	PO_LIST},
+	{KW_OPT_EXTTAG,	PO_LIST},
 	{KW_OPT_MKF,	PO_BOOL},
 	{KW_OPT_NAM,	PO_STRING},
 	{KW_OPT_MKFALT,	PO_STRING},
@@ -482,6 +485,9 @@ scn_zone_t *scan_zone_init(htable *nodes) {
 		/* discard list */
 		pzone->discard = NULL;
 
+		/* extra tags */
+		pzone->exttags = NULL;
+
 		/* init file type flags */
 		for (i = 0 ; i < sizeof(pzone->found) ; i++) {
 			pzone->found[i] = false;
@@ -568,6 +574,8 @@ void scan_zone_destroy(scn_zone_t *pzone) {
 	if (pzone->templates != NULL) {
 		da_destroy(pzone->templates);
 	}
+
+	/* don't destroy discard and extra tags lists */
 
 	free(pzone);
 }
@@ -1659,6 +1667,16 @@ bool scan_build_pmk(char *fname, scn_zone_t *psz) {
 		}
 	}
 
+	/* extra tags */
+	if (psz->exttags != NULL) {
+		da_sort(psz->exttags);
+
+		/* output each extra tag */
+		for (i = 0 ; i < da_usize(psz->exttags) ; i++) {
+			fprintf(fp, PMKF_DEF_TAG, (char *) da_idx(psz->exttags, i));
+		}
+	}
+
 	/* end of command */
 	build_cmd_end(fp);
 
@@ -2285,7 +2303,8 @@ size_t fprintf_width(size_t left, size_t width, size_t offset, FILE *fp, char *s
  ***********************************************************************/
 
 void mkf_output_header(FILE *fp, scn_zone_t *psz) {
-	char			 buf[MKF_OUTPUT_WIDTH * 2];
+	char			 buf[MKF_OUTPUT_WIDTH * 2],
+					*pstr;
 	time_t			 now;
 	unsigned int	 i;
 
@@ -2333,6 +2352,21 @@ void mkf_output_header(FILE *fp, scn_zone_t *psz) {
 
 	/* package data */
 	fprintf(fp, MKF_HEADER_DATA);
+
+	/* extra tags */
+	if (psz->exttags != NULL) {
+		fprintf(fp, "# extra tags\n");
+
+		da_sort(psz->exttags);
+
+		/* output each extra tag */
+		for (i = 0 ; i < da_usize(psz->exttags) ; i++) {
+			pstr = (char *) da_idx(psz->exttags, i);
+			fprintf(fp, MKF_VARIABLE, pstr, pstr);
+		}
+
+		fprintf(fp, "\n");
+	}
 
 	/* directories */
 	fprintf(fp, "# specific directories\n");
@@ -3889,6 +3923,12 @@ bool parse_script(char *cfname, prs_cmn_t *pcmn, scandata *psd) {
 		ppo = hash_get(pcell->data, KW_OPT_UNI);
 		if (ppo != NULL) {
 			psz->unique = po_get_bool(ppo);
+		}
+
+		/* get extra tags list */
+		ppo = hash_get(pcell->data, KW_OPT_EXTTAG);
+		if (ppo != NULL) {
+			psz->exttags = po_get_list(ppo);
 		}
 
 		/* process current zone */

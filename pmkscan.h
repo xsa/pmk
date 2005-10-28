@@ -110,6 +110,7 @@ enum {
 #define KW_OPT_CFGALT	"CFGNAME"
 #define KW_OPT_DIR		"DIRECTORY"
 #define KW_OPT_DSC		"DISCARD"
+#define KW_OPT_EXTTAG	"EXTRATAG"
 #define KW_OPT_MKF		"MAKEFILE"
 #define KW_OPT_MKFALT	"MKFNAME"
 #define KW_OPT_PMK		"PMKFILE"
@@ -178,6 +179,7 @@ enum {
 						"\tMANDIR = \"\\$(PREFIX)/man\"\n" \
 						"\tDATADIR = \"\\$(PREFIX)/share/\\$(PACKAGE)\"\n"
 #define PMKF_DEF_MAN	"\tMAN%dDIR = \"\\$(MANDIR)/man%d\"\n"
+#define PMKF_DEF_TAG	"\t%s = \"extra tag to edit\"\n"
 
 #define PMKF_CMD_NOLABEL	"%s {\n"
 #define PMKF_CMD_LABEL		"%s(%s) {\n"
@@ -238,6 +240,8 @@ enum {
 #define MKF_MAN_DIR		"MANDIR=\t\t@MANDIR@\n"
 #define MKF_MANX_DIR	"MAN%dDIR=\t@MAN%dDIR@\n"
 #define MKF_SYSCONF_DIR	"SYSCONFDIR=\t@SYSCONFDIR@\n"
+
+#define MKF_VARIABLE	"%s=\t@%s@\n"
 
 #define MKF_LINE_JUMP	"\n"
 #define MKF_TWICE_JUMP	"\n\n"
@@ -426,6 +430,7 @@ typedef struct {
 				*mkf_name;				/* alternate makefile name */
 	dynary		*dirlist,				/* scanned directory list */
 				*dirscan,				/* directory list to scan (just a pointer) */
+				*exttags,				/* extra tags */
 				*manpgs,				/* man pages dynary */
 				*datafiles,				/* data files dynary */
 				*discard,				/* discard list */
