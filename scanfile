@@ -29,6 +29,7 @@ GEN_ZONE(main) {
 	DISCARD = ("samples", "doc", "tests")
 	PMKFILE = TRUE
 	MAKEFILE = TRUE
+	EXTRATAG = ("CONFDIR", "PRIVSEP_USER")
 #	UNIQUE = TRUE
 }
 
