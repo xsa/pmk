@@ -431,6 +431,7 @@ typedef struct {
 	dynary		*dirlist,				/* scanned directory list */
 				*dirscan,				/* directory list to scan (just a pointer) */
 				*exttags,				/* extra tags */
+				*tags,					/* zone tags */
 				*manpgs,				/* man pages dynary */
 				*datafiles,				/* data files dynary */
 				*discard,				/* discard list */
@@ -438,7 +439,6 @@ typedef struct {
 	htable		*nodes,					/* global nodes table */
 				*objects,				/* zone objects */
 				*targets,				/* zone targets */
-				*tags,					/* zone tags */
 				*h_checks,				/* zone header checks */
 				*l_checks,				/* zone header checks */
 				*t_checks;				/* zone type checks */
@@ -483,7 +483,7 @@ char		*conv_to_label(ftype_t, char *, ...);
 bool		 recurse_sys_deps(htable *, dynary *, char *);
 bool		 add_library(scn_zone_t *, char *, scandata *, scn_node_t *);
 bool		 check_header(scn_zone_t *, char *, scandata *, scn_node_t *);
-bool		 check_type(htable *, char *, scandata *, scn_node_t *);
+bool		 check_type(scn_zone_t *, char *, scandata *, scn_node_t *);
 bool		 gen_checks(scn_zone_t *, scandata *);
 void		 build_cmd_begin(FILE *, char *, char *);
 void		 build_cmd_end(FILE *);

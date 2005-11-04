@@ -199,7 +199,7 @@ MKVAR_TEST_SRCS=	../common.h ../compat/config.h ../compat/pmk_stdbool.h \
 PARSER_TEST_SRCS=	../cfgtool.h ../common.h ../compat/config.h \
 			../compat/pmk_stdbool.h ../dynarray.h \
 			../errmsg.h ../func.h ../hash.h ../parse.h \
-			../pmk.h ../pmk_obj.h ../premake.h ../prseng.h \
+			../pmk_obj.h ../premake.h ../prseng.h \
 			parser_test.c
 
 PATH_TEST_SRCS=	../compat/config.h ../compat/pmk_stdbool.h \
