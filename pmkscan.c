@@ -58,6 +58,7 @@
 #include "pathtools.h"
 #include "pmkscan.h"
 #include "premake.h"
+#include "tags.h"
 
 
 /*#define PMKSCAN_DEBUG	1*/
@@ -499,7 +500,6 @@ scn_zone_t *scan_zone_init(htable *nodes) {
 		/* init zone tables */
 		pzone->objects = hash_init(256); /* XXX can do better :) */
 		pzone->targets = hash_init(256); /* XXX can do better :) */
-		pzone->tags = hash_init(512); /* XXX can do better :) */
 		pzone->h_checks = hash_init_adv(128, NULL, (void (*)(void *)) destroy_chk_cell, NULL); /* XXX can do better :) */
 		pzone->l_checks = hash_init_adv(128, NULL, (void (*)(void *)) destroy_chk_cell, NULL); /* XXX can do better :) */
 		pzone->t_checks = hash_init_adv(128, NULL, (void (*)(void *)) destroy_chk_cell, NULL); /* XXX can do better :) */
@@ -515,6 +515,9 @@ scn_zone_t *scan_zone_init(htable *nodes) {
 
 		/* init templates dynary */
 		pzone->templates = da_init();
+
+		/* init tags dynary */
+		pzone->tags = da_init();
 	}
 
 	return(pzone);
@@ -543,10 +546,6 @@ void scan_zone_destroy(scn_zone_t *pzone) {
 		hash_destroy(pzone->targets);
 	}
 
-	if (pzone->tags != NULL) {
-		hash_destroy(pzone->tags);
-	}
-
 	if (pzone->h_checks != NULL) {
 		hash_destroy(pzone->h_checks);
 	}
@@ -573,6 +572,10 @@ void scan_zone_destroy(scn_zone_t *pzone) {
 
 	if (pzone->templates != NULL) {
 		da_destroy(pzone->templates);
+	}
+
+	if (pzone->tags != NULL) {
+		da_destroy(pzone->tags);
 	}
 
 	/* don't destroy discard and extra tags lists */
@@ -1053,6 +1056,10 @@ bool check_header(scn_zone_t *psz, char *header, scandata *psd, scn_node_t *pn) 
 
 		/* link to eventual sub headers */
 		pchk->subhdrs = pcrec->subhdrs;
+
+		/* add header tag */
+		pstr = gen_basic_tag_def(header);
+		da_push(psz->tags, strdup(pstr));
 	}
 
 	/* look for related procedures */
@@ -1104,13 +1111,14 @@ bool check_header(scn_zone_t *psz, char *header, scandata *psd, scn_node_t *pn) 
 	handle member ?
  ***********************************************************************/
 
-bool check_type(htable *checks, char *type, scandata *psd, scn_node_t *pn) {
-	char	*label;
+bool check_type(scn_zone_t *psz, char *type, scandata *psd, scn_node_t *pn) {
+	char	*label,
+			*pstr;
 	check_t	*pchk,
 			*pcrec;
 
 	label = conv_to_label(pn->type, "type_%s", type);
-	if (hash_get(checks, label) != NULL) {
+	if (hash_get(psz->t_checks, label) != NULL) {
 		/* check already exists */
 		return(true);
 	}
@@ -1137,9 +1145,13 @@ bool check_type(htable *checks, char *type, scandata *psd, scn_node_t *pn) {
 		pchk->header = pcrec->header; /* XXX strdup ? */
 	}
 
-	if (hash_update(checks, label, pchk) == HASH_ADD_FAIL) {
+	if (hash_update(psz->t_checks, label, pchk) == HASH_ADD_FAIL) {
 		return(false);
 	}
+
+	/* add header tag */
+	pstr = gen_basic_tag_def(type);
+	da_push(psz->tags, strdup(pstr));
 
 	return(true);
 }
@@ -1181,7 +1193,7 @@ bool gen_checks(scn_zone_t *psz, scandata *psd) {
 			for (j = 0 ; j < da_usize(pn->type_idtfs) ; j++) {
 				pstr = (char *) da_idx(pn->type_idtfs, j);
 
-				if (check_type(psz->t_checks, pstr, psd, pn) == false) {
+				if (check_type(psz, pstr, psd, pn) == false) {
 					errorf("check_type() failed.");
 					hash_free_hkeys(phk);
 					return(false);
@@ -1604,7 +1616,6 @@ bool output_type(htable *checks, char *cname, FILE *fp) {
 bool scan_build_pmk(char *fname, scn_zone_t *psz) {
 	FILE			*fp;
 	char			 buf[MKF_OUTPUT_WIDTH * 2];
-	check_t			*pchk;
 	hkeys			*phk;
 	time_t			 now;
 	unsigned int	 i;
@@ -1739,9 +1750,7 @@ bool scan_build_pmk(char *fname, scn_zone_t *psz) {
 
 bool scan_build_cfg(scn_zone_t *psz) {
 	FILE			*fp;
-	char			 buf[MKF_OUTPUT_WIDTH * 2],
-					*pstr;
-	hkeys			*phk;
+	char			 buf[MKF_OUTPUT_WIDTH * 2];
 	time_t			 now;
 	unsigned int	 i;
 
@@ -1759,15 +1768,8 @@ bool scan_build_cfg(scn_zone_t *psz) {
 
 	fprintf(fp, "/* WORK IN PROGRESS (means not done yet) */\n\n");
 
-	phk = hash_keys_sorted(psz->tags);
-	if (phk != NULL) {
-		/* output every tags */
-		for(i = 0 ; i < phk->nkey ; i++) {
-			pstr = hash_get(psz->tags, phk->keys[i]); /* XXX check */
-			fprintf(fp, pstr);
-		}
-
-		hash_free_hkeys(phk);
+	for (i = 0 ; i < da_usize(psz->tags) ; i++) {
+		fprintf(fp, "@%s@\n\n", (char *) da_idx(psz->tags, i));
 	}
 
 	fclose(fp);
@@ -3976,7 +3978,7 @@ void usage(void) {
 int main(int argc, char *argv[]) {
 	bool		 go_exit = false,
 				 use_script = false,
-				 unique_file = false,
+				 /*unique_file = false,*/
 				 recursive = false,
 				 gen_mkf = false,
 				 gen_pmk = false;
@@ -4008,6 +4010,7 @@ int main(int argc, char *argv[]) {
 					/* XXX err msg */
 					exit(EXIT_FAILURE);
 				}
+				break;
 
 			case 'm' :
 				/* enable makefile generation */
