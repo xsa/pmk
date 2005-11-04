@@ -708,6 +708,11 @@ bool prs_c_file(prs_cmn_t *pcmn, FILE *fp) {
 
 				idtf_flag = false;
 			}
+
+			/* skip character */
+			prseng_next_char(ppe);
+
+			continue;
 #ifdef DEBUG_PRSC
 		} else {
 				debugf("cursor is not '*'");
@@ -820,3 +825,4 @@ bool prs_c_file(prs_cmn_t *pcmn, FILE *fp) {
 
 	return(true);
 }
+

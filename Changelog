@@ -1,3 +1,6 @@
+04 Nov 2005 mipsator
+ * fixed a small bug in c language parser.
+
 27 Oct 2005 mipsator
  * added support for extra tags in pmkscan.
 
