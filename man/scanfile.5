@@ -14,9 +14,9 @@ is a file containing specifications that defines which sources are to
 be scanned and what to generate from the resulting data.
 
 .Sh SYNTAX
-The syntax is almost the same than for a pmkfile. See 
-.Xr pmk 1
-for more details.
+See
+.Xr pmksyntax.5
+to have an overview of the basic syntax of scanfiles.
 
 .Sh COMMANDS
 .Pp
@@ -27,12 +27,17 @@ This command specify a zone to scan and generate a pmkfile.
 .Pp
 Arguments:
 .Bl -tag -width DIRECTORY -offset indent
+.It Dv CFGNAME
+type is 'quoted', give the name of the template config file to use instead
+of the default one.
 .It Dv DIRECTORY
 type is 'quoted', define the zone directory to scan.
-.It Dv RECURSE
-type is 'bool', enable recursive scanning, default is FALSE.
 .It Dv DISCARD
 type is 'list', list of directories to discard in recursive mode.
+.It Dv EXTRATAG
+type is 'list', list of extra tags to add in template files.
+.It Dv RECURSE
+type is 'bool', enable recursive scanning, default is FALSE.
 .It Dv UNIQUE
 type is 'bool', enable unique resulting file instead of one for each
 directory. This is actually the default and only one method available
@@ -56,13 +61,15 @@ Arguments:
 .Bl -tag -width DIRECTORY -offset indent
 .It Dv DIRECTORY
 type is 'quoted', define the zone directory to scan.
-.It Dv RECURSE
-type is 'bool', enable recursive scanning, default is FALSE.
 .It Dv DISCARD
 type is 'list', list of directories to discard in recursive mode.
-.It Dv NAME
+.It Dv EXTRATAG
+type is 'list', list of extra tags to add in template files.
+.It Dv MKFNAME
 type is 'quoted', give the name of the template makefile to use instead
 of the default one.
+.It Dv RECURSE
+type is 'bool', enable recursive scanning, default is FALSE.
 .It Dv UNIQUE
 type is 'bool', enable unique resulting file instead of one for each
 directory. This is actually the default and only one method available
@@ -75,7 +82,7 @@ GEN_MAKEFILE {
 	DIRECTORY = "."
 	RECURSE = TRUE
 	DISCARD = ("samples", "doc", "tests")
-	NAME = "Makefile.pmk"
+	MKFNAME = "Makefile.pmk"
 	UNIQUE = TRUE
 }
 .Ed
@@ -85,19 +92,24 @@ This command specify a zone to scan and what to generate.
 .Pp
 Arguments:
 .Bl -tag -width DIRECTORY -offset indent
+.It Dv CFGNAME
+type is 'quoted', give the name of the template config file to use instead
+of the default one.
 .It Dv DIRECTORY
 type is 'quoted', define the zone directory to scan.
-.It Dv RECURSE
-type is 'bool', enable recursive scanning, default is FALSE.
 .It Dv DISCARD
 type is 'list', list of directories to discard in recursive mode.
+.It Dv EXTRATAG
+type is 'list', list of extra tags to add in template files.
 .It Dv PMKFILE
 type is 'bool', enable generation of a pmkfile
 .It Dv MAKEFILE
 type is 'bool', enable generation of a makefile
-.It Dv NAME
+.It Dv MKFNAME
 type is 'quoted', give the name of the template makefile to use instead
 of the default one.
+.It Dv RECURSE
+type is 'bool', enable recursive scanning, default is FALSE.
 .It Dv UNIQUE
 type is 'bool', enable unique resulting file instead of one for each
 directory. This is actually the default and only one method available
@@ -112,7 +124,7 @@ GEN_ZONE(main) {
 	DISCARD = ("samples", "doc", "tests")
 	PMKFILE = TRUE
 	MAKEFILE = TRUE
-	NAME = "Makefile.pmk"
+	MKFNAME = "Makefile.pmk"
 	UNIQUE = TRUE
 }
 .Ed
