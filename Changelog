@@ -1,3 +1,5 @@
+# snapshot 0.9.3-s4
+
 05 Nov 2005 mipsator
  * finished basic tag support in pmkscan for config file generation.
  * added pmksyntax.5 manual page to give a common overview of PMK basic
