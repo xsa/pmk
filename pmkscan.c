@@ -946,7 +946,9 @@ bool recurse_sys_deps(htable *nodes, dynary *deps, char *nodename) {
 
 bool add_library(scn_zone_t *psz, char *library, scandata *psd, scn_node_t *pn) {
 	char	*label,
-			*pstr;
+			*pstr,
+			*tag,
+			 tmp[256]; /* XXX */
 	check_t	*pchk,
 			*pcrec;
 	size_t	 i,
@@ -976,6 +978,13 @@ bool add_library(scn_zone_t *psz, char *library, scandata *psd, scn_node_t *pn) 
 
 		/* set language */
 		pchk->ftype = pn->type;
+
+		/* add header tag */
+		snprintf(tmp, sizeof(tmp), "lib%s", library);
+		tag = gen_basic_tag_def(tmp);
+		if (da_find(psz->tags, tag) == NULL) {
+			da_push(psz->tags, strdup(tag));
+		}
 	}
 
 	/* look for related procedures */
@@ -993,6 +1002,12 @@ bool add_library(scn_zone_t *psz, char *library, scandata *psd, scn_node_t *pn) 
 					da_push(pchk->procs, strdup(pstr));
 
 					psc_log(NULL, "Node '%s': found procedure '%s'\n", pn->fname, pstr);
+
+					/* add header tag */
+					tag = gen_basic_tag_def(pstr);
+					if (da_find(psz->tags, tag) == NULL) {
+						da_push(psz->tags, strdup(tag));
+					}
 				}
 			}
 		}
@@ -1023,7 +1038,8 @@ bool add_library(scn_zone_t *psz, char *library, scandata *psd, scn_node_t *pn) 
 
 bool check_header(scn_zone_t *psz, char *header, scandata *psd, scn_node_t *pn) {
 	char	*label,
-			*pstr;
+			*pstr,
+			*tag;
 	check_t	*pchk,
 			*pcrec;
 	size_t	 i,
@@ -1058,8 +1074,10 @@ bool check_header(scn_zone_t *psz, char *header, scandata *psd, scn_node_t *pn) 
 		pchk->subhdrs = pcrec->subhdrs;
 
 		/* add header tag */
-		pstr = gen_basic_tag_def(header);
-		da_push(psz->tags, strdup(pstr));
+		tag = gen_basic_tag_def(header);
+		if (da_find(psz->tags, tag) == NULL) {
+			da_push(psz->tags, strdup(tag));
+		}
 	}
 
 	/* look for related procedures */
@@ -1077,6 +1095,12 @@ bool check_header(scn_zone_t *psz, char *header, scandata *psd, scn_node_t *pn) 
 					da_push(pchk->procs, strdup(pstr));
 
 					psc_log(NULL, "Node '%s': found procedure '%s'\n", pn->fname, pstr);
+
+					/* add header tag */
+					tag = gen_basic_tag_def(pstr);
+					if (da_find(psz->tags, tag) == NULL) {
+						da_push(psz->tags, strdup(tag));
+					}
 				}
 			}
 		}
@@ -1151,7 +1175,9 @@ bool check_type(scn_zone_t *psz, char *type, scandata *psd, scn_node_t *pn) {
 
 	/* add header tag */
 	pstr = gen_basic_tag_def(type);
-	da_push(psz->tags, strdup(pstr));
+	if (da_find(psz->tags, pstr) == NULL) {
+		da_push(psz->tags, strdup(pstr));
+	}
 
 	return(true);
 }
@@ -1766,8 +1792,14 @@ bool scan_build_cfg(scn_zone_t *psz) {
 
 	fprintf(fp, CFGF_HDR_GEN, buf);
 
-	fprintf(fp, "/* WORK IN PROGRESS (means not done yet) */\n\n");
+	if (psz->exttags != NULL) {
+		fprintf(fp, "/* extra tags */\n\n");
+		for (i = 0 ; i < da_usize(psz->exttags) ; i++) {
+			fprintf(fp, "@%s@\n\n", (char *) da_idx(psz->exttags, i));
+		}
+	}
 
+	fprintf(fp, "/* scanned tags */\n\n");
 	for (i = 0 ; i < da_usize(psz->tags) ; i++) {
 		fprintf(fp, "@%s@\n\n", (char *) da_idx(psz->tags, i));
 	}

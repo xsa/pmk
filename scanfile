@@ -37,9 +37,9 @@ GEN_ZONE(tests) {
 	DIRECTORY = "./tests"
 	RECURSE = TRUE
 	PMKFILE = TRUE
-	CFGNAME = "config.h.sample"
+#	CFGNAME = "config.h.sample"
 	MAKEFILE = TRUE
-	MKFNAME = "Makefile.sample"
+#	MKFNAME = "Makefile.sample"
 #	UNIQUE = TRUE
 }
 

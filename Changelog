@@ -1,3 +1,6 @@
+05 Nov 2005 mipsator
+ * finished basic tag support in pmkscan for config file generation.
+
 04 Nov 2005 mipsator
  * fixed a small bug in c language parser.
  * added a start of config file template generation in pmkscan.
