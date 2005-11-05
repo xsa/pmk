@@ -1,5 +1,7 @@
 05 Nov 2005 mipsator
  * finished basic tag support in pmkscan for config file generation.
+ * added pmksyntax.5 manual page to give a common overview of PMK basic
+   syntax used in pmkfile and scanfile.
 
 04 Nov 2005 mipsator
  * fixed a small bug in c language parser.

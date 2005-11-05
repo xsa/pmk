@@ -1,0 +1,110 @@
+.\" $Id$
+
+.Dd November 5, 2005
+.Dt PMKSYNTAX 5
+.Os
+
+.Sh NAME
+.Nm PMK Syntax
+.Nd PMK files syntax manual
+
+.Sh DESCRIPTION
+This manual page describe the basic syntax used in PMK files such as
+.Nm pmkfile
+and
+.Nm scanfile
+
+.Sh DATA TYPES
+.Nm
+uses pseudo types like the following:
+.Bl -tag -width "identifier"
+.It Cm bool
+The classical boolean type with TRUE and FALSE values.
+.Pp
+For example:
+.Bd -literal -offset indent
+TRUE
+FALSE
+.Ed
+.It Cm identifier
+An identifier is a string of alphanumerical and underscores characters.
+.Pp
+For example:
+.Bd -literal -offset indent
+REQUIRED
+a_label
+underscores_are_nice
+.Ed
+.It Cm quoted
+This means quoted string which can contain a set of characters delimited
+by quotation marks.
+.Pp
+For examples:
+.Bd -literal -offset indent
+"simple quoted string"
+"string that contain \\"quotes\\" backslashed"
+"can also contain filenames like pmkfile.scan"
+.Ed
+.It Cm list
+It is one or more of the previous types between brackets.
+Multiple objects are separated with a comma.
+Blanks are currently not allowed beside commas, this means that you can
+find them only in a quoted string of the list.
+.Pp
+For example:
+.Bd -literal -offset indent
+("only_one_string")
+("added a boolean",TRUE)
+(mixed_list_of,"words","and",TRUE,"quoted strings")
+.Ed
+.El
+
+.Sh BASIC SYNTAX
+.Nm
+can contain comments, blank lines and commands.
+.Pp
+A command has the following format (? character means optional field):
+.Bd -literal -offset indent
+<command><?(label)> {
+	<body>
+}
+.Ed
+.Pp
+The command and label names can be assimilated to the 'word' type.
+See
+.Sx DATA TYPES
+above.
+.Pp
+The body can contain comment(s) and definition line(s).
+A commented line start with a '#' character like the following:
+.Bd -literal -offset indent
+# this is a comment line
+.Ed
+.Pp
+A definition line has the following format:
+.Bd -literal -offset indent
+<?blank><key name><?blank>=<?blank><key value>
+.Ed
+.Pp
+The key name is of identifier type.
+.Pp
+The key value type can be 'bool', 'quoted' or 'list'.
+The right type will depend on the key name (see further).
+.Pp
+For example:
+.Bd -literal -offset indent
+CHECK_INCLUDE(header_sys_param) {
+	# following options use different uses of blank characters
+	# key value is word type
+	REQUIRED = TRUE
+	# key value is list type
+	DEPEND=	("dep_one",dep_two,"dep_three")
+	# key value is quoted type
+	INCLUDE = "sys/param.h"
+}
+.Ed
+
+.Sh SEE ALSO
+.Xr pmkfile 5 ,
+.Xr scanfile 5
+

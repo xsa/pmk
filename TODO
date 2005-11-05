@@ -58,7 +58,7 @@ pmkscan
 -----------------------------------------------------------------------
 	+S	fix label generation in pmkfile generation
 	+S	try opening ./scanfile by default ?
-	~S!	template configuration header generation :
+	+S	template configuration header generation :
 			+ add CFGNAME option (alternative config
 				template name, default config.h.scan)
 			+ mark NAME option as obsolete
@@ -67,11 +67,13 @@ pmkscan
 				default only std autoconf tags ?)
 			+ add tags hash table (in structure, init and
 				destroy)
-			- add support of tags in check_header() (record
+			+ add support of tags in check_header() (record
 				when found)
-			- add support of tags in check_type() (same as
+			+ add support of tags in check_type() (same as
 				above)
-			- update scanfile.5 (CFGNAME,MKFNAME,ADVTAG)
+			+ update scanfile.5 (CFGNAME,MKFNAME,EXTRATAG)
+	-R	add support for advanced tags in pmkscan and pmk
+	-R	update scanfile.5 (ADVTAG)
 	+S	add support for LIBRARY option in check_header()
 	~S!	update pmkscan.1
 	-R!	add more entries in pmkscan.dat
