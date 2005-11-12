@@ -49,6 +49,7 @@
 #include "functool.h"
 #include "pathtools.h"
 #include "premake.h"
+#include "tags.h"
 
 
 /*#define AC_DEBUG	1*/
@@ -150,7 +151,7 @@ bool ac_parse_config(pmkdata *pgd) {
 			buf[i] = CHAR_EOS;
 
 			/* generate define name (DEF__*) */
-			defname = build_def_name(buf);
+			defname = gen_basic_tag_def(buf);
 			if (defname == NULL) {
 				errorf("unable to build define name for '%s'", buf);
 				fclose(fp_in);

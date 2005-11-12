@@ -49,6 +49,7 @@
 #include "hash.h"
 #include "pkgconfig.h"
 #include "premake.h"
+#include "tags.h"
 
 
 /*#define SHLIB_DEBUG 1*/
@@ -503,7 +504,7 @@ bool pmk_check_binary(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 	/* check if a variable name is given */
 	varname = po_get_str(hash_get(ht, KW_OPT_VARIABLE));
 	if (varname == NULL) {
-		vtmp = str_to_def(filename);
+		vtmp = conv_to_tag(filename);
 		if (vtmp == NULL) {
 			errorf("failed to generate definition name for "
 				"'%s' in label '%s'", filename, cmd->label);
@@ -1134,7 +1135,7 @@ bool pmk_check_config(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 	/* check if a variable name is given */
 	varname = po_get_str(hash_get(ht, KW_OPT_VARIABLE));
 	if (varname == NULL) {
-		vtmp = str_to_def(cfgtool);
+		vtmp = conv_to_tag(cfgtool);
 		if (vtmp == NULL) {
 			errorf("VARIABLE not assigned in label '%s'.", cmd->label);
 			return(false);
@@ -2320,7 +2321,7 @@ bool pmk_set_variable(pmkcmd *cmd, prsopt *popt, pmkdata *pgd) {
 			pmk_log(" '%s' variable.\n", popt->key);
 
 			/* store definition for autoconf compatibility */
-			defname = build_def_name(popt->key);
+			defname = gen_basic_tag_def(popt->key);
 			if (defname == NULL) {
 				errorf("unable to build define name for '%s'.", popt->key);
 				return(false);

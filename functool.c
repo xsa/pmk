@@ -41,10 +41,11 @@
 #include "compat/pmk_stdio.h"
 #include "compat/pmk_string.h"
 #include "compat/pmk_unistd.h"
+#include "common.h"
+#include "dynarray.h"
 #include "functool.h"
 #include "premake.h"
-#include "dynarray.h"
-#include "common.h"
+#include "tags.h"
 
 /*#define FC_DEBUG	1*/
 
@@ -173,76 +174,6 @@ bool get_file_dir_path(char *filename, char *path, char *storage, int size) {
 
 
 /****************
- * str_to_def() *
- ***********************************************************************
- DESCR
-	generate semi-definition from a string
-
- IN
-	str :	string to use
-
- OUT
-	returns semidef string
- ***********************************************************************/
-
-char *str_to_def(char *str) {
-	static char	 buffer[TMP_BUF_LEN];
-	char		*p;
-
-	if (strlcpy_b(buffer, str, sizeof(buffer)) == false)
-		return(NULL); /* buffer too small */
-
-	p = buffer;
-
-	while (*p != CHAR_EOS) {
-		switch (*p) {
-			case '*' :
-				*p = 'P';
-				break;
-			default :
-				if (isalnum(*p) == 0) {
-					*p = '_';
-				} else {
-					*p = (char) toupper((int) *p);
-				}
-				break;
-		}
-		p++;
-	}
-
-	return(buffer);
-}
-
-
-/********************
- * build_def_name() *
- ***********************************************************************
- DESCR
-	build_def
-
- IN
-	XXX
-
- OUT
-	XXX
- ***********************************************************************/
-
-char *build_def_name(char *name) {
-	static char	 def_str[MAX_HASH_KEY_LEN];
-	char		*semidef;
-
-	semidef = str_to_def(name);
-	if (semidef == NULL)
-		return(NULL);
-
-	if (snprintf_b(def_str, sizeof(def_str), "DEF__%s", semidef) == false)
-		return(NULL);
-
-	return(def_str);
-}
-
-
-/****************
  * record_def() *
  ***********************************************************************
  DESCR
@@ -258,27 +189,20 @@ char *build_def_name(char *name) {
  ***********************************************************************/
 
 bool record_def(htable *ht, char *name, bool status) {
-	char	*semidef,
-			 def_str[MAX_HASH_KEY_LEN],
-			 have_str[MAX_HASH_VALUE_LEN],
+	char	*def_str,
+			*have_str,
 			 def_val[MAX_HASH_VALUE_LEN];
 
-	semidef = str_to_def(name);
-	if (semidef == NULL)
-		return(false);
+	def_str = gen_basic_tag_def(name);
 
-	if (snprintf_b(def_str, sizeof(def_str), "DEF__%s", semidef) == false)
-		return(false);
-
-	if (snprintf_b(have_str, sizeof(def_str), "HAVE_%s", semidef) == false)
-		return(false);
+	have_str = gen_ac_tag_name(name);
 
 	if (status == true) {
-		if (snprintf_b(def_val, sizeof(def_str),
+		if (snprintf_b(def_val, sizeof(def_val),
 					"#define %s 1", have_str) == false)
 			return(false);
 	} else {
-		if (snprintf_b(def_val, sizeof(def_str),
+		if (snprintf_b(def_val, sizeof(def_val),
 					"#undef %s", have_str) == false)
 			return(false);
 	}
@@ -314,20 +238,13 @@ bool record_def(htable *ht, char *name, bool status) {
  ***********************************************************************/
 
 bool record_def_data(htable *ht, char *name, char *value) {
-	char	*semidef,
-			 def_str[MAX_HASH_KEY_LEN],
-			 def_val[MAX_HASH_VALUE_LEN],
-			 have_str[MAX_HASH_VALUE_LEN];
+	char	*def_str,
+			*have_str,
+			 def_val[MAX_HASH_VALUE_LEN];
 
-	semidef = str_to_def(name);
-	if (semidef == NULL)
-		return(false);
+	def_str = gen_basic_tag_def(name);
 
-	if (snprintf_b(def_str, sizeof(def_str), "DEF__%s", semidef) == false)
-		return(false);
-
-	if (snprintf_b(have_str, sizeof(def_str), "HAVE_%s", semidef) == false)
-		return(false);
+	have_str = gen_ac_tag_name(name);
 
 	if (value != NULL) {
 		/* common variable tag HAVE_* */
@@ -338,12 +255,12 @@ bool record_def_data(htable *ht, char *name, char *value) {
 		debugf("record_def_data() : recorded '%s' with '%s'", have_str, value);
 #endif
 
-		if (snprintf_b(def_val, sizeof(def_str),
+		if (snprintf_b(def_val, sizeof(def_val),
 					"#define %s %s",
 					have_str, value) == false)
 			return(false);
 	} else {
-		if (snprintf_b(def_val, sizeof(def_str),
+		if (snprintf_b(def_val, sizeof(def_val),
 					"#undef %s", have_str) == false)
 			return(false);
 	}
@@ -357,44 +274,6 @@ bool record_def_data(htable *ht, char *name, char *value) {
 		return(false);
 #ifdef FC_DEBUG
 	debugf("record_def_data() : recorded '%s' with '%s'", def_str, def_val);
-#endif
-
-	return(true);
-}
-
-
-/****************
- * record_val() *
- ***********************************************************************
- DESCR
-	record data tag
-	XXX TODO to remove
-
- IN
-	ht :	hash table to store the definition
-	name :	data name
-	value :	value to store
-
- OUT
-	boolean
- ***********************************************************************/
-
-bool record_val(htable *ht, char *name, char *value) {
-	char	*semidef,
-			 have_str[MAX_HASH_VALUE_LEN];
-
-	semidef = str_to_def(name);
-	if (semidef == NULL)
-		return(false);
-
-	if (snprintf_b(have_str, sizeof(have_str),
-					"HAVE_%s", semidef) == false)
-		return(false);
-
-	if (hash_update_dup(ht, have_str, value) == HASH_ADD_FAIL)
-		return(false);
-#ifdef FC_DEBUG
-	debugf("record_val() : recorded '%s' with '%s'", have_str, value);
 #endif
 
 	return(true);

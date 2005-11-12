@@ -77,6 +77,8 @@ pmkscan
 	+S	add support for LIBRARY option in check_header()
 	~S!	update pmkscan.1
 	-R!	add more entries in pmkscan.dat
+	-R	add list of library targets (brainstorming needed)
+	-R	add distclean in generated makefiles ?
 
 
 pmkinstall
