@@ -380,6 +380,11 @@ enum {
 							"\t\t$(RM) $(RMFLAGS) $(DESTDIR)$(DATADIR)/$$d; \\\n" \
 							"\tdone\n\n"
 
+#define MKF_DIST_CLEAN		"distclean:\n" \
+							"\t$(RM) $(RMFLAGS) *.scan\n" \
+							"\t$(RM) $(RMFLAGS) *.log\n" \
+							"\t$(RM) $(RMFLAGS) *.core\n\n"
+
 
 /**********************************
  * type and structure definitions *

@@ -1,3 +1,7 @@
+17 Nov 2005 mipsator
+ * added basic distclean target in generated makefile and started to
+   prepare for advanced tags support.
+
 10 Nov 2005 mipsator
  * added use of new tags functions in pmk.
 
