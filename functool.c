@@ -294,10 +294,17 @@ bool record_def_data(htable *ht, char *name, char *value) {
 	boolean
  ***********************************************************************/
 
-bool process_def_list(htable *ht, dynary *da) {
-	char	*name;
+bool process_def_list(htable *ht, dynary *da, bool define) {
+	char	*name,
+			*value;
 	int		 i,
 			 n;
+
+	if (define == true) {
+		value = "1";
+	} else {
+		value = NULL;
+	}
 
 	/* process additional defines */
 	if (da != NULL) {
@@ -305,7 +312,9 @@ bool process_def_list(htable *ht, dynary *da) {
 		for (i = 0 ; i < n ; i++) {
 			name = da_idx(da, i);
 			pmk_log("\tProcessing additional define '%s': ", name);
-			record_def_data(ht, name, "1");
+			if (record_def_data(ht, name, value) == false) {
+				return(false);
+			}
 			pmk_log("ok.\n");
 		}
 	}

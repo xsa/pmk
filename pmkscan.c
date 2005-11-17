@@ -2952,6 +2952,8 @@ bool scan_build_mkf(scn_zone_t *psz) {
 		fprintf(fp, MKF_DEINST_DATA);
 	}
 
+	fprintf(fp, MKF_DIST_CLEAN);
+
 	/* generate objects */
 	mkf_output_obj_rules(fp, psz);
 
