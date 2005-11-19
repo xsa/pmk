@@ -41,9 +41,17 @@
 #include <math.h>
 #include <stdlib.h>
 
-#include "compat.h"
 #include "compat/config.h"
 
+#if defined(HAVE_WCHAR_T) || defined (HAVE_WINT_T)
+#include <wchar.h>
+#endif
+
+#ifdef HAVE_PTRDIFF_T
+#include <stddef.h>
+#endif
+
+#include "compat.h"
 #include "compat/pmk_ctype.h"
 #include "compat/pmk_libgen.h"
 #include "compat/pmk_stdbool.h"

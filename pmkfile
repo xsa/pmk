@@ -125,7 +125,7 @@ CHECK_TYPE(type_intmax_t) {
 CHECK_TYPE(type_ptrdiff_t) {
     REQUIRED = FALSE
     NAME = "ptrdiff_t"
-    HEADER = "stdint.h"
+    HEADER = "stddef.h"
 }
 
 # check wchar_t type
