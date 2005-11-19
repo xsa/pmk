@@ -546,25 +546,25 @@ check_type "long double"
 # intmax_t type check
 #
 
-check_type intmax_t stdint.h
+check_type_header intmax_t stdint.h
 
 #
 # ptrdiff_t type check
 #
 
-check_type ptrdiff_t stddef.h
+check_type_header ptrdiff_t stddef.h
 
 #
 # wchar_t type check
 #
 
-check_type wchar_t wchar.h
+check_type_header wchar_t wchar.h
 
 #
 # wint_t type check
 #
 
-check_type wint_t wchar.h
+check_type_header wint_t wchar.h
 
 
 #################
