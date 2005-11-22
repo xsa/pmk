@@ -241,6 +241,9 @@ enum {
 #define MKF_MANX_DIR	"MAN%dDIR=\t@MAN%dDIR@\n"
 #define MKF_SYSCONF_DIR	"SYSCONFDIR=\t@SYSCONFDIR@\n"
 
+#define MKF_DIR_LIST	"DIRLIST=\t"
+#define MKF_GEN_FILES	"GEN_FILES=\t"
+
 #define MKF_VARIABLE	"%s=\t@%s@\n"
 
 #define MKF_LINE_JUMP	"\n"
@@ -380,10 +383,13 @@ enum {
 							"\t\t$(RM) $(RMFLAGS) $(DESTDIR)$(DATADIR)/$$d; \\\n" \
 							"\tdone\n\n"
 
-#define MKF_DIST_CLEAN		"distclean:\n" \
-							"\t$(RM) $(RMFLAGS) *.scan\n" \
-							"\t$(RM) $(RMFLAGS) *.log\n" \
-							"\t$(RM) $(RMFLAGS) *.core\n\n"
+#define MKF_DIST_CLEAN		"distclean: clean\n" \
+							"\t$(RM) $(RMFLAGS) $(GEN_FILES)\n" \
+							"\t@for d in $(DIRLIST); do \\\n" \
+							"\t\t$(RM) $(RMFLAGS) $$d/*.scan; \\\n" \
+							"\t\t$(RM) $(RMFLAGS) $$d/*.log; \\\n" \
+							"\t\t$(RM) $(RMFLAGS) $$d/*.core; \\\n" \
+							"\tdone\n\n"
 
 
 /**********************************
@@ -513,6 +519,7 @@ bool		 recurse_src_deps(scn_zone_t *, dynary *, char *);
 bool		 gen_targets(scn_zone_t *);
 size_t		 fprintf_width(size_t, size_t, size_t, FILE *, char *);
 void		 mkf_output_header(FILE *, scn_zone_t *);
+void		 mkf_output_recurs(FILE *, scn_zone_t *);
 void		 mkf_output_srcs(FILE *, scn_zone_t *);
 void		 mkf_output_objs(FILE *, scn_zone_t *);
 void		 mkf_output_bld_trgs(FILE *, scn_zone_t *);

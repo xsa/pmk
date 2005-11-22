@@ -42,7 +42,7 @@
 #include <errno.h>
 #include <fnmatch.h>
 #include <glob.h>
-#include <regex.h>
+#include <limits.h>
 #include <stdarg.h>
 #include <stdlib.h>
 
@@ -886,7 +886,7 @@ char *conv_to_label(ftype_t ltype, char *fmt, ...) {
  ***********************************************************************/
 
 bool recurse_sys_deps(htable *nodes, dynary *deps, char *nodename) {
-	char		 dir[MAXPATHLEN],
+	char		 dir[PATH_MAX],
 				*pstr;
 	scn_node_t	*pnode;
 	size_t		 i;
@@ -1876,7 +1876,7 @@ bool find_deps(dynary *da_fc, dynary *da_fd) {
  ***********************************************************************/
 
 void extract_dir(char *path, char *dirbuf, size_t blen) {
-	char	 buffer[MAXPATHLEN],
+	char	 buffer[PATH_MAX],
 			*p;
 
 	/*
@@ -1915,8 +1915,8 @@ void extract_dir(char *path, char *dirbuf, size_t blen) {
  ***********************************************************************/
 
 void build_path(char *dir, char *file, char *buffer, size_t blen) {
-	char	 tmp[MAXPATHLEN],
-			 chk[MAXPATHLEN];
+	char	 tmp[PATH_MAX],
+			 chk[PATH_MAX];
 
 	if (*dir == '\0') {
 		/* directory empty, store only file name */
@@ -1949,7 +1949,7 @@ void build_path(char *dir, char *file, char *buffer, size_t blen) {
  ***********************************************************************/
 
 bool recurse_obj_deps(htable *nodes, dynary *deps, char *nodename) {
-	char		 dir[MAXPATHLEN];
+	char		 dir[PATH_MAX];
 	scn_node_t	*pnode;
 	size_t		 i;
 
@@ -2002,7 +2002,7 @@ bool recurse_obj_deps(htable *nodes, dynary *deps, char *nodename) {
  ***********************************************************************/
 
 bool gen_objects(scn_zone_t *psz) {
-	char			 buf[MAXPATHLEN], /* XXX filename length */
+	char			 buf[PATH_MAX], /* XXX filename length */
 					*pstr;
 	hkeys			*phk;
 	scn_node_t		*pnode,
@@ -2198,7 +2198,7 @@ bool recurse_src_deps(scn_zone_t *psz, dynary *deps, char *name) {
  ***********************************************************************/
 
 bool gen_targets(scn_zone_t *psz) {
-	char			 buf[MAXPATHLEN], /* XXX filename length */
+	char			 buf[PATH_MAX], /* XXX filename length */
 					*nodename;
 	hkeys			*phk;
 	scn_node_t		*pnode;
@@ -2454,6 +2454,75 @@ void mkf_output_header(FILE *fp, scn_zone_t *psz) {
 	}
 
 	fprintf(fp, MKF_LINE_JUMP);
+}
+
+
+/***********************
+ * mkf_output_recurs() *
+ ***********************************************************************
+ DESCR
+	XXX
+
+ IN
+	fp :	file pointer
+	psz :	scanning zone data
+
+ OUT
+	NONE
+ ***********************************************************************/
+
+void mkf_output_recurs(FILE *fp, scn_zone_t *psz) {
+	char			*pstr;
+	size_t			 ofst,
+					 lm,
+					 i,
+					 s;
+
+	/*
+		generate the list of scanned directories
+	*/
+
+	s = da_usize(psz->dirlist);
+	if (s > 0) {
+		/* get directory list */
+		fprintf(fp, "#\n# directory list\n#\n");
+		fprintf(fp, MKF_DIR_LIST);
+
+		da_sort(psz->dirlist);
+
+		lm = strlen(MKF_DIR_LIST);
+		ofst = lm;
+		for (i = 0 ; i < s ; i++) {
+			ofst = fprintf_width(lm, MKF_OUTPUT_WIDTH, ofst, fp, da_idx(psz->dirlist, i));
+		}
+
+		fprintf(fp, MKF_TWICE_JUMP);
+	}
+
+	/*
+		generate the list of template generated files
+	*/
+
+	s = da_usize(psz->templates);
+	if (s > 0) {
+		/* get list of generated files */
+		fprintf(fp, "#\n# list of generated files\n#\n");
+		fprintf(fp, MKF_GEN_FILES);
+
+		da_sort(psz->templates);
+
+		lm = strlen(MKF_GEN_FILES);
+		ofst = lm;
+		for (i = 0 ; i < s ; i++) {
+			/* generate file name from template */
+			pstr = gen_from_tmpl(da_idx(psz->templates, i));
+
+			/* add result to the list */
+			ofst = fprintf_width(lm, MKF_OUTPUT_WIDTH, ofst, fp, pstr);
+		}
+
+		fprintf(fp, MKF_TWICE_JUMP);
+	}
 }
 
 
@@ -2920,6 +2989,9 @@ bool scan_build_mkf(scn_zone_t *psz) {
 	/* generate header and definitions */
 	mkf_output_header(fp, psz);
 
+	/* generate recursive data */
+	mkf_output_recurs(fp, psz);
+
 	/* generate object dependency lists */
 	mkf_output_srcs(fp, psz);
 
@@ -3098,8 +3170,8 @@ ftype_t check_file_ext(char *fname) {
  ***********************************************************************/
 
 bool process_ppro(void *data, char *pstr, prseng_t *ppe) {
-	char		 iname[MAXPATHLEN],
-				 buf[MAXPATHLEN],
+	char		 iname[PATH_MAX],
+				 buf[PATH_MAX],
 				 c;
 	scn_node_t	*pnode;
 	scn_zone_t	*psz;
@@ -3297,8 +3369,8 @@ bool process_type(void *data, char *pstr, prseng_t *ppe) {
 bool parse_file(prs_cmn_t *pcmn, char *fname, ftype_t ft, bool isdep) {
 	FILE			*fp;
 	char			*ptr,
-					 dir[MAXPATHLEN],
-					 idir[MAXPATHLEN];
+					 dir[PATH_MAX],
+					 idir[PATH_MAX];
 	scn_node_t		*pnode;
 	scn_zone_t		*psz;
 	unsigned int	 i;
@@ -3558,7 +3630,7 @@ bool scan_dir(prs_cmn_t *pcmn, char *dir, bool recursive) {
 	struct dirent	*pde;
 	struct stat		 tstat;
 	DIR				*pd;
-	char			 buf[MAXPATHLEN],
+	char			 buf[PATH_MAX],
 					*fname;
 	dynary			*hdr_dir,
 					*to_scan = NULL;
@@ -3690,7 +3762,7 @@ bool scan_dir(prs_cmn_t *pcmn, char *dir, bool recursive) {
 bool process_zone(prs_cmn_t *pcmn, scandata *psd) {
 	bool		 frslt,
 				 rslt;
-	char		 sdir[MAXPATHLEN];
+	char		 sdir[PATH_MAX];
 	scn_zone_t	*psz;
 
 	psz = pcmn->data;
@@ -4016,7 +4088,7 @@ int main(int argc, char *argv[]) {
 				 recursive = false,
 				 gen_mkf = false,
 				 gen_pmk = false;
-	char		 buf[MAXPATHLEN],
+	char		 buf[PATH_MAX],
 				*scfile = NULL;
 	htable		*tnodes;
 	int			 chr;
