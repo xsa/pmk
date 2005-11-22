@@ -34,6 +34,7 @@
  */
 
 
+#include <limits.h>
 #include <stddef.h>
 
 #include "compat/pmk_ctype.h"
@@ -305,3 +306,32 @@ char *gen_basic_tag_def(char *content) {
 	return(buffer);
 }
 
+
+/*******************
+ * gen_from_tmpl() *
+ ***********************************************************************
+ DESCR
+	generate a file name from a template name
+
+ IN
+	template :	template file name
+
+ OUT
+	pointer to the file name buffer
+ ***********************************************************************/
+
+char *gen_from_tmpl(char *template) {
+	static char	 buffer[PATH_MAX];
+	char		*pstr;
+
+	/* copy template into buffer */
+	strlcpy(buffer, template, sizeof(buffer));
+
+	/* find and remove the last suffix */
+	pstr = strrchr(buffer, '.');
+	if (pstr != NULL) {
+		*pstr = '\0';
+	}
+
+	return(buffer);
+}

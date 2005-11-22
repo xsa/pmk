@@ -94,6 +94,7 @@ char	*gen_tag_name(int, char *, char *, char *);
 char	*gen_tag_def(int, char *, char *, char *);
 char	*gen_ac_tag_name(char *);
 char	*gen_basic_tag_def(char *);
+char	*gen_from_tmpl(char *);
 
 #endif /* _PMK_TAGS_H_ */
 
