@@ -1073,8 +1073,14 @@ bool check_header(scn_zone_t *psz, char *header, scandata *psd, scn_node_t *pn) 
 		/* link to eventual sub headers */
 		pchk->subhdrs = pcrec->subhdrs;
 
-		/* add header tag */
+		/* add AC style header tag */
 		tag = gen_basic_tag_def(header);
+		if (da_find(psz->tags, tag) == NULL) {
+			da_push(psz->tags, strdup(tag));
+		}
+
+		/* add header tag */
+		tag = gen_tag_def(TAG_TYPE_HDR, header, NULL, NULL);
 		if (da_find(psz->tags, tag) == NULL) {
 			da_push(psz->tags, strdup(tag));
 		}
@@ -1096,8 +1102,14 @@ bool check_header(scn_zone_t *psz, char *header, scandata *psd, scn_node_t *pn) 
 
 					psc_log(NULL, "Node '%s': found procedure '%s'\n", pn->fname, pstr);
 
-					/* add header tag */
+					/* add AC style header tag */
 					tag = gen_basic_tag_def(pstr);
+					if (da_find(psz->tags, tag) == NULL) {
+						da_push(psz->tags, strdup(tag));
+					}
+
+					/* add header tag */
+					tag = gen_tag_def(TAG_TYPE_HDR_PRC, header, pstr, NULL);
 					if (da_find(psz->tags, tag) == NULL) {
 						da_push(psz->tags, strdup(tag));
 					}
@@ -1173,8 +1185,14 @@ bool check_type(scn_zone_t *psz, char *type, scandata *psd, scn_node_t *pn) {
 		return(false);
 	}
 
-	/* add header tag */
+	/* add AC style header tag */
 	pstr = gen_basic_tag_def(type);
+	if (da_find(psz->tags, pstr) == NULL) {
+		da_push(psz->tags, strdup(pstr));
+	}
+
+	/* add header tag */
+	pstr = gen_tag_def(TAG_TYPE_TYPE, type, NULL, NULL);
 	if (da_find(psz->tags, pstr) == NULL) {
 		da_push(psz->tags, strdup(pstr));
 	}
@@ -1776,7 +1794,8 @@ bool scan_build_pmk(char *fname, scn_zone_t *psz) {
 
 bool scan_build_cfg(scn_zone_t *psz) {
 	FILE			*fp;
-	char			 buf[MKF_OUTPUT_WIDTH * 2];
+	char			 buf[MKF_OUTPUT_WIDTH * 2],
+					*pstr;
 	time_t			 now;
 	unsigned int	 i;
 
@@ -1795,7 +1814,8 @@ bool scan_build_cfg(scn_zone_t *psz) {
 	if (psz->exttags != NULL) {
 		fprintf(fp, "/* extra tags */\n\n");
 		for (i = 0 ; i < da_usize(psz->exttags) ; i++) {
-			fprintf(fp, "@%s@\n\n", (char *) da_idx(psz->exttags, i));
+			pstr = gen_basic_tag_def(da_idx(psz->exttags, i));
+			fprintf(fp, "@%s@\n\n", pstr);
 		}
 	}
 

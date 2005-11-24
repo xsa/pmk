@@ -280,6 +280,53 @@ bool record_def_data(htable *ht, char *name, char *value) {
 }
 
 
+/********************
+ * record_def_adv() *
+ ***********************************************************************
+ DESCR
+	XXX
+
+ IN
+	XXX
+
+ OUT
+	boolean
+ ***********************************************************************/
+
+bool record_def_adv(htable *ht, int type, char *ctn, char *ctt, char *msc, char *val) {
+	char	*tag_def,
+			*tag_name,
+			 buf[MAX_HASH_VALUE_LEN];
+
+	tag_def = gen_tag_def(type, ctn, ctt, msc);
+	tag_name = gen_tag_name(type, ctn, ctt, msc);
+
+	if (val == NULL) {
+		/* if value is NULL then undefine tag */
+		if (snprintf_b(buf, sizeof(buf), "#undef %s", tag_name) == false) {
+			return(false);
+		}
+	} else {
+		/* else value is not NULL so define tag with value */
+		if (snprintf_b(buf, sizeof(buf), "#define %s %s", tag_name, val) == false) {
+			return(false);
+		}
+
+		/* record tag */
+		if (hash_update_dup(ht, tag_name, val) == HASH_ADD_FAIL) {
+			return(false);
+		}
+	}
+
+	/* record tag define */
+	if (hash_update_dup(ht, tag_def, buf) == HASH_ADD_FAIL) {
+		return(false);
+	}
+
+	return(true);
+}
+
+
 /**********************
  * process_def_list() *
  ***********************************************************************

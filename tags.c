@@ -113,14 +113,14 @@ char *conv_to_tag(char *str) {
 
 char *gen_tag(int type, char *container, char *content, char *misc) {
 	static char	 buffer[MAX_TAG_LEN];
-	char		*cnt = NULL,
-				*ctt = NULL,
-				*msc = NULL;
+	char		cnt[MAX_TAG_LEN],
+				ctt[MAX_TAG_LEN],
+				msc[MAX_TAG_LEN];
 
 	/* set data pointers */
 	switch (type) {
 		case TAG_TYPE_HDR_TYP_MBR :
-			msc = conv_to_tag(misc);
+			strlcpy(msc, conv_to_tag(misc), sizeof(msc));
 			/* no break */
 
 		case TAG_TYPE_HDR_PRC :
@@ -128,57 +128,57 @@ char *gen_tag(int type, char *container, char *content, char *misc) {
 		case TAG_TYPE_LIB_PRC :
 		case TAG_TYPE_TYP_MBR :
 		case TAG_TYPE_HDR_TYPE :
-			ctt = conv_to_tag(content);
+			strlcpy(ctt, conv_to_tag(content), sizeof(ctt));
 			/* no break */
 
 		case TAG_TYPE_BIN :
 		case TAG_TYPE_HDR :
 		case TAG_TYPE_LIB :
 		case TAG_TYPE_TYPE :
-			cnt = conv_to_tag(container);
+			strlcpy(cnt, conv_to_tag(container), sizeof(cnt));
 			break;
 	}
 
 	/* generate tag from format string */
 	switch (type) {
 		case TAG_TYPE_BIN :
-			snprintf(buffer, sizeof(buffer), FMT_TAG_BIN, container);
+			snprintf(buffer, sizeof(buffer), FMT_TAG_BIN, cnt);
 			break;
 
 		case TAG_TYPE_HDR :
-			snprintf(buffer, sizeof(buffer), FMT_TAG_HDR, container);
+			snprintf(buffer, sizeof(buffer), FMT_TAG_HDR, cnt);
 			break;
 
 		case TAG_TYPE_HDR_PRC :
-			snprintf(buffer, sizeof(buffer), FMT_TAG_HPRC, container, content);
+			snprintf(buffer, sizeof(buffer), FMT_TAG_HPRC, cnt, ctt);
 			break;
 
 		case TAG_TYPE_HDR_MCR :
-			snprintf(buffer, sizeof(buffer), FMT_TAG_HMCR, container, content);
+			snprintf(buffer, sizeof(buffer), FMT_TAG_HMCR, cnt, ctt);
 			break;
 
 		case TAG_TYPE_LIB :
-			snprintf(buffer, sizeof(buffer), FMT_TAG_LIB, container);
+			snprintf(buffer, sizeof(buffer), FMT_TAG_LIB, cnt);
 			break;
 
 		case TAG_TYPE_LIB_PRC :
-			snprintf(buffer, sizeof(buffer), FMT_TAG_LPROC, container, content);
+			snprintf(buffer, sizeof(buffer), FMT_TAG_LPROC, cnt, ctt);
 			break;
 
 		case TAG_TYPE_TYPE :
-			snprintf(buffer, sizeof(buffer), FMT_TAG_TYPE, container);
+			snprintf(buffer, sizeof(buffer), FMT_TAG_TYPE, cnt);
 			break;
 
 		case TAG_TYPE_TYP_MBR :
-			snprintf(buffer, sizeof(buffer), FMT_TAG_TMBR, container, content);
+			snprintf(buffer, sizeof(buffer), FMT_TAG_TMBR, cnt, ctt);
 			break;
 
 		case TAG_TYPE_HDR_TYPE :
-			snprintf(buffer, sizeof(buffer), FMT_TAG_HTYPE, container, content);
+			snprintf(buffer, sizeof(buffer), FMT_TAG_HTYPE, cnt, ctt);
 			break;
 
 		case TAG_TYPE_HDR_TYP_MBR :
-			snprintf(buffer, sizeof(buffer), FMT_TAG_HTMBR, container, content, misc);
+			snprintf(buffer, sizeof(buffer), FMT_TAG_HTMBR, cnt, ctt, msc);
 			break;
 
 		default :
@@ -335,3 +335,4 @@ char *gen_from_tmpl(char *template) {
 
 	return(buffer);
 }
+
