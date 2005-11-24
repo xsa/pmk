@@ -1,3 +1,8 @@
+24 Nov 2005 mipsator
+ * fixed extra define in pmkscan generated config file.
+ * fixed lower in gen_tag().
+ * started to add advanced tags.
+
 22 Nov 2005 mipsator
  * improved distclean target in generated makefile.
 

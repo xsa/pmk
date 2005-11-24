@@ -596,6 +596,7 @@ bool pmk_check_header(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 	}
 	scb.header = pstr;
 	record_def_data(pgd->htab, scb.header, NULL);
+	record_def_adv(pgd->htab, TAG_TYPE_HDR, scb.header, NULL, NULL, NULL);
 
 	/* any macro(s) to check ? */
 	macros = po_get_list(hash_get(ht, KW_OPT_MACRO));
@@ -757,6 +758,7 @@ bool pmk_check_header(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 	pmk_log("yes.\n");
 	/* define for template */
 	record_def_data(pgd->htab, scb.header, DEFINE_DEFAULT);
+	record_def_adv(pgd->htab, TAG_TYPE_HDR, scb.header, NULL, NULL, DEFINE_DEFAULT);
 
 	/*
 		check macros in header file

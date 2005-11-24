@@ -87,6 +87,7 @@ char	*bool_to_str(bool);
 bool	 get_file_dir_path(char *, char *, char *, int);
 bool	 record_def(htable *, char *, bool);
 bool	 record_def_data(htable *, char *, char *);
+bool	 record_def_adv(htable *, int, char *, char *, char *, char *);
 bool	 process_def_list(htable *, dynary *, bool);
 bool	 record_have(htable *, char *, char *);
 bool	 label_set(htable *, char *, bool);
