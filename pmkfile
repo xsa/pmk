@@ -3,58 +3,58 @@
 
 # set target file
 SETTINGS {
-    LANG="C"
-    TARGET=("compat/config.h.pmk","Makefile.pmk","tests/Makefile.pmk")
+	LANG="C"
+	TARGET=("compat/config.h.pmk","Makefile.pmk","tests/Makefile.pmk")
 }
 
 SWITCHES {
-    sw_usermode = FALSE
+	sw_usermode = FALSE
 }
 
 IF(sw_usermode) {
-    DEFINE {
-        # override prefix
-        PREFIX = "\\$(HOME)"
-        CONFDIR = "\\$(PREFIX)/.pmk"
-        SBINDIR = "\\$(PREFIX)/bin"
-        DATADIR = "\\$(CONFDIR)"
-        MAN1DIR = "\\$(MANDIR)"
-        MAN5DIR = "\\$(MANDIR)"
-        MAN8DIR = "\\$(MANDIR)"
-    }
+	DEFINE {
+		# override prefix
+		PREFIX = "\\$(HOME)"
+		CONFDIR = "\\$(PREFIX)/.pmk"
+		SBINDIR = "\\$(PREFIX)/bin"
+		DATADIR = "\\$(CONFDIR)"
+		MAN1DIR = "\\$(MANDIR)"
+		MAN5DIR = "\\$(MANDIR)"
+		MAN8DIR = "\\$(MANDIR)"
+	}
 }
 
 IF(!sw_usermode) {
-    DEFINE {
-        CONFDIR = "\\$(SYSCONFDIR)/pmk"
-        SBINDIR = "\\$(PREFIX)/sbin"
-        DATADIR = "\\$(PREFIX)/share/\\$(PREMAKE)"
-        MAN1DIR = "\\$(MANDIR)/man1"
-        MAN5DIR = "\\$(MANDIR)/man5"
-        MAN8DIR = "\\$(MANDIR)/man8"
-    }
+	DEFINE {
+		CONFDIR = "\\$(SYSCONFDIR)/pmk"
+		SBINDIR = "\\$(PREFIX)/sbin"
+		DATADIR = "\\$(PREFIX)/share/\\$(PREMAKE)"
+		MAN1DIR = "\\$(MANDIR)/man1"
+		MAN5DIR = "\\$(MANDIR)/man5"
+		MAN8DIR = "\\$(MANDIR)/man8"
+	}
 }
 
 DEFINE {
-    BINDIR = "\\$(PREFIX)/bin"
-    MANDIR = "\\$(PREFIX)/man"
-    PRIVSEP_USER = "nobody"
-    PACKAGE = "pmk"
-    VERSION = "0.9.3"
-    INSTALL = "./pmkinstall"
+	BINDIR = "\\$(PREFIX)/bin"
+	MANDIR = "\\$(PREFIX)/man"
+	PRIVSEP_USER = "nobody"
+	PACKAGE = "pmk"
+	VERSION = "0.9.3"
+	INSTALL = "./pmkinstall"
 }
 
 # check alternate privsep user
 CHECK_VARIABLE(var_privsep) {
-    REQUIRED = FALSE
-    NAME = "PRIVSEP_USER"
+	REQUIRED = FALSE
+	NAME = "PRIVSEP_USER"
 }
 
 # if not defined fall to default user
 IF(!var_privsep) {
-    DEFINE {
-        PRIVSEP_USER = "nobody"
-    }
+	DEFINE {
+		PRIVSEP_USER = "nobody"
+	}
 }
 
 
@@ -64,18 +64,18 @@ IF(!var_privsep) {
 
 # XXX TODO : check stuff for C99, C89 and CC
 CHECK_BINARY(binary_cc) {
-    NAME = "cc"
-    VARIABLE = "CC"
+	NAME = "cc"
+	VARIABLE = "CC"
 }
 
 CHECK_BINARY(binary_cpp) {
-    NAME = "cpp"
-    VARIABLE = "CPP"
+	NAME = "cpp"
+	VARIABLE = "CPP"
 }
 
 CHECK_BINARY(binary_as) {
-    NAME = "as"
-    VARIABLE = "AS"
+	NAME = "as"
+	VARIABLE = "AS"
 }
 
 
@@ -85,61 +85,61 @@ CHECK_BINARY(binary_as) {
 
 # check _Bool type
 CHECK_TYPE(type__bool) {
-    REQUIRED = FALSE
-    NAME = "_Bool"
+	REQUIRED = FALSE
+	NAME = "_Bool"
 }
 
 # check blkcnt_t type
 CHECK_TYPE(type_blkcnt_t) {
-    REQUIRED = FALSE
-    NAME = "blkcnt_t"
-    HEADER = "sys/types.h"
+	REQUIRED = FALSE
+	NAME = "blkcnt_t"
+	HEADER = "sys/types.h"
 }
 
 # check long long type
 CHECK_TYPE(type_long_long) {
-    REQUIRED = FALSE
-    NAME = "long long"
+	REQUIRED = FALSE
+	NAME = "long long"
 }
 
 # check unsigned long long type
 CHECK_TYPE(type_unsigned_long_long) {
-    REQUIRED = FALSE
-    NAME = "unsigned long long"
+	REQUIRED = FALSE
+	NAME = "unsigned long long"
 }
 
 # check long double type
 CHECK_TYPE(type_long_double) {
-    REQUIRED = FALSE
-    NAME = "long double"
+	REQUIRED = FALSE
+	NAME = "long double"
 }
 
 # check intmax_t type
 CHECK_TYPE(type_intmax_t) {
-    REQUIRED = FALSE
-    NAME = "intmax_t"
-    HEADER = "stdint.h"
+	REQUIRED = FALSE
+	NAME = "intmax_t"
+	HEADER = "stdint.h"
 }
 
 # check ptrdiff_t type
 CHECK_TYPE(type_ptrdiff_t) {
-    REQUIRED = FALSE
-    NAME = "ptrdiff_t"
-    HEADER = "stddef.h"
+	REQUIRED = FALSE
+	NAME = "ptrdiff_t"
+	HEADER = "stddef.h"
 }
 
 # check wchar_t type
 CHECK_TYPE(type_wchar_t) {
-    REQUIRED = FALSE
-    NAME = "wchar_t"
-    HEADER = "wchar.h"
+	REQUIRED = FALSE
+	NAME = "wchar_t"
+	HEADER = "wchar.h"
 }
 
 # check wint_t type
 CHECK_TYPE(type_wint_t) {
-    REQUIRED = FALSE
-    NAME = "wint_t"
-    HEADER = "wchar.h"
+	REQUIRED = FALSE
+	NAME = "wint_t"
+	HEADER = "wchar.h"
 }
 
 
@@ -149,15 +149,15 @@ CHECK_TYPE(type_wint_t) {
 
 # checking stdbool.h
 CHECK_HEADER(header_stdbool_h) {
-    REQUIRED = FALSE
-    NAME = "stdbool.h"
+	REQUIRED = FALSE
+	NAME = "stdbool.h"
 }
 
 # checking libgen.h
 CHECK_HEADER(header_libgen_h) {
-    REQUIRED = FALSE
-    NAME = "libgen.h"
-    FUNCTION = ("dirname", "basename")
+	REQUIRED = FALSE
+	NAME = "libgen.h"
+	FUNCTION = ("dirname", "basename")
 }
 
 
@@ -167,37 +167,37 @@ CHECK_HEADER(header_libgen_h) {
 
 # checking strlcpy() and strlcat() in string.h
 CHECK_HEADER(header_string_h) {
-    REQUIRED = FALSE
-    NAME = "string.h"
-    FUNCTION = ("strlcpy","strlcat")
+	REQUIRED = FALSE
+	NAME = "string.h"
+	FUNCTION = ("strlcpy","strlcat")
 }
 
 # checking strdup in string.h
 CHECK_HEADER(function_strdup) {
-    REQUIRED = FALSE
-    NAME = "string.h"
-    FUNCTION = ("strdup")
+	REQUIRED = FALSE
+	NAME = "string.h"
+	FUNCTION = ("strdup")
 }
 
 # checking vsnprintf and snprintf in stdio.h
 CHECK_HEADER(header_stdio_h) {
-    REQUIRED = FALSE
-    NAME = "stdio.h"
-    FUNCTION = ("vsnprintf", "snprintf")
+	REQUIRED = FALSE
+	NAME = "stdio.h"
+	FUNCTION = ("vsnprintf", "snprintf")
 }
 
 # checking isblank in ctype.h
 CHECK_HEADER(function_isblank) {
-    REQUIRED = FALSE
-    NAME = "ctype.h"
-    FUNCTION = ("isblank")
+	REQUIRED = FALSE
+	NAME = "ctype.h"
+	FUNCTION = ("isblank")
 }
 
 # checking mkstemps in unistd.h
 CHECK_HEADER(function_mkstemps) {
-    REQUIRED = FALSE
-    NAME = "unistd.h"
-    FUNCTION = ("mkstemps")
+	REQUIRED = FALSE
+	NAME = "unistd.h"
+	FUNCTION = ("mkstemps")
 }
 
 
@@ -207,9 +207,9 @@ CHECK_HEADER(function_mkstemps) {
 
 # check dirname and basename in libgen
 CHECK_LIB(library_gen) {
-    REQUIRED = FALSE
-    NAME = "gen"
-    FUNCTION = ("dirname", "basename")
-    LIBS = "LGEN_FLAGS"
+	REQUIRED = FALSE
+	NAME = "gen"
+	FUNCTION = ("dirname", "basename")
+	LIBS = "LGEN_FLAGS"
 }
 
