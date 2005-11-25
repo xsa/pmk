@@ -500,6 +500,7 @@ bool pmk_check_binary(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 		errorf("NAME not assigned in label '%s'", cmd->label);
 		return(false);
 	}
+	record_def_adv(pgd->htab, TAG_TYPE_BIN, filename, NULL, NULL, NULL);
 
 	/* check if a variable name is given */
 	varname = po_get_str(hash_get(ht, KW_OPT_VARIABLE));
@@ -546,6 +547,7 @@ bool pmk_check_binary(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 		pmk_log("yes.\n");
 		/* define for template */
 		record_def_data(pgd->htab, filename, DEFINE_DEFAULT);
+		record_def_adv(pgd->htab, TAG_TYPE_BIN, filename, NULL, NULL, binpath);
 
 		/* recording path of config tool under the key given by varname */
 		if (hash_update_dup(pgd->htab, varname, binpath) == HASH_ADD_FAIL) {
@@ -602,7 +604,9 @@ bool pmk_check_header(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 	macros = po_get_list(hash_get(ht, KW_OPT_MACRO));
 	if (macros != NULL) {
 		for (i = 0 ; i < (int) da_usize(macros) ; i++) {
-			record_def_data(pgd->htab, da_idx(macros, i), NULL);
+			pstr = da_idx(macros, i);
+			record_def_data(pgd->htab, pstr, NULL);
+			record_def_adv(pgd->htab, TAG_TYPE_HDR_MCR, scb.header, pstr, NULL, NULL);
 		}
 	}
 
@@ -615,7 +619,9 @@ bool pmk_check_header(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 	if (funcs != NULL) {
 		n = da_usize(funcs);
 		for (i = 0 ; i < n ; i++) {
-			record_def_data(pgd->htab, da_idx(funcs, i), NULL);
+			pstr = da_idx(funcs, i);
+			record_def_data(pgd->htab, pstr, NULL);
+			record_def_adv(pgd->htab, TAG_TYPE_HDR_PRC, scb.header, pstr, NULL, NULL);
 		}
 	}
 
@@ -796,6 +802,7 @@ bool pmk_check_header(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 				pmk_log("yes.\n");
 				/* define for template */
 				record_def_data(pgd->htab, target, DEFINE_DEFAULT);
+				record_def_adv(pgd->htab, TAG_TYPE_HDR_MCR, scb.header, target, NULL, DEFINE_DEFAULT);
 			} else {
 				pmk_log("no.\n");
 				rslt = false;
@@ -839,6 +846,7 @@ bool pmk_check_header(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 
 				/* define for template */
 				record_def_data(pgd->htab, target, DEFINE_DEFAULT);
+				record_def_adv(pgd->htab, TAG_TYPE_HDR_PRC, scb.header, target, NULL, DEFINE_DEFAULT);
 			} else {
 				pmk_log("no.\n");
 				rslt = false;
@@ -902,6 +910,7 @@ bool pmk_check_lib(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 		return(false);
 	}
 	scb.library = pstr;
+	record_def_adv(pgd->htab, TAG_TYPE_LIB, scb.library, NULL, NULL, NULL);
 
 	/* check if a function or more must be searched */
 	obsolete_string_to_list(ht, KW_OPT_FUNCTION);
@@ -909,7 +918,9 @@ bool pmk_check_lib(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 	if (funcs != NULL) {
 		n = da_usize(funcs);
 		for (i = 0 ; i < n ; i++) {
-			record_def_data(pgd->htab, da_idx(funcs, i), NULL);
+			pstr = da_idx(funcs, i);
+			record_def_data(pgd->htab, pstr, NULL);
+			record_def_adv(pgd->htab, TAG_TYPE_LIB_PRC, scb.library, pstr, NULL, NULL);
 		}
 	}
 
@@ -997,6 +1008,7 @@ bool pmk_check_lib(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 	pmk_log("yes.\n");
 	/* define for template */
 	record_def_data(pgd->htab, scb.library, DEFINE_DEFAULT);
+	record_def_adv(pgd->htab, TAG_TYPE_LIB, scb.library, pstr, NULL, DEFINE_DEFAULT);
 
 	/*
 		check functions
@@ -1033,6 +1045,7 @@ bool pmk_check_lib(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 
 				/* define for template */
 				record_def_data(pgd->htab, target, DEFINE_DEFAULT);
+				record_def_adv(pgd->htab, TAG_TYPE_LIB_PRC, scb.library, target, NULL, DEFINE_DEFAULT);
 			} else {
 				pmk_log("no.\n");
 				rslt = false;
