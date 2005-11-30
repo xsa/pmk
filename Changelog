@@ -1,5 +1,6 @@
 30 Nov 2005 mipsator
  * fixed missing include for intmax_t in compat, noticed by veins.
+ * added few more advanced tags in pmk.
 
 24 Nov 2005 mipsator
  * fixed extra define in pmkscan generated config file.

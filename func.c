@@ -1572,6 +1572,7 @@ bool pmk_check_type(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 		return(false);
 	}
 	record_def_data(pgd->htab, type, NULL);
+	record_def_adv(pgd->htab, TAG_TYPE_TYPE, type, NULL, NULL, NULL);
 
 	/* check if an header must be used */
 	scb.header = po_get_str(hash_get(ht, KW_OPT_HEADER));
@@ -1584,6 +1585,18 @@ bool pmk_check_type(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 	if (member != NULL) {
 		record_def_data(pgd->htab, member, NULL);
 	}
+
+	if (scb.header != NULL) {
+		record_def_adv(pgd->htab, TAG_TYPE_HDR_TYPE, scb.header, type, NULL, NULL);
+		if (member != NULL) {
+			record_def_adv(pgd->htab, TAG_TYPE_HDR_TYP_MBR, scb.header, type, member, NULL);
+		}
+	} else {
+		if (member != NULL) {
+			record_def_adv(pgd->htab, TAG_TYPE_TYP_MBR, type, member, NULL, NULL);
+		}
+	}
+
 
 	/* look for additional defines */
 	defs = po_get_list(hash_get(ht, KW_OPT_DEFS));
@@ -1679,6 +1692,7 @@ bool pmk_check_type(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 		pmk_log("yes.\n");
 		/* define for template */
 		record_def_data(pgd->htab, scb.header, DEFINE_DEFAULT);
+		record_def_adv(pgd->htab, TAG_TYPE_HDR_TYPE, scb.header, type, NULL, DEFINE_DEFAULT);
 	}
 
 	scb.type = type;
@@ -1713,6 +1727,7 @@ bool pmk_check_type(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 
 	/* define for template */
 	record_def_data(pgd->htab, type, DEFINE_DEFAULT);
+	record_def_adv(pgd->htab, TAG_TYPE_TYPE, type, NULL, NULL, DEFINE_DEFAULT);
 
 	/* check optional member */
 	if (member != NULL) {
@@ -1745,6 +1760,10 @@ bool pmk_check_type(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 
 		/* define for template */
 		record_def_data(pgd->htab, member, DEFINE_DEFAULT);
+		record_def_adv(pgd->htab, TAG_TYPE_HDR_TYPE, type, member, NULL, DEFINE_DEFAULT);
+		if (scb.header != NULL) {
+			record_def_adv(pgd->htab, TAG_TYPE_HDR_TYP_MBR, scb.header, type, member, DEFINE_DEFAULT);
+		}
 	}
 
 	if (rslt == true) {
