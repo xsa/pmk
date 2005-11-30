@@ -175,6 +175,7 @@ kw_t	opt_genpmk[] = {
 	{KW_OPT_CFGALT,	PO_STRING},
 	{KW_OPT_DSC,	PO_LIST},
 	{KW_OPT_EXTTAG,	PO_LIST},
+	{KW_OPT_PMKALT,	PO_STRING},
 	{KW_OPT_REC,	PO_BOOL},
 	{KW_OPT_UNI,	PO_BOOL}
 };
@@ -189,6 +190,7 @@ kwopt_t	kw_genpmk = {
 /* GEN_MAKEFILE options */
 kw_t	opt_genmkf[] = {
 	{KW_OPT_DSC,	PO_LIST},
+	{KW_OPT_EXTMKF,	PO_STRING},
 	{KW_OPT_EXTTAG,	PO_LIST},
 	{KW_OPT_NAM,	PO_STRING},
 	{KW_OPT_MKFALT,	PO_STRING},
@@ -208,11 +210,13 @@ kw_t	opt_genzone[] = {
 	{KW_OPT_ADVTAG,	PO_BOOL},
 	{KW_OPT_CFGALT,	PO_STRING},
 	{KW_OPT_DSC,	PO_LIST},
+	{KW_OPT_EXTMKF,	PO_STRING},
 	{KW_OPT_EXTTAG,	PO_LIST},
 	{KW_OPT_MKF,	PO_BOOL},
 	{KW_OPT_NAM,	PO_STRING},
 	{KW_OPT_MKFALT,	PO_STRING},
 	{KW_OPT_PMK,	PO_BOOL},
+	{KW_OPT_PMKALT,	PO_STRING},
 	{KW_OPT_REC,	PO_BOOL},
 	{KW_OPT_UNI,	PO_BOOL}
 };
@@ -479,9 +483,13 @@ scn_zone_t *scan_zone_init(htable *nodes) {
 		pzone->gen_pmk = false;
 		pzone->gen_mkf = false;
 		pzone->recursive = false;
-		pzone->unique = false;
+		pzone->unique = true;
+
+		/* init file names */
 		pzone->cfg_name = PMKSCAN_CFGFILE;
 		pzone->mkf_name = PMKSCAN_MKFILE;
+		pzone->pmk_name = PMKSCAN_PMKFILE;
+		pzone->ext_mkf = NULL;
 
 		/* discard list */
 		pzone->discard = NULL;
@@ -1657,7 +1665,7 @@ bool output_type(htable *checks, char *cname, FILE *fp) {
 	boolean
  ***********************************************************************/
 
-bool scan_build_pmk(char *fname, scn_zone_t *psz) {
+bool scan_build_pmk(scn_zone_t *psz) {
 	FILE			*fp;
 	char			 buf[MKF_OUTPUT_WIDTH * 2];
 	hkeys			*phk;
@@ -1665,12 +1673,11 @@ bool scan_build_pmk(char *fname, scn_zone_t *psz) {
 	unsigned int	 i;
 
 	/* open output file */
-	fp = fopen(fname, "w");
+	fp = fopen(psz->pmk_name, "w");
 	if (fp == NULL) {
-		errorf("cannot open '%s' : %s.", fname, strerror(errno));
+		errorf("cannot open '%s' : %s.", psz->pmk_name, strerror(errno));
 		return(false);
 	}
-
 
 	/* header comment ******************/
 
@@ -1771,7 +1778,7 @@ bool scan_build_pmk(char *fname, scn_zone_t *psz) {
 	}
 
 	fclose(fp);
-	psc_log("Saved as '%s'\n", NULL, fname);
+	psc_log("Saved as '%s'\n", NULL, psz->pmk_name);
 
 	return(true);
 }
@@ -2501,19 +2508,46 @@ void mkf_output_recurs(FILE *fp, scn_zone_t *psz) {
 	/*
 		generate the list of scanned directories
 	*/
-
 	s = da_usize(psz->dirlist);
 	if (s > 0) {
 		/* get directory list */
 		fprintf(fp, "#\n# directory list\n#\n");
-		fprintf(fp, MKF_DIR_LIST);
+		fprintf(fp, MKF_SDIR_LIST);
 
 		da_sort(psz->dirlist);
 
-		lm = strlen(MKF_DIR_LIST);
+		lm = strlen(MKF_SDIR_LIST);
 		ofst = lm;
 		for (i = 0 ; i < s ; i++) {
-			ofst = fprintf_width(lm, MKF_OUTPUT_WIDTH, ofst, fp, da_idx(psz->dirlist, i));
+			/* get directory */
+			pstr = da_idx(psz->dirlist, i);
+
+			/* add to the list */
+			ofst = fprintf_width(lm, MKF_OUTPUT_WIDTH, ofst, fp, pstr);
+		}
+
+		fprintf(fp, MKF_TWICE_JUMP);
+	}
+
+	/*
+		generate the list of template files
+	*/
+	s = da_usize(psz->templates);
+	if (s > 0) {
+		/* get list of template files */
+		fprintf(fp, "#\n# list of generated files\n#\n");
+		fprintf(fp, MKF_TEMPLATES);
+
+		da_sort(psz->templates);
+
+		lm = strlen(MKF_TEMPLATES);
+		ofst = lm;
+		for (i = 0 ; i < s ; i++) {
+			/* get template file name */
+			pstr = da_idx(psz->templates, i);
+
+			/* add to the list */
+			ofst = fprintf_width(lm, MKF_OUTPUT_WIDTH, ofst, fp, pstr);
 		}
 
 		fprintf(fp, MKF_TWICE_JUMP);
@@ -2522,7 +2556,6 @@ void mkf_output_recurs(FILE *fp, scn_zone_t *psz) {
 	/*
 		generate the list of template generated files
 	*/
-
 	s = da_usize(psz->templates);
 	if (s > 0) {
 		/* get list of generated files */
@@ -2681,8 +2714,9 @@ void mkf_output_bld_trgs(FILE *fp, scn_zone_t *psz) {
 					 lm,
 					 i;
 
-	/* generate main building target list */
 	fprintf(fp, "#\n# target lists\n#\n");
+
+	/* generate main building target list */
 	fprintf(fp, MKF_TRGT_ALL_VAR);
 
 	/* list of targets */
@@ -2998,7 +3032,11 @@ void mkf_output_man_inst(FILE *fp, scn_zone_t *psz) {
  ***********************************************************************/
 
 bool scan_build_mkf(scn_zone_t *psz) {
-	FILE	*fp;
+	FILE	*fp,
+			*fp_ext;
+	bool	 ferr = false;
+	char	 buf[512];
+	size_t	 len;
 
 	fp = fopen(psz->mkf_name, "w");
 	if (fp == NULL) {
@@ -3033,6 +3071,7 @@ bool scan_build_mkf(scn_zone_t *psz) {
 
 	fprintf(fp, "\n#\n# generic targets\n#\n");
 	fprintf(fp, MKF_TARGET_ALL);
+/*	fprintf(fp, MKF_TARGET_CFG); XXX TO ENABLE: auto config update target */
 	fprintf(fp, MKF_TARGET_INST);
 	fprintf(fp, MKF_INST_BIN);
 	fprintf(fp, MKF_DEINST_BIN);
@@ -3046,13 +3085,54 @@ bool scan_build_mkf(scn_zone_t *psz) {
 
 	fprintf(fp, MKF_DIST_CLEAN);
 
+	/* recursive targets */
+	fprintf(fp, MKF_RECURS_TRGT);
+
+	if (psz->unique == true) {
+		fprintf(fp, MKF_LINE_JUMP);
+	} else {
+		/* recursive targets wrapper */
+		fprintf(fp, MKF_RECURS_PROC);
+	}
+
 	/* generate objects */
 	mkf_output_obj_rules(fp, psz);
 
 	/* generate targets */
 	mkf_output_trg_rules(fp, psz);
 
+	/* extra to append */
+	if (psz->ext_mkf != NULL) {
+		fp_ext = fopen(psz->ext_mkf, "r");
+		if (fp_ext == NULL) {
+			errorf("unable to open file '%s' for reading.", psz->ext_mkf);
+			return(false);
+		}
+
+		/* append extra content to the template */
+		while ((feof(fp_ext) == 0) && (ferr == false)) {
+			len = fread(buf, sizeof(char), sizeof(buf), fp_ext);
+			if (ferror(fp_ext) != 0) {
+				ferr = true;
+			} else {
+				fwrite(buf, sizeof(char), len, fp);
+				if (ferror(fp) != 0) {
+					ferr = true;
+				}
+			}
+		}
+
+		fclose(fp_ext);
+	}
+
 	fclose(fp);
+
+	/* append failed */
+	if (ferr == true) {
+		errorf("unable to append '%s' content into template.", psz->ext_mkf);
+		return(false);
+	}
+
 	psc_log("Saved as '%s'\n", NULL, psz->mkf_name);
 
 	return(true);
@@ -3819,8 +3899,8 @@ bool process_zone(prs_cmn_t *pcmn, scandata *psd) {
 				psc_log("Ok\n\n", NULL);
 
 				/* generate pmkfile */
-				psc_log("Generating %s ...\n", NULL, PMKSCAN_PMKFILE);
-				rslt = scan_build_pmk(PMKSCAN_PMKFILE, psz);
+				psc_log("Generating %s ...\n", NULL, psz->cfg_name);
+				rslt = scan_build_pmk(psz);
 				if (rslt == true) {
 					psc_log("Ok\n\n", NULL);
 				} else {
@@ -3957,6 +4037,16 @@ bool parse_script(char *cfname, prs_cmn_t *pcmn, scandata *psd) {
 						psz->cfg_name = pstr;
 					}
 				}
+
+				/* alternate name for pmkfile template */
+				ppo = hash_get(pcell->data, KW_OPT_PMKALT);
+				if (ppo != NULL) {
+					pstr = po_get_str(ppo);
+					if (pstr != NULL) {
+						/* set config file name name */
+						psz->pmk_name = pstr;
+					}
+				}
 				break;
 
 			case PSC_TOK_MAKF :
@@ -3978,6 +4068,16 @@ bool parse_script(char *cfname, prs_cmn_t *pcmn, scandata *psd) {
 						psz->mkf_name = po_get_str(ppo);
 					}
 				}
+
+				/* extra to append to makefile template */
+				ppo = hash_get(pcell->data, KW_OPT_EXTMKF);
+				if (ppo != NULL) {
+					pstr = po_get_str(ppo);
+					if (pstr != NULL) {
+						/* set config file name name */
+						psz->ext_mkf = pstr;
+					}
+				}
 				break;
 
 			case PSC_TOK_ZONE :
@@ -3995,6 +4095,16 @@ bool parse_script(char *cfname, prs_cmn_t *pcmn, scandata *psd) {
 						if (pstr != NULL) {
 							/* set config file name name */
 							psz->cfg_name = pstr;
+						}
+					}
+
+					/* alternate name for pmkfile template */
+					ppo = hash_get(pcell->data, KW_OPT_PMKALT);
+					if (ppo != NULL) {
+						pstr = po_get_str(ppo);
+						if (pstr != NULL) {
+							/* set config file name name */
+							psz->pmk_name = pstr;
 						}
 					}
 				}
@@ -4017,6 +4127,16 @@ bool parse_script(char *cfname, prs_cmn_t *pcmn, scandata *psd) {
 						if (pstr != NULL) {
 							/* set makefile name */
 							psz->mkf_name = po_get_str(ppo);
+						}
+					}
+
+					/* extra to append to makefile template */
+					ppo = hash_get(pcell->data, KW_OPT_EXTMKF);
+					if (ppo != NULL) {
+						pstr = po_get_str(ppo);
+						if (pstr != NULL) {
+							/* set config file name name */
+							psz->ext_mkf = pstr;
 						}
 					}
 				}
@@ -4261,7 +4381,7 @@ int main(int argc, char *argv[]) {
 		gen_checks(psz, &sd); /* XXX check */
 
 		psc_log("Generating %s ...\n", NULL, PMKSCAN_PMKFILE);
-		scan_build_pmk(PMKSCAN_PMKFILE, psz); /* XXX check */
+		scan_build_pmk(psz); /* XXX check */
 		psc_log("Ok\n\n", NULL);
 
 		psc_log("Generating %s ...\n", NULL, PMKSCAN_CFGFILE);

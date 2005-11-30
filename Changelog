@@ -1,6 +1,10 @@
 30 Nov 2005 mipsator
  * fixed missing include for intmax_t in compat, noticed by veins.
  * added few more advanced tags in pmk.
+ * added alternate pmkfile name support in pmkscan script.
+ * added support for inclusion of third party file content into pmkscan
+   generated makefile.
+ * added some recursive target stuff to prepare multiple generation.
 
 24 Nov 2005 mipsator
  * fixed extra define in pmkscan generated config file.
