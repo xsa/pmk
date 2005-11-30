@@ -43,6 +43,10 @@
 
 #include "compat/config.h"
 
+#ifdef HAVE_INTMAX_T
+#include <stdint.h>
+#endif
+
 #if defined(HAVE_WCHAR_T) || defined (HAVE_WINT_T)
 #include <wchar.h>
 #endif
