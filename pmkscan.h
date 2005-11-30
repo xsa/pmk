@@ -110,10 +110,12 @@ enum {
 #define KW_OPT_CFGALT	"CFGNAME"
 #define KW_OPT_DIR		"DIRECTORY"
 #define KW_OPT_DSC		"DISCARD"
+#define KW_OPT_EXTMKF	"EXTRAMKF"
 #define KW_OPT_EXTTAG	"EXTRATAG"
 #define KW_OPT_MKF		"MAKEFILE"
 #define KW_OPT_MKFALT	"MKFNAME"
 #define KW_OPT_PMK		"PMKFILE"
+#define KW_OPT_PMKALT	"PMKNAME"
 #define KW_OPT_REC		"RECURSE"
 #define KW_OPT_UNI		"UNIQUE"
 
@@ -241,8 +243,9 @@ enum {
 #define MKF_MANX_DIR	"MAN%dDIR=\t@MAN%dDIR@\n"
 #define MKF_SYSCONF_DIR	"SYSCONFDIR=\t@SYSCONFDIR@\n"
 
-#define MKF_DIR_LIST	"DIRLIST=\t"
+#define MKF_SDIR_LIST	"SUBDIRS=\t"
 #define MKF_GEN_FILES	"GEN_FILES=\t"
+#define MKF_TEMPLATES	"TEMPLATES=\t"
 
 #define MKF_VARIABLE	"%s=\t@%s@\n"
 
@@ -308,13 +311,17 @@ enum {
 #define MKF_FILE_MAN_VAR	"MAN%d_FILES=\t"
 #define MKF_FILE_DATA_VAR	"DATA_FILES=\t"
 
-#define MKF_TARGET_ALL		"all: $(ALL_TARGETS)\n\n" \
-							"clean: $(ALL_CLEAN_TARGETS)\n\n"
+#define MKF_TARGET_ALL		"all: config $(ALL_TARGETS) all_recursive\n\n" \
+							"clean: $(ALL_CLEAN_TARGETS) clean_recursive\n\n"
 
-#define MKF_TARGET_INST		"install: all $(INSTALL_TARGETS)\n\n" \
-							"deinstall: $(DEINSTALL_TARGETS)\n\n"
+#define MKF_TARGET_CFG		"config: $(GEN_FILES)\n\n" \
+							"$(GEN_FILES): $(TEMPLATES)\n" \
+							"\t@pmk\n\n"
 
-#define MKF_INST_BIN		"install_bin:\n" \
+#define MKF_TARGET_INST		"install: all $(INSTALL_TARGETS) install_recursive\n\n" \
+							"deinstall: $(DEINSTALL_TARGETS) deinstall_recursive\n\n"
+
+#define MKF_INST_BIN		"install_bin: install_bin_recursive\n" \
 							"\t# install binaries\n" \
 							"\t$(INSTALL_DIR) $(DESTDIR)$(BINDIR)\n" \
 							"\t@for f in $(BIN_FILES); do \\\n" \
@@ -331,7 +338,7 @@ enum {
 							"\t\t$(INSTALL_SBIN) $$f $(DESTDIR)$(SBINDIR)/$$d; \\\n" \
 							"\tdone\n\n"
 
-#define MKF_DEINST_BIN		"deinstall_bin:\n" \
+#define MKF_DEINST_BIN		"deinstall_bin: deinstall_bin_recursive\n" \
 							"\t# deinstall binaries\n" \
 							"\t@for f in $(BIN_FILES); do \\\n" \
 							"\t\td=`basename $$f`; \\\n" \
@@ -346,7 +353,7 @@ enum {
 							"\t\t$(RM) $(RMFLAGS) $(DESTDIR)$(SBINDIR)/$$d; \\\n" \
 							"\tdone\n\n"
 
-#define MKF_INST_MAN_H		"install_man:\n" \
+#define MKF_INST_MAN_H		"install_man: install_man_recursive\n" \
 							"\t# install manual pages\n" \
 							"\t$(INSTALL_DIR) $(DESTDIR)$(MANDIR)\n"
 #define MKF_INST_MAN_B		"\t# man%d\n" \
@@ -357,7 +364,7 @@ enum {
 							"\t\t$(INSTALL_DATA) $$f $(DESTDIR)/$(MAN%dDIR)/$$d; \\\n" \
 							"\tdone\n"
 
-#define MKF_DEINST_MAN_H	"deinstall_man:\n" \
+#define MKF_DEINST_MAN_H	"deinstall_man: deinstall_man_recursive\n" \
 							"\t# deinstall manual pages\n"
 #define MKF_DEINST_MAN_B	"\t# man%d\n" \
 							"\t@for f in $(MAN%d_FILES); do \\\n" \
@@ -366,7 +373,7 @@ enum {
 							"\t\t$(RM) $(RMFLAGS) $(DESTDIR)/$(MAN%dDIR)/$$d; \\\n" \
 							"\tdone\n"
 
-#define MKF_INST_DATA		"install_data:\n" \
+#define MKF_INST_DATA		"install_data: install_data_recursive\n" \
 							"\t# install data files\n" \
 							"\t$(INSTALL_DIR) $(DESTDIR)$(DATADIR)\n" \
 							"\t@for f in $(DATA_FILES); do \\\n" \
@@ -375,7 +382,7 @@ enum {
 							"\t\t$(INSTALL_DATA) $$f $(DESTDIR)$(DATADIR)/$$d; \\\n" \
 							"\tdone\n\n"
 
-#define MKF_DEINST_DATA		"deinstall_data:\n" \
+#define MKF_DEINST_DATA		"deinstall_data: deinstall_data_recursive\n" \
 							"\t# deinstall data files\n" \
 							"\t@for f in $(DATA_FILES); do \\\n" \
 							"\t\td=`basename $$f`; \\\n" \
@@ -383,13 +390,36 @@ enum {
 							"\t\t$(RM) $(RMFLAGS) $(DESTDIR)$(DATADIR)/$$d; \\\n" \
 							"\tdone\n\n"
 
-#define MKF_DIST_CLEAN		"distclean: clean\n" \
+#define MKF_DIST_CLEAN		"distclean: clean distclean_recursive\n" \
 							"\t$(RM) $(RMFLAGS) $(GEN_FILES)\n" \
-							"\t@for d in $(DIRLIST); do \\\n" \
+							"\t@for d in $(SUBDIRS); do \\\n" \
+							"\t\tprintf \"$(RM) $(RMFLAGS) $$d/*.scan; \\n\"; \\\n" \
 							"\t\t$(RM) $(RMFLAGS) $$d/*.scan; \\\n" \
+							"\t\tprintf \"$(RM) $(RMFLAGS) $$d/*.log; \\n\"; \\\n" \
 							"\t\t$(RM) $(RMFLAGS) $$d/*.log; \\\n" \
+							"\t\tprintf \"$(RM) $(RMFLAGS) $$d/*.core; \\n\"; \\\n" \
 							"\t\t$(RM) $(RMFLAGS) $$d/*.core; \\\n" \
 							"\tdone\n\n"
+
+#define MKF_RECURS_TRGT		"# recursive targets wrapper\n" \
+							"all_recursive \\\n" \
+							"clean_recursive \\\n" \
+							"install_recursive \\\n" \
+							"deinstall_recursive \\\n" \
+							"install_bin_recursive \\\n" \
+							"deinstall_bin_recursive \\\n" \
+							"install_data_recursive \\\n" \
+							"deinstall_data_recursive \\\n" \
+							"install_man_recursive \\\n" \
+							"deinstall_man_recursive \\\n" \
+							"distclean_recursive:\n"
+
+#define MKF_RECURS_PROC		"\t@target=`echo $@ | sed s/_recursive//`; \\\n" \
+							"\tfor d in $(SUBDIRS); do \\\n" \
+							"\t\tprintf \"Recursive make $target in $$d\\n\"; \\\n" \
+							"\t\tcd $$d; \\\n" \
+							"\t\t$(MAKE) $target; \\\n" \
+							"\tdone\\\n"
 
 
 /**********************************
@@ -438,7 +468,9 @@ typedef struct {
 				 unique;				/* unique file flag */
 	char		*directory,				/* initial directory */
 				*cfg_name,				/* alternate config file name */
-				*mkf_name;				/* alternate makefile name */
+				*mkf_name,				/* alternate makefile name */
+				*pmk_name,				/* alternative pmkfile name */
+				*ext_mkf;				/* extra to append to makefile template */
 	dynary		*dirlist,				/* scanned directory list */
 				*dirscan,				/* directory list to scan (just a pointer) */
 				*exttags,				/* extra tags */
@@ -506,7 +538,7 @@ bool		 set_lang(FILE *, ftype_t);
 bool		 output_header(htable *, char *, FILE *);
 bool		 output_library(htable *, char *, FILE *);
 bool		 output_type(htable *, char *, FILE *);
-bool		 scan_build_pmk(char *, scn_zone_t *);
+bool		 scan_build_pmk(scn_zone_t *);
 bool		 scan_build_cfg(scn_zone_t *);
 
 /* makefile specific ***************************************************/
