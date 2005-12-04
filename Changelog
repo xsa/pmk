@@ -1,3 +1,6 @@
+04 Dec 2005 mipsator
+ * small fix for parse_lang in prs_c_file().
+
 30 Nov 2005 mipsator
  * fixed missing include for intmax_t in compat, noticed by veins.
  * added few more advanced tags in pmk.
