@@ -36,6 +36,7 @@
 
 #include "compat/pmk_stdio.h"
 #include "compat/pmk_string.h"
+#include "common.h"
 #include "parse_lang.h"
 
 
@@ -638,6 +639,7 @@ bool prs_c_file(prs_cmn_t *pcmn, FILE *fp) {
 	/* init prseng	 */
 	ppe = prseng_init(fp, NULL);
 	if (ppe == NULL) {
+		errorf("parse engine init failed.");
 		return(false);
 	}
 
@@ -670,6 +672,7 @@ bool prs_c_file(prs_cmn_t *pcmn, FILE *fp) {
 					/* if an identifier flag is on => function call */
 					if (pcmn->func_decl != NULL) {
 						if (pcmn->func_decl(pcmn->data, idtf, ppe) == false) {
+							errorf("error in processing of function declarator.");
 							return(false);
 						}
 					}
@@ -680,6 +683,7 @@ bool prs_c_file(prs_cmn_t *pcmn, FILE *fp) {
 					/* if an identifier flag is on => function call */
 					if (pcmn->func_proc != NULL) {
 						if (pcmn->func_proc(pcmn->data, idtf, ppe) == false) {
+							errorf("error in processing of function call.");
 							return(false);
 						}
 					}
@@ -704,7 +708,10 @@ bool prs_c_file(prs_cmn_t *pcmn, FILE *fp) {
 				debugf("possible type identifier '%s'", idtf);
 #endif
 				/* processing, call to pcmn->func_type */
-				pcmn->func_type(pcmn->data, idtf, ppe);
+				if (pcmn->func_type(pcmn->data, idtf, ppe) == false) {
+					errorf("error in processing of type.");
+					return(false);
+				}
 
 				idtf_flag = false;
 			}
@@ -726,7 +733,10 @@ bool prs_c_file(prs_cmn_t *pcmn, FILE *fp) {
 				debugf("possible type identifier '%s'", type);
 #endif
 				/* processing, call to pcmn->func_type */
-				pcmn->func_type(pcmn->data, idtf, ppe);
+				if (pcmn->func_type(pcmn->data, idtf, ppe) == false) {
+					errorf("error in processing of type.");
+					return(false);
+				}
 
 				type_flag = false;
 			}
@@ -799,6 +809,20 @@ bool prs_c_file(prs_cmn_t *pcmn, FILE *fp) {
 #ifdef DEBUG_PRSC
 			debugf("found identifier '%s'", idtf);
 #endif
+
+		if (idtf[0] == '\0') {
+			if (prseng_eof(ppe) == true) {
+#ifdef DEBUG_PRSC
+				debugf("normal end of parsing");
+#endif
+				return(true);
+			} else {
+#ifdef DEBUG_PRSC
+				debugf("problem with '%d'", prseng_get_char(ppe));
+#endif
+				return(false);
+			}
+		}
 
 		/* check if the identifier is a type keyword */
 		if (prs_c_is_kw(idtf, c_type_keywords, nb_c_type_keywords) == true) {
