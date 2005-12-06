@@ -1,3 +1,6 @@
+05 Dec 2005 mipsator
+ * added more data in pmkscan database.
+
 04 Dec 2005 mipsator
  * small fix for parse_lang in prs_c_file().
 

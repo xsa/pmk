@@ -311,7 +311,7 @@ enum {
 #define MKF_FILE_MAN_VAR	"MAN%d_FILES=\t"
 #define MKF_FILE_DATA_VAR	"DATA_FILES=\t"
 
-#define MKF_TARGET_ALL		"all: config $(ALL_TARGETS) all_recursive\n\n" \
+#define MKF_TARGET_ALL		"all: $(ALL_TARGETS) all_recursive\n\n" \
 							"clean: $(ALL_CLEAN_TARGETS) clean_recursive\n\n"
 
 #define MKF_TARGET_CFG		"config: $(GEN_FILES)\n\n" \
