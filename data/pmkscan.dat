@@ -16,25 +16,52 @@ ADD_HEADER {
 }
 
 ADD_HEADER {
+	NAME = "dlfcn.h"
+	PROCEDURE = ("dlclose", "dlerror", "dlopen", "dlsym")
+}
+
+ADD_HEADER {
 	NAME = "libgen.h"
 	PROCEDURE = ("basename", "dirname")
 	LIBRARY = "gen"
 }
 
 ADD_HEADER {
+	NAME = "libintl.h"
+	PROCEDURE = ("gettext")
+	LIBRARY = "intl"
+}
+
+ADD_HEADER {
+	NAME = "stdarg.h"
+}
+	
+ADD_HEADER {
 	NAME = "stdio.h"
 	PROCEDURE = ("snprintf", "vsnprintf")
 }
 
 ADD_HEADER {
+	NAME = "stdlib.h"
+	PROCEDURE = ("free", "malloc")
+}
+	
+ADD_HEADER {
 	NAME = "string.h"
-	PROCEDURE = ("strdup", "strlcat", "strlcpy", "strndup", "strndupa")
+	PROCEDURE = ("strdup", "strlcat", "strlcpy", "strndup", "strndupa",
+				 "memcpy", "memcmp", "memset")
 }
 
 ADD_HEADER {
-	NAME = "socket.h"
+	NAME = "strings.h"
+	PROCEDURE = ("bzero")
+}
+
+ADD_HEADER {
+	NAME = "sys/socket.h"
 	SUBHDR = ("sys/type.h")
 	PROCEDURE = ("socket")
+	LIBRARY = "net"
 }
 
 ADD_HEADER {
@@ -44,6 +71,12 @@ ADD_HEADER {
 ADD_HEADER {
 	NAME = "syslog.h"
 	PROCEDURE = ("vsyslog")
+}
+
+ADD_HEADER {
+	NAME = "sys/wait.h"
+	SUBHDR = ("sys/type.h")
+	PROCEDURE = ("wait")
 }
 
 ADD_HEADER {
@@ -57,6 +90,16 @@ ADD_HEADER {
 ADD_LIBRARY {
 	NAME = "gen"
 	PROCEDURE = ("basename", "dirname")
+}
+
+ADD_LIBRARY {
+	NAME = "intl"
+	PROCEDURE = ("gettext")
+}
+
+ADD_LIBRARY {
+	NAME = "net"
+	PROCEDURE = ("socket")
 }
 
 
@@ -77,6 +120,11 @@ ADD_TYPE {
 }
 
 ADD_TYPE {
+	NAME = "gid_t"
+	HEADER = "sys/types.h"
+}
+
+ADD_TYPE {
 	NAME = "intmax_t"
 	HEADER = "stdint.h"
 }
@@ -90,8 +138,38 @@ ADD_TYPE {
 }
 
 ADD_TYPE {
+	NAME = "mode_t"
+	HEADER = "sys/types.h"
+}
+
+ADD_TYPE {
+	NAME = "off_t"
+	HEADER = "sys/types.h"
+}
+
+ADD_TYPE {
+	NAME = "pid_t"
+	HEADER = "sys/types.h"
+}
+
+ADD_TYPE {
 	NAME = "ptrdiff_t"
 	HEADER = "stddef.h"
+}
+
+ADD_TYPE {
+	NAME = "size_t"
+	HEADER = "sys/types.h"
+}
+
+ADD_TYPE {
+	NAME = "time_t"
+	HEADER = "sys/types.h"
+}
+
+ADD_TYPE {
+	NAME = "uid_t"
+	HEADER = "sys/types.h"
 }
 
 ADD_TYPE {
