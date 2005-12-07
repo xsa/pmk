@@ -3526,11 +3526,12 @@ bool parse_file(prs_cmn_t *pcmn, char *fname, ftype_t ft, bool isdep) {
 
 			case FILE_TYPE_C :
 			case FILE_TYPE_CXX :
-				psz->found[FILE_TYPE_C] = true;
 				psz->found_src = true;
 				if (ft == FILE_TYPE_C) {
+					psz->found[FILE_TYPE_C] = true;
 					psc_log(NULL, "\tStart parsing of C file '%s'\n", fname);
 				} else {
+					psz->found[FILE_TYPE_CXX] = true;
 					psc_log(NULL, "\tStart parsing of C++ file '%s'\n", fname);
 				}
 
