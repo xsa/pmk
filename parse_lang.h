@@ -101,6 +101,18 @@
 #define RKW_C_VLTL	"volatile"
 #define RKW_C_WHILE	"while"
 
+/* C++ extra keywords */
+#define RKW_CXX_CATCH	"catch"
+#define RKW_CXX_CIN		"cin"
+#define RKW_CXX_COUT	"cout"
+#define RKW_CXX_DELETE	"delete"
+#define RKW_CXX_ENDL	"endl"
+#define RKW_CXX_NSPC	"namespace"
+#define RKW_CXX_NEW		"new"
+#define RKW_CXX_STD		"std"
+#define RKW_CXX_THIS	"this"
+#define RKW_CXX_TRY		"try"
+#define RKW_CXX_USE		"use"
 
 #define MAX_IDTF_LEN	64	/* maximum length of an identifier *//* XXX enough ??? */
 
@@ -140,8 +152,10 @@ bool	 prs_c_line_skip(prseng_t *);
 bool	 prs_c_comment_skip(prseng_t *);
 bool	 prs_c_squote_skip(prseng_t *);
 bool	 prs_c_dquote_skip(prseng_t *);
-void	 prs_c_skip(prseng_t *);
+bool	 prs_c_skip(prseng_t *);
 bool	 prs_c_prepro(prs_cmn_t *, prseng_t *);
 bool	 prs_c_is_kw(char *, char **, size_t);
 bool	 prs_c_file(prs_cmn_t *, FILE *);
+bool	 prs_cxx_file(prs_cmn_t *, FILE *);
+bool	 prs_c_common(prs_cmn_t *, FILE *, char **, size_t);
 
