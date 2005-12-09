@@ -47,11 +47,13 @@
 enum {
 	TAG_TYPE_UNKNOWN = 0,
 	TAG_TYPE_BIN,			/* binary */
+	TAG_TYPE_CFGTOOL,		/* config tool binary (*-config) */
 	TAG_TYPE_HDR,			/* header */
 	TAG_TYPE_HDR_PRC,		/* header procedure */
 	TAG_TYPE_HDR_MCR,		/* header macro */
 	TAG_TYPE_LIB,			/* library */
 	TAG_TYPE_LIB_PRC,		/* library procedure */
+	TAG_TYPE_PKGCFG,		/* pkg-config module */
 	TAG_TYPE_TYPE,			/* type */
 	TAG_TYPE_TYP_MBR,		/* type member */
 	TAG_TYPE_HDR_TYPE,		/* header type */
@@ -60,12 +62,14 @@ enum {
 };
 
 /* tag format strings */
-#define FMT_TAG_BIN		"BIN_%s"				/* binary tag */
-#define FMT_TAG_HDR		"HDR_%s"				/* header tag */
+#define FMT_TAG_BIN		"BIN_%s"			/* binary tag */
+#define FMT_TAG_CFGTL	"CFGTOOL_%s"		/* config tool binary */
+#define FMT_TAG_HDR		"HDR_%s"			/* header tag */
 #define FMT_TAG_HPRC	"HPROC_%s_%s"		/* header procedure tag */
 #define FMT_TAG_HMCR	"HMACRO_%s_%s"		/* header macro tag */
-#define FMT_TAG_LIB		"LIB_%s"				/* library tag */
+#define FMT_TAG_LIB		"LIB_%s"			/* library tag */
 #define FMT_TAG_LPROC	"LPROC_%s_%s"		/* library procedure tag */
+#define FMT_TAG_PCFG	"PKGCFG_%s"			/* pkg-config module tag */
 #define FMT_TAG_TYPE	"TYPE_%s"			/* type tag */
 #define FMT_TAG_TMBR	"TMEMB_%s_%s"		/* type member tag */
 #define FMT_TAG_HTYPE	"HTYPE_%s_%s"		/* header type tag */

@@ -1113,6 +1113,7 @@ bool pmk_check_config(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 		errorf("NAME not assigned in label '%s'.", cmd->label);
 		return(false);
 	}
+	record_def_adv(pgd->htab, TAG_TYPE_CFGTOOL, cfgtool, NULL, NULL, NULL);
 
 	/* check dependencies */
 	if (depend_check(ht, pgd) == false) {
@@ -1254,6 +1255,7 @@ bool pmk_check_config(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 
 	/* record gathered data */
 	record_def_data(pgd->htab, cfgtool, DEFINE_DEFAULT);
+	record_def_adv(pgd->htab, TAG_TYPE_CFGTOOL, cfgtool, NULL, NULL, DEFINE_DEFAULT);
 	label_set(pgd->labl, cmd->label, true);
 	/* process additional defines */
 	if (process_def_list(pgd->htab, defs, true) == false) {
@@ -1337,6 +1339,7 @@ bool pmk_check_pkg_config(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 		errorf("NAME not assigned in label '%s'.", cmd->label);
 		return(false);
 	}
+	record_def_adv(pgd->htab, TAG_TYPE_PKGCFG, target, NULL, NULL, NULL);
 
 	/* check dependencies */
 	if (depend_check(ht, pgd) == false) {
@@ -1496,6 +1499,7 @@ bool pmk_check_pkg_config(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 
 	/* record gathered data */
 	record_def_data(pgd->htab, target, DEFINE_DEFAULT);
+	record_def_adv(pgd->htab, TAG_TYPE_PKGCFG, target, NULL, NULL, DEFINE_DEFAULT);
 	label_set(pgd->labl, cmd->label, true);
 	/* process additional defines */
 	if (process_def_list(pgd->htab, defs, true) == false) {

@@ -43,11 +43,11 @@
 /*#define DEBUG_PRSC	1*/
 
 
-/**********
- variables
-***********************************************************************/
+/*************
+ * variables *
+ ***********************************************************************/
 
-/* preprocessor keywords */
+/* preprocessor keywords ***********************************************/
 char	*pp_keywords[] = {
 	RKW_PP_DEF,
 	RKW_PP_ELIF,
@@ -63,14 +63,14 @@ char	*pp_keywords[] = {
 	RKW_PP_UDEF
 };
 
-/* assembler directives */
+/* assembler directives ************************************************/
 char	*as_keywords[] = {
 	RKW_AS_TSEG,
 	RKW_AS_DSEG
 };
 size_t nb_as_keywords = sizeof(as_keywords) / sizeof(char *);
 
-/* C language reserved keywords (without types) */
+/* C language reserved keywords (without types) ************************/
 char	*c_keywords[] = {
 	RKW_C_BOOL, RKW_C_CMPLX, RKW_C_IMGNR,
 	RKW_C_AUTO,
@@ -91,7 +91,7 @@ char	*c_keywords[] = {
 };
 size_t nb_c_keywords = sizeof(c_keywords) / sizeof(char *);
 
-/* C language reserved keywords */
+/* C language reserved type keywords ***********************************/
 char	*c_type_keywords[] = {
 	RKW_C_BOOL, RKW_C_CMPLX, RKW_C_IMGNR,
 	RKW_C_CHAR,
@@ -104,23 +104,46 @@ char	*c_type_keywords[] = {
 };
 size_t nb_c_type_keywords = sizeof(c_type_keywords) / sizeof(char *);
 
+/* C++ language reserved keywords (without types) **********************/
+char	*cxx_keywords[] = {
+	RKW_C_BOOL, RKW_C_CMPLX, RKW_C_IMGNR,
+	RKW_C_AUTO,
+	RKW_C_BREAK,
+	RKW_C_CASE, RKW_CXX_CATCH, RKW_C_CHAR, RKW_CXX_CIN, RKW_C_CONST, RKW_C_CONTN, RKW_CXX_COUT
+	RKW_CXX_DELETE, RKW_C_DFLT, RKW_C_DO, RKW_C_DBL,
+	RKW_C_ELSE, RKW_CXX_ENDL, RKW_C_ENUM, RKW_C_EXTRN,
+	RKW_C_FLOAT, RKW_C_FOR,
+	RKW_C_GOTO,
+	RKW_C_IF, RKW_C_INLN, RKW_C_INT,
+	RKW_C_LONG,
+	RKW_CXX_NSPC, RKW_CXX_NEW
+	RKW_C_RGSTR, RKW_C_RSTCT, RKW_C_RTRN,
+	RKW_C_SHORT, RKW_C_SGND, RKW_C_SIZOF, RKW_C_STTC, RKW_C_STRCT, RKW_CXX_STD, RKW_C_SWTCH,
+	RKW_CXX_THIS, RKW_CXX_TRY, RKW_C_TPDEF,
+	RKW_C_UNION, RKW_C_USGND, RKW_CXX_USE,
+	RKW_C_VOID, RKW_C_VLTL,
+	RKW_C_WHILE
+};
+size_t nb_cxx_keywords = sizeof(cxx_keywords) / sizeof(char *);
+
 
 /******************************
  * assembly parsing functions *
  **********************************************************************/
 
-/***************
- prs_asm_file()
-
+/******************
+ * prs_asm_file() *
+ ***********************************************************************
  DESCR
 	C file parsing main function
 
  IN
-	XXX
+	pcmn :	common parsing structure
+	fp :	file to parse
 
  OUT
-	XXX
-************************************************************************/
+	boolean
+ ***********************************************************************/
 
 bool prs_asm_file(prs_cmn_t *pcmn, FILE *fp) {
 	bool			 askw_flag = false;
@@ -230,18 +253,19 @@ bool prs_asm_file(prs_cmn_t *pcmn, FILE *fp) {
  * C language parsing functions *
  **********************************************************************/
 
-/*********************
- prs_c_skip_to_char()
-
+/************************
+ * prs_c_skip_to_char() *
+ ***********************************************************************
  DESCR
 	skip until a given char
 
  IN
-	XXX
+	ppe :	parsing engine structure
+	c :		delimiter character
 
  OUT
-	XXX
-************************************************************************/
+	boolean
+ ***********************************************************************/
 
 bool prs_c_skip_to_char(prseng_t *ppe, char c) {
 	bool	flag = false;
@@ -275,18 +299,18 @@ bool prs_c_skip_to_char(prseng_t *ppe, char c) {
 }
 
 
-/******************
- prs_c_line_skip()
-
+/*********************
+ * prs_c_line_skip() *
+ ***********************************************************************
  DESCR
 	skip until end of file
 
  IN
-	XXX
+	ppe :	parsing engine structure
 
  OUT
-	XXX
-************************************************************************/
+	boolean
+ ***********************************************************************/
 
 bool prs_c_line_skip(prseng_t *ppe) {
 	bool	flag = false;
@@ -320,18 +344,18 @@ bool prs_c_line_skip(prseng_t *ppe) {
 }
 
 
-/*********************
- prs_c_comment_skip()
-
+/************************
+ * prs_c_comment_skip() *
+ ***********************************************************************
  DESCR
 	skip C style comments
 
  IN
-	XXX
+	ppe :	parsing engine structure
 
  OUT
-	XXX
-************************************************************************/
+	boolean
+ ***********************************************************************/
 
 bool prs_c_comment_skip(prseng_t *ppe) {
 	bool	flag = false,
@@ -397,18 +421,18 @@ bool prs_c_comment_skip(prseng_t *ppe) {
 }
 
 
-/********************
- prs_c_squote_skip()
-
+/***********************
+ * prs_c_squote_skip() *
+ ***********************************************************************
  DESCR
 	process simple quotes
 
  IN
-	XXX
+	ppe :	parsing engine structure
 
  OUT
-	XXX
-************************************************************************/
+	boolean
+ ***********************************************************************/
 
 bool prs_c_squote_skip(prseng_t *ppe) {
 	/* skip starting quote */
@@ -450,18 +474,18 @@ bool prs_c_squote_skip(prseng_t *ppe) {
 }
 
 
-/********************
- prs_c_dquote_skip()
-
+/***********************
+ * prs_c_dquote_skip() *
+ ***********************************************************************
  DESCR
 	process double quotes
 
  IN
-	XXX
+	ppe :	parsing engine structure
 
  OUT
-	XXX
-************************************************************************/
+	boolean
+ ***********************************************************************/
 
 bool prs_c_dquote_skip(prseng_t *ppe) {
 	bool	escape = false;
@@ -495,20 +519,20 @@ bool prs_c_dquote_skip(prseng_t *ppe) {
 }
 
 
-/*************
- prs_c_skip()
-
+/****************
+ * prs_c_skip() *
+ ***********************************************************************
  DESCR
 	skip useless stuff like spaces, tabs, newlines and comments
 
  IN
-	XXX
+	ppe :	parsing engine structure
 
  OUT
-	XXX
-************************************************************************/
+	boolean
+ ***********************************************************************/
 
-void prs_c_skip(prseng_t *ppe) { /* XXX bool */
+bool prs_c_skip(prseng_t *ppe) {
 	bool	do_exit = false;
 
 #ifdef DEBUG_PRSC
@@ -530,7 +554,9 @@ void prs_c_skip(prseng_t *ppe) { /* XXX bool */
 
 			case '/' :
 				/* comment ? */
-				prs_c_comment_skip(ppe);
+				if (prs_c_comment_skip(ppe) == false) {
+					return(false);
+				}
 				break;
 
 			default:
@@ -540,21 +566,24 @@ void prs_c_skip(prseng_t *ppe) { /* XXX bool */
 #ifdef DEBUG_PRSC
 	/*debugf("prs_c_skip() : stop");*/
 #endif
+
+	return(true);
 }
 
 
-/***************
- prs_c_prepro()
-
+/******************
+ * prs_c_prepro() *
+ ***********************************************************************
  DESCR
 	handle preprocesor directives
 
  IN
-	XXX
+	pcmn :	common parsing structure
+	ppe :	parsing engine structure
 
  OUT
-	XXX
-************************************************************************/
+	boolean
+ ***********************************************************************/
 
 bool prs_c_prepro(prs_cmn_t *pcmn, prseng_t *ppe) {
 	char	 pp_idtf[MAX_IDTF_LEN];
@@ -583,9 +612,9 @@ bool prs_c_prepro(prs_cmn_t *pcmn, prseng_t *ppe) {
 }
 
 
-/**************
- prs_c_is_kw()
-
+/*****************
+ * prs_c_is_kw() *
+ ***********************************************************************
  DESCR
 	check if identifier is a keyword
 
@@ -593,8 +622,8 @@ bool prs_c_prepro(prs_cmn_t *pcmn, prseng_t *ppe) {
 	XXX
 
  OUT
-	XXX
-************************************************************************/
+	boolean
+ ***********************************************************************/
 
 bool prs_c_is_kw(char *idtf, char **kw, size_t nbkw) {
 	size_t	i,
@@ -616,20 +645,61 @@ bool prs_c_is_kw(char *idtf, char **kw, size_t nbkw) {
 }
 
 
-/*************
- prs_c_file()
-
+/****************
+ * prs_c_file() *
+ ***********************************************************************
  DESCR
 	C file parsing main function
 
  IN
-	XXX
+	pcmn :	common parsing structure
+	fp :	file to parse
 
  OUT
-	XXX
-************************************************************************/
+	boolean
+ ***********************************************************************/
 
 bool prs_c_file(prs_cmn_t *pcmn, FILE *fp) {
+	return(prs_c_common(pcmn, fp, c_keywords, nb_c_keywords));
+}
+
+
+/******************
+ * prs_cxx_file() *
+ ***********************************************************************
+ DESCR
+	C file parsing main function
+
+ IN
+	pcmn :	common parsing structure
+	fp :	file to parse
+
+ OUT
+	boolean
+ ***********************************************************************/
+
+bool prs_cxx_file(prs_cmn_t *pcmn, FILE *fp) {
+	return(prs_c_common(pcmn, fp, cxx_keywords, nb_cxx_keywords));
+}
+
+
+/******************
+ * prs_c_common() *
+ ***********************************************************************
+ DESCR
+	C file parsing main function
+
+ IN
+	pcmn :		common parsing structure
+	fp :		file to parse
+	lkw :		language keywords
+	nb_lkw :	number of language keywords
+
+ OUT
+	boolean
+ ***********************************************************************/
+
+bool prs_c_common(prs_cmn_t *pcmn, FILE *fp, char **lkw, size_t nb_lkw) {
 	bool			 idtf_flag = false,
 					 type_flag = false;
 	char			 idtf[MAX_IDTF_LEN],
@@ -835,7 +905,7 @@ bool prs_c_file(prs_cmn_t *pcmn, FILE *fp) {
 		}
 
 		/* check if the identifier is a keyword */
-		if (prs_c_is_kw(idtf, c_keywords, nb_c_keywords) == false) {
+		if (prs_c_is_kw(idtf, lkw, nb_lkw) == false) {
 			/* if not then we have to mark this identifier */
 			idtf_flag = true;
 #ifdef DEBUG_PRSC

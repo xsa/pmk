@@ -132,8 +132,10 @@ char *gen_tag(int type, char *container, char *content, char *misc) {
 			/* no break */
 
 		case TAG_TYPE_BIN :
+		case TAG_TYPE_CFGTOOL :
 		case TAG_TYPE_HDR :
 		case TAG_TYPE_LIB :
+		case TAG_TYPE_PKGCFG :
 		case TAG_TYPE_TYPE :
 			strlcpy(cnt, conv_to_tag(container), sizeof(cnt));
 			break;
@@ -143,6 +145,10 @@ char *gen_tag(int type, char *container, char *content, char *misc) {
 	switch (type) {
 		case TAG_TYPE_BIN :
 			snprintf(buffer, sizeof(buffer), FMT_TAG_BIN, cnt);
+			break;
+
+		case TAG_TYPE_CFGTOOL :
+			snprintf(buffer, sizeof(buffer), FMT_TAG_CFGTL, cnt);
 			break;
 
 		case TAG_TYPE_HDR :
@@ -163,6 +169,10 @@ char *gen_tag(int type, char *container, char *content, char *misc) {
 
 		case TAG_TYPE_LIB_PRC :
 			snprintf(buffer, sizeof(buffer), FMT_TAG_LPROC, cnt, ctt);
+			break;
+
+		case TAG_TYPE_PKGCFG :
+			snprintf(buffer, sizeof(buffer), FMT_TAG_PCFG, cnt);
 			break;
 
 		case TAG_TYPE_TYPE :
