@@ -45,13 +45,19 @@
 /*#define DEBUG_PRSENG	1*/
 
 
-/**************
- prseng_init()
-
+/*****************
+ * prseng_init() *
+ ***********************************************************************
  DESCR
+	initialize parsing engine from a file
+
  IN
+	fp :	file descriptor
+	data :	extra data to transmit or NULL
+
  OUT
-************************************************************************/
+	parsing engine structure or NULL
+ ***********************************************************************/
 
 prseng_t *prseng_init(FILE *fp, void *data) {
 	prseng_t	*ppe;
@@ -90,13 +96,19 @@ prseng_t *prseng_init(FILE *fp, void *data) {
 }
 
 
-/******************
- prseng_init_str()
-
+/*********************
+ * prseng_init_str() *
+ ***********************************************************************
  DESCR
+	initialize parsing engine from a string
+
  IN
+	str :	string to parse
+	data :	extra data to transmit or NULL
+
  OUT
-************************************************************************/
+	parsing engine structure or NULL
+ ***********************************************************************/
 
 prseng_t *prseng_init_str(char *str, void *data) {
 	prseng_t	*ppe;
@@ -125,28 +137,36 @@ prseng_t *prseng_init_str(char *str, void *data) {
 }
 
 
-/***************
- prseng_close()
-
+/********************
+ * prseng_destroy() *
+ ***********************************************************************
  DESCR
+	destroy parsing engine structure
+
  IN
+	ppe :	structure to destroy
+
  OUT
-************************************************************************/
+	NONE
+ ***********************************************************************/
 
 void prseng_destroy(prseng_t *ppe) {
 	free(ppe);
 }
 
 
-/****************
- prseng_update()
-
+/*******************
+ * prseng_update() *
+ ***********************************************************************
  DESCR
-	update buffer starting at current cursor position
+	update parsing engine buffer
 
  IN
+	ppe :	parsing engine structure
+
  OUT
-************************************************************************/
+	boolean
+ ***********************************************************************/
 
 bool prseng_update(prseng_t *ppe) {
 	size_t	 s;
@@ -198,13 +218,18 @@ bool prseng_update(prseng_t *ppe) {
 }
 
 
-/*************
- prseng_eof()
-
+/****************
+ * prseng_eof() *
+ ***********************************************************************
  DESCR
+	check for end of file
+
  IN
+	ppe :	parsing engine structure
+
  OUT
-************************************************************************/
+	boolean
+ ***********************************************************************/
 
 bool prseng_eof(prseng_t *ppe) {
 	if (ppe->err == true) {
@@ -222,13 +247,18 @@ bool prseng_eof(prseng_t *ppe) {
 }
 
 
-/******************
- prseng_get_char()
-
+/*********************
+ * prseng_get_char() *
+ ***********************************************************************
  DESCR
+	get character of parsing cursor
+
  IN
+	ppe :	parsing engine structure
+
  OUT
-************************************************************************/
+	character
+ ***********************************************************************/
 
 char prseng_get_char(prseng_t *ppe) {
 	/* return character at the current cursor position */
@@ -236,13 +266,18 @@ char prseng_get_char(prseng_t *ppe) {
 }
 
 
-/*******************
- prseng_next_char()
-
+/**********************
+ * prseng_next_char() *
+ ***********************************************************************
  DESCR
+	set parsing cursor to next character
+
  IN
+	ppe :	parsing engine structure
+
  OUT
-************************************************************************/
+	boolean
+ ***********************************************************************/
 
 bool prseng_next_char(prseng_t *ppe) {
 	if (*ppe->cur == '\n') {
@@ -271,13 +306,19 @@ bool prseng_next_char(prseng_t *ppe) {
 }
 
 
-/*******************
- prseng_test_char()
-
+/**********************
+ * prseng_test_char() *
+ ***********************************************************************
  DESCR
+	test character at the parsing cursor position
+
  IN
+	ppe :	parsing engine structure
+	c :		char to compare with
+
  OUT
-************************************************************************/
+	boolean
+ ***********************************************************************/
 
 bool prseng_test_char(prseng_t *ppe, char c) {
 	if (*ppe->cur == c) {
@@ -288,13 +329,22 @@ bool prseng_test_char(prseng_t *ppe, char c) {
 }
 
 
-/************************
- prseng_test_idtf_char()
-
+/***************************
+ * prseng_test_idtf_char() *
+ ***********************************************************************
  DESCR
+	test if character at the parsing cursor is an identifier character
+	contained in the given string
+
  IN
+	pstr :	string of identifier characters
+	c :		character to test
+
  OUT
-************************************************************************/
+	boolean
+ TODO
+	XXX do it directly with ppe ????
+ ***********************************************************************/
 
 bool prseng_test_idtf_char(char *pstr, char c) {
 	/* parse the allowed characters string */
@@ -313,13 +363,21 @@ bool prseng_test_idtf_char(char *pstr, char c) {
 }
 
 
-/******************
- prseng_get_idtf()
-
+/*********************
+ * prseng_get_idtf() *
+ ***********************************************************************
  DESCR
+	get an identifier from the actual parsing cursor position
+
  IN
+	ppe :	parsing engine structure
+	pbuf :	identifier storage buffer
+	s :		size of buffer
+	pstr :	identifier allowed characters
+
  OUT
-************************************************************************/
+	boolean
+ ***********************************************************************/
 
 bool prseng_get_idtf(prseng_t *ppe, char *pbuf, size_t s, char *pstr) {
 	/* leave space for the end of string character */
@@ -330,18 +388,23 @@ bool prseng_get_idtf(prseng_t *ppe, char *pbuf, size_t s, char *pstr) {
 		/* copy character */
 		*pbuf = *ppe->cur;
 
-		/* next character */
-		if (prseng_next_char(ppe) == false) {
-			return(false);
-		}
-
 		/* update buffer cursor */
 		pbuf++;
 		s--;
+
+		/* next character */
+		if (prseng_next_char(ppe) == false) {
+			*pbuf = CHAR_EOS;
+			return(false);
+		}
 	}
 
 	*pbuf = CHAR_EOS;
-
+/*
+	if (prseng_test_idtf_char(pstr, *ppe->cur) == true) {
+		return(false);
+	}
+*/
 	return(true);
 }
 
