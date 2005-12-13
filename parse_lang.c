@@ -89,7 +89,6 @@ char	*c_keywords[] = {
 	RKW_C_VOID, RKW_C_VLTL,
 	RKW_C_WHILE
 };
-size_t nb_c_keywords = sizeof(c_keywords) / sizeof(char *);
 
 /* C language reserved type keywords ***********************************/
 char	*c_type_keywords[] = {
@@ -102,29 +101,48 @@ char	*c_type_keywords[] = {
 	RKW_C_SHORT,
 	RKW_C_VOID
 };
-size_t nb_c_type_keywords = sizeof(c_type_keywords) / sizeof(char *);
 
 /* C++ language reserved keywords (without types) **********************/
 char	*cxx_keywords[] = {
-	RKW_C_BOOL, RKW_C_CMPLX, RKW_C_IMGNR,
-	RKW_C_AUTO,
-	RKW_C_BREAK,
-	RKW_C_CASE, RKW_CXX_CATCH, RKW_C_CHAR, RKW_CXX_CIN, RKW_C_CONST, RKW_C_CONTN, RKW_CXX_COUT
-	RKW_CXX_DELETE, RKW_C_DFLT, RKW_C_DO, RKW_C_DBL,
-	RKW_C_ELSE, RKW_CXX_ENDL, RKW_C_ENUM, RKW_C_EXTRN,
-	RKW_C_FLOAT, RKW_C_FOR,
-	RKW_C_GOTO,
-	RKW_C_IF, RKW_C_INLN, RKW_C_INT,
-	RKW_C_LONG,
-	RKW_CXX_NSPC, RKW_CXX_NEW
-	RKW_C_RGSTR, RKW_C_RSTCT, RKW_C_RTRN,
-	RKW_C_SHORT, RKW_C_SGND, RKW_C_SIZOF, RKW_C_STTC, RKW_C_STRCT, RKW_CXX_STD, RKW_C_SWTCH,
-	RKW_CXX_THIS, RKW_CXX_TRY, RKW_C_TPDEF,
-	RKW_C_UNION, RKW_C_USGND, RKW_CXX_USE,
-	RKW_C_VOID, RKW_C_VLTL,
-	RKW_C_WHILE
+	RKW_CXX_AND, RKW_CXX_ANDEQ, RKW_CXX_ASM, RKW_CXX_AUTO,
+	RKW_CXX_BITAND, RKW_CXX_BITOR, RKW_CXX_BOOL, RKW_CXX_BREAK,
+	RKW_CXX_CASE, RKW_CXX_CATCH, RKW_CXX_CHAR, RKW_CXX_CLASS,
+	RKW_CXX_COMPL, RKW_CXX_CONST, RKW_CXX_CNSTCST, RKW_CXX_CONTN,
+	RKW_CXX_DFLT, RKW_CXX_DELETE, RKW_CXX_DO, RKW_CXX_DBL, RKW_CXX_DYNCAST,
+	RKW_CXX_ELSE, RKW_CXX_ENUM, RKW_CXX_EXPLI, RKW_CXX_EXPORT, RKW_CXX_EXTRN,
+	RKW_CXX_FALSE, RKW_CXX_FLOAT, RKW_CXX_FOR, RKW_CXX_FRIEND,
+	RKW_CXX_GOTO,
+	RKW_CXX_IF, RKW_CXX_INLN, RKW_CXX_INT,
+	RKW_CXX_LONG,
+	RKW_CXX_MUTABL,
+	RKW_CXX_NSPC, RKW_CXX_NEW, RKW_CXX_NOT, RKW_CXX_NOTEQ,
+	RKW_CXX_OPER, RKW_CXX_OR, RKW_CXX_OREQ,
+	RKW_CXX_PRIV, RKW_CXX_PROT, RKW_CXX_PUBLIC,
+	RKW_CXX_RGSTR, RKW_CXX_RINTCST, RKW_CXX_RTRN,
+	RKW_CXX_SHORT, RKW_CXX_SGND, RKW_CXX_SIZOF, RKW_CXX_STTC,
+	RKW_CXX_STCCST, RKW_CXX_STRCT, RKW_CXX_SWTCH,
+	RKW_CXX_TMPLT, RKW_CXX_THIS, RKW_CXX_THROW, RKW_CXX_TRUE,
+	RKW_CXX_TRY, RKW_CXX_TYPEDEF, RKW_CXX_TYPEID, RKW_CXX_TYPENAM,
+	RKW_CXX_UNION, RKW_CXX_USGND, RKW_CXX_USING,
+	RKW_CXX_VIRT, RKW_CXX_VOID, RKW_CXX_VLTL,
+	RKW_CXX_WCHART, RKW_CXX_WHILE,
+	RKW_CXX_XOR, RKW_CXX_XOREQ
 };
 size_t nb_cxx_keywords = sizeof(cxx_keywords) / sizeof(char *);
+
+/* C++ language reserved type keywords *********************************/
+char	*cxx_type_keywords[] = {
+	RKW_CXX_BOOL,
+	RKW_CXX_CHAR,
+	RKW_CXX_DBL,
+	RKW_CXX_FLOAT,
+	RKW_CXX_INT,
+	RKW_CXX_LONG,
+	RKW_CXX_SHORT,
+	RKW_CXX_VOID,
+	RKW_CXX_WCHART
+};
+size_t nb_cxx_type_keywords = sizeof(cxx_type_keywords) / sizeof(char *);
 
 
 /******************************
@@ -660,7 +678,7 @@ bool prs_c_is_kw(char *idtf, char **kw, size_t nbkw) {
  ***********************************************************************/
 
 bool prs_c_file(prs_cmn_t *pcmn, FILE *fp) {
-	return(prs_c_common(pcmn, fp, c_keywords, nb_c_keywords));
+	return(prs_c_common(pcmn, fp, c_keywords, c_type_keywords));
 }
 
 
@@ -679,7 +697,7 @@ bool prs_c_file(prs_cmn_t *pcmn, FILE *fp) {
  ***********************************************************************/
 
 bool prs_cxx_file(prs_cmn_t *pcmn, FILE *fp) {
-	return(prs_c_common(pcmn, fp, cxx_keywords, nb_cxx_keywords));
+	return(prs_c_common(pcmn, fp, cxx_keywords, cxx_type_keywords));
 }
 
 
@@ -699,12 +717,18 @@ bool prs_cxx_file(prs_cmn_t *pcmn, FILE *fp) {
 	boolean
  ***********************************************************************/
 
-bool prs_c_common(prs_cmn_t *pcmn, FILE *fp, char **lkw, size_t nb_lkw) {
+bool prs_c_common(prs_cmn_t *pcmn, FILE *fp, char **lkw, char **tkw) {
 	bool			 idtf_flag = false,
 					 type_flag = false;
 	char			 idtf[MAX_IDTF_LEN],
 					 type[MAX_IDTF_LEN];
 	prseng_t		*ppe;
+	size_t			 nb_lkw,
+					 nb_tkw;
+
+	/* compute keyword array size */
+	nb_lkw = sizeof(lkw) / sizeof(char *);
+	nb_tkw = sizeof(tkw) / sizeof(char *);
 
 	/* init prseng	 */
 	ppe = prseng_init(fp, NULL);
@@ -895,7 +919,7 @@ bool prs_c_common(prs_cmn_t *pcmn, FILE *fp, char **lkw, size_t nb_lkw) {
 		}
 
 		/* check if the identifier is a type keyword */
-		if (prs_c_is_kw(idtf, c_type_keywords, nb_c_type_keywords) == true) {
+		if (prs_c_is_kw(idtf, tkw, nb_tkw) == true) {
 			/* if yes then we have to mark this identifier */
 			type_flag = true;
 #ifdef DEBUG_PRSC

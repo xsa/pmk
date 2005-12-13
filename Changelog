@@ -1,3 +1,6 @@
+13 Dec 2005 mipsator
+ * improved c++ file parser for pmkscan.
+
 09 Dec 2005 mipsator
  * added more support for c++.
  * added advanced tags for config tools and pkg-config.

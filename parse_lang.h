@@ -63,56 +63,119 @@
 #define RKW_AS_DSEG	"data"
 
 /* C keywords */
-#define RKW_C_BOOL	"_Bool"
-#define RKW_C_CMPLX	"_Complex"
-#define RKW_C_IMGNR	"_Imaginary"
-#define RKW_C_AUTO	"auto"
-#define RKW_C_BREAK	"break"
-#define RKW_C_CASE	"case"
-#define RKW_C_CHAR	"char"
-#define RKW_C_CONST	"const"
-#define RKW_C_CONTN	"continue"
-#define RKW_C_DFLT	"default"
-#define RKW_C_DO	"do"
-#define RKW_C_DBL	"double"
-#define RKW_C_ELSE	"else"
-#define RKW_C_ENUM	"enum"
-#define RKW_C_EXTRN	"extern"
-#define RKW_C_FLOAT	"float"
-#define RKW_C_FOR	"for"
-#define RKW_C_GOTO	"goto"
-#define RKW_C_IF	"if"
-#define RKW_C_INLN	"inline"
-#define RKW_C_INT	"int"
-#define RKW_C_LONG	"long"
-#define RKW_C_RGSTR	"register"
-#define RKW_C_RSTCT	"restrict"
-#define RKW_C_RTRN	"return"
-#define RKW_C_SHORT	"short"
-#define RKW_C_SGND	"signed"
-#define RKW_C_SIZOF	"sizeof"
-#define RKW_C_STTC	"static"
-#define RKW_C_STRCT	"struct"
-#define RKW_C_SWTCH	"switch"
-#define RKW_C_TPDEF	"typedef"
-#define RKW_C_UNION	"union"
-#define RKW_C_USGND	"unsigned"
-#define RKW_C_VOID	"void"
-#define RKW_C_VLTL	"volatile"
-#define RKW_C_WHILE	"while"
+#define RKW_C_BOOL	"_Bool"			/* ISO C99 */
+#define RKW_C_CMPLX	"_Complex"		/* ISO C?? *//* XXX */
+#define RKW_C_IMGNR	"_Imaginary"	/* ISO C?? *//* XXX */
+#define RKW_C_AUTO	"auto"			/* ISO C?? *//* XXX */
+#define RKW_C_BREAK	"break"			/* ISO C90 */
+#define RKW_C_CASE	"case"			/* ISO C90 */
+#define RKW_C_CHAR	"char"			/* ISO C90 */
+#define RKW_C_CONST	"const"			/* ISO C90 */
+#define RKW_C_CONTN	"continue"		/* ISO C90 */
+#define RKW_C_DFLT	"default"		/* ISO C90 */
+#define RKW_C_DO	"do"			/* ISO C90 */
+#define RKW_C_DBL	"double"		/* ISO C90 */
+#define RKW_C_ELSE	"else"			/* ISO C90 */
+#define RKW_C_ENUM	"enum"			/* ISO C90 */
+#define RKW_C_EXTRN	"extern"		/* ISO C90 */
+#define RKW_C_FLOAT	"float"			/* ISO C90 */
+#define RKW_C_FOR	"for"			/* ISO C90 */
+#define RKW_C_GOTO	"goto"			/* ISO C90 */
+#define RKW_C_IF	"if"			/* ISO C90 */
+#define RKW_C_INLN	"inline"		/* ISO C?? *//* XXX */
+#define RKW_C_INT	"int"			/* ISO C90 */
+#define RKW_C_LONG	"long"			/* ISO C90 */
+#define RKW_C_RGSTR	"register"		/* ISO C90 */
+#define RKW_C_RSTCT	"restrict"		/* ISO C99 *//* XXX */
+#define RKW_C_RTRN	"return"		/* ISO C90 */
+#define RKW_C_SHORT	"short"			/* ISO C90 */
+#define RKW_C_SGND	"signed"		/* ISO C90 */
+#define RKW_C_SIZOF	"sizeof"		/* ISO C90 */
+#define RKW_C_STTC	"static"		/* ISO C90 */
+#define RKW_C_STRCT	"struct"		/* ISO C90 */
+#define RKW_C_SWTCH	"switch"		/* ISO C90 */
+#define RKW_C_TPDEF	"typedef"		/* ISO C90 */
+#define RKW_C_UNION	"union"			/* ISO C90 */
+#define RKW_C_USGND	"unsigned"		/* ISO C90 */
+#define RKW_C_VOID	"void"			/* ISO C90 */
+#define RKW_C_VLTL	"volatile"		/* ISO C?? *//* XXX */
+#define RKW_C_WHILE	"while"			/* ISO C90 */
 
 /* C++ extra keywords */
-#define RKW_CXX_CATCH	"catch"
-#define RKW_CXX_CIN		"cin"
-#define RKW_CXX_COUT	"cout"
-#define RKW_CXX_DELETE	"delete"
-#define RKW_CXX_ENDL	"endl"
-#define RKW_CXX_NSPC	"namespace"
-#define RKW_CXX_NEW		"new"
-#define RKW_CXX_STD		"std"
-#define RKW_CXX_THIS	"this"
-#define RKW_CXX_TRY		"try"
-#define RKW_CXX_USE		"use"
+#define RKW_CXX_AND		"and"				/* ISO C++98 */
+#define RKW_CXX_ANDEQ	"and_eq"			/* ISO C++98 */
+#define RKW_CXX_ASM		"asm"				/* ISO C++98 */
+#define RKW_CXX_AUTO	"auto"				/* ISO C++98 */
+#define RKW_CXX_BITAND	"bitand"			/* ISO C++98 */
+#define RKW_CXX_BITOR	"bitor"				/* ISO C++98 */
+#define RKW_CXX_BOOL	"bool"				/* ISO C++98 */
+#define RKW_CXX_BREAK	"break"				/* ISO C++98 */
+#define RKW_CXX_CASE	"case"				/* ISO C++98 */
+#define RKW_CXX_CATCH	"catch"				/* ISO C++98 */
+#define RKW_CXX_CHAR	"char"				/* ISO C++98 */
+#define RKW_CXX_CLASS	"class"				/* ISO C++98 */
+#define RKW_CXX_COMPL	"compl"				/* ISO C++98 */
+#define RKW_CXX_CONST	"const"				/* ISO C++98 */
+#define RKW_CXX_CNSTCST	"const_cast"		/* ISO C++98 */
+#define RKW_CXX_CONTN	"continue"			/* ISO C++98 */
+#define RKW_CXX_DFLT	"default"			/* ISO C++98 */
+#define RKW_CXX_DELETE	"delete"			/* ISO C++98 */
+#define RKW_CXX_DO		"do"				/* ISO C++98 */
+#define RKW_CXX_DBL		"double"			/* ISO C++98 */
+#define RKW_CXX_DYNCAST	"dynamic_cast"		/* ISO C++98 */
+#define RKW_CXX_ELSE	"else"				/* ISO C++98 */
+#define RKW_CXX_ENUM	"enum"				/* ISO C++98 */
+#define RKW_CXX_EXPLI	"explicit"			/* ISO C++98 */
+#define RKW_CXX_EXPORT	"export"			/* ISO C++98 */
+#define RKW_CXX_EXTRN	"extern"			/* ISO C++98 */
+#define RKW_CXX_FALSE	"false"				/* ISO C++98 */
+#define RKW_CXX_FLOAT	"float"				/* ISO C++98 */
+#define RKW_CXX_FOR		"for"				/* ISO C++98 */
+#define RKW_CXX_FRIEND	"friend"			/* ISO C++98 */
+#define RKW_CXX_GOTO	"goto"				/* ISO C++98 */
+#define RKW_CXX_IF		"if"				/* ISO C++98 */
+#define RKW_CXX_INLN	"inline"			/* ISO C++98 */
+#define RKW_CXX_INT		"int"				/* ISO C++98 */
+#define RKW_CXX_LONG	"long"				/* ISO C++98 */
+#define RKW_CXX_MUTABL	"mutable"			/* ISO C++98 */
+#define RKW_CXX_NSPC	"namespace"			/* ISO C++98 */
+#define RKW_CXX_NEW		"new"				/* ISO C++98 */
+#define RKW_CXX_NOT		"not"				/* ISO C++98 */
+#define RKW_CXX_NOTEQ	"not_eq"			/* ISO C++98 */
+#define RKW_CXX_OPER	"operator"			/* ISO C++98 */
+#define RKW_CXX_OR		"or"				/* ISO C++98 */
+#define RKW_CXX_OREQ	"or_eq"				/* ISO C++98 */
+#define RKW_CXX_PRIV	"private"			/* ISO C++98 */
+#define RKW_CXX_PROT	"protected"			/* ISO C++98 */
+#define RKW_CXX_PUBLIC	"public"			/* ISO C++98 */
+#define RKW_CXX_RGSTR	"register"			/* ISO C++98 */
+#define RKW_CXX_RINTCST	"reinterpret_cast"	/* ISO C++98 */
+#define RKW_CXX_RTRN	"return"			/* ISO C++98 */
+#define RKW_CXX_SHORT	"short"				/* ISO C++98 */
+#define RKW_CXX_SGND	"signed"			/* ISO C++98 */
+#define RKW_CXX_SIZOF	"sizeof"			/* ISO C++98 */
+#define RKW_CXX_STTC	"static"			/* ISO C++98 */
+#define RKW_CXX_STCCST	"static_cast"		/* ISO C++98 */
+#define RKW_CXX_STRCT	"struct"			/* ISO C++98 */
+#define RKW_CXX_SWTCH	"switch"			/* ISO C++98 */
+#define RKW_CXX_TMPLT	"template"			/* ISO C++98 */
+#define RKW_CXX_THIS	"this"				/* ISO C++98 */
+#define RKW_CXX_THROW	"throw"				/* ISO C++98 */
+#define RKW_CXX_TRUE	"true"				/* ISO C++98 */
+#define RKW_CXX_TRY		"try"				/* ISO C++98 */
+#define RKW_CXX_TYPEDEF	"typedef"			/* ISO C++98 */
+#define RKW_CXX_TYPEID	"typeid"			/* ISO C++98 */
+#define RKW_CXX_TYPENAM	"typename"			/* ISO C++98 */
+#define RKW_CXX_UNION	"union"				/* ISO C++98 */
+#define RKW_CXX_USGND	"unsigned"			/* ISO C++98 */
+#define RKW_CXX_USING	"using"				/* ISO C++98 */
+#define RKW_CXX_VIRT	"virtual"			/* ISO C++98 */
+#define RKW_CXX_VOID	"void"				/* ISO C++98 */
+#define RKW_CXX_VLTL	"volatile"			/* ISO C++98 */
+#define RKW_CXX_WCHART	"wchar_t"			/* ISO C++98 */
+#define RKW_CXX_WHILE	"while"				/* ISO C++98 */
+#define RKW_CXX_XOR		"xor"				/* ISO C++98 */
+#define RKW_CXX_XOREQ	"xor_req"			/* ISO C++98 */
 
 #define MAX_IDTF_LEN	64	/* maximum length of an identifier *//* XXX enough ??? */
 
@@ -157,5 +220,5 @@ bool	 prs_c_prepro(prs_cmn_t *, prseng_t *);
 bool	 prs_c_is_kw(char *, char **, size_t);
 bool	 prs_c_file(prs_cmn_t *, FILE *);
 bool	 prs_cxx_file(prs_cmn_t *, FILE *);
-bool	 prs_c_common(prs_cmn_t *, FILE *, char **, size_t);
+bool	 prs_c_common(prs_cmn_t *, FILE *, char **, char **);
 
