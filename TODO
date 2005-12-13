@@ -9,13 +9,13 @@ Format:
 Who Status  Description
 
 Status flags:
-	-	to do
-	+	done
-	~	in progress
-	!	high priority
-	.	low priority
-	R	release goal
-	S	snapshot goal
+	-   to do
+	+   done
+	~   in progress
+	!   high priority
+	.   low priority
+	R   release goal
+	S   snapshot goal
 
 Indented lines means subtask.
 -----------------------------------------------------------------------
@@ -23,17 +23,17 @@ Indented lines means subtask.
 
 common:
 -----------------------------------------------------------------------
-	~R	update tutorial
-	~.	improve test_pmkinstall to check more modes
-	~!	new samples
+	~R  update tutorial
+	~.  improve test_pmkinstall to check more modes
+	~!  new samples
 			- add a sample that show architecture data from pmk
-	~R!	improve tag generation and substitution.
+	~R! improve tag generation and substitution.
 
 
 pmk:
 -----------------------------------------------------------------------
-	-R?	check if ~/.pmk.conf is available
-	~.	compatibility with autoconf (progressing) :
+	-R? check if ~/.pmk.conf is available
+	~.  compatibility with autoconf (progressing) :
 			~ support for DEFS (-D options to pass to the
 				compiler)
 			- support for LDFLAGS (misc linker options) ?
@@ -44,21 +44,21 @@ pmk:
 
 pmksetup:
 -----------------------------------------------------------------------
-	~.	cpu identification
+	~.  cpu identification
 			- ppc support (priviledged)
 			- sparc support
 			- sparc64 support (priviledged)
 			~ man page update
-	-	cpu optimisation for compiler
-	-	option to append to variable of pmk.conf
-	+!	clean temporary files on error (verify it's ok)
+	-   cpu optimisation for compiler
+	-   option to append to variable of pmk.conf
+	+!  clean temporary files on error (verify it's ok)
 
 
 pmkscan
 -----------------------------------------------------------------------
-	+S	fix label generation in pmkfile generation
-	+S	try opening ./scanfile by default ?
-	+S	template configuration header generation :
+	+S  fix label generation in pmkfile generation
+	+S  try opening ./scanfile by default ?
+	+S  template configuration header generation :
 			+ add CFGNAME option (alternative config
 				template name, default config.h.scan)
 			+ mark NAME option as obsolete
@@ -72,13 +72,14 @@ pmkscan
 			+ add support of tags in check_type() (same as
 				above)
 			+ update scanfile.5 (CFGNAME,MKFNAME,EXTRATAG)
-	-R	add support for advanced tags in pmkscan and pmk
-	-R	update scanfile.5 (ADVTAG)
-	+S	add support for LIBRARY option in check_header()
-	~S!	update pmkscan.1
-	-R!	add more entries in pmkscan.dat
-	-R	add list of library targets (brainstorming needed)
-	-R	add distclean in generated makefiles ?
+	-R  add support for advanced tags in pmkscan and pmk
+	-R  update scanfile.5 (ADVTAG)
+	+S  add support for LIBRARY option in check_header()
+	~S! update pmkscan.1
+	-R! add more entries in pmkscan.dat
+	-R  add list of library targets (list object)
+	~R  add distclean in generated makefiles ?
+	~R	improve C++ source scanning
 
 
 pmkinstall
@@ -87,7 +88,7 @@ pmkinstall
 
 pmkpc
 -----------------------------------------------------------------------
-	-.	missing options
+	-.  missing options
 			- PMKPC_OPT_UNINST
 			- PMKPC_OPT_DEBUG
 			- PMKPC_OPT_VAR
@@ -95,8 +96,8 @@ pmkpc
 			- PMKPC_OPT_VAR_PRNT
 			- PMKPC_OPT_VAR_SILC
 			- PMKPC_OPT_VAR_STDO
-	~.	man page
-	-.	special expression ('' quoted), post 0.8
+	~.  man page
+	-.  special expression ('' quoted), post 0.8
 
 
 misc
@@ -105,6 +106,6 @@ misc
 
 recursive tasks
 -----------------------------------------------------------------------
-	~R	track and code missing checks for snprintf and strl*
-	~R	update README and INSTALL
+	~R  track and code missing checks for snprintf and strl*
+	~R  update README and INSTALL
 
