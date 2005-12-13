@@ -44,9 +44,9 @@
 #include "premake.h"
 
 
-/**********
- constants
-************************************************************************/
+/*************
+ * constants *
+ ***********************************************************************/
 
 /* pmk specific version */
 #define PREMAKE_SUBVER_PMK	"7"
@@ -64,30 +64,45 @@
 #define MAX_LABEL_KEY		1024
 
 /* pmk's directory tags */
-#define PMK_DIR_BLD_ABS "builddir_abs"
-#define PMK_DIR_BLD_REL "builddir_rel"
-#define PMK_DIR_BLD_ROOT_ABS "builddir_root_abs"
-#define PMK_DIR_BLD_ROOT_REL "builddir_root_rel"
-#define PMK_DIR_SRC_ABS "srcdir_abs"
-#define PMK_DIR_SRC_REL "srcdir_rel"
-#define PMK_DIR_SRC_ROOT_ABS "srcdir_root_abs"
-#define PMK_DIR_SRC_ROOT_REL "srcdir_root_rel"
+#define PMK_DIR_BLD_ABS			"builddir_abs"
+#define PMK_DIR_BLD_REL			"builddir_rel"
+#define PMK_DIR_BLD_ROOT_ABS	"builddir_root_abs"
+#define PMK_DIR_BLD_ROOT_REL	"builddir_root_rel"
+#define PMK_DIR_SRC_ABS			"srcdir_abs"
+#define PMK_DIR_SRC_REL			"srcdir_rel"
+#define PMK_DIR_SRC_ROOT_ABS	"srcdir_root_abs"
+#define PMK_DIR_SRC_ROOT_REL	"srcdir_root_rel"
 
-#define PMK_TMP_AC_CONF TMPDIR "/pmk_ac_XXXXXXXX"
+#define PMK_TMP_AC_CONF TMPDIR	"/pmk_ac_XXXXXXXX"
 
 /* logs */
-#define PMK_LOG_EXT	".log"
-#define PMK_LOG		"pmk" PMK_LOG_EXT
+#define PMK_LOG_EXT		".log"
+#define PMK_LOG			"pmk" PMK_LOG_EXT
 #define PMK_BUILD_LOG	"pmk_build" PMK_LOG_EXT
+
+#define PMK_GENMSG			"%s generated from %s by PMK."
+#define PMK_TAG_IDTF_STR	"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_"
 
 /* error messages */
 #define PMK_ERR_OVRFLOW	"buffer overflow."
 #define PMK_ERR_BLDLOG	"failed to set buildlog output."
 
 
-/******************
- types definitions
-************************************************************************/
+/*********************
+ * types definitions *
+ ***********************************************************************/
+
+typedef struct {
+	char	 tmpl_name[MAXPATHLEN],
+			 src_root_abs[MAXPATHLEN],
+			 src_root_rel[MAXPATHLEN],
+			 src_abs[MAXPATHLEN],
+			 src_rel[MAXPATHLEN],
+			 bld_root_abs[MAXPATHLEN],
+			 bld_root_rel[MAXPATHLEN],
+			 bld_abs[MAXPATHLEN],
+			 bld_rel[MAXPATHLEN];
+} pmkdyn_t;
 
 /* pmk data */
 typedef struct {
@@ -104,20 +119,23 @@ typedef struct {
 	htable		*htab,
 				*labl,
 				*slht;
-
+	pmkdyn_t	 dyndata;
 } pmkdata;
 
 
-/********************
- function prototypes
-************************************************************************/
+/***********************
+ * function prototypes *
+ ***********************************************************************/
 
-bool	 init_var(pmkdata *);
-bool	 parse_cmdline(char **, int, pmkdata *);
-bool	 process_cmd(prsdata *, pmkdata *);
+bool	 process_dyn_paths(pmkdata *, char *);
+bool	 process_dyn_var_new(pmkdata *);
 bool	 process_dyn_var(pmkdata *, char *);
-bool	 process_template(char *, pmkdata *);
 pmkdata	*pmkdata_init(void);
+bool	 init_var(pmkdata *);
+bool	 process_template_new(char *, pmkdata *);
+bool	 process_template(char *, pmkdata *);
+bool	 process_cmd(prsdata *, pmkdata *);
+bool	 parse_cmdline(char **, int, pmkdata *);
 void	 clean(pmkdata *);
 void	 usage(void);
 
