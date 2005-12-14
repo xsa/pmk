@@ -27,7 +27,7 @@ common:
 	~.  improve test_pmkinstall to check more modes
 	~!  new samples
 			- add a sample that show architecture data from pmk
-	~R! improve tag generation and substitution.
+	+R! improve tag generation and substitution.
 
 
 pmk:

@@ -81,7 +81,7 @@
 #define PMK_BUILD_LOG	"pmk_build" PMK_LOG_EXT
 
 #define PMK_GENMSG			"%s generated from %s by PMK."
-#define PMK_TAG_IDTF_STR	"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_"
+#define PMK_TAG_IDTF_STR	"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ123456789_"
 
 /* error messages */
 #define PMK_ERR_OVRFLOW	"buffer overflow."
@@ -127,15 +127,18 @@ typedef struct {
  * function prototypes *
  ***********************************************************************/
 
-bool	 process_dyn_paths(pmkdata *, char *);
-bool	 process_dyn_var_new(pmkdata *);
-bool	 process_dyn_var(pmkdata *, char *);
+/* init functions */
 pmkdata	*pmkdata_init(void);
 bool	 init_var(pmkdata *);
-bool	 process_template_new(char *, pmkdata *);
-bool	 process_template(char *, pmkdata *);
+/* template functions */
+bool	 process_dyn_paths(pmkdata *, char *);
+bool	 process_dyn_var(pmkdata *);
+bool	 process_template(pmkdata *, char *);
+bool	 template_main(pmkdata *);
+/* misc functions */
 bool	 process_cmd(prsdata *, pmkdata *);
 bool	 parse_cmdline(char **, int, pmkdata *);
+bool	 set_switch_list(pmkdata *, char *, bool, int *);
 void	 clean(pmkdata *);
 void	 usage(void);
 
