@@ -1,3 +1,6 @@
+14 Dec 2005 mipsator
+ * improved template tag substitution in pmk.
+
 13 Dec 2005 mipsator
  * improved c++ file parser for pmkscan.
 

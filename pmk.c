@@ -74,237 +74,9 @@ extern size_t	 nbkwpf;
 int				 cur_line = 0;
 
 
-/*************
- * functions *
+/******************
+ * init functions *
  ***********************************************************************/
-
-/***********************
- * process_dyn_paths() *
- ***********************************************************************
- DESCR
-	process dynamic paths
-
- IN
-	pgd :		global data structure
-	tmplpath :	file to process
-
- OUT
-	NONE
- ***********************************************************************/
-
-bool process_dyn_paths(pmkdata *pgd, char *tmplpath) {
-	char		*srcdir,
-				*basedir,
-				 tpath[MAXPATHLEN];
-	pmkdyn_t	*pdd;
-
-	pdd = &(pgd->dyndata);
-
-	srcdir = pgd->srcdir;
-	basedir = pgd->basedir;
-
-	/*
-		get template path
-
-		NOTE : we use strdup() to avoid problem with linux's dirname
-	*/
-	if (strlcpy_b(tpath, tmplpath, sizeof(tpath)) == false) {
-		errorf(PMK_ERR_OVRFLOW);
-		return(false);
-	}
-
-	/* save template filename */
-	if (strlcpy_b(pdd->tmpl_name, basename(tpath), sizeof(pdd->tmpl_name)) == false) {
-		errorf(PMK_ERR_OVRFLOW);
-		return(false);
-	}
-
-	/* set absolute path of template */
-	if (strlcpy_b(pdd->src_abs, dirname(tpath), sizeof(pdd->src_abs)) == false) {
-		errorf(PMK_ERR_OVRFLOW);
-		return(false);
-	}
-
-	/* compute relative path */
-	relpath(srcdir, pdd->src_abs, tpath);
-
-	/* compute builddir_abs with relative path */
-	abspath(basedir, tpath, pdd->bld_abs);
-
-	/* compute relative path to builddir root */
-	relpath(pdd->bld_abs, basedir, pdd->bld_root_rel);
-
-	/* set buildir_rel to '.', useful ? */
-	if (strlcpy_b(pdd->bld_rel, ".", sizeof(pdd->bld_rel)) == false) {
-		errorf(PMK_ERR_OVRFLOW);
-		return(false);
-	}
-
-	/* compute and set relative path from basedir to srcdir */
-	relpath(pdd->bld_abs, srcdir, pdd->src_root_rel);
-
-	/* compute and set relative path from template to builddir */
-	relpath(pdd->bld_abs, pdd->src_abs, pdd->src_rel);
-
-	return(true);
-}
-
-
-/*********************
- * process_dyn_var() *
- ***********************************************************************
- DESCR
-	set dynamic path variables
-
- IN
-	pgd : 		global data structure
-	template :	file to process
-
- OUT
-	NONE
- ***********************************************************************/
-
-bool process_dyn_var_new(pmkdata *pgd) {
-	htable		*pht;
-	pmkdyn_t	*pdd;
-
-	pht = pgd->htab;
-	pdd = &(pgd->dyndata);
-
-	if (hash_update_dup(pht, PMK_DIR_BLD_ROOT_REL, pdd->bld_root_rel) == HASH_ADD_FAIL) {
-		return(false);
-	}
-#ifdef PMK_DEBUG
-	debugf("%s = '%s'", PMK_DIR_BLD_ROOT_REL, pdd->bld_root_rel);
-#endif
-
-	if (hash_update_dup(pht, PMK_DIR_BLD_ABS, pdd->bld_abs) == HASH_ADD_FAIL) {
-		return(false);
-	}
-#ifdef PMK_DEBUG
-	debugf("%s = '%s'", PMK_DIR_BLD_ABS, pdd->bld_abs);
-#endif
-
-	if (hash_update_dup(pht, PMK_DIR_BLD_REL, pdd->bld_rel) == HASH_ADD_FAIL) {
-		return(false);
-	}
-#ifdef PMK_DEBUG
-	debugf("%s = '%s'", PMK_DIR_BLD_REL, pdd->bld_rel);
-#endif
-
-	if (hash_update_dup(pht, PMK_DIR_SRC_ROOT_REL, pdd->src_root_rel) == HASH_ADD_FAIL) {
-		return(false);
-	}
-#ifdef PMK_DEBUG
-	debugf("%s = '%s'", PMK_DIR_SRC_ROOT_REL, pdd->src_root_rel);
-#endif
-
-	if (hash_update_dup(pht, PMK_DIR_SRC_ABS, pdd->src_abs) == HASH_ADD_FAIL) {
-		return(false);
-	}
-#ifdef PMK_DEBUG
-	debugf("%s = '%s'", PMK_DIR_SRC_ABS, pdd->src_abs);
-#endif
-
-	if (hash_update_dup(pht, PMK_DIR_SRC_REL, pdd->src_rel) == HASH_ADD_FAIL) {
-		return(false);
-	}
-#ifdef PMK_DEBUG
-	debugf("%s = '%s'", PMK_DIR_SRC_REL, pdd->src_rel);
-#endif
-
-	return(true);
-}
-
-bool process_dyn_var(pmkdata *pgd, char *template) {
-	char	*srcdir,
-			*basedir,
-			*pstr,
-			 buf[MAXPATHLEN],
-			 rpath[MAXPATHLEN],
-			 stpath[MAXPATHLEN],
-			 btpath[MAXPATHLEN];
-	htable	*pht;
-
-	pht = pgd->htab;
-
-	srcdir = pgd->srcdir;
-	basedir = pgd->basedir;
-
-	/* get template path */
-	/* NOTE : we use strdup to avoid problem with linux's dirname */
-	pstr = strdup(template);
-	if (pstr == NULL) {
-		free(pstr);
-		errorf(ERRMSG_MEM);
-		return(false);
-	}
-
-	if (strlcpy_b(stpath, dirname(pstr), sizeof(stpath)) == false) {
-		free(pstr);
-		errorf(PMK_ERR_OVRFLOW);
-		return(false);
-	}
-	free(pstr);
-
-	/* compute relative path */
-	relpath(srcdir, stpath, rpath);
-
-	/* compute builddir_abs with relative path */
-	abspath(basedir, rpath, btpath);
-	if (hash_update_dup(pht, PMK_DIR_BLD_ABS, btpath) == HASH_ADD_FAIL) {
-		return(false);
-	}
-#ifdef PMK_DEBUG
-	debugf("%s = '%s'", PMK_DIR_BLD_ABS, buf);
-#endif
-
-	/* compute relative path to builddir root */
-	relpath(btpath, basedir, buf);
-	if (hash_update_dup(pht, PMK_DIR_BLD_ROOT_REL, buf) == HASH_ADD_FAIL) {
-		return(false);
-	}
-#ifdef PMK_DEBUG
-	debugf("%s = '%s'", PMK_DIR_BLD_ROOT_REL, buf);
-#endif
-
-	/* set buildir_rel to '.', useful ? */
-	if (hash_update_dup(pht, PMK_DIR_BLD_REL, ".") == HASH_ADD_FAIL) {
-		return(false);
-	}
-#ifdef PMK_DEBUG
-	debugf("%s = '%s'", PMK_DIR_BLD_REL, buf);
-#endif
-
-	/* compute and set relative path from basedir to srcdir */
-	relpath(btpath, srcdir, buf);
-	if (hash_update_dup(pht, PMK_DIR_SRC_ROOT_REL, buf) == HASH_ADD_FAIL) {
-		return(false);
-	}
-#ifdef PMK_DEBUG
-	debugf("%s = '%s'", PMK_DIR_SRC_ROOT_REL, buf);
-#endif
-
-	/* set absolute path of template */
-	if (hash_update_dup(pht, PMK_DIR_SRC_ABS, stpath) == HASH_ADD_FAIL) {
-		return(false);
-	}
-#ifdef PMK_DEBUG
-	debugf("%s = '%s'", PMK_DIR_SRC_ABS, buf);
-#endif
-
-	/* compute and set relative path from template to builddir */
-	relpath(btpath, stpath, buf);
-	if (hash_update_dup(pht, PMK_DIR_SRC_REL, buf) == HASH_ADD_FAIL) {
-		return(false);
-	}
-#ifdef PMK_DEBUG
-	debugf("%s = '%s'", PMK_DIR_SRC_REL, buf);
-#endif
-
-	return(true);
-}
-
 
 /******************
  * pmkdata_init() *
@@ -441,81 +213,257 @@ debugf("%s = '%s'", pstr, buf);
 #ifdef PMK_DEBUG
 debugf("%s = '%s'", pstr, buf);
 #endif
-	if (hash_update_dup(pht, pstr, buf) == HASH_ADD_FAIL)
+
+	if (hash_update_dup(pht, pstr, buf) == HASH_ADD_FAIL) {
 		return(false);
+	}
 
 	/* autoconf shit ? *//* XXX YES !!! => to move ! */
-	if (hash_update_dup(pht, "OBJEXT", "o") == HASH_ADD_FAIL)
+	if (hash_update_dup(pht, "OBJEXT", "o") == HASH_ADD_FAIL) {
 		return(false);
+	}
 
 
 	pstr = hash_get(pht, PMKCONF_BIN_CC);
 	if (pstr != NULL) {
-		if (hash_update_dup(pht, "CC", pstr) == HASH_ADD_FAIL)
+		if (hash_update_dup(pht, "CC", pstr) == HASH_ADD_FAIL) {
 			return(false);
+		}
 	}
 
 	pstr = hash_get(pht, PMKCONF_BIN_CXX);
 	if (pstr != NULL) {
-		if (hash_update_dup(pht, "CXX", pstr) == HASH_ADD_FAIL)
+		if (hash_update_dup(pht, "CXX", pstr) == HASH_ADD_FAIL) {
 			return(false);
+		}
 	}
 
 	pstr = hash_get(pht, PMKCONF_BIN_CPP);
 	if (pstr != NULL) {
-		if (hash_update_dup(pht, "CPP", pstr) == HASH_ADD_FAIL)
+		if (hash_update_dup(pht, "CPP", pstr) == HASH_ADD_FAIL) {
 			return(false);
+		}
 	}
 
 	pstr = hash_get(pht, PMKCONF_BIN_INSTALL);
 	if (pstr != NULL) {
-	        /* append -c for compat with autoconf*/
-	        if (snprintf_b(buf, sizeof(buf), "%s -c", pstr) == false)
+		/* append -c for compat with autoconf*/
+		if (snprintf_b(buf, sizeof(buf), "%s -c", pstr) == false) {
+			errorf(PMK_ERR_OVRFLOW);
 			return(false);
-		if (hash_update_dup(pht, "INSTALL", buf) == HASH_ADD_FAIL)
+		}
+
+		if (hash_update_dup(pht, "INSTALL", buf) == HASH_ADD_FAIL) {
 			return(false);
+		}
 	}
 
 	pstr = hash_get(pht, PMKCONF_BIN_RANLIB);
 	if (pstr != NULL) {
-		if (hash_update_dup(pht, "RANLIB", pstr) == HASH_ADD_FAIL)
+		if (hash_update_dup(pht, "RANLIB", pstr) == HASH_ADD_FAIL) {
 			return(false);
+		}
 	}
 
 	pstr = hash_get(pht, PMKCONF_BIN_SH);
 	if (pstr != NULL) {
-		if (hash_update_dup(pht, "SHELL", pstr) == HASH_ADD_FAIL)
+		if (hash_update_dup(pht, "SHELL", pstr) == HASH_ADD_FAIL) {
 			return(false);
+		}
 	}
 
 	pstr = hash_get(pht, PMKCONF_BIN_STRIP);
 	if (pstr != NULL) {
-		if (hash_update_dup(pht, "STRIP", pstr) == HASH_ADD_FAIL)
+		if (hash_update_dup(pht, "STRIP", pstr) == HASH_ADD_FAIL) {
 			return(false);
+		}
 	}
 
 	pstr = hash_get(pht, PMKCONF_BIN_AWK);
 	if (pstr != NULL) {
-		if (hash_update_dup(pht, "AWK", pstr) == HASH_ADD_FAIL)
+		if (hash_update_dup(pht, "AWK", pstr) == HASH_ADD_FAIL) {
 			return(false);
+		}
 	}
 
 	pstr = hash_get(pht, PMKCONF_BIN_EGREP);
 	if (pstr != NULL) {
-		if (hash_update_dup(pht, "EGREP", pstr) == HASH_ADD_FAIL)
+		if (hash_update_dup(pht, "EGREP", pstr) == HASH_ADD_FAIL) {
 			return(false);
+		}
 	}
 
 	/* set absolute paths */
-	if (hash_update_dup(pht, PMK_DIR_SRC_ROOT_ABS, pgd->srcdir) == HASH_ADD_FAIL)
-			return(false);
+	if (hash_update_dup(pht, PMK_DIR_SRC_ROOT_ABS, pgd->srcdir) == HASH_ADD_FAIL) {
+		return(false);
+	}
 #ifdef PMK_DEBUG
 	debugf("%s = '%s'", PMK_DIR_SRC_ROOT_ABS, pgd->srcdir);
 #endif
-	if (hash_update_dup(pht, PMK_DIR_BLD_ROOT_ABS, pgd->basedir) == HASH_ADD_FAIL)
-			return(false);
+
+	if (hash_update_dup(pht, PMK_DIR_BLD_ROOT_ABS, pgd->basedir) == HASH_ADD_FAIL) {
+		return(false);
+	}
 #ifdef PMK_DEBUG
 	debugf("%s = '%s'", PMK_DIR_BLD_ROOT_ABS, pgd->basedir);
+#endif
+
+	return(true);
+}
+
+
+/**********************
+ * template functions *
+ ***********************************************************************/
+
+/***********************
+ * process_dyn_paths() *
+ ***********************************************************************
+ DESCR
+	process dynamic paths
+
+ IN
+	pgd :		global data structure
+	tmplpath :	file to process
+
+ OUT
+	NONE
+ ***********************************************************************/
+
+bool process_dyn_paths(pmkdata *pgd, char *tmplpath) {
+	char		*srcdir,
+				*basedir,
+				 tpath[MAXPATHLEN];
+	pmkdyn_t	*pdd;
+
+	pdd = &(pgd->dyndata);
+
+	srcdir = pgd->srcdir;
+	basedir = pgd->basedir;
+
+	/*
+		get template path
+
+		NOTE : we use strdup() to avoid problem with linux's dirname
+	*/
+	if (strlcpy_b(tpath, tmplpath, sizeof(tpath)) == false) {
+		errorf(PMK_ERR_OVRFLOW);
+		return(false);
+	}
+
+	/* save template filename */
+	if (strlcpy_b(pdd->tmpl_name, basename(tpath), sizeof(pdd->tmpl_name)) == false) {
+		errorf(PMK_ERR_OVRFLOW);
+		return(false);
+	}
+
+	/* set absolute path of template */
+	if (strlcpy_b(pdd->src_abs, dirname(tpath), sizeof(pdd->src_abs)) == false) {
+		errorf(PMK_ERR_OVRFLOW);
+		return(false);
+	}
+
+	/* compute relative path */
+	if (relpath(srcdir, pdd->src_abs, tpath) == false) {
+		errorf(PMK_ERR_OVRFLOW);
+		return(false);
+	}
+
+	/* compute builddir_abs with relative path */
+	if (abspath(basedir, tpath, pdd->bld_abs) == false) {
+		errorf(PMK_ERR_OVRFLOW);
+		return(false);
+	}
+
+	/* compute relative path to builddir root */
+	if (relpath(pdd->bld_abs, basedir, pdd->bld_root_rel) == false) {
+		errorf(PMK_ERR_OVRFLOW);
+		return(false);
+	}
+
+	/* set buildir_rel to '.', useful ? */
+	if (strlcpy_b(pdd->bld_rel, ".", sizeof(pdd->bld_rel)) == false) {
+		errorf(PMK_ERR_OVRFLOW);
+		return(false);
+	}
+
+	/* compute and set relative path from basedir to srcdir */
+	if (relpath(pdd->bld_abs, srcdir, pdd->src_root_rel) == false) {
+		errorf(PMK_ERR_OVRFLOW);
+		return(false);
+	}
+
+	/* compute and set relative path from template to builddir */
+	if (relpath(pdd->bld_abs, pdd->src_abs, pdd->src_rel) == false) {
+		errorf(PMK_ERR_OVRFLOW);
+		return(false);
+	}
+
+	return(true);
+}
+
+
+/*********************
+ * process_dyn_var() *
+ ***********************************************************************
+ DESCR
+	set dynamic path variables
+
+ IN
+	pgd : 		global data structure
+	template :	file to process
+
+ OUT
+	NONE
+ ***********************************************************************/
+
+bool process_dyn_var(pmkdata *pgd) {
+	htable		*pht;
+	pmkdyn_t	*pdd;
+
+	pht = pgd->htab;
+	pdd = &(pgd->dyndata);
+
+	if (hash_update_dup(pht, PMK_DIR_BLD_ROOT_REL, pdd->bld_root_rel) == HASH_ADD_FAIL) {
+		return(false);
+	}
+#ifdef PMK_DEBUG
+	debugf("%s = '%s'", PMK_DIR_BLD_ROOT_REL, pdd->bld_root_rel);
+#endif
+
+	if (hash_update_dup(pht, PMK_DIR_BLD_ABS, pdd->bld_abs) == HASH_ADD_FAIL) {
+		return(false);
+	}
+#ifdef PMK_DEBUG
+	debugf("%s = '%s'", PMK_DIR_BLD_ABS, pdd->bld_abs);
+#endif
+
+	if (hash_update_dup(pht, PMK_DIR_BLD_REL, pdd->bld_rel) == HASH_ADD_FAIL) {
+		return(false);
+	}
+#ifdef PMK_DEBUG
+	debugf("%s = '%s'", PMK_DIR_BLD_REL, pdd->bld_rel);
+#endif
+
+	if (hash_update_dup(pht, PMK_DIR_SRC_ROOT_REL, pdd->src_root_rel) == HASH_ADD_FAIL) {
+		return(false);
+	}
+#ifdef PMK_DEBUG
+	debugf("%s = '%s'", PMK_DIR_SRC_ROOT_REL, pdd->src_root_rel);
+#endif
+
+	if (hash_update_dup(pht, PMK_DIR_SRC_ABS, pdd->src_abs) == HASH_ADD_FAIL) {
+		return(false);
+	}
+#ifdef PMK_DEBUG
+	debugf("%s = '%s'", PMK_DIR_SRC_ABS, pdd->src_abs);
+#endif
+
+	if (hash_update_dup(pht, PMK_DIR_SRC_REL, pdd->src_rel) == HASH_ADD_FAIL) {
+		return(false);
+	}
+#ifdef PMK_DEBUG
+	debugf("%s = '%s'", PMK_DIR_SRC_REL, pdd->src_rel);
 #endif
 
 	return(true);
@@ -536,7 +484,7 @@ debugf("%s = '%s'", pstr, buf);
 	boolean
  ***********************************************************************/
 
-bool process_template_new(char *template, pmkdata *pgd) {
+bool process_template(pmkdata *pgd, char *template) {
 	FILE		*tfp,
 				*gfp;
 	bool		 ac_flag;
@@ -559,7 +507,10 @@ bool process_template_new(char *template, pmkdata *pgd) {
 
 	/* generate full path for generated file */
 	gfname = gen_from_tmpl(pdd->tmpl_name);
-	abspath(pdd->bld_abs, gfname, gfpath); /* XXX check ? */
+	if (abspath(pdd->bld_abs, gfname, gfpath) == false) {
+		errorf("failed to build absolute path from '%s' and '%s'", pdd->bld_abs, gfname);
+		return(false);
+	}
 
 	tfp = fopen(template, "r");
 	if (tfp == NULL) {
@@ -574,8 +525,9 @@ bool process_template_new(char *template, pmkdata *pgd) {
 		return(false);
 	}
 
-	if (process_dyn_var_new(pgd) == false) { /* XXX rename function after switch */
-		return(false); /* XXX error message ? */
+	if (process_dyn_var(pgd) == false) {
+		errorf("failed to process dynamic variables.");
+		return(false);
 	}
 
 	/* check if autoconf dynamic variables are needed */
@@ -585,7 +537,8 @@ bool process_template_new(char *template, pmkdata *pgd) {
 		ac_flag = true;
 		/* XXX should use directly path ? */
 		if (ac_process_dyn_var(pgd, template) == false) {
-			return(false); /* XXX error message ? */
+			errorf("failed to process autoconf dynamic variables.");
+			return(false);
 		}
 	}
 
@@ -647,6 +600,11 @@ bool process_template_new(char *template, pmkdata *pgd) {
 		} else {
 			/* put character in generated file */
 			fputc(prseng_get_char(ppe), gfp);
+
+			/* next character */
+			if (prseng_next_char(ppe) == false) {
+				return(false);
+			}
 		}
 	}
 
@@ -665,200 +623,71 @@ bool process_template_new(char *template, pmkdata *pgd) {
 	return(true);
 }
 
-bool process_template(char *template, pmkdata *pgd) {
-	FILE	*tfd,
-			*dfd;
-	bool	 ac_flag;
-	char	*plb,
-			*pbf,
-			*ptn,
-			*tptn,
-			*pfn,
-			*tpfn,
-			*ptmp,
-			 lbuf[MAXPATHLEN],
-			 buf[MAXPATHLEN],
-			 tbuf[MAXPATHLEN],
-			 tpath[MAXPATHLEN],
-			 fpath[MAXPATHLEN],
-			 cibuf[TMP_BUF_LEN];
-	htable	*pht;
 
-	pht = pgd->htab;
+/*******************
+ * template_main() *
+ ***********************************************************************
+ DESCR
+	main procedure for template management
 
-	/* save template name */
-	tptn = basename(template);
-	if (tptn == NULL) {
-		errorf("couldn't extract the base portion of '%s' : %s.",
-			template, strerror(errno));
-		return(false);
-	}
-	ptn = strdup(tptn);
-	if (ptn == NULL) {
-		free(ptn);
-		errorf(ERRMSG_MEM);
-		return(false);
+ IN
+	pgd :		global data structure
+
+ OUT
+	boolean
+ ***********************************************************************/
+
+bool template_main(pmkdata *pgd) {
+	char			*pstr,
+					 buf[MAXPATHLEN];
+	dynary			*da;
+	unsigned int	 i;
+
+	da = pgd->tlist;
+	if (da == NULL) {
+		errorf("no target given.");
+		exit(EXIT_FAILURE);
 	}
 
-	/* get the file name */
-	if (strlcpy_b(lbuf, ptn, sizeof(lbuf)) == false) {
-		errorf(PMK_ERR_OVRFLOW);
-		return(false);
-	}
+	/* process each template */
+	for (i = 0 ; i < da_usize(da) ; i++) {
+		pstr = da_idx(da, i);
+		if (pstr != NULL) {
+			if (abspath(pgd->srcdir, pstr, buf) == false) {
+				errorf("failed to build absolute path of '%s'.", pstr);
+				return(false);
+			}
 
-	/* remove the last suffix */
-	ptmp = strrchr(lbuf, '.');
-	if (ptmp != NULL) {
-		*ptmp = CHAR_EOS;
-	} else {
-		errorf("error while creating name of template.");
-		return(false);
-	}
+			if (process_dyn_paths(pgd, buf) == false) {
+				errorf("failed to process dynamic paths for '%s'.", buf);
+				return(false);
+			}
 
-	/* save generated file name */
-	tpfn = basename(lbuf);
-	if (tpfn == NULL) {
-		errorf("couldn't extract the base portion of '%s' : %s.",
-			lbuf, strerror(errno));
-		return(false);
-	}
-	pfn = strdup(tpfn);
-	if (pfn == NULL) {
-		free(pfn);
-		errorf(ERRMSG_MEM);
-		return(false);
-	}
-
-	/* get relative path from srcdir */
-	/* NOTE : we use strdup to avoid problem with linux's dirname */
-	ptmp = strdup(template);
-	if (ptmp == NULL) {
-		free(ptmp);
-		errorf(ERRMSG_MEM);
-		return(false);
-	}
-	relpath(pgd->srcdir, dirname(ptmp), buf); /* XXX check ? */
-	free(ptmp);
-	/* apply to basedir */
-	abspath(pgd->basedir, buf, tpath); /* XXX check ? */
-
-	/* create path if it does not exists */
-	if (makepath(tpath, S_IRWXU | S_IRWXG | S_IRWXO) == false) {
-		errorf("cannot build template path '%s'.", tpath);
-		return(false);
-	}
-
-	/* append filename */
-	abspath(tpath, lbuf, fpath);
-
-	tfd = fopen(template, "r");
-	if (tfd == NULL) {
-		errorf("cannot open '%s' : %s.",
-			template, strerror(errno));
-		return(false);
-	}
-
-	dfd = fopen(fpath, "w");
-	if (dfd == NULL) {
-		fclose(tfd); /* close already opened tfd before leaving */
-		errorf("cannot open '%s' : %s.",
-			fpath, strerror(errno));
-		return(false);
-	}
-
-	/* XXX should use directly path ? */
-	if (process_dyn_var(pgd, template) == false)
-		return(false); /* XXX error message ? */
-
-	if (pgd->ac_file == NULL) {
-		ac_flag = false;
-	} else {
-		ac_flag = true;
-		/* XXX should use directly path ? */
-		if (ac_process_dyn_var(pgd, template) == false)
-			return(false); /* XXX error message ? */
-	}
-
-	if (snprintf_b(cibuf, sizeof(cibuf),
-				"%s generated from %s by PMK.",
-				pfn, ptn) == false)
-		return(false);
-
-	if (hash_update_dup(pht, "configure_input", cibuf) == HASH_ADD_FAIL)
-		return(false);
-
-	free(ptn);
-	free(pfn);
-
-	while (fgets(lbuf, sizeof(lbuf), tfd) != NULL) {
-		plb = lbuf;
-		pbf = buf;
-
-		while (*plb != CHAR_EOS) {
-			if (*plb == PMK_TAG_CHAR) {
-				plb++;
-				/* get tag identifier */
-				ptmp = parse_idtf(plb, tbuf, sizeof(tbuf));
-				if (ptmp == NULL) {
-					errorf("process_template(), buffer too small.", fpath);
-					return(false);
-				}
-
-				plb = ptmp;
-
-				if (*ptmp == PMK_TAG_CHAR) {
-					ptmp = (char *) hash_get(pht, tbuf);
-					if (ptmp == NULL) {
-						/* not a valid tag, put it back */
-						*pbf = PMK_TAG_CHAR; /* first tag character */
-						pbf++;
-						ptmp = tbuf;
-					} else {
-						/* tag ok, skip ending tag char */
-						plb++;
-					}
-
-				} else {
-					/* not an identifier */
-					ptmp = tbuf;
-					*pbf = PMK_TAG_CHAR; /* first tag character */
-					pbf++;
-				}
-
-				/* copy */
-				while (*ptmp != CHAR_EOS) {
-					*pbf = *ptmp;
-					pbf++;
-					ptmp++;
-				}
-			} else {
-				/* copy normal char */
-				*pbf = *plb;
-				pbf++;
-				plb++;
-                        }
+			if (process_template(pgd, buf) == false) {
+				/* failure while processing template */
+				errorf("failed to process template '%s'.", buf);
+				return(false);
+			}
 		}
-
-                *pbf = CHAR_EOS;
-		/* saving parsed line */
-		fprintf(dfd, "%s", buf);
 	}
 
-	fclose(dfd);
-	fclose(tfd);
-
-	pmk_log("Created '%s'.\n", fpath);
-
-	if (ac_flag == true) {
-		/* clean dyn_var */
-		ac_clean_dyn_var(pht);
+	/* process eventual autoconf style config file */
+	if (pgd->ac_file != NULL) {
+		pmk_log("\nProcess '%s' for autoconf compatibility.\n", pgd->ac_file);
+		if (ac_parse_config(pgd) == false) {
+			/* failure while processing autoconf file */
+			errorf("failed to process autoconf config file '%s'.", pgd->ac_file);
+			return(false);
+		}
 	}
-
-	hash_delete(pht, "configure_input");
 
 	return(true);
 }
 
+
+/***************************
+ * miscellaneous functions *
+ ***********************************************************************/
 
 /*****************
  * process_cmd() *
@@ -964,6 +793,49 @@ void clean(pmkdata *pgd) {
 }
 
 
+/*********************
+ * set_switch_list() *
+ ***********************************************************************
+ DESCR
+	set or unset a switch
+
+ IN
+	swlst :	list of switches to process
+	state :	switch state to set (true or false)
+
+ OUT
+	boolean
+ ***********************************************************************/
+
+bool set_switch_list(pmkdata *pgd, char *swlst, bool state, int *ovrsw) {
+	char	*pstr,
+			*ststr;
+	dynary	*da;
+
+	if (state == true) {
+		ststr = BOOL_STRING_TRUE;
+	} else {
+		ststr = BOOL_STRING_FALSE;
+	}
+
+	da = str_to_dynary(swlst, CHAR_LIST_SEPARATOR);
+	if (da != NULL) {
+		do {
+			pstr = da_pop(da);
+			if (pstr != NULL) {
+				if (hash_update_dup(pgd->labl, pstr, ststr) == HASH_ADD_FAIL)
+					return(false);
+				*ovrsw++; /* increment number of overriden switches */
+				free(pstr);
+			}
+		} while (pstr != NULL);
+		da_destroy(da);
+	}
+
+	return(true);
+}
+
+
 /***********
  * usage() *
  ***********************************************************************
@@ -1001,7 +873,6 @@ int main(int argc, char *argv[]) {
 					*enable_sw = NULL,
 					*disable_sw = NULL,
 					 buf[MAXPATHLEN];
-	dynary			*da;
 	int				 rval = 0,
 					 nbpd,
 					 nbcd,
@@ -1009,7 +880,6 @@ int main(int argc, char *argv[]) {
 					 chr;
 	pmkdata			*pgd;
 	prsdata			*pdata;
-	unsigned int	 i;
 
 	/* get current path */
 	if (getcwd(buf, sizeof(buf)) == NULL) {
@@ -1059,7 +929,7 @@ int main(int argc, char *argv[]) {
 
 				case 'f' :
 					/* pmk file path */
-					/* XXX check if path is valid */
+					/* XXX check if path in optarg is valid */
 					if (uabspath(buf, optarg, pgd->pmkfile) == false) {
 						errorf("cannot use file argument.");
 						exit(EXIT_FAILURE);
@@ -1095,7 +965,7 @@ int main(int argc, char *argv[]) {
 
 				case 'o' :
 					/* file path to override pmk.conf */
-					/* XXX check if path is valid */
+					/* XXX check if path in optarg is valid */
 					if (uabspath(buf, optarg, pgd->ovrfile) == false) {
 						errorf("cannot use file argument.");
 						exit(EXIT_FAILURE);
@@ -1197,34 +1067,17 @@ int main(int argc, char *argv[]) {
 
 	if (enable_sw != NULL) {
 		/* command line switches to enable */
-		da = str_to_dynary(enable_sw, CHAR_LIST_SEPARATOR);
-		if (da != NULL) {
-			pstr = da_pop(da);
-			while (pstr != NULL) {
-				if (hash_update_dup(pgd->labl, pstr, BOOL_STRING_TRUE) == HASH_ADD_FAIL)
-					return(false);
-				ovrsw++; /* increment number of overriden switches */
-				free(pstr);
-				pstr = da_pop(da);
-			}
-			da_destroy(da);
+		if (set_switch_list(pgd, enable_sw, true, &ovrsw) == false) {
+			errorf("failed to set enabled switches.");
+			exit(EXIT_FAILURE);
 		}
 	}
 
 	if (disable_sw != NULL) {
 		/* command line switches to disable */
-		da = str_to_dynary(disable_sw, CHAR_LIST_SEPARATOR);
-		if (da != NULL) {
-			do {
-				pstr = da_pop(da);
-				if (pstr != NULL) {
-					if (hash_update_dup(pgd->labl, pstr, BOOL_STRING_FALSE) == HASH_ADD_FAIL)
-						return(false);
-					ovrsw++; /* increment number of overriden switches */
-					free(pstr);
-				}
-			} while (pstr != NULL);
-			da_destroy(da);
+		if (set_switch_list(pgd, disable_sw, false, &ovrsw) == false) {
+			errorf("failed to set disabled switches.");
+			exit(EXIT_FAILURE);
 		}
 	}
 
@@ -1287,62 +1140,31 @@ int main(int argc, char *argv[]) {
 	fp = fopen(pgd->pmkfile, "r");
 	if (fp == NULL) {
 		clean(pgd);
-		errorf("cannot open '%s' : %s.",
-			pgd->pmkfile, strerror(errno));
+		errorf("failed to open '%s' : %s.", pgd->pmkfile, strerror(errno));
 		exit(EXIT_FAILURE);
 	}
 
-	if (parse_pmkfile(fp, pdata, kw_pmkfile, nbkwpf) == false) {
-		/* XXX too much things here */
-		clean(pgd);
-		fflush(fp);
-		fclose(fp);
-		pmk_log_close();
-		errorf("while opening '%s'.", pgd->pmkfile);
-		exit(EXIT_FAILURE);
-	}
+	if (parse_pmkfile(fp, pdata, kw_pmkfile, nbkwpf) == true) {
+		pmk_log("\nProcessing commands :\n");
+		if (process_cmd(pdata, pgd) == false) {
+			/* an error occured while parsing */
+			rval = 1;
+		} else {
+			pmk_log("\nProcess templates :\n");
 
-	fflush(fp);
-	fclose(fp);
-
-	pmk_log("\nProcessing commands :\n");
-	if (process_cmd(pdata, pgd) == false) {
-		/* an error occured while parsing */
-		rval = 1;
-	} else {
-		pmk_log("\nProcess templates :\n");
-
-		da = pgd->tlist;
-
-		if (da == NULL) {
-			errorf("no target given.");
-			exit(EXIT_FAILURE);
-		}
-		for (i = 0 ; (i < da_usize(da)) && (rval == 0) ; i++) {
-			pstr = da_idx(da, i);
-			if (pstr != NULL) {
-				abspath(pgd->srcdir, pstr, buf); /* XXX check ??? */
-				if (process_template(buf, pgd) == false) {
-					/* failure while processing template */
-					errorf("failed to process '%s'.", buf);
-					rval = 1;
-				}
-			}
-		}
-
-		if (pgd->ac_file != NULL) {
-			pmk_log("\nProcess '%s' for autoconf "
-				"compatibility.\n", pgd->ac_file);
-			if (ac_parse_config(pgd) == false) {
-				/* failure while processing autoconf file */
-				errorf("failed to process autoconf config "
-					"file '%s'.", pgd->ac_file);
+			if (template_main(pgd) == false) {
+				/* an error occured while processing templates */
 				rval = 1;
 			}
-		}
 
-		pmk_log("\nEnd of log\n");
+			pmk_log("\nEnd of log\n");
+		}
+	} else {
+		errorf("failed to open '%s'.", pgd->pmkfile);
+		rval = 1;
 	}
+
+	fclose(fp);
 
 	/* flush and close files */
 	pmk_log_close();
