@@ -82,13 +82,13 @@
 #endif
 
 /* only used for snapshots, comment for release */
-#define PREMAKE_SNAP		"4"
+#define PREMAKE_SNAP		"20051215"
 
 /* build version string */
 #ifndef PREMAKE_SNAP
 #define PREMAKE_VERSION		PREMAKE_VFULL
 #else
-#define PREMAKE_VERSION		PREMAKE_VFULL "-s" PREMAKE_SNAP
+#define PREMAKE_VERSION		"SNAP" PREMAKE_SNAP
 #endif
 
 #define PREMAKE_CONFIG		"pmk.conf"
