@@ -3966,6 +3966,97 @@ bool process_zone(prs_cmn_t *pcmn, scandata *psd) {
 }
 
 
+/***********************
+ * parse_zone_opts() *
+ ***********************************************************************
+ DESCR
+	XXX
+
+ IN
+	XXX
+
+ OUT
+	XXX
+ ***********************************************************************/
+
+bool parse_zone_opts(htable *pht, scn_zone_t *psz) {
+	char		*pstr;
+	pmkobj		*ppo;
+
+	/* get pmkfile switch */
+	ppo = hash_get(pht, KW_OPT_PMK);
+	if (ppo != NULL) {
+		psz->gen_pmk = po_get_bool(ppo);
+
+		if (psz->gen_pmk == true) {
+			/* alternate name for config file template */
+			ppo = hash_get(pht, KW_OPT_CFGALT);
+			if (ppo != NULL) {
+				pstr = po_get_str(ppo);
+				if (pstr != NULL) {
+					/* set config file name name */
+					psz->cfg_name = pstr;
+				} else {
+					return(false);
+				}
+			}
+
+			/* alternate name for pmkfile template */
+			ppo = hash_get(pht, KW_OPT_PMKALT);
+			if (ppo != NULL) {
+				pstr = po_get_str(ppo);
+				if (pstr != NULL) {
+					/* set config file name name */
+					psz->pmk_name = pstr;
+				} else {
+					return(false);
+				}
+			}
+		}
+	}
+
+	/* get makefile switch */
+	ppo = hash_get(pht, KW_OPT_MKF);
+	if (ppo != NULL) {
+		psz->gen_mkf = po_get_bool(ppo);
+
+		if (psz->gen_mkf == true) {
+			/* alternate name for makefile template */
+			ppo = hash_get(pht, KW_OPT_NAM); /* check old option */
+			if (ppo != NULL) {
+				/* obsolete option message */
+				fprintf(stderr, "Warning: %s is obsolete, use %s instead.\n", KW_OPT_NAM, KW_OPT_MKFALT);
+			} else {
+				ppo = hash_get(pht, KW_OPT_MKFALT); /* check new option */
+			}
+			if (ppo != NULL) {
+				pstr = po_get_str(ppo);
+				if (pstr != NULL) {
+					/* set makefile name */
+					psz->mkf_name = po_get_str(ppo);
+				} else {
+					return(false);
+				}
+			}
+
+			/* extra to append to makefile template */
+			ppo = hash_get(pht, KW_OPT_EXTMKF);
+			if (ppo != NULL) {
+				pstr = po_get_str(ppo);
+				if (pstr != NULL) {
+					/* set config file name name */
+					psz->ext_mkf = pstr;
+				} else {
+					return(false);
+				}
+			}
+		}
+	}
+
+	return(true);
+}
+
+
 /******************
  * parse_script() *
  ***********************************************************************
@@ -3984,8 +4075,7 @@ bool process_zone(prs_cmn_t *pcmn, scandata *psd) {
 bool parse_script(char *cfname, prs_cmn_t *pcmn, scandata *psd) {
 	FILE		*fd;
 	bool		 frslt = true;
-	char		*pdir,
-				*pstr;
+	char		*pdir;
 	htable		*tnodes;
 	pmkobj		*ppo;
 	prscell		*pcell;
@@ -4026,120 +4116,11 @@ bool parse_script(char *cfname, prs_cmn_t *pcmn, scandata *psd) {
 
 		switch(pcell->token) {
 			case PSC_TOK_PMKF :
-				/* generate pmkfile only */
-				psz->gen_pmk = true;
-
-				/* alternate name for config file template */
-				ppo = hash_get(pcell->data, KW_OPT_CFGALT);
-				if (ppo != NULL) {
-					pstr = po_get_str(ppo);
-					if (pstr != NULL) {
-						/* set config file name name */
-						psz->cfg_name = pstr;
-					}
-				}
-
-				/* alternate name for pmkfile template */
-				ppo = hash_get(pcell->data, KW_OPT_PMKALT);
-				if (ppo != NULL) {
-					pstr = po_get_str(ppo);
-					if (pstr != NULL) {
-						/* set config file name name */
-						psz->pmk_name = pstr;
-					}
-				}
-				break;
-
 			case PSC_TOK_MAKF :
-				/* generate makefile only */
-				psz->gen_mkf = true;
-
-				/* alternate name for makefile template */
-				ppo = hash_get(pcell->data, KW_OPT_NAM); /* check old option */
-				if (ppo != NULL) {
-					/* obsolete option message */
-					fprintf(stderr, "Warning: %s is obsolete, use %s instead.\n", KW_OPT_NAM, KW_OPT_MKFALT);
-				} else {
-					ppo = hash_get(pcell->data, KW_OPT_MKFALT); /* check new option */
-				}
-				if (ppo != NULL) {
-					pstr = po_get_str(ppo);
-					if (pstr != NULL) {
-						/* set makefile name */
-						psz->mkf_name = po_get_str(ppo);
-					}
-				}
-
-				/* extra to append to makefile template */
-				ppo = hash_get(pcell->data, KW_OPT_EXTMKF);
-				if (ppo != NULL) {
-					pstr = po_get_str(ppo);
-					if (pstr != NULL) {
-						/* set config file name name */
-						psz->ext_mkf = pstr;
-					}
-				}
-				break;
-
 			case PSC_TOK_ZONE :
-				/* mixed zone */
-
-				/* get pmkfile switch */
-				ppo = hash_get(pcell->data, KW_OPT_PMK);
-				if (ppo != NULL) {
-					psz->gen_pmk = po_get_bool(ppo);
-
-					/* alternate name for config file template */
-					ppo = hash_get(pcell->data, KW_OPT_CFGALT);
-					if (ppo != NULL) {
-						pstr = po_get_str(ppo);
-						if (pstr != NULL) {
-							/* set config file name name */
-							psz->cfg_name = pstr;
-						}
-					}
-
-					/* alternate name for pmkfile template */
-					ppo = hash_get(pcell->data, KW_OPT_PMKALT);
-					if (ppo != NULL) {
-						pstr = po_get_str(ppo);
-						if (pstr != NULL) {
-							/* set config file name name */
-							psz->pmk_name = pstr;
-						}
-					}
-				}
-
-				/* get makefile switch */
-				ppo = hash_get(pcell->data, KW_OPT_MKF);
-				if (ppo != NULL) {
-					psz->gen_mkf = po_get_bool(ppo);
-
-					/* alternate name for makefile template */
-					ppo = hash_get(pcell->data, KW_OPT_NAM); /* check old option */
-					if (ppo != NULL) {
-						/* obsolete option message */
-						fprintf(stderr, "Warning: %s is obsolete, use %s instead.\n", KW_OPT_NAM, KW_OPT_MKFALT);
-					} else {
-						ppo = hash_get(pcell->data, KW_OPT_MKFALT); /* check new option */
-					}
-					if (ppo != NULL) {
-						pstr = po_get_str(ppo);
-						if (pstr != NULL) {
-							/* set makefile name */
-							psz->mkf_name = po_get_str(ppo);
-						}
-					}
-
-					/* extra to append to makefile template */
-					ppo = hash_get(pcell->data, KW_OPT_EXTMKF);
-					if (ppo != NULL) {
-						pstr = po_get_str(ppo);
-						if (pstr != NULL) {
-							/* set config file name name */
-							psz->ext_mkf = pstr;
-						}
-					}
+				if (parse_zone_opts(pcell->data, psz) == false) {
+					errorf("parsing of script file failed."); /* XXX better error message ? */
+					return(false);
 				}
 				break;
 
