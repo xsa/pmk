@@ -106,6 +106,7 @@ enum {
 #define KW_CMD_GENZN	"GEN_ZONE"
 
 /* script keyword options */
+#define KW_OPT_ADDSO	"ADD_SO"
 #define KW_OPT_ADVTAG	"ADVTAG"
 #define KW_OPT_CFGALT	"CFGNAME"
 #define KW_OPT_DIR		"DIRECTORY"
@@ -572,6 +573,7 @@ bool		 process_ppro(void *, char *, prseng_t *);
 bool		 process_proc_call(void *, char *, prseng_t *);
 bool		 process_proc_decl(void *, char *, prseng_t *);
 bool		 process_type(void *, char *, prseng_t *);
+bool		 parse_zone_opts(htable *, scn_zone_t *);
 bool		 parse_file(prs_cmn_t *, char *, ftype_t, bool);
 bool		 process_zone(prs_cmn_t *, scandata *);
 bool		 parse_script(char *, prs_cmn_t *, scandata *);
