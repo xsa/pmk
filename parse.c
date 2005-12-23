@@ -54,7 +54,7 @@ char	parse_err[MAX_ERR_MSG_LEN];
 
 /******************
  * prsdata_init() *
- **********************************************************************
+ ***********************************************************************
  DESCR
 	initialize parsing data structure
 
@@ -63,7 +63,7 @@ char	parse_err[MAX_ERR_MSG_LEN];
 
  OUT
 	prsdata structure
-***********************************************************************/
+ ***********************************************************************/
 
 prsdata *prsdata_init(void) {
 	prsdata	*pdata;
@@ -83,18 +83,18 @@ prsdata *prsdata_init(void) {
 }
 
 
-/******************
- prsdata_destroy()
- **********************************************************************
+/*********************
+ * prsdata_destroy() *
+ ***********************************************************************
  DESCR
 	free space allocated by parsing data structure
 
  IN
-	pdata: structure to clean
+	pdata:	structure to clean
 
  OUT
 	NONE
-***********************************************************************/
+ ***********************************************************************/
 
 void prsdata_destroy(prsdata *pdata) {
 #ifdef PRS_DEBUG
@@ -111,9 +111,9 @@ void prsdata_destroy(prsdata *pdata) {
 }
 
 
-/***************
- prsnode_init()
- **********************************************************************
+/******************
+ * prsnode_init() *
+ ***********************************************************************
  DESCR
 	initialize parsing node structure
 
@@ -122,7 +122,7 @@ void prsdata_destroy(prsdata *pdata) {
 
  OUT
 	parsing node structure
-***********************************************************************/
+ ***********************************************************************/
 
 prsnode *prsnode_init(void) {
 	prsnode	*pnode;
@@ -137,19 +137,19 @@ prsnode *prsnode_init(void) {
 }
 
 
-/**************
- prsnode_add()
- **********************************************************************
+/*****************
+ * prsnode_add() *
+ ***********************************************************************
  DESCR
 	add a cell to a node
 
  IN
-	pnode: target node
-	pcell: cell to add
+	pnode:	target node
+	pcell:	cell to add
 
  OUT
 	NONE
-***********************************************************************/
+ ***********************************************************************/
 
 void prsnode_add(prsnode *pnode, prscell *pcell) {
 #ifdef PRS_DEBUG
@@ -173,18 +173,18 @@ void prsnode_add(prsnode *pnode, prscell *pcell) {
 }
 
 
-/******************
- prsnode_destroy()
- **********************************************************************
+/*********************
+ * prsnode_destroy() *
+ ***********************************************************************
  DESCR
 	free space allocated by parsing node structure
 
  IN
-	pnode: node structure to clean
+	pnode:	node structure to clean
 
  OUT
 	NONE
-***********************************************************************/
+ ***********************************************************************/
 
 void prsnode_destroy(prsnode *pnode) {
 	prscell	*p,
@@ -204,18 +204,20 @@ void prsnode_destroy(prsnode *pnode) {
 }
 
 
-/***************
- prscell_init()
- **********************************************************************
+/******************
+ * prscell_init() *
+ ***********************************************************************
  DESCR
 	initialize parsing cell structure
 
  IN
-	NONE
+	token:		cell token
+	type:		cell type
+	subtoken:	cell subtoken
 
  OUT
 	parsing cell structure or NULL if failed
-***********************************************************************/
+ ***********************************************************************/
 
 prscell *prscell_init(int token, int type, int subtoken) {
 	bool	 rval = false;
@@ -275,18 +277,18 @@ prscell *prscell_init(int token, int type, int subtoken) {
 }
 
 
-/******************
- prscell_destroy()
- **********************************************************************
+/*********************
+ * prscell_destroy() *
+ ***********************************************************************
  DESCR
 	free space allocated for parsing cell structure
 
  IN
-	pcell: structure to clean
+	pcell:	structure to clean
 
  OUT
 	NONE
-***********************************************************************/
+ ***********************************************************************/
 
 void prscell_destroy(prscell *pcell) {
 #ifdef PRS_DEBUG
@@ -310,9 +312,9 @@ void prscell_destroy(prscell *pcell) {
 }
 
 
-/**************
- prsopt_init()
- **********************************************************************
+/*****************
+ * prsopt_init() *
+ ***********************************************************************
  DESCR
 	init a prsopt structure
 
@@ -321,7 +323,7 @@ void prscell_destroy(prscell *pcell) {
 
  OUT
 	prsopt structure
-***********************************************************************/
+  ***********************************************************************/
 
 prsopt *prsopt_init(void) {
 	prsopt	*ppo;
@@ -332,18 +334,20 @@ prsopt *prsopt_init(void) {
 }
 
 
-/******************
- prsopt_init_adv()
- **********************************************************************
+/*********************
+ * prsopt_init_adv() *
+ ***********************************************************************
  DESCR
 	init a prsopt structure with given aguments
 
  IN
-	NONE
+	key:	parse option key name
+	opchar:	operation character
+	value:	parse option value
 
  OUT
 	prsopt structure
-***********************************************************************/
+ ***********************************************************************/
 
 prsopt *prsopt_init_adv(char *key, char opchar, char *value) {
 	prsopt	*ppo;
@@ -377,16 +381,16 @@ prsopt *prsopt_init_adv(char *key, char opchar, char *value) {
 
 /********************
  * prsopt_destroy() *
- **********************************************************************
+ ***********************************************************************
  DESCR
 	destroy a prsopt structure
 
  IN
-	ppo: prsopt structure to free
+	ppo:	prsopt structure to free
 
  OUT
 	NONE
-***********************************************************************/
+ ***********************************************************************/
 
 void prsopt_destroy(prsopt *ppo) {
 	if (ppo->value != NULL) {
@@ -403,8 +407,8 @@ void prsopt_destroy(prsopt *ppo) {
 	create hash table with keyword structures
 
  IN
-	kwtab: keyword table
-	nbkw: size of table
+	kwtab:	keyword table
+	nbkw:	size of table
 
  OUT
 	hash table
@@ -441,7 +445,7 @@ htable *keyword_hash(prskw kwtab[], int nbkw) {
 	skip blank character(s)
 
  IN
-	pstr: current parsing cursor
+	ppe:	parsing engine structure
 
  OUT
 	new parsing cursor
@@ -462,13 +466,13 @@ bool prs_skip_blank(prseng_t *ppe) {
  * prs_skip_comment() *
  ***********************************************************************
  DESCR
-	XXX
+	skip a comment
 
  IN
-	XXX
+	ppe:	parsing engine structure
 
  OUT
-	XXX
+	boolean
  ***********************************************************************/
 
 bool prs_skip_comment(prseng_t *ppe) {
@@ -505,7 +509,7 @@ bool prs_skip_comment(prseng_t *ppe) {
 	skip useless text (blanks, comments, empty lines)
 
  IN
-	pstr: starting pointer
+	ppe:	parsing engine structure
 
  OUT
 	NONE
@@ -555,12 +559,12 @@ bool prs_skip_useless(prseng_t *ppe) {
  * parse_label() *
  ***********************************************************************
  DESCR
-	get label
+	parse a label
 
  IN
-	pstr: current parsing cursor
-	pbuf: storage buffer
-	size: size of buffer
+	ppe:	parsing engine structure
+	pbuf:	storage buffer
+	size:	size of buffer
 
  OUT
 	new parsing cursor or NULL
@@ -587,12 +591,12 @@ bool parse_label(prseng_t *ppe, char *pbuf, size_t size) {
  * parse_bool() *
  ***********************************************************************
  DESCR
-	get bool value
+	parse a bool value
 
  IN
-	pstr: current parsing cursor
-	po: storage pmk object
-	size: size of buffer
+	ppe:	parsing engine structure
+	po:		storage pmk object
+	size:	size of buffer
 
  OUT
 	new parsing cursor or NULL
@@ -648,12 +652,12 @@ bool parse_bool(prseng_t *ppe, pmkobj *po, size_t size) {
  * parse_quoted() *
  ***********************************************************************
  DESCR
-	get quoted string content
+	parse quoted string content
 
  IN
-	pstr: current parsing cursor
-	po: storage pmk object
-	size: size of buffer
+	ppe:	parsing engine structure
+	po:		storage pmk object
+	size:	size of buffer
 
  OUT
 	new parsing cursor
@@ -779,12 +783,12 @@ bool parse_quoted(prseng_t *ppe, pmkobj *po, size_t size) {
  * parse_list() *
  ***********************************************************************
  DESCR
-	get list
+	parse a list
 
  IN
-	pstr: current parsing cursor
-	po: storage pmk object
-	size: size of buffer
+	ppe:	parsing engine structure
+	po:		storage pmk object
+	size:	size of buffer
 
  OUT
 	new parsing cursor
@@ -962,9 +966,9 @@ bool parse_list(prseng_t *ppe, pmkobj *po, size_t size) {
 	parse key
 
  IN
-	pstr: current parsing cursor
-	po: storage pmk object
-	size: size of buffer
+	ppe:	parsing engine structure
+	po:		storage pmk object
+	size:	size of buffer
 
  OUT
 	new parsing cursor or NULL
@@ -1020,9 +1024,9 @@ bool parse_key(prseng_t *ppe, pmkobj *po, size_t size) {
 	parse data
 
  IN
-	ppe: parsing engine structure
-	po: storage pmk object
-	size: size of buffer
+	ppe:	parsing engine structure
+	po:		storage pmk object
+	size:	size of buffer
 
  OUT
 	boolean
@@ -1073,12 +1077,11 @@ bool parse_data(prseng_t *ppe, pmkobj *po, size_t size) {
 	parse command header
 
  IN
-	ppe: parser engine structure
-	pnode: parser node structure
+	ppe:	parser engine structure
+	pnode:	parser node structure
 
  OUT
-	- parser cell structure on success
-	- NULL on failure
+	parser cell structure on success or NULL
  ***********************************************************************/
 
 prscell *parse_cmd_header(prseng_t *ppe, prsnode *pnode) {
@@ -1214,9 +1217,9 @@ prscell *parse_cmd_header(prseng_t *ppe, prsnode *pnode) {
 	parse an option
 
  IN
-	ppe: parsing engine structure
-	popt: option storage structure
-	seplst: string that contain all separator characters
+	ppe:	parsing engine structure
+	popt:	option storage structure
+	seplst:	string that contain all separator characters
 
  OUT
 	boolean
@@ -1310,9 +1313,9 @@ bool parse_opt(prseng_t *ppe, prsopt *popt, char *seplst) {
 	parse a command line option
 
  IN
-	line: option line
-	popt: storage structure
-	seplst: string that contain all separator characters
+	line:	option line
+	popt:	storage structure
+	seplst:	string that contain all separator characters
 
  OUT
 	boolean
@@ -1387,9 +1390,9 @@ bool parse_clopt(char *line, prsopt *popt, char *seplst) {
 	check if the key is available in the given option array
 
  IN
-	key: key to search
-	opts: option array
-	nbopts: number of options
+	key:	key to search
+	opts:	option array
+	nbopts:	number of options
 
  OUT
 	return the pointer to the kw_t structure else NULL
@@ -1415,8 +1418,8 @@ kw_t *check_opt_avl(char *key, kw_t *opts, size_t nbopts) {
 	check if the option has a type allowed by the keyword mask
 
  IN
-	pkw: keyword structure
-	po: option structure
+	pkw:	keyword structure
+	po:		pmk object structure
 
  OUT
 	boolean
@@ -1446,8 +1449,8 @@ bool check_opt_type(kw_t *pkw, pmkobj *po) {
 	check if the option name and type are valid
 
  IN
-	ppo: option structure
-	pkwo: keyword options structure
+	pmd:	misc data structure
+	ppo:	parse option structure
 
  OUT
 	boolean
@@ -1513,9 +1516,9 @@ bool check_option(miscdata_t *pmd, prsopt *ppo) {
 	process a block option
 
  IN
-	ppe: parsing engine structure
-	pnode: parsing node structure
-	pcell: parent cell structure
+	ppe:	parsing engine structure
+	pnode:	parsing node structure
+	pcell:	parent cell structure
 
  OUT
 	boolean
@@ -1598,13 +1601,13 @@ bool process_block_opt(prseng_t *ppe, prsnode *pnode, prscell *pcell) {
  * parse_opt_block() *
  ***********************************************************************
  DESCR
-        parse a block of options
+	parse a block of options
 
  IN
-        pdata: parsing data structure
-	ppe: parsing engine structure
-	pcell: parent cell structure
-	chk_delim: check delimiter switch
+	pdata:		parsing data structure
+	ppe:		parsing engine structure
+	pcell:		parent cell structure
+	chk_delim:	check delimiter switch
 
  OUT
 	boolean
@@ -1693,13 +1696,13 @@ bool parse_opt_block(prsdata *pdata, prseng_t *ppe, prscell *pcell,
  * parse_cmd_block() *
  ***********************************************************************
  DESCR
-        parse a block of commands
+	parse a block of commands
 
  IN
-        pdata: parsing data structure
-	ppe: parsing engine structure
-	pcell: parent cell structure
-	chk_delim: check delimiter switch
+	pdata:		parsing data structure
+	ppe:		parsing engine structure
+	pnode:		node structure
+	chk_delim:	check delimiter switch
 
  OUT
 	boolean
@@ -1789,10 +1792,10 @@ bool parse_cmd_block(prsdata *pdata, prseng_t *ppe, prsnode *pnode,
 	parse pmkfile
 
  IN
-	fp: file descriptor
-	pdata: parsing data structure
-	kwtab: keyword table
-	size: size of keyword table
+	fp:		file descriptor
+	pdata:	parsing data structure
+	kwtab:	keyword table
+	size:	size of keyword table
 
  OUT
 	boolean
@@ -1816,13 +1819,6 @@ bool parse_pmkfile(FILE *fp, prsdata *pdata, prskw kwtab[], size_t size) {
 		/* message done */
 		rslt = false;
 	}
-
-	/*|+ update buffer window +|                    */
-	/*if (prs_fill_buf(ppe) == false) {            */
-	/*        errorf("parsing buffer init failed.");*/
-	/*        prseng_destroy(ppe);                 */
-	/*        return(false);                        */
-	/*}                                             */
 
 	if ((rslt == true) && (parse_cmd_block(pdata, ppe, pdata->tree,
 													false) == false)) {
@@ -1850,8 +1846,8 @@ bool parse_pmkfile(FILE *fp, prsdata *pdata, prskw kwtab[], size_t size) {
 	process option line of configuration file
 
  IN
-	pht: storage hash table
-	popt: option structure to record
+	pht:	storage hash table
+	popt:	option structure to record
 
  OUT
 	boolean
@@ -1877,10 +1873,10 @@ bool process_opt(htable *pht, prsopt *popt) {
 	parse configuration file
 
  IN
-	fp: file to parse
-	pht: data used by processing function
-	seplst: list of separators
-	func: processing function
+	fp:		file to parse
+	pht:	data used by processing function
+	seplst:	list of separators
+	func:	processing function
 
  OUT
 	boolean
