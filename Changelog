@@ -1,3 +1,6 @@
+16 Jan 2006 mipsator
+ * fixed missing tokens in detect_cpu.c for kw_pmkcpu.
+
 # snapshot 20051215
 
 14 Dec 2005 mipsator

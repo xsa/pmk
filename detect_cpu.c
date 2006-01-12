@@ -54,27 +54,27 @@
 
 /* config tools data file keyword */
 prskw	kw_pmkcpu[] = {
-	{"LIST_ARCH_EQUIV",		LIST_ARCH_EQUIV,	PRS_KW_CELL,	NULL},
-	{"LIST_X86_CPU_VENDOR",		LIST_X86_CPU_VENDOR,	PRS_KW_CELL,	NULL},
-	{"LIST_X86_CPU_MODEL",		LIST_X86_CPU_MODEL,	PRS_KW_CELL,	NULL},
-	{"LIST_X86_CPU_CLASS",		LIST_X86_CPU_CLASS,	PRS_KW_CELL,	NULL},
-	{"LIST_ALPHA_CPU_CLASS",	LIST_ALPHA_CPU_CLASS,	PRS_KW_CELL,	NULL},
-	{"LIST_IA64_CPU_CLASS",		LIST_IA64_CPU_CLASS,	PRS_KW_CELL,	NULL}
+	{"LIST_ARCH_EQUIV",			LIST_ARCH_EQUIV,		PRS_KW_CELL,	PRS_TOK_NULL,	NULL},
+	{"LIST_X86_CPU_VENDOR",		LIST_X86_CPU_VENDOR,	PRS_KW_CELL,	PRS_TOK_NULL,	NULL},
+	{"LIST_X86_CPU_MODEL",		LIST_X86_CPU_MODEL,		PRS_KW_CELL,	PRS_TOK_NULL,	NULL},
+	{"LIST_X86_CPU_CLASS",		LIST_X86_CPU_CLASS,		PRS_KW_CELL,	PRS_TOK_NULL,	NULL},
+	{"LIST_ALPHA_CPU_CLASS",	LIST_ALPHA_CPU_CLASS,	PRS_KW_CELL,	PRS_TOK_NULL,	NULL},
+	{"LIST_IA64_CPU_CLASS",		LIST_IA64_CPU_CLASS,	PRS_KW_CELL,	PRS_TOK_NULL,	NULL}
 };
 size_t	nbkwc = sizeof(kw_pmkcpu) / sizeof(prskw);
 
 
 arch_cell	arch_tab[] = {
-	{"x86_32",	PMK_ARCH_X86_32},
-	{"x86_64",	PMK_ARCH_X86_64},
-	{"sparc32",	PMK_ARCH_SPARC},
-	{"sparc64",	PMK_ARCH_SPARC64},
-	{"ia_64",	PMK_ARCH_IA_64},
-	{"ppc",		PMK_ARCH_PPC},
-	{"alpha",	PMK_ARCH_ALPHA},
-	{"m68k",	PMK_ARCH_M68K},
+	{"x86_32",		PMK_ARCH_X86_32},
+	{"x86_64",		PMK_ARCH_X86_64},
+	{"sparc32",		PMK_ARCH_SPARC},
+	{"sparc64",		PMK_ARCH_SPARC64},
+	{"ia_64",		PMK_ARCH_IA_64},
+	{"ppc",			PMK_ARCH_PPC},
+	{"alpha",		PMK_ARCH_ALPHA},
+	{"m68k",		PMK_ARCH_M68K},
 	{"parisc_64",	PMK_ARCH_PARISC},
-	{"vax",		PMK_ARCH_VAX}
+	{"vax",			PMK_ARCH_VAX}
 };
 size_t	nbarch = sizeof(arch_tab) / sizeof(arch_cell);
 
@@ -234,7 +234,7 @@ unsigned char arch_name_to_id(char *arch_name) {
  ***********************************************************************/
 
 htable *arch_wrapper(prsdata *pdata, char *arch_name) {
-	htable		*pht;
+	htable			*pht;
 	unsigned char	 arch_id;
 
 #if defined(ARCH_X86_32) || defined(ARCH_X86_64)
@@ -262,8 +262,7 @@ htable *arch_wrapper(prsdata *pdata, char *arch_name) {
 				return(NULL);
 			}
 
-			pcell->stdvendor = x86_get_std_cpu_vendor(pdata,
-							pcell->vendor);
+			pcell->stdvendor = x86_get_std_cpu_vendor(pdata, pcell->vendor);
 			if (x86_set_cpu_data(pdata, pcell, pht) == false) {
 				errorf("failed to record cpu data.");
 				return(NULL);
@@ -479,10 +478,10 @@ char *x86_get_std_cpu_vendor(prsdata *pdata, char *civendor) {
  ***********************************************************************/
 
 bool x86_get_cpuid_data(x86_cpu_cell *cell) {
-	char		 feat_str[TMP_BUF_LEN] = "";
+	char			 feat_str[TMP_BUF_LEN] = "";
 	unsigned int	 i;
-	uint32_t	 buffer[13],
-			 extlevel;
+	uint32_t		 buffer[13],
+					 extlevel;
 
 	if (x86_check_cpuid_flag() == 0) {
 		/* no cpuid flag => 386 or old 486 */
@@ -521,19 +520,19 @@ bool x86_get_cpuid_data(x86_cpu_cell *cell) {
 	/* processing feature register 1 */
 	for (i = 0 ; i < nb_feat_reg1 ; i++) {
 		if ((x86_cpu_reg_edx & x86_cpu_feat_reg1[i].mask) != 0) {
-			strlcat(feat_str, x86_cpu_feat_reg1[i].descr,
-					sizeof(feat_str)); /* no check */
-			if (strlcat_b(feat_str, " ", sizeof(feat_str)) == false)
+			strlcat(feat_str, x86_cpu_feat_reg1[i].descr, sizeof(feat_str)); /* no check */
+			if (strlcat_b(feat_str, " ", sizeof(feat_str)) == false) {
 				return(false);
+			}
 		}
 	}
 	/* processing feature register 2 */
 	for (i = 0 ; i < nb_feat_reg2 ; i++) {
 		if ((x86_cpu_reg_edx & x86_cpu_feat_reg2[i].mask) != 0) {
-			strlcat(feat_str, x86_cpu_feat_reg2[i].descr,
-					sizeof(feat_str)); /* no check */
-			if (strlcat_b(feat_str, " ", sizeof(feat_str)) == false)
+			strlcat(feat_str, x86_cpu_feat_reg2[i].descr, sizeof(feat_str)); /* no check */
+			if (strlcat_b(feat_str, " ", sizeof(feat_str)) == false) {
 				return(false);
+			}
 		}
 	}
 
@@ -548,11 +547,10 @@ bool x86_get_cpuid_data(x86_cpu_cell *cell) {
 		/* processing extended feature register */
 		for (i = 0 ; i < nb_feat_extreg ; i++) {
 			if ((x86_cpu_reg_edx & x86_cpu_feat_extreg[i].mask) != 0) {
-				strlcat(feat_str,
-						x86_cpu_feat_extreg[i].descr,
-						sizeof(feat_str)); /* no check */
-				if (strlcat_b(feat_str, " ", sizeof(feat_str)) == false)
+				strlcat(feat_str, x86_cpu_feat_extreg[i].descr, sizeof(feat_str)); /* no check */
+				if (strlcat_b(feat_str, " ", sizeof(feat_str)) == false) {
 					return(false);
+				}
 			}
 		}
 	}
@@ -582,8 +580,9 @@ bool x86_get_cpuid_data(x86_cpu_cell *cell) {
 
 		buffer[12] = 0;	/* terminate string */
 		cell->cpuname = strdup((char *) buffer);
-		if (cell->cpuname == NULL)
+		if (cell->cpuname == NULL) {
 			return(false);
+		}
 	} else {
 		cell->cpuname = NULL;
 	}
@@ -609,7 +608,7 @@ bool x86_get_cpuid_data(x86_cpu_cell *cell) {
 
 bool x86_set_cpu_data(prsdata *pdata, x86_cpu_cell *pcell, htable *pht) {
 	char	 buffer[TMP_BUF_LEN],
-		*pstr;
+			*pstr;
 	htable	*phtbis;
 
 	if (snprintf_b(buffer, sizeof(buffer), "%u", pcell->family) == false)
@@ -738,13 +737,13 @@ int nb_feat = sizeof(alpha_cpu_feat) / sizeof(alpha_cpu_feature);
  ***********************************************************************/
 
 bool alpha_set_cpu_data(prsdata *pdata, htable *pht) {
-	char		 buffer[16],
-			 feat_str[TMP_BUF_LEN] = "",
-			*pstr;
-	htable		*phtbis;
+	char			 buffer[16],
+					 feat_str[TMP_BUF_LEN] = "",
+					*pstr;
+	htable			*phtbis;
 	unsigned int	 i;
-	uint64_t	 implver,
-			 amask;
+	uint64_t		 implver,
+					 amask;
 
 /*debugf("alpha_set_cpu_data() : end");*/
 	phtbis = (htable *) seek_key(pdata, LIST_ALPHA_CPU_CLASS);
@@ -753,8 +752,7 @@ bool alpha_set_cpu_data(prsdata *pdata, htable *pht) {
 		implver = alpha_exec_implver();
 /*debugf("alpha_set_cpu_data() : implver = '%u'", implver);*/
 
-		if (snprintf_b(buffer, sizeof(buffer), ALPHA_CPU_CLASS_FMT,
-					implver) == false) {
+		if (snprintf_b(buffer, sizeof(buffer), ALPHA_CPU_CLASS_FMT, implver) == false) {
 			return(false);
 		}
 /*debugf("alpha_set_cpu_data() : buffer = '%s'", buffer);*/
@@ -763,8 +761,7 @@ bool alpha_set_cpu_data(prsdata *pdata, htable *pht) {
 			pstr = ALPHA_CPU_UNKNOWN;
 		}
 
-		if (hash_update_dup(pht, PMKCONF_HW_ALPHA_CPU_CLASS,
-						pstr) == HASH_ADD_FAIL) {
+		if (hash_update_dup(pht, PMKCONF_HW_ALPHA_CPU_CLASS, pstr) == HASH_ADD_FAIL) {
 			return(false);
 		}
 
@@ -774,16 +771,15 @@ bool alpha_set_cpu_data(prsdata *pdata, htable *pht) {
 		/* processing feature mask */
 		for (i = 0 ; i < nb_feat ; i++) {
 			if ((amask & alpha_cpu_feat[i].mask) != 0) {
-				strlcat(feat_str, alpha_cpu_feat[i].descr,
-						sizeof(feat_str)); /* no check */
-				if (strlcat_b(feat_str, " ", sizeof(feat_str)) == false)
+				strlcat(feat_str, alpha_cpu_feat[i].descr, sizeof(feat_str)); /* no check */
+				if (strlcat_b(feat_str, " ", sizeof(feat_str)) == false) {
 					return(false);
+				}
 			}
 		}
 
 		/* save feature string */
-		if (hash_update_dup(pht, PMKCONF_HW_ALPHA_CPU_FEATURES,
-				feat_str) == HASH_ADD_FAIL) {
+		if (hash_update_dup(pht, PMKCONF_HW_ALPHA_CPU_FEATURES, feat_str) == HASH_ADD_FAIL) {
 			return(false);
 		}
 
@@ -831,12 +827,12 @@ size_t nb_feat = sizeof(ia64_cpu_feat) / sizeof(ia64_cpu_feature);
  ***********************************************************************/
 
 bool ia64_get_cpuid_data(prsdata *pdata, htable *pht) {
-	char		 buffer[TMP_BUF_LEN],
-			*pstr;
-	htable		*phtbis;
-	uint64_t	 regbuf[3],
-			 level,
-			 rslt;
+	char			 buffer[TMP_BUF_LEN],
+					*pstr;
+	htable			*phtbis;
+	uint64_t		 regbuf[3],
+					 level,
+					 rslt;
 	unsigned int	 i;
 
 	regbuf[0] = ia64_get_cpuid_register(0);
