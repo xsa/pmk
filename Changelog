@@ -1,5 +1,6 @@
 16 Jan 2006 mipsator
  * fixed missing tokens in detect_cpu.c for kw_pmkcpu.
+ * fixed CPP substitution in pmkcfg.sh script.
 
 # snapshot 20051215
 
