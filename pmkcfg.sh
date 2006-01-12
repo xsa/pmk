@@ -495,8 +495,9 @@ if [ -z "$CPP" ]; then
 	fi
 else
 	printf "CPP defined, skipping C preprocessor check.\n"
-	mkf_sed 'CPP' "$CPP"
 fi
+
+mkf_sed 'CPP' "$CPP"
 
 #
 # as check
