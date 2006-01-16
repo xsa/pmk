@@ -433,7 +433,6 @@ if [ -z "$CFLAGS" ]; then
 	get_make_var CFLAGS
 else
 	printf "CFLAGS defined, skipping detection.\n"
-	mkf_sed 'CFLAGS' "$CFLAGS"
 fi
 
 #
@@ -444,7 +443,6 @@ if [ -z "$LDFLAGS" ]; then
 	get_make_var LDFLAGS
 else
 	printf "LDFLAGS defined, skipping detection.\n"
-	mkf_sed 'LDFLAGS' "$LDFLAGS"
 fi
 
 
@@ -632,13 +630,23 @@ check_header_function ctype.h isblank
 check_header_function unistd.h mkstemps
 
 #
+# seteuid() check
+#
+
+if check_header_function unistd.h seteuid; then
+	PS_FLAGS=""
+else
+	PS_FLAGS="-DWITHOUT_FORK"
+fi
+
+#
 # dirname() check
 #
 
 if check_lib_function gen dirname; then
-	mkf_sed 'LGEN_FLAGS' "-lgen"
+	LGEN_FLAGS="-lgen"
 else
-	mkf_sed 'LGEN_FLAGS' ""
+	LGEN_FLAGS=""
 fi
 
 #
@@ -646,6 +654,25 @@ fi
 #
 
 check_lib_function gen basename
+
+#
+# isnan() check
+#
+
+if check_lib_function m isnan; then
+	LM_FLAGS="-lm"
+else
+	LM_FLAGS=""
+fi
+
+
+#####################
+# compilation flags #
+########################################################################
+
+mkf_sed 'CFLAGS' "$CFLAGS"
+mkf_sed 'LDFLAGS' "$LDFLAGS $LGEN_FLAGS $LM_FLAGS"
+
 
 #
 # end

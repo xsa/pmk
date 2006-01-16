@@ -1,4 +1,9 @@
 16 Jan 2006 mipsator
+ * fixed pmkcfg.sh to correctly set library flags.
+ * added isnan() and seteuid() functions in pmkcfg.sh for failing
+   architectures.
+
+13 Jan 2006 mipsator
  * fixed missing tokens in detect_cpu.c for kw_pmkcpu.
  * fixed CPP substitution in pmkcfg.sh script.
 
