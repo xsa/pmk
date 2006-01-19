@@ -1,3 +1,7 @@
+19 Jan 2006 mipsator
+ * some temporary fixes for pmkcfg.sh portability. Better fixes will
+   come further ...
+
 16 Jan 2006 mipsator
  * fixed pmkcfg.sh to correctly set library flags.
  * added isnan() and seteuid() functions in pmkcfg.sh for failing

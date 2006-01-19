@@ -144,7 +144,8 @@ EOF
 	rm $testmake $testmkvar
 
 	printf "'%s'\n" "$rslt"
-	mkf_sed "$mkvar" "$rslt"
+#	mkf_sed "$mkvar" "$rslt"
+	make_var_value=$rslt
 }
 
 check_binary() {
@@ -167,10 +168,10 @@ check_binary() {
 
 	if test "$r" -eq 0; then
 		printf "yes\n"
+		mkf_sed "$tname" "$tval"
 	else
 		printf "no\n"
 	fi
-	mkf_sed "$tname" "$tval"
 
 	return $r
 }
@@ -343,6 +344,8 @@ mkf_sed() {
 	sed_var="$1"
 	sed_val="$2"
 
+#printf "DEBUG: replace @%s@ by %s\n" "$sed_var" "$sed_val"
+
 	for f in $file_list; do
 		cp $f $temporary
 		cat $temporary | sed "s,@$sed_var@,$sed_val," > $f
@@ -431,6 +434,7 @@ mkf_sed 'INSTALL' './pmkinstall'
 
 if [ -z "$CFLAGS" ]; then
 	get_make_var CFLAGS
+	CFLAGS=$make_var_value
 else
 	printf "CFLAGS defined, skipping detection.\n"
 fi
@@ -441,6 +445,7 @@ fi
 
 if [ -z "$LDFLAGS" ]; then
 	get_make_var LDFLAGS
+	LDFLAGS=$make_var_value
 else
 	printf "LDFLAGS defined, skipping detection.\n"
 fi
@@ -670,7 +675,7 @@ fi
 # compilation flags #
 ########################################################################
 
-mkf_sed 'CFLAGS' "$CFLAGS"
+mkf_sed 'CFLAGS' "$CFLAGS $PS_FLAGS"
 mkf_sed 'LDFLAGS' "$LDFLAGS $LGEN_FLAGS $LM_FLAGS"
 
 
