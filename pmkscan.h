@@ -84,7 +84,8 @@ enum {
 enum {
 	PSC_TOK_PMKF = 1,
 	PSC_TOK_MAKF,
-	PSC_TOK_ZONE
+	PSC_TOK_ZONE,
+	PSC_TOK_ADDSO
 };
 
 
@@ -104,9 +105,9 @@ enum {
 #define KW_CMD_GENPF	"GEN_PMKFILE"
 #define KW_CMD_GENMF	"GEN_MAKEFILE"
 #define KW_CMD_GENZN	"GEN_ZONE"
+#define KW_CMD_ADDSO	"ADD_SO"
 
 /* script keyword options */
-#define KW_OPT_ADDSO	"ADD_SO"
 #define KW_OPT_ADVTAG	"ADVTAG"
 #define KW_OPT_CFGALT	"CFGNAME"
 #define KW_OPT_DIR		"DIRECTORY"
@@ -115,9 +116,11 @@ enum {
 #define KW_OPT_EXTTAG	"EXTRATAG"
 #define KW_OPT_MKF		"MAKEFILE"
 #define KW_OPT_MKFALT	"MKFNAME"
+#define KW_OPT_OBJECT	"OBJECT"
 #define KW_OPT_PMK		"PMKFILE"
 #define KW_OPT_PMKALT	"PMKNAME"
 #define KW_OPT_REC		"RECURSE"
+#define KW_OPT_SONAME	"NAME"
 #define KW_OPT_UNI		"UNIQUE"
 
 /* common options */

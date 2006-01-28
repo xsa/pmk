@@ -228,10 +228,24 @@ kwopt_t	kw_genzone = {
 	sizeof(opt_genzone) / sizeof(kw_t)
 };
 
+/* ADDSO required options */
+kw_t	req_addso[] = {
+	{KW_OPT_SONAME,	PO_STRING},
+	{KW_OPT_OBJECT,	PO_LIST}
+};
+
+kwopt_t	kw_addso = {
+	req_addso,
+	sizeof(req_addso) / sizeof(kw_t),
+	NULL,
+	0
+};
+
 prskw	kw_scanfile[] = {
 	{KW_CMD_GENPF,		PSC_TOK_PMKF,	PRS_KW_CELL,	PRS_TOK_NULL,	&kw_genpmk},
 	{KW_CMD_GENMF,		PSC_TOK_MAKF,	PRS_KW_CELL,	PRS_TOK_NULL,	&kw_genmkf},
-	{KW_CMD_GENZN,		PSC_TOK_ZONE,	PRS_KW_CELL,	PRS_TOK_NULL,	&kw_genzone}
+	{KW_CMD_GENZN,		PSC_TOK_ZONE,	PRS_KW_CELL,	PRS_TOK_NULL,	&kw_genzone},
+/*	{KW_CMD_ADDSO,		PSC_TOK_ADDSO,	PRS_KW_CELL,	PRS_TOK_NULL,	&kw_addso}*/
 };
 size_t	nbkwsf = sizeof(kw_scanfile) / sizeof(prskw);
 
@@ -4124,6 +4138,10 @@ bool parse_script(char *cfname, prs_cmn_t *pcmn, scandata *psd) {
 				}
 				break;
 
+
+			case PSC_TOK_ADDSO :
+				break;
+
 			default :
 				scan_zone_destroy(psz);
 				hash_destroy(tnodes);
@@ -4211,7 +4229,7 @@ int main(int argc, char *argv[]) {
 				 gen_mkf = false,
 				 gen_pmk = false;
 	char		 buf[PATH_MAX],
-				*scfile = NULL;
+				 scfile[PATH_MAX] = PMKSCAN_CONFIG;
 	htable		*tnodes;
 	int			 chr;
 	prs_cmn_t	 pcmn;
@@ -4229,7 +4247,7 @@ int main(int argc, char *argv[]) {
 			case 'f' :
 				/* use script file */
 				use_script = true;
-				scfile = optarg;
+				strlcpy(scfile, optarg, sizeof(scfile)); /* XXX test !! */
 				break;
 
 			case 'l' :
@@ -4294,7 +4312,6 @@ int main(int argc, char *argv[]) {
 	if ((gen_pmk == false) && (gen_mkf == false) && (use_script == false)) {
 		/* look for default config file */
 		use_script = true;
-		scfile = PMKSCAN_CONFIG;
 	}
 
 	if ((gen_pmk == true) || (use_script == true)) {
