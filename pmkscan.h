@@ -1,5 +1,9 @@
 /* $Id$ */
 
+/* editor indenting options, ugly but useful */
+/* vim: set tabstop=4: *//* vim */
+/* -*- Mode: C; tab-width:4 -*- *//* emacs */
+
 /*
  * Copyright (c) 2003-2005 Damien Couderc
  * All rights reserved.
@@ -105,7 +109,6 @@ enum {
 #define KW_CMD_GENPF	"GEN_PMKFILE"
 #define KW_CMD_GENMF	"GEN_MAKEFILE"
 #define KW_CMD_GENZN	"GEN_ZONE"
-#define KW_CMD_ADDSO	"ADD_SO"
 
 /* script keyword options */
 #define KW_OPT_ADVTAG	"ADVTAG"
@@ -116,11 +119,10 @@ enum {
 #define KW_OPT_EXTTAG	"EXTRATAG"
 #define KW_OPT_MKF		"MAKEFILE"
 #define KW_OPT_MKFALT	"MKFNAME"
-#define KW_OPT_OBJECT	"OBJECT"
 #define KW_OPT_PMK		"PMKFILE"
 #define KW_OPT_PMKALT	"PMKNAME"
 #define KW_OPT_REC		"RECURSE"
-#define KW_OPT_SONAME	"NAME"
+#define KW_OPT_LIBOBJ	"LIBOBJ"
 #define KW_OPT_UNI		"UNIQUE"
 
 /* common options */
@@ -185,6 +187,7 @@ enum {
 						"\tSBINDIR = \"\\$(PREFIX)/sbin\"\n" \
 						"\tMANDIR = \"\\$(PREFIX)/man\"\n" \
 						"\tDATADIR = \"\\$(PREFIX)/share/\\$(PACKAGE)\"\n"
+#define PMKF_DEF_LIB	"\tLIBDIR =  \"\\$(PREFIX)/lib/\"\n"
 #define PMKF_DEF_MAN	"\tMAN%dDIR = \"\\$(MANDIR)/man%d\"\n"
 #define PMKF_DEF_TAG	"\t%s = \"extra tag to edit\"\n"
 
@@ -227,6 +230,11 @@ enum {
 						"# LDFLAGS shall contain -lc if used with ld\n" \
 						"LDFLAGS=\t@LDFLAGS@\n\n"
 
+#define MKF_HEADER_AR	"AR=\t\t@AR@\n" \
+						"ARFLAGS=\t@ARFLAGS@\n"
+
+#define MKF_HEADER_RANLIB	"RANLIB=\t\t@RANLIB@\n"
+
 #define MKF_HEADER_CPP	"CPP=\t\t@CPP@\n"
 
 #define MKF_HEADER_MISC	"INSTALL=\t@INSTALL@\n" \
@@ -241,10 +249,16 @@ enum {
 #define MKF_HEADER_DATA	"PACKAGE=\t@PACKAGE@\n" \
 						"VERSION=\t@VERSION@\n\n"
 
+#define MKF_LIB_DATA	"LIBNAME=\t@LIBNAME@\n" \
+						"STATICLIB=\t$(LIBNAME).a\n" \
+						"SHAREDLIB=\t$(LIBNAME)\n" \
+						"LIBVERS=\t@LIBVERS@\n\n"
+
 #define MKF_HEADER_DIR	"PREFIX=\t\t@PREFIX@\n" \
 						"BINDIR=\t\t@BINDIR@\n" \
 						"SBINDIR=\t@SBINDIR@\n" \
 						"DATADIR=\t@DATADIR@\n"
+#define MKF_LIB_DIR		"LIBDIR=\t\t@LIBDIR@\n"
 #define MKF_MAN_DIR		"MANDIR=\t\t@MANDIR@\n"
 #define MKF_MANX_DIR	"MAN%dDIR=\t@MAN%dDIR@\n"
 #define MKF_SYSCONF_DIR	"SYSCONFDIR=\t@SYSCONFDIR@\n"
@@ -278,18 +292,19 @@ enum {
 #define MKF_BLD_CXX_OBJ		"# C++ suffixes\n" \
 							".cxx.o:\n" \
 							"\t$(CXX) $(CXXFLAGS) -o $@ -c $<\n" \
-							"\n.cpp.o:\n" \
+							"\t.cpp.o:\n" \
 							"\t$(CXX) $(CXXFLAGS) -o $@ -c $<\n\n" \
 
-#define MKF_BLD_YACC_SRC	"# yacc suffixes\n" \
+#define MKF_BLD_YACC_SRC	"# yacc suffix\n" \
 							".y.c:\n" \
 							"\t$(YACC) $(YFLAGS) $<\n" \
 							"\tmv y.tab.c $@\n\n"
 
-#define MKF_BLD_LEX_SRC		"# lex suffixes\n" \
+#define MKF_BLD_LEX_SRC		"# lex suffix\n" \
 							".l.c:\n" \
 							"\t$(LEX) $(LFLAGS) $<\n" \
 							"\tmv lex.yy.c $@\n\n"
+
 
 #define MKF_OBJECT_SRCS		"%s_SRCS=\t"
 #define MKF_OBJECT_LABL		"%s: $(%s_SRCS)\n"
@@ -299,6 +314,9 @@ enum {
 #define MKF_TARGET_DEF		"\t$(LD) $(LDFLAGS) -o $@ $(%s_OBJS)\n\n"
 #define MKF_TARGET_C		"\t$(CC) $(LDFLAGS) -o $@ $(%s_OBJS)\n\n"
 #define MKF_TARGET_CXX		"\t$(CXX) $(LDFLAGS) -o $@ $(%s_OBJS)\n\n"
+
+#define MKF_TARGET_LIB_STC	"$(AR) $(ARFLAGS) $@ $(%s_OBJS)\n" \
+							"$(RANLIB) $@"
 
 #define MKF_TARGET_CLN		"%s_clean:\n" \
 							"\t$(RM) $(RMFLAGS) $(%s_OBJS)\n" \
@@ -317,17 +335,17 @@ enum {
 #define MKF_FILE_MAN_VAR	"MAN%d_FILES=\t"
 #define MKF_FILE_DATA_VAR	"DATA_FILES=\t"
 
-#define MKF_TARGET_ALL		"all: $(ALL_TARGETS) all_recursive\n\n" \
-							"clean: $(ALL_CLEAN_TARGETS) clean_recursive\n\n"
+#define MKF_TARGET_ALL		"all: $(ALL_TARGETS)\n\n" \
+							"clean: $(ALL_CLEAN_TARGETS)\n\n"
 
 #define MKF_TARGET_CFG		"config: $(GEN_FILES)\n\n" \
 							"$(GEN_FILES): $(TEMPLATES)\n" \
 							"\t@pmk\n\n"
 
-#define MKF_TARGET_INST		"install: all $(INSTALL_TARGETS) install_recursive\n\n" \
-							"deinstall: $(DEINSTALL_TARGETS) deinstall_recursive\n\n"
+#define MKF_TARGET_INST		"install: all $(INSTALL_TARGETS)\n\n" \
+							"deinstall: $(DEINSTALL_TARGETS)\n\n"
 
-#define MKF_INST_BIN		"install_bin: install_bin_recursive\n" \
+#define MKF_INST_BIN		"install_bin:\n" \
 							"\t# install binaries\n" \
 							"\t$(INSTALL_DIR) $(DESTDIR)$(BINDIR)\n" \
 							"\t@for f in $(BIN_FILES); do \\\n" \
@@ -344,7 +362,7 @@ enum {
 							"\t\t$(INSTALL_SBIN) $$f $(DESTDIR)$(SBINDIR)/$$d; \\\n" \
 							"\tdone\n\n"
 
-#define MKF_DEINST_BIN		"deinstall_bin: deinstall_bin_recursive\n" \
+#define MKF_DEINST_BIN		"deinstall_bin:\n" \
 							"\t# deinstall binaries\n" \
 							"\t@for f in $(BIN_FILES); do \\\n" \
 							"\t\td=`basename $$f`; \\\n" \
@@ -359,7 +377,7 @@ enum {
 							"\t\t$(RM) $(RMFLAGS) $(DESTDIR)$(SBINDIR)/$$d; \\\n" \
 							"\tdone\n\n"
 
-#define MKF_INST_MAN_H		"install_man: install_man_recursive\n" \
+#define MKF_INST_MAN_H		"install_man:\n" \
 							"\t# install manual pages\n" \
 							"\t$(INSTALL_DIR) $(DESTDIR)$(MANDIR)\n"
 #define MKF_INST_MAN_B		"\t# man%d\n" \
@@ -370,7 +388,7 @@ enum {
 							"\t\t$(INSTALL_DATA) $$f $(DESTDIR)/$(MAN%dDIR)/$$d; \\\n" \
 							"\tdone\n"
 
-#define MKF_DEINST_MAN_H	"deinstall_man: deinstall_man_recursive\n" \
+#define MKF_DEINST_MAN_H	"deinstall_man:\n" \
 							"\t# deinstall manual pages\n"
 #define MKF_DEINST_MAN_B	"\t# man%d\n" \
 							"\t@for f in $(MAN%d_FILES); do \\\n" \
@@ -379,7 +397,7 @@ enum {
 							"\t\t$(RM) $(RMFLAGS) $(DESTDIR)/$(MAN%dDIR)/$$d; \\\n" \
 							"\tdone\n"
 
-#define MKF_INST_DATA		"install_data: install_data_recursive\n" \
+#define MKF_INST_DATA		"install_data:\n" \
 							"\t# install data files\n" \
 							"\t$(INSTALL_DIR) $(DESTDIR)$(DATADIR)\n" \
 							"\t@for f in $(DATA_FILES); do \\\n" \
@@ -388,7 +406,7 @@ enum {
 							"\t\t$(INSTALL_DATA) $$f $(DESTDIR)$(DATADIR)/$$d; \\\n" \
 							"\tdone\n\n"
 
-#define MKF_DEINST_DATA		"deinstall_data: deinstall_data_recursive\n" \
+#define MKF_DEINST_DATA		"deinstall_data:\n" \
 							"\t# deinstall data files\n" \
 							"\t@for f in $(DATA_FILES); do \\\n" \
 							"\t\td=`basename $$f`; \\\n" \
@@ -396,7 +414,18 @@ enum {
 							"\t\t$(RM) $(RMFLAGS) $(DESTDIR)$(DATADIR)/$$d; \\\n" \
 							"\tdone\n\n"
 
-#define MKF_DIST_CLEAN		"distclean: clean distclean_recursive\n" \
+#define MKF_INST_LIB		"install_lib:\n" \
+							"\t# install library\n" \
+							"\t$(INSTALL_DIR) $(DESTDIR)$(LIBDIR)\n" \
+							"\t\tprintf \"$(INSTALL_LIB) $$f $(DESTDIR)$(LIBDIR)/$$d\\n\"; \\\n" \
+							"\t\t$(INSTALL_LIB) $$f $(DESTDIR)$(LIBDIR)/$$d; \\\n"
+
+#define MKF_DEINST_LIB		"deinstall_lib:\n" \
+							"\t# deinstall library\n" \
+							"\t\tprintf \"$(RM) $(RMFLAGS) $(DESTDIR)$(LIBDIR)/$$d\\n\"; \\\n" \
+							"\t\t$(RM) $(RMFLAGS) $(DESTDIR)$(LIBDIR)/$$d; \\\n"
+
+#define MKF_DIST_CLEAN		"distclean: clean\n" \
 							"\t$(RM) $(RMFLAGS) $(GEN_FILES)\n" \
 							"\t@for d in $(SUBDIRS); do \\\n" \
 							"\t\tprintf \"$(RM) $(RMFLAGS) $$d/*.scan; \\n\"; \\\n" \
@@ -407,6 +436,7 @@ enum {
 							"\t\t$(RM) $(RMFLAGS) $$d/*.core; \\\n" \
 							"\tdone\n\n"
 
+/* XXX recursive makefiles, not enabled yet
 #define MKF_RECURS_TRGT		"# recursive targets wrapper\n" \
 							"all_recursive \\\n" \
 							"clean_recursive \\\n" \
@@ -426,7 +456,7 @@ enum {
 							"\t\tcd $$d; \\\n" \
 							"\t\t$(MAKE) $target; \\\n" \
 							"\tdone\\\n"
-
+*/
 
 /**********************************
  * type and structure definitions *
@@ -470,6 +500,7 @@ typedef struct {
 				 advtag,				/* use advanced tagging */
 				 gen_pmk,				/* pmkfile generation flag */
 				 gen_mkf,				/* makefile generation flag */
+				 gen_lib,				/* library generation flag */
 				 recursive,				/* recursive scan flag */
 				 unique;				/* unique file flag */
 	char		*directory,				/* initial directory */

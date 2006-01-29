@@ -212,9 +212,11 @@ kw_t	opt_genzone[] = {
 	{KW_OPT_DSC,	PO_LIST},
 	{KW_OPT_EXTMKF,	PO_STRING},
 	{KW_OPT_EXTTAG,	PO_LIST},
+	{KW_OPT_LIB,	PO_STRING},
+	{KW_OPT_LIBOBJ,	PO_LIST},
 	{KW_OPT_MKF,	PO_BOOL},
-	{KW_OPT_NAM,	PO_STRING},
 	{KW_OPT_MKFALT,	PO_STRING},
+	{KW_OPT_NAM,	PO_STRING},
 	{KW_OPT_PMK,	PO_BOOL},
 	{KW_OPT_PMKALT,	PO_STRING},
 	{KW_OPT_REC,	PO_BOOL},
@@ -228,24 +230,10 @@ kwopt_t	kw_genzone = {
 	sizeof(opt_genzone) / sizeof(kw_t)
 };
 
-/* ADDSO required options */
-kw_t	req_addso[] = {
-	{KW_OPT_SONAME,	PO_STRING},
-	{KW_OPT_OBJECT,	PO_LIST}
-};
-
-kwopt_t	kw_addso = {
-	req_addso,
-	sizeof(req_addso) / sizeof(kw_t),
-	NULL,
-	0
-};
-
 prskw	kw_scanfile[] = {
 	{KW_CMD_GENPF,		PSC_TOK_PMKF,	PRS_KW_CELL,	PRS_TOK_NULL,	&kw_genpmk},
 	{KW_CMD_GENMF,		PSC_TOK_MAKF,	PRS_KW_CELL,	PRS_TOK_NULL,	&kw_genmkf},
-	{KW_CMD_GENZN,		PSC_TOK_ZONE,	PRS_KW_CELL,	PRS_TOK_NULL,	&kw_genzone},
-/*	{KW_CMD_ADDSO,		PSC_TOK_ADDSO,	PRS_KW_CELL,	PRS_TOK_NULL,	&kw_addso}*/
+	{KW_CMD_GENZN,		PSC_TOK_ZONE,	PRS_KW_CELL,	PRS_TOK_NULL,	&kw_genzone}
 };
 size_t	nbkwsf = sizeof(kw_scanfile) / sizeof(prskw);
 
@@ -496,6 +484,7 @@ scn_zone_t *scan_zone_init(htable *nodes) {
 		pzone->advtag = true;
 		pzone->gen_pmk = false;
 		pzone->gen_mkf = false;
+		pzone->gen_lib = false;
 		pzone->recursive = false;
 		pzone->unique = true;
 
@@ -1004,7 +993,7 @@ bool add_library(scn_zone_t *psz, char *library, scandata *psd, scn_node_t *pn) 
 		/* add header tag */
 		snprintf(tmp, sizeof(tmp), "lib%s", library);
 		tag = gen_basic_tag_def(tmp);
-		if (da_find(psz->tags, tag) == NULL) {
+		if (da_find(psz->tags, tag) == false) {
 			da_push(psz->tags, strdup(tag));
 		}
 	}
@@ -1016,10 +1005,10 @@ bool add_library(scn_zone_t *psz, char *library, scandata *psd, scn_node_t *pn) 
 			pstr = da_idx(pcrec->procs, i);
 
 			/* if procedure has been found in parsing */
-			if (da_find(pn->func_calls, pstr) != NULL) {
+			if (da_find(pn->func_calls, pstr) == true) {
 
 				/* if it has not been added in the check yet */
-				if (da_find(pchk->procs, pstr) == NULL) {
+				if (da_find(pchk->procs, pstr) == false) {
 					/* add in the list of function to check */
 					da_push(pchk->procs, strdup(pstr));
 
@@ -1027,7 +1016,7 @@ bool add_library(scn_zone_t *psz, char *library, scandata *psd, scn_node_t *pn) 
 
 					/* add header tag */
 					tag = gen_basic_tag_def(pstr);
-					if (da_find(psz->tags, tag) == NULL) {
+					if (da_find(psz->tags, tag) == false) {
 						da_push(psz->tags, strdup(tag));
 					}
 				}
@@ -1097,13 +1086,13 @@ bool check_header(scn_zone_t *psz, char *header, scandata *psd, scn_node_t *pn) 
 
 		/* add AC style header tag */
 		tag = gen_basic_tag_def(header);
-		if (da_find(psz->tags, tag) == NULL) {
+		if (da_find(psz->tags, tag) == false) {
 			da_push(psz->tags, strdup(tag));
 		}
 
 		/* add header tag */
 		tag = gen_tag_def(TAG_TYPE_HDR, header, NULL, NULL);
-		if (da_find(psz->tags, tag) == NULL) {
+		if (da_find(psz->tags, tag) == false) {
 			da_push(psz->tags, strdup(tag));
 		}
 	}
@@ -1115,10 +1104,10 @@ bool check_header(scn_zone_t *psz, char *header, scandata *psd, scn_node_t *pn) 
 			pstr = da_idx(pcrec->procs, i);
 
 			/* if procedure has been found in parsing */
-			if (da_find(pn->func_calls, pstr) != NULL) {
+			if (da_find(pn->func_calls, pstr) == true) {
 
 				/* if it has not been added in the check yet */
-				if (da_find(pchk->procs, pstr) == NULL) {
+				if (da_find(pchk->procs, pstr) == false) {
 					/* add in the list of function to check */
 					da_push(pchk->procs, strdup(pstr));
 
@@ -1126,13 +1115,13 @@ bool check_header(scn_zone_t *psz, char *header, scandata *psd, scn_node_t *pn) 
 
 					/* add AC style header tag */
 					tag = gen_basic_tag_def(pstr);
-					if (da_find(psz->tags, tag) == NULL) {
+					if (da_find(psz->tags, tag) == false) {
 						da_push(psz->tags, strdup(tag));
 					}
 
 					/* add header tag */
 					tag = gen_tag_def(TAG_TYPE_HDR_PRC, header, pstr, NULL);
-					if (da_find(psz->tags, tag) == NULL) {
+					if (da_find(psz->tags, tag) == false) {
 						da_push(psz->tags, strdup(tag));
 					}
 				}
@@ -1209,13 +1198,13 @@ bool check_type(scn_zone_t *psz, char *type, scandata *psd, scn_node_t *pn) {
 
 	/* add AC style header tag */
 	pstr = gen_basic_tag_def(type);
-	if (da_find(psz->tags, pstr) == NULL) {
+	if (da_find(psz->tags, pstr) == false) {
 		da_push(psz->tags, strdup(pstr));
 	}
 
 	/* add header tag */
 	pstr = gen_tag_def(TAG_TYPE_TYPE, type, NULL, NULL);
-	if (da_find(psz->tags, pstr) == NULL) {
+	if (da_find(psz->tags, pstr) == false) {
 		da_push(psz->tags, strdup(pstr));
 	}
 
@@ -2417,6 +2406,11 @@ void mkf_output_header(FILE *fp, scn_zone_t *psz) {
 		fprintf(fp, MKF_HEADER_YACC);
 	}
 
+	if (psz->gen_lib == true) {
+		fprintf(fp, MKF_HEADER_AR);
+		fprintf(fp, MKF_HEADER_RANLIB);
+	}
+
 	fprintf(fp, "\n# misc stuff\n");
 	if (psz->found_src == true) {
 		/* linker stuff */
@@ -3090,6 +3084,10 @@ bool scan_build_mkf(scn_zone_t *psz) {
 	fprintf(fp, MKF_INST_BIN);
 	fprintf(fp, MKF_DEINST_BIN);
 
+
+
+
+
 	mkf_output_man_inst(fp, psz);
 
 	if (psz->found[FILE_TYPE_DATA] == true) {
@@ -3100,13 +3098,13 @@ bool scan_build_mkf(scn_zone_t *psz) {
 	fprintf(fp, MKF_DIST_CLEAN);
 
 	/* recursive targets */
-	fprintf(fp, MKF_RECURS_TRGT);
+	/*fprintf(fp, MKF_RECURS_TRGT);*//* XXX not enabled yet */
 
 	if (psz->unique == true) {
 		fprintf(fp, MKF_LINE_JUMP);
 	} else {
 		/* recursive targets wrapper */
-		fprintf(fp, MKF_RECURS_PROC);
+		/*fprintf(fp, MKF_RECURS_PROC);*//* XXX not enbled yet */
 	}
 
 	/* generate objects */
@@ -4114,78 +4112,84 @@ bool parse_script(char *cfname, prs_cmn_t *pcmn, scandata *psd) {
 
 	pcell = pdata->tree->first;
 	while (pcell != NULL) {
-		/* init of nodes table */
-		tnodes = hash_init_adv(512, NULL,
-				(void (*)(void *))scan_node_destroy, NULL);
-
-		/* init zone structure */
-		psz = scan_zone_init(tnodes);
-		if (psz == NULL) {
-			/* XXX err msg */
-			prsdata_destroy(pdata);
-			hash_destroy(tnodes);
-			exit(EXIT_FAILURE);
-		}
-		pcmn->data = psz;
-
 		switch(pcell->token) {
 			case PSC_TOK_PMKF :
 			case PSC_TOK_MAKF :
 			case PSC_TOK_ZONE :
+				/* init of nodes table */
+				tnodes = hash_init_adv(512, NULL,
+						(void (*)(void *))scan_node_destroy, NULL);
+
+				/* init zone structure */
+				psz = scan_zone_init(tnodes);
+				if (psz == NULL) {
+					/* XXX err msg */
+					prsdata_destroy(pdata);
+					hash_destroy(tnodes);
+					exit(EXIT_FAILURE);
+				}
+				pcmn->data = psz;
+
 				if (parse_zone_opts(pcell->data, psz) == false) {
 					errorf("parsing of script file failed."); /* XXX better error message ? */
 					return(false);
 				}
-				break;
 
+				/* get base directory (REQUIRED) */
+				pdir = po_get_str(hash_get(pcell->data, KW_OPT_DIR));
+				psz->directory = strdup(pdir);
 
-			case PSC_TOK_ADDSO :
+				/* get discard list */
+				ppo = hash_get(pcell->data, KW_OPT_DSC);
+				if (ppo != NULL) {
+					psz->discard = po_get_list(ppo);
+				}
+
+				/* get library name */
+				ppo = hash_get(pcell->data, KW_OPT_LIB);
+				if (ppo != NULL) {
+					psz->gen_lib = true;
+
+					/* XXX TODO set libname */
+					/*XXX = po_get_str(ppo);*/
+
+					/* XXX TODO get LIBOBJ */
+					/*XXX = po_get_list(ppo);*/
+				}
+
+				/* get recursivity switch (OPTIONAL, false by default) */
+				ppo = hash_get(pcell->data, KW_OPT_REC);
+				if (ppo != NULL) {
+					psz->recursive = po_get_bool(ppo);
+				}
+
+				/* get unique file switch (OPTIONAL, false by default) */
+				ppo = hash_get(pcell->data, KW_OPT_UNI);
+				if (ppo != NULL) {
+					psz->unique = po_get_bool(ppo);
+				}
+
+				/* get extra tags list */
+				ppo = hash_get(pcell->data, KW_OPT_EXTTAG);
+				if (ppo != NULL) {
+					psz->exttags = po_get_list(ppo);
+				}
+
+				/* process current zone */
+				if (process_zone(pcmn, psd) == false) {
+					frslt = false;
+				}
+
+				scan_zone_destroy(psz);
+				hash_destroy(tnodes);
 				break;
 
 			default :
-				scan_zone_destroy(psz);
-				hash_destroy(tnodes);
 				prsdata_destroy(pdata);
 				errorf("parsing of script file failed.");
 				return(false);
 				break;
 		}
-
-		/* get base directory (REQUIRED) */
-		pdir = po_get_str(hash_get(pcell->data, KW_OPT_DIR));
-		psz->directory = strdup(pdir);
-
-		/* get discard list */
-		ppo = hash_get(pcell->data, KW_OPT_DSC);
-		if (ppo != NULL) {
-			psz->discard = po_get_list(ppo);
-		}
-
-		/* get recursivity switch (OPTIONAL, false by default) */
-		ppo = hash_get(pcell->data, KW_OPT_REC);
-		if (ppo != NULL) {
-			psz->recursive = po_get_bool(ppo);
-		}
-
-		/* get unique file switch (OPTIONAL, false by default) */
-		ppo = hash_get(pcell->data, KW_OPT_UNI);
-		if (ppo != NULL) {
-			psz->unique = po_get_bool(ppo);
-		}
-
-		/* get extra tags list */
-		ppo = hash_get(pcell->data, KW_OPT_EXTTAG);
-		if (ppo != NULL) {
-			psz->exttags = po_get_list(ppo);
-		}
-
-		/* process current zone */
-		if (process_zone(pcmn, psd) == false) {
-			frslt = false;
-		}
-
-		scan_zone_destroy(psz);
-		hash_destroy(tnodes);
 
 		pcell = pcell->next;
 	}

@@ -49,7 +49,7 @@
 
 /* config tools data file keyword */
 prskw	kw_pmkcfgtool[] = {
-	{"ADD_CFGTOOL", CFGT_TOK_ADDCT, PRS_KW_CELL,	NULL}
+	{"ADD_CFGTOOL", CFGT_TOK_ADDCT, PRS_KW_CELL,	PRS_TOK_NULL,	NULL}
 };
 int	nbkwct = sizeof(kw_pmkcfgtool) / sizeof(prskw);
 
