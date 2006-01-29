@@ -1719,7 +1719,8 @@ bool scan_build_pmk(scn_zone_t *psz) {
 	build_cmd_begin(fp, "DEFINE", NULL);
 
 	/* output default defines */
-	fprintf(fp, PMKF_DEF_STD); /* (XXX TO IMPROVE)  */
+	fprintf(fp, PMKF_DEF_STD);
+	fprintf(fp, PMKF_DEF_DIR);
 
 	/* output needed man directories */
 	if (psz->found[FILE_TYPE_MAN] == true) {
@@ -1779,6 +1780,32 @@ bool scan_build_pmk(scn_zone_t *psz) {
 
 		hash_free_hkeys(phk);
 	}
+
+	if (psz->gen_lib == true) {
+		/* shared lib building command ******************/
+
+		/* output command */
+		build_cmd_begin(fp, "BUILD_SHLIB_NAME", NULL);
+
+		/* output lib name */
+		build_quoted(fp, "NAME", "$PACKAGE");
+
+		/* output major version */
+		build_quoted(fp, "MAJOR", "$VERS_MAJ");
+
+		/* output minor version */
+		build_quoted(fp, "MINOR", "$VERS_MIN");
+
+		/* output versioned variable name */
+		build_quoted(fp, "VERSION_FULL", "SHARED_LIB");
+
+		/* XXX TODO set VERSION_NONE ? */
+
+		/* end of command */
+		build_cmd_end(fp);
+	}
+
+	fprintf(fp, "\n");
 
 	fclose(fp);
 	psc_log("Saved as '%s'\n", NULL, psz->pmk_name);
@@ -2422,6 +2449,11 @@ void mkf_output_header(FILE *fp, scn_zone_t *psz) {
 	/* package data */
 	fprintf(fp, MKF_HEADER_DATA);
 
+	if (psz->gen_lib == true) {
+		/* library data */
+		fprintf(fp, MKF_HEADER_LIB);
+	}
+
 	/* extra tags */
 	if (psz->exttags != NULL) {
 		fprintf(fp, "# extra tags\n");
@@ -2452,6 +2484,12 @@ void mkf_output_header(FILE *fp, scn_zone_t *psz) {
 			}
 		}
 	}
+
+	/* library install directory */
+	if (psz->gen_lib == true) {
+		fprintf(fp, MKF_LIB_DIR);
+	}
+
 
 	/* system configuration directory */
 	fprintf(fp, MKF_SYSCONF_DIR);
@@ -3084,9 +3122,10 @@ bool scan_build_mkf(scn_zone_t *psz) {
 	fprintf(fp, MKF_INST_BIN);
 	fprintf(fp, MKF_DEINST_BIN);
 
-
-
-
+	if (psz->gen_lib == true) {
+		fprintf(fp, MKF_INST_LIB);
+		fprintf(fp, MKF_DEINST_LIB);
+	}
 
 	mkf_output_man_inst(fp, psz);
 
