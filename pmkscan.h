@@ -182,8 +182,10 @@ enum {
 
 #define PMKF_DEF_CMT	"main defines (NEED MANUAL EDITION)"
 #define PMKF_DEF_STD	"\tPACKAGE = \"mypackage\"\n" \
-						"\tVERSION = \"0.0\"\n" \
-						"\tBINDIR = \"\\$(PREFIX)/bin\"\n" \
+						"\tVERS_MAJ = \"0\"\n" \
+						"\tVERS_MIN = \"0\"\n" \
+						"\tVERSION = \"$VERS_MAJ.$VERS_MIN\"\n"
+#define PMKF_DEF_DIR	"\tBINDIR = \"\\$(PREFIX)/bin\"\n" \
 						"\tSBINDIR = \"\\$(PREFIX)/sbin\"\n" \
 						"\tMANDIR = \"\\$(PREFIX)/man\"\n" \
 						"\tDATADIR = \"\\$(PREFIX)/share/\\$(PACKAGE)\"\n"
@@ -249,10 +251,8 @@ enum {
 #define MKF_HEADER_DATA	"PACKAGE=\t@PACKAGE@\n" \
 						"VERSION=\t@VERSION@\n\n"
 
-#define MKF_LIB_DATA	"LIBNAME=\t@LIBNAME@\n" \
-						"STATICLIB=\t$(LIBNAME).a\n" \
-						"SHAREDLIB=\t$(LIBNAME)\n" \
-						"LIBVERS=\t@LIBVERS@\n\n"
+#define MKF_HEADER_LIB	"STATIC_LIB=\t$(PACKAGE).a\n" \
+						"SHARED_LIB=\t@SHARED_LIB@\n"
 
 #define MKF_HEADER_DIR	"PREFIX=\t\t@PREFIX@\n" \
 						"BINDIR=\t\t@BINDIR@\n" \
@@ -417,13 +417,17 @@ enum {
 #define MKF_INST_LIB		"install_lib:\n" \
 							"\t# install library\n" \
 							"\t$(INSTALL_DIR) $(DESTDIR)$(LIBDIR)\n" \
-							"\t\tprintf \"$(INSTALL_LIB) $$f $(DESTDIR)$(LIBDIR)/$$d\\n\"; \\\n" \
-							"\t\t$(INSTALL_LIB) $$f $(DESTDIR)$(LIBDIR)/$$d; \\\n"
+							"\tprintf \"$(INSTALL_DATA) $(STATIC_LIB) $(DESTDIR)$(LIBDIR)/$$d\\n\"; \\\n" \
+							"\t$(INSTALL_DATA) $(STATIC_LIB) $(DESTDIR)$(LIBDIR)/$$d \\\n" \
+							"\tprintf \"$(INSTALL_DATA) $(SHARED_LIB) $(DESTDIR)$(LIBDIR)/$$d\\n\"; \\\n" \
+							"\t$(INSTALL_DATA) $(SHARED_LIB) $(DESTDIR)$(LIBDIR)/$$d \\\n\n"
 
 #define MKF_DEINST_LIB		"deinstall_lib:\n" \
 							"\t# deinstall library\n" \
-							"\t\tprintf \"$(RM) $(RMFLAGS) $(DESTDIR)$(LIBDIR)/$$d\\n\"; \\\n" \
-							"\t\t$(RM) $(RMFLAGS) $(DESTDIR)$(LIBDIR)/$$d; \\\n"
+							"\tprintf \"$(RM) $(RMFLAGS) $(DESTDIR)$(LIBDIR)/$(STATIC_LIB)\\n\"; \\\n" \
+							"\t$(RM) $(RMFLAGS) $(DESTDIR)$(LIBDIR)/$(STATIC_LIB) \\\n" \
+							"\tprintf \"$(RM) $(RMFLAGS) $(DESTDIR)$(LIBDIR)/$(SHARED_LIB)\\n\"; \\\n" \
+							"\t$(RM) $(RMFLAGS) $(DESTDIR)$(LIBDIR)/$(SHARED_LIB) \\\n\n"
 
 #define MKF_DIST_CLEAN		"distclean: clean\n" \
 							"\t$(RM) $(RMFLAGS) $(GEN_FILES)\n" \
