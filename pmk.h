@@ -106,6 +106,7 @@ typedef struct {
 
 /* pmk data */
 typedef struct {
+	bool		 comp_detect;
 	cfgtdata	*cfgt;
 	char		*ac_file,
 				*lang,
