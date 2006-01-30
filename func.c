@@ -1885,11 +1885,16 @@ bool pmk_build_shlib_name(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 
 	pmk_log("\n* Building shared library name\n");
 
+	if (pgd->comp_detect == false) {
+		errorf("compiler detection missing, check the man page.\n");
+		return(false);
+	}
+
 	pmk_log("\tShared library support : ");
 
 	if (pgd->slht == NULL) {
 		pmk_log("no.\n");
-		errorf("Your system is not supported yet.");
+		errorf("your system is not supported yet.");
 		return(false); /* XXX REQUIRED option ? */
 	} else {
 		pmk_log("yes.\n");
@@ -2216,74 +2221,74 @@ bool pmk_setparam_detect(pmkcmd *cmd, prsopt *popt, pmkdata *pgd) {
 		if (ccpath == NULL) {
 			errorf("\ncannot get compiler path ('%s').\n", pstr);
 			return(false);
+		}
+
+		if (detect_compiler(ccpath, pgd->buildlog, cdata, &cinfo) == false) {
+			pmk_log("failed.\n");
+			return(false);
+		}
+
+		pgd->comp_detect = true;
+
+		pmk_log("%s (version %s).\n", comp_get_descr(cdata, cinfo.c_id), cinfo.version);
+
+		/* set shared lib flags */
+		pld = check_lang_comp(pstr);
+		if (pld == NULL) {
+			errorf("unable to set shared library compiler flags (%s).\n", pld->slflg);
+			return(false);
+		}
+
+		/* check if an override exists for compiler flags */
+		if (snprintf_b(buf, sizeof(buf), "%s_%s", pld->slflg, cinfo.c_id) == false) {
+			errorf("overflow.\n");
+			return(false);
+		}
+
+		if (cdata->sht != NULL) {
+			/* XXX need to skip if system has no data ? */
+			ostr = hash_get(cdata->sht, buf);
 		} else {
-			if (detect_compiler(ccpath, pgd->buildlog, cdata, &cinfo) == true) {
-				pmk_log("%s (version %s).\n",
-					comp_get_descr(cdata, cinfo.c_id), cinfo.version);
+			ostr = NULL;
+		}
 
-				/* set shared lib flags */
-				pld = check_lang_comp(pstr);
-				if (pld != NULL) {
-					/* check if an override exists for compiler flags */
-					if (snprintf_b(buf, sizeof(buf), "%s_%s",
-								pld->slflg, cinfo.c_id) == false) {
-						errorf("overflow.\n");
-						return(false);
-					}
+		/* set shared lib compiler flags */
+		if (ostr != NULL) {
+			pmk_log("\tFound system specific %s.\n", pld->slflg);
+		} else {
+			pcell = comp_get(cdata, cinfo.c_id);
+			ostr = pcell->slcflags;
+		}
 
-					if (cdata->sht != NULL) {
-						/* XXX need to skip if system has no data ? */
-						ostr = hash_get(cdata->sht, buf);
-					} else {
-						ostr = NULL;
-					}
+		pmk_log("\t\tSetting %s to '%s'\n", pld->slflg, ostr);
+		if (hash_update_dup(pgd->htab, pld->slflg, ostr) == HASH_ADD_FAIL) {
+			return(false);
+		}
 
-					/* set shared lib compiler flags */
-					if (ostr != NULL) {
-						pmk_log("\tFound system specific %s.\n", pld->slflg);
-					} else {
-						pcell = comp_get(cdata, cinfo.c_id);
-						ostr = pcell->slcflags;
-					}
+		/* check if an override exists for linking flags */
+		if (snprintf_b(buf, sizeof(buf), "%s_%s", SL_LDFLAG_VARNAME, cinfo.c_id) == false) {
+			errorf("overflow.\n");
+			return(false);
+		}
 
-					pmk_log("\t\tSetting %s to '%s'\n", pld->slflg, ostr);
-					if (hash_update_dup(pgd->htab, pld->slflg, ostr) == HASH_ADD_FAIL)
-						return(false);
+		if (cdata->sht != NULL) { /* XXX need to skip if system has no data ? */
+			ostr = hash_get(cdata->sht, buf);
+		} else {
+			ostr = NULL;
+		}
 
-					/* check if an override exists for linking flags */
-					if (snprintf_b(buf, sizeof(buf),
-							"%s_%s", SL_LDFLAG_VARNAME,
-							cinfo.c_id) == false) {
-						errorf("overflow.\n");
-						return(false);
-					}
+		/* set shared lib compiler flags */
+		if (ostr != NULL) {
+			pmk_log("\tFound system specific %s.\n", SL_LDFLAG_VARNAME);
+		} else {
+			pcell = comp_get(cdata, cinfo.c_id);
+			ostr = pcell->slldflags;
+		}
 
-					if (cdata->sht != NULL) { /* XXX need to skip if system has no data ? */
-						ostr = hash_get(cdata->sht, buf);
-					} else {
-						ostr = NULL;
-					}
-
-					/* set shared lib compiler flags */
-					if (ostr != NULL) {
-						pmk_log("\tFound system specific %s.\n", SL_LDFLAG_VARNAME);
-					} else {
-						pcell = comp_get(cdata, cinfo.c_id);
-						ostr = pcell->slldflags;
-					}
-
-					/* set shared lib linking flags */
-					pmk_log("\t\tSetting %s to '%s'\n", SL_LDFLAG_VARNAME, ostr);
-					if (hash_update_dup(pgd->htab, SL_LDFLAG_VARNAME, ostr) == HASH_ADD_FAIL)
-						return(false);
-				} else {
-					errorf("unable to set shared library compiler flags (%s).\n", pld->slflg);
-					return(false);
-				}
-			} else {
-				pmk_log("failed.\n");
-				return(false);
-			}
+		/* set shared lib linking flags */
+		pmk_log("\t\tSetting %s to '%s'\n", SL_LDFLAG_VARNAME, ostr);
+		if (hash_update_dup(pgd->htab, SL_LDFLAG_VARNAME, ostr) == HASH_ADD_FAIL) {
+			return(false);
 		}
 	}
 

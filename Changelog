@@ -1,3 +1,7 @@
+30 Jan 2006 mipsator
+ * pmk now inform when compiler has not been detected before checking
+   for shared library support.
+
 19 Jan 2006 mipsator
  * some temporary fixes for pmkcfg.sh portability. Better fixes will
    come further ...

@@ -112,6 +112,9 @@ pmkdata *pmkdata_init(void) {
 		return(NULL);
 	}
 
+	/* init compiler detection flag */
+	ppd->comp_detect = false;
+
 	/* init template list */
 	ppd->tlist = NULL;
 
@@ -254,6 +257,13 @@ debugf("%s = '%s'", pstr, buf);
 		}
 
 		if (hash_update_dup(pht, "INSTALL", buf) == HASH_ADD_FAIL) {
+			return(false);
+		}
+	}
+
+	pstr = hash_get(pht, PMKCONF_BIN_AR);
+	if (pstr != NULL) {
+		if (hash_update_dup(pht, "AR", pstr) == HASH_ADD_FAIL) {
 			return(false);
 		}
 	}
