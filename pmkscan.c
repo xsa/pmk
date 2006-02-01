@@ -1671,6 +1671,7 @@ bool output_type(htable *checks, char *cname, FILE *fp) {
 bool scan_build_pmk(scn_zone_t *psz) {
 	FILE			*fp;
 	char			 buf[MKF_OUTPUT_WIDTH * 2];
+	dynary			*da;
 	hkeys			*phk;
 	time_t			 now;
 	unsigned int	 i;
@@ -1705,6 +1706,15 @@ bool scan_build_pmk(scn_zone_t *psz) {
 		build_comment(fp, "TARGET = ()\t# TO EDIT");
 	}
 
+	if (psz->gen_lib == true) {
+		/* compilers to detect */
+		da = da_init();
+		da_push(da, strdup("CC")); /* XXX hardcode */
+
+		build_list(fp, "DETECT", da); 
+		da_destroy(da);
+	}
+
 	/* end of command */
 	build_cmd_end(fp);
 
@@ -1721,6 +1731,9 @@ bool scan_build_pmk(scn_zone_t *psz) {
 	/* output default defines */
 	fprintf(fp, PMKF_DEF_STD);
 	fprintf(fp, PMKF_DEF_DIR);
+	if (psz->gen_lib == true) {
+		fprintf(fp, PMKF_DEF_LIB);
+	}
 
 	/* output needed man directories */
 	if (psz->found[FILE_TYPE_MAN] == true) {
