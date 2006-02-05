@@ -233,7 +233,8 @@ kwopt_t	kw_genzone = {
 prskw	kw_scanfile[] = {
 	{KW_CMD_GENPF,		PSC_TOK_PMKF,	PRS_KW_CELL,	PRS_TOK_NULL,	&kw_genpmk},
 	{KW_CMD_GENMF,		PSC_TOK_MAKF,	PRS_KW_CELL,	PRS_TOK_NULL,	&kw_genmkf},
-	{KW_CMD_GENZN,		PSC_TOK_ZONE,	PRS_KW_CELL,	PRS_TOK_NULL,	&kw_genzone}
+	{KW_CMD_GENZN,		PSC_TOK_ZONE,	PRS_KW_CELL,	PRS_TOK_NULL,	&kw_genzone},
+	{KW_CMD_DEFLIB,		PSC_TOK_DEFLIB,	PRS_KW_NODE,	PSC_TOK_SETLIB,	NULL}
 };
 size_t	nbkwsf = sizeof(kw_scanfile) / sizeof(prskw);
 
@@ -370,6 +371,9 @@ scn_node_t *scan_node_init(char *fname) {
 
 		/* init dependency state */
 		pnode->isdep = false; /* XXX useful ? see scan_file() */
+
+		/* init library flag */
+		pnode->islib = false;
 
 		/* init main() procedure flag */
 		pnode->mainproc = false;
@@ -511,6 +515,7 @@ scn_zone_t *scan_zone_init(htable *nodes) {
 		/* init zone tables */
 		pzone->objects = hash_init(256); /* XXX can do better :) */
 		pzone->targets = hash_init(256); /* XXX can do better :) */
+		pzone->libraries = hash_init(16); /* should be enough */
 		pzone->h_checks = hash_init_adv(128, NULL, (void (*)(void *)) destroy_chk_cell, NULL); /* XXX can do better :) */
 		pzone->l_checks = hash_init_adv(128, NULL, (void (*)(void *)) destroy_chk_cell, NULL); /* XXX can do better :) */
 		pzone->t_checks = hash_init_adv(128, NULL, (void (*)(void *)) destroy_chk_cell, NULL); /* XXX can do better :) */
@@ -555,6 +560,10 @@ void scan_zone_destroy(scn_zone_t *pzone) {
 
 	if (pzone->targets != NULL) {
 		hash_destroy(pzone->targets);
+	}
+
+	if (pzone->libraries != NULL) {
+		hash_destroy(pzone->libraries);
 	}
 
 	if (pzone->h_checks != NULL) {
@@ -2749,6 +2758,36 @@ void mkf_output_objs(FILE *fp, scn_zone_t *psz) {
 
 		hash_free_hkeys(phk);
 	}
+
+	phk = hash_keys_sorted(psz->libraries);
+	if (phk != NULL) {
+		/* generate target deps */
+		fprintf(fp, "#\n# library dependency lists\n#\n");
+		for (i = 0 ; i < phk->nkey ; i++) {
+			pstr = hash_get(psz->libraries, phk->keys[i]);
+			pn = hash_get(psz->nodes, pstr);
+
+			/* target label */
+			snprintf(buf, sizeof(buf), MKF_TARGET_OBJS, pn->prefix);
+			str_to_upper(buf, sizeof(buf), buf);
+			fprintf(fp, buf);
+
+			lm = strlen(buf);
+			ofst = lm;
+
+			da_sort(pn->obj_deps);
+
+			/* append objects */
+			for (j = 0 ; j < da_usize(pn->obj_deps) ; j++) {
+				ofst = fprintf_width(lm, MKF_OUTPUT_WIDTH, ofst, fp,
+										(char *) da_idx(pn->obj_deps, j));
+			}
+
+			fprintf(fp, MKF_TWICE_JUMP);
+		}
+
+		hash_free_hkeys(phk);
+	}
 }
 
 
@@ -4043,9 +4082,30 @@ bool process_zone(prs_cmn_t *pcmn, scandata *psd) {
 	XXX
  ***********************************************************************/
 
-bool parse_zone_opts(htable *pht, scn_zone_t *psz) {
-	char		*pstr;
+bool parse_zone_opts(prs_cmn_t *pcmn, htable *pht, htable *libs) {
+	char		*pdir,
+				*pstr;
 	pmkobj		*ppo;
+	htable		*tnodes;
+	scn_zone_t	*psz;
+
+
+	/* init of nodes table */
+	tnodes = hash_init_adv(512, NULL, (void (*)(void *))scan_node_destroy, NULL);
+	if (tnodes == NULL) {
+		/* XXX errmsg !! */
+		return(false);
+	}
+
+	/* init zone structure */
+	psz = scan_zone_init(tnodes);
+	if (psz == NULL) {
+		/* XXX err msg */
+		hash_destroy(tnodes);
+		return(false);
+	}
+	pcmn->data = psz;
+
 
 	/* get pmkfile switch */
 	ppo = hash_get(pht, KW_OPT_PMK);
@@ -4117,6 +4177,103 @@ bool parse_zone_opts(htable *pht, scn_zone_t *psz) {
 		}
 	}
 
+
+	/* get base directory (REQUIRED) */
+	pdir = po_get_str(hash_get(pht, KW_OPT_DIR));
+	psz->directory = strdup(pdir);
+
+	/* get discard list */
+	ppo = hash_get(pht, KW_OPT_DSC);
+	if (ppo != NULL) {
+		psz->discard = po_get_list(ppo);
+	}
+
+	/* get library name */
+	ppo = hash_get(pht, KW_OPT_LIB);
+	if (ppo != NULL) {
+		/* XXX TODO manage library lists */
+	}
+
+	/* get recursivity switch (OPTIONAL, false by default) */
+	ppo = hash_get(pht, KW_OPT_REC);
+	if (ppo != NULL) {
+		psz->recursive = po_get_bool(ppo);
+	}
+
+	/* get unique file switch (OPTIONAL, false by default) */
+	ppo = hash_get(pht, KW_OPT_UNI);
+	if (ppo != NULL) {
+		psz->unique = po_get_bool(ppo);
+	}
+
+	/* get extra tags list */
+	ppo = hash_get(pht, KW_OPT_EXTTAG);
+	if (ppo != NULL) {
+		psz->exttags = po_get_list(ppo);
+	}
+
+	return(true);
+}
+
+
+/******************
+ * parse_deflib() *
+ ***********************************************************************
+ DESCR
+	XXX
+
+ IN
+	XXX
+
+ OUT
+	boolean
+ ***********************************************************************/
+
+bool parse_deflib(htable *lnodes, prsnode *pnode) {
+	prscell		*pcell;
+	prsopt		*popt;
+
+	/* init pcell with the first cell of the node */
+	pcell = pnode->first;
+
+	while (pcell != NULL) {
+		popt = pcell->data;
+		/* XXX */
+		debugf("define name = '%s'", popt->key);
+				/*    |+ get libname +|                                              */
+				/*    pstr = po_get_str(ppo);                                        */
+				/*                                                                   */
+				/*    |+ look for object list +|                                     */
+				/*    da = po_get_list(hash_get(pcell->data, KW_OPT_LIBOBJ));        */
+				/*    if (da == NULL) {                                              */
+				/*        errorf("unable to get object list for library '%s'", pstr);*/
+				/*        |+ XXX TODO destroy stuff +|                               */
+				/*        return(false);                                             */
+				/*    }                                                              */
+				/*                                                                   */
+				/*    psz->gen_lib = true;                                           */
+				/*                                                                   */
+				/*    |+ create new node +|                                          */
+				/*    pnode = scan_node_init(pstr);                                  */
+				/*    if (pnode == NULL) {                                           */
+				/*        errorf("unable to initialize scan node");                  */
+				/*        |+ XXX TODO destroy stuff +|                               */
+				/*        return(false);                                             */
+				/*    }                                                              */
+				/*                                                                   */
+				/*    |+ set lib name +|                                             */
+				/*    snprintf(libname, sizeof(libname), "lib%s", pstr);             */
+				/*    pnode->prefix = strdup(libname);                               */
+				/*                                                                   */
+				/*    |+ set object dependencies +|                                  */
+				/*    while ((pstr = da_shift(da)) && (pstr != NULL)) {              */
+				/*        |+ add dep into lib node +|                                */
+				/*        da_push(pnode->obj_deps, pstr);                            */
+				/*    }                                                              */
+
+		pcell = pcell->next;
+	}
+
 	return(true);
 }
 
@@ -4139,9 +4296,7 @@ bool parse_zone_opts(htable *pht, scn_zone_t *psz) {
 bool parse_script(char *cfname, prs_cmn_t *pcmn, scandata *psd) {
 	FILE		*fd;
 	bool		 frslt = true;
-	char		*pdir;
-	htable		*tnodes;
-	pmkobj		*ppo;
+	htable		*lnodes;
 	prscell		*pcell;
 	prsdata		*pdata;
 	scn_zone_t	*psz;
@@ -4152,8 +4307,19 @@ bool parse_script(char *cfname, prs_cmn_t *pcmn, scandata *psd) {
 		return(false);
 	}
 
+	/* init of nodes table */
+	lnodes = hash_init_adv(64, NULL, (void (*)(void *))scan_node_destroy, NULL);
+	if (lnodes == NULL) {
+		/* XXX errmsg */
+		return(false);
+	}
+
 	/* initialise parsing data structure */
 	pdata = prsdata_init();
+	if (pdata == NULL) {
+		/* XXX errmsg */
+		return(false);
+	}
 
 	if (parse_pmkfile(fd, pdata, kw_scanfile, nbkwsf) == false) {
 		fclose(fd);
@@ -4165,80 +4331,34 @@ bool parse_script(char *cfname, prs_cmn_t *pcmn, scandata *psd) {
 	pcell = pdata->tree->first;
 	while (pcell != NULL) {
 		switch(pcell->token) {
+			case PSC_TOK_DEFLIB :
+				if (parse_deflib(lnodes, pcell->data) == false) {
+					errorf("parsing of script file failed."); /* XXX better error message ? */
+					return(false); /* XXX stuff to free */
+				}
+				break;
+
 			case PSC_TOK_PMKF :
 			case PSC_TOK_MAKF :
 			case PSC_TOK_ZONE :
-				/* init of nodes table */
-				tnodes = hash_init_adv(512, NULL,
-						(void (*)(void *))scan_node_destroy, NULL);
-
-				/* init zone structure */
-				psz = scan_zone_init(tnodes);
-				if (psz == NULL) {
-					/* XXX err msg */
-					prsdata_destroy(pdata);
-					hash_destroy(tnodes);
-					exit(EXIT_FAILURE);
-				}
-				pcmn->data = psz;
-
-				if (parse_zone_opts(pcell->data, psz) == false) {
+				if (parse_zone_opts(pcmn, pcell->data, lnodes) == false) {
 					errorf("parsing of script file failed."); /* XXX better error message ? */
-					return(false);
+					return(false); /* XXX stuff to free */
 				}
-
-				/* get base directory (REQUIRED) */
-				pdir = po_get_str(hash_get(pcell->data, KW_OPT_DIR));
-				psz->directory = strdup(pdir);
-
-				/* get discard list */
-				ppo = hash_get(pcell->data, KW_OPT_DSC);
-				if (ppo != NULL) {
-					psz->discard = po_get_list(ppo);
-				}
-
-				/* get library name */
-				ppo = hash_get(pcell->data, KW_OPT_LIB);
-				if (ppo != NULL) {
-					psz->gen_lib = true;
-
-					/* XXX TODO set libname */
-					/*XXX = po_get_str(ppo);*/
-
-					/* XXX TODO get LIBOBJ */
-					/*XXX = po_get_list(ppo);*/
-				}
-
-				/* get recursivity switch (OPTIONAL, false by default) */
-				ppo = hash_get(pcell->data, KW_OPT_REC);
-				if (ppo != NULL) {
-					psz->recursive = po_get_bool(ppo);
-				}
-
-				/* get unique file switch (OPTIONAL, false by default) */
-				ppo = hash_get(pcell->data, KW_OPT_UNI);
-				if (ppo != NULL) {
-					psz->unique = po_get_bool(ppo);
-				}
-
-				/* get extra tags list */
-				ppo = hash_get(pcell->data, KW_OPT_EXTTAG);
-				if (ppo != NULL) {
-					psz->exttags = po_get_list(ppo);
-				}
-
 				/* process current zone */
 				if (process_zone(pcmn, psd) == false) {
 					frslt = false;
 				}
 
+				/* free scan zone stuff */
+				psz = pcmn->data;
+				hash_destroy(psz->nodes);
 				scan_zone_destroy(psz);
-				hash_destroy(tnodes);
 				break;
 
 			default :
 				prsdata_destroy(pdata);
-				errorf("parsing of script file failed.");
+				errorf("parsing of script file failed."); /* XXX better error message */
 				return(false);
 				break;
 		}

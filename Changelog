@@ -1,3 +1,9 @@
+05 Feb 2006 mipsator
+ * added some experimental stuff into pmkscan to handle libraries
+   lately. This stuff could make current unstable as i have not enough
+   time to make sure all is fine before commit. I'll notifiy when
+   everything will come back to normality.
+
 30 Jan 2006 mipsator
  * pmk now inform when compiler has not been detected before checking
    for shared library support.

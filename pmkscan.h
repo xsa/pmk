@@ -89,7 +89,8 @@ enum {
 	PSC_TOK_PMKF = 1,
 	PSC_TOK_MAKF,
 	PSC_TOK_ZONE,
-	PSC_TOK_ADDSO
+	PSC_TOK_DEFLIB,
+	PSC_TOK_SETLIB
 };
 
 
@@ -100,7 +101,6 @@ enum {
 
 /* command keyword options */
 #define KW_OPT_HDR		"HEADER"
-#define KW_OPT_LIB		"LIBRARY"
 #define KW_OPT_MBR		"MEMBER"
 #define KW_OPT_PRC		"PROCEDURE"
 #define KW_OPT_SUB		"SUBHDR"
@@ -109,6 +109,7 @@ enum {
 #define KW_CMD_GENPF	"GEN_PMKFILE"
 #define KW_CMD_GENMF	"GEN_MAKEFILE"
 #define KW_CMD_GENZN	"GEN_ZONE"
+#define KW_CMD_DEFLIB	"DEFINE_LIBS"
 
 /* script keyword options */
 #define KW_OPT_ADVTAG	"ADVTAG"
@@ -126,6 +127,7 @@ enum {
 #define KW_OPT_UNI		"UNIQUE"
 
 /* common options */
+#define KW_OPT_LIB		"LIBRARY"
 #define KW_OPT_NAM		"NAME"	/* OBSOLETE */
 
 /* file types **********************************************************/
@@ -482,7 +484,8 @@ typedef struct {
 				*obj_name,		/* object name */
 				*prefix,		/* prefix name */
 				*dname;			/* directory name */
-	bool		 isdep,			/* is a dependency flag ? */
+	bool		 isdep,			/* dependency flag */
+				 islib,			/* library flag */
 				 mainproc;		/* has main() proc flag ? */
 	dynary		*system_inc,	/* system include list */
 				*local_inc,		/* local include list */
@@ -523,6 +526,7 @@ typedef struct {
 	htable		*nodes,					/* global nodes table */
 				*objects,				/* zone objects */
 				*targets,				/* zone targets */
+				*libraries,				/* zone libraries */
 				*h_checks,				/* zone header checks */
 				*l_checks,				/* zone header checks */
 				*t_checks;				/* zone type checks */
@@ -611,7 +615,8 @@ bool		 process_ppro(void *, char *, prseng_t *);
 bool		 process_proc_call(void *, char *, prseng_t *);
 bool		 process_proc_decl(void *, char *, prseng_t *);
 bool		 process_type(void *, char *, prseng_t *);
-bool		 parse_zone_opts(htable *, scn_zone_t *);
+bool		 parse_deflib(htable *, prsnode *);
+bool		 parse_zone_opts(prs_cmn_t *, htable *, htable *);
 bool		 parse_file(prs_cmn_t *, char *, ftype_t, bool);
 bool		 process_zone(prs_cmn_t *, scandata *);
 bool		 parse_script(char *, prs_cmn_t *, scandata *);
