@@ -175,6 +175,7 @@ kw_t	opt_genpmk[] = {
 	{KW_OPT_CFGALT,	PO_STRING},
 	{KW_OPT_DSC,	PO_LIST},
 	{KW_OPT_EXTTAG,	PO_LIST},
+	{KW_OPT_LIB,	PO_LIST},
 	{KW_OPT_PMKALT,	PO_STRING},
 	{KW_OPT_REC,	PO_BOOL},
 	{KW_OPT_UNI,	PO_BOOL}
@@ -192,6 +193,7 @@ kw_t	opt_genmkf[] = {
 	{KW_OPT_DSC,	PO_LIST},
 	{KW_OPT_EXTMKF,	PO_STRING},
 	{KW_OPT_EXTTAG,	PO_LIST},
+	{KW_OPT_LIB,	PO_LIST},
 	{KW_OPT_NAM,	PO_STRING},
 	{KW_OPT_MKFALT,	PO_STRING},
 	{KW_OPT_REC,	PO_BOOL},
@@ -212,7 +214,7 @@ kw_t	opt_genzone[] = {
 	{KW_OPT_DSC,	PO_LIST},
 	{KW_OPT_EXTMKF,	PO_STRING},
 	{KW_OPT_EXTTAG,	PO_LIST},
-	{KW_OPT_LIB,	PO_STRING},
+	{KW_OPT_LIB,	PO_LIST},
 	{KW_OPT_LIBOBJ,	PO_LIST},
 	{KW_OPT_MKF,	PO_BOOL},
 	{KW_OPT_MKFALT,	PO_STRING},
@@ -515,7 +517,6 @@ scn_zone_t *scan_zone_init(htable *nodes) {
 		/* init zone tables */
 		pzone->objects = hash_init(256); /* XXX can do better :) */
 		pzone->targets = hash_init(256); /* XXX can do better :) */
-		pzone->libraries = hash_init(16); /* should be enough */
 		pzone->h_checks = hash_init_adv(128, NULL, (void (*)(void *)) destroy_chk_cell, NULL); /* XXX can do better :) */
 		pzone->l_checks = hash_init_adv(128, NULL, (void (*)(void *)) destroy_chk_cell, NULL); /* XXX can do better :) */
 		pzone->t_checks = hash_init_adv(128, NULL, (void (*)(void *)) destroy_chk_cell, NULL); /* XXX can do better :) */
@@ -528,6 +529,9 @@ scn_zone_t *scan_zone_init(htable *nodes) {
 
 		/* init data files dynary */
 		pzone->datafiles = da_init();
+
+		/* init libraries dynary */
+		pzone->libraries = da_init();
 
 		/* init templates dynary */
 		pzone->templates = da_init();
@@ -562,10 +566,6 @@ void scan_zone_destroy(scn_zone_t *pzone) {
 		hash_destroy(pzone->targets);
 	}
 
-	if (pzone->libraries != NULL) {
-		hash_destroy(pzone->libraries);
-	}
-
 	if (pzone->h_checks != NULL) {
 		hash_destroy(pzone->h_checks);
 	}
@@ -588,6 +588,10 @@ void scan_zone_destroy(scn_zone_t *pzone) {
 
 	if (pzone->datafiles != NULL) {
 		da_destroy(pzone->datafiles);
+	}
+
+	if (pzone->libraries != NULL) {
+		da_destroy(pzone->libraries);
 	}
 
 	if (pzone->templates != NULL) {
@@ -2759,35 +2763,35 @@ void mkf_output_objs(FILE *fp, scn_zone_t *psz) {
 		hash_free_hkeys(phk);
 	}
 
-	phk = hash_keys_sorted(psz->libraries);
-	if (phk != NULL) {
-		/* generate target deps */
-		fprintf(fp, "#\n# library dependency lists\n#\n");
-		for (i = 0 ; i < phk->nkey ; i++) {
-			pstr = hash_get(psz->libraries, phk->keys[i]);
-			pn = hash_get(psz->nodes, pstr);
-
-			/* target label */
-			snprintf(buf, sizeof(buf), MKF_TARGET_OBJS, pn->prefix);
-			str_to_upper(buf, sizeof(buf), buf);
-			fprintf(fp, buf);
-
-			lm = strlen(buf);
-			ofst = lm;
-
-			da_sort(pn->obj_deps);
-
-			/* append objects */
-			for (j = 0 ; j < da_usize(pn->obj_deps) ; j++) {
-				ofst = fprintf_width(lm, MKF_OUTPUT_WIDTH, ofst, fp,
-										(char *) da_idx(pn->obj_deps, j));
-			}
-
-			fprintf(fp, MKF_TWICE_JUMP);
-		}
-
-		hash_free_hkeys(phk);
-	}
+	/*phk = hash_keys_sorted(psz->libraries);                               */
+	/*if (phk != NULL) {                                                    */
+	/*    |+ generate target deps +|                                        */
+	/*    fprintf(fp, "#\n# library dependency lists\n#\n");                */
+	/*    for (i = 0 ; i < phk->nkey ; i++) {                               */
+	/*        pstr = hash_get(psz->libraries, phk->keys[i]);                */
+	/*        pn = hash_get(psz->nodes, pstr);                              */
+	/*                                                                      */
+	/*        |+ target label +|                                            */
+	/*        snprintf(buf, sizeof(buf), MKF_TARGET_OBJS, pn->prefix);      */
+	/*        str_to_upper(buf, sizeof(buf), buf);                          */
+	/*        fprintf(fp, buf);                                             */
+	/*                                                                      */
+	/*        lm = strlen(buf);                                             */
+	/*        ofst = lm;                                                    */
+	/*                                                                      */
+	/*        da_sort(pn->obj_deps);                                        */
+	/*                                                                      */
+	/*        |+ append objects +|                                          */
+	/*        for (j = 0 ; j < da_usize(pn->obj_deps) ; j++) {              */
+	/*            ofst = fprintf_width(lm, MKF_OUTPUT_WIDTH, ofst, fp,      */
+	/*                                    (char *) da_idx(pn->obj_deps, j));*/
+	/*        }                                                             */
+	/*                                                                      */
+	/*        fprintf(fp, MKF_TWICE_JUMP);                                  */
+	/*    }                                                                 */
+	/*                                                                      */
+	/*    hash_free_hkeys(phk);                                             */
+	/*}                                                                     */
 }
 
 
@@ -4069,6 +4073,68 @@ bool process_zone(prs_cmn_t *pcmn, scandata *psd) {
 }
 
 
+/******************
+ * parse_deflib() *
+ ***********************************************************************
+ DESCR
+	XXX
+
+ IN
+	XXX
+
+ OUT
+	boolean
+ ***********************************************************************/
+
+bool parse_deflib(htable *lnodes, prsnode *pnode) {
+	char		 libname[1024], /* XXX better size */
+				*pstr;
+	dynary		*da;
+	prscell		*pcell;
+	prsopt		*popt;
+	scn_node_t	*psn;
+
+	/* init pcell with the first cell of the node */
+	pcell = pnode->first;
+
+	while (pcell != NULL) {
+		popt = pcell->data;
+
+		psc_log("Recording library definition '%s'.\n", NULL, popt->key);
+
+		/* look for object list */
+		da = po_get_list(popt->value);
+		if (da == NULL) {
+			errorf("unable to get object list for library '%s'", popt->key);
+			/* XXX TODO destroy stuff */
+			return(false);
+		}
+
+		/* create new node */
+		psn = scan_node_init(popt->key);
+		if (pnode == NULL) {
+			errorf("unable to initialize scan node");
+			/* XXX TODO destroy stuff */
+			return(false);
+		}
+
+		/* set lib name */
+		snprintf(libname, sizeof(libname), "lib%s", popt->key);
+		psn->prefix = strdup(libname);
+
+		/* set object dependencies */
+		while ((pstr = da_shift(da)) && (pstr != NULL)) {
+			/* add dep into lib node */
+			da_push(psn->obj_deps, pstr);
+		}
+
+		pcell = pcell->next;
+	}
+
+	return(true);
+}
+
+
 /***********************
  * parse_zone_opts() *
  ***********************************************************************
@@ -4191,7 +4257,14 @@ bool parse_zone_opts(prs_cmn_t *pcmn, htable *pht, htable *libs) {
 	/* get library name */
 	ppo = hash_get(pht, KW_OPT_LIB);
 	if (ppo != NULL) {
-		/* XXX TODO manage library lists */
+		/* manage library lists */
+		psz->libraries = po_get_list(ppo);
+		if (psz->libraries != NULL) {
+			psz->gen_lib = true;
+
+			/* XXX hack ? */
+			ppo->data = NULL;
+		}
 	}
 
 	/* get recursivity switch (OPTIONAL, false by default) */
@@ -4210,68 +4283,6 @@ bool parse_zone_opts(prs_cmn_t *pcmn, htable *pht, htable *libs) {
 	ppo = hash_get(pht, KW_OPT_EXTTAG);
 	if (ppo != NULL) {
 		psz->exttags = po_get_list(ppo);
-	}
-
-	return(true);
-}
-
-
-/******************
- * parse_deflib() *
- ***********************************************************************
- DESCR
-	XXX
-
- IN
-	XXX
-
- OUT
-	boolean
- ***********************************************************************/
-
-bool parse_deflib(htable *lnodes, prsnode *pnode) {
-	prscell		*pcell;
-	prsopt		*popt;
-
-	/* init pcell with the first cell of the node */
-	pcell = pnode->first;
-
-	while (pcell != NULL) {
-		popt = pcell->data;
-		/* XXX */
-		debugf("define name = '%s'", popt->key);
-				/*    |+ get libname +|                                              */
-				/*    pstr = po_get_str(ppo);                                        */
-				/*                                                                   */
-				/*    |+ look for object list +|                                     */
-				/*    da = po_get_list(hash_get(pcell->data, KW_OPT_LIBOBJ));        */
-				/*    if (da == NULL) {                                              */
-				/*        errorf("unable to get object list for library '%s'", pstr);*/
-				/*        |+ XXX TODO destroy stuff +|                               */
-				/*        return(false);                                             */
-				/*    }                                                              */
-				/*                                                                   */
-				/*    psz->gen_lib = true;                                           */
-				/*                                                                   */
-				/*    |+ create new node +|                                          */
-				/*    pnode = scan_node_init(pstr);                                  */
-				/*    if (pnode == NULL) {                                           */
-				/*        errorf("unable to initialize scan node");                  */
-				/*        |+ XXX TODO destroy stuff +|                               */
-				/*        return(false);                                             */
-				/*    }                                                              */
-				/*                                                                   */
-				/*    |+ set lib name +|                                             */
-				/*    snprintf(libname, sizeof(libname), "lib%s", pstr);             */
-				/*    pnode->prefix = strdup(libname);                               */
-				/*                                                                   */
-				/*    |+ set object dependencies +|                                  */
-				/*    while ((pstr = da_shift(da)) && (pstr != NULL)) {              */
-				/*        |+ add dep into lib node +|                                */
-				/*        da_push(pnode->obj_deps, pstr);                            */
-				/*    }                                                              */
-
-		pcell = pcell->next;
 	}
 
 	return(true);

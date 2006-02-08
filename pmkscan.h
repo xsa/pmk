@@ -522,11 +522,11 @@ typedef struct {
 				*manpgs,				/* man pages dynary */
 				*datafiles,				/* data files dynary */
 				*discard,				/* discard list */
+				*libraries,				/* zone libraries */
 				*templates;				/* template files */
 	htable		*nodes,					/* global nodes table */
 				*objects,				/* zone objects */
 				*targets,				/* zone targets */
-				*libraries,				/* zone libraries */
 				*h_checks,				/* zone header checks */
 				*l_checks,				/* zone header checks */
 				*t_checks;				/* zone type checks */
