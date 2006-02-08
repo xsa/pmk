@@ -174,6 +174,7 @@ pmkobj *po_dup(pmkobj *po) {
 				break;
 
 			default :
+				free(dup);
 				return(NULL); /* XXX TODO */
 				break;
 		}
