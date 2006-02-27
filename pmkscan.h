@@ -1,9 +1,5 @@
 /* $Id$ */
 
-/* editor indenting options, ugly but useful */
-/* vim: set tabstop=4: *//* vim */
-/* -*- Mode: C; tab-width:4 -*- *//* emacs */
-
 /*
  * Copyright (c) 2003-2005 Damien Couderc
  * All rights reserved.
@@ -485,7 +481,6 @@ typedef struct {
 				*prefix,		/* prefix name */
 				*dname;			/* directory name */
 	bool		 isdep,			/* dependency flag */
-				 islib,			/* library flag */
 				 mainproc;		/* has main() proc flag ? */
 	dynary		*system_inc,	/* system include list */
 				*local_inc,		/* local include list */
@@ -500,6 +495,14 @@ typedef struct {
 	int			 score;			/* hit score */
 } scn_node_t;
 
+/* library cell */
+typedef struct {
+	char		*lib_name,		/* library name */
+				*lib_static,	/* static library filename */
+				*lib_shared;	/* shared library filename */
+	dynary		*obj_deps;		/* object dependency list */
+} lib_cell_t;
+				
 /* scanning zone data structure */
 typedef struct {
 	bool		 found[NB_FILE_TYPE],	/* file type flags */
@@ -522,11 +525,11 @@ typedef struct {
 				*manpgs,				/* man pages dynary */
 				*datafiles,				/* data files dynary */
 				*discard,				/* discard list */
-				*libraries,				/* zone libraries */
 				*templates;				/* template files */
 	htable		*nodes,					/* global nodes table */
 				*objects,				/* zone objects */
 				*targets,				/* zone targets */
+				*libraries,				/* zone libraries */
 				*h_checks,				/* zone header checks */
 				*l_checks,				/* zone header checks */
 				*t_checks;				/* zone type checks */
@@ -559,6 +562,8 @@ typedef struct {
 /* init functions ******************************************************/
 scn_node_t	*scan_node_init(char *);
 void		 scan_node_destroy(scn_node_t *);
+lib_cell_t	*lib_cell_init(char *, dynary *);
+void		 lib_cell_destroy(lib_cell_t *);
 scn_zone_t	*scan_zone_init(htable *);
 void		 scan_zone_destroy(scn_zone_t *);
 
@@ -626,3 +631,4 @@ void		 usage(void);
 
 #endif /* _PMKSCAN_H_ */
 
+/* vim: set noexpandtab tabstop=4 softtabstop=4 shiftwidth=4: */
