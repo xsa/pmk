@@ -1,3 +1,7 @@
+27 Feb 2006 mipsator
+ * added hash_extract() to extract data from an hash table.
+ * added more serious partial lib support.
+
 05 Feb 2006 mipsator
  * added some experimental stuff into pmkscan to handle libraries
    lately. This stuff could make current unstable as i have not enough

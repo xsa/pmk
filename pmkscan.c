@@ -374,9 +374,6 @@ scn_node_t *scan_node_init(char *fname) {
 		/* init dependency state */
 		pnode->isdep = false; /* XXX useful ? see scan_file() */
 
-		/* init library flag */
-		pnode->islib = false;
-
 		/* init main() procedure flag */
 		pnode->mainproc = false;
 
@@ -464,6 +461,69 @@ void scan_node_destroy(scn_node_t *pnode) {
 }
 
 
+/*******************
+ * lib_cell_init() *
+ ***********************************************************************
+ DESCR
+	XXX
+
+ IN
+	XXX
+
+ OUT
+	XXX
+ ***********************************************************************/
+
+lib_cell_t *lib_cell_init(char *name, dynary *da) {
+	char		 buffer[256], /* XXX */
+				 ubuf[256]; /* XXX */
+	lib_cell_t	*plc;
+	
+	plc = (lib_cell_t *) malloc(sizeof(lib_cell_t));
+	if (plc != NULL) {
+		/* set library filename */
+		snprintf(buffer, sizeof(buffer), "lib%s", name);
+		plc->lib_name = strdup(buffer);
+
+		str_to_upper(ubuf, sizeof(ubuf), buffer); /* XXX check ? */
+		
+		/* set static library variable name */
+		snprintf(buffer, sizeof(buffer), "LIB%s_STATIC", ubuf);
+		plc->lib_static = strdup(buffer);
+		
+		/* set shared library variable name */
+		snprintf(buffer, sizeof(buffer), "LIB%s_SHARED", ubuf);
+		plc->lib_shared = strdup(buffer);
+
+		/* set object dependencies */		
+		plc->obj_deps = da;
+	}
+	
+	return(plc);
+}
+
+
+/**********************
+ * lib_cell_destroy() *
+ ***********************************************************************
+ DESCR
+	XXX
+
+ IN
+	XXX
+
+ OUT
+	XXX
+ ***********************************************************************/
+
+void lib_cell_destroy(lib_cell_t *plc) {
+	da_destroy(plc->obj_deps);
+	free(plc->lib_name);
+	free(plc->lib_static);
+	free(plc->lib_shared);
+}
+
+
 /********************
  * scan_zone_init() *
  ***********************************************************************
@@ -517,6 +577,7 @@ scn_zone_t *scan_zone_init(htable *nodes) {
 		/* init zone tables */
 		pzone->objects = hash_init(256); /* XXX can do better :) */
 		pzone->targets = hash_init(256); /* XXX can do better :) */
+		pzone->libraries = hash_init_adv(16, NULL, (void (*)(void *)) lib_cell_destroy, NULL); /* library cells */
 		pzone->h_checks = hash_init_adv(128, NULL, (void (*)(void *)) destroy_chk_cell, NULL); /* XXX can do better :) */
 		pzone->l_checks = hash_init_adv(128, NULL, (void (*)(void *)) destroy_chk_cell, NULL); /* XXX can do better :) */
 		pzone->t_checks = hash_init_adv(128, NULL, (void (*)(void *)) destroy_chk_cell, NULL); /* XXX can do better :) */
@@ -529,9 +590,6 @@ scn_zone_t *scan_zone_init(htable *nodes) {
 
 		/* init data files dynary */
 		pzone->datafiles = da_init();
-
-		/* init libraries dynary */
-		pzone->libraries = da_init();
 
 		/* init templates dynary */
 		pzone->templates = da_init();
@@ -566,6 +624,10 @@ void scan_zone_destroy(scn_zone_t *pzone) {
 		hash_destroy(pzone->targets);
 	}
 
+	if (pzone->libraries != NULL) {
+		hash_destroy(pzone->libraries);
+	}
+
 	if (pzone->h_checks != NULL) {
 		hash_destroy(pzone->h_checks);
 	}
@@ -588,10 +650,6 @@ void scan_zone_destroy(scn_zone_t *pzone) {
 
 	if (pzone->datafiles != NULL) {
 		da_destroy(pzone->datafiles);
-	}
-
-	if (pzone->libraries != NULL) {
-		da_destroy(pzone->libraries);
 	}
 
 	if (pzone->templates != NULL) {
@@ -4151,9 +4209,13 @@ bool parse_deflib(htable *lnodes, prsnode *pnode) {
 bool parse_zone_opts(prs_cmn_t *pcmn, htable *pht, htable *libs) {
 	char		*pdir,
 				*pstr;
+	dynary		*da_l,	/* library list */
+				*da_o;	/* object list */
 	pmkobj		*ppo;
 	htable		*tnodes;
+	lib_cell_t	*plc;
 	scn_zone_t	*psz;
+	size_t		 i;
 
 
 	/* init of nodes table */
@@ -4254,17 +4316,27 @@ bool parse_zone_opts(prs_cmn_t *pcmn, htable *pht, htable *libs) {
 		psz->discard = po_get_list(ppo);
 	}
 
-	/* get library name */
+	/* get library name list */
 	ppo = hash_get(pht, KW_OPT_LIB);
 	if (ppo != NULL) {
-		/* manage library lists */
-		psz->libraries = po_get_list(ppo);
-		if (psz->libraries != NULL) {
-			psz->gen_lib = true;
-
-			/* XXX hack ? */
-			ppo->data = NULL;
+		da_l = po_get_list(ppo);
+		if (da_l != NULL) {
+			for (i = 0 ; i < da_usize(da_l) ; i++) {
+				/* get lib name */
+				pstr = da_idx(da_l, i);
+				
+				/* get associated object list */
+				da_o = hash_extract(libs, pstr);
+				if (da_o != NULL) {
+					plc = lib_cell_init(pstr, da_o); /* XXX TODO check ! */
+					
+					if (hash_add(psz->libraries, pstr, plc) == HASH_ADD_FAIL) {
+						/* XXX TODO handle error */
+					}
+				}
+			}
 		}
+		psz->gen_lib = true;
 	}
 
 	/* get recursivity switch (OPTIONAL, false by default) */
@@ -4608,3 +4680,4 @@ int main(int argc, char *argv[]) {
 	return(0);
 }
 
+/* vim: set noexpandtab tabstop=4 softtabstop=4 shiftwidth=4: */

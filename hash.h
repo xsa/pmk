@@ -117,6 +117,7 @@ bool			 hash_add_array(htable *, hpair *, size_t);
 bool			 hash_add_array_adv(htable *, hpair *, size_t, void *(*)(void *));
 unsigned int	 hash_append(htable *, char *, void *, void *);
 void			 hash_delete(htable *, char *);
+void			*hash_extract(htable *, char *);
 void			*hash_get(htable *, char *);
 size_t			 hash_merge(htable *, htable *);
 size_t			 hash_nbkey(htable *);
@@ -127,3 +128,5 @@ void			 hash_free_hkeys(hkeys *);
 void			*hash_str_append(void *, void *, void *);
 
 #endif /* _PMK_HASH_H_ */
+
+/* vim: set noexpandtab tabstop=4 softtabstop=4 shiftwidth=4: */

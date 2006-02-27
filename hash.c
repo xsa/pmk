@@ -258,10 +258,10 @@ void hash_set_grow(htable *ht) {
  ***********************************************************************/
 
 size_t hash_destroy(htable *pht) {
-	hcell		*p,
-			*t;
-	size_t		 s,
-			 c = 0;
+	hcell			*p,
+					*t;
+	size_t			 s,
+					 c = 0;
 	unsigned int	 i;
 
 	if (pht == NULL)
@@ -502,9 +502,9 @@ bool hash_add_array(htable *pht, hpair *php, size_t size) {
  ***********************************************************************/
 
 bool hash_add_array_adv(htable *pht, hpair *php, size_t size, void *(dupfunc)(void *)) {
-	bool		 error = false,
-			 rval = false;
-	htable		*pmht;
+	bool			 error = false,
+					 rval = false;
+	htable			*pmht;
 	unsigned int	 i;
 
 	pmht = hash_init(size);
@@ -548,8 +548,8 @@ bool hash_add_array_adv(htable *pht, hpair *php, size_t size, void *(dupfunc)(vo
 
 unsigned int hash_append(htable *pht, char *key, void *value, void *misc) {
 	unsigned int	 rval;
-	void		*pobj,
-			*robj;
+	void			*pobj,
+					*robj;
 
 	if (value == NULL) {
 #ifdef HASH_DEBUG
@@ -602,8 +602,8 @@ unsigned int hash_append(htable *pht, char *key, void *value, void *misc) {
  ***********************************************************************/
 
 void hash_delete(htable *pht, char *key) {
-	hcell		*phc,
-			*last;
+	hcell			*phc,
+					*last;
 	unsigned int	 hash;
 
 	/* compute hash code */
@@ -646,6 +646,69 @@ void hash_delete(htable *pht, char *key) {
 }
 
 
+/******************
+ * hash_extract() *
+ ***********************************************************************
+ DESCR
+	remove a key from the hash table
+
+ IN
+	pht : hash table
+	key : key to search
+
+ OUT
+	-
+ ***********************************************************************/
+
+void *hash_extract(htable *pht, char *key) {
+	hcell			*phc,
+					*last;
+	unsigned int	 hash;
+	void			*data = NULL;
+
+	/* compute hash code */
+	hash = hash_compute(key, pht->size);
+
+	phc = pht->nodetab[hash].first;
+	last = NULL;
+	while (phc != NULL) {
+		/* hash not empty */
+		if (strncmp(key, phc->key, MAX_HASH_KEY_LEN) == 0) {
+			/* found key */
+			if (last == NULL) {
+				/* first cell */
+				if (phc->next == NULL) {
+					/* only one cell */
+					pht->nodetab[hash].first = NULL;
+					pht->nodetab[hash].last = NULL;
+				} else {
+					/* re-link with next cell */
+					pht->nodetab[hash].first = phc->next;
+				}
+			} else {
+				last->next = phc->next;
+				if (phc->next == NULL) {
+					/* delete last cell, update node */
+					pht->nodetab[hash].last = last;
+				}
+			}
+			data = phc->value;
+			phc->value = NULL;
+			hash_free_hcell(pht, phc);
+			pht->count--;
+
+			break;
+		} else {
+			/* go to next cell */
+			last = phc;
+			phc = phc->next;
+		}
+	}
+	/* key not found */
+	return(data);
+}
+
+
 /**************
  * hash_get() *
  ***********************************************************************
@@ -661,7 +724,7 @@ void hash_delete(htable *pht, char *key) {
  ***********************************************************************/
 
 void *hash_get(htable *pht, char *key) {
-	hcell		*phc;
+	hcell			*phc;
 	unsigned int	 hash;
 
 	/* compute hash code */
@@ -701,9 +764,9 @@ void *hash_get(htable *pht, char *key) {
  ***********************************************************************/
 
 size_t hash_merge(htable *dst_ht, htable *src_ht) {
-	hcell		*p;
-	size_t		 s,
-			 c = 0;
+	hcell			*p;
+	size_t			 s,
+					 c = 0;
 	unsigned int	 i;
 
 	/* get table size */
@@ -762,10 +825,10 @@ size_t hash_nbkey(htable *pht) {
  ***********************************************************************/
 
 hkeys *hash_keys(htable *pht) {
-	hcell		*p;
-	hkeys		*phk;
+	hcell			*p;
+	hkeys			*phk;
 	unsigned int	 i,
-			 j = 0;
+					 j = 0;
 
 	/* init hkeys struct to be returned */
 	phk = (hkeys *)malloc(sizeof(hkeys));
@@ -952,3 +1015,5 @@ void *hash_str_append(void *orig, void *value, void *sep) {
 	free(value);
 	return((void *) pbuf);
 }
+
+/* vim: set noexpandtab tabstop=4 softtabstop=4 shiftwidth=4: */
