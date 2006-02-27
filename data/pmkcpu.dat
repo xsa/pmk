@@ -40,6 +40,9 @@ LIST_ARCH_EQUIV {
 	"mac68k" = "m68k"
 	"mvme68k" = "m68k"
 
+	# mips
+	"sgimips" = "mips"
+
 	# parisc
 	"9000/800" = "parisc_64"
 	"parisc64" = "parisc_64"
