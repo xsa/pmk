@@ -249,9 +249,6 @@ enum {
 #define MKF_HEADER_DATA	"PACKAGE=\t@PACKAGE@\n" \
 						"VERSION=\t@VERSION@\n\n"
 
-#define MKF_HEADER_LIB	"STATIC_LIB=\t$(PACKAGE).a\n" \
-						"SHARED_LIB=\t@SHARED_LIB@\n"
-
 #define MKF_HEADER_DIR	"PREFIX=\t\t@PREFIX@\n" \
 						"BINDIR=\t\t@BINDIR@\n" \
 						"SBINDIR=\t@SBINDIR@\n" \
@@ -320,14 +317,18 @@ enum {
 							"\t$(RM) $(RMFLAGS) $(%s_OBJS)\n" \
 							"\t$(RM) $(RMFLAGS) %s\n\n"
 
-#define MKF_TRGT_ALL_VAR	"ALL_TARGETS=\t"
-#define MKF_TRGT_CLEAN_VAR	"ALL_CLEAN_TARGETS=\t"
+#define MKF_TRGT_ALL_VAR	"ALL_TARGETS=\t$(ALL_BIN_TARGETS) $(ALL_LIB_TARGETS)"
+#define MKF_TRGT_ALL_BIN	"ALL_BIN_TARGETS=\t"
+#define MKF_TRGT_ALL_LIB	"ALL_LIB_TARGETS=\t"
+#define MKF_TRGT_CLEAN_VAR	"ALL_CLEAN_TARGETS=\t$(ALL_CLEAN_BIN_TARGETS) $(ALL_CLEAN_LIB_TARGETS)"
+#define MKF_TRGT_CLEAN_BIN	"ALL_BIN_CLEAN_TARGETS=\t"
+#define MKF_TRGT_CLEAN_LIB	"ALL_BIN_CLEAN_TARGETS=\t"
 #define MKF_TRGT_INST_VAR	"INSTALL_TARGETS=\tinstall_bin " \
 							"install_sbin install_man install_data\n\n"
 #define MKF_TRGT_DEINST_VAR	"DEINSTALL_TARGETS=\tdeinstall_bin " \
 							"deinstall_sbin deinstall_man deinstall_data\n\n"
 #define MKF_FILE_BIN_VAR	"# by default we consider all binaries as non privileged\n" \
-							"BIN_FILES=\t$(ALL_TARGETS)\n\n"
+							"BIN_FILES=\t$(ALL_BIN_TARGETS)\n\n"
 #define MKF_FILE_SBIN_VAR	"# move privileged binaries here if needed\n" \
 							"SBIN_FILES=\n\n"
 #define MKF_FILE_MAN_VAR	"MAN%d_FILES=\t"

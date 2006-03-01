@@ -1,3 +1,8 @@
+01 Mar 2006 mipsator
+ * still going on with library handling. Result is still not useable yet
+   as library generation targets are missing. That should be the last
+   step before completion.
+
 27 Feb 2006 mipsator
  * added hash_extract() to extract data from an hash table.
  * added more serious partial lib support.
