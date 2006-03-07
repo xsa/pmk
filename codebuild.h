@@ -1,7 +1,7 @@
 /* $Id$ */
 
 /*
- * Copyright (c) 2005 Damien Couderc
+ * Copyright (c) 2005-2006 Damien Couderc
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -143,3 +143,4 @@ void	 cb_cleaner(code_bld_t *);
 
 #endif /* _PMK_CODEBUILD_H_ */
 
+/* vim: set noexpandtab tabstop=4 softtabstop=4 shiftwidth=4: */

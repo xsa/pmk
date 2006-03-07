@@ -336,8 +336,13 @@ bool c_code_builder(code_bld_t *pcb) {
 	fclose(tfp);
 	fclose(lfp);
 
-	if ((ferror(tfp) != 0) || (ferror(lfp) != 0)) {
-		errorf("c_code_builder: output failed");
+	if (ferror(tfp) != 0) {
+		errorf("c_code_builder: generated source I/O failure");
+		return(false);
+	}
+
+	if (ferror(lfp) != 0) {
+		errorf("c_code_builder: build log I/O failure");
 		return(false);
 	}
 
@@ -359,13 +364,34 @@ bool c_code_builder(code_bld_t *pcb) {
  ***********************************************************************/
 
 bool cmdline_builder(code_bld_t *pcb, bool dolink) {
+	FILE	*lfp;
+	bool	 r = false;
+	
 	switch (pcb->lang) {
 		case LANG_C :
 		case LANG_CXX :
-			return(c_cmdline_builder(pcb, dolink));
+			r = c_cmdline_builder(pcb, dolink);
 	}
 
-	return(false);
+	if (r == true) {
+		lfp = fopen(pcb->blog, "a");
+		if (lfp == NULL) {
+			errorf("c_code_builder: build log fopen() failed");
+			return(false); /* failed to open */
+		}
+	
+		fprintf(lfp, "Generated command line:\n");
+		fprintf(lfp, "%s\n", pcb->bldcmd);
+
+		fclose(lfp);
+
+		if (ferror(lfp) != 0) {
+			errorf("c_code_builder: build log I/O failure");
+			return(false);
+		}
+	}
+
+	return(r);
 }
 
 
@@ -481,4 +507,4 @@ void cb_cleaner(code_bld_t *pcb) {
 	unlink(pcb->binfile);
 }
 
-
+/* vim: set noexpandtab tabstop=4 softtabstop=4 shiftwidth=4: */
