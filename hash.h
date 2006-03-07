@@ -1,7 +1,7 @@
 /* $Id$ */
 
 /*
- * Copyright (c) 2003-2005 Damien Couderc
+ * Copyright (c) 2003-2006 Damien Couderc
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -52,11 +52,18 @@
 #	define MAX_HASH_VALUE_LEN 512
 #endif
 
-#define HASH_ADD_FAIL	0 /* addition or appending failed */
-#define HASH_ADD_OKAY	1 /* first add */
-#define HASH_ADD_COLL	2 /* collision, key chained */
-#define HASH_ADD_UPDT	3 /* key already exists, change value */
-#define HASH_ADD_APPD	4 /* value appended */
+enum {
+	HASH_ADD_FAIL = 0,	/* addition or appending failed */
+	HASH_ADD_OKAY,		/* first add */
+	HASH_ADD_COLL,		/* collision, key chained */
+	HASH_ADD_UPDT,		/* key already exists, change value */
+	HASH_ADD_APPD		/* value appended */
+};
+
+enum {
+	HASH_METHOD_ADD = 1,
+	HASH_METHOD_UPD = 2
+};
 
 /* error messages */
 #define HASH_ERR_UPDT		"Hash table update failed."
@@ -70,7 +77,8 @@
 typedef struct s_hcell {
 	char			 key[MAX_HASH_KEY_LEN];
 	void			*value;
-	struct s_hcell	*next;
+	struct s_hcell	*prev,
+					*next;
 } hcell;
 
 typedef struct {
@@ -98,24 +106,37 @@ typedef struct {
 	char	**keys;
 } hkeys;
 
+typedef unsigned char	hmtd;
+
+typedef unsigned char	herr;
+
 
 /***********************
  * function prototypes *
  ***********************************************************************/
 
-unsigned int	 hash_compute(char *, size_t);
+size_t			 hash_compute(char *, size_t);
+herr			 hash_size_check(htable *);
+hnode			*hash_node_array_init(size_t);
+hnode			*hash_node_seek(htable *, char *);
+hcell			*hash_cell_init(char *, void *);
+hcell			*hash_cell_seek(hnode *, char *);
+herr			 hash_cell_add(htable *, hcell *, hmtd);
+hcell			*hash_cell_extract(hnode *, char *);
+void			*hash_cell_destroy(htable *, hcell *);
+
 htable			*hash_init(size_t);
 htable			*hash_init_adv(size_t, void *(*)(void *), void (*)(void *), void *(*)(void *, void *, void *));
 bool			 hash_resize(htable *, size_t);
 void			 hash_set_grow(htable *);
 size_t			 hash_destroy(htable *);
-unsigned int	 hash_add(htable *, char *, void *);
-unsigned int	 hash_update(htable *, char *, void *);
-unsigned int	 hash_update_dup(htable *, char *, void *);
-unsigned int	 hash_add_cell(hnode *, hcell *);
+herr			 hash_add(htable *, char *, void *);
+herr			 hash_update(htable *, char *, void *);
+herr			 hash_update_dup(htable *, char *, void *);
+
 bool			 hash_add_array(htable *, hpair *, size_t);
 bool			 hash_add_array_adv(htable *, hpair *, size_t, void *(*)(void *));
-unsigned int	 hash_append(htable *, char *, void *, void *);
+herr			 hash_append(htable *, char *, void *, void *);
 void			 hash_delete(htable *, char *);
 void			*hash_extract(htable *, char *);
 void			*hash_get(htable *, char *);
