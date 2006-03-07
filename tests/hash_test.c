@@ -26,16 +26,22 @@ int main(void) {
 	char		tstr[256],
 			ttstr[256],
 			*val;
+	herr		*err;
 	hkeys		*phk = NULL;
 	htable		*hp;
 	unsigned int	i;
+	size_t		nbcol;
 
 	printf("Testing init\n");
-	hp = hash_init(TAB_SIZE / 2);
-	hash_set_grow(hp);
+	hp = hash_init(TAB_SIZE);
+	/*hash_set_grow(hp);*/
 
 	printf("Adding test key\n");
-	hash_add(hp, "prefix", strdup("/usr/local"));
+	err = hash_add(hp, "prefix", strdup("/usr/local"));
+	if (err == HASH_ADD_FAIL) {
+		printf("hash error.\n"); 
+		exit(EXIT_FAILURE);
+	}
 
 	printf("Testing key : ");
 	val = hash_get(hp, "prefix");
@@ -46,7 +52,11 @@ int main(void) {
 	}
 
 	printf("Appending to the test key value\n");
-	hash_append(hp, "prefix", strdup("lll"), NULL);
+	err = hash_append(hp, "prefix", strdup("lll"), NULL);
+	if (err == HASH_ADD_FAIL) {
+		printf("hash error.\n"); 
+		exit(EXIT_FAILURE);
+	}
 
 	printf("Testing key : ");
 	val = hash_get(hp, "prefix");
@@ -82,7 +92,12 @@ int main(void) {
 	hash_add_array(hp, testab, n);
 
 	phk = hash_keys(hp);
-	printf("Displaying %d keys :\n", n);
+	if (phk == NULL) {
+		printf("hash_keys error.\n"); 
+		exit(EXIT_FAILURE);
+	}
+
+	printf("Displaying %zd keys :\n", n);
 	for(i = 0 ; i < phk->nkey ; i++) {
 		printf("\t%s => %s\n", (char *) phk->keys[i], (char *) hash_get(hp, phk->keys[i]));
 	}
@@ -94,8 +109,9 @@ int main(void) {
 
 	printf("Adding %d random keys\n", NBKEYS);
 
+	nbcol = 0;
 	for(i = 0 ; i < NBKEYS ; i++) {
-		snprintf(tstr, sizeof(tstr), "XXXXXXXXXX");
+		snprintf(tstr, sizeof(tstr), "XXXXXXXXXXXX");
 		/* mktemp() is only used to generate random values */
 		if (mktemp(tstr) != NULL) {
 			snprintf(ttstr, sizeof(ttstr), "value.%s", tstr);
@@ -111,6 +127,7 @@ int main(void) {
 					break;
 				case HASH_ADD_COLL:
 					printf("Collision for key %s\n", tstr);
+					nbcol++;
 					break;
 				case HASH_ADD_UPDT:
 					printf("Updated key %s\n", tstr);
@@ -123,6 +140,8 @@ int main(void) {
 			printf("Random value failed\n");
 		}
 	}
+
+	printf("Result : %zd collisions for %d keys\n", nbcol, NBKEYS);
 
 	printf("Testing destroy\n");
 	n = hash_destroy(hp);
