@@ -3292,10 +3292,10 @@ bool scan_build_mkf(scn_zone_t *psz) {
 	fprintf(fp, MKF_INST_BIN);
 	fprintf(fp, MKF_DEINST_BIN);
 
-	if (psz->gen_lib == true) {
-		fprintf(fp, MKF_INST_LIB);
-		fprintf(fp, MKF_DEINST_LIB);
-	}
+	/*if (psz->gen_lib == true) {     */
+	/*    fprintf(fp, MKF_INST_LIB);  */
+	/*    fprintf(fp, MKF_DEINST_LIB);*/
+	/*}                               */
 
 	mkf_output_man_inst(fp, psz);
 
