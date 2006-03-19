@@ -208,66 +208,71 @@ enum {
 #define MKF_OUTPUT_WIDTH	72
 #define MKF_TAB_WIDTH		8
 
-#define MKF_HEADER_GEN	"# Makefile template built by pmkscan (%s)\n" \
-						"# @configure_input@\n\n"
+#define MKF_HEADER_GEN		"# Makefile template built by pmkscan (%s)\n" \
+							"# @configure_input@\n\n"
 
-#define MKF_HEADER_ASM	"AS=\t\t@AS@\n" \
-						"ASFLAGS=\n"
+#define MKF_HEADER_ASM		"AS=\t\t@AS@\n" \
+							"ASFLAGS=\n"
 
-#define MKF_HEADER_C	"CC=\t\t@CC@\n" \
-						"CFLAGS=\t\t@CFLAGS@\n"
+#define MKF_HEADER_C		"CC=\t\t@CC@\n" \
+							"CFLAGS=\t\t@CFLAGS@\n"
 
-#define MKF_HEADER_CXX	"CXX=\t@CXX@\n" \
-						"CXXFLAGS=\t@CXXFLAGS@\n"
+#define MKF_HEADER_CXX		"CXX=\t@CXX@\n" \
+							"CXXFLAGS=\t@CXXFLAGS@\n"
 
-#define MKF_HEADER_YACC	"YACC=\t@YACC@\n" \
-						"YFLAGS=\t@YFLAGS@\n"
+#define MKF_HEADER_YACC		"YACC=\t@YACC@\n" \
+							"YFLAGS=\t@YFLAGS@\n"
 
-#define MKF_HEADER_LEX	"LEX=\t@LEX@\n" \
-						"LFLAGS=\t@LFLAGS@\n"
+#define MKF_HEADER_LEX		"LEX=\t@LEX@\n" \
+							"LFLAGS=\t@LFLAGS@\n"
 
-#define MKF_HEADER_LD	"LINKER=\t\t@CC@\n" \
-						"# LDFLAGS shall contain -lc if used with ld\n" \
-						"LDFLAGS=\t@LDFLAGS@\n\n"
+#define MKF_HEADER_LD		"LINKER=\t\t@CC@\n" \
+							"# LDFLAGS shall contain -lc if used with ld\n" \
+							"LDFLAGS=\t@LDFLAGS@\n\n"
 
-#define MKF_HEADER_AR	"AR=\t\t@AR@\n" \
-						"ARFLAGS=\t@ARFLAGS@\n"
+#define MKF_HEADER_SHARED	"SLLDFLAGS=\t@SLLDFLAGS@\n"
+							
+#define MKF_HEADER_AR		"AR=\t\t@AR@\n" \
+							"ARFLAGS=\tcru\n"
+							/*"ARFLAGS=\t@ARFLAGS@\n"*/
 
 #define MKF_HEADER_RANLIB	"RANLIB=\t\t@RANLIB@\n"
 
-#define MKF_HEADER_CPP	"CPP=\t\t@CPP@\n"
+#define MKF_HEADER_CPP		"CPP=\t\t@CPP@\n"
 
-#define MKF_HEADER_MISC	"INSTALL=\t@INSTALL@\n" \
-						"INSTALL_BIN=\t$(INSTALL) -m 755\n" \
-						"INSTALL_DATA=\t$(INSTALL) -m 644\n" \
-						"INSTALL_DIR=\t$(INSTALL) -d -m 755\n" \
-						"INSTALL_MAN=\t$(INSTALL) -m 644\n" \
-						"INSTALL_SBIN=\t$(INSTALL) -m 755\n\n" \
-						"RM=\t\trm\n" \
-						"RMFLAGS=\t-rf\n\n"
+#define MKF_HEADER_MISC		"INSTALL=\t@INSTALL@\n" \
+							"INSTALL_BIN=\t$(INSTALL) -m 755\n" \
+							"INSTALL_DATA=\t$(INSTALL) -m 644\n" \
+							"INSTALL_DIR=\t$(INSTALL) -d -m 755\n" \
+							"INSTALL_MAN=\t$(INSTALL) -m 644\n" \
+							"INSTALL_SBIN=\t$(INSTALL) -m 755\n\n" \
+							"RM=\t\trm\n" \
+							"RMFLAGS=\t-rf\n\n"
 
-#define MKF_HEADER_DATA	"PACKAGE=\t@PACKAGE@\n" \
-						"VERSION=\t@VERSION@\n\n"
+#define MKF_HEADER_DATA		"PACKAGE=\t@PACKAGE@\n" \
+							"VERSION=\t@VERSION@\n\n"
 
-#define MKF_HEADER_DIR	"PREFIX=\t\t@PREFIX@\n" \
-						"BINDIR=\t\t@BINDIR@\n" \
-						"SBINDIR=\t@SBINDIR@\n" \
-						"DATADIR=\t@DATADIR@\n"
-#define MKF_LIB_DIR		"LIBDIR=\t\t@LIBDIR@\n"
-#define MKF_MAN_DIR		"MANDIR=\t\t@MANDIR@\n"
-#define MKF_MANX_DIR	"MAN%dDIR=\t@MAN%dDIR@\n"
-#define MKF_SYSCONF_DIR	"SYSCONFDIR=\t@SYSCONFDIR@\n"
+#define MKF_HEADER_DIR		"PREFIX=\t\t@PREFIX@\n" \
+							"BINDIR=\t\t@BINDIR@\n" \
+							"SBINDIR=\t@SBINDIR@\n" \
+							"DATADIR=\t@DATADIR@\n"
+#define MKF_LIB_DIR			"LIBDIR=\t\t@LIBDIR@\n"
+#define MKF_MAN_DIR			"MANDIR=\t\t@MANDIR@\n"
+#define MKF_MANX_DIR		"MAN%dDIR=\t@MAN%dDIR@\n"
+#define MKF_SYSCONF_DIR		"SYSCONFDIR=\t@SYSCONFDIR@\n"
 
-#define MKF_SDIR_LIST	"SUBDIRS=\t"
-#define MKF_GEN_FILES	"GEN_FILES=\t"
-#define MKF_TEMPLATES	"TEMPLATES=\t"
+#define MKF_SDIR_LIST		"SUBDIRS=\t"
+#define MKF_GEN_FILES		"GEN_FILES=\t"
+#define MKF_TEMPLATES		"TEMPLATES=\t"
 
-#define MKF_VARIABLE	"%s=\t@%s@\n"
+#define MKF_SUBSTVAR		"%s=\t@%s@\n"
+#define MKF_VARHDR			"%s=\t"
+#define MKF_STCLIB_VAR		"%s=\t%s.a\n"
 
-#define MKF_LINE_JUMP	"\n"
-#define MKF_TWICE_JUMP	"\n\n"
+#define MKF_LINE_JUMP		"\n"
+#define MKF_TWICE_JUMP		"\n\n"
 
-#define MKF_SUFFIXES	".SUFFIXES: .o .s .c .C .cc .cxx .cpp\n\n"
+#define MKF_SUFFIXES		".SUFFIXES: .o .s .c .C .cc .cxx .cpp\n\n"
 
 #define MKF_BLD_ASM_OBJ		"# assembly suffix\n" \
 							"# we use CPP to be more portable\n" \
@@ -306,16 +311,21 @@ enum {
 
 #define MKF_TARGET_OBJS		"%s_OBJS=\t"
 #define MKF_TARGET_LABL		"%s: $(%s_OBJS)\n"
+#define MKF_TARGET_SIMPLE	"$(%s): $(%s)\n"
 #define MKF_TARGET_DEF		"\t$(LD) $(LDFLAGS) -o $@ $(%s_OBJS)\n\n"
 #define MKF_TARGET_C		"\t$(CC) $(LDFLAGS) -o $@ $(%s_OBJS)\n\n"
 #define MKF_TARGET_CXX		"\t$(CXX) $(LDFLAGS) -o $@ $(%s_OBJS)\n\n"
 
-#define MKF_TARGET_LIB_STC	"$(AR) $(ARFLAGS) $@ $(%s_OBJS)\n" \
-							"$(RANLIB) $@"
+#define MKF_TARGET_LIB_STC	"\t$(AR) $(ARFLAGS) $@ $(%s)\n" \
+							"\t$(RANLIB) $@\n\n"
+
+#define MKF_TARGET_LIB_SHD	"\t$(CC) $(SLLDFLAGS) -o $@ $(%s)\n\n"
 
 #define MKF_TARGET_CLN		"%s_clean:\n" \
 							"\t$(RM) $(RMFLAGS) $(%s_OBJS)\n" \
 							"\t$(RM) $(RMFLAGS) %s\n\n"
+
+#define MKF_TARGET_LIB_CLN	"\t$(RM) $(RMFLAGS) $(%s)\n"
 
 #define MKF_TRGT_ALL_VAR	"ALL_TARGETS=\t$(ALL_BIN_TARGETS) $(ALL_LIB_TARGETS)"
 #define MKF_TRGT_ALL_BIN	"ALL_BIN_TARGETS=\t"
@@ -494,6 +504,7 @@ typedef struct {
 /* library cell */
 typedef struct {
 	char		*lib_name,		/* library name */
+				*lib_objs,		/* library objects variable */
 				*lib_static,	/* static library filename */
 				*lib_shared;	/* shared library filename */
 	dynary		*obj_deps;		/* object dependency list */
@@ -506,7 +517,7 @@ typedef struct {
 				 advtag,				/* use advanced tagging */
 				 gen_pmk,				/* pmkfile generation flag */
 				 gen_mkf,				/* makefile generation flag */
-				 gen_lib,				/* library generation flag */
+				 gen_lib,				/* library generation flag *//* XXX to remove ? */
 				 recursive,				/* recursive scan flag */
 				 unique;				/* unique file flag */
 	char		*directory,				/* initial directory */
@@ -605,6 +616,7 @@ void		 mkf_output_man_trgs(FILE *, scn_zone_t *);
 void		 mkf_output_data_trgs(FILE *, scn_zone_t *);
 void		 mkf_output_obj_rules(FILE *, scn_zone_t *);
 void		 mkf_output_trg_rules(FILE *, scn_zone_t *);
+void		 mkf_output_lib_trg_rules(FILE *, scn_zone_t *);
 void		 mkf_output_man_inst(FILE *, scn_zone_t *);
 bool		 scan_build_mkf(scn_zone_t *);
 

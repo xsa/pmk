@@ -299,7 +299,6 @@ scn_node_t *scan_node_init(char *fname) {
 		len++;
 		pnode->prefix = (char *) malloc(len);
 		if (pnode->prefix == NULL) {
-			/* XXX msg err ? */
 			return(NULL);
 		}
 		strlcpy(pnode->prefix, fname, len);
@@ -465,18 +464,19 @@ void scan_node_destroy(scn_node_t *pnode) {
  * lib_cell_init() *
  ***********************************************************************
  DESCR
-	XXX
+	initialise a library cell structure
 
  IN
-	XXX
+	name :	library name
+	da :	object list
 
  OUT
-	XXX
+	structure pointer or NULL
  ***********************************************************************/
 
 lib_cell_t *lib_cell_init(char *name, dynary *da) {
-	char		 buffer[256], /* XXX */
-				 ubuf[256]; /* XXX */
+	char		 buffer[TMP_BUF_LEN],
+				 ubuf[TMP_BUF_LEN];
 	lib_cell_t	*plc;
 	
 	plc = (lib_cell_t *) malloc(sizeof(lib_cell_t));
@@ -485,8 +485,12 @@ lib_cell_t *lib_cell_init(char *name, dynary *da) {
 		snprintf(buffer, sizeof(buffer), "lib%s", name);
 		plc->lib_name = strdup(buffer);
 
-		str_to_upper(ubuf, sizeof(ubuf), buffer); /* XXX check ? */
-		
+		str_to_upper(ubuf, sizeof(ubuf), buffer);
+
+		/* set library objects variable */
+		snprintf(buffer, sizeof(buffer), "%s_OBJS", ubuf);
+		plc->lib_objs = strdup(buffer);
+
 		/* set static library variable name */
 		snprintf(buffer, sizeof(buffer), "%s_STATIC", ubuf);
 		plc->lib_static = strdup(buffer);
@@ -507,18 +511,19 @@ lib_cell_t *lib_cell_init(char *name, dynary *da) {
  * lib_cell_destroy() *
  ***********************************************************************
  DESCR
-	XXX
+	free the given library cell structure
 
  IN
-	XXX
+	plc :	library cell to destroy
 
  OUT
-	XXX
+	NONE
  ***********************************************************************/
 
 void lib_cell_destroy(lib_cell_t *plc) {
 	da_destroy(plc->obj_deps);
 	free(plc->lib_name);
+	free(plc->lib_objs);
 	free(plc->lib_static);
 	free(plc->lib_shared);
 }
@@ -845,33 +850,18 @@ bool parse_data_file(prsdata *pdata, scandata *sdata) {
 	while (pcell != NULL) {
 		switch(pcell->token) {
 			case PSC_TOK_ADDHDR :
-				pchk = mk_chk_cell(pcell->data, pcell->token);
-				if (pchk == NULL) {
-					/* XXX err msg ? */
-					return(false);
-				}
-
-				hash_add(sdata->headers, pchk->name, pchk); /* XXX check */
-				break;
-
 			case PSC_TOK_ADDLIB :
-				pchk = mk_chk_cell(pcell->data, pcell->token);
-				if (pchk == NULL) {
-					/* XXX err msg ? */
-					return(false);
-				}
-
-				hash_add(sdata->libraries, pchk->name, pchk); /* XXX check */
-				break;
-
 			case PSC_TOK_ADDTYP :
 				pchk = mk_chk_cell(pcell->data, pcell->token);
 				if (pchk == NULL) {
-					/* XXX err msg ? */
+					errorf("failed to initialize type check cell");
 					return(false);
 				}
 
-				hash_add(sdata->types, pchk->name, pchk); /* XXX check */
+				if (hash_add(sdata->types, pchk->name, pchk) == HASH_ADD_FAIL) {
+					errorf("failed to add '%s'", pchk->name);
+					return(false);
+				}
 				break;
 
 			default :
@@ -1030,7 +1020,7 @@ bool add_library(scn_zone_t *psz, char *library, scandata *psd, scn_node_t *pn) 
 	char	*label,
 			*pstr,
 			*tag,
-			 tmp[256]; /* XXX */
+			 tmp[TMP_BUF_LEN];
 	check_t	*pchk,
 			*pcrec;
 	size_t	 i,
@@ -1050,7 +1040,7 @@ bool add_library(scn_zone_t *psz, char *library, scandata *psd, scn_node_t *pn) 
 		pchk = init_chk_cell(library);
 		if (pchk == NULL) {
 			/* allocation failed */
-			/* XXX err msg ? */
+			errorf("failed to init check cell");
 			return(false);
 		}
 
@@ -1141,7 +1131,7 @@ bool check_header(scn_zone_t *psz, char *header, scandata *psd, scn_node_t *pn) 
 		pchk = init_chk_cell(header);
 		if (pchk == NULL) {
 			/* allocation failed */
-			/* XXX err msg ? */
+			errorf("failed to init check cell");
 			return(false);
 		}
 
@@ -1252,7 +1242,7 @@ bool check_type(scn_zone_t *psz, char *type, scandata *psd, scn_node_t *pn) {
 	pchk = init_chk_cell(type);
 	if (pchk == NULL) {
 		/* allocation failed */
-		/* XXX err msg ? */
+		errorf("failed to init check cell");
 		return(false);
 	}
 
@@ -1560,7 +1550,7 @@ bool set_lang(FILE *fp, ftype_t ltype) {
  * ouput_header() *
  ***********************************************************************
  DESCR
-	XXX
+	ouput an header check
 
  IN
  	checks :	checks hash table
@@ -1616,7 +1606,7 @@ bool output_header(htable *checks, char *cname, FILE *fp) {
  * ouput_library() *
  ***********************************************************************
  DESCR
-	XXX
+	ouput a library check
 
  IN
  	checks :	checks hash table
@@ -1669,7 +1659,7 @@ bool output_library(htable *checks, char *cname, FILE *fp) {
  * output_type() *
  ***********************************************************************
  DESCR
-	XXX
+	ouput a type check
 
  IN
  	checks :	checks hash table
@@ -1781,7 +1771,16 @@ bool scan_build_pmk(scn_zone_t *psz) {
 	if (psz->gen_lib == true) {
 		/* compilers to detect */
 		da = da_init();
-		da_push(da, strdup("CC")); /* XXX hardcode */
+
+		if (psz->found[FILE_TYPE_C] == true) {
+			/* check for C compiler */
+			da_push(da, strdup("CC"));
+		}
+
+		if (psz->found[FILE_TYPE_CXX] == true) {
+			/* check for C++ compiler */
+			da_push(da, strdup("CXX"));
+		}
 
 		build_list(fp, "DETECT", da); 
 		da_destroy(da);
@@ -1838,7 +1837,11 @@ bool scan_build_pmk(scn_zone_t *psz) {
 	if (phk != NULL) {
 		/* output every type checks */
 		for(i = 0 ; i < phk->nkey ; i++) {
-			output_type(psz->t_checks, phk->keys[i], fp); /* XXX check */
+			if (output_type(psz->t_checks, phk->keys[i], fp) == false) {
+				hash_free_hkeys(phk);
+				fclose(fp);
+				return(false);
+			}
 		}
 
 		hash_free_hkeys(phk);
@@ -1849,7 +1852,11 @@ bool scan_build_pmk(scn_zone_t *psz) {
 	if (phk != NULL) {
 		/* output every header checks */
 		for(i = 0 ; i < phk->nkey ; i++) {
-			output_header(psz->h_checks, phk->keys[i], fp); /* XXX check */
+			if (output_header(psz->h_checks, phk->keys[i], fp) == false) {
+				hash_free_hkeys(phk);
+				fclose(fp);
+				return(false);
+			}
 		}
 
 		hash_free_hkeys(phk);
@@ -1860,7 +1867,11 @@ bool scan_build_pmk(scn_zone_t *psz) {
 	if (phk != NULL) {
 		/* output every library checks */
 		for(i = 0 ; i < phk->nkey ; i++) {
-			output_library(psz->l_checks, phk->keys[i], fp); /* XXX check */
+			if (output_library(psz->l_checks, phk->keys[i], fp) == false) {
+				hash_free_hkeys(phk);
+				fclose(fp);
+				return(false);
+			}
 		}
 
 		hash_free_hkeys(phk);
@@ -1881,10 +1892,10 @@ bool scan_build_pmk(scn_zone_t *psz) {
 			build_quoted(fp, "NAME", phk->keys[i]);
 	
 			/* output major version */
-			build_quoted(fp, "MAJOR", "0"); /* XXX to improve */
+			build_quoted(fp, "MAJOR", "0");
 	
 			/* output minor version */
-			build_quoted(fp, "MINOR", "0"); /* XXX to improve */
+			build_quoted(fp, "MINOR", "0");
 	
 			/* output non versioned variable name */
 			build_quoted(fp, "VERSION_NONE", plc->lib_shared);
@@ -2153,7 +2164,7 @@ bool recurse_obj_deps(htable *nodes, dynary *deps, char *nodename) {
  ***********************************************************************/
 
 bool gen_objects(scn_zone_t *psz) {
-	char			 buf[PATH_MAX], /* XXX filename length */
+	char			 buf[PATH_MAX],
 					*pstr;
 	hkeys			*phk;
 	scn_node_t		*pnode,
@@ -2186,7 +2197,10 @@ bool gen_objects(scn_zone_t *psz) {
 			psc_log(NULL, "\tProcessing '%s'\n", buf);
 
 			/* add object reference */
-			hash_update_dup(psz->objects, buf, pnode->fname); /* XXX check */
+			if (hash_update_dup(psz->objects, buf, pnode->fname) == HASH_ADD_FAIL) {
+				hash_free_hkeys(phk);
+				return(false);
+			}
 
 			/* set object name */
 			pnode->obj_name = strdup(buf);
@@ -2213,8 +2227,8 @@ bool gen_objects(scn_zone_t *psz) {
 #endif /* PMKSCAN_DEBUG */
 
 					/* and set object link if common declarator is found */
-					if (da_push(pn->obj_links,
-								strdup(pnode->obj_name)) == false) {
+					if (da_push(pn->obj_links, strdup(pnode->obj_name)) == false) {
+						hash_free_hkeys(phk);
 						return(false);
 					}
 				}
@@ -2233,8 +2247,8 @@ bool gen_objects(scn_zone_t *psz) {
 #endif /* PMKSCAN_DEBUG */
 
 						/* and set object link if common declarator is found */
-						if (da_push(pn->obj_links,
-									strdup(pnode->obj_name)) == false) {
+						if (da_push(pn->obj_links, strdup(pnode->obj_name)) == false) {
+							hash_free_hkeys(phk);
 							return(false);
 						}
 					}
@@ -2307,7 +2321,7 @@ bool recurse_src_deps(scn_zone_t *psz, dynary *deps, char *name) {
 			if (da_find(deps, odep) == false) {
 				/* and add the object if not already present */
 				if (da_push(deps, strdup(odep)) == false) {
-					/* XXX err msg */
+					errorf("failed to add '%s'", odep);
 					return(false);
 				}
 
@@ -2349,7 +2363,7 @@ bool recurse_src_deps(scn_zone_t *psz, dynary *deps, char *name) {
  ***********************************************************************/
 
 bool gen_targets(scn_zone_t *psz) {
-	char			 buf[PATH_MAX], /* XXX filename length */
+	char			 buf[PATH_MAX],
 					*nodename;
 	hkeys			*phk;
 	scn_node_t		*pnode;
@@ -2386,7 +2400,10 @@ bool gen_targets(scn_zone_t *psz) {
 			/* build and store object name */
 			strlcpy(buf, pnode->prefix, sizeof(buf));
 			strlcat(buf, OBJ_SUFFIX, sizeof(buf));
-			da_push(pnode->obj_deps, strdup(buf)); /* XXX check ? */
+			if (da_push(pnode->obj_deps, strdup(buf)) == false) {
+				/* err msg */
+				return(false);
+			}
 
 #ifdef PMKSCAN_DEBUG
 			debugf("START recurse_src_deps() for node '%s'", pnode->fname);
@@ -2477,7 +2494,7 @@ size_t fprintf_width(size_t left, size_t width, size_t offset, FILE *fp, char *s
  * mkf_output_header() *
  ***********************************************************************
  DESCR
-	XXX
+	ouput makefile template header
 
  IN
 	fp :	file pointer
@@ -2490,8 +2507,10 @@ size_t fprintf_width(size_t left, size_t width, size_t offset, FILE *fp, char *s
 void mkf_output_header(FILE *fp, scn_zone_t *psz) {
 	char			 buf[MKF_OUTPUT_WIDTH * 2],
 					*pstr;
+	hkeys			*phk;
+	lib_cell_t		*plc;
+	size_t			 i;
 	time_t			 now;
-	unsigned int	 i;
 
 	/* generating date */
 	now = time(NULL);
@@ -2528,8 +2547,24 @@ void mkf_output_header(FILE *fp, scn_zone_t *psz) {
 	}
 
 	if (psz->gen_lib == true) {
+		/* library stuff */
+		fprintf(fp, MKF_HEADER_SHARED);
 		fprintf(fp, MKF_HEADER_AR);
 		fprintf(fp, MKF_HEADER_RANLIB);
+		
+		phk = hash_keys_sorted(psz->libraries);
+		if (phk != NULL) {
+			/* generate library name variables */
+			fprintf(fp, "\n# library variables\n");
+
+			for (i = 0 ; i < phk->nkey ; i++) {
+				plc = hash_get(psz->libraries, phk->keys[i]);
+				
+				fprintf(fp, MKF_STCLIB_VAR, plc->lib_static, plc->lib_name);
+				fprintf(fp, MKF_SUBSTVAR, plc->lib_shared, plc->lib_shared);
+			}
+			hash_free_hkeys(phk);
+		}
 	}
 
 	fprintf(fp, "\n# misc stuff\n");
@@ -2552,7 +2587,7 @@ void mkf_output_header(FILE *fp, scn_zone_t *psz) {
 		/* output each extra tag */
 		for (i = 0 ; i < da_usize(psz->exttags) ; i++) {
 			pstr = (char *) da_idx(psz->exttags, i);
-			fprintf(fp, MKF_VARIABLE, pstr, pstr);
+			fprintf(fp, MKF_SUBSTVAR, pstr, pstr);
 		}
 
 		fprintf(fp, "\n");
@@ -2578,7 +2613,6 @@ void mkf_output_header(FILE *fp, scn_zone_t *psz) {
 	if (psz->gen_lib == true) {
 		fprintf(fp, MKF_LIB_DIR);
 	}
-
 
 	/* system configuration directory */
 	fprintf(fp, MKF_SYSCONF_DIR);
@@ -2623,7 +2657,7 @@ void mkf_output_header(FILE *fp, scn_zone_t *psz) {
  * mkf_output_recurs() *
  ***********************************************************************
  DESCR
-	XXX
+	ouput recursively gathered items
 
  IN
 	fp :	file pointer
@@ -2718,7 +2752,7 @@ void mkf_output_recurs(FILE *fp, scn_zone_t *psz) {
  * mkf_output_srcs() *
  ***********************************************************************
  DESCR
-	XXX
+	output source lists
 
  IN
 	fp :	file pointer
@@ -2776,7 +2810,7 @@ void mkf_output_srcs(FILE *fp, scn_zone_t *psz) {
  * mkf_output_objs() *
  ***********************************************************************
  DESCR
-	XXX
+	output object lists
 
  IN
 	fp :	file pointer
@@ -2838,8 +2872,7 @@ void mkf_output_objs(FILE *fp, scn_zone_t *psz) {
 			plc = hash_get(psz->libraries, phk->keys[i]);
 
 			/* target label */
-			snprintf(buf, sizeof(buf), MKF_TARGET_OBJS, plc->lib_name);
-			str_to_upper(buf, sizeof(buf), buf);
+			snprintf(buf, sizeof(buf), MKF_VARHDR, plc->lib_objs);
 			fprintf(fp, buf);
 
 			lm = strlen(buf);
@@ -2865,7 +2898,7 @@ void mkf_output_objs(FILE *fp, scn_zone_t *psz) {
  * mkf_output_bld_trgs() *
  ***********************************************************************
  DESCR
-	XXX
+	output build targets
 
  IN
 	fp :	file pointer
@@ -2974,7 +3007,7 @@ void mkf_output_bld_trgs(FILE *fp, scn_zone_t *psz) {
  * mkf_output_man_trgs() *
  ***********************************************************************
  DESCR
-	XXX
+	output man page targets
 
  IN
 	fp :	file pointer
@@ -3036,7 +3069,7 @@ void mkf_output_man_trgs(FILE *fp, scn_zone_t *psz) {
  * mkf_output_data_trgs() *
  ***********************************************************************
  DESCR
-	XXX
+	ouput data targets
 
  IN
 	fp :	file pointer
@@ -3082,7 +3115,7 @@ void mkf_output_data_trgs(FILE *fp, scn_zone_t *psz) {
  * mkf_output_obj_rules() *
  ***********************************************************************
  DESCR
-	XXX
+	output object rules
 
  IN
 	fp :	file pointer
@@ -3124,7 +3157,7 @@ void mkf_output_obj_rules(FILE *fp, scn_zone_t *psz) {
  * mkf_output_trg_rules() *
  ***********************************************************************
  DESCR
-	XXX
+	output target rules
 
  IN
 	fp :	file pointer
@@ -3162,7 +3195,7 @@ void mkf_output_trg_rules(FILE *fp, scn_zone_t *psz) {
 			pname = hash_get(psz->targets, phk->keys[i]);
 			pn = hash_get(psz->nodes, pname);
 			if (pn != NULL) {
-				/* XXX */
+				/* process node depending on its type */
 				switch (pn->type) {
 					/*case FILE_TYPE_ASM : XXX */
 
@@ -3187,11 +3220,62 @@ void mkf_output_trg_rules(FILE *fp, scn_zone_t *psz) {
 }
 
 
+/******************************
+ * mkf_output_lib_trg_rules() *
+ ***********************************************************************
+ DESCR
+	output library target rules
+
+ IN
+	fp :	file pointer
+	psz :	scanning zone data
+
+ OUT
+	NONE
+************************************************************************/
+
+void mkf_output_lib_trg_rules(FILE *fp, scn_zone_t *psz) {
+	hkeys			*phk;
+	lib_cell_t		*plc;
+	size_t			 i;
+
+	phk = hash_keys_sorted(psz->libraries);
+	if (phk == NULL) {
+		/* nothing to do */
+		return;
+	}
+
+	/* generate targets */
+	fprintf(fp, "\n#\n# target rules\n#\n");
+	for (i = 0 ; i < phk->nkey ; i++) {
+		plc = hash_get(psz->libraries, phk->keys[i]);
+
+		/* build target */
+		fprintf(fp, "%s: $(%s) $(%s)\n\n", plc->lib_name, plc->lib_static, plc->lib_shared);
+
+		fprintf(fp, MKF_TARGET_SIMPLE, plc->lib_static, plc->lib_objs);
+		fprintf(fp, MKF_TARGET_LIB_STC, plc->lib_objs);
+
+		fprintf(fp, MKF_TARGET_SIMPLE, plc->lib_shared, plc->lib_objs);
+		fprintf(fp, MKF_TARGET_LIB_SHD, plc->lib_objs);
+
+		/* clean targets */
+		fprintf(fp, "%s_clean:\n", plc->lib_name);
+		fprintf(fp, MKF_TARGET_LIB_CLN, plc->lib_objs);
+		fprintf(fp, MKF_TARGET_LIB_CLN, plc->lib_static);
+		fprintf(fp, MKF_TARGET_LIB_CLN, plc->lib_shared);
+	}
+	hash_free_hkeys(phk);
+
+	fprintf(fp, MKF_TWICE_JUMP);
+}
+
+
 /*************************
  * mkf_output_man_inst() *
  ***********************************************************************
  DESCR
-	XXX
+	output manual pages install rule
 
  IN
 	fp :	file pointer
@@ -3321,6 +3405,7 @@ bool scan_build_mkf(scn_zone_t *psz) {
 
 	/* generate targets */
 	mkf_output_trg_rules(fp, psz);
+	mkf_output_lib_trg_rules(fp, psz);
 
 	/* extra to append */
 	if (psz->ext_mkf != NULL) {

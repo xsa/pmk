@@ -1,3 +1,6 @@
+19 Mar 2006 mipsator
+ * import latest work on library support (both static and dynamic).
+
 07 Mar 2006 mipsator
  * improved a bit the makefile generation before completing library
    generation support.
