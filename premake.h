@@ -82,7 +82,7 @@
 #endif
 
 /* only used for snapshots, comment for release */
-#define PREMAKE_SNAP		"20051215"
+#define PREMAKE_SNAP		"20060319"
 
 /* build version string */
 #ifndef PREMAKE_SNAP
