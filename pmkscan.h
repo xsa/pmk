@@ -230,7 +230,10 @@ enum {
 							"# LDFLAGS shall contain -lc if used with ld\n" \
 							"LDFLAGS=\t@LDFLAGS@\n\n"
 
-#define MKF_HEADER_SHARED	"SLLDFLAGS=\t@SLLDFLAGS@\n"
+#define MKF_HEADER_SHARED	"SHLIB_SUPPORT=\t@SHLIB_SUPPORT@\n" \
+							"SLCLAGS=\t@SLCFLAGS@\n" \
+							"SLCXXLAGS=\t@SLCXXFLAGS@\n" \
+							"SLLDFLAGS=\t@SLLDFLAGS@\n"
 							
 #define MKF_HEADER_AR		"AR=\t\t@AR@\n" \
 							"ARFLAGS=\tcru\n"
@@ -258,7 +261,7 @@ enum {
 							"DATADIR=\t@DATADIR@\n"
 #define MKF_LIB_DIR			"LIBDIR=\t\t@LIBDIR@\n"
 #define MKF_MAN_DIR			"MANDIR=\t\t@MANDIR@\n"
-#define MKF_MANX_DIR		"MAN%dDIR=\t@MAN%dDIR@\n"
+#define MKF_MANX_DIR		"MAN%zuDIR=\t@MAN%zuDIR@\n"
 #define MKF_SYSCONF_DIR		"SYSCONFDIR=\t@SYSCONFDIR@\n"
 
 #define MKF_SDIR_LIST		"SUBDIRS=\t"
@@ -283,17 +286,17 @@ enum {
 
 #define MKF_BLD_C_OBJ		"# C suffixes\n" \
 							".c.o:\n" \
-							"\t$(CC) $(CFLAGS) -o $@ -c $<\n" \
+							"\t$(CC) $(CFLAGS) $(SLCFLAGS) -o $@ -c $<\n" \
 							"\n.C.o:\n" \
-							"\t$(CC) $(CFLAGS) -o $@ -c $<\n" \
+							"\t$(CC) $(CFLAGS) $(SLCFLAGS) -o $@ -c $<\n" \
 							"\n.cc.o:\n" \
-							"\t$(CC) $(CFLAGS) -o $@ -c $<\n\n"
+							"\t$(CC) $(CFLAGS) $(SLCFLAGS) -o $@ -c $<\n\n"
 
 #define MKF_BLD_CXX_OBJ		"# C++ suffixes\n" \
 							".cxx.o:\n" \
-							"\t$(CXX) $(CXXFLAGS) -o $@ -c $<\n" \
+							"\t$(CXX) $(CXXFLAGS) $(SLCXXFLAGS) -o $@ -c $<\n" \
 							"\t.cpp.o:\n" \
-							"\t$(CXX) $(CXXFLAGS) -o $@ -c $<\n\n" \
+							"\t$(CXX) $(CXXFLAGS) $(SLCXXFLAGS) -o $@ -c $<\n\n"
 
 #define MKF_BLD_YACC_SRC	"# yacc suffix\n" \
 							".y.c:\n" \
@@ -319,7 +322,9 @@ enum {
 #define MKF_TARGET_LIB_STC	"\t$(AR) $(ARFLAGS) $@ $(%s)\n" \
 							"\t$(RANLIB) $@\n\n"
 
-#define MKF_TARGET_LIB_SHD	"\t$(CC) $(SLLDFLAGS) -o $@ $(%s)\n\n"
+#define MKF_TARGET_LIB_SHD	"\t@if $(SHLIB_SUPPORT); then \\\n" \
+							"\t\t$(CC) $(LDFLAGS) $(SLLDFLAGS) -o $@ $(%s) \\\n" \
+							"\tfi\n"
 
 #define MKF_TARGET_CLN		"%s_clean:\n" \
 							"\t$(RM) $(RMFLAGS) $(%s_OBJS)\n" \
@@ -382,7 +387,7 @@ enum {
 #define MKF_DEINST_BIN		"# deinstall binaries\n" \
 							"deinstall_bin:\n" \
 							"\t@if test -n \"$(BIN_FILES)\"; then \\\n" \
-							"\t\t@list=\"$(BIN_FILES)\"; \\\n" \
+							"\t\tlist=\"$(BIN_FILES)\"; \\\n" \
 							"\t\tfor f in $$list; do \\\n" \
 							"\t\t\td=`basename $$f`; \\\n" \
 							"\t\t\tprintf \"$(RM) $(RMFLAGS) $(DESTDIR)$(BINDIR)/$$d\\n\"; \\\n" \

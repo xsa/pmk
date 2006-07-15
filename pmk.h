@@ -144,3 +144,5 @@ void	 clean(pmkdata *);
 void	 usage(void);
 
 #endif /* _PMK_H_ */
+
+/* vim: set noexpandtab tabstop=4 softtabstop=4 shiftwidth=4: */

@@ -94,15 +94,11 @@ bool	 label_set(htable *, char *, bool);
 bool	 label_check(htable *, char *);
 bool	 depend_check(htable *, pmkdata *);
 bool	 require_check(htable *);
-lgdata	*check_lang(char *);							/* WILL BE OBSOLETE */
-lgdata	*check_lang_comp(char *);						/* WILL BE OBSOLETE */
-lgdata	*get_lang(htable *, pmkdata *);					/* WILL BE OBSOLETE */
 char	*get_lang_str(htable *, pmkdata *);
-char	*get_comp_path(htable *, char *);				/* WILL BE OBSOLETE */
 bool	 check_cfgt_data(pmkdata *);
 bool	 process_required(pmkdata *, pmkcmd *, bool , char *, char *);
-bool	 c_file_builder(char *, size_t, char *, ...);	/* WILL BE OBSOLETE */
 bool	 obsolete_string_to_list(htable *, char *);
 
 #endif /* _PMK_FUNCTOOL_H_ */
 
+/* vim: set noexpandtab tabstop=4 softtabstop=4 shiftwidth=4: */

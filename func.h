@@ -223,3 +223,4 @@ bool	pmk_set_variable(pmkcmd *, prsopt *, pmkdata *);
 
 #endif /* _PMK_FUNC_H_ */
 
+/* vim: set noexpandtab tabstop=4 softtabstop=4 shiftwidth=4: */

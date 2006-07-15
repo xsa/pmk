@@ -41,6 +41,7 @@
 #include "compat/pmk_stdio.h"
 
 #include "dynarray.h"
+#include "hash.h"
 #include "premake.h"
 
 
@@ -67,6 +68,7 @@ typedef unsigned int	lang_t;
 #define TEST_FILE_NAME	TMPDIR "/pmk_XXXXXXXX" C_FILE_EXT
 #define BIN_TEST_NAME	TMPDIR "/pmk_XXXXXXXX_bin"
 
+#define UNKNOWN_LANG	-1
 
 #define CODE_C_HDR		"#include <%s>\n"
 #define CODE_C_BEG		"/* main procedure */\n" \
@@ -87,6 +89,13 @@ typedef unsigned int	lang_t;
 #define CODE_C_MEMBER	"/* check structure member */\n" \
 						"if (sizeof(test_var.%s)) {\n" \
 						"\treturn(0);\n" \
+						"}\n"
+
+#define CODE_C_SHARED	"/* simple C function for shared object */\n" \
+						"void shfunc(void);\n\n" \
+						"void shfunc(void) {\n" \
+						"\tint    i = 0;\n\n" \
+						"\ti++;\n" \
 						"}\n"
 
 
@@ -114,6 +123,7 @@ typedef struct {
 				*member,				/* type member name */
 				*pathcomp,				/* compiler path */
 				*flags,					/* compilation flags */
+				*slflags,				/* compilation flags */
 				*alt_cflags,			/* alternative compilation flags variable */
 				*alt_libs,				/* alternative linker flags variable */
 				*blog;					/* build log */
@@ -128,18 +138,24 @@ typedef struct {
  ***********************************************************************/
 
 void	 code_bld_init(code_bld_t *, char *);
+int		 verify_language(char *);
 bool	 set_language(code_bld_t *, char *);
 char	*set_compiler(code_bld_t *, htable *t);
 char	*get_lang_label(code_bld_t *);
+char	*get_compiler_label(code_bld_t *);
 char	*get_cflags_label(code_bld_t *);
 char	*get_libs_label(code_bld_t *);
 void	 code_logger(FILE *, FILE *, const char *, ...);
 bool	 code_builder(code_bld_t *);
 bool	 c_code_builder(code_bld_t *);
+bool	 shared_builder(code_bld_t *);
+bool	 c_shared_builder(code_bld_t *);
 bool	 cmdline_builder(code_bld_t *, bool);
 bool	 c_cmdline_builder(code_bld_t *, bool);
 bool	 object_builder(code_bld_t *);
 void	 cb_cleaner(code_bld_t *);
+bool	 check_so_support(char *, htable *);
+char	*obsolete_get_lang_from_comp(char *);
 
 #endif /* _PMK_CODEBUILD_H_ */
 
