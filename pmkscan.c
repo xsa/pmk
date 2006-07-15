@@ -3794,7 +3794,7 @@ bool parse_file(prs_cmn_t *pcmn, char *fname, ftype_t ft, bool isdep) {
 		/* open file */
 		fp = fopen(fname, "r");
 		if (fp == NULL) {
-			errorf("Warning : cannot open '%s' : %s.\n", fname, strerror(errno));
+			fprintf(stderr, "Warning : cannot open '%s' : %s.\n", fname, strerror(errno));
 			return(true);
 		}
 

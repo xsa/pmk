@@ -1092,18 +1092,19 @@ bool pmk_check_config(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 				 rval = false;
 	char		 pipebuf[TMP_BUF_LEN],
 				 cfgpath[MAXPATHLEN],
-				*cfgtool,
-				*varname,
-				*vtmp,
-				*modname,
-				*libvers,
 				*bpath,
+				*cfgtool,
 				*cflags,
+				*lang,
 				*libs,
-				*opt;
+				*libvers,
+				*modname,
+				*opt,
+				*varname,
+				*vtmp;
+	code_bld_t	 scb;
 	dynary		*defs;
 	cfgtcell	*pcc = NULL;
-	lgdata		*pld;
 
 	pmk_log("\n* Checking with config tool [%s]\n", cmd->label);
 	required = require_check(ht);
@@ -1146,11 +1147,17 @@ bool pmk_check_config(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 		return(false);
 	}
 
-	/* get the language used */
-	pld = get_lang(ht, pgd);
-	if (pld == NULL) {
-		pmk_log("\tSKIPPED, unknown language.\n");
-		return(process_required(pgd, cmd, required, cfgtool, NULL));
+	/* get language */
+	lang = get_lang_str(ht, pgd);
+	if (lang == NULL) {
+		errorf("Failed, language has not been set.");
+		return(false);
+	}
+
+	/* init build structure */
+	if (set_language(&scb, lang) == false) {
+		pmk_log("\tSkipped, unknown language '%s'.\n", lang);
+		return(process_required(pgd, cmd, required, NULL, NULL));
 	}
 
 	/* look for additional defines */
@@ -1171,7 +1178,7 @@ bool pmk_check_config(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 		}
 	} else {
 		/* use default variable of the used language */
-		cflags = pld->cflg;
+		cflags = get_cflags_label(&scb);
 	}
 
 	/* check for alternative variable for LIBS */
@@ -1314,21 +1321,22 @@ bool pmk_check_config(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
  ***********************************************************************/
 
 bool pmk_check_pkg_config(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
-	bool	 required = true;
-	char	*target,
-			*pipebuf,
-			*pstr,
-			 pc_cmd[MAXPATHLEN],
-			 pc_buf[MAXPATHLEN],
-			*bpath,
-			*pc_path,
-			*libvers,
-			*cflags,
-			*libs;
-	dynary	*defs;
-	lgdata	*pld;
-	pkgcell	*ppc;
-	pkgdata	*ppd;
+	bool		 required = true;
+	char		 pc_cmd[MAXPATHLEN],
+				 pc_buf[MAXPATHLEN],
+				*bpath,
+				*cflags,
+				*lang,
+				*libs,
+				*libvers,
+				*pc_path,
+				*pipebuf,
+				*pstr,
+				*target;
+	code_bld_t	 scb;
+	dynary		*defs;
+	pkgcell		*ppc;
+	pkgdata		*ppd;
 
 	pmk_log("\n* Checking pkg-config module [%s]\n", cmd->label);
 
@@ -1363,11 +1371,17 @@ bool pmk_check_pkg_config(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 		return(false);
 	}
 
-	/* get the language used */
-	pld = get_lang(ht, pgd);
-	if (pld == NULL) {
-		pmk_log("\tSKIPPED, unknown language.\n");
-		return(process_required(pgd, cmd, required, target, NULL));
+	/* get language */
+	lang = get_lang_str(ht, pgd);
+	if (lang == NULL) {
+		errorf("Failed, language has not been set.");
+		return(false);
+	}
+
+	/* init build structure */
+	if (set_language(&scb, lang) == false) {
+		pmk_log("\tSkipped, unknown language '%s'.\n", lang);
+		return(process_required(pgd, cmd, required, NULL, NULL));
 	}
 
 	/* look for additional defines */
@@ -1388,7 +1402,7 @@ bool pmk_check_pkg_config(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 		}
 	} else {
 		/* use default variable of the used language */
-		cflags = pld->cflg;
+		cflags = get_cflags_label(&scb);
 	}
 
 	/* check for alternative variable for LIBS */
@@ -2056,7 +2070,7 @@ bool pmk_set_parameter(pmkcmd *cmd, prsopt *popt, pmkdata *pgd) {
 		return(pmk_setparam_target(cmd, popt, pgd));
 	}
 
-	/* set target files */
+	/* compiler detection */
 	if (strncmp(popt->key, KW_SETNGS_CCDTCT, sizeof(popt->key)) == 0) {
 		return(pmk_setparam_detect(cmd, popt, pgd));
 	}
@@ -2071,7 +2085,7 @@ bool pmk_set_parameter(pmkcmd *cmd, prsopt *popt, pmkdata *pgd) {
  * pmk_setparam_accompat() *
  ***********************************************************************
  DESCR
-	set accompat parameter
+	set autoconf compatability parameter
  ***********************************************************************/
 
 bool pmk_setparam_accompat(pmkcmd *cmd, prsopt *popt, pmkdata *pgd) {
@@ -2127,7 +2141,7 @@ bool pmk_setparam_glang(pmkcmd *cmd, prsopt *popt, pmkdata *pgd) {
 
 	if (pstr != NULL) {
 		/* check if provided lang is supported */
-		if (check_lang(pstr) != NULL) {
+		if (verify_language(pstr) != UNKNOWN_LANG) {
 			pgd->lang = strdup(pstr);
 			if (pgd->lang == NULL) {
 				errorf(ERRMSG_MEM);
@@ -2150,7 +2164,7 @@ bool pmk_setparam_glang(pmkcmd *cmd, prsopt *popt, pmkdata *pgd) {
  * pmk_setparam_target() *
  ***********************************************************************
  DESCR
-	set accompat parameter
+	set target list parameter
  ***********************************************************************/
 
 bool pmk_setparam_target(pmkcmd *cmd, prsopt *popt, pmkdata *pgd) {
@@ -2178,25 +2192,27 @@ bool pmk_setparam_target(pmkcmd *cmd, prsopt *popt, pmkdata *pgd) {
 	return(true);
 }
 
+
 /*************************
  * pmk_setparam_detect() *
  ***********************************************************************
  DESCR
-	set accompat parameter
+	detect a list of compilers
  ***********************************************************************/
 
 bool pmk_setparam_detect(pmkcmd *cmd, prsopt *popt, pmkdata *pgd) {
-	char		*pstr,
+	char		*ccpath,
+				*lang,
 				*ostr,
-				*ccpath,
+				*pstr,
 				 buf[TMP_BUF_LEN];
+	code_bld_t	 scb;
 	comp_cell	*pcell;
 	comp_data	*cdata;
 	comp_info	 cinfo;
 	dynary		*da;
 	int			 i = 0,
 				 n;
-	lgdata		*pld;
 
 	pmk_log("\tDetecting compilers :\n");
 
@@ -2214,33 +2230,50 @@ bool pmk_setparam_detect(pmkcmd *cmd, prsopt *popt, pmkdata *pgd) {
 
 	n = da_usize(da);
 	for (i=0 ; i < n ; i++) {
-		pstr = da_idx(da, i);
-		pmk_log("\t\tDetecting '%s' : ", pstr);
+		lang = da_idx(da, i);
+
+		/* init build structure */
+		if (set_language(&scb, lang) == false) {
+			/* check for obsolete compiler name */
+			pstr = obsolete_get_lang_from_comp(lang); /* OBSOLETE */
+			if (pstr == NULL) {
+				errorf("Unknown language'%s'.\n", lang);
+				return(false);
+			}
+
+			pmk_log("\t\tWARNING: obsolete value for compiler detection,\n");
+			pmk_log("\t\t\tuse language label instead.\n");
+
+			lang = pstr;
+			if (set_language(&scb, lang) == false) {
+				errorf("Unknown language '%s'.\n", lang);
+				return(false);
+			}
+		}
+
 		/* get the appropriate compiler */
-		ccpath = get_comp_path(pgd->htab, pstr);
+		pstr = get_compiler_label(&scb);
+		ccpath = hash_get(pgd->htab, pstr);
 		if (ccpath == NULL) {
-			errorf("\ncannot get compiler path ('%s').\n", pstr);
+			errorf("Cannot get compiler path ('%s').\n", pstr);
 			return(false);
 		}
 
+		pmk_log("\t\tDetecting '%s' compiler : ", lang);
+
+		/* try to identify the compiler */
 		if (detect_compiler(ccpath, pgd->buildlog, cdata, &cinfo) == false) {
 			pmk_log("failed.\n");
 			return(false);
 		}
 
+		/* mark compiler as detected */
 		pgd->comp_detect = true;
 
 		pmk_log("%s (version %s).\n", comp_get_descr(cdata, cinfo.c_id), cinfo.version);
 
-		/* set shared lib flags */
-		pld = check_lang_comp(pstr);
-		if (pld == NULL) {
-			errorf("unable to set shared library compiler flags (%s).\n", pld->slflg);
-			return(false);
-		}
-
 		/* check if an override exists for compiler flags */
-		if (snprintf_b(buf, sizeof(buf), "%s_%s", pld->slflg, cinfo.c_id) == false) {
+		if (snprintf_b(buf, sizeof(buf), "%s_%s", scb.pld->slflags, cinfo.c_id) == false) {
 			errorf("overflow.\n");
 			return(false);
 		}
@@ -2254,14 +2287,15 @@ bool pmk_setparam_detect(pmkcmd *cmd, prsopt *popt, pmkdata *pgd) {
 
 		/* set shared lib compiler flags */
 		if (ostr != NULL) {
-			pmk_log("\tFound system specific %s.\n", pld->slflg);
+			pmk_log("\tFound system specific %s.\n", scb.pld->slflags);
 		} else {
 			pcell = comp_get(cdata, cinfo.c_id);
 			ostr = pcell->slcflags;
 		}
 
-		pmk_log("\t\tSetting %s to '%s'\n", pld->slflg, ostr);
-		if (hash_update_dup(pgd->htab, pld->slflg, ostr) == HASH_ADD_FAIL) {
+		/* set shared lib compiler flags */
+		pmk_log("\t\tSetting %s to '%s'\n", scb.pld->slflags, ostr);
+		if (hash_update_dup(pgd->htab, scb.pld->slflags, ostr) == HASH_ADD_FAIL) {
 			return(false);
 		}
 
@@ -2277,7 +2311,7 @@ bool pmk_setparam_detect(pmkcmd *cmd, prsopt *popt, pmkdata *pgd) {
 			ostr = NULL;
 		}
 
-		/* set shared lib compiler flags */
+		/* check specific shared lib linker flags */
 		if (ostr != NULL) {
 			pmk_log("\tFound system specific %s.\n", SL_LDFLAG_VARNAME);
 		} else {
@@ -2285,10 +2319,17 @@ bool pmk_setparam_detect(pmkcmd *cmd, prsopt *popt, pmkdata *pgd) {
 			ostr = pcell->slldflags;
 		}
 
-		/* set shared lib linking flags */
+		/* set shared lib linker flags */
 		pmk_log("\t\tSetting %s to '%s'\n", SL_LDFLAG_VARNAME, ostr);
 		if (hash_update_dup(pgd->htab, SL_LDFLAG_VARNAME, ostr) == HASH_ADD_FAIL) {
 			return(false);
+		}
+
+        /* try to compile shared object */
+		if (check_so_support(pgd->buildlog, pgd->htab) == true) {
+			/* XXX TODO update cdata to reflect successful shared object support */
+		} else {
+			/* XXX TODO update cdata to reflect failure of shared object support */
 		}
 	}
 
@@ -2378,3 +2419,4 @@ bool pmk_set_variable(pmkcmd *cmd, prsopt *popt, pmkdata *pgd) {
 	return(true);
 }
 
+/* vim: set noexpandtab tabstop=4 softtabstop=4 shiftwidth=4: */

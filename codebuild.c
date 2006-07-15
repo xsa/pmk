@@ -59,13 +59,14 @@ size_t		nb_lang_data = sizeof(lang_data) / sizeof(lgdata_t);
  * code_bld_init() *
  ***********************************************************************
  DESCR
-	XXX
+	initialize code build structure
 
  IN
-	XXX
+	pcb :	code build data structure
+	blog :	build log file name
 
  OUT
-	XXX
+	NONE
  ***********************************************************************/
 
 void code_bld_init(code_bld_t *pcb, char *blog) {
@@ -86,20 +87,20 @@ void code_bld_init(code_bld_t *pcb, char *blog) {
 }
 
 
-/******************
- * set_language() *
+/*********************
+ * verify_language() *
  ***********************************************************************
  DESCR
-	XXX
+	verify support for the given language
 
  IN
-	XXX
+	lang :	language identifier string
 
  OUT
-	XXX
+	boolean
  ***********************************************************************/
 
-bool set_language(code_bld_t *pcb, char *lang) {
+int verify_language(char *lang) {
 	size_t	i,
 			len;
 
@@ -109,16 +110,45 @@ bool set_language(code_bld_t *pcb, char *lang) {
 	for (i = 0 ; i < nb_lang_data ; i++) {
 		/* if language is found */
 		if (strncmp(lang_data[i].name, lang, len) == 0) {
-			/* set data */
-			pcb->lang = lang_data[i].lang;
-			pcb->pld = &lang_data[i];
-			return(true);
+			/* return index of the language cell */
+			return(i);
 		}
 	}
 
 	/* unknown language */
-	pcb->pld = NULL;
-	return(false);
+	return(UNKNOWN_LANG);
+}
+
+
+/******************
+ * set_language() *
+ ***********************************************************************
+ DESCR
+	set the language used for the code building
+
+ IN
+	pcb :	code build data structure
+	lang :	language identifier string
+
+ OUT
+	boolean
+ ***********************************************************************/
+
+bool set_language(code_bld_t *pcb, char *lang) {
+	int	 i;
+
+	/* verify if the language is supported */
+	i = verify_language(lang);
+	if (i == UNKNOWN_LANG) {
+		/* unknown language */
+		pcb->pld = NULL;
+		return(false);
+	}
+
+	/* language found */
+	pcb->lang = lang_data[i].lang;
+	pcb->pld = &lang_data[i];
+	return(true);
 }
 
 
@@ -126,13 +156,14 @@ bool set_language(code_bld_t *pcb, char *lang) {
  * set_compiler() *
  ***********************************************************************
  DESCR
-	XXX
+	set the path to the compiler to be used for building
 
  IN
-	XXX
+	pcb :	code build data structure
+	pht :	XXX
 
  OUT
-	XXX
+	returns the compiler path
  ***********************************************************************/
 
 char *set_compiler(code_bld_t *pcb, htable *pht) {
@@ -146,13 +177,13 @@ char *set_compiler(code_bld_t *pcb, htable *pht) {
  * get_lang_label() *
  ***********************************************************************
  DESCR
-	XXX
+	get the label of the language used for building
 
  IN
-	XXX
+	pcb :	code build data structure
 
  OUT
-	XXX
+	returns the language label string
  ***********************************************************************/
 
 char *get_lang_label(code_bld_t *pcb) {
@@ -160,26 +191,44 @@ char *get_lang_label(code_bld_t *pcb) {
 }
 
 
+/************************
+ * get_compiler_label() *
+ ***********************************************************************
+ DESCR
+	get the label of the language used for building
+
+ IN
+	pcb :	code build data structure
+
+ OUT
+	returns the language label string
+ ***********************************************************************/
+
+char *get_compiler_label(code_bld_t *pcb) {
+	return(pcb->pld->compiler);
+}
+
+
 /**********************
  * get_cflags_label() *
  ***********************************************************************
  DESCR
-	XXX
+	get the compiler flags variable name (can be default or alternative)
 
  IN
-	XXX
+	pcb :	code build data structure
 
  OUT
-	XXX
+	returns the variable name
  ***********************************************************************/
 
 char *get_cflags_label(code_bld_t *pcb) {
-	/* if an alternative cflags variable exists */
+	/* if an alternative cflags variable name exists */
 	if (pcb->alt_cflags != NULL) {
-		/* then return the alternative */
+		/* then return the alternative name */
 		return(pcb->alt_cflags);
 	} else {
-		/* else return the default of the used language */
+		/* else return the default name of the used language */
 		return(pcb->pld->cflags);
 	}
 }
@@ -189,22 +238,22 @@ char *get_cflags_label(code_bld_t *pcb) {
  * get_libs_label() *
  ***********************************************************************
  DESCR
-	XXX
+	get the linker flags variable name (can be default or alternative)
 
  IN
-	XXX
+	pcb :	code build data structure
 
  OUT
-	XXX
+	returns the variable name
  ***********************************************************************/
 
 char *get_libs_label(code_bld_t *pcb) {
-	/* if an alternative libs variable exists */
+	/* if an alternative libs variable name exists */
 	if (pcb->alt_libs != NULL) {
-		/* then return the alternative */
+		/* then return the alternative name */
 		return(pcb->alt_libs);
 	} else {
-		/* else return the default */
+		/* else return the default name */
 		return("LIBS");	/* XXX TODO use premake.h standard value (smth like PMK_STD_LIBS) */
 	}
 }
@@ -214,13 +263,18 @@ char *get_libs_label(code_bld_t *pcb) {
  * code_logger() *
  ***********************************************************************
  DESCR
-	XXX
+	write code in the temporary source file and log it
 
  IN
-	XXX
+	tfp :	temporary source file descriptor
+	lfp :	log file descriptor
+	fmt :	message format string
 
  OUT
-	XXX
+	NONE
+
+ NOTE
+	TODO : check returned values XXX
  ***********************************************************************/
 
 
@@ -238,13 +292,13 @@ void code_logger(FILE *tfp, FILE *lfp, const char *fmt, ...) {
  * code_builder() *
  ***********************************************************************
  DESCR
-	XXX
+	code building wrapper
 
  IN
-	XXX
+	pcb :	code build data structure
 
  OUT
-	XXX
+	boolean
  ***********************************************************************/
 
 bool code_builder(code_bld_t *pcb) {
@@ -262,13 +316,13 @@ bool code_builder(code_bld_t *pcb) {
  * c_code_builder() *
  ***********************************************************************
  DESCR
-	XXX
+	C language code building
 
  IN
-	XXX
+	pcb :	code build data structure
 
  OUT
-	XXX
+	boolean
  ***********************************************************************/
 
 bool c_code_builder(code_bld_t *pcb) {
@@ -351,16 +405,93 @@ bool c_code_builder(code_bld_t *pcb) {
 
 
 /********************
+ * shared_builder() *
+ ***********************************************************************
+ DESCR
+	shared code building wrapper
+
+ IN
+	pcb :	code build data structure
+
+ OUT
+	boolean
+ ***********************************************************************/
+
+bool shared_builder(code_bld_t *pcb) {
+	switch (pcb->lang) {
+		case LANG_C :
+		case LANG_CXX :
+			return(c_shared_builder(pcb));
+	}
+
+	return(false);
+}
+
+
+/**********************
+ * c_shared_builder() *
+ ***********************************************************************
+ DESCR
+	C shared code builder
+
+ IN
+	pcb :	code build data structure
+
+ OUT
+	boolean
+ ***********************************************************************/
+
+bool c_shared_builder(code_bld_t *pcb) {
+	FILE	*tfp,
+			*lfp;
+
+	/* open temporary file */
+	tfp = tmps_open(TEST_FILE_NAME, "w", pcb->srcfile, sizeof(pcb->srcfile), strlen(C_FILE_EXT));
+	if (tfp == NULL) {
+		errorf("c_shared_builder: tmps_open() failed");
+		return(false); /* failed to open */
+	}
+
+	lfp = fopen(pcb->blog, "a");
+	if (lfp == NULL) {
+		errorf("c_shared_builder: build log fopen() failed");
+		return(false); /* failed to open */
+	}
+
+	fprintf(lfp, "Generated source file:\n");
+
+	/* shared function */
+	code_logger(tfp, lfp, CODE_C_SHARED);
+
+	fclose(tfp);
+	fclose(lfp);
+
+	if (ferror(tfp) != 0) {
+		errorf("c_shared_builder: generated source I/O failure");
+		return(false);
+	}
+
+	if (ferror(lfp) != 0) {
+		errorf("c_shared_builder: build log I/O failure");
+		return(false);
+	}
+
+	return(true);
+}
+
+
+/*********************
  * cmdline_builder() *
  ***********************************************************************
  DESCR
-	XXX
+	wrapper for compiler command line building
 
  IN
-	XXX
+	pcb :		code build data structure
+	dolink :	linking indicator
 
  OUT
-	XXX
+	boolean
  ***********************************************************************/
 
 bool cmdline_builder(code_bld_t *pcb, bool dolink) {
@@ -395,17 +526,18 @@ bool cmdline_builder(code_bld_t *pcb, bool dolink) {
 }
 
 
-/**********************
+/***********************
  * c_cmdline_builder() *
  ***********************************************************************
  DESCR
-	XXX
+	build C compiler command line
 
  IN
-	XXX
+	pcb :		code build data structure
+	dolink :	linking indicator
 
  OUT
-	XXX
+	boolean
  ***********************************************************************/
 
 bool c_cmdline_builder(code_bld_t *pcb, bool dolink) {
@@ -466,13 +598,13 @@ bool c_cmdline_builder(code_bld_t *pcb, bool dolink) {
  * object_builder() *
  ***********************************************************************
  DESCR
-	XXX
+	execute object building command line
 
  IN
-	XXX
+	compiler command line builder
 
  OUT
-	XXX
+	boolean
  ***********************************************************************/
 
 bool object_builder(code_bld_t *pcb) {
@@ -488,13 +620,14 @@ bool object_builder(code_bld_t *pcb) {
  * cb_cleaner() *
  ***********************************************************************
  DESCR
-	XXX
+	clean code builder files (temporary source and eventually generated
+	binary)
 
  IN
-	XXX
+	compiler command line builder
 
  OUT
-	XXX
+	NONE
  ***********************************************************************/
 
 void cb_cleaner(code_bld_t *pcb) {
@@ -505,6 +638,110 @@ void cb_cleaner(code_bld_t *pcb) {
 
 	/* No need to check return here as binary could not exists */
 	unlink(pcb->binfile);
+}
+
+
+/**********************
+ * check_so_support() *
+ ***********************************************************************
+ DESCR
+	XXX
+
+ IN
+	XXX
+
+ OUT
+	XXX
+ ***********************************************************************/
+
+bool check_so_support(char *buildlog, htable *htab) {
+	char		*lang;
+	code_bld_t	 scb;
+
+	code_bld_init(&scb, buildlog);
+	lang = "C"; /* XXX TODO language relative to the compiler */
+	set_language(&scb, lang);
+	set_compiler(&scb, htab); /* XXX check */
+
+	pmk_log("\t\tCompiling shared objet : ");
+	
+	if (shared_builder(&scb) == false) {
+		/* XXX failed */
+		/*debugf("shared_builder = false");*/
+		pmk_log("Failed\n");
+		return(false);
+	} else {
+		/*debugf("shared_builder = true");*/
+		/* XXX set shared stuff variables */
+		if (cmdline_builder(&scb, false) == false) {
+			/* XXX failed */
+			/*debugf("cmdline_builder = false");*/
+			pmk_log("Failed\n");
+			return(false);
+		} else {
+			/*debugf("cmdline_builder = true");*/
+			if (object_builder(&scb) == false) {
+				/* XXX */
+				/*debugf("object_builder = false");*/
+				pmk_log("Failed\n");
+				return(false);
+			} else {
+				/* XXX */
+				/*debugf("object_builder = true");*/
+				pmk_log("Succeeded\n");
+			}
+		}
+	}
+
+	/* try linking shared object */
+	pmk_log("\t\tLinking shared objet : X_TODO_X\n");
+
+	cb_cleaner(&scb);
+
+	return(false);
+}
+
+
+/*********************************
+ * obsolete_get_lang_from_comp() *
+ ***********************************************************************
+ DESCR
+	provide compiler path
+
+ IN
+	compname :	compiler name from lgdata structure
+
+ OUT
+	language name
+
+ NOTE :
+	OBSOLETE, to remove later when useless
+ ***********************************************************************/
+
+char *obsolete_get_lang_from_comp(char *compname) {
+	char	key[OPT_NAME_LEN];
+	size_t	i,
+			len;
+
+	/* failed to build compiler label */
+	if (snprintf_b(key, sizeof(key), "BIN_%s", compname) == false) {
+		return(NULL);
+	}
+
+	/* length of the generated string */
+	len = strlen(key);
+
+	/* search for matching compiler label */
+	for (i = 0 ; i < nb_lang_data ; i++) {
+		/* if compiler is found */
+		if (strncmp(lang_data[i].compiler, key, len) == 0) {
+			/* return the language name */
+			return(lang_data[i].name);
+		}
+	}
+
+	/* unknown compiler */
+	return(NULL);
 }
 
 /* vim: set noexpandtab tabstop=4 softtabstop=4 shiftwidth=4: */

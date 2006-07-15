@@ -522,91 +522,6 @@ bool require_check(htable *pht) {
 }
 
 
-/****************
- * check_lang() *
- ***********************************************************************
- DESCR
-	check language
-
- IN
-	lang :	language to check
-
- OUT
-	language structure or NULL
- ***********************************************************************/
-
-lgdata *check_lang(char *lang) {
-	int	 i;
-
-	for (i = 0 ; i < NBLANG ; i++) {
-		if (strncmp(ldata[i].name, lang, LANG_NAME_LEN) == 0) {
-			return(&ldata[i]);
-		}
-	}
-
-	return(NULL);
-}
-
-
-/*********************
- * check_lang_comp() *
- ***********************************************************************
- DESCR
-	check language with its compiler (symbolic) name
-
- IN
-	comp :	compiler (symbolic) name
-
- OUT
-	language structure or NULL
- ***********************************************************************/
-
-lgdata *check_lang_comp(char *comp) {
-	int	 i;
-
-	for (i = 0 ; i < NBLANG ; i++) {
-		if (strncmp(ldata[i].comp, comp, LANG_NAME_LEN) == 0) {
-			return(&ldata[i]);
-		}
-	}
-
-	return(NULL);
-}
-
-
-/**************
- * get_lang() *
- ***********************************************************************
- DESCR
-	provide data on language used
-
- IN
-	pht :	hash table that should contain LANG
-	pgd :	global data structure
-
- OUT
-	lgdata structure or NULL for unknown language
- ***********************************************************************/
-
-lgdata *get_lang(htable *pht, pmkdata *pgd) {
-	char	*lang;
-
-	/* check first if language has been provided locally */
-	lang = (char *)po_get_data(hash_get(pht, KW_OPT_LANG));
-	if (lang == NULL) {
-		/* check global lang if available */
-		if (pgd->lang != NULL) {
-			return(check_lang(pgd->lang));
-		} else {
-			/* else return C by default */
-			return(&ldata[0]);
-		}
-	}
-
-	return(check_lang(lang));
-}
-
-
 /******************
  * get_lang_str() *
  ***********************************************************************
@@ -632,30 +547,6 @@ char *get_lang_str(htable *pht, pmkdata *pgd) {
 	}
 
 	return(lang);
-}
-
-
-/*******************
- * get_comp_path() *
- ***********************************************************************
- DESCR
-	provide compiler path
-
- IN
-	pht :		main hash table
-	compname :	compiler name from lgdata structure
-
- OUT
-	compiler's path
- ***********************************************************************/
-
-char *get_comp_path(htable *pht, char *compname) {
-	char	key[OPT_NAME_LEN];
-
-	if (snprintf_b(key, sizeof(key), "BIN_%s", compname) == false)
-		return(NULL);
-
-	return((char *) hash_get(pht, key));
 }
 
 
@@ -730,6 +621,9 @@ bool process_required(pmkdata *pgd, pmkcmd *pcmd, bool required,
 
  OUT
 	NONE
+
+ NOTE :
+	OBSOLETE, to remove later when useless
  ***********************************************************************/
 
 bool obsolete_string_to_list(htable *ht, char *opt) {
@@ -769,3 +663,4 @@ bool obsolete_string_to_list(htable *ht, char *opt) {
 	return(true);
 }
 
+/* vim: set noexpandtab tabstop=4 softtabstop=4 shiftwidth=4: */
