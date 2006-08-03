@@ -1,3 +1,6 @@
+03 Aug 2006 mipsator
+ * much mode #defines in compiler detection module.
+
 15 Jul 2006 mipsator
  * a long time since the last commit but had no feeling to work on pmk until
  last days. Here is some cleanup and the latest work done.
