@@ -1,7 +1,7 @@
 /* $Id$ */
 
 /*
- * Copyright (c) 2003-2005 Damien Couderc
+ * Copyright (c) 2003-2006 Damien Couderc
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -69,12 +69,12 @@ kwopt_t	kw_addcomp = {
 
 /* ADD_SYSTEM options */
 kw_t	req_addsys[] = {
-	{"NAME",		PO_STRING},
-	{"SL_EXT",		PO_STRING},
-	{"SL_VERSION",		PO_STRING},
-	{"SL_LIBNAME",		PO_STRING},
-	{"SL_LIBNAME_VMAJ",	PO_STRING},
-	{"SL_LIBNAME_VFULL",	PO_STRING}
+	{SYS_KW_NAME,		PO_STRING},
+	{SYS_KW_EXT,		PO_STRING},
+	{SYS_KW_VERSION,	PO_STRING},
+	{SYS_KW_FMT,		PO_STRING},
+	{SYS_KW_FMT_MAJ,	PO_STRING},
+	{SYS_KW_FMT_FULL,	PO_STRING}
 };
 
 kwopt_t	kw_addsys = {
@@ -83,7 +83,6 @@ kwopt_t	kw_addsys = {
 	NULL,	/* allow 'custom' options */
 	0
 };
-
 
 prskw	kw_pmkcomp[] = {
 	{"ADD_COMPILER",	PCC_TOK_ADDC,	PRS_KW_CELL,	PRS_TOK_NULL,	&kw_addcomp},
@@ -284,7 +283,7 @@ bool add_system(comp_data *pcd, htable *pht, char *osname) {
 	hkeys			*phk;
 	unsigned int	 i;
 
-	name = po_get_str(hash_get(pht, "NAME"));
+	name = po_get_str(hash_get(pht, SYS_KW_NAME));
 	if (name == NULL) {
 		return(false);
 	}
@@ -294,8 +293,8 @@ bool add_system(comp_data *pcd, htable *pht, char *osname) {
 		return(true);
 	}
 
-	hash_add(pht, "SLSYSNAME", po_mk_str(strdup(name)));
-	hash_delete(pht, "NAME");
+	hash_add(pht, SL_SYS_LABEL, po_mk_str(strdup(name)));
+	hash_delete(pht, SYS_KW_NAME);
 
 	/* remaining values are system overrides, save it */
 	phk = hash_keys(pht);

@@ -1,7 +1,7 @@
 /* $Id$ */
 
 /*
- * Copyright (c) 2003-2004 Damien Couderc
+ * Copyright (c) 2003-2006 Damien Couderc
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -72,6 +72,8 @@
 
 #define SL_LDFLAG_VARNAME	"SLLDFLAGS"
 
+#define SL_SYS_LABEL		"SLSYSNAME"
+
 
 /****************
  * keyword data *
@@ -84,6 +86,14 @@
 #define CC_KW_VERSION	"VERSION"
 #define CC_KW_SLCFLAGS	"SLCFLAGS"
 #define CC_KW_SLLDFLAGS	"SLLDFLAGS"
+
+/* ADD_SYSTEM keyword options */
+#define SYS_KW_NAME	"NAME"
+#define SYS_KW_EXT	"SL_EXT"
+#define SYS_KW_VERSION	"SL_VERSION"
+#define SYS_KW_FMT	"SL_LIBNAME"
+#define SYS_KW_FMT_MAJ	"SL_LIBNAME_VMAJ"
+#define SYS_KW_FMT_FULL	"SL_LIBNAME_VFULL"
 
 /* reserved variable name */
 #define SL_KW_LIB_VNONE	"SL_LIBNAME"
@@ -150,8 +160,8 @@ typedef struct {
 } comp_info;
 
 typedef struct {
-	htable	*cht,
-		*sht;
+	htable	*cht,	/* compiler data hash table */
+		*sht;	/* system data hash table */
 } comp_data;
 
 
