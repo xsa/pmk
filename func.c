@@ -1,7 +1,7 @@
 /* $Id$ */
 
 /*
- * Copyright (c) 2003-2005 Damien Couderc
+ * Copyright (c) 2003-2006 Damien Couderc
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -68,7 +68,7 @@ kw_t	req_name[] = {
 kw_t	opt_chkbin[] = {
 	{KW_OPT_DEFS,		PO_LIST},
 	{KW_OPT_DEPEND,		PO_LIST},
-	{KW_OPT_REQUIRED,	PO_BOOL | PO_STRING},
+	{KW_OPT_REQUIRED,	PO_BOOL},
 	{KW_OPT_VARIABLE,	PO_STRING}
 };
 
@@ -88,7 +88,7 @@ kw_t	opt_chkhdr[] = {
 	{KW_OPT_FUNCTION,	PO_STRING | PO_LIST},
 	{KW_OPT_LANG,		PO_STRING},
 	{KW_OPT_MACRO,		PO_LIST},
-	{KW_OPT_REQUIRED,	PO_BOOL | PO_STRING}
+	{KW_OPT_REQUIRED,	PO_BOOL}
 };
 
 kwopt_t	kw_chkhdr = {
@@ -106,7 +106,7 @@ kw_t	opt_chklib[] = {
 	{KW_OPT_LANG,		PO_STRING},
 	{KW_OPT_LIBS,		PO_STRING},
 	{KW_OPT_MACRO,		PO_LIST},
-	{KW_OPT_REQUIRED,	PO_BOOL | PO_STRING}
+	{KW_OPT_REQUIRED,	PO_BOOL}
 };
 
 kwopt_t	kw_chklib = {
@@ -122,7 +122,7 @@ kw_t	opt_chkcfg[] = {
 	{KW_OPT_DEPEND,		PO_LIST},
 	{KW_OPT_CFLAGS,		PO_STRING},
 	{KW_OPT_LIBS,		PO_STRING},
-	{KW_OPT_REQUIRED,	PO_BOOL | PO_STRING},
+	{KW_OPT_REQUIRED,	PO_BOOL},
 	{KW_OPT_VARIABLE,	PO_STRING},
 	{KW_OPT_VERSION,	PO_STRING}
 };
@@ -140,7 +140,7 @@ kw_t	opt_chkpc[] = {
 	{KW_OPT_DEPEND,		PO_LIST},
 	{KW_OPT_CFLAGS,		PO_STRING},
 	{KW_OPT_LIBS,		PO_STRING},
-	{KW_OPT_REQUIRED,	PO_BOOL | PO_STRING},
+	{KW_OPT_REQUIRED,	PO_BOOL},
 	{KW_OPT_VERSION,	PO_STRING}
 };
 
@@ -158,7 +158,7 @@ kw_t	opt_chktyp[] = {
 	{KW_OPT_HEADER,		PO_STRING},
 	{KW_OPT_LANG,		PO_STRING},
 	{KW_OPT_MEMBER,		PO_STRING},
-	{KW_OPT_REQUIRED,	PO_BOOL | PO_STRING}
+	{KW_OPT_REQUIRED,	PO_BOOL}
 };
 
 kwopt_t	kw_chktyp = {
@@ -172,7 +172,7 @@ kwopt_t	kw_chktyp = {
 kw_t	opt_chkvar[] = {
 	{KW_OPT_DEFS,		PO_LIST},
 	{KW_OPT_DEPEND,		PO_LIST},
-	{KW_OPT_REQUIRED,	PO_BOOL | PO_STRING},
+	{KW_OPT_REQUIRED,	PO_BOOL},
 	{KW_OPT_VALUE,		PO_STRING}
 };
 
@@ -185,13 +185,14 @@ kwopt_t	kw_chkvar = {
 
 /* BUILD_SHLIB_NAME options */
 kw_t	req_bldshl[] = {
-		{KW_OPT_NAME,	PO_STRING},
-		{KW_OPT_MAJOR,	PO_STRING},
-		{KW_OPT_MINOR,	PO_STRING}
+	{KW_OPT_NAME,		PO_STRING},
+	{KW_OPT_MAJOR,		PO_STRING},
+	{KW_OPT_MINOR,		PO_STRING}
 };
 kw_t	opt_bldshl	[] = {
-		{KW_SL_VERS_FULL,	PO_STRING},
-		{KW_SL_VERS_NONE,	PO_STRING}
+	{KW_OPT_REQUIRED,	PO_BOOL},
+	{KW_SL_VERS_FULL,	PO_STRING},
+	{KW_SL_VERS_NONE,	PO_STRING}
 };
 kwopt_t	kw_bldshl = {
 	req_bldshl,
@@ -698,7 +699,7 @@ bool pmk_check_header(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 			return(false);
 		}
 	}
-	scb.flags = inc_path;
+	set_cflags(&scb, inc_path);
 
 	/*
 		check header file
@@ -712,7 +713,7 @@ bool pmk_check_header(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 	}
 
 	/* build compiler command */
-	 if (cmdline_builder(&scb, true) == false) {
+	 if (cmdline_builder(&scb, LINK_SRC) == false) {
 		errorf(ERR_MSG_CC_CMD);
 		return(false);
 	}
@@ -742,7 +743,7 @@ bool pmk_check_header(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 		}
 
 		/* build compiler command */
-		 if (cmdline_builder(&scb, true) == false) {
+		 if (cmdline_builder(&scb, LINK_SRC) == false) {
 			errorf(ERR_MSG_CC_CMD);
 			return(false);
 		}
@@ -786,7 +787,7 @@ bool pmk_check_header(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 			}
 
 			/* build compiler command */
-			 if (cmdline_builder(&scb, true) == false) {
+			 if (cmdline_builder(&scb, LINK_SRC) == false) {
 				errorf(ERR_MSG_CC_CMD);
 				return(false);
 			}
@@ -829,7 +830,7 @@ bool pmk_check_header(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 				return(false);
 			}
 
-			 if (cmdline_builder(&scb, true) == false) {
+			 if (cmdline_builder(&scb, LINK_SRC) == false) {
 				errorf(ERR_MSG_CC_CMD);
 				return(false);
 			}
@@ -974,7 +975,7 @@ bool pmk_check_lib(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 		pmk_log("\tStore library flags in '%s'.\n", get_libs_label(&scb));
 
 		/* get actual content of LIBS, no need to check as it is initialised */
-		scb.flags = hash_get(pgd->htab, PMKVAL_ENV_LIBS);
+		set_cflags(&scb, hash_get(pgd->htab, PMKVAL_ENV_LIBS));
 	}
 
 	/*
@@ -989,7 +990,7 @@ bool pmk_check_lib(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 	}
 
 	/* build compiler command */
-	 if (cmdline_builder(&scb, true) == false) {
+	 if (cmdline_builder(&scb, LINK_SRC) == false) {
 		errorf(ERR_MSG_CC_CMD);
 		return(false);
 	}
@@ -1028,7 +1029,7 @@ bool pmk_check_lib(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 			}
 
 			/* build compiler command */
-			 if (cmdline_builder(&scb, true) == false) {
+			 if (cmdline_builder(&scb, LINK_SRC) == false) {
 				errorf(ERR_MSG_CC_CMD);
 				return(false);
 			}
@@ -1676,7 +1677,7 @@ bool pmk_check_type(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 				return(false);
 			}
 		}
-		scb.flags = inc_path;
+		set_cflags(&scb, inc_path);
 
 		/*
 			check header file
@@ -1690,7 +1691,7 @@ bool pmk_check_type(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 		}
 
 		/* build compiler command */
-		 if (cmdline_builder(&scb, true) == false) {
+		 if (cmdline_builder(&scb, LINK_SRC) == false) {
 			errorf(ERR_MSG_CC_CMD);
 			return(false);
 		}
@@ -1724,7 +1725,7 @@ bool pmk_check_type(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 	}
 
 	/* build compiler command */
-	 if (cmdline_builder(&scb, true) == false) {
+	 if (cmdline_builder(&scb, LINK_SRC) == false) {
 		errorf(ERR_MSG_CC_CMD);
 		return(false);
 	}
@@ -1760,7 +1761,7 @@ bool pmk_check_type(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 		}
 
 		/* build compiler command */
-		 if (cmdline_builder(&scb, true) == false) {
+		 if (cmdline_builder(&scb, LINK_SRC) == false) {
 			errorf(ERR_MSG_CC_CMD);
 			return(false);
 		}
@@ -1891,6 +1892,7 @@ bool pmk_check_variable(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
  ***********************************************************************/
 
 bool pmk_build_shlib_name(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
+	bool	 required;
 	char	*variable,
 			*versvar,
 			*versmaj,
@@ -1899,22 +1901,17 @@ bool pmk_build_shlib_name(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 
 	pmk_log("\n* Building shared library name\n");
 
-	if (pgd->comp_detect == false) {
-		errorf("compiler detection missing, check the man page.\n");
-		return(false);
-	}
-
+	required = require_check(ht);
+	
 	pmk_log("\tShared library support : ");
-
-	if (pgd->slht == NULL) {
+	if (pgd->sys_detect == false) {
 		pmk_log("no.\n");
-		errorf("your system is not supported yet.");
-		return(false); /* XXX REQUIRED option ? */
-	} else {
-		pmk_log("yes.\n");
+		return(process_required(pgd, cmd, required, NULL, NULL));
 	}
 
-	pstr = hash_get(pgd->slht, "SLSYSNAME");
+	pmk_log("yes.\n");
+
+	pstr = hash_get(pgd->htab, SL_SYS_LABEL);
 	pmk_log("\tUsing support for '%s'.\n", pstr);
 
 	/* get name */
@@ -1927,7 +1924,7 @@ bool pmk_build_shlib_name(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 #ifdef SHLIB_DEBUG
 		debugf("value = '%s'", value);
 #endif
-		hash_update(pgd->slht, SL_KW_LIB_NAME, value);
+		hash_update(pgd->htab, SL_KW_LIB_NAME, value);
 	}
 
 	/* get major version number */
@@ -1940,7 +1937,7 @@ bool pmk_build_shlib_name(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 #ifdef SHLIB_DEBUG
 		debugf("value = '%s'", value);
 #endif
-		hash_update(pgd->slht, SL_KW_LIB_MAJ, value); /* no dup */
+		hash_update(pgd->htab, SL_KW_LIB_MAJ, value); /* no dup */
 	}
 
 	/* get minor version number */
@@ -1953,17 +1950,17 @@ bool pmk_build_shlib_name(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 #ifdef SHLIB_DEBUG
 		debugf("value = '%s'", value);
 #endif
-		hash_update(pgd->slht, SL_KW_LIB_MIN, value); /* no dup */
+		hash_update(pgd->htab, SL_KW_LIB_MIN, value); /* no dup */
 	}
 
 	/* get libname without version */
 	variable = po_get_str(hash_get(ht, KW_SL_VERS_NONE));
 	if (variable != NULL) {
-		pstr = hash_get(pgd->slht, SL_KW_LIB_VNONE);
+		pstr = hash_get(pgd->htab, SL_KW_LIB_VNONE);
 #ifdef SHLIB_DEBUG
 		debugf("pstr = '%s'", pstr);
 #endif
-		value = process_string(pstr, pgd->slht);
+		value = process_string(pstr, pgd->htab);
 #ifdef SHLIB_DEBUG
 		debugf("value = '%s'", value);
 #endif
@@ -1976,20 +1973,18 @@ bool pmk_build_shlib_name(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 		pmk_log("\tSetting %s to '%s'\n", variable, value);
 #ifdef SHLIB_DEBUG
 		debugf("save in '%s'", variable);
-#endif
 	} else {
-#ifdef SHLIB_DEBUG
 		debugf("variable not set");
 #endif
 	}
 
 	versvar = po_get_str(hash_get(ht, KW_SL_VERS_FULL));
 	if (versvar != NULL) {
-		pstr = hash_get(pgd->slht, SL_KW_LIB_VFULL);
+		pstr = hash_get(pgd->htab, SL_KW_LIB_VFULL);
 #ifdef SHLIB_DEBUG
 		debugf("pstr = '%s'", pstr);
 #endif
-		value = process_string(pstr, pgd->slht);
+		value = process_string(pstr, pgd->htab);
 #ifdef SHLIB_DEBUG
 		debugf("value = '%s'", value);
 #endif
@@ -2000,20 +1995,18 @@ bool pmk_build_shlib_name(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 		pmk_log("\tSetting %s to '%s'\n", versvar, value);
 #ifdef SHLIB_DEBUG
 		debugf("save in '%s'", versvar);
-#endif
 	} else {
-#ifdef SHLIB_DEBUG
 		debugf("versvar not set");
 #endif
 	}
 
 	versmaj = po_get_str(hash_get(ht, KW_SL_VERS_MAJ));
 	if (versmaj != NULL) {
-		pstr = hash_get(pgd->slht, SL_KW_LIB_VMAJ);
+		pstr = hash_get(pgd->htab, SL_KW_LIB_VMAJ);
 #ifdef SHLIB_DEBUG
 		debugf("pstr = '%s'", pstr);
 #endif
-		value = process_string(pstr, pgd->slht);
+		value = process_string(pstr, pgd->htab);
 #ifdef SHLIB_DEBUG
 		debugf("value = '%s'", value);
 #endif
@@ -2024,9 +2017,7 @@ bool pmk_build_shlib_name(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 		pmk_log("\tSetting %s to '%s'\n", versmaj, value);
 #ifdef SHLIB_DEBUG
 		debugf("save in '%s'", versmaj);
-#endif
 	} else {
-#ifdef SHLIB_DEBUG
 		debugf("versmaj not set");
 #endif
 	}
@@ -2035,9 +2026,9 @@ bool pmk_build_shlib_name(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 }
 
 
-/*******************
- * option functions
- *
+/********************
+ * option functions *
+ ***********************************************************************
  * IN
  *	cmd : command structure
  *	popt : option structure
@@ -2141,7 +2132,7 @@ bool pmk_setparam_glang(pmkcmd *cmd, prsopt *popt, pmkdata *pgd) {
 
 	if (pstr != NULL) {
 		/* check if provided lang is supported */
-		if (verify_language(pstr) != UNKNOWN_LANG) {
+		if (verify_language(pstr) != LANG_UNKNOWN) {
 			pgd->lang = strdup(pstr);
 			if (pgd->lang == NULL) {
 				errorf(ERRMSG_MEM);
@@ -2201,20 +2192,19 @@ bool pmk_setparam_target(pmkcmd *cmd, prsopt *popt, pmkdata *pgd) {
  ***********************************************************************/
 
 bool pmk_setparam_detect(pmkcmd *cmd, prsopt *popt, pmkdata *pgd) {
-	char		*ccpath,
-				*lang,
-				*ostr,
-				*pstr,
-				 buf[TMP_BUF_LEN];
-	code_bld_t	 scb;
-	comp_cell	*pcell;
-	comp_data	*cdata;
-	comp_info	 cinfo;
-	dynary		*da;
-	int			 i = 0,
-				 n;
+	char			*ccpath,
+					*lang,
+					*osname,
+					*pstr;
+	code_bld_t		 scb;
+	comp_parse_t	*pcp;
+	compiler_t		*pc;
+	dynary			*da;
+	hkeys			*phk;
+	int				 i = 0,
+					 n;
 
-	pmk_log("\tDetecting compilers :\n");
+	pmk_log("\tDetecting compiler shared library support :\n");
 
 	da = po_get_list(popt->value);
 	if (da == NULL) {
@@ -2222,19 +2212,29 @@ bool pmk_setparam_detect(pmkcmd *cmd, prsopt *popt, pmkdata *pgd) {
 		return(false);
 	}
 
-	pmk_log("\t\tGathering data for compiler detection.\n");
-	cdata = parse_comp_file_adv(PMKCOMP_DATA, pgd->htab);
-	if (cdata == NULL) {
-		return(false);
-	}
+	/* get os name */
+	osname = hash_get(pgd->htab, PMKCONF_OS_NAME);
 
+	/*
+	 * parsing compiler data to build a database that will be used further
+	 */
+	pmk_log("\t\tGathering data for compiler detection.\n");
+	pcp = parse_comp_file(PMKCOMP_DATA, osname);
+	
+	/* process each language provided in detection list */
 	n = da_usize(da);
 	for (i=0 ; i < n ; i++) {
 		lang = da_idx(da, i);
 
+		/* init code building structure */
+		code_bld_init(&scb, pgd->buildlog);
+
 		/* init build structure */
 		if (set_language(&scb, lang) == false) {
-			/* check for obsolete compiler name */
+			/*
+			 * if language name is invalid then check
+			 * for obsolete compiler name
+			 */
 			pstr = obsolete_get_lang_from_comp(lang); /* OBSOLETE */
 			if (pstr == NULL) {
 				errorf("Unknown language'%s'.\n", lang);
@@ -2252,6 +2252,7 @@ bool pmk_setparam_detect(pmkcmd *cmd, prsopt *popt, pmkdata *pgd) {
 		}
 
 		/* get the appropriate compiler */
+		set_compiler(&scb, pgd->htab);
 		pstr = get_compiler_label(&scb);
 		ccpath = hash_get(pgd->htab, pstr);
 		if (ccpath == NULL) {
@@ -2259,86 +2260,62 @@ bool pmk_setparam_detect(pmkcmd *cmd, prsopt *popt, pmkdata *pgd) {
 			return(false);
 		}
 
-		pmk_log("\t\tDetecting '%s' compiler : ", lang);
+		pmk_log("\t\tDetecting %s compiler : ", lang);
 
 		/* try to identify the compiler */
-		if (detect_compiler(ccpath, pgd->buildlog, cdata, &cinfo) == false) {
+		pc = &(pgd->comp_data.data[scb.lang]);
+		if (comp_detect(ccpath, pgd->buildlog, pc, pcp, scb.pld->slflags) == false) {
 			pmk_log("failed.\n");
 			return(false);
 		}
+		/* set the language type, so the compiler data are valid */
+		pc->lang = scb.lang; /* XXX set in detect proc ? */
 
-		/* mark compiler as detected */
-		pgd->comp_detect = true;
-
-		pmk_log("%s (version %s).\n", comp_get_descr(cdata, cinfo.c_id), cinfo.version);
-
-		/* check if an override exists for compiler flags */
-		if (snprintf_b(buf, sizeof(buf), "%s_%s", scb.pld->slflags, cinfo.c_id) == false) {
-			errorf("overflow.\n");
-			return(false);
-		}
-
-		if (cdata->sht != NULL) {
-			/* XXX need to skip if system has no data ? */
-			ostr = hash_get(cdata->sht, buf);
-		} else {
-			ostr = NULL;
-		}
+		pmk_log("%s (version %s).\n", pc->descr, pc->version);
 
 		/* set shared lib compiler flags */
-		if (ostr != NULL) {
-			pmk_log("\tFound system specific %s.\n", scb.pld->slflags);
-		} else {
-			pcell = comp_get(cdata, cinfo.c_id);
-			ostr = pcell->slcflags;
-		}
-
-		/* set shared lib compiler flags */
-		pmk_log("\t\tSetting %s to '%s'\n", scb.pld->slflags, ostr);
-		if (hash_update_dup(pgd->htab, scb.pld->slflags, ostr) == HASH_ADD_FAIL) {
+		pmk_log("\t\tSetting %s to '%s'\n", scb.pld->slflags, pc->slcflags);
+		if (hash_update_dup(pgd->htab, scb.pld->slflags, pc->slcflags) == HASH_ADD_FAIL) {
 			return(false);
-		}
-
-		/* check if an override exists for linking flags */
-		if (snprintf_b(buf, sizeof(buf), "%s_%s", SL_LDFLAG_VARNAME, cinfo.c_id) == false) {
-			errorf("overflow.\n");
-			return(false);
-		}
-
-		if (cdata->sht != NULL) { /* XXX need to skip if system has no data ? */
-			ostr = hash_get(cdata->sht, buf);
-		} else {
-			ostr = NULL;
-		}
-
-		/* check specific shared lib linker flags */
-		if (ostr != NULL) {
-			pmk_log("\tFound system specific %s.\n", SL_LDFLAG_VARNAME);
-		} else {
-			pcell = comp_get(cdata, cinfo.c_id);
-			ostr = pcell->slldflags;
 		}
 
 		/* set shared lib linker flags */
-		pmk_log("\t\tSetting %s to '%s'\n", SL_LDFLAG_VARNAME, ostr);
-		if (hash_update_dup(pgd->htab, SL_LDFLAG_VARNAME, ostr) == HASH_ADD_FAIL) {
+		pmk_log("\t\tSetting %s to '%s'\n", SL_LDFLAG_VARNAME, pc->slldflags);
+		if (hash_update_dup(pgd->htab, SL_LDFLAG_VARNAME, pc->slldflags) == HASH_ADD_FAIL) {
 			return(false);
 		}
 
-        /* try to compile shared object */
-		if (check_so_support(pgd->buildlog, pgd->htab) == true) {
-			/* XXX TODO update cdata to reflect successful shared object support */
+		/* try to compile shared object */
+		pmk_log("\t\tChecking shared library support : ");
+		if (check_so_support(&scb, pc->slcflags, pc->slldflags) == true) {
+			pmk_log("ok.\n");
+			/* XXX TODO set something to tell that support is ok */
 		} else {
-			/* XXX TODO update cdata to reflect failure of shared object support */
+			pmk_log("failed.\n");
 		}
 	}
 
-	/* move shared lib hash table into global structure */
-	pgd->slht = cdata->sht;
-	cdata->sht = NULL; /* avoid data destruction */
+	/* get system data */
+	pmk_log("\t\tGetting system data for %s : ", osname);
+	phk = hash_keys_sorted(pcp->sht);
+	if (phk == NULL) {
+		pmk_log("failed.\n");
+	} else {
+		for (i = 0 ; i < (int) phk->nkey ; i++) {
+			pstr = hash_get(pcp->sht, phk->keys[i])	;
+			hash_update_dup(pgd->htab, phk->keys[i], pstr); /* XXX check */
+		}
+		pmk_log("ok.\n");
+
+		/* mark system as detected */
+		pgd->sys_detect = true;
+	}
+
+	/* clean now useless parsed data */
+	destroy_comp_parse(pcp);
 
 	/* clean cdata */
-	compdata_destroy(cdata);
+	cb_cleaner(&scb);
 
 	return(true);
 }

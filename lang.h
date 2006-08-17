@@ -1,7 +1,7 @@
 /* $Id$ */
 
 /*
- * Copyright (c) 2003-2005 Damien Couderc
+ * Copyright (c) 2006 Damien Couderc
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,18 +34,40 @@
  */
 
 
-#ifndef _PMK_FUNCTOOL_H_
-#define _PMK_FUNCTOOL_H_
-
-#include "common.h"
-#include "hash_tools.h"
-#include "pmk.h"
-#include "premake.h"
-
+#ifndef _PMK_LANG_H_
+#define _PMK_LANG_H_
 
 /*************
  * constants *
  **********************************************************************************************/
+
+/*************************
+ * define language tokens *
+ **********************************************************************************************
+ * %CONST LANG_UNKNOWN:	unknown language token
+ * %CONST LANG_C:		C language token
+ * %CONST LANG_CXX:		C++ language token
+ * %CONST LANG_NUMBER:	number of supported languages
+ **********************************************************************************************/
+enum {
+	LANG_UNKNOWN = -1,	/* unknown language */
+	LANG_C,				/* C language */
+	LANG_CXX,			/* C++ language */
+	LANG_NUMBER			/* number of languages */
+};
+
+/* language labels */
+#define LANG_LABEL_C		"C"		/* C language */
+#define LANG_LABEL_CXX		"C++"	/* C++ language */
+
+
+/* compiler flags labels */
+#define CFLAGS_LABEL_C		"CFLAGS"	/* C language */
+#define CFLAGS_LABEL_CXX	"CXXFLAGS"	/* C++ language */
+
+/* shared lib compiler flags labels */
+#define SLCFLAGS_LABEL_C	"SLCFLAGS"		/* C language */
+#define SLCFLAGS_LABEL_CXX	"SLCXXFLAGS"	/* C++ language */
 
 #define LANG_NAME_LEN	64
 #define COMP_NAME_LEN	64
@@ -53,48 +75,20 @@
 #define CFLG_NAME_LEN	64
 #define SHFLG_NAME_LEN	64
 
-#define KW_OPT_DEPEND	"DEPEND"
-#define KW_OPT_LANG		"LANG"
-#define KW_OPT_REQUIRED	"REQUIRED"
-
-#define CHAR_VERSION_SEPARATOR	'.'
-
 
 /**********************************
  * type and structure definitions *
  ***********************************************************************/
 
+/* language cell */
 typedef struct {
-	char	name[LANG_NAME_LEN],
-			comp[COMP_NAME_LEN],
-			pre[PRE_NAME_LEN],
-			cflg[CFLG_NAME_LEN],
-			slflg[CFLG_NAME_LEN];
-} lgdata;
+	char	name[LANG_NAME_LEN],		/* language label (ex. C) */
+			compiler[COMP_NAME_LEN],	/* compiler label (ex. CC) */
+			cflags[CFLG_NAME_LEN],		/* compiler flags label (ex. CFLAGS) */
+			slflags[CFLG_NAME_LEN];		/* shared lib compiler flags (ex. SLCFLAGS) */
+	int		lang;						/* language token */
+} lgdata_t;
 
-
-/**************
- * prototypes *
- ***********************************************************************/
-
-bool	 check_bool_str(char *);
-bool	 invert_bool(bool);
-char	*bool_to_str(bool);
-bool	 get_file_dir_path(char *, char *, char *, int);
-bool	 record_def(htable *, char *, bool);
-bool	 record_def_data(htable *, char *, char *);
-bool	 record_def_adv(htable *, int, char *, char *, char *, char *);
-bool	 process_def_list(htable *, dynary *, bool);
-bool	 record_have(htable *, char *, char *);
-bool	 label_set(htable *, char *, bool);
-bool	 label_check(htable *, char *);
-bool	 depend_check(htable *, pmkdata *);
-bool	 require_check(htable *);
-char	*get_lang_str(htable *, pmkdata *);
-bool	 check_cfgt_data(pmkdata *);
-bool	 process_required(pmkdata *, pmkcmd *, bool , char *, char *);
-bool	 obsolete_string_to_list(htable *, char *);
-
-#endif /* _PMK_FUNCTOOL_H_ */
+#endif /* _PMK_LANG_H_ */
 
 /* vim: set noexpandtab tabstop=4 softtabstop=4 shiftwidth=4: */

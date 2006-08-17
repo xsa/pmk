@@ -187,6 +187,7 @@
 #define MK_VAR_LDFLAGS	"LDFLAGS"
 #define MK_VAR_LIBS	"LIBS"
 #define MK_VAR_DEBUG	"DEBUG"
+#define MK_VAR_SL_SUPP	"SHLIB_SUPPORT"
 
 /* maximal size of an error message */
 #define MAX_ERR_MSG_LEN		256

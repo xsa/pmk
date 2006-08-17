@@ -2123,3 +2123,5 @@ bool strlcpy_b(char *dst, const char *src, size_t siz) {
 	else
 		return(true);
 }
+
+/* vim: set noexpandtab tabstop=4 softtabstop=4 shiftwidth=4: */
