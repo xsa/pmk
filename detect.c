@@ -41,13 +41,16 @@
 #include "compat/pmk_unistd.h"
 #include "common.h"
 #include "detect.h"
+#include "lang.h"
 
 
-/****************
+/***************
  * keyword data *
  ***********************************************************************/
 
-/* ADD_COMPILER options */
+/*
+ * ADD_COMPILER options
+ */
 kw_t	req_addcomp[] = {
 	{CC_KW_ID,	PO_STRING},
 	{CC_KW_DESCR,	PO_STRING},
@@ -67,7 +70,9 @@ kwopt_t	kw_addcomp = {
 	sizeof(opt_addcomp) / sizeof(kw_t)
 };
 
-/* ADD_SYSTEM options */
+/*
+ * ADD_SYSTEM options
+ */
 kw_t	req_addsys[] = {
 	{SYS_KW_NAME,		PO_STRING},
 	{SYS_KW_EXT,		PO_STRING},
@@ -92,86 +97,126 @@ int	nbkwpc = sizeof(kw_pmkcomp) / sizeof(prskw);
 
 
 /*************
- * functions *
+ * procedures *
  ***********************************************************************/
 
-/*******************
- * compdata_init() *
+/*****************************
+ * %PROC init_compiler_data() *
  ***********************************************************************
- DESCR
-	init comp_data structure
-
- IN
-	csize: compilers hash table size
-	ssize: systems hash table size
-
- OUT
-	new structure or NULL
+ * %DESCR initialize compiler data structure
+ *
+ * %PARAM pcd:	compiler data structure
+ * %PARAM sz:	number of languages
+ *
+ * %RETURN boolean status
  ***********************************************************************/
 
-comp_data *compdata_init(size_t csize, size_t ssize) {
-	comp_data	*cdata;
+bool init_compiler_data(comp_data_t *pcd, size_t lnb) {
+	int	i;
 
-	/* allocate compiler data structure */
-	cdata = (comp_data *) malloc(sizeof(comp_data));
-	if (cdata == NULL)
-		return(NULL);
+	/* record size of compiler profile array */
+	pcd->sz = lnb;
 
-	/* init compilers hash table */
-	cdata->cht = hash_init_adv(csize, NULL, (void (*)(void *)) compcell_destroy, NULL);
-	if (cdata->cht == NULL) {
-		free(cdata);
-		/*debugf("cannot initialize comp_data");*/
-		return(NULL);
+	/* allocate array of compiler profiles */
+	pcd->data = (compiler_t *) malloc(sizeof(compiler_t) * lnb);
+
+	if (pcd->data == NULL) {
+		return false;
 	}
 
-	/* init systems hash table */
-	cdata->sht = hash_init(ssize);
-	if (cdata->sht == NULL) {
-		free(cdata);
-		hash_destroy(cdata->sht);
-		/*debugf("cannot initialize comp_data");*/
-		return(NULL);
+	/* initialize every cell of the array */
+	for (i = 0 ; i < (int) lnb ; i++) {
+		pcd->data[i].c_id = NULL;
+		pcd->data[i].descr = NULL;
+		pcd->data[i].c_macro = NULL;
+		pcd->data[i].v_macro = NULL;
+		pcd->data[i].slcflags = NULL;
+		pcd->data[i].slldflags = NULL;
+		pcd->data[i].version = NULL;
+		pcd->data[i].lang = LANG_UNKNOWN;
 	}
 
-	/* init ok */
-	return(cdata);
+	return true;
 }
 
 
-/**********************
- * compdata_destroy() *
+/******************************
+ * %PROC clean_compiler_cell() *
  ***********************************************************************
- DESCR
-	clean comp_data structure
-
- IN
-	pcd: structure to clean
-
- OUT
-	NONE
+ * %DESCR initialize compiler data structure
+ *
+ * %PARAM pc:	compiler cell structure
+ *
+ * %RETURN boolean status
  ***********************************************************************/
 
-void compdata_destroy(comp_data *pcd) {
-	hash_destroy(pcd->cht);
-	hash_destroy(pcd->sht);
+void clean_compiler_cell(compiler_t *pc) {
+	if (pc->c_id != NULL) {
+		free(pc->c_id);
+	}
+
+	if (pc->descr != NULL) {
+		free(pc->descr);
+	}
+
+	if (pc->c_macro != NULL) {
+		free(pc->c_macro);
+	}
+
+	if (pc->v_macro != NULL) {
+		free(pc->v_macro);
+	}
+
+	if (pc->slcflags != NULL) {
+		free(pc->slcflags);
+	}
+
+	if (pc->slldflags != NULL) {
+		free(pc->slldflags);
+	}
+
+	if (pc->version != NULL) {
+		free(pc->version);
+	}
 }
 
 
-/**********************
- * compcell_destroy() *
+/******************************
+ * %PROC clean_compiler_data() *
  ***********************************************************************
- DESCR
-	clean comp_cell structure
-
- IN
-	pcc: structure to clean
-
- OUT
-	NONE
+ * %DESCR initialize compiler data structure
+ *
+ * %PARAM pcd:	compiler data structure
+ *
+ * %RETURN boolean status
  ***********************************************************************/
 
-void compcell_destroy(comp_cell *pcc) {
+void clean_compiler_data(comp_data_t *pcd) {
+	int	i;
+
+	/* clean every cell of the array */
+	for (i = 0 ; i < (int) pcd->sz ; i++) {
+		clean_compiler_cell(&(pcd->data[i]));
+	}
+
+	/* free allocated memory of the	array */
+	free(pcd->data);
+
+	pcd->sz = 0;
+}
+
+	
+/***************************
+ * %PROC compcell_destroy() *
+ ***********************************************************************
+ * %DESCR clean comp_prscell_t structure
+ *
+ * %PARAM pcc: structure to clean
+ *
+ * %RETURN NONE
+ ***********************************************************************/
+
+void compcell_destroy(comp_prscell_t *pcc) {
 	free(pcc->c_id);
 	free(pcc->descr);
 	free(pcc->c_macro);
@@ -182,33 +227,88 @@ void compcell_destroy(comp_cell *pcc) {
 }
 
 
-/******************
- * add_compiler() *
+/**************************
+ * %PROC init_comp_parse() *
  ***********************************************************************
- DESCR
-	add a new compiler cell
-
- IN
-	pcd: compiler data structure
-	pht: parsed data
-
- OUT
-	boolean
+ * %DESCR initialize comp_parse_t structure from compiler data file
+ *
+ * %RETURN new structure or NULL on failure
  ***********************************************************************/
 
-bool add_compiler(comp_data *pcd, htable *pht) {
-	comp_cell	*pcell;
-	char		*pstr,
-				 tstr[TMP_BUF_LEN];
+comp_parse_t *init_comp_parse(void) {
+	comp_parse_t	*pcp;
 
-	pcell = (comp_cell *) malloc(sizeof(comp_cell));
+	/* allocate compiler data structure */
+	pcp = (comp_parse_t *) malloc(sizeof(comp_parse_t));
+	if (pcp == NULL) {
+		return NULL;
+	}
+
+	/* init compilers hash table */
+	pcp->cht = hash_init_adv(MAX_COMP, NULL, (void (*)(void *)) compcell_destroy, NULL);
+	if (pcp->cht == NULL) {
+		free(pcp);
+		/*debugf("cannot initialize comp_data");*/
+		return NULL;
+	}
+
+	/* init systems hash table */
+	pcp->sht = hash_init(MAX_OS);
+	if (pcp->sht == NULL) {
+		free(pcp);
+		hash_destroy(pcp->sht);
+		/*debugf("cannot initialize comp_data");*/
+		return NULL;
+	}
+
+	/* init ok */
+	return pcp;
+}
+
+
+/*****************************
+ * %PROC destroy_comp_parse() *
+ ***********************************************************************
+ * %DESCR destroy comp_parse_t structure
+ *
+ * %PARAM pcp:	compiler parsed data structure
+ *
+ * %RETURN none
+ ***********************************************************************/
+
+void destroy_comp_parse(comp_parse_t *pcp) {
+	/* destroy compiler cell hash table */
+	hash_destroy(pcp->cht);
+
+	/* destroy system cell hash table */
+	hash_destroy(pcp->sht);
+}
+
+
+/***********************
+ * %PROC add_compiler() *
+ ***********************************************************************
+ * %DESCR add a new compiler cell
+ *
+ * %PARAM pcp:	compiler parsed data structure
+ * %PARAM pht:	compiler cell hash table
+ *
+ * %RETURN boolean
+ ***********************************************************************/
+
+bool add_compiler(comp_parse_t *pcp, htable *pht) {
+	comp_prscell_t	*pcell;
+	char			*pstr,
+					 tstr[TMP_BUF_LEN];
+
+	pcell = (comp_prscell_t *) malloc(sizeof(comp_prscell_t));
 	if (pcell == NULL)
-		return(false);
+		return false;
 
 	pstr = po_get_str(hash_get(pht, CC_KW_ID));
 	if (pstr == NULL) {
 		free(pcell);
-		return(false);
+		return false;
 	} else {
 		pcell->c_id = strdup(pstr);
 	}
@@ -216,7 +316,7 @@ bool add_compiler(comp_data *pcd, htable *pht) {
 	pstr = po_get_str(hash_get(pht, CC_KW_DESCR));
 	if (pstr == NULL) {
 		free(pcell);
-		return(false);
+		return false;
 	} else {
 		pcell->descr = strdup(pstr);
 	}
@@ -224,7 +324,7 @@ bool add_compiler(comp_data *pcd, htable *pht) {
 	pstr = po_get_str(hash_get(pht, CC_KW_MACRO));
 	if (pstr == NULL) {
 		free(pcell);
-		return(false);
+		return false;
 	} else {
 		pcell->c_macro = strdup(pstr);
 	}
@@ -236,7 +336,7 @@ bool add_compiler(comp_data *pcd, htable *pht) {
 		if (snprintf_b(tstr, sizeof(tstr),
 					DEF_VERSION, pstr) == false) {
 			free(pcell);
-			return(false);
+			return false;
 		}
 		pcell->v_macro = strdup(tstr);
 	}
@@ -256,28 +356,26 @@ bool add_compiler(comp_data *pcd, htable *pht) {
 	}
 
 	/* no need to strdup */
-	if (hash_update(pcd->cht, pcell->c_id, pcell) == HASH_ADD_FAIL)
-		return(false);
+	if (hash_update(pcp->cht, pcell->c_id, pcell) == HASH_ADD_FAIL) {
+		return false;
+	}
 
-	return(true);
+	return true;
 }
 
 
-/****************
- * add_system() *
+/*********************
+ * %PROC add_system() *
  ***********************************************************************
- DESCR
-	add a new system cell
-
- IN
-	pcd: compiler data structure
-	pht: parsed data
-
- OUT
-	boolean
+ * %DESCR add a new system cell
+ *
+ * %PARAM pcp:	compiler parsed data structure
+ * %PARAM pht:	system cell hash table
+ *
+ * %RETURN boolean
  ***********************************************************************/
 
-bool add_system(comp_data *pcd, htable *pht, char *osname) {
+bool add_system(comp_parse_t *pcp, htable *pht, char *osname) {
 	char			*name,
 					*pstr;
 	hkeys			*phk;
@@ -285,111 +383,67 @@ bool add_system(comp_data *pcd, htable *pht, char *osname) {
 
 	name = po_get_str(hash_get(pht, SYS_KW_NAME));
 	if (name == NULL) {
-		return(false);
+		return false;
 	}
 
 	if (strncmp(osname, name, sizeof(osname)) != 0) {
 		/* not the target system, skipping */
-		return(true);
+		return true;
 	}
 
-	hash_add(pht, SL_SYS_LABEL, po_mk_str(strdup(name)));
-	hash_delete(pht, SYS_KW_NAME);
+	hash_add(pht, SL_SYS_LABEL, po_mk_str(strdup(name))); /* XXX check */
+	hash_delete(pht, SYS_KW_NAME); /* XXX check ? */
 
 	/* remaining values are system overrides, save it */
 	phk = hash_keys(pht);
-	for(i = 0 ; i < phk->nkey ; i++) {
+	for (i = 0 ; i < phk->nkey ; i++) {
 		pstr = po_get_str(hash_get(pht, phk->keys[i]))	;
-		hash_update_dup(pcd->sht, phk->keys[i], pstr);
+		hash_update_dup(pcp->sht, phk->keys[i], pstr); /* XXX check */
 	}
 
-	return(true);
+	return true;
 }
 
 
-/**************
- * comp_get() *
+/**************************
+ * %PROC parse_comp_file() *
  ***********************************************************************
- DESCR
-	get compiler data
-
- IN
-	pcd : compiler data structure
-	c_id : compiler id
-
- OUT
-	compiler cell structure
+ * %DESCR parse compiler data file
+ *
+ * %PARAM cdfile:	compiler data file to parse
+ * %PARAM osname:	name of the target OS
+ *
+ * %RETURN pointer to allocated compiler parsing structure
  ***********************************************************************/
 
-comp_cell *comp_get(comp_data *pcd, char *c_id) {
-	return(hash_get(pcd->cht, c_id));
-}
+comp_parse_t *parse_comp_file(char *cdfile, char *osname) {
+	FILE			*fd;
+	bool			 rval;
+	comp_parse_t	*pcp;
+	prscell			*pcell;
+	prsdata			*pdata;
 
-
-/********************
- * comp_get_descr() *
- ***********************************************************************
- DESCR
-	get compiler descr
-
- IN
-	pcd:	compiler data structure
-	c_id:	compiler id
- OUT
-	compiler description
- ***********************************************************************/
-
-char *comp_get_descr(comp_data *pcd, char *c_id) {
-	comp_cell	*pcell;
-
-	pcell = hash_get(pcd->cht, c_id);
-
-	return(pcell->descr);
-}
-
-
-/*************************
- * parse_comp_file_adv() *
- ***********************************************************************
- DESCR
-	parse data from PMKCOMP_DATA file
-
- IN
-	cdfile: compilers data file
-	pht: config hash table
-
- OUT
-	compiler data structure or NULL
- ***********************************************************************/
-
-comp_data *parse_comp_file_adv(char *cdfile, htable *pht) {
-	FILE		*fd;
-	bool		 rval;
-	char		*osname = NULL;
-	comp_data	*cdata;
-	prscell		*pcell;
-	prsdata		*pdata;
+	/* try to open compilers data file */
+	fd = fopen(cdfile, "r");
+	if (fd == NULL) {
+		errorf("cannot open '%s' : %s.", cdfile, strerror(errno));
+		return NULL;
+	}
 
 	/* init compiler data structure */
-	cdata = compdata_init(MAX_COMP, MAX_OS);
-	if (cdata == NULL) {
-		return(NULL);
+	pcp = init_comp_parse();
+	if (pcp == NULL) {
+		fclose(fd);
+		return NULL;
 	}
 
 	/* initialize parsing structure */
 	pdata = prsdata_init();
 	if (pdata == NULL) {
-		compdata_destroy(cdata);
 		errorf("cannot initialize prsdata.");
-		return(NULL);
-	}
-
-	fd = fopen(cdfile, "r");
-	if (fd == NULL) {
-		compdata_destroy(cdata);
-		prsdata_destroy(pdata);
-		errorf("cannot open '%s' : %s.", cdfile, strerror(errno));
-		return(NULL);
+		destroy_comp_parse(pcp);
+		fclose(fd);
+		return NULL;
 	}
 
 	/* parse data file and fill prsdata strucutre */
@@ -399,39 +453,33 @@ comp_data *parse_comp_file_adv(char *cdfile, htable *pht) {
 	if (rval == true) {
 		pcell = pdata->tree->first;
 
-		if (pht != NULL) {
-			osname = hash_get(pht, PMKCONF_OS_NAME);
-		}
-
 		while (pcell != NULL) {
 			switch(pcell->token) {
 				case PCC_TOK_ADDC :
-/*debugf("calling add_compiler()");*/
-					if (add_compiler(cdata, pcell->data) == false) {
+					if (add_compiler(pcp, pcell->data) == false) {
 						errorf("add_compiler() failed in parse_comp_file_adv().");
-						compdata_destroy(cdata);
+						destroy_comp_parse(pcp);
 						prsdata_destroy(pdata);
-						return(NULL);
+						return NULL;
 					}
 					break;
 
 				case PCC_TOK_ADDS :
-/*debugf("calling add_system()");*/
 					if (osname != NULL) {
-						if (add_system(cdata, pcell->data, osname) == false) {
+						if (add_system(pcp, pcell->data, osname) == false) {
 							errorf("add_system() failed in parse_comp_file_adv().");
-							compdata_destroy(cdata);
+							destroy_comp_parse(pcp);
 							prsdata_destroy(pdata);
-							return(NULL);
+							return NULL;
 						}
 					}
 					break;
 
 				default :
 					errorf("parsing of data file failed.");
-					compdata_destroy(cdata);
+					destroy_comp_parse(pcp);
 					prsdata_destroy(pdata);
-					return(NULL);
+					return NULL;
 					break;
 			}
 
@@ -439,116 +487,100 @@ comp_data *parse_comp_file_adv(char *cdfile, htable *pht) {
 		}
 	} else {
 		errorf("parsing of data file failed.");
-		compdata_destroy(cdata);
+		destroy_comp_parse(pcp);
 		prsdata_destroy(pdata);
-		return(NULL);
+		return NULL;
 	}
 
 	/* parsing data no longer needed */
 	prsdata_destroy(pdata);
 
-	return(cdata);
+	return pcp;
 }
 
 
-/*********************
- * parse_comp_file() *
+/************************
+ * %PROC gen_test_file() *
  ***********************************************************************
- DESCR
-	parse data from PMKCOMP_DATA file
-
- IN
-	cdfile: compilers data file
-
- OUT
-	compiler data structure or NULL
+ * %DESCR generate test file
+ *
+ * %PARAM pcp:		compiler data structure
+ * %PARAM fnbuf:	filename buffer
+ * %PARAM bsz:		buffer size
+ *
+ * %RETURN boolean status
  ***********************************************************************/
 
-comp_data *parse_comp_file(char *cdfile) {
-	return(parse_comp_file_adv(cdfile, NULL));
-}
+bool gen_test_file(comp_parse_t *pcp, char *fnbuf, size_t bsz) {
+	FILE				*fp;
+	comp_prscell_t		*pcell;
+	hkeys				*phk;
+	unsigned int		 i;
 
-
-/*******************
- * gen_test_file() *
- ***********************************************************************
- DESCR
-	generate test file
-
- IN
-	fp: target file
-	pcd: compiler data structure
-
- OUT
-	boolean
- ***********************************************************************/
-
-bool gen_test_file(FILE *fp, comp_data *pcd) {
-	comp_cell	*pcell;
-	hkeys		*phk;
-	htable		*pht;
-	unsigned int	 i;
-
-	pht = pcd->cht;
-
-	phk = hash_keys(pht);
+	/* get key list of parsed compiler data */
+	phk = hash_keys(pcp->cht);
 	if (phk == NULL) {
-		debugf("cannot get hash keys.");
+		errorf("no parsed compiler data found");
+		return false;
 	}
 
+	/* open source file for writing */
+	fp = tmps_open(CC_TEST_FILE, "w", fnbuf, bsz, strlen(CC_TFILE_EXT));
+	if (fp == NULL) {
+		errorf("cannot open compiler test file ('%s').", fnbuf);
+		hash_free_hkeys(phk);
+		return false;
+	}
+
+	/*
+	 * fill the source test file with the code that try to identify the compiler
+	 */
 	fprintf(fp, COMP_TEST_HEADER);
 
-	for(i = 0 ; i < phk->nkey ; i++) {
-		pcell = hash_get(pht, phk->keys[i]);
-		fprintf(fp, COMP_TEST_FORMAT, pcell->descr,
-			pcell->c_macro, pcell->c_id, pcell->v_macro);
+	for (i = 0 ; i < phk->nkey ; i++) {
+		pcell = hash_get(pcp->cht, phk->keys[i]);
+		fprintf(fp, COMP_TEST_FORMAT, pcell->descr, pcell->c_macro, pcell->c_id, pcell->v_macro);
 	}
 
 	fprintf(fp, COMP_TEST_FOOTER);
 
-	return(true);
+	fclose(fp);
+	hash_free_hkeys(phk);
+
+	return true;
 }
 
 
-/*********************
- * detect_compiler() *
+/**********************
+ * %PROC comp_identify *
  ***********************************************************************
- DESCR
-	detect compiler
-
- IN
-	cpath: compiler path
-	blog: buildlog file or /dev/null
-	pcd: compiler data structure
-	cinfo: compiler info structure
-
- OUT
-	boolean
+ * %DESCR identify given compiler
+ *
+ * %PARAM cpath:	path of the compiler to identify
+ * %PARAM blog:		build log file name
+ * %PARAM pc:		compiler cell to populate
+ * %PARAM pcp:		compiler parsing structure
+ *
+ * %RETURN boolean
  ***********************************************************************/
 
-bool detect_compiler(char *cpath, char *blog, comp_data *pcd, comp_info *cinfo) {
-	FILE		*tfp,
-			*rpipe;
+bool comp_identify(char *cpath, char *blog, compiler_t *pc, comp_parse_t *pcp) {
+	FILE		*rpipe;
 	bool		 failed = false;
 	char		 cfgcmd[MAXPATHLEN],
-			 ftmp[MAXPATHLEN],
-			 pipebuf[TMP_BUF_LEN];
-	int		 r;
+				 ftmp[MAXPATHLEN],
+				 pipebuf[TMP_BUF_LEN];
+	int			 r;
 
-	tfp = tmps_open(CC_TEST_FILE, "w", ftmp, sizeof(ftmp), strlen(CC_TFILE_EXT));
-	if (tfp != NULL) {
-		/* fill test file */
-		gen_test_file(tfp, pcd);
-		fclose(tfp);
-	} else {
-		errorf("cannot open test file ('%s').", ftmp);
-		return(false);
+	if (gen_test_file(pcp, ftmp, sizeof(ftmp)) == false) {
+		return false;
 	}
+
 	/* build compiler command */
 	if (snprintf_b(cfgcmd, sizeof(cfgcmd), CC_TEST_FORMAT,
 				cpath, CC_TEST_BIN, ftmp, blog) == false) {
-		errorf("failed to build compiler command line");
-		return(false);
+		errorf("failed to build compiler command line.");
+		return false;
 	}
 
 	/* get result */
@@ -560,6 +592,7 @@ bool detect_compiler(char *cpath, char *blog, comp_data *pcd, comp_info *cinfo) 
 		errorf("cannot remove %s : %s.", ftmp, strerror(errno));
 	}
 
+	/* if compiled without error */
 	if (r == 0) {
 		rpipe = popen(CC_TEST_BIN, "r");
 		if (rpipe != NULL) {
@@ -568,13 +601,13 @@ bool detect_compiler(char *cpath, char *blog, comp_data *pcd, comp_info *cinfo) 
 				failed = true;
 			} else {
 				/* get compiler id */
-				cinfo->c_id = strdup(pipebuf);
+				pc->c_id = strdup(pipebuf);
 
 				if (get_line(rpipe, pipebuf, sizeof(pipebuf)) == false) {
 					errorf("cannot get compiler version.");
 					failed = true;
 				} else {
-					cinfo->version = strdup(pipebuf);
+					pc->version = strdup(pipebuf);
 				}
 			}
 
@@ -586,17 +619,100 @@ bool detect_compiler(char *cpath, char *blog, comp_data *pcd, comp_info *cinfo) 
 
 		/* delete binary */
 		if (unlink(CC_TEST_BIN) == -1) {
-			errorf("cannot remove %s : %s.",
-				CC_TEST_BIN, strerror(errno));
+			errorf("cannot remove %s : %s.", CC_TEST_BIN, strerror(errno));
 		}
 
-		if (failed == true)
-			return(false);
+		if (failed == true) {
+			return false;
+		}
 	} else {
 		errorf("failed to build test binary : %s.", strerror(errno));
+		return false;
+	}
+
+	return true;
+}
+
+
+/********************
+ * %PROC comp_detect *
+ ***********************************************************************
+ * %DESCR identify given compiler
+ *
+ * %PARAM cpath:	path of the compiler to identify
+ * %PARAM blog:		build log file name
+ * %PARAM pc:		compiler cell to populate
+ * %PARAM pcp:		compiler parsing structure
+ * %PARAM label:		XXX
+ *
+ * %RETURN boolean
+ ***********************************************************************/
+
+bool comp_detect(char *cpath, char *blog, compiler_t *pc, comp_parse_t *pcp, char *label) {
+	char			 buf[TMP_BUF_LEN],
+					*pstr;
+	comp_prscell_t	*pcell;
+
+	if (comp_identify(cpath, blog, pc, pcp) == false) {
+		return false;
+	}
+
+	/* look for the detected compiler data */
+	pcell = hash_get(pcp->cht, pc->c_id);
+	if (pcell == NULL) {
+		errorf("unknown compiler identifier : %s\n", pc->c_id);
+		return false;
+	}
+
+	/*
+	 * populate compiler cell with identified compiler data
+	 *
+	 * c_id and version have already been set by comp_identify
+	 * lang XXX ?
+	 */
+	pc->descr = strdup(pcell->descr);
+	pc->c_macro = strdup(pcell->c_macro); /* XXX useless ? */
+	pc->v_macro = strdup(pcell->v_macro); /* XXX useless ? */
+
+	/*
+	 * check system specific flags for shared library support
+	 */
+
+	/* generate tag for system specific compiler flags */
+	if (snprintf_b(buf, sizeof(buf), "%s_%s", label, pc->c_id) == false) {
+		errorf("overflow.\n");
 		return(false);
 	}
 
-	return(true);
+	/* check if an override exists for compiler flags */
+	pstr = hash_get(pcp->sht, buf);
+	if (pstr == NULL) {
+		/* take compiler's generic flags */
+		pc->slcflags = strdup(pcell->slcflags);
+	} else {
+		/* take system specific flags */
+		pc->slcflags = strdup(pstr);
+	}
+
+	/* generate tag for system specific linker flags */
+	if (snprintf_b(buf, sizeof(buf), "%s_%s", SL_LDFLAG_VARNAME, pc->c_id) == false) {
+		errorf("overflow.\n");
+		return(false);
+	}
+
+	/* check if an override exists for linker flags */
+	pstr = hash_get(pcp->sht, buf);
+	if (pstr == NULL) {
+		/* take compiler's generic flags */
+		pc->slldflags = strdup(pcell->slldflags);
+	} else {
+		/* take system specific flags */
+		pc->slldflags = strdup(pstr);
+	}
+	
+	/*pcd->data[i].lang = LANG_UNKNOWN;*/
+
+	return true;
 }
 
+/* vim: set noexpandtab tabstop=4 softtabstop=4 shiftwidth=4: */

@@ -1,7 +1,7 @@
 /* $Id$ */
 
 /*
- * Copyright (c) 2003-2005 Damien Couderc
+ * Copyright (c) 2003-2006 Damien Couderc
  * Copyright (c) 2003-2004 Xavier Santolaria <xavier@santolaria.net>
  * All rights reserved.
  *
@@ -541,6 +541,7 @@ void debugf(const char *fmt, ...) {
 	va_end(plst);
 
 	fprintf(stdout, "!DEBUG! %s\n", buf);
+	fflush(stdout);
 }
 
 
@@ -614,7 +615,9 @@ bool pmk_log(const char *fmt, ...) {
 
 	if (pmk_log_fp != NULL) {
 		fprintf(pmk_log_fp, buf);
+		fflush(pmk_log_fp);
 		fprintf(stdout, buf);
+		fflush(stdout);
 		return(true);
 	} else {
 		errorf("unable to log.");

@@ -42,6 +42,7 @@
 
 #include "dynarray.h"
 #include "hash.h"
+#include "lang.h"
 #include "premake.h"
 
 
@@ -49,26 +50,16 @@
  * constants *
  **********************************************************************************************/
 
+/* linking methods */
 enum {
-	LANG_UNKNOWN = 0,
-	LANG_C,
-	LANG_CXX
+	LINK_NONE = 0,	/* no linking */
+	LINK_SRC,		/* link source */
+	LINK_OBJ		/* link object */
 };
 
-typedef unsigned int	lang_t;
-
-
-#define LANG_NAME_LEN	64
-#define COMP_NAME_LEN	64
-#define PRE_NAME_LEN	64
-#define CFLG_NAME_LEN	64
-#define SHFLG_NAME_LEN	64
-
 #define C_FILE_EXT		".c"
-#define TEST_FILE_NAME	TMPDIR "/pmk_XXXXXXXX" C_FILE_EXT
-#define BIN_TEST_NAME	TMPDIR "/pmk_XXXXXXXX_bin"
-
-#define UNKNOWN_LANG	-1
+#define BIN_TEST_NAME	TMPDIR "/pmk_XXXXXXXX"
+#define TEST_FILE_NAME	BIN_TEST_NAME C_FILE_EXT
 
 #define CODE_C_HDR		"#include <%s>\n"
 #define CODE_C_BEG		"/* main procedure */\n" \
@@ -91,11 +82,18 @@ typedef unsigned int	lang_t;
 						"\treturn(0);\n" \
 						"}\n"
 
-#define CODE_C_SHARED	"/* simple C function for shared object */\n" \
+#define CODE_C_SHARED_F	"/* simple C function for shared object */\n" \
 						"void shfunc(void);\n\n" \
 						"void shfunc(void) {\n" \
 						"\tint    i = 0;\n\n" \
 						"\ti++;\n" \
+						"}\n"
+
+#define CODE_C_SHARED_M	"/* main object */\n" \
+						"void shfunc(void);\n\n" \
+						"int main() {\n" \
+						"\tshfunc();\n" \
+						"\treturn(0);\n" \
 						"}\n"
 
 
@@ -103,18 +101,12 @@ typedef unsigned int	lang_t;
  * type and structure definitions *
  ***********************************************************************/
 
+/* code building cell */
 typedef struct {
-	char	name[LANG_NAME_LEN],
-			compiler[COMP_NAME_LEN],
-			cflags[CFLG_NAME_LEN],
-			slflags[CFLG_NAME_LEN];
-	lang_t	lang;
-} lgdata_t;
-
-typedef struct {
-	char		 srcfile[MAXPATHLEN],
-				 binfile[MAXPATHLEN],
-				 bldcmd[MAXPATHLEN],
+	char		 binfile[MAXPATHLEN],	/* binary file */
+				 bldcmd[MAXPATHLEN],	/* building command buffer */
+				 objfile[MAXPATHLEN],	/* binary file */
+				 srcfile[MAXPATHLEN],	/* source file */
 				*header,				/* header filename */
 				*library,				/* library name */
 				*define,				/* macro name */
@@ -122,14 +114,15 @@ typedef struct {
 				*type,					/* type name */
 				*member,				/* type member name */
 				*pathcomp,				/* compiler path */
-				*flags,					/* compilation flags */
-				*slflags,				/* compilation flags */
+				*cflags,				/* compilation flags */
+				*slcflags,				/* shared lib compilation flags */
+				*slldflags,				/* shared lib linking flags */
 				*alt_cflags,			/* alternative compilation flags variable */
 				*alt_libs,				/* alternative linker flags variable */
 				*blog;					/* build log */
 	dynary		*subhdrs;				/* header dependencies */
-	lang_t		 lang;					/* language */
-	lgdata_t	*pld;
+	int			 lang;					/* language id */
+	lgdata_t	*pld;					/* pointer to related language structure */
 } code_bld_t;
 
 
@@ -137,10 +130,14 @@ typedef struct {
  * prototypes *
  ***********************************************************************/
 
+void	 name_randomize(char *);
 void	 code_bld_init(code_bld_t *, char *);
 int		 verify_language(char *);
 bool	 set_language(code_bld_t *, char *);
 char	*set_compiler(code_bld_t *, htable *t);
+void	 set_cflags(code_bld_t *, char *);
+void	 set_slcflags(code_bld_t *, char *);
+void	 set_slldflags(code_bld_t *, char *);
 char	*get_lang_label(code_bld_t *);
 char	*get_compiler_label(code_bld_t *);
 char	*get_cflags_label(code_bld_t *);
@@ -148,13 +145,13 @@ char	*get_libs_label(code_bld_t *);
 void	 code_logger(FILE *, FILE *, const char *, ...);
 bool	 code_builder(code_bld_t *);
 bool	 c_code_builder(code_bld_t *);
-bool	 shared_builder(code_bld_t *);
-bool	 c_shared_builder(code_bld_t *);
-bool	 cmdline_builder(code_bld_t *, bool);
-bool	 c_cmdline_builder(code_bld_t *, bool);
+bool	 shared_builder(code_bld_t *, char *);
+bool	 c_shared_builder(code_bld_t *, char *);
+bool	 cmdline_builder(code_bld_t *, int);
+bool	 c_cmdline_builder(code_bld_t *, int);
 bool	 object_builder(code_bld_t *);
 void	 cb_cleaner(code_bld_t *);
-bool	 check_so_support(char *, htable *);
+bool	 check_so_support(code_bld_t *, char *, char *);
 char	*obsolete_get_lang_from_comp(char *);
 
 #endif /* _PMK_CODEBUILD_H_ */

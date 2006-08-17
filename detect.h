@@ -64,10 +64,10 @@
 
 #define CC_TFILE_EXT	".c"
 #define CC_TEST_FILE	TMPDIR "/cc_testXXXXXXXX" CC_TFILE_EXT
-#define CC_TEST_BIN	TMPDIR "/cc_test_bin"
+#define CC_TEST_BIN		TMPDIR "/cc_test_bin"
 #define CC_TEST_FORMAT	"%s -o %s %s >%s 2>&1"
 
-#define DEF_VERSION	"#define CC_V\t%s"
+#define DEF_VERSION		"#define CC_V\t%s"
 #define DEF_NOVERSION	"#undef CC_V"
 
 #define SL_LDFLAG_VARNAME	"SLLDFLAGS"
@@ -80,18 +80,18 @@
  ***********************************************************************/
 
 /* ADD_COMPILER keyword options */
-#define CC_KW_ID	"ID"
-#define CC_KW_DESCR	"DESCR"
-#define CC_KW_MACRO	"MACRO"
+#define CC_KW_ID		"ID"
+#define CC_KW_DESCR		"DESCR"
+#define CC_KW_MACRO		"MACRO"
 #define CC_KW_VERSION	"VERSION"
 #define CC_KW_SLCFLAGS	"SLCFLAGS"
 #define CC_KW_SLLDFLAGS	"SLLDFLAGS"
 
 /* ADD_SYSTEM keyword options */
-#define SYS_KW_NAME	"NAME"
-#define SYS_KW_EXT	"SL_EXT"
+#define SYS_KW_NAME		"NAME"
+#define SYS_KW_EXT		"SL_EXT"
 #define SYS_KW_VERSION	"SL_VERSION"
-#define SYS_KW_FMT	"SL_LIBNAME"
+#define SYS_KW_FMT		"SL_LIBNAME"
 #define SYS_KW_FMT_MAJ	"SL_LIBNAME_VMAJ"
 #define SYS_KW_FMT_FULL	"SL_LIBNAME_VFULL"
 
@@ -104,7 +104,7 @@
 #define SL_KW_LIB_MIN	"SL_MINOR"
 
 
-/*************************
+/************************
  * code of various tests *
  ***********************************************************************/
 
@@ -141,45 +141,84 @@
 	"}\n"
 
 
-/****************************
+/***************************
  * compiler data structures *
  ***********************************************************************/
 
+/* compiler cell */
 typedef struct {
 	char	*c_id,
-		*descr,
-		*c_macro,
-		*v_macro,
-		*slcflags,
-		*slldflags;
-} comp_cell;
+			*descr,
+			*c_macro,
+			*v_macro,
+			*slcflags,
+			*slldflags;
+} comp_prscell_t;
 
 typedef struct {
 	char	*c_id,
-		*version;
+			*version;
 } comp_info;
 
 typedef struct {
 	htable	*cht,	/* compiler data hash table */
-		*sht;	/* system data hash table */
+			*sht;	/* system data hash table */
 } comp_data;
 
+/*********************
+ * %TYPE comp_parse_t *
+ ***********************************************************************
+ * %DESCR compiler data storage for detection
+ ***********************************************************************/
+typedef struct {
+	htable		*cht,	/* %FIELD cht:	compiler cell data hash table */
+				*sht;	/* %FIELD sht:	system cell data hash table */
+} comp_parse_t;
 
-/***********************
- * function prototypes *
+/*******************
+ * %TYPE compiler_t *
+ ***********************************************************************
+ * %DESCR compiler profile containing data for shared lib support
+ ***********************************************************************/
+typedef struct {
+	char	*c_id,		/* %FIELD c_id:			compiler identifier */
+			*descr,		/* %FIELD descr:		compiler description */
+			*c_macro,	/* %FIELD c_macro:		XXX */
+			*v_macro,	/* %FIELD v_macro:		XXX */
+			*slcflags,	/* %FIELD slcflags:		shared lib compiler flags */
+			*slldflags,	/* %FIELD slldflags:	shared lib linker flags */
+			*version;	/* %FIELD version:		detected version of the compiler */
+	int		 lang;		/* %FIELD lang:			language identifier */
+} compiler_t;
+
+/********************
+ * %TYPE comp_data_t *
+ ***********************************************************************
+ * %DESCR parsed compilers data
+ ***********************************************************************/
+typedef struct {
+	compiler_t	*data;	/* %FIELD data:	array of data cells for detected compiler */
+	size_t		 sz;	/* %FIELD sz:	number of data cells */
+} comp_data_t;
+
+
+/*********************
+ * SECTION prototypes *
  ***********************************************************************/
 
-comp_data	*compdata_init(size_t, size_t);
-void		 compdata_destroy(comp_data *);
-void		 compcell_destroy(comp_cell *);
-bool		 add_compiler(comp_data *, htable *);
-bool		 add_system(comp_data *, htable *, char *);
-comp_cell	*comp_get(comp_data *, char *c_id);
-char		*comp_get_descr(comp_data *, char *);
-comp_data	*parse_comp_file_adv(char *, htable *);
-comp_data	*parse_comp_file(char *);
-bool		 gen_test_file(FILE *, comp_data *);
-bool		 detect_compiler(char *, char *, comp_data *, comp_info *);
+bool			 init_compiler_data(comp_data_t	*, size_t);
+void			 clean_compiler_cell(compiler_t *);
+void			 clean_compiler_data(comp_data_t *);
+void			 compcell_destroy(comp_prscell_t *);
+comp_parse_t	*init_comp_parse(void);
+void			 destroy_comp_parse(comp_parse_t *);
+bool			 add_compiler(comp_parse_t *, htable *);
+bool			 add_system(comp_parse_t *, htable *, char *);
+comp_parse_t	*parse_comp_file(char *, char *);
+bool			 gen_test_file(comp_parse_t *, char *, size_t);
+bool			 comp_identify(char *, char *, compiler_t *, comp_parse_t *);
+bool			 comp_detect(char *, char *, compiler_t *, comp_parse_t *, char *);
 
 #endif /* _DETECT_H_ */
 
+/* vim: set noexpandtab tabstop=4 softtabstop=4 shiftwidth=4: */

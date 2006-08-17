@@ -37,6 +37,7 @@
 #ifndef _PMK_H_
 #define _PMK_H_
 
+#include "detect.h"
 #include "dynarray.h"
 #include "hash.h"
 #include "cfgtool.h"
@@ -106,7 +107,7 @@ typedef struct {
 
 /* pmk data */
 typedef struct {
-	bool		 comp_detect;
+	bool		 sys_detect;
 	cfgtdata	*cfgt;
 	char		*ac_file,
 				*lang,
@@ -116,10 +117,10 @@ typedef struct {
 				 ovrfile[MAXPATHLEN],
 				 buildlog[MAXPATHLEN],
 				 errmsg[MAX_ERR_MSG_LEN];
+	comp_data_t	 comp_data;
 	dynary		*tlist;
 	htable		*htab,
-				*labl,
-				*slht;
+				*labl;
 	pmkdyn_t	 dyndata;
 } pmkdata;
 

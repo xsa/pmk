@@ -808,6 +808,7 @@ bool prs_c_common(prs_cmn_t *pcmn, FILE *fp, char **lkw, char **tkw) {
 				}
 
 				idtf_flag = false;
+				type_flag = true;
 			}
 
 			/* skip character */
@@ -944,3 +945,4 @@ bool prs_c_common(prs_cmn_t *pcmn, FILE *fp, char **lkw, char **tkw) {
 	return(true);
 }
 
+/* vim: set noexpandtab tabstop=4 softtabstop=4 shiftwidth=4: */

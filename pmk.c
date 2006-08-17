@@ -55,6 +55,7 @@
 #include "common.h"
 #include "func.h"
 #include "hash_tools.h"
+#include "lang.h"
 #include "pathtools.h"
 #include "pmk.h"
 #include "tags.h"
@@ -112,23 +113,27 @@ pmkdata *pmkdata_init(void) {
 		return(NULL);
 	}
 
-	/* init compiler detection flag */
-	ppd->comp_detect = false;
+	if (init_compiler_data(&(ppd->comp_data), LANG_NUMBER) == false) {
+		hash_destroy(ppd->htab);
+		hash_destroy(ppd->labl);
+		errorf("cannot initialize compiler data structure.");
+		return(NULL);
+	}
 
-	/* init template list */
-	ppd->tlist = NULL;
+	/* init compiler detection flag */
+	ppd->sys_detect = false;
 
 	/* init autoconf file */
 	ppd->ac_file = NULL;
+
+	/* init template list */
+	ppd->tlist = NULL;
 
 	/* init default language */
 	ppd->lang = NULL;
 
 	/* init on demand */
 	ppd->cfgt = NULL;
-
-	/* init shared lib support */
-	ppd->slht = NULL;
 
 	return(ppd);
 }
@@ -301,6 +306,11 @@ debugf("%s = '%s'", pstr, buf);
 		if (hash_update_dup(pht, "EGREP", pstr) == HASH_ADD_FAIL) {
 			return(false);
 		}
+	}
+
+	/* shared lib support */
+	if (hash_update_dup(pht, MK_VAR_SL_SUPP, "`false`") == HASH_ADD_FAIL) {
+		return(false);
 	}
 
 	/* set absolute paths */
@@ -786,9 +796,13 @@ void clean(pmkdata *pgd) {
 	if (pgd->labl != NULL) {
 		hash_destroy(pgd->labl);
 	}
+
+	clean_compiler_data(&(pgd->comp_data));
+
 	if (pgd->cfgt != NULL) {
 		cfgtdata_destroy(pgd->cfgt);
 	}
+
 	if (pgd->tlist != NULL) {
 		da_destroy(pgd->tlist);
 	}

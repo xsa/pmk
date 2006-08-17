@@ -1,7 +1,7 @@
 /* $Id$ */
 
 /*
- * Copyright (c) 2005 Damien Couderc
+ * Copyright (c) 2005-2006 Damien Couderc
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -48,11 +48,51 @@
  * language data *
  ***********************************************************************/
 
-lgdata_t	lang_data[] = { /* XXX TODO use defines */
-	{"C",	PMKCONF_BIN_CC,		"CFLAGS",	"SLCFLAGS",		LANG_C},
-	{"C++",	PMKCONF_BIN_CXX,	"CXXFLAGS",	"SLCXXFLAGS",	LANG_CXX}
+lgdata_t	lang_data[] = {
+/*	language label		compiler label		comp. flags label	SL cflags label		language ID */
+	{LANG_LABEL_C,		PMKCONF_BIN_CC,		CFLAGS_LABEL_C,		SLCFLAGS_LABEL_C,	LANG_C},
+	{LANG_LABEL_CXX,	PMKCONF_BIN_CXX,	CFLAGS_LABEL_CXX,	SLCFLAGS_LABEL_CXX,	LANG_CXX}
 };
 size_t		nb_lang_data = sizeof(lang_data) / sizeof(lgdata_t);
+
+
+/********************
+ * name_randomize() *
+ ***********************************************************************
+ DESCR
+	randomize a filename
+
+ IN
+	name :	filename to randomize
+
+ OUT
+	NONE
+ ***********************************************************************/
+
+void name_randomize(char *name) {
+	struct timeval	 tv;
+	char			 subst[] = "aZbY0cXdWe1VfUgT2hSiRj3QkPlO4mNnMo5LpKqJ6rIsHt7GuFvE8wDxCy9BzA";
+	int				 len,
+					 i;
+
+	/* intialise random() */
+	len = strlen(subst);
+	gettimeofday(&tv, NULL);
+	srandom(tv.tv_sec * tv.tv_usec);
+
+	while (*name != '\0') {
+		/* if character is X then randomize */
+		if (*name == 'X') {
+			/* get random value */
+			i = (int) random() % len;
+			/* replace */
+			*name = subst[i];
+		}
+
+		/* next character */
+		name++;
+	}
+}
 
 
 /*******************
@@ -70,7 +110,7 @@ size_t		nb_lang_data = sizeof(lang_data) / sizeof(lgdata_t);
  ***********************************************************************/
 
 void code_bld_init(code_bld_t *pcb, char *blog) {
-	/* init struct */
+	/* init data pointers */
 	pcb->header = NULL;
 	pcb->library = NULL;
 	pcb->define = NULL;
@@ -78,11 +118,22 @@ void code_bld_init(code_bld_t *pcb, char *blog) {
 	pcb->type = NULL;
 	pcb->member = NULL;
 	pcb->pathcomp = NULL;
-	pcb->flags = NULL;
+	pcb->cflags = NULL;
+	pcb->slcflags = NULL;
+	pcb->slldflags = NULL;
 	pcb->alt_cflags = NULL;
 	pcb->alt_libs = NULL;
 	pcb->subhdrs = NULL;
 
+	/* init filename buffers */
+	pcb->binfile[0] = '\0';
+	pcb->objfile[0] = '\0';
+	pcb->srcfile[0] = '\0';
+
+	/* init command line buffer */
+	pcb->bldcmd[0] = '\0';
+
+	/* set build log file name */
 	pcb->blog = blog;
 }
 
@@ -116,7 +167,7 @@ int verify_language(char *lang) {
 	}
 
 	/* unknown language */
-	return(UNKNOWN_LANG);
+	return(LANG_UNKNOWN);
 }
 
 
@@ -139,7 +190,7 @@ bool set_language(code_bld_t *pcb, char *lang) {
 
 	/* verify if the language is supported */
 	i = verify_language(lang);
-	if (i == UNKNOWN_LANG) {
+	if (i == LANG_UNKNOWN) {
 		/* unknown language */
 		pcb->pld = NULL;
 		return(false);
@@ -170,6 +221,57 @@ char *set_compiler(code_bld_t *pcb, htable *pht) {
 	pcb->pathcomp = hash_get(pht, pcb->pld->compiler);
 
 	return(pcb->pathcomp);
+}
+
+
+/********************
+ * PROC set_cflags() *
+ ***********************************************************************
+ * DESCR XXX
+ *
+ * PARAM XXX
+ * PARAM XXX
+ *
+ * RETURN XXX
+ ***********************************************************************/
+
+void set_cflags(code_bld_t *pcb, char *cflags) {
+	/* set cflags value */
+	pcb->cflags = cflags;
+}
+
+
+/**********************
+ * PROC set_slcflags() *
+ ***********************************************************************
+ * DESCR XXX
+ *
+ * PARAM XXX
+ * PARAM XXX
+ *
+ * RETURN XXX
+ ***********************************************************************/
+
+void set_slcflags(code_bld_t *pcb, char *slcflags) {
+	/* set slcflags value */
+	pcb->slcflags = slcflags;
+}
+
+
+/***********************
+ * PROC set_slldflags() *
+ ***********************************************************************
+ * DESCR XXX
+ *
+ * PARAM XXX
+ * PARAM XXX
+ *
+ * RETURN XXX
+ ***********************************************************************/
+
+void set_slldflags(code_bld_t *pcb, char *slldflags) {
+	/* set slldflags value */
+	pcb->slldflags = slldflags;
 }
 
 
@@ -417,11 +519,11 @@ bool c_code_builder(code_bld_t *pcb) {
 	boolean
  ***********************************************************************/
 
-bool shared_builder(code_bld_t *pcb) {
+bool shared_builder(code_bld_t *pcb, char *content) {
 	switch (pcb->lang) {
 		case LANG_C :
 		case LANG_CXX :
-			return(c_shared_builder(pcb));
+			return(c_shared_builder(pcb, content));
 	}
 
 	return(false);
@@ -441,7 +543,7 @@ bool shared_builder(code_bld_t *pcb) {
 	boolean
  ***********************************************************************/
 
-bool c_shared_builder(code_bld_t *pcb) {
+bool c_shared_builder(code_bld_t *pcb, char *content) {
 	FILE	*tfp,
 			*lfp;
 
@@ -460,8 +562,8 @@ bool c_shared_builder(code_bld_t *pcb) {
 
 	fprintf(lfp, "Generated source file:\n");
 
-	/* shared function */
-	code_logger(tfp, lfp, CODE_C_SHARED);
+	/* code content */
+	code_logger(tfp, lfp, content);
 
 	fclose(tfp);
 	fclose(lfp);
@@ -488,20 +590,20 @@ bool c_shared_builder(code_bld_t *pcb) {
 
  IN
 	pcb :		code build data structure
-	dolink :	linking indicator
+	lnk :		linking method
 
  OUT
 	boolean
  ***********************************************************************/
 
-bool cmdline_builder(code_bld_t *pcb, bool dolink) {
+bool cmdline_builder(code_bld_t *pcb, int lnk) {
 	FILE	*lfp;
 	bool	 r = false;
 	
 	switch (pcb->lang) {
 		case LANG_C :
 		case LANG_CXX :
-			r = c_cmdline_builder(pcb, dolink);
+			r = c_cmdline_builder(pcb, lnk);
 	}
 
 	if (r == true) {
@@ -534,39 +636,72 @@ bool cmdline_builder(code_bld_t *pcb, bool dolink) {
 
  IN
 	pcb :		code build data structure
-	dolink :	linking indicator
+	lnk :		linking method
 
  OUT
 	boolean
  ***********************************************************************/
 
-bool c_cmdline_builder(code_bld_t *pcb, bool dolink) {
+bool c_cmdline_builder(code_bld_t *pcb, int lnk) {
 	/* start with compiler */
 	if (pcb->pathcomp == NULL) {
 		return(false);
 	}
 	strlcpy(pcb->bldcmd, pcb->pathcomp, sizeof(pcb->bldcmd));
 
-	/* if flags are provided */
-	if (pcb->flags != NULL) {
+	/* if compiler flags are provided */
+	if (pcb->cflags != NULL) {
 		strlcat(pcb->bldcmd, " ", sizeof(pcb->bldcmd));
-		strlcat(pcb->bldcmd, pcb->flags, sizeof(pcb->bldcmd));
+		strlcat(pcb->bldcmd, pcb->cflags, sizeof(pcb->bldcmd));
 	}
 
-	/* copy template of object name */
-	strlcpy(pcb->binfile, BIN_TEST_NAME, sizeof(pcb->binfile));
-
-	/* if we don't link then append object extension */
-	if (dolink == false) {
-		strlcat(pcb->binfile, ".o", sizeof(pcb->binfile));
+	/* if not in linking mode */
+	if (lnk == LINK_NONE) {
+		/* append shared lib compiler flags if they are provided */
+		if (pcb->slcflags != NULL) {
+			strlcat(pcb->bldcmd, " ", sizeof(pcb->bldcmd));
+			strlcat(pcb->bldcmd, pcb->slcflags, sizeof(pcb->bldcmd));
+		}
+	} else {
+		/* else append shared lib linker flags if they are provided */
+		if (pcb->slldflags != NULL) {
+			strlcat(pcb->bldcmd, " ", sizeof(pcb->bldcmd));
+			strlcat(pcb->bldcmd, pcb->slldflags, sizeof(pcb->bldcmd));
+		}
 	}
-
-	/* randomize name */
-	mktemp(pcb->binfile);
 
 	/* append the object name */
 	strlcat(pcb->bldcmd, " -o ", sizeof(pcb->bldcmd));
-	strlcat(pcb->bldcmd, pcb->binfile, sizeof(pcb->bldcmd));
+	if (lnk != LINK_NONE) {
+		/*
+		 * linking => create a binary file
+		 */
+
+		/* copy filename template */
+		strlcpy(pcb->binfile, BIN_TEST_NAME, sizeof(pcb->binfile));
+
+		/* randomize binary name */
+		name_randomize(pcb->binfile);
+
+		/* append binary file name */
+		strlcat(pcb->bldcmd, pcb->binfile, sizeof(pcb->bldcmd));
+	} else {
+		/*
+		 * no linking => create object file
+		 */
+
+		/* copy filename template */
+		strlcpy(pcb->objfile, BIN_TEST_NAME, sizeof(pcb->objfile));
+
+		/* randomize object name */
+		name_randomize(pcb->objfile);
+
+		/* append object extension */
+		strlcat(pcb->objfile, ".o", sizeof(pcb->objfile));
+
+		/* append object file name */
+		strlcat(pcb->bldcmd, pcb->objfile, sizeof(pcb->bldcmd));
+	}
 
 	/* if an optional library has been provided */
 	if (pcb->library != NULL) {
@@ -575,13 +710,19 @@ bool c_cmdline_builder(code_bld_t *pcb, bool dolink) {
 	}
 
 	/* if we don't link use -c */
-	if (dolink == false) {
+	if (lnk == LINK_NONE) {
 		strlcat(pcb->bldcmd, " -c", sizeof(pcb->bldcmd));
 	}
 
-	/* append source filename */
-	strlcat(pcb->bldcmd, " ", sizeof(pcb->bldcmd));
-	strlcat(pcb->bldcmd, pcb->srcfile, sizeof(pcb->bldcmd));
+	if (lnk == LINK_OBJ) {
+		/* append object filename */
+		strlcat(pcb->bldcmd, " ", sizeof(pcb->bldcmd));
+		strlcat(pcb->bldcmd, pcb->objfile, sizeof(pcb->bldcmd));
+	} else {
+		/* append source filename */
+		strlcat(pcb->bldcmd, " ", sizeof(pcb->bldcmd));
+		strlcat(pcb->bldcmd, pcb->srcfile, sizeof(pcb->bldcmd));
+	}
 
 	/* append log redirection */
 	strlcat(pcb->bldcmd, " >>", sizeof(pcb->bldcmd));
@@ -631,13 +772,22 @@ bool object_builder(code_bld_t *pcb) {
  ***********************************************************************/
 
 void cb_cleaner(code_bld_t *pcb) {
-	if (unlink(pcb->srcfile) == -1) {
-		/* cannot remove temporary source file */
-		errorf("cannot remove source file '%s'", pcb->srcfile);
+	if (pcb->srcfile[0] != '\0') {
+		if (unlink(pcb->srcfile) == -1) {
+			/* cannot remove temporary source file */
+			errorf("cannot remove source file '%s'", pcb->srcfile);
+		}
 	}
 
-	/* No need to check return here as binary could not exists */
-	unlink(pcb->binfile);
+	if (pcb->objfile[0] != '\0') {
+		/* No need to check return here as object could not exists */
+		unlink(pcb->objfile);
+	}
+
+	if (pcb->binfile[0] != '\0') {
+		/* No need to check return here as binary could not exists */
+		unlink(pcb->binfile);
+	}
 }
 
 
@@ -654,51 +804,48 @@ void cb_cleaner(code_bld_t *pcb) {
 	XXX
  ***********************************************************************/
 
-bool check_so_support(char *buildlog, htable *htab) {
-	char		*lang;
-	code_bld_t	 scb;
+bool check_so_support(code_bld_t *pcb, char *slcflags, char *slldflags) {
+	/* set shared library compiler flags */
+	set_slcflags(pcb, slcflags);
 
-	code_bld_init(&scb, buildlog);
-	lang = "C"; /* XXX TODO language relative to the compiler */
-	set_language(&scb, lang);
-	set_compiler(&scb, htab); /* XXX check */
+	/* set shared library linker flags */
+	set_slldflags(pcb, slldflags);
 
-	pmk_log("\t\tCompiling shared objet : ");
-	
-	if (shared_builder(&scb) == false) {
-		/* XXX failed */
-		/*debugf("shared_builder = false");*/
-		pmk_log("Failed\n");
+	/* prepare source of first shared object */
+	if (shared_builder(pcb, CODE_C_SHARED_F) == false) {
+		/* failed to build source code */
 		return(false);
 	} else {
-		/*debugf("shared_builder = true");*/
-		/* XXX set shared stuff variables */
-		if (cmdline_builder(&scb, false) == false) {
-			/* XXX failed */
-			/*debugf("cmdline_builder = false");*/
-			pmk_log("Failed\n");
+		/* set command line for shared object */
+		if (cmdline_builder(pcb, LINK_NONE) == false) {
+			/* failed to generate command line */
 			return(false);
 		} else {
-			/*debugf("cmdline_builder = true");*/
-			if (object_builder(&scb) == false) {
-				/* XXX */
-				/*debugf("object_builder = false");*/
-				pmk_log("Failed\n");
+			/* let's go compiling */
+			if (object_builder(pcb) == false) {
+				/* failed to compile */
 				return(false);
-			} else {
-				/* XXX */
-				/*debugf("object_builder = true");*/
-				pmk_log("Succeeded\n");
 			}
 		}
 	}
 
-	/* try linking shared object */
-	pmk_log("\t\tLinking shared objet : X_TODO_X\n");
+	/*
+	 * now try linking shared object
+	 */
 
-	cb_cleaner(&scb);
+	/* set command line for shared object */
+	if (cmdline_builder(pcb, LINK_OBJ) == false) {
+		/* failed to generate command line */
+		return(false);
+	} else {
+		/* let's go compiling */
+		if (object_builder(pcb) == false) {
+			/* failed to compile */
+			return(false);
+		}
+	}
 
-	return(false);
+	return(true);
 }
 
 

@@ -1,3 +1,7 @@
+17 Aug 2006 mipsator
+ * rewritten compiler detection for shared lib support.
+ * improved shared lib support verification.
+
 03 Aug 2006 mipsator
  * much mode #defines in compiler detection module.
 

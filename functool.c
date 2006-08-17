@@ -497,7 +497,6 @@ bool depend_check(htable *lht, pmkdata *gd) {
  ***********************************************************************/
 
 bool require_check(htable *pht) {
-	bool	 rval;
 	pmkobj	*req;
 
 	req = hash_get(pht, KW_OPT_REQUIRED);
@@ -506,19 +505,11 @@ bool require_check(htable *pht) {
 		return(true);
 	}
 
-	switch(po_get_type(req)) {
-		case PO_BOOL :
-			rval = po_get_bool(req);
-			break;
-		case PO_STRING :
-			rval = check_bool_str(po_get_str(req));
-			break;
-		default :
-			rval = false;
-			break;
+	if (po_get_type(req) != PO_BOOL) {
+		return(false);
 	}
 
-	return(rval);
+	return(po_get_bool(req));
 }
 
 

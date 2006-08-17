@@ -261,7 +261,7 @@ enum {
 							"DATADIR=\t@DATADIR@\n"
 #define MKF_LIB_DIR			"LIBDIR=\t\t@LIBDIR@\n"
 #define MKF_MAN_DIR			"MANDIR=\t\t@MANDIR@\n"
-#define MKF_MANX_DIR		"MAN%zuDIR=\t@MAN%zuDIR@\n"
+#define MKF_MANX_DIR		"MAN%iDIR=\t@MAN%iDIR@\n"
 #define MKF_SYSCONF_DIR		"SYSCONFDIR=\t@SYSCONFDIR@\n"
 
 #define MKF_SDIR_LIST		"SUBDIRS=\t"

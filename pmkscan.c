@@ -2508,8 +2508,9 @@ void mkf_output_header(FILE *fp, scn_zone_t *psz) {
 	char			 buf[MKF_OUTPUT_WIDTH * 2],
 					*pstr;
 	hkeys			*phk;
+	int				 i;
 	lib_cell_t		*plc;
-	size_t			 i;
+	size_t			 s;
 	time_t			 now;
 
 	/* generating date */
@@ -2557,7 +2558,7 @@ void mkf_output_header(FILE *fp, scn_zone_t *psz) {
 			/* generate library name variables */
 			fprintf(fp, "\n# library variables\n");
 
-			for (i = 0 ; i < phk->nkey ; i++) {
+			for (i = 0 ; i < (int) phk->nkey ; i++) {
 				plc = hash_get(psz->libraries, phk->keys[i]);
 				
 				fprintf(fp, MKF_STCLIB_VAR, plc->lib_static, plc->lib_name);
@@ -2585,7 +2586,8 @@ void mkf_output_header(FILE *fp, scn_zone_t *psz) {
 		da_sort(psz->exttags);
 
 		/* output each extra tag */
-		for (i = 0 ; i < da_usize(psz->exttags) ; i++) {
+		s = da_usize(psz->exttags);
+		for (i = 0 ; i < (int) s ; i++) {
 			pstr = (char *) da_idx(psz->exttags, i);
 			fprintf(fp, MKF_SUBSTVAR, pstr, pstr);
 		}

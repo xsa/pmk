@@ -1,4 +1,4 @@
-# Makefile template built by pmkscan (2006-03-07 21:50)
+# Makefile template built by pmkscan (2006-08-11 13:51)
 # @configure_input@
 
 CPP=		@CPP@
@@ -90,9 +90,9 @@ AUTOCONF_SRCS=	autoconf.c autoconf.h cfgtool.h common.h compat/config.h \
 		compat/pmk_ctype.h compat/pmk_libgen.h \
 		compat/pmk_stdbool.h compat/pmk_stdio.h \
 		compat/pmk_string.h compat/pmk_sys_types.h \
-		compat/pmk_unistd.h dynarray.h errmsg.h functool.h \
-		hash.h hash_tools.h parse.h pathtools.h pmk.h pmk_obj.h \
-		premake.h prseng.h tags.h
+		compat/pmk_unistd.h detect.h dynarray.h errmsg.h \
+		functool.h hash.h hash_tools.h parse.h pathtools.h pmk.h \
+		pmk_obj.h premake.h prseng.h tags.h
 
 CFGTOOL_SRCS=	cfgtool.c cfgtool.h common.h compat/config.h \
 		compat/pmk_stdbool.h compat/pmk_stdio.h \
@@ -101,8 +101,8 @@ CFGTOOL_SRCS=	cfgtool.c cfgtool.h common.h compat/config.h \
 
 CODEBUILD_SRCS=	codebuild.c codebuild.h common.h compat/config.h \
 		compat/pmk_stdbool.h compat/pmk_stdio.h \
-		compat/pmk_string.h dynarray.h errmsg.h hash.h pmk_obj.h \
-		premake.h
+		compat/pmk_string.h dynarray.h errmsg.h hash.h lang.h \
+		pmk_obj.h premake.h
 
 COMMON_SRCS=	common.c common.h compat/config.h compat/pmk_stdbool.h \
 		compat/pmk_stdio.h compat/pmk_string.h \
@@ -135,14 +135,15 @@ FUNC_SRCS=	autoconf.h cfgtool.h codebuild.h common.h compat/config.h \
 		compat/pmk_stdbool.h compat/pmk_stdio.h \
 		compat/pmk_string.h compat/pmk_unistd.h detect.h \
 		dynarray.h errmsg.h func.c func.h functool.h hash.h \
-		hash_tools.h parse.h pkgconfig.h pmk.h pmk_obj.h \
+		hash_tools.h lang.h parse.h pkgconfig.h pmk.h pmk_obj.h \
 		premake.h prseng.h tags.h
 
 FUNCTOOL_SRCS=	cfgtool.h common.h compat/config.h compat/pmk_ctype.h \
 		compat/pmk_stdbool.h compat/pmk_stdio.h \
-		compat/pmk_string.h compat/pmk_unistd.h dynarray.h \
-		errmsg.h functool.c functool.h hash.h hash_tools.h \
-		parse.h pmk.h pmk_obj.h premake.h prseng.h tags.h
+		compat/pmk_string.h compat/pmk_unistd.h detect.h \
+		dynarray.h errmsg.h functool.c functool.h hash.h \
+		hash_tools.h parse.h pmk.h pmk_obj.h premake.h prseng.h \
+		tags.h
 
 HASH_SRCS=	common.h compat/config.h compat/pmk_stdbool.h \
 		compat/pmk_stdio.h compat/pmk_string.h dynarray.h \
@@ -175,9 +176,9 @@ PMK_SRCS=	autoconf.h cfgtool.h common.h compat/config.h \
 		compat/pmk_ctype.h compat/pmk_libgen.h \
 		compat/pmk_stdbool.h compat/pmk_stdio.h \
 		compat/pmk_string.h compat/pmk_sys_types.h \
-		compat/pmk_unistd.h dynarray.h errmsg.h func.h hash.h \
-		hash_tools.h parse.h pathtools.h pmk.c pmk.h pmk_obj.h \
-		premake.h prseng.h tags.h
+		compat/pmk_unistd.h detect.h dynarray.h errmsg.h func.h \
+		hash.h hash_tools.h lang.h parse.h pathtools.h pmk.c \
+		pmk.h pmk_obj.h premake.h prseng.h tags.h
 
 PMK_OBJ_SRCS=	compat/config.h compat/pmk_stdbool.h compat/pmk_stdio.h \
 		compat/pmk_string.h dynarray.h hash.h pmk_obj.c \
@@ -312,7 +313,7 @@ install_sbin:
 # deinstall binaries
 deinstall_bin:
 	@if test -n "$(BIN_FILES)"; then \
-		@list="$(BIN_FILES)"; \
+		list="$(BIN_FILES)"; \
 		for f in $$list; do \
 			d=`basename $$f`; \
 			printf "$(RM) $(RMFLAGS) $(DESTDIR)$(BINDIR)/$$d\n"; \
