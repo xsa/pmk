@@ -850,7 +850,31 @@ bool parse_data_file(prsdata *pdata, scandata *sdata) {
 	while (pcell != NULL) {
 		switch(pcell->token) {
 			case PSC_TOK_ADDHDR :
+				pchk = mk_chk_cell(pcell->data, pcell->token);
+				if (pchk == NULL) {
+					errorf("failed to initialize header check cell");
+					return(false);
+				}
+
+				if (hash_add(sdata->headers, pchk->name, pchk) == HASH_ADD_FAIL) {
+					errorf("failed to add '%s'", pchk->name);
+					return(false);
+				}
+				break;
+
 			case PSC_TOK_ADDLIB :
+				pchk = mk_chk_cell(pcell->data, pcell->token);
+				if (pchk == NULL) {
+					errorf("failed to initialize library check cell");
+					return(false);
+				}
+
+				if (hash_add(sdata->libraries, pchk->name, pchk) == HASH_ADD_FAIL) {
+					errorf("failed to add '%s'", pchk->name);
+					return(false);
+				}
+				break;
+
 			case PSC_TOK_ADDTYP :
 				pchk = mk_chk_cell(pcell->data, pcell->token);
 				if (pchk == NULL) {

@@ -1,3 +1,7 @@
+01 Sep 2006 mipsator
+ * fixed a regression in rev. 102 that prevented from generating a
+   complete pmkfile (header and library checks were missing).
+
 17 Aug 2006 mipsator
  * rewritten compiler detection for shared lib support.
  * improved shared lib support verification.
