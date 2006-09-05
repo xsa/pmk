@@ -1798,12 +1798,12 @@ bool scan_build_pmk(scn_zone_t *psz) {
 
 		if (psz->found[FILE_TYPE_C] == true) {
 			/* check for C compiler */
-			da_push(da, strdup("CC"));
+			da_push(da, strdup("C"));
 		}
 
 		if (psz->found[FILE_TYPE_CXX] == true) {
 			/* check for C++ compiler */
-			da_push(da, strdup("CXX"));
+			da_push(da, strdup("C++"));
 		}
 
 		build_list(fp, "DETECT", da); 
@@ -4232,7 +4232,7 @@ bool process_zone(prs_cmn_t *pcmn, scandata *psd) {
 				psc_log("Ok\n\n", NULL);
 
 				/* generate pmkfile */
-				psc_log("Generating %s ...\n", NULL, psz->cfg_name);
+				psc_log("Generating %s ...\n", NULL, psz->pmk_name);
 				rslt = scan_build_pmk(psz);
 				if (rslt == true) {
 					psc_log("Ok\n\n", NULL);
