@@ -55,30 +55,53 @@
     .globl  x86_check_cpuid_flag
 
 x86_check_cpuid_flag:
-    pushl   %ecx        /* save ecx register */
+	/* save ecx register in the stack */
+	pushl	%ecx
 
-    pushfl
-    popl    %eax        /* get eflags */
+	/* push flags into stack */
+	pushfl
 
-    movl    %eax,%ecx   /* save flags */
+	/* pop EFLAGS register from stack into eax */
+	popl	%eax
 
-    xorl    $0x200000,%eax  /* clear CPU ID flag */
+	/* save original EFLAGS into ecx */
+	movl	%eax,%ecx
 
-    pushl   %eax
-    popfl           /* load eflags */
+	/* flip CPUID flag (bit 21 of EFLAGS) for testing purpose */
+	xorl	$0x200000,%eax
 
-    pushfl
-    popl    %eax        /* get current eflags state */
+	/* put back modified EFLAGS into stack */
+	pushl	%eax
 
-    pushl   %ecx
-    popfl           /* put original state back */
+	/* reload flags from stack */
+	popfl
 
-    popl    %ecx        /* restore ecx register */
+	/* put flags again into stack to check it */
+	pushfl
 
-    andl    $0x200000,%eax  /* keep CPU ID  flag only */
-    rorl    $21,%eax    /* and shift it to bit 0 */
+	/* pop EFLAGS register from stack into eax */
+	popl	%eax
 
-    ret
+	/* push the original EFLAGS value stored in ecx into stack */
+	pushl	%ecx
+
+	/* put original state back from the stack */
+	popfl
+
+	/* xor between original EFLAGS saved in ecx and current in eax */
+	xorl	%ecx,%eax
+
+	/* keep only CPUID flag */
+	andl	$0x200000,%eax
+
+	/* and shift it to bit 0 */
+	rorl	$21,%eax
+
+	/* restore ecx register that was previously stored in stack */
+	popl	%ecx
+
+	/* return value of CPUID in bit 0 of eax */
+	ret
 
 /*
     exec cpuid function
@@ -132,30 +155,30 @@ x86_exec_cpuid:
     .globl  x86_check_cpuid_flag
 
 x86_check_cpuid_flag:
-    pushq   %rcx        /* save rcx register */
+	pushq	%rcx        /* save rcx register */
 
-    pushfq
-    popq    %rax        /* get eflags */
+	pushfq
+	popq    %rax        /* get eflags */
 
-    movq    %rax,%rcx   /* save flags */
+	movq    %rax,%rcx   /* save flags */
 
-    xorq    $0x200000,%rax  /* clear CPU ID flag */
+	xorq    $0x200000,%rax  /* clear CPU ID flag */
 
-    pushq   %rax
-    popfq           /* load eflags */
+	pushq   %rax
+	popfq           /* load eflags */
 
-    pushfq
-    popq    %rax        /* get current eflags state */
+	pushfq
+	popq    %rax        /* get current eflags state */
 
-    pushq   %rcx
-    popfq           /* put original state back */
+	pushq   %rcx
+	popfq           /* put original state back */
 
-    popq    %rcx        /* restore ebx register */
+	popq    %rcx        /* restore ebx register */
 
-    andq    $0x200000,%rax  /* keep CPU ID  flag only */
-    rorq    $21,%rax    /* and shift it to bit 0 */
+	andq    $0x200000,%rax  /* keep CPU ID  flag only */
+	rorq    $21,%rax    /* and shift it to bit 0 */
 
-    ret
+	ret
 
 /*
     exec cpuid function
@@ -262,3 +285,4 @@ ia64_get_cpuid_register:
 
 #endif /* ARCH_IA64 */
 
+/* vim: set noexpandtab tabstop=4 softtabstop=4 shiftwidth=4: */
