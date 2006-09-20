@@ -1133,7 +1133,7 @@ prscell *parse_cmd_header(prseng_t *ppe, prsnode *pnode) {
 		}
 	} else {
 		/* unknown command */
-		strlcpy(parse_err, "unknown command.", sizeof(parse_err)); /* no check */
+		snprintf(parse_err, sizeof(parse_err), "unknown command '%s'.", name);
 		return(NULL);
 	}
 
