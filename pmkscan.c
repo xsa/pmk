@@ -107,6 +107,13 @@ scn_ext_t	 file_ext[] = {
 };
 size_t	 nb_file_ext = sizeof(file_ext) / sizeof(scn_ext_t);
 
+lib_type_t	 lib_types[] = {
+		/*{LANG_LABEL_ASM,	LIB_TYPE_ASM},*/
+		{LANG_LABEL_C,		LIB_TYPE_C},
+		{LANG_LABEL_CXX,	LIB_TYPE_CXX}
+};
+size_t	 nb_lib_types = sizeof(lib_types) / sizeof(lib_type_t);
+
 
 /* pmkscan data parser options *****************************************/
 
@@ -163,6 +170,24 @@ size_t	nbkwps = sizeof(kw_pmkscan) / sizeof(prskw);
 
 
 /* pmkscan script parser options ***************************************/
+
+/* DEFINE_LIB required options */
+kw_t	req_deflib[] = {
+	{KW_OPT_NAM,	PO_STRING},
+	{KW_OPT_LINKER,	PO_STRING},
+	{KW_OPT_SRCS,	PO_LIST}
+};
+
+/* DEFINE_LIB options */
+kw_t	opt_deflib[] = {
+	{KW_OPT_HDRS,	PO_LIST}};
+
+kwopt_t	kw_deflib = {
+	req_deflib,
+	sizeof(req_deflib) / sizeof(kw_t),
+	opt_deflib,
+	sizeof(opt_deflib) / sizeof(kw_t)
+};
 
 /* common required options */
 kw_t	req_dir[] = {
@@ -233,10 +258,10 @@ kwopt_t	kw_genzone = {
 };
 
 prskw	kw_scanfile[] = {
-	{KW_CMD_GENPF,		PSC_TOK_PMKF,	PRS_KW_CELL,	PRS_TOK_NULL,	&kw_genpmk},
-	{KW_CMD_GENMF,		PSC_TOK_MAKF,	PRS_KW_CELL,	PRS_TOK_NULL,	&kw_genmkf},
-	{KW_CMD_GENZN,		PSC_TOK_ZONE,	PRS_KW_CELL,	PRS_TOK_NULL,	&kw_genzone},
-	{KW_CMD_DEFLIB,		PSC_TOK_DEFLIB,	PRS_KW_NODE,	PSC_TOK_SETLIB,	NULL}
+	{KW_CMD_GENPF,		PSC_TOK_PMKF,		PRS_KW_CELL,	PRS_TOK_NULL,	&kw_genpmk},
+	{KW_CMD_GENMF,		PSC_TOK_MAKF,		PRS_KW_CELL,	PRS_TOK_NULL,	&kw_genmkf},
+	{KW_CMD_GENZN,		PSC_TOK_ZONE,		PRS_KW_CELL,	PRS_TOK_NULL,	&kw_genzone},
+	{KW_CMD_DEFLIB,		PSC_TOK_DEFLIB,		PRS_KW_CELL,	PRS_TOK_NULL,	&kw_deflib}
 };
 size_t	nbkwsf = sizeof(kw_scanfile) / sizeof(prskw);
 
@@ -468,13 +493,13 @@ void scan_node_destroy(scn_node_t *pnode) {
 
  IN
 	name :	library name
-	da :	object list
+	srcs :	object list
 
  OUT
 	structure pointer or NULL
  ***********************************************************************/
 
-lib_cell_t *lib_cell_init(char *name, dynary *da) {
+lib_cell_t *lib_cell_init(char *name, dynary *srcs, dynary *hdrs, ltype_t type) {
 	char		 buffer[TMP_BUF_LEN],
 				 ubuf[TMP_BUF_LEN];
 	lib_cell_t	*plc;
@@ -485,7 +510,18 @@ lib_cell_t *lib_cell_init(char *name, dynary *da) {
 		snprintf(buffer, sizeof(buffer), "lib%s", name);
 		plc->lib_name = strdup(buffer);
 
+
+		/* set library name variable */
 		str_to_upper(ubuf, sizeof(ubuf), buffer);
+		plc->lib_label = strdup(ubuf);
+
+		/* set library objects variable */
+		snprintf(buffer, sizeof(buffer), "%s_SRCS", ubuf);
+		plc->lib_srcs = strdup(buffer);
+
+		/* set library objects variable */
+		snprintf(buffer, sizeof(buffer), "%s_HDRS", ubuf);
+		plc->lib_hdrs = strdup(buffer);
 
 		/* set library objects variable */
 		snprintf(buffer, sizeof(buffer), "%s_OBJS", ubuf);
@@ -499,8 +535,17 @@ lib_cell_t *lib_cell_init(char *name, dynary *da) {
 		snprintf(buffer, sizeof(buffer), "%s_SHARED", ubuf);
 		plc->lib_shared = strdup(buffer);
 
-		/* set object dependencies */		
-		plc->obj_deps = da;
+		/* library linking type */		
+		plc->type = type;
+
+		/* source dependencies */		
+		plc->src_list = srcs;
+
+		/* header dependencies */		
+		plc->hdr_list = hdrs;
+
+		/* object dependencies */		
+		plc->obj_deps = da_init();
 	}
 	
 	return(plc);
@@ -521,8 +566,20 @@ lib_cell_t *lib_cell_init(char *name, dynary *da) {
  ***********************************************************************/
 
 void lib_cell_destroy(lib_cell_t *plc) {
+	/* destroy sources list */
+	da_destroy(plc->src_list);
+
+	/* destroy objects list */
 	da_destroy(plc->obj_deps);
+
+	/* destroy headers list */
+	if (plc->hdr_list != NULL) {
+		da_destroy(plc->hdr_list);
+	}
+
 	free(plc->lib_name);
+	free(plc->lib_srcs);
+	free(plc->lib_hdrs);
 	free(plc->lib_objs);
 	free(plc->lib_static);
 	free(plc->lib_shared);
@@ -1911,26 +1968,26 @@ bool scan_build_pmk(scn_zone_t *psz) {
 	
 			/* output command */
 			build_cmd_begin(fp, "BUILD_SHLIB_NAME", NULL);
-	
+
 			/* output lib name */
 			build_quoted(fp, "NAME", phk->keys[i]);
-	
+
 			/* output major version */
 			build_quoted(fp, "MAJOR", "0");
-	
+
 			/* output minor version */
 			build_quoted(fp, "MINOR", "0");
-	
+
 			/* output non versioned variable name */
 			build_quoted(fp, "VERSION_NONE", plc->lib_shared);
-	
+
 			/* output versioned variable name */
 			/* XXX TODO set VERSION_FULL ? */
-	
+
 			/* end of command */
 			build_cmd_end(fp);
 		}
-	
+
 		hash_free_hkeys(phk);
 	}
 
@@ -2401,7 +2458,7 @@ bool gen_targets(scn_zone_t *psz) {
 	}
 
 	/* for each object */
-	for(i = 0 ; i < phk->nkey ; i++) {
+	for (i = 0 ; i < phk->nkey ; i++) {
 		/* get it's node structure */
 		nodename = hash_get(psz->objects, phk->keys[i]);
 		pnode = hash_get(psz->nodes, nodename); /* XXX check needed ??? (think no) */
@@ -2439,6 +2496,74 @@ bool gen_targets(scn_zone_t *psz) {
 			}
 #ifdef PMKSCAN_DEBUG
 			debugf("END recurse_src_deps() for node '%s'\n", pnode->fname);
+#endif /* PMKSCAN_DEBUG */
+		}
+	}
+
+	return(true);
+}
+
+
+/*********************
+ * gen_lib_targets() *
+ ***********************************************************************
+ DESCR
+	generate targets from the objects
+
+ IN
+	psz :	scanning zone data
+
+ OUT
+	boolean
+ ***********************************************************************/
+
+bool gen_lib_targets(scn_zone_t *psz) {
+	char			 buf[PATH_MAX],
+					*srcname;
+	hkeys			*phk;
+	lib_cell_t		*plc;
+	scn_node_t		*pnode;
+	unsigned int	 i,
+					 j;
+
+	phk = hash_keys(psz->libraries);
+	if (phk == NULL) {
+		/* no libraries, skip */
+		psc_log("No library targets to generate.\n", NULL);
+		return(true);
+	}
+
+	/* for each library */
+	for (i = 0 ; i < phk->nkey ; i++) {
+		/* get it's cell structure */
+		plc = hash_get(psz->libraries, phk->keys[i]);
+
+		/* check each object link */
+		for (j = 0 ; j < da_usize(plc->src_list) ; j++) {
+			/* get source name name */
+			srcname = da_idx(plc->src_list, j);
+
+			/*|+ build and store object name +|                    */
+			/*strlcpy(buf, pnode->prefix, sizeof(buf));            */
+			/*strlcat(buf, OBJ_SUFFIX, sizeof(buf));               */
+			pnode = hash_get(psz->nodes, srcname); /* XXX check */
+			if (da_push(plc->obj_deps, strdup(pnode->obj_name)) == false) {
+				/* err msg */
+				return(false);
+			}
+
+#ifdef PMKSCAN_DEBUG
+			debugf("START recurse_src_deps() for source '%s'", srcname);
+#endif /* PMKSCAN_DEBUG */
+			/* recurse source deps to find object deps */
+			if (recurse_src_deps(psz, plc->obj_deps, srcname) == false) {
+				/* failed */
+				return(false);
+
+		}
+
+#ifdef PMKSCAN_DEBUG
+			debugf("END recurse_src_deps() for for source '%s'", srcname);
 #endif /* PMKSCAN_DEBUG */
 		}
 	}
@@ -2571,9 +2696,16 @@ void mkf_output_header(FILE *fp, scn_zone_t *psz) {
 		fprintf(fp, MKF_HEADER_YACC);
 	}
 
+	/* library stuff */
 	if (psz->gen_lib == true) {
-		/* library stuff */
-		fprintf(fp, MKF_HEADER_SHARED);
+
+		if (psz->lib_type[LIB_TYPE_C] == true) {
+			fprintf(fp, MKF_HDR_C_SL);
+		}
+		if (psz->lib_type[LIB_TYPE_CXX] == true) {
+			fprintf(fp, MKF_HDR_CXX_SL);
+		}
+
 		fprintf(fp, MKF_HEADER_AR);
 		fprintf(fp, MKF_HEADER_RANLIB);
 		
@@ -2955,7 +3087,7 @@ void mkf_output_bld_trgs(FILE *fp, scn_zone_t *psz) {
 	/* generate main binary building target list */
 	fprintf(fp, MKF_TRGT_ALL_BIN);
 
-	/* list of targets */
+	/* list of binary targets */
 	phk = hash_keys_sorted(psz->targets);
 	if (phk != NULL) {
 		lm = strlen(MKF_TRGT_ALL_BIN);
@@ -2967,10 +3099,10 @@ void mkf_output_bld_trgs(FILE *fp, scn_zone_t *psz) {
 	}
 	fprintf(fp, MKF_TWICE_JUMP);
 
-	/* generate main cleaning target list */
+	/* generate main binary cleaning target list */
 	fprintf(fp, MKF_TRGT_CLEAN_BIN);
 
-	/* list of targets */
+	/* list of binary targets */
 	if (phk != NULL) {
 		lm = strlen(MKF_TRGT_CLEAN_BIN);
 		ofst = lm;
@@ -2986,7 +3118,7 @@ void mkf_output_bld_trgs(FILE *fp, scn_zone_t *psz) {
 	/* generate main library building target list */
 	fprintf(fp, MKF_TRGT_ALL_LIB);
 
-	/* list of targets */
+	/* list of library targets */
 	phk = hash_keys_sorted(psz->libraries);
 	if (phk != NULL) {
 		lm = strlen(MKF_TRGT_ALL_LIB);
@@ -3005,7 +3137,7 @@ void mkf_output_bld_trgs(FILE *fp, scn_zone_t *psz) {
 	/* generate main library cleaning target list */
 	fprintf(fp, MKF_TRGT_CLEAN_LIB);
 
-	/* list of targets */
+	/* list of library targets */
 	if (phk != NULL) {
 		lm = strlen(MKF_TRGT_CLEAN_LIB);
 		ofst = lm;
@@ -3272,7 +3404,7 @@ void mkf_output_lib_trg_rules(FILE *fp, scn_zone_t *psz) {
 	}
 
 	/* generate targets */
-	fprintf(fp, "\n#\n# target rules\n#\n");
+	fprintf(fp, "\n#\n# library target rules\n#\n");
 	for (i = 0 ; i < phk->nkey ; i++) {
 		plc = hash_get(psz->libraries, phk->keys[i]);
 
@@ -3283,7 +3415,18 @@ void mkf_output_lib_trg_rules(FILE *fp, scn_zone_t *psz) {
 		fprintf(fp, MKF_TARGET_LIB_STC, plc->lib_objs);
 
 		fprintf(fp, MKF_TARGET_SIMPLE, plc->lib_shared, plc->lib_objs);
-		fprintf(fp, MKF_TARGET_LIB_SHD, plc->lib_objs);
+		switch(plc->type) {
+			case LIB_TYPE_C :
+				fprintf(fp, MKF_TARGET_SL_C, plc->lib_objs);
+				break;
+
+			case LIB_TYPE_CXX :
+				fprintf(fp, MKF_TARGET_SL_CXX, plc->lib_objs);
+				break;
+
+			default :
+			fprintf(fp, MKF_TARGET_LIB_SHD, plc->lib_objs, plc->lib_objs);
+		}
 
 		/* clean targets */
 		fprintf(fp, "%s_clean:\n", plc->lib_name);
@@ -4265,19 +4408,26 @@ bool process_zone(prs_cmn_t *pcmn, scandata *psd) {
 				psc_log("Ok\n\n", NULL);
 
 				/* scanning generated objects */
-				psc_log("Processing objects for target generation ...\n", NULL);
+				psc_log("Processing objects for binary target generation ...\n", NULL);
 				rslt = gen_targets(psz);
 				if (rslt == false) {
 					psc_log("Failed\n\n", NULL);
 				} else {
 					psc_log("Ok\n\n", NULL);
 
-					/* generate makefile */
-					psc_log("Generating %s ...\n", NULL, psz->mkf_name);
-					if (scan_build_mkf(psz) == true ) {
-						psc_log("Ok\n\n", NULL);
-					} else {
+					psc_log("Processing objects for library target generation ...\n", NULL);
+					rslt = gen_lib_targets(psz);
+					if (rslt == false) {
 						psc_log("Failed\n\n", NULL);
+					} else {
+
+						/* generate makefile */
+						psc_log("Generating %s ...\n", NULL, psz->mkf_name);
+						if (scan_build_mkf(psz) == true ) {
+							psc_log("Ok\n\n", NULL);
+						} else {
+							psc_log("Failed\n\n", NULL);
+						}
 					}
 				}
 			}
@@ -4302,7 +4452,7 @@ bool process_zone(prs_cmn_t *pcmn, scandata *psd) {
  * parse_deflib() *
  ***********************************************************************
  DESCR
-	XXX
+	define library parameters
 
  IN
 	XXX
@@ -4311,33 +4461,58 @@ bool process_zone(prs_cmn_t *pcmn, scandata *psd) {
 	boolean
  ***********************************************************************/
 
-bool parse_deflib(htable *lnodes, prsnode *pnode) {
-	dynary		*da;
-	prscell		*pcell;
-	prsopt		*popt;
+bool parse_deflib(htable *pht, htable *libs) {
+	char		*name,
+				*linker = NULL;
+	dynary		*srcs = NULL,
+				*objs,
+				*hdrs = NULL;
+	int			 i;
+	lib_cell_t	*plc;
+	ltype_t		 type = LIB_TYPE_UNKNOWN;
+	pmkobj		*ppo;
 
-	/* init pcell with the first cell of the node */
-	pcell = pnode->first;
-
-	while (pcell != NULL) {
-		popt = pcell->data;
-
-		psc_log("Recording library definition '%s'.\n", NULL, popt->key);
-
-		/* look for object list */
-		da = po_get_list(popt->value);
-		if (da == NULL) {
-			errorf("unable to get object list for library '%s'", popt->key);
-			/* XXX TODO destroy stuff */
-			return(false);
-		}
-
-		hash_add(lnodes, popt->key, da);
-
-		pcell = pcell->next;
+	/* get library name (REQUIRED) */
+	name = po_get_str(hash_get(pht, KW_OPT_NAM));
+	if (name == NULL) {
+		return false;
 	}
 
-	return(true);
+	/* get source list (REQUIRED) */
+	ppo = hash_extract(pht, KW_OPT_SRCS); /* XXX duplicate ? */
+	if (ppo == NULL) {
+		return false;
+	}
+	srcs = po_get_list(ppo);
+
+	/* get header list */
+	ppo = hash_extract(pht, KW_OPT_HDRS); /* XXX duplicate ? */
+	if (ppo != NULL) {
+		hdrs = po_get_list(ppo);
+	}
+
+	/* get linker type */
+	linker = po_get_str(hash_get(pht, KW_OPT_LINKER));
+
+	/* check lib type */
+	for (i = 0 ; i < nb_lib_types ; i++) {
+		if (strncmp(lib_types[i].lang, linker, strlen(lib_types[i].lang) + 1) == 0) {
+			type = lib_types[i].type;
+			break;
+		}
+	}
+
+	/* init lib cell */
+	plc = lib_cell_init(name, srcs, hdrs, type);
+
+	if (hash_add(libs, name, plc) == HASH_ADD_FAIL) {
+		lib_cell_destroy(plc);
+		return false;
+	}
+
+	psc_log("Recording library definition '%s'.\n", NULL, name);
+
+	return true;
 }
 
 
@@ -4473,17 +4648,20 @@ bool parse_zone_opts(prs_cmn_t *pcmn, htable *pht, htable *libs) {
 				/* get lib name */
 				pstr = da_idx(da_l, i);
 				
-				/* get associated object list */
-				/*da_o = hash_extract(libs, pstr);*/
-				da_o = hash_get(libs, pstr);
-				if (da_o != NULL) {
-					plc = lib_cell_init(pstr, da_o); /* XXX TODO check ! */
-					
-					if (hash_add(psz->libraries, pstr, plc) == HASH_ADD_FAIL) {
-						/* XXX error msg */
-						return(false);
-					}
+				/* look for lib cell */
+				plc = hash_extract(libs, pstr);
+				if (plc == NULL) {
+					/* lib cell not found */
+					return(false);
 				}
+
+				/* adds the extracted cell in zone libraries */
+				if (hash_add(psz->libraries, pstr, plc) == HASH_ADD_FAIL) {
+					return(false);
+				}
+
+				/* set library type flag */
+				psz->lib_type[plc->type] = true;
 			}
 		}
 		psz->gen_lib = true;
@@ -4529,7 +4707,7 @@ bool parse_zone_opts(prs_cmn_t *pcmn, htable *pht, htable *libs) {
 bool parse_script(char *cfname, prs_cmn_t *pcmn, scandata *psd) {
 	FILE		*fd;
 	bool		 frslt = true;
-	htable		*lnodes;
+	htable		*lcells;
 	prscell		*pcell;
 	prsdata		*pdata;
 	scn_zone_t	*psz;
@@ -4540,9 +4718,9 @@ bool parse_script(char *cfname, prs_cmn_t *pcmn, scandata *psd) {
 		return(false);
 	}
 
-	/* init of nodes table */
-	lnodes = hash_init_adv(64, NULL, (void (*)(void *))scan_node_destroy, NULL);
-	if (lnodes == NULL) {
+	/* init of library cells hash table */
+	lcells = hash_init_adv(32, NULL, (void (*)(void *)) lib_cell_destroy, NULL);
+	if (lcells == NULL) {
 		/* XXX errmsg */
 		return(false);
 	}
@@ -4561,22 +4739,26 @@ bool parse_script(char *cfname, prs_cmn_t *pcmn, scandata *psd) {
 		return(false);
 	}
 
+	fclose(fd);
+
 	pcell = pdata->tree->first;
 	while (pcell != NULL) {
 		switch(pcell->token) {
 			case PSC_TOK_DEFLIB :
-				if (parse_deflib(lnodes, pcell->data) == false) {
-					errorf("parsing of script file failed."); /* XXX better error message ? */
-					return(false); /* XXX stuff to free */
+				if (parse_deflib(pcell->data, lcells) == false) {
+					errorf("parsing of script file failed (token %d).", pcell->token);
+					prsdata_destroy(pdata);
+					return(false);
 				}
 				break;
 
 			case PSC_TOK_PMKF :
 			case PSC_TOK_MAKF :
 			case PSC_TOK_ZONE :
-				if (parse_zone_opts(pcmn, pcell->data, lnodes) == false) {
-					errorf("parsing of script file failed."); /* XXX better error message ? */
-					return(false); /* XXX stuff to free */
+				if (parse_zone_opts(pcmn, pcell->data, lcells) == false) {
+					errorf("parsing of script file failed (token %d).", pcell->token);
+					prsdata_destroy(pdata);
+					return(false);
 				}
 				/* process current zone */
 				if (process_zone(pcmn, psd) == false) {
@@ -4590,8 +4772,8 @@ bool parse_script(char *cfname, prs_cmn_t *pcmn, scandata *psd) {
 				break;
 
 			default :
+				errorf("parsing of script file failed (unexpected token %d).", pcell->token);
 				prsdata_destroy(pdata);
-				errorf("parsing of script file failed."); /* XXX better error message */
 				return(false);
 				break;
 		}

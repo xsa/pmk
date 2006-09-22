@@ -203,6 +203,28 @@ debugf("%s = '%s'", pstr, buf);
 		return(false);
 	}
 
+	pstr = MK_VAR_CLDFLAGS;
+	if (get_make_var(pstr, buf, sizeof(buf)) == false) {
+		buf[0] = CHAR_EOS; /* empty string */
+	}
+#ifdef PMK_DEBUG
+debugf("%s = '%s'", pstr, buf);
+#endif
+	if (hash_update_dup(pht, pstr, buf) == HASH_ADD_FAIL) {
+		return(false);
+	}
+
+	pstr = MK_VAR_CXXLDFLAGS;
+	if (get_make_var(pstr, buf, sizeof(buf)) == false) {
+		buf[0] = CHAR_EOS; /* empty string */
+	}
+#ifdef PMK_DEBUG
+debugf("%s = '%s'", pstr, buf);
+#endif
+	if (hash_update_dup(pht, pstr, buf) == HASH_ADD_FAIL) {
+		return(false);
+	}
+
 	pstr = MK_VAR_LIBS;
 	if (get_make_var(pstr, buf, sizeof(buf)) == false) {
 		buf[0] = CHAR_EOS; /* empty string */
@@ -1198,3 +1220,5 @@ int main(int argc, char *argv[]) {
 
 	return(rval);
 }
+
+/* vim: set noexpandtab tabstop=4 softtabstop=4 shiftwidth=4: */
