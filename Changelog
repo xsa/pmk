@@ -1,5 +1,6 @@
 22 Sep 2006 mipsator
  * import large chunk of code for better support of shared library.
+ * fixed format of c++ suffix in generated makefile.
 
 14 Sep 2006 mipsator
  * fixed CPUID checking for X86 32 bits CPUs, noticed by Leslie Polzer.
