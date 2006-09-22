@@ -61,13 +61,30 @@ enum {
 #define LANG_LABEL_CXX		"C++"	/* C++ language */
 
 
+/* compiler labels */
+#define COMP_LABEL_C		"CC"	/* C language */
+#define COMP_LABEL_CXX		"CXX"	/* C++ language */
+
+
 /* compiler flags labels */
 #define CFLAGS_LABEL_C		"CFLAGS"	/* C language */
 #define CFLAGS_LABEL_CXX	"CXXFLAGS"	/* C++ language */
 
+
+/* linker flags labels */
+#define LDFLAGS_LABEL_C		"CLDFLAGS"		/* C language */
+#define LDFLAGS_LABEL_CXX	"CXXLDFLAGS"	/* C++ language */
+
+
 /* shared lib compiler flags labels */
 #define SLCFLAGS_LABEL_C	"SLCFLAGS"		/* C language */
 #define SLCFLAGS_LABEL_CXX	"SLCXXFLAGS"	/* C++ language */
+
+
+/* shared lib linker flags labels */
+#define SLLDFLAGS_LABEL_C	"SLCLDFLAGS"	/* C language */
+#define SLLDFLAGS_LABEL_CXX	"SLCXXLDFLAGS"	/* C++ language */
+
 
 #define LANG_NAME_LEN	64
 #define COMP_NAME_LEN	64
@@ -85,7 +102,9 @@ typedef struct {
 	char	name[LANG_NAME_LEN],		/* language label (ex. C) */
 			compiler[COMP_NAME_LEN],	/* compiler label (ex. CC) */
 			cflags[CFLG_NAME_LEN],		/* compiler flags label (ex. CFLAGS) */
-			slflags[CFLG_NAME_LEN];		/* shared lib compiler flags (ex. SLCFLAGS) */
+			ldflags[CFLG_NAME_LEN],		/* linker flags label (ex. CLDFLAGS) */
+			slcflags[CFLG_NAME_LEN],	/* shared lib compiler flags label (ex. SLCFLAGS) */
+			slldflags[CFLG_NAME_LEN];	/* shared lib linker flags label (ex. SLCLDFLAGS) */
 	int		lang;						/* language token */
 } lgdata_t;
 

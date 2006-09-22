@@ -49,16 +49,6 @@
 
 /*#define FC_DEBUG	1*/
 
-/*****************
- * language data *
- ***********************************************************************/
-
-#define NBLANG	2
-lgdata	ldata[NBLANG] = {
-	{"C",	"CC",	"CPPFLAGS",	"CFLAGS",	"SLCFLAGS"},
-	{"C++",	"CXX",	"CPPFLAGS",	"CXXFLAGS",	"SLCXXFLAGS"}
-};
-
 
 /********************
  * check_bool_str() *

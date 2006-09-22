@@ -2264,7 +2264,7 @@ bool pmk_setparam_detect(pmkcmd *cmd, prsopt *popt, pmkdata *pgd) {
 
 		/* try to identify the compiler */
 		pc = &(pgd->comp_data.data[scb.lang]);
-		if (comp_detect(ccpath, pgd->buildlog, pc, pcp, scb.pld->slflags) == false) {
+		if (comp_detect(ccpath, pgd->buildlog, pc, pcp, scb.pld->slcflags) == false) {
 			pmk_log("failed.\n");
 			return(false);
 		}
@@ -2274,14 +2274,14 @@ bool pmk_setparam_detect(pmkcmd *cmd, prsopt *popt, pmkdata *pgd) {
 		pmk_log("%s (version %s).\n", pc->descr, pc->version);
 
 		/* set shared lib compiler flags */
-		pmk_log("\t\tSetting %s to '%s'\n", scb.pld->slflags, pc->slcflags);
-		if (hash_update_dup(pgd->htab, scb.pld->slflags, pc->slcflags) == HASH_ADD_FAIL) {
+		pmk_log("\t\tSetting %s to '%s'\n", scb.pld->slcflags, pc->slcflags);
+		if (hash_update_dup(pgd->htab, scb.pld->slcflags, pc->slcflags) == HASH_ADD_FAIL) {
 			return(false);
 		}
 
 		/* set shared lib linker flags */
 		pmk_log("\t\tSetting %s to '%s'\n", SL_LDFLAG_VARNAME, pc->slldflags);
-		if (hash_update_dup(pgd->htab, SL_LDFLAG_VARNAME, pc->slldflags) == HASH_ADD_FAIL) {
+		if (hash_update_dup(pgd->htab, scb.pld->slldflags, pc->slldflags) == HASH_ADD_FAIL) {
 			return(false);
 		}
 
