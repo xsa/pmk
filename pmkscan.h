@@ -274,13 +274,6 @@ enum {
 							"# LDFLAGS shall contain -lc if used with ld\n" \
 							"LDFLAGS=\t@LDFLAGS@\n\n"
 
-/* XXX better handling of shared libs needed here */
-#define MKF_HEADER_SHARED	"# XXX broken, obsolete, to remove and replace\n" \
-							"SHLIB_SUPPORT=\t@SHLIB_SUPPORT@\n" \
-							"SLCLAGS=\t@SLCFLAGS@\n" \
-							"SLCXXLAGS=\t@SLCXXFLAGS@\n" \
-							"SLLDFLAGS=\t@SLLDFLAGS@\n"
-							
 #define MKF_HEADER_AR		"AR=\t\t@AR@\n" \
 							"ARFLAGS=\tcru\n"
 							/*"ARFLAGS=\t@ARFLAGS@\n"*/
@@ -343,7 +336,7 @@ enum {
 #define MKF_BLD_CXX_OBJ		"# C++ suffixes\n" \
 							".cxx.o:\n" \
 							"\t$(CXX) $(CXXFLAGS) $(SLCXXFLAGS) -o $@ -c $<\n" \
-							"\t.cpp.o:\n" \
+							"\n.cpp.o:\n" \
 							"\t$(CXX) $(CXXFLAGS) $(SLCXXFLAGS) -o $@ -c $<\n\n"
 
 #define MKF_BLD_YACC_SRC	"# yacc suffix\n" \
