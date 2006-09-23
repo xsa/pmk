@@ -4813,31 +4813,22 @@ void usage(void) {
  ***********************************************************************/
 
 int main(int argc, char *argv[]) {
-	bool		 go_exit = false,
-				 use_script = false,
-				 /*unique_file = false,*/
-				 recursive = false,
-				 gen_mkf = false,
-				 gen_pmk = false;
-	char		 buf[PATH_MAX],
-				 scfile[PATH_MAX] = PMKSCAN_CONFIG;
-	htable		*tnodes;
+	bool		 go_exit = false;
+	char		 scfile[PATH_MAX] = PMKSCAN_CONFIG;
 	int			 chr;
 	prs_cmn_t	 pcmn;
-	prsdata		*pdata = NULL; /* XXX into global struct ? */
+	prsdata		*pdata = NULL;
 	scandata	 sd;
-	scn_zone_t	*psz;
 
 	while (go_exit == false) {
-		chr = getopt(argc, argv, "f:hlmpruv");
+		chr = getopt(argc, argv, "f:hlv");
 		switch (chr) {
 			case -1 :
 				go_exit = true;
 				break;
 
 			case 'f' :
-				/* use script file */
-				use_script = true;
+				/* use alternate script file */
 				strlcpy(scfile, optarg, sizeof(scfile)); /* XXX test !! */
 				break;
 
@@ -4847,26 +4838,6 @@ int main(int argc, char *argv[]) {
 					/* XXX err msg */
 					exit(EXIT_FAILURE);
 				}
-				break;
-
-			case 'm' :
-				/* enable makefile generation */
-				gen_mkf = true;
-				break;
-
-			case 'p' :
-				/* enable pmkfile generation */
-				gen_pmk = true;
-				break;
-
-			case 'r' :
-				/* enable recursive scanning */
-				recursive = true;
-				break;
-
-			case 'u' :
-				/* use unique file (with recursive mode) */
-				/* unique_file = true; *//* XXX TODO */
 				break;
 
 			case 'v' :
@@ -4899,111 +4870,26 @@ int main(int argc, char *argv[]) {
 	pcmn.func_type = &process_type;
 	pcmn.data = NULL; /* will be updated later */
 
-	/* if generation options and scanfile are not set */
-	if ((gen_pmk == false) && (gen_mkf == false) && (use_script == false)) {
-		/* look for default config file */
-		use_script = true;
-	}
-
-	if ((gen_pmk == true) || (use_script == true)) {
-		/* initialise parsing data structure */
-		pdata = prsdata_init();
-		if (pdata == NULL) {
-			errorf("\ncannot initialize prsdata.");
-			exit(EXIT_FAILURE);
-		} else {
-			if (parse_data_file(pdata, &sd) == false) {
-				/* error message displayed by parse_data_file */
-				prsdata_destroy(pdata);
-				exit(EXIT_FAILURE);
-			}
-		}
-	}
-
-	/* if a script file has been provided */
-	if (use_script == true) {
-		psc_log("Using scanning script '%s'.\n", NULL, scfile);
-
-		if (parse_script(scfile, &pcmn, &sd) == false) {
-			exit(EXIT_FAILURE);
-		}
-
-		prsdata_destroy(pdata);
-
-		exit(EXIT_SUCCESS);
-	}
-
-	/* init of nodes table */
-	tnodes = hash_init_adv(512, NULL,
-			(void (*)(void *))scan_node_destroy, NULL);
-
-	/* init zone structure */
-	psz = scan_zone_init(tnodes);
-	if (psz == NULL) {
-		/* XXX err msg */
+	/* initialise parsing data structure */
+	pdata = prsdata_init();
+	if (pdata == NULL) {
+		errorf("\ncannot initialize prsdata.");
 		exit(EXIT_FAILURE);
-	}
-	pcmn.data = psz;
-
-	if (argc != 0) {
-		/* use optional path */
-		if (strlcpy_b(buf, argv[0], sizeof(buf)) == false) {
-			errorf("failed to set buffer.");
-			exit(EXIT_FAILURE);
-		}
 	} else {
-		strlcpy(buf, ".", sizeof(buf)); /* should not fail */
+		if (parse_data_file(pdata, &sd) == false) {
+			/* error message displayed by parse_data_file */
+			prsdata_destroy(pdata);
+			exit(EXIT_FAILURE);
+		}
 	}
 
-	/* end of init */
-	psc_log("Ok\n\n", NULL);
+	psc_log("Using scanning script '%s'.\n", NULL, scfile);
 
-	/* scanning directory */
-	psc_log("Starting file parsing :\n", NULL);
-	if (scan_dir(&pcmn, buf, recursive) == false) {
+	if (parse_script(scfile, &pcmn, &sd) == false) {
 		exit(EXIT_FAILURE);
 	}
-	psc_log("Parsing finished.\n\n", NULL);
 
-	/* pmkfile stuff */
-	if (gen_pmk == true) {
-		psc_log("Processing nodes for check generation ...\n", NULL);
-		gen_checks(psz, &sd); /* XXX check */
-
-		psc_log("Generating %s ...\n", NULL, PMKSCAN_PMKFILE);
-		scan_build_pmk(psz); /* XXX check */
-		psc_log("Ok\n\n", NULL);
-
-		psc_log("Generating %s ...\n", NULL, PMKSCAN_CFGFILE);
-		scan_build_cfg(psz); /* XXX check */
-		psc_log("Ok\n\n", NULL);
-	}
-
-	/* makefile stuff */
-	if (gen_mkf == true) {
-		/* scanning resulting nodes */
-		psc_log("Processing nodes for object generation ...\n", NULL);
-		gen_objects(psz); /* XXX check */
-		psc_log("Ok\n\n", NULL);
-
-		/* scanning generated objects */
-		psc_log("Processing objects for target generation ...\n", NULL);
-		gen_targets(psz); /* XXX check */
-		psc_log("Ok\n\n", NULL);
-
-		psc_log("Generating %s ...\n", NULL, PMKSCAN_MKFILE);
-		scan_build_mkf(psz); /* XXX check */
-		psc_log("Ok\n\n", NULL);
-	}
-
-	/* cleaning */
-	scan_zone_destroy(psz);
-	hash_destroy(tnodes);
-	if (gen_pmk == true) {
-		prsdata_destroy(pdata);
-	}
-
-	psc_log("\nWork complete.\n\n", NULL);
+	prsdata_destroy(pdata);
 
 	if (fp_log != NULL) {
 		fclose(fp_log);
