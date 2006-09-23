@@ -1,45 +1,22 @@
 # pmkscan script
 # $Id$
 
-#GEN_PMKFILE {
-#	DIRECTORY = "."
-#	RECURSE = TRUE
-#	DISCARD = ("samples", "doc", "data", "man")
-#	UNIQUE = TRUE
-#}
-
-#GEN_MAKEFILE {
-#	DIRECTORY = "."
-#	RECURSE = TRUE
-#	DISCARD = ("samples", "doc", "tests")
-#	NAME = "Makefile.pmk"
-#	UNIQUE = TRUE
-#}
-
-#GEN_MAKEFILE {
-#	DIRECTORY = "tests"
-#	RECURSE = FALSE
-#	NAME = "Makefile.pmk"
-#	UNIQUE = TRUE
-#}
-
 GEN_ZONE(main) {
 	DIRECTORY = "."
 	RECURSE = TRUE
 	DISCARD = ("samples", "doc", "tests")
 	PMKFILE = TRUE
+	PMKNAME = "pmkfile.scan"
+	CFGNAME = "config.h.scan"
 	MAKEFILE = TRUE
+	MKFNAME = "Makefile.scan"
 	EXTRATAG = ("CONFDIR", "PRIVSEP_USER")
-#	UNIQUE = TRUE
 }
 
 GEN_ZONE(tests) {
 	DIRECTORY = "./tests"
 	RECURSE = TRUE
 	PMKFILE = TRUE
-#	CFGNAME = "config.h.sample"
 	MAKEFILE = TRUE
-#	MKFNAME = "Makefile.sample"
-#	UNIQUE = TRUE
 }
 
