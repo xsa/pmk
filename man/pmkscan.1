@@ -11,41 +11,36 @@
 .Sh SYNOPSIS
 .Nm
 .Bk -words
-.Op Fl hmprv
-.Op Ar path
+.Op Fl hlv
+.Op Fl f Ar file
 .Ek
 
 .Sh DESCRIPTION
 .Nm
-is a tool which scans the sources with the intention to generate a
+is a tool which scans the sources with the intention to generate build files like
 .Xr pmkfile 5
-template (named pmkfile.scan), a makefile template (named Makefile.scan)
-or both.
+, config file template (by default config.h.pmk) and makefile template (by default Makefile.pmk).
 .Pp
 The options are as follows:
 .Bl -tag -width Ds
+.It Fl f Ar file
+Use the given file instead of the default script named
+.Xr scanfile 5
+which should be in the working directory.
 .It Fl h
 Display usage.
-.It Fl m
-Generate a Makefile template.
-.It Fl p
-Generate a pmkfile template.
-.It Fl r
-Recursive scan.
+.It Fl l
+Log into pmkscan log file.
 .It Fl v
 Display the version number.
 .El
 .Pp
-.Ar path
-is optional as default
-.Ar path
-is the current working directory.
 .Sh FILES
-.Bl -tag -width "pmkfile.scan" -compact
-.It Pa pmkfile.scan
+.Bl -tag -width "pmkfile" -compact
+.It Pa pmkfile
 default
 .Xr pmkscan 1
-resulting template
+generated pmkfile.
 .It Pa pmkscan.dat
 .Xr pmkscan 1
 database

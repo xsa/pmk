@@ -129,6 +129,31 @@ GEN_ZONE(main) {
 }
 .Ed
 
+.It Cm DEF_LIB
+This command define library attributes.
+.Pp
+Arguments:
+.Bl -tag -width DIRECTORY -offset indent
+.It Dv NAME
+type is 'quoted', give the name of the library.
+.It Dv LINKER
+type is 'quoted', define the relative language of the linker to be used.
+.It Dv SOURCES
+type is 'list', list of the main sources which objects must be linked in the library.
+.It Dv HEADERS
+type is 'list', list of library headers to be installed.
+.El
+.Pp
+For example:
+.Bd -literal -offset indent
+DEFINE_LIB {
+	NAME = "testc"
+	LINKER = "C"
+	SOURCES = ("libtest.c")
+	HEADERS = ("libtest.h")
+}
+.Ed
+
 .Sh SEE ALSO
 .Xr pmkscan 1 ,
 .Xr pmkfile 5
