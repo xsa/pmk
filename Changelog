@@ -1,3 +1,7 @@
+23 Sep 2006 mipsator
+ * removed obsolete command line options of pmkscan.
+ * updated pmkscan and scanfile man pages.
+
 22 Sep 2006 mipsator
  * import large chunk of code for better support of shared library.
  * fixed format of c++ suffix in generated makefile.
