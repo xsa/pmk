@@ -2543,9 +2543,6 @@ bool gen_lib_targets(scn_zone_t *psz) {
 			/* get source name name */
 			srcname = da_idx(plc->src_list, j);
 
-			/*|+ build and store object name +|                    */
-			/*strlcpy(buf, pnode->prefix, sizeof(buf));            */
-			/*strlcat(buf, OBJ_SUFFIX, sizeof(buf));               */
 			pnode = hash_get(psz->nodes, srcname); /* XXX check */
 			if (da_push(plc->obj_deps, strdup(pnode->obj_name)) == false) {
 				/* err msg */
@@ -4801,7 +4798,7 @@ bool parse_script(char *cfname, prs_cmn_t *pcmn, scandata *psd) {
  ***********************************************************************/
 
 void usage(void) {
-	fprintf(stderr, "usage: pmkscan [-f file] [-hmpuv] [path]\n");
+	fprintf(stderr, "usage: pmkscan [-hlv] [-f file] [path]\n");
 }
 
 
