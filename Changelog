@@ -1,3 +1,6 @@
+24 Sep 2006 mipsator
+ * started simplification and automatization of makefile template's targets.
+
 23 Sep 2006 mipsator
  * removed obsolete command line options of pmkscan.
  * updated pmkscan and scanfile man pages.
