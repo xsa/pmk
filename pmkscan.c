@@ -2518,8 +2518,7 @@ bool gen_targets(scn_zone_t *psz) {
  ***********************************************************************/
 
 bool gen_lib_targets(scn_zone_t *psz) {
-	char			 buf[PATH_MAX],
-					*srcname;
+	char			*srcname;
 	hkeys			*phk;
 	lib_cell_t		*plc;
 	scn_node_t		*pnode;
@@ -3064,6 +3063,7 @@ void mkf_output_objs(FILE *fp, scn_zone_t *psz) {
  ***********************************************************************/
 
 void mkf_output_bld_trgs(FILE *fp, scn_zone_t *psz) {
+	bool			 need_sep;
 	char			 buf[MKF_OUTPUT_WIDTH * 2];
 	hkeys			*phk;
 	lib_cell_t		*plc;
@@ -3074,87 +3074,203 @@ void mkf_output_bld_trgs(FILE *fp, scn_zone_t *psz) {
 	fprintf(fp, "#\n# target lists\n#\n");
 
 	/* generate main building target list */
-	fprintf(fp, MKF_TRGT_ALL_VAR);
+	fprintf(fp, MKF_VARHDR, MKF_TRGT_ALL_VAR);
+	need_sep = false;
+	if (hash_nbkey(psz->targets) != 0) {
+		/* if binary targets have been found */
+		fprintf(fp, MKF_VAR, MKF_TRGT_ALL_BIN);
+		need_sep = true;
+	}
+	if (hash_nbkey(psz->libraries) != 0) {
+		if (need_sep == true) {
+			/* put a separator if needed */
+			fprintf(fp, " ");
+		}
+		/* if library targets have been found */
+		fprintf(fp, MKF_VAR, MKF_ALL_LIB_VAR);
+	}
 	fprintf(fp, MKF_TWICE_JUMP);
 
 	/* generate main cleaning target list */
-	fprintf(fp, MKF_TRGT_CLEAN_VAR);
-	fprintf(fp, MKF_TWICE_JUMP);
-
-	/* generate main binary building target list */
-	fprintf(fp, MKF_TRGT_ALL_BIN);
-
-	/* list of binary targets */
-	phk = hash_keys_sorted(psz->targets);
-	if (phk != NULL) {
-		lm = strlen(MKF_TRGT_ALL_BIN);
-		ofst = lm;
-		for (i = 0 ; i < phk->nkey ; i++) {
-			ofst = fprintf_width(lm, MKF_OUTPUT_WIDTH, ofst,
-												fp, phk->keys[i]);
+	fprintf(fp, MKF_VARHDR, MKF_TRGT_CLEAN_ALL);
+	need_sep = false;
+	if (hash_nbkey(psz->targets) != 0) {
+		/* if binary targets have been found */
+		fprintf(fp, MKF_VAR, MKF_TRGT_CLEAN_BIN);
+		need_sep = true;
+	}
+	if (hash_nbkey(psz->libraries) != 0) {
+		if (need_sep == true) {
+			/* put a separator if needed */
+			fprintf(fp, " ");
 		}
+		/* if library targets have been found */
+		fprintf(fp, MKF_VAR, MKF_TRGT_CLEAN_LIB);
 	}
 	fprintf(fp, MKF_TWICE_JUMP);
 
-	/* generate main binary cleaning target list */
-	fprintf(fp, MKF_TRGT_CLEAN_BIN);
-
-	/* list of binary targets */
-	if (phk != NULL) {
-		lm = strlen(MKF_TRGT_CLEAN_BIN);
-		ofst = lm;
-		for (i = 0 ; i < phk->nkey ; i++) {
-			snprintf(buf, sizeof(buf), "%s_clean", phk->keys[i]);
-			ofst = fprintf_width(lm, MKF_OUTPUT_WIDTH, ofst, fp, buf);
+	if (hash_nbkey(psz->targets) != 0) {
+		/* generate main binary building target list */
+		fprintf(fp, MKF_VARHDR, MKF_TRGT_ALL_BIN);
+		/* list of binary targets */
+		phk = hash_keys_sorted(psz->targets);
+		if (phk != NULL) {
+			lm = strlen(MKF_TRGT_ALL_BIN);
+			ofst = lm;
+			for (i = 0 ; i < phk->nkey ; i++) {
+				ofst = fprintf_width(lm, MKF_OUTPUT_WIDTH, ofst, fp, phk->keys[i]);
+			}
 		}
-		hash_free_hkeys(phk);
-	}
-	fprintf(fp, MKF_TWICE_JUMP);
+		fprintf(fp, MKF_TWICE_JUMP);
 
-
-	/* generate main library building target list */
-	fprintf(fp, MKF_TRGT_ALL_LIB);
-
-	/* list of library targets */
-	phk = hash_keys_sorted(psz->libraries);
-	if (phk != NULL) {
-		lm = strlen(MKF_TRGT_ALL_LIB);
-		ofst = lm;
-		for (i = 0 ; i < phk->nkey ; i++) {
-			/* get lib cell */
-			plc = hash_get(psz->libraries, phk->keys[i]);
-
-			snprintf(buf, sizeof(buf), "%s", plc->lib_name);
-
-			ofst = fprintf_width(lm, MKF_OUTPUT_WIDTH, ofst, fp, buf);
+		/* generate main binary cleaning target list */
+		fprintf(fp, MKF_VARHDR, MKF_TRGT_CLEAN_BIN);
+		/* list of binary targets */
+		if (phk != NULL) {
+			lm = strlen(MKF_TRGT_CLEAN_BIN);
+			ofst = lm;
+			for (i = 0 ; i < phk->nkey ; i++) {
+				snprintf(buf, sizeof(buf), "%s_clean", phk->keys[i]);
+				ofst = fprintf_width(lm, MKF_OUTPUT_WIDTH, ofst, fp, buf);
+			}
+			hash_free_hkeys(phk);
 		}
+		fprintf(fp, MKF_TWICE_JUMP);
 	}
-	fprintf(fp, MKF_TWICE_JUMP);
 
-	/* generate main library cleaning target list */
-	fprintf(fp, MKF_TRGT_CLEAN_LIB);
+	if (hash_nbkey(psz->libraries) != 0) {
+		/* generate main library building target list */
+		fprintf(fp, MKF_TRGT_ALL_LIB);
+		fprintf(fp, MKF_TWICE_JUMP);
 
-	/* list of library targets */
-	if (phk != NULL) {
-		lm = strlen(MKF_TRGT_CLEAN_LIB);
-		ofst = lm;
-		for (i = 0 ; i < phk->nkey ; i++) {
-			/* get lib cell */
-			plc = hash_get(psz->libraries, phk->keys[i]);
+		/* generate static libraries building target list */
+		fprintf(fp, MKF_VARHDR, MKF_TRGT_ALL_ST_LIB);
+		/* list of library targets */
+		phk = hash_keys_sorted(psz->libraries);
+		if (phk != NULL) {
+			lm = strlen(MKF_TRGT_ALL_LIB);
+			ofst = lm;
+			for (i = 0 ; i < phk->nkey ; i++) {
+				/* get lib cell */
+				plc = hash_get(psz->libraries, phk->keys[i]);
 
-			snprintf(buf, sizeof(buf), "%s_clean", plc->lib_name);
+				snprintf(buf, sizeof(buf), "$(%s)", plc->lib_static);
 
-			ofst = fprintf_width(lm, MKF_OUTPUT_WIDTH, ofst, fp, buf);
+				ofst = fprintf_width(lm, MKF_OUTPUT_WIDTH, ofst, fp, buf);
+			}
 		}
-		hash_free_hkeys(phk);
+		fprintf(fp, MKF_TWICE_JUMP);
+
+		/* generate shared libraries building target list */
+		fprintf(fp, MKF_VARHDR, MKF_TRGT_ALL_SH_LIB);
+		/* list of library targets */
+		phk = hash_keys_sorted(psz->libraries);
+		if (phk != NULL) {
+			lm = strlen(MKF_TRGT_ALL_LIB);
+			ofst = lm;
+			for (i = 0 ; i < phk->nkey ; i++) {
+				/* get lib cell */
+				plc = hash_get(psz->libraries, phk->keys[i]);
+
+				snprintf(buf, sizeof(buf), "$(%s)", plc->lib_shared);
+
+				ofst = fprintf_width(lm, MKF_OUTPUT_WIDTH, ofst, fp, buf);
+			}
+		}
+		fprintf(fp, MKF_TWICE_JUMP);
+
+		/* generate main library cleaning target list *//* XXX to improve */
+		fprintf(fp, MKF_VARHDR, MKF_TRGT_CLEAN_LIB);
+		/* list of library targets */
+		if (phk != NULL) {
+			lm = strlen(MKF_TRGT_CLEAN_LIB);
+			ofst = lm;
+			for (i = 0 ; i < phk->nkey ; i++) {
+				/* get lib cell */
+				plc = hash_get(psz->libraries, phk->keys[i]);
+
+				snprintf(buf, sizeof(buf), "%s_clean", plc->lib_name);
+
+				ofst = fprintf_width(lm, MKF_OUTPUT_WIDTH, ofst, fp, buf);
+			}
+			hash_free_hkeys(phk);
+		}
+		fprintf(fp, MKF_TWICE_JUMP);
 	}
-	fprintf(fp, MKF_TWICE_JUMP);
 
 	/* main installing target list */
-	fprintf(fp, MKF_TRGT_INST_VAR);
+	fprintf(fp, MKF_VARHDR, MKF_TRGT_INST_VAR);
+	need_sep = false;
+	if (hash_nbkey(psz->targets) != 0) {
+		/* if binary targets have been found */
+		fprintf(fp, MKF_TRGT_INST_BIN);
+		need_sep = true;
+	}
+	if (hash_nbkey(psz->libraries) != 0) {
+		if (need_sep == true) {
+			/* put a separator if needed */
+			fprintf(fp, " ");
+		}
+		/* if library targets have been found */
+		fprintf(fp, MKF_TRGT_INST_LIB);
+		need_sep = true;
+	}
+	if (psz->found[FILE_TYPE_MAN] == true) {
+		if (need_sep == true) {
+			/* put a separator if needed */
+			fprintf(fp, " ");
+		}
+		/* if library targets have been found */
+		fprintf(fp, MKF_TRGT_INST_MAN);
+		need_sep = true;
+	}
+	if (psz->found[FILE_TYPE_DATA] == true) {
+		if (need_sep == true) {
+			/* put a separator if needed */
+			fprintf(fp, " ");
+		}
+		/* if library targets have been found */
+		fprintf(fp, MKF_TRGT_INST_DATA);
+		need_sep = true;
+	}
+	fprintf(fp, MKF_TWICE_JUMP);
 
 	/* main deinstalling target list */
-	fprintf(fp, MKF_TRGT_DEINST_VAR);
+	fprintf(fp, MKF_VARHDR, MKF_TRGT_DEINST_VAR);
+	need_sep = false;
+	if (hash_nbkey(psz->targets) != 0) {
+		/* if binary targets have been found */
+		fprintf(fp, MKF_TRGT_DEINST_BIN);
+		need_sep = true;
+	}
+	if (hash_nbkey(psz->libraries) != 0) {
+		if (need_sep == true) {
+			/* put a separator if needed */
+			fprintf(fp, " ");
+		}
+		/* if library targets have been found */
+		fprintf(fp, MKF_TRGT_DEINST_LIB);
+		need_sep = true;
+	}
+	if (psz->found[FILE_TYPE_MAN] == true) {
+		if (need_sep == true) {
+			/* put a separator if needed */
+			fprintf(fp, " ");
+		}
+		/* if library targets have been found */
+		fprintf(fp, MKF_TRGT_DEINST_MAN);
+		need_sep = true;
+	}
+	if (psz->found[FILE_TYPE_DATA] == true) {
+		if (need_sep == true) {
+			/* put a separator if needed */
+			fprintf(fp, " ");
+		}
+		/* if library targets have been found */
+		fprintf(fp, MKF_TRGT_DEINST_DATA);
+		need_sep = true;
+	}
+	fprintf(fp, MKF_TWICE_JUMP);
 }
 
 
@@ -3541,6 +3657,8 @@ bool scan_build_mkf(scn_zone_t *psz) {
 	fprintf(fp, MKF_TARGET_INST);
 	fprintf(fp, MKF_INST_BIN);
 	fprintf(fp, MKF_DEINST_BIN);
+	fprintf(fp, MKF_INST_LIB);
+	fprintf(fp, MKF_DEINST_LIB);
 
 	/*if (psz->gen_lib == true) {     */
 	/*    fprintf(fp, MKF_INST_LIB);  */
@@ -4462,7 +4580,6 @@ bool parse_deflib(htable *pht, htable *libs) {
 	char		*name,
 				*linker = NULL;
 	dynary		*srcs = NULL,
-				*objs,
 				*hdrs = NULL;
 	int			 i;
 	lib_cell_t	*plc;
@@ -4492,7 +4609,7 @@ bool parse_deflib(htable *pht, htable *libs) {
 	linker = po_get_str(hash_get(pht, KW_OPT_LINKER));
 
 	/* check lib type */
-	for (i = 0 ; i < nb_lib_types ; i++) {
+	for (i = 0 ; i < (int) nb_lib_types ; i++) {
 		if (strncmp(lib_types[i].lang, linker, strlen(lib_types[i].lang) + 1) == 0) {
 			type = lib_types[i].type;
 			break;
@@ -4529,8 +4646,7 @@ bool parse_deflib(htable *pht, htable *libs) {
 bool parse_zone_opts(prs_cmn_t *pcmn, htable *pht, htable *libs) {
 	char		*pdir,
 				*pstr;
-	dynary		*da_l,	/* library list */
-				*da_o;	/* object list */
+	dynary		*da_l;	/* library list */
 	pmkobj		*ppo;
 	htable		*tnodes;
 	lib_cell_t	*plc;

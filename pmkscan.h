@@ -312,6 +312,7 @@ enum {
 
 #define MKF_SUBSTVAR		"%s=\t@%s@\n"
 #define MKF_VARHDR			"%s=\t"
+#define MKF_VAR				"$(%s)"
 #define MKF_STCLIB_VAR		"%s=\t%s.a\n"
 
 /* suffix defines ******************/
@@ -374,23 +375,30 @@ enum {
 
 #define MKF_TARGET_LIB_CLN	"\t$(RM) $(RMFLAGS) $(%s)\n" /* XXX add lib objects ? */
 
-#define MKF_TRGT_ALL_VAR	"ALL_TARGETS=\t$(ALL_BIN_TARGETS) $(ALL_LIB_TARGETS)" /* XXX make it dynamic */
-#define MKF_TRGT_ALL_BIN	"ALL_BIN_TARGETS=\t"
-#define MKF_TRGT_ALL_LIB	"ALL_LIB_TARGETS=\t"
-/*#define MKF_TRGT_ALL_LIB	"ALL_LIB_TARGETS=\t$(ST_LIB_TARGETS) $(SH_LIB_TARGETS)"*/
-#define MKF_TRGT_ALL_ST_LIB	"ST_LIB_TARGETS=\t"
-#define MKF_TRGT_ALL_SH_LIB	"SH_LIB_TARGETS=\t"
+#define MKF_TRGT_ALL_VAR	"ALL_TARGETS"
+#define MKF_ALL_LIB_VAR		"ALL_LIB_TARGETS"
+#define MKF_TRGT_ALL_BIN	"ALL_BIN_TARGETS"
+#define MKF_TRGT_ALL_LIB	"ALL_LIB_TARGETS=\t$(ST_LIB_TARGETS) $(SH_LIB_TARGETS)" /* XXX to be set by PMK !!! */
+#define MKF_TRGT_ALL_ST_LIB	"ST_LIB_TARGETS"
+#define MKF_TRGT_ALL_SH_LIB	"SH_LIB_TARGETS"
 
-#define MKF_TRGT_CLEAN_VAR	"ALL_CLEAN_TARGETS=\t$(ALL_BIN_CLEAN_TARGETS) $(ALL_LIB_CLEAN_TARGETS)" /* XXX make it dynamic */
-#define MKF_TRGT_CLEAN_BIN	"ALL_BIN_CLEAN_TARGETS=\t"
-#define MKF_TRGT_CLEAN_LIB	"ALL_LIB_CLEAN_TARGETS=\t"
+#define MKF_TRGT_CLEAN_ALL	"ALL_CLEAN_TARGETS"
+#define MKF_TRGT_CLEAN_BIN	"ALL_BIN_CLEAN_TARGETS"
+#define MKF_TRGT_CLEAN_LIB	"ALL_LIB_CLEAN_TARGETS"
 #define MKF_TRGT_CLEAN_STL	"ST_LIB_CLEAN_TARGETS=\t"
 #define MKF_TRGT_CLEAN_SHL	"SH_LIB_CLEAN_TARGETS=\t"
 
-#define MKF_TRGT_INST_VAR	"INSTALL_TARGETS=\tinstall_bin " \
-							"install_sbin install_man install_data\n\n"
-#define MKF_TRGT_DEINST_VAR	"DEINSTALL_TARGETS=\tdeinstall_bin " \
-							"deinstall_sbin deinstall_man deinstall_data\n\n"
+#define MKF_TRGT_INST_VAR	"INSTALL_TARGETS"
+#define MKF_TRGT_INST_BIN	"install_bin install_sbin"
+#define MKF_TRGT_INST_LIB	"install_lib"
+#define MKF_TRGT_INST_MAN	"install_man"
+#define MKF_TRGT_INST_DATA	"install_data"
+
+#define MKF_TRGT_DEINST_VAR		"DEINSTALL_TARGETS"
+#define MKF_TRGT_DEINST_BIN		"deinstall_bin deinstall_sbin"
+#define MKF_TRGT_DEINST_LIB		"deinstall_lib"
+#define MKF_TRGT_DEINST_MAN		"deinstall_man"
+#define MKF_TRGT_DEINST_DATA	"deinstall_data"
 #define MKF_FILE_BIN_VAR	"# by default we consider all binaries as non privileged\n" \
 							"BIN_FILES=\t$(ALL_BIN_TARGETS)\n\n"
 #define MKF_FILE_SBIN_VAR	"# move privileged binaries here if needed\n" \
@@ -460,6 +468,8 @@ enum {
 							"SBINDIR",							\
 							"$(RM) $(RMFLAGS)")
 
+#define MKF_INST_LIB		"install_lib:\n\n" /* XXX until things are really done */
+#define MKF_DEINST_LIB		"deinstall_lib:\n\n" /* XXX until things are really done */
 
 #define MKF_INST_MAN_H		"install_man:\n" \
 							"\t# install manual pages\n" \
