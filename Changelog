@@ -1,100 +1,100 @@
-24 Sep 2006 mipsator
+24 Sep 2006 coudercd
  * started simplification and automatization of makefile template's targets.
 
-23 Sep 2006 mipsator
+23 Sep 2006 coudercd
  * removed obsolete command line options of pmkscan.
  * updated pmkscan and scanfile man pages.
 
-22 Sep 2006 mipsator
+22 Sep 2006 coudercd
  * import large chunk of code for better support of shared library.
  * fixed format of c++ suffix in generated makefile.
 
-14 Sep 2006 mipsator
+14 Sep 2006 coudercd
  * fixed CPUID checking for X86 32 bits CPUs, noticed by Leslie Polzer.
 
-05 Sep 2006 mipsator
+05 Sep 2006 coudercd
  * updated values for compiler detection in SETTINGS to sync with pmk.
 
 # snapshot 20060902
 
-01 Sep 2006 mipsator
+01 Sep 2006 coudercd
  * fixed a regression in rev. 102 that prevented from generating a
    complete pmkfile (header and library checks were missing).
 
-17 Aug 2006 mipsator
+17 Aug 2006 coudercd
  * rewritten compiler detection for shared lib support.
  * improved shared lib support verification.
 
-03 Aug 2006 mipsator
+03 Aug 2006 coudercd
  * much mode #defines in compiler detection module.
 
-15 Jul 2006 mipsator
+15 Jul 2006 coudercd
  * a long time since the last commit but had no feeling to work on pmk until
  last days. Here is some cleanup and the latest work done.
 
 # snapshot 20060319
 
-19 Mar 2006 mipsator
+19 Mar 2006 coudercd
  * import latest work on library support (both static and dynamic).
 
-07 Mar 2006 mipsator
+07 Mar 2006 coudercd
  * improved a bit the makefile generation before completing library
    generation support.
 
-01 Mar 2006 mipsator
+01 Mar 2006 coudercd
  * still going on with library handling. Result is still not useable yet
    as library generation targets are missing. That should be the last
    step before completion.
 
-27 Feb 2006 mipsator
+27 Feb 2006 coudercd
  * added hash_extract() to extract data from an hash table.
  * added more serious partial lib support.
 
-05 Feb 2006 mipsator
+05 Feb 2006 coudercd
  * added some experimental stuff into pmkscan to handle libraries
    lately. This stuff could make current unstable as i have not enough
    time to make sure all is fine before commit. I'll notifiy when
    everything will come back to normality.
 
-30 Jan 2006 mipsator
+30 Jan 2006 coudercd
  * pmk now inform when compiler has not been detected before checking
    for shared library support.
 
-19 Jan 2006 mipsator
+19 Jan 2006 coudercd
  * some temporary fixes for pmkcfg.sh portability. Better fixes will
    come further ...
 
-16 Jan 2006 mipsator
+16 Jan 2006 coudercd
  * fixed pmkcfg.sh to correctly set library flags.
  * added isnan() and seteuid() functions in pmkcfg.sh for failing
    architectures.
 
-13 Jan 2006 mipsator
+13 Jan 2006 coudercd
  * fixed missing tokens in detect_cpu.c for kw_pmkcpu.
  * fixed CPP substitution in pmkcfg.sh script.
 
 # snapshot 20051215
 
-14 Dec 2005 mipsator
+14 Dec 2005 coudercd
  * improved template tag substitution in pmk.
 
-13 Dec 2005 mipsator
+13 Dec 2005 coudercd
  * improved c++ file parser for pmkscan.
 
-09 Dec 2005 mipsator
+09 Dec 2005 coudercd
  * added more support for c++.
  * added advanced tags for config tools and pkg-config.
 
-07 Dec 2005 mipsator
+07 Dec 2005 coudercd
  * fixed C++ flag setting in pmkscan.
 
-05 Dec 2005 mipsator
+05 Dec 2005 coudercd
  * added more data in pmkscan database.
 
-04 Dec 2005 mipsator
+04 Dec 2005 coudercd
  * small fix for parse_lang in prs_c_file().
 
-30 Nov 2005 mipsator
+30 Nov 2005 coudercd
  * fixed missing include for intmax_t in compat, noticed by veins.
  * added few more advanced tags in pmk.
  * added alternate pmkfile name support in pmkscan script.
@@ -102,47 +102,47 @@
    generated makefile.
  * added some recursive target stuff to prepare multiple generation.
 
-24 Nov 2005 mipsator
+24 Nov 2005 coudercd
  * fixed extra define in pmkscan generated config file.
  * fixed lower in gen_tag().
  * started to add advanced tags.
 
-22 Nov 2005 mipsator
+22 Nov 2005 coudercd
  * improved distclean target in generated makefile.
 
-19 Nov 2005 mipsator
+19 Nov 2005 coudercd
  * fixed pmkfile, pmkcfg.sh and compat.
  * polished a bit func.c.
 
-17 Nov 2005 mipsator
+17 Nov 2005 coudercd
  * added basic distclean target in generated makefile and started to
    prepare for advanced tags support.
 
-10 Nov 2005 mipsator
+10 Nov 2005 coudercd
  * added use of new tags functions in pmk.
 
 # snapshot 0.9.3-s4
 
-05 Nov 2005 mipsator
+05 Nov 2005 coudercd
  * finished basic tag support in pmkscan for config file generation.
  * added pmksyntax.5 manual page to give a common overview of PMK basic
    syntax used in pmkfile and scanfile.
 
-04 Nov 2005 mipsator
+04 Nov 2005 coudercd
  * fixed a small bug in c language parser.
  * added a start of config file template generation in pmkscan.
 
-27 Oct 2005 mipsator
+27 Oct 2005 coudercd
  * added support for extra tags in pmkscan.
 
-27 Oct 2005 mipsator
+27 Oct 2005 coudercd
  * started improvements to pmkscan (see TODO).
 
-25 Oct 2005 mipsator
+25 Oct 2005 coudercd
  * added support for sub headers, language label and language option in
    pmkscan.
 
-24 Oct 2005 mipsator
+24 Oct 2005 coudercd
  * fixed a bug when generating a pmkfile that has no checks, noticed by
    veins of skreel.org.
  * set './scanfile' as default specification file for pmkscan when no
@@ -150,88 +150,88 @@
 
 # snapshot 0.9.3-s3
 
-23 Oct 2005 mipsator
+23 Oct 2005 coudercd
  * misc changes before new snapshot.
 
-19 Oct 2005 mipsator
+19 Oct 2005 coudercd
  * improved/fixed the pmkfile generation in pmkscan.
 
-13 Oct 2005 mipsator
+13 Oct 2005 coudercd
  * polished checks in func.
  * added scanfile.5 man page.
 
-10 Oct 2005 mipsator
+10 Oct 2005 coudercd
  * rewritten check_header() and check_type() to guarantee the recording
    of tags.
 
-06 Oct 2005 mipsator
+06 Oct 2005 coudercd
  * added conv_to_label() to fix label generation in pmkscan.
 
-05 Oct 2005 mipsator
+05 Oct 2005 coudercd
  * new engine for pmkfile generation in pmkscan (thought need to have a
    better engine for label names).
 
-02 Oct 2005 mipsator
+02 Oct 2005 coudercd
  * fixed command line option parsing in pmksetup (broken after 0.9.3 with
    prseng import).
 
-28 Sep 2005 mipsator
+28 Sep 2005 coudercd
  * splitted member detection in CHECK_TYPE, now type and member are
    checked separatly.
 
-27 Sep 2005 mipsator
+27 Sep 2005 coudercd
  * polished code builder stuff, now used in check_header, check_lib and
    check_type.
 
-24 Sep 2005 mipsator
+24 Sep 2005 coudercd
  * unbreak the pmkfile.
  * fixed shared library support bug when system is not supported.
 
-03 Sep 2005 mipsator
+03 Sep 2005 coudercd
  * imported primary work on code builder engine.
 
 # snapshot 0.9.3-s2
 
-21 Aug 2005 mipsator
+21 Aug 2005 coudercd
  * replaced stdio.h by pmk_stdio.h.
  * replaced old tests/Makefile.pmk by the one generated by pmkscan
    (removed unneeded targets and install stuff).
  * fixed tests so all compile without warnings.
 
-20 Aug 2005 mipsator
+20 Aug 2005 coudercd
  * replaced old makefile template by the one generated by pmkscan
    (CFLAGS has been modified and added CONFDIR and PRIVSEP_USER).
  * enabled compat tests.
  * updated pmkscan latest changes (polishing).
 
-18 Aug 2005 mipsator
+18 Aug 2005 coudercd
  * added MANDIR and SYSCONFDIR support in pmkscan.
  * tuned pmkcfg.sh to prepare switch from hand made Makefile to
    pmkscan generated Makefile.
 
-17 Aug 2005 mipsator
+17 Aug 2005 coudercd
  * fixed %c conversion in vsnprintf().
  * updated pmkcfg.sh and config.in.pmk in sync with compat.
 
-15 Aug 2005 mipsator
+15 Aug 2005 coudercd
  * updated pmkcfg.sh and config.h.pmk in sync with compat.
 
-12 Aug 2005 mipsator
+12 Aug 2005 coudercd
  * added support for NaN and infinity in vsnprintf().
 
-10 Aug 2005 mipsator
+10 Aug 2005 coudercd
  * added strdup() in compat.
  * fragmented a bit vsnprintf() related functions.
 
-09 Aug 2005 mipsator
+09 Aug 2005 coudercd
  * handle template files in pmkscan.
 
-06 Aug 2005 mipsator
+06 Aug 2005 coudercd
  * added latest work done on pmkscan. The makefile generation is almost
    complete. Some work has to be done on pmkfile generation for the next
    release.
 
-02 Aug 2005 mipsator
+02 Aug 2005 coudercd
  * added da_sort() to sort the content of the dynary.
  * first import of code building functions for further use in pmk.
  * fixed bugs in pathtools.
@@ -239,21 +239,21 @@
  * updated pmkscan data.
  * cleaned test sources.
 
-21 Jul 2005 mipsator
+21 Jul 2005 coudercd
  * added ISO C99 vsnprintf() implementation (missing wide char support).
  * rewritten a bit compat.
 
-07 Jul 2005 mipsator
+07 Jul 2005 coudercd
  * added type data support in pmkscan.
 
-05 Jul 2005 mipsator
+05 Jul 2005 coudercd
  * finished support for man pages and data files in pmkscan's makefile
    generation.
  * fixed recursive scanning of directory in pmkscan.
 
 # snapshot 0.9.3-s1
 
-01 Jul 2005 mipsator
+01 Jul 2005 coudercd
  * fixed scan_dir() by replacing use of non portable member of structure
    dirent by the use of stat(). This should fix problems encountered on
    Solaris 8.
@@ -263,71 +263,71 @@
 30 Jun 2005 mreindl
  * include config.h in compat/pmk_sys_types.h.
 
-30 Jun 2005 mipsator
+30 Jun 2005 coudercd
  * added support for a configuration script in pmkscan.
  * added an example of configuration script.
 
-13 Jun 2005 mipsator
+13 Jun 2005 coudercd
  * add da_find() to search a string through a dynary.
 
-20 May 2005 mipsator
+20 May 2005 coudercd
  * fixed a bug in chkpath() when the parser come to the beginning of
    the string and that it does not start with a separator.
 
-14 May 2005 mipsator
+14 May 2005 coudercd
  * added hash_keys_sorted() which returns a sorted list of keys.
  * update of style for function header comments. 
  * added parse_asm_file() to parse assembly files.
  * improvements to pmkscan.
  * misc change in compat module.
 
-07 May 2005 mipsator
+07 May 2005 coudercd
  * imported new compatibility layer.
  * polished pmkscan output.
 
-04 May 2005 mipsator
+04 May 2005 coudercd
  * improved target's object dependencies scanning in pmkscan.
  * removed useless pmkshgen* files as the idea will be implemented in
    pmkinstall.
 
-25 Apr 2005 mipsator
+25 Apr 2005 coudercd
  * fixed a bug that prevent --list-all option to work in pmkpc.
  * added missing variable substitution for library path in pmkpc.
 
-21 Apr 2005 mipsator
+21 Apr 2005 coudercd
  * modified pmkscan to use parse_lang.
  * improved the -m option of pmkscan.
  * fixed/improved stuff in prseng.
  * updated plang test.
 
-17 Apr 2005 mipsator
+17 Apr 2005 coudercd
  * updated parse_lang in sync with latest changes.
 
-13 Apr 2005 mipsator
+13 Apr 2005 coudercd
  * added missing parts for pmk and pmksetup, tree should be still broken
    due to the missing parts i did not committed yet.
  * added missing parts for pkgconfig object.
 
-12 Apr 2005 mipsator
+12 Apr 2005 coudercd
  * updated parse.c to use prseng functions.
  * added detection of C99 and C89 compilers.
 
-07 Apr 2005 mipsator
+07 Apr 2005 coudercd
  * imported the more than experimental c file parsing engine. This is still
    work in progress but is largely useable.
  * imported tests/plang_test.c to test c file parser.
 
-06 Apr 2005 mipsator
+06 Apr 2005 coudercd
  * imported new main engine of pmkscan to permit generation of pmkfile
    and makefile templates. This does not include the new file parser.
 
-05 Apr 2005 mipsator
+05 Apr 2005 coudercd
  * import of prseng sources, a set of functions to manage a parsing
    buffer. It will be used in pmkscan and later by the pmk parser.
 
 # snapshot 0.9.2-s1
 
-23 Mar 2005 mipsator
+23 Mar 2005 coudercd
  * added option checking for compiler data.
  * improved option checking so we can specify required options and
    allow any optional options. Or having no required options but a
@@ -335,32 +335,32 @@
 
 # snapshot 0.9.2-s1
 
-23 Mar 2005 mipsator
+23 Mar 2005 coudercd
  * added option checking for compiler data.
  * improved option checking so we can specify required options and
    allow any optional options. Or having no required options but a
    specified bunch of optional options.
 
-20 Mar 2005 mipsator
+20 Mar 2005 coudercd
  * improved the parser to allow type checking of options.
 
 17 Mar 2005 mreindl
  * pmkcfg.sh: fall back to 'cc -E' when cpp isn't available and obey $CPP when
    set.
 
-13 Mar 2005 mipsator
+13 Mar 2005 coudercd
  * added option checking in parser.
  * comment cosmetics in parser.
 
-25 Feb 2005 mipsator
+25 Feb 2005 coudercd
  * implemented backup options in pmkinstall.
 
-05 Feb 2005 mipsator
+05 Feb 2005 coudercd
  * fragmented pmkinstall main loop into sub functions.
 
 # PMK 0.9.2 release
 
-29 Jan 2005 mipsator
+29 Jan 2005 coudercd
  * fixed the -v option of pmksetup.
  * fixed pmksetup behavior when the user has not the required privileges.
  * moved the configuration directory checking earlier in the program
@@ -368,12 +368,12 @@
 
 # PMK 0.9.1 release
 
-26 Jan 2005 mipsator
+26 Jan 2005 coudercd
  * fixed segfault in x86 cpu detection.
  * added __ALPHA in alpha architecture macro.
  * fixed call order for setegid(), setgid(), seteuid() and setuid().
 
-21 Jan 2005 mipsator
+21 Jan 2005 coudercd
  * keep the PATH separator as is instead of replacing it with a comma.
 	NOTE: This means that you must update your pmk.conf before using
 	pmk again.
@@ -381,41 +381,41 @@
  * fixed keycomp() by reverting changes that broken sorting.
  * added more information about pmk.conf in its manual page.
 
-20 Jan 2005 mipsator
+20 Jan 2005 coudercd
  * fixed skip_useless() to update frame buffer.
 
-18 Jan 2005 mipsator
+18 Jan 2005 coudercd
  * moved pmksetup into bin instead of sbin.
  * use lists for install and deinstall.
 
-17 Jan 2005 mipsator
+17 Jan 2005 coudercd
  * merged PRIVSEP branch.
 
-13 Jan 2005 mipsator
+13 Jan 2005 coudercd
  * more stuff for ia64 cpu detection.
 
-12 Jan 2005 mipsator
+12 Jan 2005 coudercd
  * added basic ia64 cpu identification.
 
-06 Jan 2005 mipsator
+06 Jan 2005 coudercd
  * made pmksetup more verbose on cpu detection failure.
 
-02 Jan 2005 mipsator
+02 Jan 2005 coudercd
  * added alpha cpu identification.
 
 # PMK 0.9.0 release
 
-27 Dec 2004 mipsator
+27 Dec 2004 coudercd
  * improved handling of CFLAGS and LDFLAGS with pmkcfg.sh
  * added x86 64 bits cpu detection code.
 
-26 Dec 2004 mipsator
+26 Dec 2004 coudercd
  * added snprintf_b(), strlcat_b() and strlcpy_b() in pmk_string.c.
  * added support for AMD cpu feature detection.
  * replaced some snprintf(), strlcat() and strlcpy() with their boolean
    counterparts.
 
-25 Dec 2004 mipsator
+25 Dec 2004 coudercd
  * fixed respect of CC in pmkcfg.sh script.
  * added DEFS usage in pmkfile.5.
  * updated pmkfile.
@@ -423,97 +423,97 @@
  * updated pmk.conf.5 to reflect latest changes.
  * more warning fixes in compat found with aggressive compiler options.
 
-23 Dec 2004 mipsator
+23 Dec 2004 coudercd
  * fixed use of the assembler to comply with SunOS.
 
-22 Dec 2004 mipsator
+22 Dec 2004 coudercd
  * fixed a lot of compiler warnings (almost all about comparison between
    signed and unsigned) that were revealed with 'aggressive' options.
 
-20 Dec 2004 mipsator
+20 Dec 2004 coudercd
  * reworked CHECK_LIB in the same spirit as CHECK_HEADER.
  * replaced remaining copy_text_file() by fcopy().
  * removed copy_text_file() from common object as it is useless now.
 
-19 Dec 2004 mipsator
+19 Dec 2004 coudercd
  * added c_file_builder() to reduce redundant code.
  * added MACRO option in CHECK_HEADER to detect compiler macros in headers.
  * removed copy_config() from pmksetup and use fcopy() instead.
 
-11 Dec 2004 mipsator
+11 Dec 2004 coudercd
  * added detection of 'id' and 'sudo' in pmksetup, idea from Sean Chittenden.
 
-06 Dec 2004 mipsator
+06 Dec 2004 coudercd
  * added detection of 'ls' and 'echo' in pmksetup.
 
-27 Nov 2004 mipsator
+27 Nov 2004 coudercd
  * added cpu features for x86 architecture.
 
 # snapshot 0.8.1-s9
 
-27 Nov 2004 mipsator
+27 Nov 2004 coudercd
  * incorporated x86 cpu detection code into pmksetup, enjoy !
  * miscellaneous cosmetics changes.
 
-26 Nov 2004 mipsator
+26 Nov 2004 coudercd
  * made cpuid_test using compat.
  * done major clean-up in tests directory (but still need some work).
  * fixed a bug in x86_get_cpuid_data() that was remaining from before
    x86_cpu_cell structure changes.
 
-25 Nov 2004 mipsator
+25 Nov 2004 coudercd
  * added missing code that translate arch name into id.
  * improved architecture detection code.
 
-24 Nov 2004 mipsator
+24 Nov 2004 coudercd
  * x86 cpu detection engine is complete, need more data now.
 
-21 Nov 2004 mipsator
+21 Nov 2004 coudercd
  * improved tests/Makefile to preprocess assembly files by default.
  * added detection of cc,cpp and as in pmkcfg.sh.
  * added generation of tests/Makefile from a template.
  * improved Makefile to preprocess assembly files by default.
 
-17 Nov 2004 mipsator
+17 Nov 2004 coudercd
  * modified x86 cpu detection stuff to use less assembly.
 
-05 Nov 2004 mipsator
+05 Nov 2004 coudercd
  * improved cpu arch detection in pmksetup.
  * added some x86 cpu detection stuff used by tests/cpuid_test.
 
-01 Nov 2004 mipsator
+01 Nov 2004 coudercd
  * misc changes before cpu detection.
 
-27 Oct 2004 mipsator
+27 Oct 2004 coudercd
  * added 'as' (assembler) detection in pmksetup.
 
-25 Oct 2004 mipsator
+25 Oct 2004 coudercd
  * fixed pmkcfg.sh on IRIX.
 
-18 Oct 2004 mipsator
+18 Oct 2004 coudercd
  * improved pmkcfg.sh to try to detect posix shells before using /bin/sh
    (this fix the Tru64 and SunOS lack of default posix shell problem).
 
-11 Oct 2004 mipsator
+11 Oct 2004 coudercd
  * imported experimental cpu family detection.
 
 # snapshot 0.8.1-s8
 
-26 Sep 2004 mipsator
+26 Sep 2004 coudercd
  * updated pmkfile.5 to sync with latest changes.
  * updated README and INSTALL to warn about non POSIX compliant shells.
 
-26 Sep 2004 mipsator
+26 Sep 2004 coudercd
  * improved CHECK_LIB to handle more than one function. 
 
-24 Sep 2004 mipsator
+24 Sep 2004 coudercd
  * CHECK_HEADER is now able to check more than one function (feature
    asked by Gergely Czuczy).
  * fixed initialisation of some variables in pmk.c (noticed on irix).
  * updated samples/bin_c to use config.h and one check for strl*()
    functions.
 
-23 Sep 2004 mipsator
+23 Sep 2004 coudercd
  * returned on getopts use in pmkcfg.sh to handle blanks in arguments.
 
 # snapshot 0.8.1-s7
@@ -521,37 +521,37 @@
 10 Sep 2004 xsa
  * imported some IRIX stuff in pmkcomp.dat.
 
-06 Sep 2004 mipsator
+06 Sep 2004 coudercd
  * improved pmkcfg.sh function to return test status (0 or 1).
 
-05 Sep 2004 mipsator
+05 Sep 2004 coudercd
  * added check_lib_function() in pmkcfg.sh (preliminary stuff).
 
-29 Aug 2004 mipsator
+29 Aug 2004 coudercd
  * more process_required(), less redundant code.
 
-28 Aug 2004 mipsator
+28 Aug 2004 coudercd
  * added process_required() to remove redundant code for required flag.
 
 # snapshot 0.8.1-s6
 
-28 Aug 2004 mipsator
+28 Aug 2004 coudercd
  * fixed a bug introduced by an improvement while fixing config file
    parsing.
 
 # snapshot 0.8.1-s5
 
-27 Aug 2004 mipsator
+27 Aug 2004 coudercd
  * fixed bugs in parse_pmkconf().
  * added more debug stuff.
 
-21 Aug 2004 mipsator
+21 Aug 2004 coudercd
  * added compiler flags in sample bin makefiles.
 
 20 Aug 2004 mreindl
  * add bin_c++ sample
 
-20 Aug 2004 mipsator
+20 Aug 2004 coudercd
  * move backup right before copy of new config file.
 
 19 Aug 2004 mreindl
@@ -560,11 +560,11 @@
 
 # snapshot 0.8.1-s4
 
-15 Aug 2004 mipsator
+15 Aug 2004 coudercd
  * added missing support of additional defines in CHECK_CONFIG and
    CHECK_PKG_CONFIG.
 
-08 Aug 2004 mipsator
+08 Aug 2004 coudercd
  * added support for additional defines (keyword DEFS) in CHECK_HEADER,
    CHECK_LIB, CHECK_TYPE and CHECK_VARIABLE.
  * set option keywords as defines.
@@ -575,14 +575,14 @@
 08 Aug 2004 mreindl
  * added -fPIC in SLLDFLAGS for gcc.
 
-05 Aug 2004 mipsator
+05 Aug 2004 coudercd
  * fixed makefile template of c++ lib sample.
 
 04 Aug 2004 mreindl
  * sprinkle some -fPICs in c++ lib sample for AMD64 platform.
  * spacing nitpicking in pmkcomp.dat.
 
-02 Aug 2004 mipsator
+02 Aug 2004 coudercd
  * fixed pmk_set_variable() to check type of value to prevent coredump
    on syntax error (noticed by Han Boetes).
  * removed redundant (and confusing dependency in samples/pmkfile.sample
@@ -592,16 +592,16 @@
 
 # snapshot 0.8.1-s3
 
-28 Jul 2004 mipsator
+28 Jul 2004 coudercd
  * added lex and yacc detection in pmksetup (request from chandlerc).
  * processed some XXXs.
 
-25 Jul 2004 mipsator
+25 Jul 2004 coudercd
  * improved configuration header processing in autoconf support.
 
 # snapshot 0.8.1-s2
 
-18 Jul 2004 mipsator
+18 Jul 2004 coudercd
  * clean up the code before starting to play with parse_data().
  * fixed getopt() parameters in pmkscan.
  * added option to parse config file in parser_test.
@@ -610,56 +610,56 @@
  * modified pmkscan.dat to put list data in multiple lines.
  * fixed C++ library sample.
 
-13 Jul 2004 mipsator
+13 Jul 2004 coudercd
  * misc fixes and cleanup for experimental parsing engine.
 
-12 Jul 2004 mipsator
+12 Jul 2004 coudercd
  * imported experimental parser engine.
  * synced parser test.
 
-11 Jul 2004 mipsator
+11 Jul 2004 coudercd
  * fixed compatibility headers.
 
-28 Jun 2004 mipsator
+28 Jun 2004 coudercd
  * added variable substitution in pmkscan.
  * cleaned-up Makefile.pmk (obsolete tests).
 
-27 Jun 2004 mipsator
+27 Jun 2004 coudercd
  * added more stuff to prepare changes in pmkscan.
 
-26 Jun 2004 mipsator
+26 Jun 2004 coudercd
  * moved process_string() and single_append() into hash_tools.
  * updated pmkfile (was using obsolete commands).
 
-16 Jun 2004 mipsator
+16 Jun 2004 coudercd
  * fixed parse_pc_file().
  * fixed process_variables().
  * misc. changes.
 
-22 May 2004 mipsator
+22 May 2004 coudercd
  * hunted some more XXX ...
 
-16 May 2004 mipsator
+16 May 2004 coudercd
  * fixed some XXX remaining in parse.c and pmkinstall.c.
 
-11 May 2004 mipsator
+11 May 2004 coudercd
  * fixed samples to run properly.
  * added missing error messages.
  * added misc defines for LIBS and CFLAGS.
 
 # snapshot 0.8.1-s1
 
-02 May 2004 mipsator
+02 May 2004 coudercd
  * fixed a bug recently introduced in CHECK_PKG_CONFIG.
 
-24 Apr 2004 mipsator
+24 Apr 2004 coudercd
  * more stuff related to the pmksetup engine changes.
 
-15 Apr 2004 mipsator
+15 Apr 2004 coudercd
  * added new engine for pmksetup. Some minor changes are still remaining
    but pmksetup is working fine.
 
-01 Apr 2004 mipsator
+01 Apr 2004 coudercd
  * imported skeleton of pmkshgen.
  * fixed use of parse_clopt's value in pmk and pmksetup.
  * booleanification of pmksetup.	
@@ -667,22 +667,22 @@
 
 # PMK 0.8.1 release
 
-14 Mar 2004 mipsator
+14 Mar 2004 coudercd
  * modified a bit the version string format.
 
-29 Feb 2004 mipsator
+29 Feb 2004 coudercd
  * added failsafe checks in dynarray functions, based on a patch from
    Marek Habersack.
  * fixed pkgcell_destroy() to call free() only when needed, based on a
    patch from Marek Habersack.
  * added MODULE option to CHECK_CONFIG command.
 
-25 Feb 2004 mipsator
+25 Feb 2004 coudercd
  * moved tests for pmkscan and pmkinstall.
  * fixed pmkc against segfault when .pc doesn't exists or empty
    requires field, based on a patch from Marek Habersack.
 
-21 Feb 2004 mipsator
+21 Feb 2004 coudercd
  * fixed pmkscan bug that happens when no sources files exist, noticed
    by Marek Habersack.
  * updated pmkscan.dat to check for strndup(), strndupa() an vsyslog(),
@@ -693,26 +693,26 @@
 
 # PMK 0.8 release
 
-14 Feb 2004 mipsator
+14 Feb 2004 coudercd
  * added missing tutorial stuff for release.
 
-13 Feb 2004 mipsator
+13 Feb 2004 coudercd
  * updated the tutorial to speak about command label (noticed by
    Kurt V. Hindenburg).
 
 # snapshot 0.7.13
 
-12 Feb 2004 mipsator
+12 Feb 2004 coudercd
  * added parse_clopt() to handle line command options.
  * added support for addition and removal of variable in pmksetup.
  * fixed command line option support in pmk.
  * updated pmksetup.8 man page about -r and -u options.
 
-10 Feb 2004 mipsator
+10 Feb 2004 coudercd
  * added 2 sections to the tutorial.
  * updated pmkfile.5 with shared library name building.
 
-09 Feb 2004 mipsator
+09 Feb 2004 coudercd
  * rewritten pmkinstall to permit multiple directory creation.
  * updated pmkinstall man page.
  * updated usage() of pmkinstall.
@@ -720,7 +720,7 @@
  * imported the beginning of a tutorial.
  * rewritten a bit shared lib support and pmkcomp.dat format.
 
-08 Feb 2004 mipsator
+08 Feb 2004 coudercd
  * implemented output filtering options in pmkpc.
  * updated pmkpc(1) to sync with actual state.
  * added support for multiple sources in pmkinstall.
@@ -729,7 +729,7 @@
  * replaced use of strtoul() by str_to_ulong() in pmkinstall.
  * fixed check_mode() in pmkinstall to behave as BSD install.
 
-07 Feb 2004 mipsator
+07 Feb 2004 coudercd
  * fixed building of the pmkscan location in usermode.
  * moved sample tests in samples/Makefile.
  * added document headers that were missing in some files.
@@ -741,7 +741,7 @@
 
 # snapshot 0.7.12
 
-05 Feb 2004 mipsator
+05 Feb 2004 coudercd
  * converted pmk_set_parameter() to a wrapper.
  * added sub-functions for pmk_set_paremeter().
  * added system specific overriding support of compiler flags.
@@ -752,18 +752,18 @@
  * big STATUS updates, pmk tested on nearly every Unix out there with C-only
 	support
 
-04 Feb 2004 mipsator
+04 Feb 2004 coudercd
  * improved process_string() to be recursive.
  * imported experimental shared lib support.
 
-27 Jan 2004 mipsator
+27 Jan 2004 coudercd
  * fixed wrong check of init_var().
 
-26 Jan 2004 mipsator
+26 Jan 2004 coudercd
  * fixed a bug in pmkpc that occurs when using non implemented option
 	in pmkpc (noticed by xixi ;).
 
-25 Jan 2004 mipsator
+25 Jan 2004 coudercd
  * added support for --atleast-pkgconfig-version in pmkpc.
  * added man page for pmkpc.
  * added missing checks for hash_update* almost everywhere.
@@ -779,7 +779,7 @@
  * added the --usage option in pmkpc.
  * added the --help option in pmkpc.
 
-21 Jan 2004 mipsator
+21 Jan 2004 coudercd
  * use str_to_ulong() in functool and pmkinstall.
  * added compare_version() in pkgconfig for version string comparison.
  * updated func to use compare_version() instead of check_version().
@@ -788,14 +788,14 @@
  * added support for --atleast-version, --exact-version and
 	--max-version in pmkpc.
 
-20 Jan 2004 mipsator
+20 Jan 2004 coudercd
  * moved size type from int to size_t for most functions in common.
  * added str_to_ulong() in common for string to unsigned long conversions.
 
 19 Jan 2004 xsa
  * imported sample test for C binary.
 
-17 Jan 2004 mipsator
+17 Jan 2004 coudercd
  * fixed specific deinstall stuff in Makefile.
  * fixed setting of shared lib cflags.
  * fixed init of ac_file and lang in global data.
@@ -804,12 +804,12 @@
 
 # snapshot 0.7.11
 
-16 Jan 2004 mipsator
+16 Jan 2004 coudercd
  * fixed parse_pc_file() to use pkgcell_init().
  * improved init of pmk's global data.
  * fixed some files to use our compatibility wrappers.
 
-14 Jan 2004 mipsator
+14 Jan 2004 coudercd
  * imported cfgtool.c and cfgtool.h to store config tool related code.
  * updated func.c to use cfgtool new functions.
  * moved config tool stuff from pkgconfig to cfgtool.
@@ -817,13 +817,13 @@
  * improved pmkpc to fall back on config tool if module is not found.
  * added missing pkg-config options to pmkpc as 'not implemented' yet.
 
-13 Jan 2004 mipsator
+13 Jan 2004 coudercd
  * improved pmkpc to not care about argument order (like pkg-config).
  * added support for multiple module.
  * moved get_file_path() from functool to common.
  * moved process_opt() from pmk to parse.
 
-12 Jan 2004 mipsator
+12 Jan 2004 coudercd
  * imported preliminary code for our pkg-config alternative.
  * got rid of cfgrm, cfgum and config targets in Makefile template.
  * added showmode, sm and fclean targets in Makefile template.
@@ -833,7 +833,7 @@
  * removed Makefile which is now useless.
  * updated documentation.
 
-11 Jan 2004 mipsator
+11 Jan 2004 coudercd
  * added more C++ support in some checks (handle CXXFLAGS when needed).
  * improved some checks to be more verbose on used variables.
  * removed a fix into check_config() that was wrong.
@@ -841,13 +841,13 @@
 
 # snapshot 0.7.10
 
-08 Jan 2004 mipsator
+08 Jan 2004 coudercd
  * fixed segfault on some platform when cleaning cfgtdata.
 
-06 Jan 2004 mipsator
+06 Jan 2004 coudercd
  * fixed recording of cfgtool path in pmk_check_config().
 
-05 Jan 2004 mipsator
+05 Jan 2004 coudercd
  * improved check_mode() in pmkinstall.c, patch provided by
 						Pedro Martelletto.
  * improved a bit pmkcfg.sh to use a list of templates.
@@ -856,7 +856,7 @@
  * fixed pmkinstall bug when destination already existed.
  * INSTALL can now safely set (back) to pmkinstall.
 
-03 Jan 2004 mipsator
+03 Jan 2004 coudercd
  * fixed get_make_var() by replacing misused mkstemp() by tmps_open().
  * simplified mkstemps() to remove warnings about the cast.
  * improved a bit comp_test.c to display more info.
@@ -871,20 +871,20 @@
  * added PC_PATH_LIB to pmk.conf (look if PREFIX/lib/pkgconfig exists).
  * updated pmk.conf.5 accordinally.
 
-02 Jan 2004 mipsator
+02 Jan 2004 coudercd
  * added diverting from CHECK_PKG_CONFIG to CHECK_CONFIG.
  * added data file for specific config tool options.
  * added support for specific config tool options (huge).
  * finalized pkgconfig support.
 
-01 Jan 2004 mipsator
+01 Jan 2004 coudercd
  * added pkg_cell_add() and pkg_mod_exists() in pkgconfig.
  * rewritten pkg_recurse() to use pkg_cell_add().
  * updated test/pkgconfig_test.c in sync pkgconfig support changes.
  * wished happy new year :)
  * introduced internal pkgconfig support in CHECK_PKG_CONFIG.
 
-31 Dec 2003 mipsator
+31 Dec 2003 coudercd
  * added str_to_dynary_adv() to handle numerous separators.
  * changed str_to_dynary() to reuse str_to_dynary_adv() code.
  * rewritten and cleaned pkgconfig stuff.
@@ -894,13 +894,13 @@
  * implemented pkg_get_cflags() and pkg_get_libs().
  * misc changes in pkgconfig_test.
 
-30 Dec 2003 mipsator
+30 Dec 2003 coudercd
  * imported some code for internal support of pkgconfig.
  * added pkgconfig_test.c in tests.
  * added variable substitution in pkgconfig support.
  * added pkg_recurse() in pkgconfig to prepare for recursion.
 
-29 Dec 2003 mipsator
+29 Dec 2003 coudercd
  * moved hash_add() as hash_update() and kept hash_add() as an alias.
  * updated hash_init_adv() to support data duplication.
  * updated hash_init() in sync with hash_init_adv().
@@ -912,7 +912,7 @@
  * made consistent use of boolean string values.
  * replaced remaining hash_add() calls in pmksetup.
 
-28 Dec 2003 mipsator
+28 Dec 2003 coudercd
  * added check_lang_comp() into functool to get lang info via compiler.
  * added code to set shared lib flags (SLCFLAGS and SLCXXFLAGS).
  * updated pmkcomp.dat to sync with shared lib support.
@@ -921,27 +921,27 @@
 
 # snapshot 0.7.8
 
-23 Dec 2003 mipsator
+23 Dec 2003 coudercd
  * moved compiler detection in SETTINGS section using DETECT option.
  * fixed bad stuff discovered by lint (wasn't changing pmk's behavior).
  * added some data in pmkcomp.dat about shared libs.
  * updated pmkfile.5 man page.
 
-20 Dec 2003 mipsator
+20 Dec 2003 coudercd
  * avoided use of srandomdev() in mkstemps as it is not portable.
 
-19 Dec 2003 mipsator
+19 Dec 2003 coudercd
  * added mkstemps.c, mkstemps.h and pmk_unistd.h in compat directory.
  * added detection of mkstemps() in pmkcfg.sh and pmkfile.
  * fixed pmkcfg.sh for function detection in an header.
  * replaced unistd header includes by pmk_unistd header.
 
-18 Dec 2003 mipsator
+18 Dec 2003 coudercd
  * fixed detect.c and func.c to use correctly tmps_open().
 
 # snapshot 0.7.7
 
-17 Dec 2003  mipsator
+17 Dec 2003  coudercd
  * added pmkcomp.dat in data directory.
  * moved compiler detection data in pmkcomp.dat file.
  * modified detect.c and detect.h to use data from dat file.
@@ -953,7 +953,7 @@
  * added missing comments, cleaned-up code.
  * added better handling of the version when unknown.
 
-15 Dec 2003  mipsator
+15 Dec 2003  coudercd
  * added gen_test_file() to automate test file generation in detect.
  * improved detect_compiler() to store data about the compiler.
  * updated use of detect_compiler() in pmk.
@@ -964,7 +964,7 @@
 
 # snapshot 0.7.6
 
-12 Dec 2003  mipsator
+12 Dec 2003  coudercd
  * added tmp_open() in common.
  * updated func.c to use tmp_open().
  * changed remaining fprintf() to sterr into errorf() in common.
@@ -975,26 +975,26 @@
  * added detect.c and detect.h for compiler detection.
  * updated pmk to display detected compiler.
 
-10 Dec 2003  mipsator
+10 Dec 2003  coudercd
  * added new option to pmk to enable check build logging.
  * updated pmk man page with new -l option.
 
-09 Dec 2003  mipsator
+09 Dec 2003  coudercd
  * added MEMBER in CHECK_TYPE to check structure member.
  * updated pmkfile man page to sync with MEMBER addition.
 
-06 Dec 2003  mipsator
+06 Dec 2003  coudercd
  * moved fcopy() from pmkinstall to common.
  * add many missing code that was marked with XXX tags.
 	(autoconf.c, common.c, func.c, functool.c)
 
 # snapshot 0.7.5
 
-30 Nov 2003 mipsator
+30 Nov 2003 coudercd
  * added optional HEADER in CHECK_TYPE command.
  * updated pmkcfg.sh and pmkfile to check blkcnt_t correctly.
 
-29 Nov 2003 mipsator
+29 Nov 2003 coudercd
  * added use of POSIX macro for exit() status in parse.c, pmk.c,
 	pmkinstall.c and pmkscan.c files.
  * added support for suid and sgid flags in pmkinstall.
@@ -1007,18 +1007,18 @@
  * added compat to I_OBJS to fix pmkinstall build.
  * added stuff related to blkcnt_t type.
 
-27 Nov 2003 mipsator
+27 Nov 2003 coudercd
  * updated pmkinstall man page.
 
 27 Nov 2003 xsa
  * added ECHO_N, ECHO_C, ECHO_T variables to pmk.conf for autoconf compat.
  * sync pmk.conf(5) man page with the ECHO_* variables addition.
 
-26 Nov 2003 mipsator
+26 Nov 2003 coudercd
  * added test_pmkinstall target in makefiles.
  * improved mode operator support in pmkinstall.
 
-25 Nov 2003 mipsator
+25 Nov 2003 coudercd
  * added support for -o and -g options (owner and group) of pmkinstall.
  * added mode argument to makepath() in pathtools.
  * updated pmk.c to provide mode to makepath().
@@ -1027,47 +1027,47 @@
  * updated makefiles to include pathtools for pmkinstall.
  * added some code for strip support in pmkinstall.
 
-24 Nov 2003 mipsator
+24 Nov 2003 coudercd
  * started to rewrite pmkinstall from scratch (much easier than making
 	xinstall portable).
  * implemented -m option (only octal values) of pmkinstall.
  * added basic support for symbolic values in -m option of pmkinstall.
 
-23 Nov 2003 mipsator
+23 Nov 2003 coudercd
  * removed oboslete definitions in kw_pmkscan[].
 
 # snapshot 0.7.4
 
-18 Nov 2003 mipsator
+18 Nov 2003 coudercd
  * added DESTDIR and fixed Makefiles.
 
 # snapshot 0.7.3
 
-18 Nov 2003 mipsator
+18 Nov 2003 coudercd
  * disabled build of pmkinstall as it's still work in progress.
  * added some getopts options to pmkcfg.sh (prefix override).
  * updated Makefile.pmk and Makefile in sync with pmkcfg.sh changes.
  * updated README and INSTALL to sync with pmkcfg.sh changes.
 
-17 Nov 2003 mipsator
+17 Nov 2003 coudercd
  * removed stuff in pmkinstall to make sunos happy.
 
-14 Nov 2003 mipsator
+14 Nov 2003 coudercd
  * replaced remaining warn() and warnx() calls in pmkinstall.
 
-13 Nov 2003 mipsator
+13 Nov 2003 coudercd
  * removed err() and errx() calls and replaced by errof() in pmkinstall.
  * removed paths.h in pmkinstall.
 
 # snapshot 0.7.2
 
-10 Nov 2003 mipsator
+10 Nov 2003 coudercd
  * fixed init of CXXFLAGS.
  * added init of CXX.
 
 # snapshot 0.7.1
 
-07 Nov 2003 mipsator
+07 Nov 2003 coudercd
  * improved init of CFLAGS, CXXFLAGS, CPPFLAGS, LIBS, LDFLAGS and
 	DEBUG with values gathered from make.
  * changed target of get_make_var() from test to all.
@@ -1075,11 +1075,11 @@
  * added pmkinstall man page.
  * modified compat.c to make ansi compiler happy.
 
-04 Nov 2003 mipsator
+04 Nov 2003 coudercd
  * added makepath() in pathtools.
  * modified process_template() to use makepath().
 
-27 Oct 2003 mipsator
+27 Oct 2003 coudercd
  * updated Makefile.pmk to build in a test directory.
  * rewritten ac_parse_config() and fixed AC_COMPAT to be relative to
 	pmkfile location
@@ -1089,50 +1089,50 @@
  * modified arguments of ac_process_dyn_var() and process_dyn_var().
  * reorganised order of autoconf directories in Makefiles samples.
 
-18 Oct 2003 mipsator
+18 Oct 2003 coudercd
  * fixed computing of top_srcdir.
  * added processing of dynamic variables in pmk.
  * added creation of directories in template processing.
  * changed init_var() arguments.
  * updated pmkfile.
 
-14 Oct 2003 mipsator
+14 Oct 2003 coudercd
  * removed obsolete stuff (mostly compat with 0.6 syntax).
 
 # PMK 0.7 release
 
-12 Oct 2003 mipsator
+12 Oct 2003 coudercd
  * removed stuff not related to autoconf into ac_set_variables().
  * added some more stuff in ac_set_variables().
  * changed init of alternative variables in func.
 
-10 Oct 2003 mipsator
+10 Oct 2003 coudercd
  * improved process_template().
  * fixed computing of top_srcdir in ac_process_dyn_var().
  * more changes in ac_set_variables().
 
 # snapshot 0.6.6
 
-07 Oct 2003 mipsator
+07 Oct 2003 coudercd
  * more autoconf compat.
  * added target for pmkinstall in Makefile.pmk.
  * updated Makefile.
  * fixed missing '/' in pmkscan.h.
 
-06 Oct 2003 mipsator
+06 Oct 2003 coudercd
  * finished addition of third license clause.
 
-05 Oct 2003 mipsator
+05 Oct 2003 coudercd
  * added missing variables for autoconf compatibility.
  * added third license clause to almost all the files.
  * imported pmkinstall tools for further use.
  * added more third license clause into compat directory.
 
-02 Oct 2003 mipsator
+02 Oct 2003 coudercd
  * renamed pmk_check_include() by pmk_check_header().
  * removed a useless free() in single_append().
 
-01 Oct 2003 mipsator
+01 Oct 2003 coudercd
  * added premk-cvs@lists.sourceforge.net to get commit messages.
  * updated pmkfile man page.
  * added init_var() in pmk to set specific variables.
@@ -1141,14 +1141,14 @@
  * more in init_var() and ac_set_variables().
  * improved process_template() to set configure_input tag.
 
-30 Sep 2003 mipsator
+30 Sep 2003 coudercd
  * changed USERMODE by PMK_USERMODE to avoid conflicts.
  * fixed hash_str_append() in hash.
  * more debug messages in hash.
  * fixed single_append() in functool.
  * improved pmk_check_lib() to use optional LIBS variable.
 
-28 Sep 2003 mipsator
+28 Sep 2003 coudercd
  * added find_file_dir() in common.
  * rewritten find_file() to use find_file_dir().
  * added get_file_dir_path() and single_append() in functool.
@@ -1160,7 +1160,7 @@
 
 # snapshot 0.6.5
 
-27 Sep 2003 mipsator
+27 Sep 2003 coudercd
  * improved process_string() to allow escaping of $ character.
  * improved parse_quoted() to not eat escape characters.
  * added mkf_sed() and renamed do_sed() to templ_sed() in pmkcfg.
@@ -1173,12 +1173,12 @@
  * bunch of fixes and cosmetics changes before next snapshot.
  * fixed vicious bug in pmksetup that results in segfault on tru64.
 
-26 Sep 2003 mipsator
+26 Sep 2003 coudercd
  * added support to negate labels in conditions like DEPEND or IF.
  * updated pmkfile.5 to sync with latest changes.
  * fixed pmk_switches() for use of bool type.
 
-25 Sep 2003 mipsator
+25 Sep 2003 coudercd
  * added prs_get_line(), parse_node(), parse_command() and parse_line() to
 	allow use of real nodes (aka commands into another command).
  * rewritten parse_pmkfile() to use new functions.
@@ -1186,16 +1186,16 @@
  * added pmk_ifcond() into func.c to manage new 'IF' keyword.
  * updated pmkfile sample to use 'IF' keyword.
 
-22 Sep 2003 mipsator
+22 Sep 2003 coudercd
  * added small support for DEFS.
 
 # snapshot 0.6.4
 
-20 Sep 2003 mipsator
+20 Sep 2003 coudercd
  * added ac_set_variables() in autoconf.
  * added autoconf compatibility stuff for byte order.
 
-19 Sep 2003 mipsator
+19 Sep 2003 coudercd
  * made syntax more simple, now all the checks use NAME for the main
 	target (example in CHECK_TYPE, NAME contain the type to check).
  * added CHECK_HEADER which does the same thing as CHECK_INCLUDE which
@@ -1204,7 +1204,7 @@
  * updated pmkfile.5 man page to sync with previous changes.
  * updated pmkfile sample.
 
-18 Sep 2003 mipsator
+18 Sep 2003 coudercd
  * improved str_to_dynary() to init and return dynary structure.
  * updated use of str_to_dynary in func, funtool, pmk and pmksetup.
  * changed syntax of path variables in pmk configuration file.
@@ -1221,16 +1221,16 @@
  * added pkg-config detection in pmksetup.
  * updated pmk_check_pkg_config() to use BIN_PKGCONFIG if provided.
 
-15 Sep 2003 mipsator
+15 Sep 2003 coudercd
  * removed useless parse_conf_line() in common.
  * added function comments that were missing.
 
-14 Sep 2003 mipsator
+14 Sep 2003 coudercd
  * made Makefile more portable.
 
 # snapshot 0.6.3
 
-14 Sep 2003 mipsator
+14 Sep 2003 coudercd
  * finished global language support.
  * fixed parsing of bool data in compatibility mode.
  * added parse_pmkconf(), a common configuration file parser (pmk.conf).
@@ -1241,7 +1241,7 @@
  * updated pmkfile.5 and pmk.conf.5 man pages.
  * updated override file sample.
 
-13 Sep 2003 mipsator
+13 Sep 2003 coudercd
  * added dumping of pmk.conf in test_pmksetup target of Makefile.
  * added parse_obsolete() for pmk.conf compatibility with old format.
  * modified parse_opt() to check a list of operator instead of
@@ -1250,7 +1250,7 @@
  * defined write format for pmk.conf in pmksetup.h
 	(see PMKSTP_WRITE_FORMAT).
 
-11 Sep 2003 mipsator
+11 Sep 2003 coudercd
  * added bool object in pmk objects.
  * added bool object support in parser.
  * updated require_check() to support bool object.
@@ -1258,7 +1258,7 @@
  * fixed pmkfile sample.
  * rewritten str_to_def() to have full compatibility with autoconf.
 
-10 Sep 2003 mipsator
+10 Sep 2003 coudercd
  * added parse_key() and parse_data() to enforce syntax checking.
  * removed parse_word which became useless.
  * added warning for AC_COMPAT and TARGET to mark them as obsolete.
@@ -1266,7 +1266,7 @@
 
 # snapshot 0.6.2
 
-06 Sep 2003 mipsator
+06 Sep 2003 coudercd
  * more stuff to permit node command (i will explain later).
  * modified parse_cell() and prscell_init() to meet our current goal.
  * added more stuff again for node command.
@@ -1279,7 +1279,7 @@
  * removed redundant code in pmk_target() and pmk_ac_acompat().
  * updated pmkfile man page.
 
-05 Sep 2003 mipsator
+05 Sep 2003 coudercd
  * improved parser engine again (first part).
  * new pmk language style (no longer need leading dot) but keep
 	compat with 0.6 release.
@@ -1291,40 +1291,40 @@
 
 # snapshot 0.6.1
 
-02 Sep 2003 mipsator
+02 Sep 2003 coudercd
  * added byte_order_check() in pmksetup to set HW_BYTEORDER.
 
-01 Sep 2003 mipsator
+01 Sep 2003 coudercd
  * added invert_bool() and get_comp_path() in functool.
  * improved language checking and compiler path setting in func.
  * small improvement of pmk_target().
  * cleaned po_get_data() use in func.
 
-30 Aug 2003 mipsator
+30 Aug 2003 coudercd
  * added VARNAME in CHECK_BINARY to specify alternate storage variable.
  * fixed deinstall target in Makefile.
 
-28 Aug 2003 mipsator
+28 Aug 2003 coudercd
  * added missing checks.
  * style.
 
-23 Aug 2003 mipsator
+23 Aug 2003 coudercd
  * added switches support.
  * update man pages about switches.
 
 # PMK 0.6 release
 
-23 Aug 2003 mipsator
+23 Aug 2003 coudercd
  * changes for 0.6 release.
 
 # snapshot 0.5.6
 
-22 Aug 2003 mipsator
+22 Aug 2003 coudercd
  * misc fixes
 
 # snapshot 0.5.5
 
-21 Aug 2003 mipsator
+21 Aug 2003 coudercd
  * changed type of DEPEND, it must be a list now.
  * LIST in TARGET command is now of the list type.
  * allow use of lists in pmkscan data file.
@@ -1333,39 +1333,39 @@
  * added arguments to pmkscan (-v -h and optional path).
  * added pmkscan.1 man page.
 
-20 Aug 2003 mipsator
+20 Aug 2003 coudercd
  * added hash_add_array_adv() in hash.
  * add support for isblank() in compat.
 
-18 Aug 2003 mipsator
+18 Aug 2003 coudercd
  * added po_get_str() and po_get_list in pmk_obj.
 
-17 Aug 2003 mipsator
+17 Aug 2003 coudercd
  * fixed a small bug in depend_check().
  * finished parser improvement for list parsing.
 
-16 Aug 2003 mipsator
+16 Aug 2003 coudercd
  * added po_dup() in pmk_obj.
 
-15 Aug 2003 mipsator
+15 Aug 2003 coudercd
  * added po_append() to pmk_obj.
  * adapted solution of dynarray to hash functions.
  * sync with new hash functions.
 
-14 Aug 2003 mipsator
+14 Aug 2003 coudercd
  * found a better solution to handle structure freeing in dynarray.
  * reversed changes relative to use of pmk objects with dynarray.
 
-13 Aug 2003 mipsator
+13 Aug 2003 coudercd
  * more (disabled) stuff for list support.
 
-12 Aug 2003 mipsator
+12 Aug 2003 coudercd
  * renamed pmk objects function in the same style as hash and dynarray.
  * misc renaming into sources.
  * switch dynarray to use pmk objects.
  * added preliminary support for list in parser.
 
-11 Aug 2003 mipsator
+11 Aug 2003 coudercd
  * added pmk objects.
  * added pmk object support in hash.
  * added pmk object support in dynarray.
@@ -1374,12 +1374,12 @@
 
 # snapshot 0.5.4
 
-09 Aug 2003 mipsator
+09 Aug 2003 coudercd
  * more stuff in pmkfile man page.
  * some changes in pmkscan data file.
  * some changes in pmkfile too.
 
-08 Aug 2003 mipsator
+08 Aug 2003 coudercd
  * rewritten parse_cell() in the same spirit as parse_opt().
  * modified parse_cell() and parse() to parse new and old format of pmkfile.
  * updated pmkfile.5 with new format syntax.
@@ -1389,35 +1389,35 @@
  * added missing error messages in parse_quoted(), parse_list() and parse_word().
  * update pmkscan.dat to new parser format.
 
-07 Aug 2003 mipsator
+07 Aug 2003 coudercd
  * rewritten parse_opt().
  * updated sample files to work with the new parser.
  * added parser_test.c into test directory.
  * added parse_word(), parse_quoted(), parse_list() and skip_blank().
  * rewritten parse_opt() again to be more compact, simple and efficient.
 
-01 Aug 2003 mipsator
+01 Aug 2003 coudercd
  * added test_pmkscan target plus some cosmetics in Makefile.
 
 # snapshot 0.5.3
 
-01 Aug 2003 mipsator
+01 Aug 2003 coudercd
  * fixed a bad free() in pmkscan.
 
-31 Jul 2003 mipsator
+31 Jul 2003 coudercd
  * improved dynarrays to store void* instead of char*.
  * fixed use of new dynarrays.
  * updated man/pmkfile.5 to sync with reality.
 
-30 Jul 2003 mipsator
+30 Jul 2003 coudercd
  * massive style conforming.
 
-29 Jul 2003 mipsator
+29 Jul 2003 coudercd
  * style, descriptions and misc in pmk.
  * added pmk_check_type() and some style cosmetics in func.
  * updated pmkfile sample to use CHECK_TYPE.
 
-28 Jul 2003 mipsator
+28 Jul 2003 coudercd
  * improved dir_explore().
  * added scanning support for c++ files.
  * added da_shift() and da_resize() in dynarray.
@@ -1425,7 +1425,7 @@
  * changed return type of da_size() and da_usize() in dynarray.
  * updated test/da_test.c to use da_shift().
 
-26 Jul 2003 mipsator
+26 Jul 2003 coudercd
  * added dir_recurse() in pmkscan to make it scanning a complete tree.
  * added missing function comments in parse.c .
  * added prsdata_destroy().
@@ -1434,10 +1434,10 @@
 
 # snapshot 0.5.2
 
-24 Jul 2003 mipsator
+24 Jul 2003 coudercd
  * added dir_explore() as first step to recursivity.
 
-23 Jul 2003 mipsator
+23 Jul 2003 coudercd
  * added detection and processing of functions in pmkscan.
  * replaced free() by hash_free_hcell() where needed in hash.
  * misc in pmkscan.
@@ -1445,11 +1445,11 @@
  * another misc changes in pmkscan.
  * two other fixes in hash.
 
-22 Jul 2003 mipsator
+22 Jul 2003 coudercd
  * rewritten hash_keys() to return a new structure (hkeys).
  * fix use of hash_keys() in sources.
 
-21 Jul 2003 mipsator
+21 Jul 2003 coudercd
  * added output_file() and misc in pmkscan.
  * improved hash functions to work with (void*) instead of (char*).
  * update all files that use hash_add() and hash_get().
@@ -1458,17 +1458,17 @@
  * updated Makefile to install pmkscan.
  * use USER_TEST to define where to find pmkscan.dat file.
 
-19 Jul 2003 mipsator
+19 Jul 2003 coudercd
  * updated STATUS
  * fixed test/Makefile for portability.
  * misc in pmkscan (not debugged).
 
 # snapshot 0.5.1
 
-17 Jul 2003 mipsator
+17 Jul 2003 coudercd
  * added a check for _Bool type (fix for Tru64 >= 5.x and solaris 9).
 
-16 Jul 2003 mipsator
+16 Jul 2003 coudercd
  * misc changes in pmkscan.c to use regex.
  * added sub versions for all tools.
  * added display of subversion and snapversion in debug mode.
@@ -1477,30 +1477,30 @@
  * added pmkscan in Makefile.
  * added missing pmkscan.dat in data.
 
-15 Jul 2003 mipsator
+15 Jul 2003 coudercd
  * add parse.c and parse.h with a new shared parsing engine.
  * add pmkscan.c and pmkscan.h, this is preliminary and unusable code.
  * pmk now use the new parsing engine.
 
-05 Jul 2003 mipsator
+05 Jul 2003 coudercd
  * added c++ in the binary list of pmksetup.
  * modified get_lang().
  * added c++ support in pmk_check_include() and pmk_check_library().
  * updated pmkfile sample to use c++ in one test.
 
-02 Jul 2003 mipsator
+02 Jul 2003 coudercd
  * added get_lang() as preliminary work on C++ support.
  * fixed a memory fault in pmk and corrected a typo
 	(noticed by Ritschard Pierre-Yves).
 
 # PMK 0.5 release
 
-30 Jun 2003 mipsator
+30 Jun 2003 coudercd
  * changes for 0.5
 
 # snapshot 0.4.7
 
-27 Jun 2003 mipsator
+27 Jun 2003 coudercd
  * fixed hash_destroy() to support null pointer as argument
 	(noticed by Marek Habersack).
  * fixed use of dirname to avoid modification of the original string under
@@ -1510,24 +1510,24 @@
 
 # snapshot 0.4.6
 
-26 Jun 2003 mipsator
+26 Jun 2003 coudercd
  * added override file sample.
  * updated Makefile to use override file sample.
  * added subdir makefile example.
  * rewritten *srcdir and *buiddir computation, seems perfect now.
 
-25 Jun 2003 mipsator
+25 Jun 2003 coudercd
  * updated pmk man page.
  * added option to load a file that override pmk.conf (not tested yet).
  * updated man page.
 
-24 Jun 2003 mipsator
+24 Jun 2003 coudercd
  * added uabspath() in pathtools.
  * added -b option to set basedir.
  * moved pmkfile path in gdata.
  * related misc ...
 
-22 Jun 2003 mipsator
+22 Jun 2003 coudercd
  * added missing snapshots in Changelog.
  * fixed a bug in chkpath().
  * finished (??) to implement srcdir and builddir stuff.
@@ -1537,7 +1537,7 @@
 
 # snapshot 0.4.5
 
-21 Jun 2003 mipsator
+21 Jun 2003 coudercd
  * added pathtools.c and pathtools.h files.
  * moved relpath() into pathtools.
  * added chkpath() into pathtools.
@@ -1551,10 +1551,10 @@
  * fixed remaining <string.h> to "compat/string.h".
  * added BONUS file to talk about reusable components of this package.
 
-18 Jun 2003 mipsator
+18 Jun 2003 coudercd
  * added relpath() to common.
 
-11 Jun 2003 mipsator
+11 Jun 2003 coudercd
  * added srcdir in gdata structure.
  * modified hash_append() to avoid adding separator to an empty string.
  * added init of CFLAGS and LIBS.
@@ -1564,7 +1564,7 @@
 
 # snapshot 0.4.4
 
-10 Jun 2003 mipsator
+10 Jun 2003 coudercd
  * updated TODO
  * modified behavior of pmk_check_binary().
  * added support for alternative CFLAGS and CLIBS in pmk_check_config()
@@ -1574,7 +1574,7 @@
  	of error messages.
  * updated TODO and STATUS
 
-08 Jun 2003 mipsator
+08 Jun 2003 coudercd
  * added support for pkg-config with CHECK_PKG_CONFIG.
  	(added pmk_check_pkg_config() in func)
  * made version optional in CHECK_CONFIG.
@@ -1583,37 +1583,37 @@
  * added a check to ensure that the given package exists.
  * use PACKAGE instead of TARGET in CHECK_CONFIG.
 
-07 Jun 2003 mipsator
+07 Jun 2003 coudercd
  * cleaned-up and reorganized includes.
  * added autoconf.c and autoconf.h for autoconf compatibility stuff.
 
 # snapshot 0.4.3
 
-05 Jun 2003 mipsator
+05 Jun 2003 coudercd
  * massive changes in func.c to complete check functions.
  	(added missing record_def, record_val and label_set
 		and moved some portions of code)
 
-04 Jun 2003 mipsator
+04 Jun 2003 coudercd
  * makes pmkcfg.sh using the same tags as pmk (@DEF__*).
  * updates compat/compat.h.in to use DEF__* tags.
 
-03 Jun 2003 mipsator
+03 Jun 2003 coudercd
  * updated makefile sample to use LIBS and CFLAGS.
  * added CFLAGS and LIBS support in pmk_check_config().
  * added LIBS support in pmk_check_lib().
  * fixed initialisation of the buffer in hash_append().
 
-02 Jun 2003 mipsator
+02 Jun 2003 coudercd
  * improved hash_append().
  * updated hash_test.c to test appending function.
 
-01 Jun 2003 mipsator
+01 Jun 2003 coudercd
  * added hash_append().
 
 # snapshot 0.4.2
 
-31 May 2003 mipsator
+31 May 2003 coudercd
  * added strlcat.c and strlcat.h in compat directory.
  * pmkcfg.sh now have a check for strlcat.
  * fully included strlcat in compat.
@@ -1621,48 +1621,48 @@
  * use INC_PATH in pmk_check_include().
  * use LIB_PATH in pmk_check_lib().
 
-28 May 2003 mipsator
+28 May 2003 coudercd
  * misc changes in Makefile.
  * changed samples/ac_config.h into samples/ac_config.h.sample .
  * ac_config.h.sample is more complete.
 
-27 May 2003 mipsator
+27 May 2003 coudercd
  * record_val() is now functional.
  * use record_val() for almost all tests.
  * fixed/improved parse_ac_config().
  * enabled parse_ac_config() in pmk.
 
-25 May 2003 mipsator
+25 May 2003 coudercd
  * few changes related to autoconf compatibility.
 
-23 May 2003 mipsator
+23 May 2003 coudercd
  * added AC_COMPAT in pmkfile.sample plus some comments.
  * added samples/ac_config.h for autoconf compatibility test.
  * AC_COMPAT now handle FILENAME to set the configuration file to process.
  * ac_file is now included in pmkdata structure.
 
-22 May 2003 mipsator
+22 May 2003 coudercd
  * improve a bit copy_text_file().
  * add parse_ac_config(), not finished yet but it doesn't break the code.
 
-21 May 2003 mipsator
+21 May 2003 coudercd
  * added copy_text_file().
  * misc on buffers.
 
 15 May 2003 xsa
  * now using hash_add_array() for the predefined variables in pmksetup.
 
-15 May 2003 mipsator
+15 May 2003 coudercd
  * added AC_COMPAT for autoconf compatibility.
  * cleanup in various files (XXX comments).
  * added missing check (XXX comments).
  * misc.
 
-14 May 2003 mipsator
+14 May 2003 coudercd
  * moved functab and misc related.
  * use hash_add_array() in hash_test.
 
-06 May 2003 mipsator
+06 May 2003 coudercd
  * added hash_add_array().
 
 05 May 2003 xsa
@@ -1673,7 +1673,7 @@
  * added predef_vars(), adding the static variables to the pmk.conf file.
  * error checking when hadh_add() 'ing values.
 
-04 May 2003 mipsator
+04 May 2003 coudercd
  * finished and tested hash_resize().
  * added hash_set_grow() to set autogrow mode.
  * added autogrow in htable.
@@ -1684,30 +1684,30 @@
  * more checks in record_def().
  * added checks in label_set() and label_check().
 
-03 May 2003 mipsator
+03 May 2003 coudercd
  * rewritten record_def().
  * added stuff to store label states (now need to handle dependencies).
  * added cleaning function to simplify pmk (need more work).
 
-02 May 2003 mipsator
+02 May 2003 coudercd
  * improved a bit find_file().
  * rewritten dynarrays, mostly based on a patch from Ted Unangst.
 
-30 Apr 2003 mipsator
+30 Apr 2003 coudercd
  * added tagging stuff.
 
-29 Apr 2003 mipsator
+29 Apr 2003 coudercd
  * improved parse_cmd().
  * some fixes from Ted Unangst.
 
 # PMK 0.4 release
 
-28 Apr 2003 mipsator
+28 Apr 2003 coudercd
  * many fixes for 0.4 release ...
  * fixed find_file() again should be the last time.
 
 
-27 Apr 2003 mipsator
+27 Apr 2003 coudercd
  * moved man pages in man directory.
  * added pmkfile(5).
  * fixed parse_conf_line().
@@ -1715,13 +1715,13 @@
    an pmk_check_lib().
  * more changes in process_template().
 
-26 Apr 2003 mipsator
+26 Apr 2003 coudercd
  * implemented pmk_check_lib().
  * added check_include_function in pmkcfg.sh .
  * improved str_to_dynary() and parse_conf_line().
  * pmk_check_include() has been updated to check function again.
 
-25 Apr 2003 mipsator
+25 Apr 2003 coudercd
  * pmk_check_binary() has been completed.
  * pmk_check_include() has been rewritten to have a better test.
  * process_template() has been improved for speed.
@@ -1733,7 +1733,7 @@
  * moved BIN_PATH gathering in get_env_vars().
  * change behavior of pmksetup when a binary is not found.
 
-24 Apr 2003 mipsator
+24 Apr 2003 coudercd
  * written check_version().
  * improved version checking in pmk_check_config().
  * fixed a vicious bug in find_file().
