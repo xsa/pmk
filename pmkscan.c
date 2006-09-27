@@ -2704,32 +2704,14 @@ void mkf_output_header(FILE *fp, scn_zone_t *psz) {
 
 		fprintf(fp, MKF_HEADER_AR);
 		fprintf(fp, MKF_HEADER_RANLIB);
-		
-		phk = hash_keys_sorted(psz->libraries);
-		if (phk != NULL) {
-			/* generate library name variables */
-			fprintf(fp, "\n# library variables\n");
-
-			for (i = 0 ; i < (int) phk->nkey ; i++) {
-				plc = hash_get(psz->libraries, phk->keys[i]);
-				
-				fprintf(fp, MKF_STCLIB_VAR, plc->lib_static, plc->lib_name);
-				fprintf(fp, MKF_SUBSTVAR, plc->lib_shared, plc->lib_shared);
-			}
-			hash_free_hkeys(phk);
-		}
 	}
 
-	fprintf(fp, "\n# misc stuff\n");
-	if (psz->found_src == true) {
-		/* linker stuff */
-		fprintf(fp, MKF_HEADER_LD);
-	}
 	/* misc stuff */
+	fprintf(fp, "\n# misc stuff\n");
 	fprintf(fp, MKF_HEADER_MISC);
 
 	/* package data */
-	fprintf(fp, MKF_HEADER_DATA);
+	fprintf(fp, MKF_HEADER_DATA); /* XXX useful ? */
 
 	/* extra tags */
 	if (psz->exttags != NULL) {
@@ -2961,6 +2943,43 @@ void mkf_output_srcs(FILE *fp, scn_zone_t *psz) {
 
 
 /*********************
+ * mkf_output_libs() *
+ ***********************************************************************
+ DESCR
+	output library name macros
+
+ IN
+	fp :	file pointer
+	psz :	scanning zone data
+
+ OUT
+	NONE
+ ***********************************************************************/
+
+void mkf_output_libs(FILE *fp, scn_zone_t *psz) {
+	hkeys			*phk;
+	lib_cell_t		*plc;
+	size_t			 i;
+
+	phk = hash_keys_sorted(psz->libraries);
+	if (phk != NULL) {
+		/* generate library name variables */
+		fprintf(fp, "#\n# library name macros\n#\n");
+
+		for (i = 0 ; i < (int) phk->nkey ; i++) {
+			plc = hash_get(psz->libraries, phk->keys[i]);
+				
+			fprintf(fp, MKF_STCLIB_VAR, plc->lib_static, plc->lib_name);
+			fprintf(fp, MKF_SUBSTVAR, plc->lib_shared, plc->lib_shared);
+		}
+		hash_free_hkeys(phk);
+
+		fprintf(fp, MKF_LINE_JUMP);
+	}
+}
+
+
+/*********************
  * mkf_output_objs() *
  ***********************************************************************
  DESCR
@@ -2989,7 +3008,8 @@ void mkf_output_objs(FILE *fp, scn_zone_t *psz) {
 	phk = hash_keys_sorted(psz->targets);
 	if (phk != NULL) {
 		/* generate target deps */
-		fprintf(fp, "#\n# target dependency lists\n#\n");
+		fprintf(fp, "#\n# binary target dependency lists\n#\n");
+
 		for (i = 0 ; i < phk->nkey ; i++) {
 			pstr = hash_get(psz->targets, phk->keys[i]);
 			pn = hash_get(psz->nodes, pstr);
@@ -3021,6 +3041,8 @@ void mkf_output_objs(FILE *fp, scn_zone_t *psz) {
 	phk = hash_keys_sorted(psz->libraries);
 	if (phk != NULL) {
 		/* output every library */
+		fprintf(fp, "#\n# library target dependency lists\n#\n");
+
 		for(i = 0 ; i < phk->nkey ; i++) {
 			/* get lib cell */
 			plc = hash_get(psz->libraries, phk->keys[i]);
@@ -3634,6 +3656,9 @@ bool scan_build_mkf(scn_zone_t *psz) {
 
 	/* generate object dependency lists */
 	mkf_output_srcs(fp, psz);
+
+	/* generate library name macros */
+	mkf_output_libs(fp, psz);
 
 	/* generate target dependency lists */
 	mkf_output_objs(fp, psz);
