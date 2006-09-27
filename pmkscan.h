@@ -46,7 +46,7 @@
  ***********************************************************************/
 
 /* pmkscan specific version */
-#define PREMAKE_SUBVER_PMKSCAN	"5"
+#define PREMAKE_SUBVER_PMKSCAN	"6"
 
 #ifndef DATADIR
 /* for lint */
@@ -695,6 +695,7 @@ size_t		 fprintf_width(size_t, size_t, size_t, FILE *, char *);
 void		 mkf_output_header(FILE *, scn_zone_t *);
 void		 mkf_output_recurs(FILE *, scn_zone_t *);
 void		 mkf_output_srcs(FILE *, scn_zone_t *);
+void		 mkf_output_libs(FILE *, scn_zone_t *);
 void		 mkf_output_objs(FILE *, scn_zone_t *);
 void		 mkf_output_bld_trgs(FILE *, scn_zone_t *);
 void		 mkf_output_man_trgs(FILE *, scn_zone_t *);
