@@ -1,3 +1,7 @@
+28 Sep 2006 coudercd
+ * better management of the template files, now pmkscan can process
+   them in only one pass.
+
 24 Sep 2006 coudercd
  * started simplification and automatization of makefile template's targets.
 

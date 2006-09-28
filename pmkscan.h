@@ -510,8 +510,8 @@ enum {
 #define MKF_DIST_CLEAN		"distclean: clean\n" \
 							"\t$(RM) $(RMFLAGS) $(GEN_FILES)\n" \
 							"\t@for d in $(SUBDIRS); do \\\n" \
-							"\t\tprintf \"$(RM) $(RMFLAGS) $$d/*.scan $$d/*.log $$d/*.core\\n\"; \\\n" \
-							"\t\t$(RM) $(RMFLAGS) $$d/*.scan $$d/*.log $$d/*.core; \\\n" \
+							"\t\tprintf \"$(RM) $(RMFLAGS) $$d/*.log\\n\"; \\\n" \
+							"\t\t$(RM) $(RMFLAGS) $$d/*.log; \\\n" \
 							"\tdone\n\n"
 
 /* XXX recursive makefiles, not enabled yet
