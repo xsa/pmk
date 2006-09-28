@@ -4309,8 +4309,13 @@ bool scan_node_file(prs_cmn_t *pcmn, char *fname, bool isdep) {
 			/* data files will be processed later */
 			psz->found[FILE_TYPE_TEMPL] = true;
 
-			/* add template file in the list */
-			da_push(psz->templates, strdup(fname)); /* XXX check ? */
+			/* if not already added */
+			if (da_find(psz->templates, fname) == false) {
+				/* add template file in the list */
+				if (da_push(psz->templates, strdup(fname)) == false) {
+					return false;
+				}
+			}
 
 			/* display data file as recorded */
 			psc_log("t", "\tRecorded template file '%s'\n", fname);
@@ -4683,7 +4688,7 @@ bool parse_zone_opts(prs_cmn_t *pcmn, htable *pht, htable *libs) {
 	tnodes = hash_init_adv(512, NULL, (void (*)(void *))scan_node_destroy, NULL);
 	if (tnodes == NULL) {
 		/* XXX errmsg !! */
-		return(false);
+		return false;
 	}
 
 	/* init zone structure */
@@ -4691,7 +4696,7 @@ bool parse_zone_opts(prs_cmn_t *pcmn, htable *pht, htable *libs) {
 	if (psz == NULL) {
 		/* XXX err msg */
 		hash_destroy(tnodes);
-		return(false);
+		return false;
 	}
 	pcmn->data = psz;
 
@@ -4706,11 +4711,16 @@ bool parse_zone_opts(prs_cmn_t *pcmn, htable *pht, htable *libs) {
 			ppo = hash_get(pht, KW_OPT_CFGALT);
 			if (ppo != NULL) {
 				pstr = po_get_str(ppo);
-				if (pstr != NULL) {
-					/* set config file name name */
-					psz->cfg_name = pstr;
-				} else {
-					return(false);
+				if (pstr == NULL) {
+					return false;
+				}
+
+				/* set config file template name */
+				psz->cfg_name = pstr;
+			} else {
+				/* add default config file template in the list */
+				if (da_push(psz->templates, strdup(PMKSCAN_CFGFILE)) == false) {
+					return false;
 				}
 			}
 
@@ -4718,12 +4728,12 @@ bool parse_zone_opts(prs_cmn_t *pcmn, htable *pht, htable *libs) {
 			ppo = hash_get(pht, KW_OPT_PMKALT);
 			if (ppo != NULL) {
 				pstr = po_get_str(ppo);
-				if (pstr != NULL) {
-					/* set config file name name */
-					psz->pmk_name = pstr;
-				} else {
-					return(false);
+				if (pstr == NULL) {
+					return false;
 				}
+
+				/* set pmkfile file template name */
+				psz->pmk_name = pstr;
 			}
 		}
 	}
@@ -4735,20 +4745,24 @@ bool parse_zone_opts(prs_cmn_t *pcmn, htable *pht, htable *libs) {
 
 		if (psz->gen_mkf == true) {
 			/* alternate name for makefile template */
-			ppo = hash_get(pht, KW_OPT_NAM); /* check old option */
-			if (ppo != NULL) {
-				/* obsolete option message */
-				fprintf(stderr, "Warning: %s is obsolete, use %s instead.\n", KW_OPT_NAM, KW_OPT_MKFALT);
-			} else {
-				ppo = hash_get(pht, KW_OPT_MKFALT); /* check new option */
-			}
+			ppo = hash_get(pht, KW_OPT_MKFALT); /* check new option */
 			if (ppo != NULL) {
 				pstr = po_get_str(ppo);
-				if (pstr != NULL) {
-					/* set makefile name */
-					psz->mkf_name = po_get_str(ppo);
-				} else {
-					return(false);
+				if (pstr == NULL) {
+					return false;
+				}
+
+				/* set makefile name */
+				psz->mkf_name = po_get_str(ppo);
+
+				/* add alternative makefile template in the list */
+				if (da_push(psz->templates, strdup(pstr)) == false) {
+					return false;
+				}
+			} else {
+				/* add default makefile template in the list */
+				if (da_push(psz->templates, strdup(PMKSCAN_MKFILE)) == false) {
+					return false;
 				}
 			}
 
@@ -4760,7 +4774,7 @@ bool parse_zone_opts(prs_cmn_t *pcmn, htable *pht, htable *libs) {
 					/* set config file name name */
 					psz->ext_mkf = pstr;
 				} else {
-					return(false);
+					return false;
 				}
 			}
 		}
@@ -4790,12 +4804,12 @@ bool parse_zone_opts(prs_cmn_t *pcmn, htable *pht, htable *libs) {
 				plc = hash_extract(libs, pstr);
 				if (plc == NULL) {
 					/* lib cell not found */
-					return(false);
+					return false;
 				}
 
 				/* adds the extracted cell in zone libraries */
 				if (hash_add(psz->libraries, pstr, plc) == HASH_ADD_FAIL) {
-					return(false);
+					return false;
 				}
 
 				/* set library type flag */
@@ -4823,7 +4837,7 @@ bool parse_zone_opts(prs_cmn_t *pcmn, htable *pht, htable *libs) {
 		psz->exttags = po_get_list(ppo);
 	}
 
-	return(true);
+	return true;
 }
 
 
