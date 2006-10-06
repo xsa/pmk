@@ -1,3 +1,7 @@
+06 Oct 2006 coudercd
+ * fixed coredumps in pmk_check_config() and pmk_check_pkg_config() due
+   to missing initialization of the codebuild structure.
+
 28 Sep 2006 coudercd
  * better management of the template files, now pmkscan can process
    them in only one pass.
