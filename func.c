@@ -1108,6 +1108,9 @@ bool pmk_check_config(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 	cfgtcell	*pcc = NULL;
 
 	pmk_log("\n* Checking with config tool [%s]\n", cmd->label);
+
+	code_bld_init(&scb, pgd->buildlog);
+	
 	required = require_check(ht);
 
 	cfgtool = po_get_str(hash_get(ht, KW_OPT_NAME));
@@ -1340,6 +1343,8 @@ bool pmk_check_pkg_config(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 	pkgdata		*ppd;
 
 	pmk_log("\n* Checking pkg-config module [%s]\n", cmd->label);
+
+	code_bld_init(&scb, pgd->buildlog);
 
 	required = require_check(ht);
 
