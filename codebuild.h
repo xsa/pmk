@@ -115,6 +115,7 @@ typedef struct {
 				*member,				/* type member name */
 				*pathcomp,				/* compiler path */
 				*cflags,				/* compilation flags */
+				*ldflags,				/* linker flags */
 				*slcflags,				/* shared lib compilation flags */
 				*slldflags,				/* shared lib linking flags */
 				*alt_cflags,			/* alternative compilation flags variable */
@@ -136,6 +137,7 @@ int		 verify_language(char *);
 bool	 set_language(code_bld_t *, char *);
 char	*set_compiler(code_bld_t *, htable *t);
 void	 set_cflags(code_bld_t *, char *);
+void	 set_ldflags(code_bld_t *, char *);
 void	 set_slcflags(code_bld_t *, char *);
 void	 set_slldflags(code_bld_t *, char *);
 char	*get_lang_label(code_bld_t *);
