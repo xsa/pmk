@@ -119,6 +119,7 @@ void code_bld_init(code_bld_t *pcb, char *blog) {
 	pcb->member = NULL;
 	pcb->pathcomp = NULL;
 	pcb->cflags = NULL;
+	pcb->ldflags = NULL;
 	pcb->slcflags = NULL;
 	pcb->slldflags = NULL;
 	pcb->alt_cflags = NULL;
@@ -224,7 +225,7 @@ char *set_compiler(code_bld_t *pcb, htable *pht) {
 }
 
 
-/********************
+/*********************
  * PROC set_cflags() *
  ***********************************************************************
  * DESCR XXX
@@ -238,6 +239,23 @@ char *set_compiler(code_bld_t *pcb, htable *pht) {
 void set_cflags(code_bld_t *pcb, char *cflags) {
 	/* set cflags value */
 	pcb->cflags = cflags;
+}
+
+
+/**********************
+ * PROC set_ldflags() *
+ ***********************************************************************
+ * DESCR XXX
+ *
+ * PARAM XXX
+ * PARAM XXX
+ *
+ * RETURN XXX
+ ***********************************************************************/
+
+void set_ldflags(code_bld_t *pcb, char *ldflags) {
+	/* set cflags value */
+	pcb->ldflags = ldflags;
 }
 
 
@@ -655,6 +673,13 @@ bool c_cmdline_builder(code_bld_t *pcb, int lnk) {
 		strlcat(pcb->bldcmd, pcb->cflags, sizeof(pcb->bldcmd));
 	}
 
+	if (lnk != LINK_NONE) {
+		/* if linker flags are provided */
+		if (pcb->ldflags != NULL) {
+			strlcat(pcb->bldcmd, " ", sizeof(pcb->bldcmd));
+			strlcat(pcb->bldcmd, pcb->ldflags, sizeof(pcb->bldcmd));
+		}
+	}
 	/* if not in linking mode */
 	if (lnk == LINK_NONE) {
 		/* append shared lib compiler flags if they are provided */
