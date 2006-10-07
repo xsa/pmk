@@ -81,6 +81,7 @@ bool	 check_bool_str(char *);
 bool	 invert_bool(bool);
 char	*bool_to_str(bool);
 bool	 get_file_dir_path(char *, char *, char *, int);
+bool	 find_pattern(dynary *, char *, char *, int);
 bool	 record_def(htable *, char *, bool);
 bool	 record_def_data(htable *, char *, char *);
 bool	 record_def_adv(htable *, int, char *, char *, char *, char *);
