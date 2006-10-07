@@ -34,6 +34,9 @@
  */
 
 
+#include <dirent.h>
+#include <fnmatch.h>
+#include <limits.h>
 #include <stdlib.h>
 #include <stdarg.h>
 
@@ -160,6 +163,59 @@ bool get_file_dir_path(char *filename, char *path, char *storage, int size) {
 
 	da_destroy(bplst);
 	return(rval);
+}
+
+
+/******************
+ * find_pattern() *
+ ***********************************************************************
+ DESCR
+	find a file pattern in the given list of path
+
+ IN
+	da :		dynary that contains list of path
+	pattern :	pattern to find
+	pbuf :		buffer to store directory if matching
+	bsize :		buffer size
+
+ OUT
+	returns true if pattern is found in one of the list of path
+ ***********************************************************************/
+
+bool find_pattern(dynary *da, char *pattern, char *pbuf, int bsize) {
+	struct dirent	*de;
+	DIR				*dp;
+	bool			 found;
+	char			*path;
+	size_t			 i,
+					 rsize;
+
+	found = false;
+	rsize = sizeof(de->d_name);
+
+	for (i = 0 ; (i < da_usize(da)) && (found == false) ; i++) {
+		path = da_idx(da, i);
+
+		dp = opendir(path);
+		if (dp == NULL) {
+			/* can't open directory */
+			continue;
+		}
+
+		while ((de = readdir(dp)) != NULL) {
+			/* check with pattern */
+			if (fnmatch(pattern, de->d_name, 0) == 0) {
+				/* file match with pattern */
+				if (strlcpy_b(pbuf, path, bsize) == true) {
+					/* pbuf set */
+					found = true;
+				}
+				break;
+			}
+		}
+		closedir(dp);
+	}
+	return(found);
 }
 
 

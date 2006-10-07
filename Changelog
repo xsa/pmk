@@ -1,3 +1,6 @@
+07 Oct 2006 coudercd
+ * lib checking was broken in a previous commit, it is now fixed.
+
 06 Oct 2006 coudercd
  * fixed coredumps in pmk_check_config() and pmk_check_pkg_config() due
    to missing initialization of the codebuild structure.

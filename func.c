@@ -890,11 +890,14 @@ bool pmk_check_lib(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 				 rslt = true,
 				 rval;
 	char		 lib_buf[TMP_BUF_LEN] = "",
+				 lib_path[TMP_BUF_LEN] = "",
 				*lang,
+				 pattern[TMP_BUF_LEN] = "",
 				*pstr,
 				*target = NULL;
 	code_bld_t	 scb;
-	dynary		*funcs,
+	dynary		*da,
+				*funcs,
 				*defs;
 	int			 i,
 				 n;
@@ -978,6 +981,32 @@ bool pmk_check_lib(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 		set_cflags(&scb, hash_get(pgd->htab, PMKVAL_ENV_LIBS));
 	}
 
+	/* get the list of library path */
+	pstr = (char *) hash_get(pgd->htab, PMKCONF_PATH_LIB);
+	if (pstr == NULL) {
+		errorf("%s not available.", PMKCONF_PATH_LIB);
+		return(false);
+	}
+
+	/* convert to dynary */
+	da = str_to_dynary(pstr, PATH_STR_DELIMITER);
+	if (da == NULL) {
+		errorf("unable to convert '%s'",PMKCONF_PATH_LIB);
+		return(false);
+	}
+
+	/* generate library pattern */
+	snprintf(pattern, sizeof(pattern), "lib%s*.*", scb.library);
+
+	/* parse list of path to find the pattern */
+	if (find_pattern(da, pattern, lib_buf, sizeof(lib_buf)) == true) {
+		snprintf(lib_path, sizeof(lib_path), "-L%s", lib_buf);
+		set_ldflags(&scb, lib_path);
+	}
+
+	/* clean dynary now useless */
+	da_destroy(da);
+	
 	/*
 		check library
 	*/
