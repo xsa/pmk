@@ -331,7 +331,16 @@ debugf("%s = '%s'", pstr, buf);
 	}
 
 	/* shared lib support */
-	if (hash_update_dup(pht, MK_VAR_SL_SUPP, "`false`") == HASH_ADD_FAIL) {
+	if (hash_update_dup(pht, MK_VAR_SL_BUILD, "") == HASH_ADD_FAIL) {
+		return(false);
+	}
+	if (hash_update_dup(pht, MK_VAR_SL_CLEAN, "") == HASH_ADD_FAIL) {
+		return(false);
+	}
+	if (hash_update_dup(pht, MK_VAR_SL_INST, "") == HASH_ADD_FAIL) {
+		return(false);
+	}
+	if (hash_update_dup(pht, MK_VAR_SL_DEINST, "") == HASH_ADD_FAIL) {
 		return(false);
 	}
 

@@ -2229,7 +2229,8 @@ bool pmk_setparam_detect(pmkcmd *cmd, prsopt *popt, pmkdata *pgd) {
 	char			*ccpath,
 					*lang,
 					*osname,
-					*pstr;
+					*pstr,
+					 temp[64]; /* XXX size */
 	code_bld_t		 scb;
 	comp_parse_t	*pcp;
 	compiler_t		*pc;
@@ -2323,10 +2324,30 @@ bool pmk_setparam_detect(pmkcmd *cmd, prsopt *popt, pmkdata *pgd) {
 		pmk_log("\t\tChecking shared library support : ");
 		if (check_so_support(&scb, pc->slcflags, pc->slldflags) == true) {
 			pmk_log("ok.\n");
-			/* XXX TODO set something to tell that support is ok */
+
+			/* shared lib support */
+			snprintf(temp, sizeof(temp), "%s ", scb.pld->mk_bld_rule);
+			if (hash_append(pgd->htab, MK_VAR_SL_BUILD, strdup(temp), NULL) == HASH_ADD_FAIL) {
+				return(false);
+			}
+			snprintf(temp, sizeof(temp), "%s ", scb.pld->mk_cln_rule);
+			if (hash_append(pgd->htab, MK_VAR_SL_CLEAN, strdup(temp), NULL) == HASH_ADD_FAIL) {
+				return(false);
+			}
+			snprintf(temp, sizeof(temp), "%s ", scb.pld->mk_inst_rule);
+			if (hash_append(pgd->htab, MK_VAR_SL_INST, strdup(temp), NULL) == HASH_ADD_FAIL) {
+				return(false);
+			}
+			snprintf(temp, sizeof(temp), "%s ", scb.pld->mk_deinst_rule);
+			if (hash_append(pgd->htab, MK_VAR_SL_DEINST, strdup(temp), NULL) == HASH_ADD_FAIL) {
+				return(false);
+			}
 		} else {
 			pmk_log("failed.\n");
 		}
+
+		/* clean cdata */
+		cb_cleaner(&scb);
 	}
 
 	/* get system data */
@@ -2347,9 +2368,6 @@ bool pmk_setparam_detect(pmkcmd *cmd, prsopt *popt, pmkdata *pgd) {
 
 	/* clean now useless parsed data */
 	destroy_comp_parse(pcp);
-
-	/* clean cdata */
-	cb_cleaner(&scb);
 
 	return(true);
 }
