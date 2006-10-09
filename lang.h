@@ -37,6 +37,10 @@
 #ifndef _PMK_LANG_H_
 #define _PMK_LANG_H_
 
+#include <sys/types.h>
+
+#include "premake.h"
+
 /*************
  * constants *
  **********************************************************************************************/
@@ -57,40 +61,51 @@ enum {
 };
 
 /* language labels */
-#define LANG_LABEL_C		"C"		/* C language */
-#define LANG_LABEL_CXX		"C++"	/* C++ language */
-
+#define LANG_LABEL_C			"C"		/* C language */
+#define LANG_LABEL_CXX			"C++"	/* C++ language */
 
 /* compiler labels */
-#define COMP_LABEL_C		"CC"	/* C language */
-#define COMP_LABEL_CXX		"CXX"	/* C++ language */
-
+#define COMP_LABEL_C			"CC"	/* C language */
+#define COMP_LABEL_CXX			"CXX"	/* C++ language */
 
 /* compiler flags labels */
-#define CFLAGS_LABEL_C		"CFLAGS"	/* C language */
-#define CFLAGS_LABEL_CXX	"CXXFLAGS"	/* C++ language */
-
+#define CFLAGS_LABEL_C			"CFLAGS"	/* C language */
+#define CFLAGS_LABEL_CXX		"CXXFLAGS"	/* C++ language */
 
 /* linker flags labels */
-#define LDFLAGS_LABEL_C		"CLDFLAGS"		/* C language */
-#define LDFLAGS_LABEL_CXX	"CXXLDFLAGS"	/* C++ language */
-
+#define LDFLAGS_LABEL_C			"CLDFLAGS"		/* C language */
+#define LDFLAGS_LABEL_CXX		"CXXLDFLAGS"	/* C++ language */
 
 /* shared lib compiler flags labels */
-#define SLCFLAGS_LABEL_C	"SLCFLAGS"		/* C language */
-#define SLCFLAGS_LABEL_CXX	"SLCXXFLAGS"	/* C++ language */
-
+#define SLCFLAGS_LABEL_C		"SLCFLAGS"		/* C language */
+#define SLCFLAGS_LABEL_CXX		"SLCXXFLAGS"	/* C++ language */
 
 /* shared lib linker flags labels */
-#define SLLDFLAGS_LABEL_C	"SLCLDFLAGS"	/* C language */
-#define SLLDFLAGS_LABEL_CXX	"SLCXXLDFLAGS"	/* C++ language */
+#define SLLDFLAGS_LABEL_C		"SLCLDFLAGS"	/* C language */
+#define SLLDFLAGS_LABEL_CXX		"SLCXXLDFLAGS"	/* C++ language */
 
+/* XXX */
+#define MK_BLD_TARGET_C			"c_shared_libs"
+#define MK_BLD_TARGET_CXX		"cxx_shared_libs"
+
+/* XXX */
+#define MK_CLN_TARGET_C			"c_shared_libs_clean"
+#define MK_CLN_TARGET_CXX		"cxx_shared_libs_clean"
+
+/* XXX */
+#define MK_INST_TARGET_C		"c_shared_libs_install"
+#define MK_INST_TARGET_CXX		"cxx_shared_libs_install"
+
+/* XXX */
+#define MK_DEINST_TARGET_C		"c_shared_libs_deinstall"
+#define MK_DEINST_TARGET_CXX	"cxx_shared_libs_deinstall"
 
 #define LANG_NAME_LEN	64
 #define COMP_NAME_LEN	64
 #define PRE_NAME_LEN	64
 #define CFLG_NAME_LEN	64
 #define SHFLG_NAME_LEN	64
+#define MK_RULE_LEN		64
 
 
 /**********************************
@@ -99,14 +114,26 @@ enum {
 
 /* language cell */
 typedef struct {
-	char	name[LANG_NAME_LEN],		/* language label (ex. C) */
-			compiler[COMP_NAME_LEN],	/* compiler label (ex. CC) */
-			cflags[CFLG_NAME_LEN],		/* compiler flags label (ex. CFLAGS) */
-			ldflags[CFLG_NAME_LEN],		/* linker flags label (ex. CLDFLAGS) */
-			slcflags[CFLG_NAME_LEN],	/* shared lib compiler flags label (ex. SLCFLAGS) */
-			slldflags[CFLG_NAME_LEN];	/* shared lib linker flags label (ex. SLCLDFLAGS) */
-	int		lang;						/* language token */
+	char	name[LANG_NAME_LEN],			/* language label (ex. C) */
+			compiler[COMP_NAME_LEN],		/* compiler label (ex. CC) */
+			cflags[CFLG_NAME_LEN],			/* compiler flags label (ex. CFLAGS) */
+			ldflags[CFLG_NAME_LEN],			/* linker flags label (ex. CLDFLAGS) */
+			slcflags[CFLG_NAME_LEN],		/* shared lib compiler flags label (ex. SLCFLAGS) */
+			slldflags[CFLG_NAME_LEN],		/* shared lib linker flags label (ex. SLCLDFLAGS) */
+			mk_bld_rule[MK_RULE_LEN],		/* */
+			mk_cln_rule[MK_RULE_LEN],		/* */
+			mk_inst_rule[MK_RULE_LEN],		/* */
+			mk_deinst_rule[MK_RULE_LEN];	/* */
+	int		lang;							/* language token */
 } lgdata_t;
+
+
+/********************
+ * global variables *
+ **********************************************************************************************/
+
+extern lgdata_t	lang_data[];
+extern size_t	nb_lang_data;
 
 #endif /* _PMK_LANG_H_ */
 

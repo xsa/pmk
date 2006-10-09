@@ -1,3 +1,7 @@
+09 Oct 2006 coudercd
+ * recovered shared library support from my broken laptop which died 2
+   seconds after the stuff was completed.
+
 07 Oct 2006 coudercd
  * lib checking was broken in a previous commit, it is now fixed.
 

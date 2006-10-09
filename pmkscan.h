@@ -212,6 +212,7 @@ enum {
 						"\tMANDIR = \"\\\\$(PREFIX)/man\"\n" \
 						"\tDATADIR = \"\\\\$(PREFIX)/share/\\\\$(PACKAGE)\"\n"
 #define PMKF_DEF_LIB	"\tLIBDIR =  \"\\\\$(PREFIX)/lib\"\n"
+#define PMKF_DEF_INC	"\tINCDIR =  \"\\\\$(PREFIX)/include\"\n"
 #define PMKF_DEF_MAN	"\tMAN%dDIR = \"\\\\$(MANDIR)/man%d\"\n"
 #define PMKF_DEF_TAG	"\t%s = \"extra tag to edit\"\n"
 
@@ -249,6 +250,8 @@ enum {
 
 #define MKF_HEADER_ASM		"AS=\t\t@AS@\n" \
 							"ASFLAGS=\n"
+#define MKF_HEADER_CPP		"CPP=\t\t@CPP@\n"
+
 
 #define MKF_HEADER_C		COMP_LABEL_C "=\t\t@" COMP_LABEL_C "@\n" \
 							CFLAGS_LABEL_C "=\t\t@" CFLAGS_LABEL_C "@\n" \
@@ -257,7 +260,7 @@ enum {
 #define MKF_HDR_C_SL		SLCFLAGS_LABEL_C "=\t@" SLCFLAGS_LABEL_C "@\n" \
 							SLLDFLAGS_LABEL_C "=\t@" SLLDFLAGS_LABEL_C "@\n"
 							
-#define MKF_HEADER_CXX		COMP_LABEL_CXX "=\t@" COMP_LABEL_CXX "@\n" \
+#define MKF_HEADER_CXX		COMP_LABEL_CXX "=\t\t@" COMP_LABEL_CXX "@\n" \
 							CFLAGS_LABEL_CXX "=\t@" CFLAGS_LABEL_CXX "@\n" \
 							LDFLAGS_LABEL_CXX "=\t@" LDFLAGS_LABEL_CXX "@\n"
 
@@ -280,16 +283,17 @@ enum {
 
 #define MKF_HEADER_RANLIB	"RANLIB=\t\t@RANLIB@\n"
 
-#define MKF_HEADER_CPP		"CPP=\t\t@CPP@\n"
-
 #define MKF_HEADER_MISC		"INSTALL=\t@INSTALL@\n" \
-							"INSTALL_BIN=\t$(INSTALL) -m 755\n" \
+							"RM=\t\trm\n" \
+							"RMFLAGS=\t-rf\n"
+
+#define MKF_HEADER_ALIAS	"INSTALL_BIN=\t$(INSTALL) -m 755\n" \
+							"INSTALL_SBIN=\t$(INSTALL) -m 755\n" \
+							"INSTALL_STLIB=\t$(INSTALL) -m 644\n" \
+							"INSTALL_SHLIB=\t$(INSTALL) -m 755\n" \
 							"INSTALL_DATA=\t$(INSTALL) -m 644\n" \
 							"INSTALL_DIR=\t$(INSTALL) -d -m 755\n" \
-							"INSTALL_MAN=\t$(INSTALL) -m 644\n" \
-							"INSTALL_SBIN=\t$(INSTALL) -m 755\n\n" \
-							"RM=\t\trm\n" \
-							"RMFLAGS=\t-rf\n\n"
+							"INSTALL_MAN=\t$(INSTALL) -m 644\n\n"
 
 #define MKF_HEADER_DATA		"PACKAGE=\t@PACKAGE@\n" \
 							"VERSION=\t@VERSION@\n\n"
@@ -299,6 +303,7 @@ enum {
 							"SBINDIR=\t@SBINDIR@\n" \
 							"DATADIR=\t@DATADIR@\n"
 #define MKF_LIB_DIR			"LIBDIR=\t\t@LIBDIR@\n"
+#define MKF_INC_DIR			"INCDIR=\t\t@INCDIR@\n"
 #define MKF_MAN_DIR			"MANDIR=\t\t@MANDIR@\n"
 #define MKF_MANX_DIR		"MAN%iDIR=\t@MAN%iDIR@\n"
 #define MKF_SYSCONF_DIR		"SYSCONFDIR=\t@SYSCONFDIR@\n"
@@ -307,13 +312,18 @@ enum {
 #define MKF_GEN_FILES		"GEN_FILES=\t"
 #define MKF_TEMPLATES		"TEMPLATES=\t"
 
-#define MKF_OBJECT_SRCS		"%s_SRCS=\t"
-#define MKF_TARGET_OBJS		"%s_OBJS=\t"
+#define MKF_OBJ_SRCS_VAR	"%s_SRCS"
+#define MKF_OBJECT_SRCS		MKF_OBJ_SRCS_VAR "=\t"
+#define MKF_TRGT_OBJS_VAR	"%s_OBJS"
+#define MKF_TARGET_OBJS		MKF_TRGT_OBJS_VAR "=\t"
 
 #define MKF_SUBSTVAR		"%s=\t@%s@\n"
 #define MKF_VARHDR			"%s=\t"
 #define MKF_VAR				"$(%s)"
-#define MKF_STCLIB_VAR		"%s=\t%s.a\n"
+#define MKF_STCLIB_VAR		"%s=\t$(%s).a\n"
+#define MKF_LIB_HEADERS		"%s_HEADERS=\t"
+#define MKF_TRGT			"%s: "
+#define MKF_VARTRGT			"$(%s): "
 
 /* suffix defines ******************/
 
@@ -352,8 +362,8 @@ enum {
 
 /* target defines ******************/
 
-#define MKF_OBJECT_LABL		"%s: $(%s_SRCS)\n"
-#define MKF_TARGET_LABL		"%s: $(%s_OBJS)\n"
+#define MKF_OBJECT_LABL		"%s: $(" MKF_OBJ_SRCS_VAR ")\n"
+#define MKF_TARGET_LABL		"%s: $(" MKF_TRGT_OBJS_VAR ")\n"
 #define MKF_TARGET_SIMPLE	"$(%s): $(%s)\n"
 #define MKF_TARGET_DEF		"\t$(LD) $(LDFLAGS) -o $@ $(%s_OBJS)\n\n"
 #define MKF_TARGET_C		"\t$(CC) $(CLDFLAGS) -o $@ $(%s_OBJS)\n\n"
@@ -373,32 +383,73 @@ enum {
 							"\t$(RM) $(RMFLAGS) $(%s_OBJS)\n" \
 							"\t$(RM) $(RMFLAGS) %s\n\n"
 
-#define MKF_TARGET_LIB_CLN	"\t$(RM) $(RMFLAGS) $(%s)\n" /* XXX add lib objects ? */
+#define MKF_TARGET_LIB_CLN	"\t$(RM) $(RMFLAGS) $(%s)\n"
 
-#define MKF_TRGT_ALL_VAR	"ALL_TARGETS"
-#define MKF_ALL_LIB_VAR		"ALL_LIB_TARGETS"
+#define MKF_TRGT_BLD_VAR	"BUILD_TARGETS"
+#define MKF_LIB_BLD_VAR		"LIB_BUILD_TARGETS"
+#define MKF_STATIC_LIB_VAR	"STATIC_LIB_TARGETS"
+#define MKF_SHARED_LIB_VAR	"SHARED_LIB_TARGETS"
+#define MKF_C_SHLIB_VAR		"C_SHLIB_TARGETS"
+#define MKF_CXX_SHLIB_VAR	"CXX_SHLIB_TARGETS"
 #define MKF_TRGT_ALL_BIN	"ALL_BIN_TARGETS"
-#define MKF_TRGT_ALL_LIB	"ALL_LIB_TARGETS=\t$(ST_LIB_TARGETS) $(SH_LIB_TARGETS)" /* XXX to be set by PMK !!! */
-#define MKF_TRGT_ALL_ST_LIB	"ST_LIB_TARGETS"
-#define MKF_TRGT_ALL_SH_LIB	"SH_LIB_TARGETS"
+#define MKF_TRGT_ALL_LIB	MKF_LIB_BLD_VAR "=\tstatic_libs $(" MKF_SHARED_LIB_VAR ")\n"
 
-#define MKF_TRGT_CLEAN_ALL	"ALL_CLEAN_TARGETS"
-#define MKF_TRGT_CLEAN_BIN	"ALL_BIN_CLEAN_TARGETS"
-#define MKF_TRGT_CLEAN_LIB	"ALL_LIB_CLEAN_TARGETS"
-#define MKF_TRGT_CLEAN_STL	"ST_LIB_CLEAN_TARGETS=\t"
-#define MKF_TRGT_CLEAN_SHL	"SH_LIB_CLEAN_TARGETS=\t"
+#define MKF_TRGT_CLEAN_VAR	"CLEAN_TARGETS"
+#define MKF_BIN_CLEAN_VAR	"BIN_CLEAN_TARGETS"
+#define MKF_LIB_CLEAN_VAR	"LIB_CLEAN_TARGETS"
+#define MKF_STLIB_CLN_VAR	"STLIB_CLEAN_TARGETS"
+#define MKF_SHLIB_CLN_VAR	"SHLIB_CLEAN_TARGETS"
+#define MKF_C_SHL_CLN_VAR	"C_SHLIB_CLEAN_TARGETS"
+#define MKF_CXX_SHL_CLN_VAR	"CXX_SHLIB_CLEAN_TARGETS"
+#define MKF_LIB_CLEAN_ALL	MKF_LIB_CLEAN_VAR "=\tstatic_libs_clean $(" MKF_SHLIB_CLN_VAR ")\n"
+#define MKF_TRGT_CLEAN_STL	"STLIB_CLEAN_TARGETS=\t"
+#define MKF_TRGT_CLEAN_SHL	"SHLIB_CLEAN_TARGETS=\t"
 
-#define MKF_TRGT_INST_VAR	"INSTALL_TARGETS"
-#define MKF_TRGT_INST_BIN	"install_bin install_sbin"
-#define MKF_TRGT_INST_LIB	"install_lib"
-#define MKF_TRGT_INST_MAN	"install_man"
-#define MKF_TRGT_INST_DATA	"install_data"
+#define MKF_TRGT_INST_VAR		"INSTALL_TARGETS"
+#define MKF_BIN_INST_VAR		"BIN_INSTALL_TARGETS"
+#define MKF_LIB_INST_VAR		"LIB_INSTALL_TARGETS"
+#define MKF_STLIB_INST_VAR		"STLIB_INST_TARGETS"
+#define MKF_SHLIB_INST_VAR		"SHLIB_INST_TARGETS"
+#define MKF_C_SHL_INST_VAR		"C_SHLIB_INST_TARGETS"
+#define MKF_CXX_SHL_INST_VAR	"CXX_SHLIB_INST_TARGETS"
+#define MKF_LIB_INSTALL_ALL		MKF_LIB_INST_VAR "=\tlib_headers_install static_libs_install $(" MKF_SHLIB_INST_VAR ")\n"
+#define MKF_TRGT_INST_BIN		"install_bin install_sbin"
+#define MKF_TRGT_INST_LIB		"install_lib: $(" MKF_LIB_INST_VAR ")\n\n"
+#define MKF_TRGT_INST_LIBHDR	"lib_headers_install"
+#define MKF_TRGT_INST_STLIB		"install_static_lib"
+#define MKF_TRGT_INST_SHLIB		"install_shared_lib"
+#define MKF_TRGT_INST_MAN		"install_man"
+#define MKF_TRGT_INST_DATA		"install_data"
 
 #define MKF_TRGT_DEINST_VAR		"DEINSTALL_TARGETS"
-#define MKF_TRGT_DEINST_BIN		"deinstall_bin deinstall_sbin"
-#define MKF_TRGT_DEINST_LIB		"deinstall_lib"
+#define MKF_BIN_DEINST_VAR		"BIN_DEINSTALL_TARGETS"
+#define MKF_LIB_DEINST_VAR		"LIB_DEINSTALL_TARGETS"
+#define MKF_STLIB_DEINST_VAR	"STLIB_DEINST_TARGETS"
+#define MKF_SHLIB_DEINST_VAR	"SHLIB_DEINST_TARGETS"
+#define MKF_C_SHL_DEINST_VAR	"C_SHLIB_DEINST_TARGETS"
+#define MKF_CXX_SHL_DEINST_VAR	"CXX_SHLIB_DEINST_TARGETS"
+#define MKF_LIB_DEINSTALL_ALL	MKF_LIB_DEINST_VAR "=\tlib_headers_deinstall static_libs_deinstall $(" MKF_SHLIB_DEINST_VAR ")\n"
+#define MKF_TRGT_DEINST_LIBHDR	"lib_headers_deinstall"
+#define MKF_TRGT_DEINST_LIB		"deinstall_lib: $(" MKF_LIB_DEINST_VAR ")\n\n"
 #define MKF_TRGT_DEINST_MAN		"deinstall_man"
 #define MKF_TRGT_DEINST_DATA	"deinstall_data"
+
+#define MKF_TRGT_STLIBS		"# static library targets\n" \
+							"static_libs: $(" MKF_STATIC_LIB_VAR ")\n\n" \
+							"static_libs_clean: $(" MKF_STLIB_CLN_VAR ")\n\n" \
+							"static_libs_install: $(" MKF_STLIB_INST_VAR ")\n\n" \
+							"static_libs_deinstall: $(" MKF_STLIB_DEINST_VAR ")\n\n"
+#define MKF_TRGT_C_SHLIBS	"# C language shared library targets\n" \
+							"c_shared_libs: $(" MKF_C_SHLIB_VAR ")\n\n" \
+							"c_shared_libs_clean: $(" MKF_C_SHL_CLN_VAR ")\n\n" \
+							"c_shared_libs_install: $(" MKF_C_SHL_INST_VAR ")\n\n" \
+							"c_shared_libs_deinstall: $(" MKF_C_SHL_DEINST_VAR ")\n\n"
+#define MKF_TRGT_CXX_SHLIBS	"# C++ language shared library targets\n" \
+							"cxx_shared_libs: $(" MKF_CXX_SHLIB_VAR ")\n\n" \
+							"cxx_shared_libs_clean: $(" MKF_CXX_SHL_CLN_VAR ")\n\n" \
+							"cxx_shared_libs_install: $(" MKF_CXX_SHL_INST_VAR ")\n\n" \
+							"cxx_shared_libs_deinstall: $(" MKF_CXX_SHL_DEINST_VAR ")\n\n"
+
 #define MKF_FILE_BIN_VAR	"# by default we consider all binaries as non privileged\n" \
 							"BIN_FILES=\t$(ALL_BIN_TARGETS)\n\n"
 #define MKF_FILE_SBIN_VAR	"# move privileged binaries here if needed\n" \
@@ -408,15 +459,15 @@ enum {
 #define MKF_FILE_MAN_VAR	"MAN%d_FILES=\t"
 #define MKF_FILE_DATA_VAR	"DATA_FILES=\t"
 
-#define MKF_TARGET_ALL		"all: $(ALL_TARGETS)\n\n" \
-							"clean: $(ALL_CLEAN_TARGETS)\n\n"
+#define MKF_TARGET_ALL		"all: $(" MKF_TRGT_BLD_VAR ")\n\n" \
+							"clean: $(" MKF_TRGT_CLEAN_VAR ")\n\n"
 
 #define MKF_TARGET_CFG		"config: $(GEN_FILES)\n\n" \
 							"$(GEN_FILES): $(TEMPLATES)\n" \
 							"\t@pmk\n\n"
 
-#define MKF_TARGET_INST		"install: all $(INSTALL_TARGETS)\n\n" \
-							"deinstall: $(DEINSTALL_TARGETS)\n\n"
+#define MKF_TARGET_INST		"install: $(" MKF_TRGT_INST_VAR ")\n\n" \
+							"deinstall: $(" MKF_TRGT_DEINST_VAR ")\n\n"
 
 #define INST_LIST_RULE(comment, target, list, dir, inst)	\
 							"# " comment "\n" \
@@ -468,8 +519,8 @@ enum {
 							"SBINDIR",							\
 							"$(RM) $(RMFLAGS)")
 
-#define MKF_INST_LIB		"install_lib:\n\n" /* XXX until things are really done */
-#define MKF_DEINST_LIB		"deinstall_lib:\n\n" /* XXX until things are really done */
+#define MKF_INST_STLIB		"\t$(INSTALL_STLIB) $(%s) $(DESTDIR)$(LIBDIR)/$(%s)\n"
+#define MKF_INST_SHLIB		"\t$(INSTALL_SHLIB) $(%s) $(DESTDIR)$(LIBDIR)/$(%s)\n"
 
 #define MKF_INST_MAN_H		"install_man:\n" \
 							"\t# install manual pages\n" \
@@ -697,7 +748,11 @@ void		 mkf_output_recurs(FILE *, scn_zone_t *);
 void		 mkf_output_srcs(FILE *, scn_zone_t *);
 void		 mkf_output_libs(FILE *, scn_zone_t *);
 void		 mkf_output_objs(FILE *, scn_zone_t *);
-void		 mkf_output_bld_trgs(FILE *, scn_zone_t *);
+void		 mkf_output_suffixes(FILE *, scn_zone_t *);
+void		 mkf_output_build_trgs(FILE *, scn_zone_t *);
+void		 mkf_output_clean_trgs(FILE *, scn_zone_t *);
+void		 mkf_output_inst_trgs(FILE *, scn_zone_t *);
+void		 mkf_output_deinst_trgs(FILE *, scn_zone_t *);
 void		 mkf_output_man_trgs(FILE *, scn_zone_t *);
 void		 mkf_output_data_trgs(FILE *, scn_zone_t *);
 void		 mkf_output_obj_rules(FILE *, scn_zone_t *);

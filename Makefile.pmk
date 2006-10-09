@@ -153,6 +153,8 @@ HASH_TOOLS_SRCS=	compat/config.h compat/pmk_stdbool.h compat/pmk_stdio.h \
 			compat/pmk_string.h dynarray.h errmsg.h hash.h \
 			hash_tools.c hash_tools.h pmk_obj.h premake.h
 
+LANG_SRCS=	lang.c lang.h premake.h
+
 PARSE_SRCS=	common.h compat/config.h compat/pmk_ctype.h \
 		compat/pmk_stdbool.h compat/pmk_stdio.h \
 		compat/pmk_string.h dynarray.h errmsg.h hash.h parse.c \
@@ -221,8 +223,9 @@ TAGS_SRCS=	compat/config.h compat/pmk_ctype.h compat/pmk_stdbool.h \
 # target dependency lists
 #
 PMK_OBJS=	autoconf.o cfgtool.o codebuild.o common.o compat.o detect.o \
-		dynarray.o func.o functool.o hash.o hash_tools.o parse.o \
-		pathtools.o pkgconfig.o pmk.o pmk_obj.o prseng.o tags.o
+		dynarray.o func.o functool.o hash.o hash_tools.o lang.o \
+		parse.o pathtools.o pkgconfig.o pmk.o pmk_obj.o prseng.o \
+		tags.o
 
 PMKINSTALL_OBJS=	common.o compat.o dynarray.o hash.o pathtools.o \
 			pmk_obj.o pmkinstall.o
