@@ -379,9 +379,9 @@ enum {
 #define MKF_TARGET_SL_C		"\t$(CC) $(CLDFLAGS) $(SLCLDFLAGS) -o $@ $(%s)\n\n" /* XXX make better */
 #define MKF_TARGET_SL_CXX	"\t$(CXX) $(CXXLDFLAGS) $(SLCXXLDFLAGS) -o $@ $(%s)\n\n" /* XXX make better */
 
-#define MKF_TARGET_CLN		"%s_clean:\n" \
+#define MKF_TARGET_CLN		"$(%s)_clean:\n" \
 							"\t$(RM) $(RMFLAGS) $(%s_OBJS)\n" \
-							"\t$(RM) $(RMFLAGS) %s\n\n"
+							"\t$(RM) $(RMFLAGS) $(%s)\n\n"
 
 #define MKF_TARGET_LIB_CLN	"\t$(RM) $(RMFLAGS) $(%s)\n"
 
@@ -495,30 +495,10 @@ enum {
 							"\t\tdone \\\n" \
 							"\tfi\n\n" \
 
-#define MKF_INST_BIN \
-		INST_LIST_RULE(	"install binaries",				\
-						"install_bin",					\
-						"BIN_FILES",					\
-						"BINDIR",						\
-						"$(INSTALL_BIN)")				\
-		INST_LIST_RULE(	"install privileged binaries",	\
-						"install_sbin",					\
-						"SBIN_FILES",					\
-						"SBINDIR",						\
-						"$(INSTALL_BIN)")
-
-#define MKF_DEINST_BIN \
-		DEINST_LIST_RULE(	"deinstall binaries",				\
-							"deinstall_bin",					\
-							"BIN_FILES",						\
-							"BINDIR",							\
-							"$(RM) $(RMFLAGS)")					\
-		DEINST_LIST_RULE(	"deinstall privileged binaries",	\
-							"deinstall_sbin",					\
-							"SBIN_FILES",						\
-							"SBINDIR",							\
-							"$(RM) $(RMFLAGS)")
-
+#define MKF_INST_BIN		"$(%s)_install: $(%s)\n" \
+							"\t$(INSTALL_BIN) $(%s) $(DESTDIR)$(BINDIR)/$(%s)\n\n"
+#define MKF_DEINST_BIN		"$(%s)_deinstall:\n" \
+							"\t$(RM) $(RMFLAGS) $(DESTDIR)$(BINDIR)/$(%s)\n\n"
 #define MKF_INST_STLIB		"\t$(INSTALL_STLIB) $(%s) $(DESTDIR)$(LIBDIR)/$(%s)\n"
 #define MKF_INST_SHLIB		"\t$(INSTALL_SHLIB) $(%s) $(DESTDIR)$(LIBDIR)/$(%s)\n"
 
@@ -559,33 +539,8 @@ enum {
 
 
 #define MKF_DIST_CLEAN		"distclean: clean\n" \
-							"\t$(RM) $(RMFLAGS) $(GEN_FILES)\n" \
-							"\t@for d in $(SUBDIRS); do \\\n" \
-							"\t\tprintf \"$(RM) $(RMFLAGS) $$d/*.log\\n\"; \\\n" \
-							"\t\t$(RM) $(RMFLAGS) $$d/*.log; \\\n" \
-							"\tdone\n\n"
+							"\t$(RM) $(RMFLAGS) $(GEN_FILES)\n"
 
-/* XXX recursive makefiles, not enabled yet
-#define MKF_RECURS_TRGT		"# recursive targets wrapper\n" \
-							"all_recursive \\\n" \
-							"clean_recursive \\\n" \
-							"install_recursive \\\n" \
-							"deinstall_recursive \\\n" \
-							"install_bin_recursive \\\n" \
-							"deinstall_bin_recursive \\\n" \
-							"install_data_recursive \\\n" \
-							"deinstall_data_recursive \\\n" \
-							"install_man_recursive \\\n" \
-							"deinstall_man_recursive \\\n" \
-							"distclean_recursive:\n"
-
-#define MKF_RECURS_PROC		"\t@target=`echo $@ | sed s/_recursive//`; \\\n" \
-							"\tfor d in $(SUBDIRS); do \\\n" \
-							"\t\tprintf \"Recursive make $target in $$d\\n\"; \\\n" \
-							"\t\tcd $$d; \\\n" \
-							"\t\t$(MAKE) $target; \\\n" \
-							"\tdone\\\n"
-*/
 
 /**********************************
  * type and structure definitions *
@@ -613,6 +568,7 @@ typedef struct {
 	char		*fname,			/* filename */
 				*obj_name,		/* object name */
 				*prefix,		/* prefix name */
+				*label,			/* binary label */
 				*dname;			/* directory name */
 	bool		 isdep,			/* dependency flag */
 				 mainproc;		/* has main() proc flag ? */
@@ -746,6 +702,7 @@ size_t		 fprintf_width(size_t, size_t, size_t, FILE *, char *);
 void		 mkf_output_header(FILE *, scn_zone_t *);
 void		 mkf_output_recurs(FILE *, scn_zone_t *);
 void		 mkf_output_srcs(FILE *, scn_zone_t *);
+void		 mkf_output_bins(FILE *, scn_zone_t *);
 void		 mkf_output_libs(FILE *, scn_zone_t *);
 void		 mkf_output_objs(FILE *, scn_zone_t *);
 void		 mkf_output_suffixes(FILE *, scn_zone_t *);

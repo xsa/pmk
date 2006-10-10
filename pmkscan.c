@@ -407,6 +407,9 @@ scn_node_t *scan_node_init(char *fname) {
 		/* object pointer or null */
 		pnode->obj_name = NULL;
 
+		/* target label */
+		pnode->label = NULL;
+
 		/* directory name */
 		pnode->dname = NULL;
 	}
@@ -443,6 +446,10 @@ void scan_node_destroy(scn_node_t *pnode) {
 
 	if (pnode->prefix != NULL) {
 		free(pnode->prefix);
+	}
+
+	if (pnode->label != NULL) {
+		free(pnode->label);
 	}
 
 	if (pnode->dname != NULL) {
@@ -2471,6 +2478,10 @@ bool gen_targets(scn_zone_t *psz) {
 				return false;
 			}
 
+			/* build and store label name */
+			str_to_upper(buf, sizeof(buf), pnode->prefix);
+			pnode->label = strdup(buf);
+
 			/* init object deps */
 			pnode->obj_deps = da_init();
 			if (pnode->obj_deps == NULL) {
@@ -2547,6 +2558,10 @@ bool gen_lib_targets(scn_zone_t *psz) {
 				psc_log("cannot find node '%s'.\n", NULL, srcname);
 				return false;
 			}
+
+			/* build and store label name */
+			pnode->label = strdup(plc->lib_label);
+
 			if (da_push(plc->obj_deps, strdup(pnode->obj_name)) == false) {
 				/* err msg */
 				return false;
@@ -2893,8 +2908,7 @@ void mkf_output_srcs(FILE *fp, scn_zone_t *psz) {
 		pn = hash_get(psz->nodes, pstr);
 
 		/* object label */
-		snprintf(buf, sizeof(buf), MKF_OBJECT_SRCS, pn->prefix);
-		str_to_upper(buf, sizeof(buf), buf);
+		snprintf(buf, sizeof(buf), MKF_OBJECT_SRCS, pn->label);
 		fprintf(fp, buf);
 
 		lm = strlen(buf);
@@ -2911,6 +2925,42 @@ void mkf_output_srcs(FILE *fp, scn_zone_t *psz) {
 		fprintf(fp, MKF_TWICE_JUMP);
 	}
 	hash_free_hkeys(phk);
+}
+
+
+/*********************
+ * mkf_output_bins() *
+ ***********************************************************************
+ DESCR
+	output library name macros
+
+ IN
+	fp :	file pointer
+	psz :	scanning zone data
+
+ OUT
+	NONE
+ ***********************************************************************/
+
+void mkf_output_bins(FILE *fp, scn_zone_t *psz) {
+	char			*pstr;
+	hkeys			*phk;
+	scn_node_t		*pn;
+	size_t			 i;
+
+	phk = hash_keys_sorted(psz->targets);
+	if (phk != NULL) {
+		/* generate binary name variables */
+		fprintf(fp, "#\n# binary name macros\n#\n");
+
+		for (i = 0 ; i < phk->nkey ; i++) {
+			pstr = hash_get(psz->targets, phk->keys[i]);
+			pn = hash_get(psz->nodes, pstr);
+				
+			fprintf(fp, "%s=\t%s\n\n", pn->label, pn->prefix);
+		}
+		hash_free_hkeys(phk);
+	}
 }
 
 
@@ -3007,8 +3057,7 @@ void mkf_output_objs(FILE *fp, scn_zone_t *psz) {
 			pn = hash_get(psz->nodes, pstr);
 
 			/* target label */
-			snprintf(buf, sizeof(buf), MKF_TARGET_OBJS, pn->prefix);
-			str_to_upper(buf, sizeof(buf), buf);
+			snprintf(buf, sizeof(buf), MKF_TARGET_OBJS, pn->label);
 			fprintf(fp, buf);
 
 			lm = strlen(buf);
@@ -3123,9 +3172,11 @@ void mkf_output_suffixes(FILE *fp, scn_zone_t *psz) {
 
 void mkf_output_build_trgs(FILE *fp, scn_zone_t *psz) {
 	bool			 need_sep;
-	char			 buf[MKF_OUTPUT_WIDTH * 2];
+	char			 buf[MKF_OUTPUT_WIDTH * 2],
+					*pstr;
 	hkeys			*phk;
 	lib_cell_t		*plc;
+	scn_node_t		*pn;
 	size_t			 ofst,
 					 lm,
 					 i;
@@ -3160,7 +3211,11 @@ void mkf_output_build_trgs(FILE *fp, scn_zone_t *psz) {
 			lm = strlen(MKF_TRGT_ALL_BIN);
 			ofst = lm;
 			for (i = 0 ; i < phk->nkey ; i++) {
-				ofst = fprintf_width(lm, MKF_OUTPUT_WIDTH, ofst, fp, phk->keys[i]);
+				pstr = hash_get(psz->targets, phk->keys[i]);
+				pn = hash_get(psz->nodes, pstr);
+
+				snprintf(buf, sizeof(buf), "$(%s)", pn->label);
+				ofst = fprintf_width(lm, MKF_OUTPUT_WIDTH, ofst, fp, buf);
 			}
 		}
 		fprintf(fp, MKF_TWICE_JUMP);
@@ -3256,9 +3311,11 @@ void mkf_output_build_trgs(FILE *fp, scn_zone_t *psz) {
 
 void mkf_output_clean_trgs(FILE *fp, scn_zone_t *psz) {
 	bool			 need_sep;
-	char			 buf[MKF_OUTPUT_WIDTH * 2];
+	char			 buf[MKF_OUTPUT_WIDTH * 2],
+					*pstr;
 	hkeys			*phk;
 	lib_cell_t		*plc;
+	scn_node_t		*pn;
 	size_t			 ofst,
 					 lm,
 					 i;
@@ -3291,7 +3348,10 @@ void mkf_output_clean_trgs(FILE *fp, scn_zone_t *psz) {
 			lm = strlen(MKF_BIN_CLEAN_VAR);
 			ofst = lm;
 			for (i = 0 ; i < phk->nkey ; i++) {
-				snprintf(buf, sizeof(buf), "%s_clean", phk->keys[i]);
+				pstr = hash_get(psz->targets, phk->keys[i]);
+				pn = hash_get(psz->nodes, pstr);
+
+				snprintf(buf, sizeof(buf), "$(%s)_clean", pn->label);
 				ofst = fprintf_width(lm, MKF_OUTPUT_WIDTH, ofst, fp, buf);
 			}
 			hash_free_hkeys(phk);
@@ -3392,9 +3452,11 @@ void mkf_output_clean_trgs(FILE *fp, scn_zone_t *psz) {
 
 void mkf_output_inst_trgs(FILE *fp, scn_zone_t *psz) {
 	bool			 need_sep;
-	char			 buf[MKF_OUTPUT_WIDTH * 2];
+	char			 buf[MKF_OUTPUT_WIDTH * 2],
+					*pstr;
 	hkeys			*phk;
 	lib_cell_t		*plc;
+	scn_node_t		*pn;
 	size_t			 ofst,
 					 lm,
 					 i;
@@ -3447,7 +3509,11 @@ void mkf_output_inst_trgs(FILE *fp, scn_zone_t *psz) {
 			lm = strlen(MKF_BIN_INST_VAR);
 			ofst = lm;
 			for (i = 0 ; i < phk->nkey ; i++) {
-				ofst = fprintf_width(lm, MKF_OUTPUT_WIDTH, ofst, fp, phk->keys[i]);
+				pstr = hash_get(psz->targets, phk->keys[i]);
+				pn = hash_get(psz->nodes, pstr);
+
+				snprintf(buf, sizeof(buf), "$(%s)_install", pn->label);
+				ofst = fprintf_width(lm, MKF_OUTPUT_WIDTH, ofst, fp, buf);
 			}
 		}
 		fprintf(fp, MKF_TWICE_JUMP);
@@ -3543,9 +3609,11 @@ void mkf_output_inst_trgs(FILE *fp, scn_zone_t *psz) {
 
 void mkf_output_deinst_trgs(FILE *fp, scn_zone_t *psz) {
 	bool			 need_sep;
-	char			 buf[MKF_OUTPUT_WIDTH * 2];
+	char			 buf[MKF_OUTPUT_WIDTH * 2],
+					*pstr;
 	hkeys			*phk;
 	lib_cell_t		*plc;
+	scn_node_t		*pn;
 	size_t			 ofst,
 					 lm,
 					 i;
@@ -3598,7 +3666,11 @@ void mkf_output_deinst_trgs(FILE *fp, scn_zone_t *psz) {
 			lm = strlen(MKF_BIN_DEINST_VAR);
 			ofst = lm;
 			for (i = 0 ; i < phk->nkey ; i++) {
-				ofst = fprintf_width(lm, MKF_OUTPUT_WIDTH, ofst, fp, phk->keys[i]);
+				pstr = hash_get(psz->targets, phk->keys[i]);
+				pn = hash_get(psz->nodes, pstr);
+
+				snprintf(buf, sizeof(buf), "$(%s)_deinstall", pn->label);
+				ofst = fprintf_width(lm, MKF_OUTPUT_WIDTH, ofst, fp, buf);
 			}
 		}
 		fprintf(fp, MKF_TWICE_JUMP);
@@ -3843,8 +3915,7 @@ void mkf_output_obj_rules(FILE *fp, scn_zone_t *psz) {
 ************************************************************************/
 
 void mkf_output_trg_rules(FILE *fp, scn_zone_t *psz) {
-	char			 buf[MKF_OUTPUT_WIDTH * 2],
-					*pstr,
+	char			*pstr,
 					*pname;
 	hkeys			*phk;
 	scn_node_t		*pn;
@@ -3858,37 +3929,44 @@ void mkf_output_trg_rules(FILE *fp, scn_zone_t *psz) {
 
 	if (phk != NULL) {
 		/* generate targets */
-		fprintf(fp, "\n#\n# target rules\n#\n");
+		fprintf(fp, "#\n# binary target rules\n#\n\n");
 		for (i = 0 ; i < phk->nkey ; i++) {
 			pstr = phk->keys[i];
 
-			/* uppercase string */
-			str_to_upper(buf, sizeof(buf), pstr);
-
-			/* build target */
-			fprintf(fp, MKF_TARGET_LABL, pstr, buf);
 			pname = hash_get(psz->targets, phk->keys[i]);
 			pn = hash_get(psz->nodes, pname);
 			if (pn != NULL) {
+				fprintf(fp, "# %s binary targets\n", phk->keys[i]);
+
+				/* build target */
+				fprintf(fp, "$(%s): $(%s_OBJS)\n", pn->label, pn->label);
 				/* process node depending on its type */
 				switch (pn->type) {
 					/*case FILE_TYPE_ASM : XXX */
 
 					case FILE_TYPE_C :
-						fprintf(fp, MKF_TARGET_C, buf);
+						fprintf(fp, MKF_TARGET_C, pn->label);
 						break;
 
 					case FILE_TYPE_CXX :
-						fprintf(fp, MKF_TARGET_CXX, buf);
+						fprintf(fp, MKF_TARGET_CXX, pn->label);
 						break;
 
 					default :
-						fprintf(fp, MKF_TARGET_DEF, buf);
+						fprintf(fp, MKF_TARGET_DEF, pn->label);
 				}
+
+
 			}
 
 			/* clean target */
-			fprintf(fp, MKF_TARGET_CLN, pstr, buf, pstr);
+			fprintf(fp, MKF_TARGET_CLN, pn->label, pn->label, pn->label);
+
+			/* install target */
+			fprintf(fp, MKF_INST_BIN, pn->label, pn->label, pn->label, pn->label);
+
+			/* deinstall target */
+			fprintf(fp, MKF_DEINST_BIN, pn->label, pn->label);
 		}
 		hash_free_hkeys(phk);
 	}
@@ -4136,6 +4214,9 @@ bool scan_build_mkf(scn_zone_t *psz) {
 	/* generate object dependency lists */
 	mkf_output_srcs(fp, psz);
 
+	/* generate binary name macros */
+	mkf_output_bins(fp, psz);
+
 	/* generate library name macros */
 	mkf_output_libs(fp, psz);
 
@@ -4205,8 +4286,6 @@ bool scan_build_mkf(scn_zone_t *psz) {
 	/* generate binary targets */
 	if (hash_nbkey(psz->targets) > 0) {
 		mkf_output_trg_rules(fp, psz);
-		fprintf(fp, MKF_INST_BIN);
-		fprintf(fp, MKF_DEINST_BIN);
 	}
 
 	/* generate library targets */
