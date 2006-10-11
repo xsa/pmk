@@ -2293,6 +2293,10 @@ bool gen_objects(scn_zone_t *psz) {
 			/* set object name */
 			pnode->obj_name = strdup(buf);
 
+			/* build and store label name */
+			str_to_upper(buf, sizeof(buf), pnode->prefix);
+			pnode->label = strdup(buf);
+
 			/* generate object's source dependencies */
 			recurse_obj_deps(psz->nodes, pnode->src_deps, pnode->fname);
 
@@ -2477,10 +2481,6 @@ bool gen_targets(scn_zone_t *psz) {
 										pnode->fname) == HASH_ADD_FAIL) {
 				return false;
 			}
-
-			/* build and store label name */
-			str_to_upper(buf, sizeof(buf), pnode->prefix);
-			pnode->label = strdup(buf);
 
 			/* init object deps */
 			pnode->obj_deps = da_init();
@@ -4132,6 +4132,8 @@ void mkf_output_lib_trg_rules(FILE *fp, scn_zone_t *psz) {
 }
 
 
+
+
 /*************************
  * mkf_output_man_inst() *
  ***********************************************************************
@@ -4147,34 +4149,102 @@ void mkf_output_lib_trg_rules(FILE *fp, scn_zone_t *psz) {
  ***********************************************************************/
 
 void mkf_output_man_inst(FILE *fp, scn_zone_t *psz) {
+	char			*pstr;
+	size_t			 j,
+					 k;
 	unsigned int	 i;
 
-	if (psz->found[FILE_TYPE_MAN] == false) {
-		/* no man page, skip */
-		return;
-	}
-
+	/* manual pages to install */
 	fprintf(fp, MKF_INST_MAN_H);
-	/* manual pages to install/deinstall */
 	for (i = 1 ; i < 10 ; i++) {
 		/* if category has at least one file */
 		if (psz->found[FILE_TYPE_MAN + i] == true) {
-			/* gather list of man categories */
-			fprintf(fp, MKF_INST_MAN_B, i, i, i, i, i);
-		}
-	}
-	fprintf(fp, MKF_TWICE_JUMP);
+			/* output directory creation */
+			fprintf(fp, MKF_INST_MAN_D, i, i);
 
+			/* for each man page */
+			for (j = 0 ; j < da_usize(psz->manpgs) ; j++) {
+				/* get the last character */
+				pstr = da_idx(psz->manpgs, j);
+				k = strlen(pstr) - 1;
+
+				/*
+						if the numeric conversion of the character is equal
+						to the current man page category
+				*/
+				if ((size_t) atoi(&pstr[k]) == i) {
+					fprintf(fp, MKF_INST_MAN_P, pstr, i, basename(pstr));
+				}
+			}
+		}
+	}
+	fprintf(fp, MKF_LINE_JUMP);
+
+	/* manual pages to deinstall */
 	fprintf(fp, MKF_DEINST_MAN_H);
-	/* manual pages to install/deinstall */
 	for (i = 1 ; i < 10 ; i++) {
 		/* if category has at least one file */
 		if (psz->found[FILE_TYPE_MAN + i] == true) {
-			/* gather list of man categories */
-			fprintf(fp, MKF_DEINST_MAN_B, i, i, i, i);
+			/* output directory */
+			fprintf(fp, MKF_DEINST_MAN_D, i);
+
+			/* for each man page */
+			for (j = 0 ; j < da_usize(psz->manpgs) ; j++) {
+				/* get the last character */
+				pstr = da_idx(psz->manpgs, j);
+				k = strlen(pstr) - 1;
+
+				/*
+						if the numeric conversion of the character is equal
+						to the current man page category
+				*/
+				if ((size_t) atoi(&pstr[k]) == i) {
+					fprintf(fp, MKF_DEINST_MAN_P, i, basename(pstr));
+				}
+			}
 		}
 	}
-	fprintf(fp, MKF_TWICE_JUMP);
+	fprintf(fp, MKF_LINE_JUMP);
+}
+
+
+/**************************
+ * mkf_output_data_trgs() *
+ ***********************************************************************
+ DESCR
+	ouput data targets
+
+ IN
+	fp :	file pointer
+	psz :	scanning zone data
+
+ OUT
+	NONE
+ ***********************************************************************/
+
+void mkf_output_data_inst(FILE *fp, scn_zone_t *psz) {
+	char		*pstr;
+	size_t		 i;
+
+	da_sort(psz->datafiles);
+
+	/* data files to install */
+	fprintf(fp, MKF_INST_DATA_H);
+	for (i = 0 ; i < da_usize(psz->datafiles) ; i++) {
+		pstr = da_idx(psz->datafiles, i);
+
+		fprintf(fp, MKF_INST_DATA_P, pstr, basename(pstr));
+	}
+	fprintf(fp, MKF_LINE_JUMP);
+
+	/* data files to deinstall */
+	fprintf(fp, MKF_DEINST_DATA_H);
+	for (i = 0 ; i < da_usize(psz->datafiles) ; i++) {
+		pstr = da_idx(psz->datafiles, i);
+
+		fprintf(fp, MKF_DEINST_DATA_P, basename(pstr));
+	}
+	fprintf(fp, MKF_LINE_JUMP);
 }
 
 
@@ -4261,23 +4331,21 @@ bool scan_build_mkf(scn_zone_t *psz) {
 		fprintf(fp, MKF_TRGT_DEINST_LIB);
 	}
 
-	mkf_output_man_inst(fp, psz);
+	if (psz->found[FILE_TYPE_MAN] == true) {
+		mkf_output_man_inst(fp, psz);
+	}
 
 	if (psz->found[FILE_TYPE_DATA] == true) {
-		fprintf(fp, MKF_INST_DATA);
-		fprintf(fp, MKF_DEINST_DATA);
+		mkf_output_data_inst(fp, psz);
 	}
 
 	fprintf(fp, MKF_DIST_CLEAN);
-
-	/* recursive targets */
-	/*fprintf(fp, MKF_RECURS_TRGT);*//* XXX not enabled yet */
 
 	if (psz->unique == true) {
 		fprintf(fp, MKF_LINE_JUMP);
 	} else {
 		/* recursive targets wrapper */
-		/*fprintf(fp, MKF_RECURS_PROC);*//* XXX not enbled yet */
+		/* XXX not implemented yet */
 	}
 
 	/* generate objects */
