@@ -8,33 +8,57 @@ $Id$
 
 Additional credits:
 
+
 Patches:
-	- Ted Unangst
-		(dynarray rewrite, many fixes)
-	- Pedro Martelletto
-		(check_mode() improvement)
-	- Marek Habersack
-		(many segfault fixes)
+
+- Ted Unangst
+	* dynarray rewrite
+	* many fixes
+
+- Pedro Martelletto
+	* check_mode() improvement
+
+- Marek Habersack
+	* many segfault fixes
+
+- Leslie Polzer
+	* CPUID checking for 32bits x86 CPU
+
 
 Bug report:
-	- Marek Habersack
-		(dirname failure with glibc implementation)
-	- Jean-Pierre Ritschard
-		(memory fault in pmk)
-	- Han Boetes
-		(memory fault in pmk_set_variable() due to a missing
-		check, redundancy in pmkfile.sample)
+
+- Marek Habersack
+	* dirname failure with glibc implementation
+
+- Jean-Pierre Ritschard
+	* memory fault in pmk
+
+- Han Boetes
+	* memory fault in pmk_set_variable() due to a missing check
+	* redundancy in pmkfile.sample
+
+- "veins"
+	* problem of empty pmkfile when no check exists
+
+- "wintellect"
+	* coredumps in pmk_check_config() and pmk_check_pkg_config()
+	* library path detection failure in pmk_check_lib()
+
 
 Notices:
-	- Pedro Martelletto
-	- Kurt V. Hindenburg
+
+- Pedro Martelletto
+- Kurt V. Hindenburg
+
 
 Typos:
-	- Pedro Martelletto
+
+- Pedro Martelletto
 
 Testers:
-	- Fiesh
-	- Saad Khadi
-	- Francois Petitjean
-	- Sascha Welter
+
+- Fiesh
+- Saad Khadi
+- Francois Petitjean
+- Sascha Welter
 
