@@ -440,14 +440,14 @@ else
 fi
 
 #
-# gathering LDFLAGS
+# gathering CLDFLAGS
 #
 
-if [ -z "$LDFLAGS" ]; then
-	get_make_var LDFLAGS
-	LDFLAGS=$make_var_value
+if [ -z "$CLDFLAGS" ]; then
+	get_make_var CLDFLAGS
+	CLDFLAGS=$make_var_value
 else
-	printf "LDFLAGS defined, skipping detection.\n"
+	printf "CLDFLAGS defined, skipping detection.\n"
 fi
 
 
@@ -676,7 +676,7 @@ fi
 ########################################################################
 
 mkf_sed 'CFLAGS' "$CFLAGS $PS_FLAGS"
-mkf_sed 'LDFLAGS' "$LDFLAGS $LGEN_FLAGS $LM_FLAGS"
+mkf_sed 'CLDFLAGS' "$CLDFLAGS $LGEN_FLAGS $LM_FLAGS"
 
 
 #

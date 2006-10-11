@@ -1,11 +1,11 @@
-# Makefile template built by pmkscan (2006-08-11 13:51)
+# Makefile template built by pmkscan (2006-10-11 20:09)
 # @configure_input@
 
-CPP=		@CPP@
 
-# language specific
+# build tools
 AS=		@AS@
 ASFLAGS=
+CPP=		@CPP@
 CC=		@CC@
 CFLAGS=		@CFLAGS@ \
 		$(WARN) $(DBGFLAGS) \
@@ -13,28 +13,21 @@ CFLAGS=		@CFLAGS@ \
 		-DPRIVSEP_USER=\"$(PRIVSEP_USER)\" \
 		-DSYSCONFDIR=\"$(SYSCONFDIR)\" \
 		-DCONFDIR=\"$(CONFDIR)\"
-
-# misc stuff
-LINKER=		@CC@
-# LDFLAGS shall contain -lc if used with ld
-LDFLAGS=	@LDFLAGS@
-
+CLDFLAGS=	@CLDFLAGS@
 INSTALL=	@INSTALL@
-INSTALL_BIN=	$(INSTALL) -m 755
-INSTALL_DATA=	$(INSTALL) -m 644
-INSTALL_DIR=	$(INSTALL) -d -m 755
-INSTALL_MAN=	$(INSTALL) -m 644
-INSTALL_SBIN=	$(INSTALL) -m 755
-
 RM=		rm
 RMFLAGS=	-rf
 
-PACKAGE=	@PACKAGE@
-VERSION=	@VERSION@
 
-# extra tags
-CONFDIR=	@CONFDIR@
-PRIVSEP_USER=	@PRIVSEP_USER@
+# tool aliases
+INSTALL_BIN=	$(INSTALL) -m 755
+INSTALL_SBIN=	$(INSTALL) -m 755
+INSTALL_STLIB=	$(INSTALL) -m 644
+INSTALL_SHLIB=	$(INSTALL) -m 755
+INSTALL_DATA=	$(INSTALL) -m 644
+INSTALL_DIR=	$(INSTALL) -d -m 755
+INSTALL_MAN=	$(INSTALL) -m 644
+
 
 # specific directories
 PREFIX=		@PREFIX@
@@ -47,44 +40,22 @@ MAN5DIR=	@MAN5DIR@
 MAN8DIR=	@MAN8DIR@
 SYSCONFDIR=	@SYSCONFDIR@
 
-.SUFFIXES: .o .s .c .C .cc .cxx .cpp
-
-# assembly suffix
-# we use CPP to be more portable
-.s.o:
-	$(CPP) $< | sed '/^#/d' > tmp_asm.s
-	$(AS) $(ASFLAGS) -o $@ tmp_asm.s
-	$(RM) $(RMFLAGS) tmp_asm.s
-
-# C suffixes
-.c.o:
-	$(CC) $(CFLAGS) -o $@ -c $<
-
-.C.o:
-	$(CC) $(CFLAGS) -o $@ -c $<
-
-.cc.o:
-	$(CC) $(CFLAGS) -o $@ -c $<
+# packaging
+PACKAGE=	@PACKAGE@
+VERSION=	@VERSION@
 
 
-#
-# directory list
-#
-SUBDIRS=	. CVS compat compat/CVS data data/CVS doc man man/CVS samples \
-		tests
+# extra tags
+CONFDIR=	@CONFDIR@
+PRIVSEP_USER=	@PRIVSEP_USER@
 
 #
 # list of generated files
 #
-TEMPLATES=	Makefile.pmk compat/config.h.pmk
+GEN_FILES=	Makefile Makefile compat/config.h
 
 #
-# list of generated files
-#
-GEN_FILES=	Makefile compat/config.h
-
-#
-# object dependency lists
+# source dependency lists
 #
 AUTOCONF_SRCS=	autoconf.c autoconf.h cfgtool.h common.h compat/config.h \
 		compat/pmk_ctype.h compat/pmk_libgen.h \
@@ -117,7 +88,8 @@ COMPAT_SRCS=	compat.c compat.h compat/config.h compat/pmk_ctype.h \
 DETECT_SRCS=	common.h compat/config.h compat/pmk_stdbool.h \
 		compat/pmk_stdio.h compat/pmk_string.h \
 		compat/pmk_unistd.h detect.c detect.h dynarray.h \
-		errmsg.h hash.h parse.h pmk_obj.h premake.h prseng.h
+		errmsg.h hash.h lang.h parse.h pmk_obj.h premake.h \
+		prseng.h
 
 DETECT_CPU_SRCS=	common.h compat/config.h compat/pmk_stdbool.h \
 			compat/pmk_stdio.h compat/pmk_string.h \
@@ -153,7 +125,8 @@ HASH_TOOLS_SRCS=	compat/config.h compat/pmk_stdbool.h compat/pmk_stdio.h \
 			compat/pmk_string.h dynarray.h errmsg.h hash.h \
 			hash_tools.c hash_tools.h pmk_obj.h premake.h
 
-LANG_SRCS=	lang.c lang.h premake.h
+LANG_SRCS=	compat/config.h compat/pmk_stdbool.h dynarray.h errmsg.h \
+		hash.h lang.c lang.h pmk_obj.h premake.h
 
 PARSE_SRCS=	common.h compat/config.h compat/pmk_ctype.h \
 		compat/pmk_stdbool.h compat/pmk_stdio.h \
@@ -202,7 +175,7 @@ PMKSCAN_SRCS=	common.h compat/config.h compat/pmk_ctype.h \
 		compat/pmk_libgen.h compat/pmk_stdbool.h \
 		compat/pmk_stdio.h compat/pmk_string.h \
 		compat/pmk_sys_types.h compat/pmk_unistd.h dynarray.h \
-		errmsg.h hash.h hash_tools.h parse.h parse_lang.h \
+		errmsg.h hash.h hash_tools.h lang.h parse.h parse_lang.h \
 		pathtools.h pmk_obj.h pmkscan.c pmkscan.h premake.h \
 		prseng.h tags.h
 
@@ -220,12 +193,24 @@ TAGS_SRCS=	compat/config.h compat/pmk_ctype.h compat/pmk_stdbool.h \
 		compat/pmk_stdio.h compat/pmk_string.h tags.c tags.h
 
 #
-# target dependency lists
+# binary name macros
+#
+PMK=	pmk
+
+PMKINSTALL=	pmkinstall
+
+PMKPC=	pmkpc
+
+PMKSCAN=	pmkscan
+
+PMKSETUP=	pmksetup
+
+#
+# binary target dependency lists
 #
 PMK_OBJS=	autoconf.o cfgtool.o codebuild.o common.o compat.o detect.o \
-		dynarray.o func.o functool.o hash.o hash_tools.o lang.o \
-		parse.o pathtools.o pkgconfig.o pmk.o pmk_obj.o prseng.o \
-		tags.o
+		dynarray.o func.o functool.o hash.o hash_tools.o lang.o parse.o \
+		pathtools.o pkgconfig.o pmk.o pmk_obj.o prseng.o tags.o
 
 PMKINSTALL_OBJS=	common.o compat.o dynarray.o hash.o pathtools.o \
 			pmk_obj.o pmkinstall.o
@@ -243,28 +228,33 @@ PMKSETUP_OBJS=	common.o compat.o detect_cpu.o detect_cpu_asm.o \
 #
 # target lists
 #
-ALL_TARGETS=	$(ALL_BIN_TARGETS) $(ALL_LIB_TARGETS)
 
-ALL_CLEAN_TARGETS=	$(ALL_BIN_CLEAN_TARGETS) $(ALL_LIB_CLEAN_TARGETS)
+# building
+BUILD_TARGETS=	$(ALL_BIN_TARGETS)
 
-ALL_BIN_TARGETS=	pmk pmkinstall pmkpc pmkscan pmksetup
+ALL_BIN_TARGETS=	$(PMKINSTALL) $(PMK) $(PMKPC) $(PMKSCAN) $(PMKSETUP)
 
-ALL_BIN_CLEAN_TARGETS=	pmk_clean pmkinstall_clean pmkpc_clean \
-			pmkscan_clean pmksetup_clean
 
-ALL_LIB_TARGETS=	
+# cleaning
+CLEAN_TARGETS=	$(BIN_CLEAN_TARGETS)
 
-ALL_LIB_CLEAN_TARGETS=	
+BIN_CLEAN_TARGETS=	$(PMK)_clean $(PMKINSTALL)_clean $(PMKPC)_clean \
+			$(PMKSCAN)_clean $(PMKSETUP)_clean
 
-INSTALL_TARGETS=	install_bin install_sbin install_man install_data
 
-DEINSTALL_TARGETS=	deinstall_bin deinstall_sbin deinstall_man deinstall_data
+# installing
+INSTALL_TARGETS=	$(BIN_INSTALL_TARGETS) install_man install_data
 
-# by default we consider all binaries as non privileged
-BIN_FILES=	$(ALL_BIN_TARGETS)
+BIN_INSTALL_TARGETS=	$(PMKINSTALL)_install $(PMK)_install $(PMKPC)_install \
+			$(PMKSCAN)_install $(PMKSETUP)_install
 
-# move privileged binaries here if needed
-SBIN_FILES=
+
+# deinstalling
+DEINSTALL_TARGETS=	$(BIN_DEINSTALL_TARGETS) deinstall_man deinstall_data
+
+BIN_DEINSTALL_TARGETS=	$(PMK)_deinstall $(PMKINSTALL)_deinstall \
+			$(PMKPC)_deinstall $(PMKSCAN)_deinstall \
+			$(PMKSETUP)_deinstall
 
 MAN1_FILES=	man/pmk.1 man/pmkinstall.1 man/pmkpc.1 man/pmkscan.1
 
@@ -276,137 +266,87 @@ DATA_FILES=	data/pmkcfgtool.dat data/pmkcomp.dat data/pmkcpu.dat \
 		data/pmkscan.dat
 
 
+# by default we consider all binaries as non privileged
+BIN_FILES=	$(ALL_BIN_TARGETS)
+
+# move privileged binaries here if needed
+SBIN_FILES=
+
+.SUFFIXES: .o .s .c .C .cc .cxx .cpp
+
+# assembly suffix
+# we use CPP to be more portable
+.s.o:
+	$(CPP) $< | sed '/^#/d' > tmp_asm.s
+	$(AS) $(ASFLAGS) -o $@ tmp_asm.s
+	$(RM) $(RMFLAGS) tmp_asm.s
+
+# C suffixes
+.c.o:
+	$(CC) $(CFLAGS) $(SLCFLAGS) -o $@ -c $<
+
+
 #
 # generic targets
 #
-all: $(ALL_TARGETS)
+all: $(BUILD_TARGETS)
 
-clean: $(ALL_CLEAN_TARGETS)
+clean: $(CLEAN_TARGETS)
 
-install: all $(INSTALL_TARGETS)
+install: $(INSTALL_TARGETS)
 
 deinstall: $(DEINSTALL_TARGETS)
 
-# install binaries
-install_bin:
-	@if test -n "$(BIN_FILES)"; then \
-		printf "$(INSTALL_DIR) $(DESTDIR)$(BINDIR)"; \
-		$(INSTALL_DIR) $(DESTDIR)$(BINDIR); \
-		list="$(BIN_FILES)"; \
-		for f in $$list; do \
-			d=`basename $$f`; \
-			printf "$(INSTALL_BIN) $$f $(DESTDIR)$(BINDIR)/$$d\n"; \
-			$(INSTALL_BIN) $$f $(DESTDIR)$(BINDIR)/$$d; \
-		done \
-	fi
-
-# install privileged binaries
-install_sbin:
-	@if test -n "$(SBIN_FILES)"; then \
-		printf "$(INSTALL_DIR) $(DESTDIR)$(SBINDIR)"; \
-		$(INSTALL_DIR) $(DESTDIR)$(SBINDIR); \
-		list="$(SBIN_FILES)"; \
-		for f in $$list; do \
-			d=`basename $$f`; \
-			printf "$(INSTALL_BIN) $$f $(DESTDIR)$(SBINDIR)/$$d\n"; \
-			$(INSTALL_BIN) $$f $(DESTDIR)$(SBINDIR)/$$d; \
-		done \
-	fi
-
-# deinstall binaries
-deinstall_bin:
-	@if test -n "$(BIN_FILES)"; then \
-		list="$(BIN_FILES)"; \
-		for f in $$list; do \
-			d=`basename $$f`; \
-			printf "$(RM) $(RMFLAGS) $(DESTDIR)$(BINDIR)/$$d\n"; \
-			$(RM) $(RMFLAGS) $(DESTDIR)$(BINDIR)/$$d; \
-		done \
-	fi
-
-# deinstall privileged binaries
-deinstall_sbin:
-	@if test -n "$(BIN_FILES)"; then \
-		list="$(SBIN_FILES)"; \
-		for f in $$list; do \
-			d=`basename $$f`; \
-			printf "$(RM) $(RMFLAGS) $(DESTDIR)$(SBINDIR)/$$d\n"; \
-			$(RM) $(RMFLAGS) $(DESTDIR)$(SBINDIR)/$$d; \
-		done \
-	fi
-
+# install manual pages
 install_man:
-	# install manual pages
 	$(INSTALL_DIR) $(DESTDIR)$(MANDIR)
 	# man1
 	$(INSTALL_DIR) $(DESTDIR)$(MAN1DIR)
-	@for f in $(MAN1_FILES); do \
-		d=`basename $$f`; \
-		printf "$(INSTALL_DATA) $$f $(DESTDIR)$(MAN1DIR)/$$d\n"; \
-		$(INSTALL_DATA) $$f $(DESTDIR)/$(MAN1DIR)/$$d; \
-	done
+	$(INSTALL_DATA) man/pmk.1 $(DESTDIR)$(MAN1DIR)/pmk.1
+	$(INSTALL_DATA) man/pmkinstall.1 $(DESTDIR)$(MAN1DIR)/pmkinstall.1
+	$(INSTALL_DATA) man/pmkpc.1 $(DESTDIR)$(MAN1DIR)/pmkpc.1
+	$(INSTALL_DATA) man/pmkscan.1 $(DESTDIR)$(MAN1DIR)/pmkscan.1
 	# man5
 	$(INSTALL_DIR) $(DESTDIR)$(MAN5DIR)
-	@for f in $(MAN5_FILES); do \
-		d=`basename $$f`; \
-		printf "$(INSTALL_DATA) $$f $(DESTDIR)$(MAN5DIR)/$$d\n"; \
-		$(INSTALL_DATA) $$f $(DESTDIR)/$(MAN5DIR)/$$d; \
-	done
+	$(INSTALL_DATA) man/pmk.conf.5 $(DESTDIR)$(MAN5DIR)/pmk.conf.5
+	$(INSTALL_DATA) man/pmkfile.5 $(DESTDIR)$(MAN5DIR)/pmkfile.5
+	$(INSTALL_DATA) man/pmksyntax.5 $(DESTDIR)$(MAN5DIR)/pmksyntax.5
+	$(INSTALL_DATA) man/scanfile.5 $(DESTDIR)$(MAN5DIR)/scanfile.5
 	# man8
 	$(INSTALL_DIR) $(DESTDIR)$(MAN8DIR)
-	@for f in $(MAN8_FILES); do \
-		d=`basename $$f`; \
-		printf "$(INSTALL_DATA) $$f $(DESTDIR)$(MAN8DIR)/$$d\n"; \
-		$(INSTALL_DATA) $$f $(DESTDIR)/$(MAN8DIR)/$$d; \
-	done
+	$(INSTALL_DATA) man/pmksetup.8 $(DESTDIR)$(MAN8DIR)/pmksetup.8
 
-
+# deinstall manual pages
 deinstall_man:
-	# deinstall manual pages
 	# man1
-	@for f in $(MAN1_FILES); do \
-		d=`basename $$f`; \
-		printf "$(RM) $(RMFLAGS) $(DESTDIR)/$(MAN1DIR)/$$d\n"; \
-		$(RM) $(RMFLAGS) $(DESTDIR)/$(MAN1DIR)/$$d; \
-	done
+	$(RM) $(RMFLAGS) $(DESTDIR)$(MAN1DIR)/pmk.1
+	$(RM) $(RMFLAGS) $(DESTDIR)$(MAN1DIR)/pmkinstall.1
+	$(RM) $(RMFLAGS) $(DESTDIR)$(MAN1DIR)/pmkpc.1
+	$(RM) $(RMFLAGS) $(DESTDIR)$(MAN1DIR)/pmkscan.1
 	# man5
-	@for f in $(MAN5_FILES); do \
-		d=`basename $$f`; \
-		printf "$(RM) $(RMFLAGS) $(DESTDIR)/$(MAN5DIR)/$$d\n"; \
-		$(RM) $(RMFLAGS) $(DESTDIR)/$(MAN5DIR)/$$d; \
-	done
+	$(RM) $(RMFLAGS) $(DESTDIR)$(MAN5DIR)/pmk.conf.5
+	$(RM) $(RMFLAGS) $(DESTDIR)$(MAN5DIR)/pmkfile.5
+	$(RM) $(RMFLAGS) $(DESTDIR)$(MAN5DIR)/pmksyntax.5
+	$(RM) $(RMFLAGS) $(DESTDIR)$(MAN5DIR)/scanfile.5
 	# man8
-	@for f in $(MAN8_FILES); do \
-		d=`basename $$f`; \
-		printf "$(RM) $(RMFLAGS) $(DESTDIR)/$(MAN8DIR)/$$d\n"; \
-		$(RM) $(RMFLAGS) $(DESTDIR)/$(MAN8DIR)/$$d; \
-	done
+	$(RM) $(RMFLAGS) $(DESTDIR)$(MAN8DIR)/pmksetup.8
 
+# install data files
+install_data: $(DATA_FILES)
+	$(INSTALL_DATA) data/pmkcfgtool.dat $(DESTDIR)$(DATADIR)/pmkcfgtool.dat
+	$(INSTALL_DATA) data/pmkcomp.dat $(DESTDIR)$(DATADIR)/pmkcomp.dat
+	$(INSTALL_DATA) data/pmkcpu.dat $(DESTDIR)$(DATADIR)/pmkcpu.dat
+	$(INSTALL_DATA) data/pmkscan.dat $(DESTDIR)$(DATADIR)/pmkscan.dat
 
-install_data:
-	# install data files
-	$(INSTALL_DIR) $(DESTDIR)$(DATADIR)
-	@for f in $(DATA_FILES); do \
-		d=`basename $$f`; \
-		printf "$(INSTALL_DATA) $$f $(DESTDIR)$(DATADIR)/$$d\n"; \
-		$(INSTALL_DATA) $$f $(DESTDIR)$(DATADIR)/$$d; \
-	done
-
+# deinstall data files
 deinstall_data:
-	# deinstall data files
-	@for f in $(DATA_FILES); do \
-		d=`basename $$f`; \
-		printf "$(RM) $(RMFLAGS) $(DESTDIR)$(DATADIR)/$$d\n"; \
-		$(RM) $(RMFLAGS) $(DESTDIR)$(DATADIR)/$$d; \
-	done
+	$(RM) $(RMFLAGS) $(DESTDIR)$(DATADIR)/pmkcfgtool.dat
+	$(RM) $(RMFLAGS) $(DESTDIR)$(DATADIR)/pmkcomp.dat
+	$(RM) $(RMFLAGS) $(DESTDIR)$(DATADIR)/pmkcpu.dat
+	$(RM) $(RMFLAGS) $(DESTDIR)$(DATADIR)/pmkscan.dat
 
 distclean: clean
 	$(RM) $(RMFLAGS) $(GEN_FILES)
-	@for d in $(SUBDIRS); do \
-		printf "$(RM) $(RMFLAGS) $$d/*.scan $$d/*.log $$d/*.core\n"; \
-		$(RM) $(RMFLAGS) $$d/*.scan $$d/*.log $$d/*.core; \
-	done
-
 
 #
 # object rules
@@ -450,6 +390,9 @@ hash.o: $(HASH_SRCS)
 hash_tools.o: $(HASH_TOOLS_SRCS)
 
 
+lang.o: $(LANG_SRCS)
+
+
 parse.o: $(PARSE_SRCS)
 
 
@@ -486,42 +429,77 @@ prseng.o: $(PRSENG_SRCS)
 tags.o: $(TAGS_SRCS)
 
 
-
 #
-# target rules
+# binary target rules
 #
-pmk: $(PMK_OBJS)
-	$(CC) $(LDFLAGS) -o $@ $(PMK_OBJS)
 
-pmk_clean:
+# pmk binary targets
+$(PMK): $(PMK_OBJS)
+	$(CC) $(CLDFLAGS) -o $@ $(PMK_OBJS)
+
+$(PMK)_clean:
 	$(RM) $(RMFLAGS) $(PMK_OBJS)
-	$(RM) $(RMFLAGS) pmk
+	$(RM) $(RMFLAGS) $(PMK)
 
-pmkinstall: $(PMKINSTALL_OBJS)
-	$(CC) $(LDFLAGS) -o $@ $(PMKINSTALL_OBJS)
+$(PMK)_install: $(PMK)
+	$(INSTALL_BIN) $(PMK) $(DESTDIR)$(BINDIR)/$(PMK)
 
-pmkinstall_clean:
+$(PMK)_deinstall:
+	$(RM) $(RMFLAGS) $(DESTDIR)$(BINDIR)/$(PMK)
+
+# pmkinstall binary targets
+$(PMKINSTALL): $(PMKINSTALL_OBJS)
+	$(CC) $(CLDFLAGS) -o $@ $(PMKINSTALL_OBJS)
+
+$(PMKINSTALL)_clean:
 	$(RM) $(RMFLAGS) $(PMKINSTALL_OBJS)
-	$(RM) $(RMFLAGS) pmkinstall
+	$(RM) $(RMFLAGS) $(PMKINSTALL)
 
-pmkpc: $(PMKPC_OBJS)
-	$(CC) $(LDFLAGS) -o $@ $(PMKPC_OBJS)
+$(PMKINSTALL)_install: $(PMKINSTALL)
+	$(INSTALL_BIN) $(PMKINSTALL) $(DESTDIR)$(BINDIR)/$(PMKINSTALL)
 
-pmkpc_clean:
+$(PMKINSTALL)_deinstall:
+	$(RM) $(RMFLAGS) $(DESTDIR)$(BINDIR)/$(PMKINSTALL)
+
+# pmkpc binary targets
+$(PMKPC): $(PMKPC_OBJS)
+	$(CC) $(CLDFLAGS) -o $@ $(PMKPC_OBJS)
+
+$(PMKPC)_clean:
 	$(RM) $(RMFLAGS) $(PMKPC_OBJS)
-	$(RM) $(RMFLAGS) pmkpc
+	$(RM) $(RMFLAGS) $(PMKPC)
 
-pmkscan: $(PMKSCAN_OBJS)
-	$(CC) $(LDFLAGS) -o $@ $(PMKSCAN_OBJS)
+$(PMKPC)_install: $(PMKPC)
+	$(INSTALL_BIN) $(PMKPC) $(DESTDIR)$(BINDIR)/$(PMKPC)
 
-pmkscan_clean:
+$(PMKPC)_deinstall:
+	$(RM) $(RMFLAGS) $(DESTDIR)$(BINDIR)/$(PMKPC)
+
+# pmkscan binary targets
+$(PMKSCAN): $(PMKSCAN_OBJS)
+	$(CC) $(CLDFLAGS) -o $@ $(PMKSCAN_OBJS)
+
+$(PMKSCAN)_clean:
 	$(RM) $(RMFLAGS) $(PMKSCAN_OBJS)
-	$(RM) $(RMFLAGS) pmkscan
+	$(RM) $(RMFLAGS) $(PMKSCAN)
 
-pmksetup: $(PMKSETUP_OBJS)
-	$(CC) $(LDFLAGS) -o $@ $(PMKSETUP_OBJS)
+$(PMKSCAN)_install: $(PMKSCAN)
+	$(INSTALL_BIN) $(PMKSCAN) $(DESTDIR)$(BINDIR)/$(PMKSCAN)
 
-pmksetup_clean:
+$(PMKSCAN)_deinstall:
+	$(RM) $(RMFLAGS) $(DESTDIR)$(BINDIR)/$(PMKSCAN)
+
+# pmksetup binary targets
+$(PMKSETUP): $(PMKSETUP_OBJS)
+	$(CC) $(CLDFLAGS) -o $@ $(PMKSETUP_OBJS)
+
+$(PMKSETUP)_clean:
 	$(RM) $(RMFLAGS) $(PMKSETUP_OBJS)
-	$(RM) $(RMFLAGS) pmksetup
+	$(RM) $(RMFLAGS) $(PMKSETUP)
+
+$(PMKSETUP)_install: $(PMKSETUP)
+	$(INSTALL_BIN) $(PMKSETUP) $(DESTDIR)$(BINDIR)/$(PMKSETUP)
+
+$(PMKSETUP)_deinstall:
+	$(RM) $(RMFLAGS) $(DESTDIR)$(BINDIR)/$(PMKSETUP)
 

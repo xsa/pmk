@@ -17,6 +17,9 @@ GEN_ZONE(tests) {
 	DIRECTORY = "./tests"
 	RECURSE = TRUE
 	PMKFILE = TRUE
+	PMKNAME = "pmkfile.scan"
+	CFGNAME = "config.h.scan"
 	MAKEFILE = TRUE
+	MKFNAME = "Makefile.scan"
 }
 

@@ -469,32 +469,6 @@ enum {
 #define MKF_TARGET_INST		"install: $(" MKF_TRGT_INST_VAR ")\n\n" \
 							"deinstall: $(" MKF_TRGT_DEINST_VAR ")\n\n"
 
-#define INST_LIST_RULE(comment, target, list, dir, inst)	\
-							"# " comment "\n" \
-							target ":\n" \
-							"\t@if test -n \"$(" list ")\"; then \\\n" \
-							"\t\tprintf \"$(INSTALL_DIR) $(DESTDIR)$(" dir ")\\n\"; \\\n" \
-							"\t\t$(INSTALL_DIR) $(DESTDIR)$(" dir "); \\\n" \
-							"\t\tlist=\"$(" list ")\"; \\\n" \
-							"\t\tfor f in $$list; do \\\n" \
-							"\t\t\td=`basename $$f`; \\\n" \
-							"\t\t\tprintf \"" inst " $$f $(DESTDIR)$(" dir ")/$$d\\n\"; \\\n" \
-							"\t\t\t" inst " $$f $(DESTDIR)$(" dir ")/$$d; \\\n" \
-							"\t\tdone \\\n" \
-							"\tfi\n\n" \
-
-#define DEINST_LIST_RULE(comment, target, list, dir, deinst)	\
-							"# " comment "\n" \
-							target ":\n" \
-							"\t@if test -n \"$(" list ")\"; then \\\n" \
-							"\t\tlist=\"$(" list ")\"; \\\n" \
-							"\t\tfor f in $$list; do \\\n" \
-							"\t\t\td=`basename $$f`; \\\n" \
-							"\t\t\tprintf \"\t" deinst " $(DESTDIR)$(" dir ")/$$d\\n\"; \\\n" \
-							"\t\t\t" deinst " $(DESTDIR)$(" dir ")/$$d; \\\n" \
-							"\t\tdone \\\n" \
-							"\tfi\n\n" \
-
 #define MKF_INST_BIN		"$(%s)_install: $(%s)\n" \
 							"\t$(INSTALL_BIN) $(%s) $(DESTDIR)$(BINDIR)/$(%s)\n\n"
 #define MKF_DEINST_BIN		"$(%s)_deinstall:\n" \
@@ -502,40 +476,26 @@ enum {
 #define MKF_INST_STLIB		"\t$(INSTALL_STLIB) $(%s) $(DESTDIR)$(LIBDIR)/$(%s)\n"
 #define MKF_INST_SHLIB		"\t$(INSTALL_SHLIB) $(%s) $(DESTDIR)$(LIBDIR)/$(%s)\n"
 
-#define MKF_INST_MAN_H		"install_man:\n" \
-							"\t# install manual pages\n" \
+/* XXX put dependencies in rule ? */
+#define MKF_INST_MAN_H		"# install manual pages\n" \
+							"install_man:\n" \
 							"\t$(INSTALL_DIR) $(DESTDIR)$(MANDIR)\n"
-#define MKF_INST_MAN_B		"\t# man%d\n" \
-							"\t$(INSTALL_DIR) $(DESTDIR)$(MAN%dDIR)\n" \
-							"\t@for f in $(MAN%d_FILES); do \\\n" \
-							"\t\td=`basename $$f`; \\\n" \
-							"\t\tprintf \"$(INSTALL_DATA) $$f $(DESTDIR)$(MAN%dDIR)/$$d\\n\"; \\\n" \
-							"\t\t$(INSTALL_DATA) $$f $(DESTDIR)/$(MAN%dDIR)/$$d; \\\n" \
-							"\tdone\n"
+#define MKF_INST_MAN_D		"\t# man%d\n" \
+							"\t$(INSTALL_DIR) $(DESTDIR)$(MAN%uDIR)\n"
+#define MKF_INST_MAN_P		"\t$(INSTALL_DATA) %s $(DESTDIR)$(MAN%uDIR)/%s\n"
 
-#define MKF_DEINST_MAN_H	"deinstall_man:\n" \
-							"\t# deinstall manual pages\n"
-#define MKF_DEINST_MAN_B	"\t# man%d\n" \
-							"\t@for f in $(MAN%d_FILES); do \\\n" \
-							"\t\td=`basename $$f`; \\\n" \
-							"\t\tprintf \"$(RM) $(RMFLAGS) $(DESTDIR)/$(MAN%dDIR)/$$d\\n\"; \\\n" \
-							"\t\t$(RM) $(RMFLAGS) $(DESTDIR)/$(MAN%dDIR)/$$d; \\\n" \
-							"\tdone\n"
+#define MKF_DEINST_MAN_H	"# deinstall manual pages\n" \
+							"deinstall_man:\n"	
+#define MKF_DEINST_MAN_D	"\t# man%d\n"
+#define MKF_DEINST_MAN_P	"\t$(RM) $(RMFLAGS) $(DESTDIR)$(MAN%uDIR)/%s\n"
 
-#define MKF_INST_DATA \
-		INST_LIST_RULE(	"install data files",	\
-						"install_data",			\
-						"DATA_FILES",			\
-						"DATADIR",				\
-						"$(INSTALL_DATA)")
+#define MKF_INST_DATA_H		"# install data files\n" \
+							"install_data: $(DATA_FILES)\n"
+#define MKF_INST_DATA_P		"\t$(INSTALL_DATA) %s $(DESTDIR)$(DATADIR)/%s\n"
 
-#define MKF_DEINST_DATA \
-		DEINST_LIST_RULE(	"deinstall data files",	\
-							"deinstall_data",		\
-							"DATA_FILES",			\
-							"DATADIR",				\
-							"$(RM) $(RMFLAGS)")
-
+#define MKF_DEINST_DATA_H	"# deinstall data files\n" \
+							"deinstall_data:\n"
+#define MKF_DEINST_DATA_P	"\t$(RM) $(RMFLAGS) $(DESTDIR)$(DATADIR)/%s\n"
 
 
 #define MKF_DIST_CLEAN		"distclean: clean\n" \
@@ -716,6 +676,7 @@ void		 mkf_output_obj_rules(FILE *, scn_zone_t *);
 void		 mkf_output_trg_rules(FILE *, scn_zone_t *);
 void		 mkf_output_lib_trg_rules(FILE *, scn_zone_t *);
 void		 mkf_output_man_inst(FILE *, scn_zone_t *);
+void		 mkf_output_data_inst(FILE *, scn_zone_t *);
 bool		 scan_build_mkf(scn_zone_t *);
 
 /* common functions */
