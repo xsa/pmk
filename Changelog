@@ -1,3 +1,7 @@
+14 Oct 2006 coudercd
+ * lib checking fix was incomplete, it should be now (noticed by Phil
+   aka wintellect).
+
 11 Oct 2006 coudercd
  * fixed label generation for objects.
  * reimplemented instal targets for data files and man pages.

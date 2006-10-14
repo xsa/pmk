@@ -1090,9 +1090,16 @@ bool pmk_check_lib(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 			return(false);
 		}
 
-		if (snprintf_b(lib_buf, sizeof(lib_buf), "-l%s", scb.library) == false) {
-			errorf("failed to build library name.");
-			return(false);
+		if (scb.ldflags != NULL) {
+			if (snprintf_b(lib_buf, sizeof(lib_buf), "%s -l%s", scb.ldflags, scb.library) == false) {
+				errorf("failed to build library path or name.");
+				return(false);
+			}
+		} else {
+			if (snprintf_b(lib_buf, sizeof(lib_buf), "-l%s", scb.library) == false) {
+				errorf("failed to build library name.");
+				return(false);
+			}
 		}
 
 		/* put result in LIBS or alternative variable */
