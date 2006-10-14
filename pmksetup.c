@@ -1,7 +1,7 @@
 /* $Id$ */
 
 /*
- * Copyright (c) 2003-2005 Damien Couderc
+ * Copyright (c) 2003-2006 Damien Couderc
  * Copyright (c) 2003-2004 Xavier Santolaria
  * All rights reserved.
  *
@@ -902,14 +902,14 @@ bool detection_loop(int argc, char *argv[]) {
 				}
 
 				if (parse_clopt(optarg, ppo, PRS_PMKCONF_SEP) == false) {
-					errorf("bad argument for -a option: %s.", optarg);
+					errorf("bad argument for -%c option: %s.", ch, optarg);
 					return(false);
 				}
 
 				/* add in hash */
 				pstr = po_get_str(ppo->value);
 				if (pstr == NULL) {
-					errorf("failed to get argument for -a option");
+					errorf("failed to get argument for -%c option", ch);
 					return(false);
 				}
 
@@ -1275,3 +1275,4 @@ int main(int argc, char *argv[]) {
 	return(EXIT_SUCCESS);
 }
 
+/* vim: set noexpandtab tabstop=4 softtabstop=4 shiftwidth=4: */
