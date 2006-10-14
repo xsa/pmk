@@ -218,3 +218,4 @@ bool	 parse_pmkconf(FILE *, htable *, char *, bool (*)(htable *, prsopt *));
 
 #endif /* _PMK_PARSE_H_ */
 
+/* vim: set noexpandtab tabstop=4 softtabstop=4 shiftwidth=4: */

@@ -1,7 +1,7 @@
 /* $Id$ */
 
 /*
- * Copyright (c) 2003-2005 Damien Couderc
+ * Copyright (c) 2003-2006 Damien Couderc
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -455,10 +455,10 @@ bool prs_skip_blank(prseng_t *ppe) {
 	while (prseng_test_idtf_char(" \t",
 				prseng_get_char(ppe)) == true) {
 		if (prseng_next_char(ppe) == false) {
-			return(false);
+			return false;
 		}
 	}
-	return(true);
+	return true;
 }
 
 
@@ -494,11 +494,11 @@ bool prs_skip_comment(prseng_t *ppe) {
 
 		/* next char */
 		if (prseng_next_char(ppe) == false) {
-			return(false);
+			return false;
 		}
 	}
 
-	return(true);
+	return true;
 }
 
 
@@ -530,7 +530,7 @@ bool prs_skip_useless(prseng_t *ppe) {
 			case '\t' :
 			case '\n' :
 				if (prseng_next_char(ppe) == false) {
-					return(false);
+					return false;
 				}
 				break;
 
@@ -551,7 +551,7 @@ bool prs_skip_useless(prseng_t *ppe) {
 	debugf("prs_skip_useless() : process ended on line %d with char '%c'",
 									ppe->linenum, prseng_get_char(ppe));
 #endif
-	return(true);
+	return true;
 }
 
 
@@ -579,7 +579,7 @@ bool parse_label(prseng_t *ppe, char *pbuf, size_t size) {
 		pbuf++;
 		size--;
 		if (prseng_next_char(ppe) == false) {
-			return(false);
+			return false;
 		}
 	}
 
@@ -611,7 +611,7 @@ bool parse_bool(prseng_t *ppe, pmkobj *po, size_t size) {
 	if (pb == NULL) {
 		strlcpy(parse_err, PRS_ERR_ALLOC,
 				sizeof(parse_err)); /* no check */
-		return(false);
+		return false;
 	}
 
 	if (size > sizeof(buf))
@@ -622,7 +622,7 @@ bool parse_bool(prseng_t *ppe, pmkobj *po, size_t size) {
 	/* get bool identifier */
 	if (prseng_get_idtf(ppe, buf, size, PRS_BOOL_IDTF_STR) == false) {
 		strlcpy(parse_err, PRS_ERR_PRSENG, sizeof(parse_err)); /* no check */
-		return(false);
+		return false;
 	}
 
 	/* is it true value ? */
@@ -637,14 +637,14 @@ bool parse_bool(prseng_t *ppe, pmkobj *po, size_t size) {
 			strlcpy(parse_err, "unknown boolean identifier.",
 					sizeof(parse_err)); /* no check */
 			free(pb);
-			return(false);
+			return false;
 		}
 	}
 
 	po->type = PO_BOOL;
 	po->data = pb;
 
-	return(true);
+	return true;
 }
 
 
@@ -672,7 +672,7 @@ bool parse_quoted(prseng_t *ppe, pmkobj *po, size_t size) {
 
 	buffer = (char *) malloc(size);
 	if (buffer == NULL) {
-		return(false);
+		return false;
 	}
 
 	pbuf = buffer;
@@ -682,13 +682,13 @@ bool parse_quoted(prseng_t *ppe, pmkobj *po, size_t size) {
 
 	/* skip starting double quote */
 	if (prseng_next_char(ppe) == false) {
-		return(false);
+		return false;
 	}
 
 	if (prseng_eof(ppe) == true) {
 		free(buffer);
 		strlcpy(parse_err, "ending quote is missing.", sizeof(parse_err)); /* no check */
-		return(false);
+		return false;
 	}
 
 	/* unset escape flag */
@@ -700,7 +700,7 @@ bool parse_quoted(prseng_t *ppe, pmkobj *po, size_t size) {
 			case CHAR_EOS :
 				strlcpy(parse_err, "ending quote is missing.",
 										sizeof(parse_err)); /* no check */
-				return(false);
+				return false;
 
 			case PMK_CHAR_ESCAPE :
 #ifdef PRS_DEBUG
@@ -748,13 +748,13 @@ bool parse_quoted(prseng_t *ppe, pmkobj *po, size_t size) {
 			if (size < 0) {
 				free(buffer);
 				strlcpy(parse_err, PRS_ERR_OVERFLOW, sizeof(parse_err)); /* no check */
-				return(false);
+				return false;
 			}
 		}
 
 		if (prseng_next_char(ppe) == false) {
 			free(buffer);
-			return(false);
+			return false;
 		}
 	}
 
@@ -772,10 +772,10 @@ bool parse_quoted(prseng_t *ppe, pmkobj *po, size_t size) {
 	if (po->data == NULL) {
 		/* strdup() failed */
 		errorf(ERRMSG_MEM);
-		return(false);
+		return false;
 	}
 
-	return(true);
+	return true;
 }
 
 
@@ -805,18 +805,18 @@ bool parse_list(prseng_t *ppe, pmkobj *po, size_t size) {
 	pda = da_init();
 	if (pda == NULL) {
 		strlcpy(parse_err, PRS_ERR_ALLOC, sizeof(parse_err)); /* no check */
-		return(false);
+		return false;
 	}
 
 	/* skip starting list char */
 	if (prseng_next_char(ppe) == false) {
-		return(false);
+		return false;
 	}
 
 	while (loop == true) {
 		/* skip blank characters */
 		if (prs_skip_blank(ppe) == false) {
-			return(false);
+			return false;
 		}
 
 		c = prseng_get_char(ppe);
@@ -835,14 +835,14 @@ bool parse_list(prseng_t *ppe, pmkobj *po, size_t size) {
 					/* yes => syntax error */
 					da_destroy(pda);
 					strlcpy(parse_err, PRS_ERR_SYNTAX, sizeof(parse_err)); /* no check */
-					return(false);
+					return false;
 				}
 
 				/* found string data */
 				if (parse_quoted(ppe, &potmp, size) == false) {
 					da_destroy(pda);
 					strlcpy(parse_err, PRS_ERR_SYNTAX, sizeof(parse_err)); /* no check */
-					return(false);
+					return false;
 				}
 
 #ifdef PRS_DEBUG
@@ -851,7 +851,7 @@ bool parse_list(prseng_t *ppe, pmkobj *po, size_t size) {
 
 				if (da_push(pda, potmp.data) == false) {
 					da_destroy(pda);
-					return(false);
+					return false;
 				}
 
 				/* set data flag */
@@ -867,7 +867,7 @@ bool parse_list(prseng_t *ppe, pmkobj *po, size_t size) {
 					/* no => syntax error */
 					da_destroy(pda);
 					strlcpy(parse_err, PRS_ERR_SYNTAX, sizeof(parse_err)); /* no check */
-					return(false);
+					return false;
 				}
 
 #ifdef PRS_DEBUG
@@ -889,7 +889,7 @@ bool parse_list(prseng_t *ppe, pmkobj *po, size_t size) {
 				da_destroy(pda);
 				strlcpy(parse_err, "end of list not found.",
 												sizeof(parse_err)); /* no check */
-				return(false);
+				return false;
 				break;
 
 			default :
@@ -898,13 +898,13 @@ bool parse_list(prseng_t *ppe, pmkobj *po, size_t size) {
 					/* yes => syntax error */
 					da_destroy(pda);
 					strlcpy(parse_err, PRS_ERR_SYNTAX, sizeof(parse_err)); /* no check */
-					return(false);
+					return false;
 				}
 
 				buffer = (char *) malloc(size);
 				if (buffer == NULL) {
 					strlcpy(parse_err, PRS_ERR_ALLOC, sizeof(parse_err)); /* no check */
-					return(false);
+					return false;
 				}
 
 				if (prseng_get_idtf(ppe, buffer, size,
@@ -918,7 +918,7 @@ bool parse_list(prseng_t *ppe, pmkobj *po, size_t size) {
 				if (*buffer == CHAR_EOS) {
 					da_destroy(pda);
 					strlcpy(parse_err, PRS_ERR_SYNTAX, sizeof(parse_err)); /* no check */
-					return(false);
+					return false;
 				}
 
 #ifdef PRS_DEBUG
@@ -927,7 +927,7 @@ bool parse_list(prseng_t *ppe, pmkobj *po, size_t size) {
 
 				if (da_push(pda, buffer) == false) {
 					da_destroy(pda);
-					return(false);
+					return false;
 				}
 
 				/* set data flag */
@@ -936,7 +936,7 @@ bool parse_list(prseng_t *ppe, pmkobj *po, size_t size) {
 		}
 
 		if (prseng_next_char(ppe) == false) {
-			return(false);
+			return false;
 		}
 	}
 
@@ -955,7 +955,7 @@ bool parse_list(prseng_t *ppe, pmkobj *po, size_t size) {
 	po->type = PO_LIST;
 	po->data = pda;
 
-	return(true);
+	return true;
 }
 
 
@@ -989,7 +989,7 @@ bool parse_key(prseng_t *ppe, pmkobj *po, size_t size) {
 #endif
 		/* found a quoted string */
 		if (parse_quoted(ppe, po, size) == false) {
-			return(false);
+			return false;
 		}
 	} else {
 #ifdef PRS_DEBUG
@@ -999,21 +999,21 @@ bool parse_key(prseng_t *ppe, pmkobj *po, size_t size) {
 		buffer = (char *) malloc(size);
 		if (buffer == NULL) {
 			strlcpy(parse_err, PRS_ERR_ALLOC, sizeof(parse_err)); /* no check */
-			return(false);
+			return false;
 		}
 
 		if (prseng_get_idtf(ppe, buffer, size, PRS_PMK_IDTF_STR) == false) {
 			free(buffer);
 			/* XXX better msg ? */
 			strlcpy(parse_err, PRS_ERR_OVERFLOW, sizeof(parse_err)); /* no check */
-			return(false);
+			return false;
 		}
 
 		po->type = PO_STRING;
 		po->data = buffer;
 	}
 
-	return(true);
+	return true;
 }
 
 
@@ -1035,6 +1035,9 @@ bool parse_key(prseng_t *ppe, pmkobj *po, size_t size) {
 bool parse_data(prseng_t *ppe, pmkobj *po, size_t size) {
 	po->type = PO_NULL;
 
+#ifdef PRS_DEBUG
+			debugf("parse_data(): first character = '%c'", prseng_get_char(ppe));
+#endif
 	switch (prseng_get_char(ppe)) {
 		/* found a quoted string */
 		case PMK_CHAR_QUOTE_START :
@@ -1042,7 +1045,7 @@ bool parse_data(prseng_t *ppe, pmkobj *po, size_t size) {
 			debugf("parse_data(): calling parse_quoted()");
 #endif
 			if (parse_quoted(ppe, po, size) == false) {
-				return(false);
+				return false;
 			}
 			break;
 
@@ -1052,7 +1055,7 @@ bool parse_data(prseng_t *ppe, pmkobj *po, size_t size) {
 			debugf("parse_data(): calling parse_list()");
 #endif
 			if (parse_list(ppe, po, size) == false) {
-				return(false);
+				return false;
 			}
 			break;
 
@@ -1061,12 +1064,12 @@ bool parse_data(prseng_t *ppe, pmkobj *po, size_t size) {
 			debugf("parse_data(): calling parse_bool()");
 #endif
 			if (parse_bool(ppe, po, size) == false) {
-				return(false);
+				return false;
 			}
 			break;
 	}
 
-	return(true);
+	return true;
 }
 
 
@@ -1235,12 +1238,12 @@ bool parse_opt(prseng_t *ppe, prsopt *popt, char *seplst) {
 
 	if (parse_key(ppe, &po, sizeof(popt->key)) == false) {
 		strlcpy(parse_err, PRS_ERR_SYNTAX, sizeof(parse_err)); /* no check */
-		return(false);
+		return false;
 	}
 
 	if (strlcpy_b(popt->key, po.data, sizeof(popt->key)) == false) {
 		free(po.data);
-		return(false);
+		return false;
 	}
 
 	free(po.data);
@@ -1250,18 +1253,18 @@ bool parse_opt(prseng_t *ppe, prsopt *popt, char *seplst) {
 #endif
 
 	if (prs_skip_blank(ppe) == false) {
-		return(false);
+		return false;
 	}
 
 	/* check if character is in separator list */
 	c = prseng_get_char(ppe);
 	if (prseng_test_idtf_char(seplst, c) == false) {
 		strlcpy(parse_err, PRS_ERR_SYNTAX, sizeof(parse_err)); /* no check */
-		return(false);
+		return false;
 	} else {
 		popt->opchar = c;
 		if (prseng_next_char(ppe) == false) {
-			return(false);
+			return false;
 		}
 	}
 #ifdef PRS_DEBUG
@@ -1269,12 +1272,12 @@ bool parse_opt(prseng_t *ppe, prsopt *popt, char *seplst) {
 #endif
 
 	if (prs_skip_blank(ppe) == false) {
-		return(false);
+		return false;
 	}
 	popt->value = (pmkobj *) malloc(sizeof(pmkobj));
 	if (popt->value == NULL) {
 		strlcpy(parse_err, PRS_ERR_ALLOC, sizeof(parse_err)); /* no check */
-		return(false);
+		return false;
 	}
 
 	/* parse data */
@@ -1282,7 +1285,7 @@ bool parse_opt(prseng_t *ppe, prsopt *popt, char *seplst) {
 		po_free(popt->value);
 		/*strlcpy(parse_err, PRS_ERR_SYNTAX,                        */
 		/*                        sizeof(parse_err)); |+ no check +|*/
-		return(false);
+		return false;
 	}
 
 #ifdef PRS_DEBUG
@@ -1302,7 +1305,7 @@ bool parse_opt(prseng_t *ppe, prsopt *popt, char *seplst) {
 	}
 #endif
 
-	return(true);
+	return true;
 }
 
 
@@ -1333,16 +1336,16 @@ bool parse_clopt(char *line, prsopt *popt, char *seplst) {
 	ppe = prseng_init_str(line, NULL);
 	if (ppe == NULL) {
 		strlcpy(parse_err, PRS_ERR_ALLOC, sizeof(parse_err)); /* no check */
-		return(false);
+		return false;
 	}
 
 	if (parse_key(ppe, &po, sizeof(popt->key)) == false) {
 		strlcpy(parse_err, PRS_ERR_SYNTAX, sizeof(parse_err)); /* no check */
-		return(false);
+		return false;
 	} else {
 		if (strlcpy_b(popt->key, po.data, sizeof(popt->key)) == false) {
 			free(po.data);
-			return(false);
+			return false;
 		}
 
 		free(po.data);
@@ -1356,30 +1359,35 @@ bool parse_clopt(char *line, prsopt *popt, char *seplst) {
 	c = prseng_get_char(ppe);
 	if (prseng_test_idtf_char(seplst, c) == false) {
 		strlcpy(parse_err, PRS_ERR_SYNTAX, sizeof(parse_err)); /* no check */
-		return(false);
+		return false;
 	} else {
 		popt->opchar = c;
 		if (prseng_next_char(ppe) == false) {
-			return(false);
+			return false;
 		}
 	}
 #ifdef PRS_DEBUG
 	debugf("assign = '%c'", popt->opchar);
 #endif
 
-	if (parse_key(ppe, &po, OPT_VALUE_LEN) == false) {
+	if (parse_data(ppe, &po, OPT_VALUE_LEN) == false) {
 		strlcpy(parse_err, PRS_ERR_SYNTAX, sizeof(parse_err)); /* no check */
-		return(false);
+		return false;
 	} else {
+		if (po.type != PO_STRING) {
+			strlcpy(parse_err, PRS_ERR_SYNTAX, sizeof(parse_err)); /* no check */
+			return false;
+		} else {
 #ifdef PRS_DEBUG
-	debugf("value = '%s'", po.data);
+			debugf("value = '%s'", po.data);
 #endif
 
-		popt->value = po_mk_str(po.data);
-		free(po.data);
+			popt->value = po_mk_str(po.data);
+			free(po.data);
+		}
 	}
 
-	return(true);
+	return true;
 }
 
 
@@ -1434,11 +1442,11 @@ bool check_opt_type(kw_t *pkw, pmkobj *po) {
 			a type mask has been given but doesn't match
 			with the option type
 		*/
-		return(false);
+		return false;
 	}
 
 	/* the option type matches or the mask is set to PO_NULL */
-	return(true);
+	return true;
 }
 
 
@@ -1463,7 +1471,7 @@ bool check_option(miscdata_t *pmd, prsopt *ppo) {
 	pkwo = pmd->kwopts;
 	if (pkwo == NULL) {
 		/* nothing to check */
-		return(true);
+		return true;
 	}
 
 	if (pkwo->req != NULL) {
@@ -1475,16 +1483,16 @@ bool check_option(miscdata_t *pmd, prsopt *ppo) {
 				/* wrong option type */
 				snprintf(parse_err, sizeof(parse_err),
 											PRS_ERR_TYP_OPT, ppo->key);
-				return(false);
+				return false;
 			}
 			/* decrement required option counter */
 			pmd->nbreq--;
-			return(true);
+			return true;
 		}
 
 		if (pkwo->opt == NULL) {
 			/* allow any optional variable names */
-			return(true);
+			return true;
 		}
 	}
 
@@ -1497,15 +1505,15 @@ bool check_option(miscdata_t *pmd, prsopt *ppo) {
 				/* wrong option type */
 				snprintf(parse_err, sizeof(parse_err),
 											PRS_ERR_TYP_OPT, ppo->key);
-				return(false);
+				return false;
 			}
-			return(true);
+			return true;
 		}
 	}
 
 	/* provided option is not expected */
 	snprintf(parse_err, sizeof(parse_err), PRS_ERR_INV_OPT, ppo->key);
-	return(false);
+	return false;
 }
 
 
@@ -1537,7 +1545,7 @@ bool process_block_opt(prseng_t *ppe, prsnode *pnode, prscell *pcell) {
 #ifdef PRS_DEBUG
 		debugf("process_block_opt() : parse_opt() returned false");
 #endif
-		return(false);
+		return false;
 	}
 
 #ifdef PRS_DEBUG
@@ -1553,7 +1561,7 @@ bool process_block_opt(prseng_t *ppe, prsnode *pnode, prscell *pcell) {
 			ncell = prscell_init(pnode->token, PRS_KW_ITEM, PRS_TOK_NULL);
 			if (ncell == NULL) {
 				errorf("process_block_opt() : prscell init failed");
-				return(false);
+				return false;
 			}
 
 			nopt = ncell->data;
@@ -1574,7 +1582,7 @@ bool process_block_opt(prseng_t *ppe, prsnode *pnode, prscell *pcell) {
 			/* check keyword option (NULL handled) */
 			if (check_option(ppe->data, &opt) == false) {
 				/* err msg done */
-				return(false);
+				return false;
 			}
 
 			/* verify if option is allowed */
@@ -1582,18 +1590,18 @@ bool process_block_opt(prseng_t *ppe, prsnode *pnode, prscell *pcell) {
 				/* duplicate option */
 				strlcpy(parse_err, "duplicate option.",
 											sizeof(parse_err)); /* XXX */
-				return(false);
+				return false;
 			}
 
 			if (hash_update(pcell->data, opt.key, /* no need to strdup */
 										opt.value) == HASH_ADD_FAIL) {
 				strlcpy(parse_err, PRS_ERR_HASH, sizeof(parse_err)); /* no check */
-				return(false);
+				return false;
 			}
 		break;
 	}
 
-	return(true);
+	return true;
 }
 
 
@@ -1639,7 +1647,7 @@ bool parse_opt_block(prsdata *pdata, prseng_t *ppe, prscell *pcell,
 	while (loop == true) {
 		/* skip useless text */
 		if (prs_skip_useless(ppe) == false) {
-			return(false);
+			return false;
 		}
 
 		switch(prseng_get_char(ppe)) {
@@ -1648,7 +1656,7 @@ bool parse_opt_block(prsdata *pdata, prseng_t *ppe, prscell *pcell,
 				debugf("parse_opt_block() : found end of block character.");
 #endif
 				if (prseng_next_char(ppe) == false) {
-					return(false);
+					return false;
 				}
 
 				if (chk_delim == true) {
@@ -1661,34 +1669,34 @@ bool parse_opt_block(prsdata *pdata, prseng_t *ppe, prscell *pcell,
 						snprintf(parse_err, sizeof(parse_err), /* no check */
 							"at least one required option is missing (%d).",
 													(int) pmd->nbreq);
-						return(false);
+						return false;
 					}
 				} else {
 					/* delimiter not expected */
-					return(false);
+					return false;
 				}
 				break;
 
 			case CHAR_EOS :
 				if (chk_delim == true) {
 					/* expected delimiter not found */
-					return(false);
+					return false;
 				} else {
 					/* main loop, no delimiter was expected => ok */
-					return(true);
+					return true;
 				}
 				break;
 
 			default :
 				if (process_block_opt(ppe, pnode, pcell) == false) {
 					/* error message already set */
-					return(false);
+					return false;
 				}
 				break;
 		}
 	}
 
-	return(true);
+	return true;
 }
 
 
@@ -1721,7 +1729,7 @@ bool parse_cmd_block(prsdata *pdata, prseng_t *ppe, prsnode *pnode,
 	while (loop == true) {
 		/* skip useless text */
 		if (prs_skip_useless(ppe) == false) {
-			return(false);
+			return false;
 		}
 
 #ifdef PRS_DEBUG
@@ -1734,7 +1742,7 @@ bool parse_cmd_block(prsdata *pdata, prseng_t *ppe, prsnode *pnode,
 #endif
 
 				if (prseng_next_char(ppe) == false) {
-					return(false);
+					return false;
 				}
 
 				if (chk_delim == true) {
@@ -1742,7 +1750,7 @@ bool parse_cmd_block(prsdata *pdata, prseng_t *ppe, prsnode *pnode,
 					loop = false;
 				} else {
 					/* delimiter not expected */
-					return(false);
+					return false;
 				}
 				break;
 
@@ -1752,10 +1760,10 @@ bool parse_cmd_block(prsdata *pdata, prseng_t *ppe, prsnode *pnode,
 #endif
 				if (chk_delim == true) {
 					/* expected delimiter not found */
-					return(false);
+					return false;
 				} else {
 					/* main loop, no delimiter was expected => ok */
-					return(true);
+					return true;
 				}
 				break;
 
@@ -1766,7 +1774,7 @@ bool parse_cmd_block(prsdata *pdata, prseng_t *ppe, prsnode *pnode,
 				pcell = parse_cmd_header(ppe, pnode);
 				if (pcell == NULL) {
 					/* parsing failed, message done */
-					return(false);
+					return false;
 				}
 
 #ifdef PRS_DEBUG
@@ -1776,12 +1784,12 @@ bool parse_cmd_block(prsdata *pdata, prseng_t *ppe, prsnode *pnode,
 #ifdef PRS_DEBUG
 					debugf("parse_cmd_block() : command boby parsing has fail.");
 #endif
-					return(false);
+					return false;
 				}
 		}
 	}
 
-	return(true);
+	return true;
 }
 
 
@@ -1810,7 +1818,7 @@ bool parse_pmkfile(FILE *fp, prsdata *pdata, prskw kwtab[], size_t size) {
 	if (ppe == NULL) {
 		/* cannot init engine structure */
 		errorf("init of parsing engine structure failed.");
-		return(false);
+		return false;
 	}
 
 	/* init hash table of command keywords */
@@ -1859,10 +1867,10 @@ bool process_opt(htable *pht, prsopt *popt) {
 		if (hash_update_dup(pht, popt->key,
 							po_get_str(popt->value)) == HASH_ADD_FAIL) {
 			errorf("hash failure.");
-			return(false);
+			return false;
 		}
 	}
-	return(true);
+	return true;
 }
 
 
@@ -1896,7 +1904,7 @@ bool parse_pmkconf(FILE *fp, htable *pht, char *seplst,
 	if (ppe == NULL) {
 		/* cannot init engine structure */
 		errorf("init of parsing engine structure failed.");
-		return(false);
+		return false;
 	}
 
 	while (prseng_eof(ppe) == false) {
@@ -1932,13 +1940,13 @@ bool parse_pmkconf(FILE *fp, htable *pht, char *seplst,
 						strlcpy(parse_err, PRS_ERR_OVERFLOW,
 												sizeof(parse_err)); /* no check */
 						prseng_destroy(ppe);
-						return(false);
+						return false;
 					}
 
 					/* next char */
 					if (prseng_next_char(ppe) == false) {
 						prseng_destroy(ppe);
-						return(false);
+						return false;
 					}
 				}
 
@@ -1955,7 +1963,7 @@ bool parse_pmkconf(FILE *fp, htable *pht, char *seplst,
 				/* process option */
 				if (func(pht, &opt) == false) {
 					errorf("line %d : processing failed", ppe->linenum);
-					return(false);
+					return false;
 				}
 				break;
 
@@ -1971,13 +1979,13 @@ bool parse_pmkconf(FILE *fp, htable *pht, char *seplst,
 				/* next char */
 				if (prseng_next_char(ppe) == false) {
 					prseng_destroy(ppe);
-					return(false);
+					return false;
 				}
 
 				/* process option */
 				if (func(pht, &opt) == false) {
 					errorf("line %d : processing failed", ppe->linenum);
-					return(false);
+					return false;
 				}
 				break;
 
@@ -1995,7 +2003,7 @@ bool parse_pmkconf(FILE *fp, htable *pht, char *seplst,
 					/* parse ok */
 					if (func(pht, &opt) == false) {
 						errorf("line %d : processing failed", ppe->linenum);
-						return(false);
+						return false;
 					}
 				} else {
 #ifdef PRS_DEBUG
@@ -2003,7 +2011,7 @@ bool parse_pmkconf(FILE *fp, htable *pht, char *seplst,
 #endif
 					/* incorrect line */
 					errorf("line %d : %s", ppe->linenum, parse_err);
-					return(false);
+					return false;
 				}
 
 				/* skip end of line */
@@ -2011,7 +2019,7 @@ bool parse_pmkconf(FILE *fp, htable *pht, char *seplst,
 					/* next char */
 					if (prseng_next_char(ppe) == false) {
 						prseng_destroy(ppe);
-						return(false);
+						return false;
 					}
 				}
 
@@ -2026,9 +2034,10 @@ bool parse_pmkconf(FILE *fp, htable *pht, char *seplst,
 	if (prseng_eof(ppe) == false) {
 		/* error occured before EOF */
 		errorf("line %d : %.32s", ppe->linenum, "end of file not reached.");
-		return(false);
+		return false;
 	}
 
-	return(true);
+	return true;
 }
 
+/* vim: set noexpandtab tabstop=4 softtabstop=4 shiftwidth=4: */
