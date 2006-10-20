@@ -3485,7 +3485,7 @@ void mkf_output_inst_trgs(FILE *fp, scn_zone_t *psz) {
 			/* put a separator if needed */
 			fprintf(fp, " ");
 		}
-		/* if library targets have been found */
+		/* if manual pages have been found */
 		fprintf(fp, MKF_TRGT_INST_MAN);
 		need_sep = true;
 	}
@@ -3494,7 +3494,7 @@ void mkf_output_inst_trgs(FILE *fp, scn_zone_t *psz) {
 			/* put a separator if needed */
 			fprintf(fp, " ");
 		}
-		/* if library targets have been found */
+		/* if data files have been found */
 		fprintf(fp, MKF_TRGT_INST_DATA);
 		need_sep = true;
 	}
@@ -3642,7 +3642,7 @@ void mkf_output_deinst_trgs(FILE *fp, scn_zone_t *psz) {
 			/* put a separator if needed */
 			fprintf(fp, " ");
 		}
-		/* if library targets have been found */
+		/* if manual pages have been found */
 		fprintf(fp, MKF_TRGT_DEINST_MAN);
 		need_sep = true;
 	}
@@ -3651,7 +3651,7 @@ void mkf_output_deinst_trgs(FILE *fp, scn_zone_t *psz) {
 			/* put a separator if needed */
 			fprintf(fp, " ");
 		}
-		/* if library targets have been found */
+		/* if data files have been found */
 		fprintf(fp, MKF_TRGT_DEINST_DATA);
 		need_sep = true;
 	}
@@ -4325,11 +4325,6 @@ bool scan_build_mkf(scn_zone_t *psz) {
 	fprintf(fp, MKF_TARGET_ALL);
 /*	fprintf(fp, MKF_TARGET_CFG); XXX TO ENABLE: auto config update target */
 	fprintf(fp, MKF_TARGET_INST);
-
-	if (psz->gen_lib == true) {
-		fprintf(fp, MKF_TRGT_INST_LIB);
-		fprintf(fp, MKF_TRGT_DEINST_LIB);
-	}
 
 	if (psz->found[FILE_TYPE_MAN] == true) {
 		mkf_output_man_inst(fp, psz);
