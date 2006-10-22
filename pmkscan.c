@@ -180,7 +180,10 @@ kw_t	req_deflib[] = {
 
 /* DEFINE_LIB options */
 kw_t	opt_deflib[] = {
-	{KW_OPT_HDRS,	PO_LIST}};
+	{KW_OPT_HDRS,	PO_LIST},
+	{KW_OPT_VMAJ,	PO_STRING},
+	{KW_OPT_VMIN,	PO_STRING}
+};
 
 kwopt_t	kw_deflib = {
 	req_deflib,
@@ -520,6 +523,10 @@ lib_cell_t *lib_cell_init(char *name, dynary *srcs, dynary *hdrs, ltype_t type) 
 		/* set library name variable */
 		str_to_upper(ubuf, sizeof(ubuf), buffer);
 		plc->lib_label = strdup(ubuf);
+
+        /* init version numbers */
+		plc->lib_vmaj = NULL;
+		plc->lib_vmin = NULL;
 
 		/* set library objects variable */
 		snprintf(buffer, sizeof(buffer), "%s_SRCS", ubuf);
@@ -1886,8 +1893,10 @@ bool scan_build_pmk(scn_zone_t *psz) {
 	/* output command */
 	build_cmd_begin(fp, "DEFINE", NULL);
 
-	/* output default defines */
-	fprintf(fp, PMKF_DEF_STD);
+	/* output package name */
+	fprintf(fp, PMKF_DEF_PKG);
+
+    /* output directories */
 	fprintf(fp, PMKF_DEF_DIR);
 	if (psz->gen_lib == true) {
 		fprintf(fp, PMKF_DEF_LIB);
@@ -1979,17 +1988,19 @@ bool scan_build_pmk(scn_zone_t *psz) {
 			/* output lib name */
 			build_quoted(fp, "NAME", phk->keys[i]);
 
-			/* output major version */
-			build_quoted(fp, "MAJOR", "0");
+			if ((plc->lib_vmaj != NULL) && (plc->lib_vmin != NULL)) {
+				/* output major version */
+				build_quoted(fp, "MAJOR", plc->lib_vmaj);
 
-			/* output minor version */
-			build_quoted(fp, "MINOR", "0");
+				/* output minor version */
+				build_quoted(fp, "MINOR", plc->lib_vmin);
 
-			/* output non versioned variable name */
-			build_quoted(fp, "VERSION_NONE", plc->lib_shared);
-
-			/* output versioned variable name */
-			/* XXX TODO set VERSION_FULL ? */
+				/* output versioned variable name */
+				build_quoted(fp, "VERSION_FULL", plc->lib_shared);
+			} else {
+				/* output non versioned variable name */
+				build_quoted(fp, "VERSION_NONE", plc->lib_shared);
+			}
 
 			/* end of command */
 			build_cmd_end(fp);
@@ -4111,7 +4122,7 @@ void mkf_output_lib_trg_rules(FILE *fp, scn_zone_t *psz) {
 				break;
 
 			default :
-			fprintf(fp, MKF_TARGET_LIB_SHD, plc->lib_objs, plc->lib_objs);
+			    fprintf(fp, MKF_TARGET_LIB_SHD, plc->lib_objs);
 		}
 
 		fprintf(fp, "$(%s)_shared_clean: $(%s)_clean\n", plc->lib_label, plc->lib_label);
@@ -5288,6 +5299,15 @@ bool parse_deflib(htable *pht, htable *libs) {
 
 	/* init lib cell */
 	plc = lib_cell_init(name, srcs, hdrs, type);
+    if (plc == NULL) {
+        return false;
+    }
+
+	/* get library major version number */
+	plc->lib_vmaj = po_get_str(hash_get(pht, KW_OPT_VMAJ));
+
+	/* get library minor version number */
+	plc->lib_vmin = po_get_str(hash_get(pht, KW_OPT_VMIN));
 
 	if (hash_add(libs, name, plc) == HASH_ADD_FAIL) {
 		lib_cell_destroy(plc);
