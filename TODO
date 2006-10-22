@@ -57,16 +57,17 @@ pmksetup:
 pmkscan
 -----------------------------------------------------------------------
 	+R	add support for advanced tags in pmkscan and pmk
-	-R	update scanfile.5 (ADVTAG)
+	-R	update scanfile.5 (ADVTAG)(VMAJ & VMIN in DEFINE_LIB)
 	~R!	add more entries in pmkscan.dat
 	+R	add list of library targets in makefile for automatic lib
 			generation (list object)
 	~R	add distclean in generated makefiles
 	+R	improve C++ source scanning
 	-R	move hard coded strings of pmkscan.c into macros
-	-R	reorganize macros of pmkscan.h
+	~R	reorganize macros of pmkscan.h
 	+R	reimplement data install target generation in pmkscan
 	+R	reimplement man pages install target generation in pmkscan
+    -R  static library versioning
 
 
 pmkinstall

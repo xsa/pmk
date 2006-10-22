@@ -1,3 +1,7 @@
+22 Oct 2006 coudercd
+ * added support for shared library versioning.
+ * library version numbers become optional.
+
 14 Oct 2006 coudercd
  * lib checking fix was incomplete, it should be now (noticed by Phil
    aka wintellect).

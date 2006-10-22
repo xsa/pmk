@@ -185,12 +185,12 @@ kwopt_t	kw_chkvar = {
 
 /* BUILD_SHLIB_NAME options */
 kw_t	req_bldshl[] = {
-	{KW_OPT_NAME,		PO_STRING},
-	{KW_OPT_MAJOR,		PO_STRING},
-	{KW_OPT_MINOR,		PO_STRING}
+	{KW_OPT_NAME,		PO_STRING}
 };
-kw_t	opt_bldshl	[] = {
+kw_t	opt_bldshl[] = {
 	{KW_OPT_REQUIRED,	PO_BOOL},
+	{KW_OPT_MAJOR,		PO_STRING},
+	{KW_OPT_MINOR,		PO_STRING},
 	{KW_SL_VERS_FULL,	PO_STRING},
 	{KW_SL_VERS_NONE,	PO_STRING}
 };
@@ -1955,7 +1955,7 @@ bool pmk_build_shlib_name(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 	pstr = hash_get(pgd->htab, SL_SYS_LABEL);
 	pmk_log("\tUsing support for '%s'.\n", pstr);
 
-	/* get name */
+	/* get name (REQUIRED) */
 	pstr = po_get_str(hash_get(ht, KW_OPT_NAME));
 	if (pstr != NULL) {
 #ifdef SHLIB_DEBUG

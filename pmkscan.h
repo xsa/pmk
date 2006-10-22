@@ -108,7 +108,6 @@ enum {
 #define KW_CMD_GENMF	"GEN_MAKEFILE"
 #define KW_CMD_GENZN	"GEN_ZONE"
 #define KW_CMD_DEFLIB	"DEFINE_LIB"
-#define KW_CMD_DEFLIBS	"DEFINE_LIBS"
 
 /* script keyword options */
 #define KW_OPT_ADVTAG	"ADVTAG"
@@ -127,6 +126,9 @@ enum {
 #define KW_OPT_SRCS		"SOURCES"
 #define KW_OPT_HDRS		"HEADERS"
 #define KW_OPT_UNI		"UNIQUE"
+#define KW_OPT_VMAJ		"VMAJ"
+#define KW_OPT_VMIN		"VMIN"
+
 
 /* common options */
 #define KW_OPT_LIB		"LIBRARY"
@@ -203,10 +205,7 @@ enum {
 #define PMKF_TRGT_CMT	"list of template files"
 
 #define PMKF_DEF_CMT	"main defines (NEED MANUAL EDITION)"
-#define PMKF_DEF_STD	"\tPACKAGE = \"mypackage\"\n" \
-						"\tVERS_MAJ = \"0\"\n" \
-						"\tVERS_MIN = \"0\"\n" \
-						"\tVERSION = \"$VERS_MAJ.$VERS_MIN\"\n"
+#define PMKF_DEF_PKG	"\tPACKAGE = \"mypackage\"\n"
 #define PMKF_DEF_DIR	"\tBINDIR = \"\\\\$(PREFIX)/bin\"\n" \
 						"\tSBINDIR = \"\\\\$(PREFIX)/sbin\"\n" \
 						"\tMANDIR = \"\\\\$(PREFIX)/man\"\n" \
@@ -310,7 +309,7 @@ enum {
 
 #define MKF_HEADER_RANLIB	MKF_LABEL_RANLIB "=\t\t@" MKF_LABEL_RANLIB "@\n"
 
-#define MKF_HEADER_MISC		MKF_LABEL_INSTALL "=\t@" MKF_LABEL_INSTALL" @\n" \
+#define MKF_HEADER_MISC		MKF_LABEL_INSTALL "=\t@" MKF_LABEL_INSTALL"@\n" \
 							MKF_LABEL_RM "=\t\trm\n" \
 							MKF_LABEL_RM "FLAGS=\t-rf\n"
 
@@ -401,10 +400,7 @@ enum {
 #define MKF_TARGET_LIB_STC	"\t$(" MKF_LABEL_AR ") $(" MKF_LABEL_AR "FLAGS) $@ $(%s)\n" \
 							"\t$(" MKF_LABEL_RANLIB ") $@\n\n"
 
-#define MKF_TARGET_LIB_SHD	"\t@if $(SHLIB_SUPPORT); then \\\n" \
-							"\t\tprintf \"$(CC) $(LDFLAGS) $(SLLDFLAGS) -o $@ $(%s)\\n\"; \\\n" \
-							"\t\t$(LD) $(LDFLAGS) $(SLLDFLAGS) -o $@ $(%s); \\\n" \
-							"\tfi\n"
+#define MKF_TARGET_LIB_SHD	"\t$(LD) $(LDFLAGS) $(SLLDFLAGS) -o $@ $(%s)\n"
 
 #define MKF_TARGET_SL_C		"\t$(CC) $(CLDFLAGS) $(SLCLDFLAGS) -o $@ $(%s)\n\n" /* XXX make better */
 
@@ -474,15 +470,15 @@ enum {
 							MKF_TRGT_INST_STLIB ": $(" MKF_STLIB_INST_VAR ")\n\n" \
 							MKF_TRGT_DEINST_STLIB ": $(" MKF_STLIB_DEINST_VAR ")\n\n"
 #define MKF_TRGT_C_SHLIBS	"# C language shared library targets\n" \
-							"c_shared_libs: $(" MKF_C_SHLIB_VAR ")\n\n" \
-							"c_shared_libs_clean: $(" MKF_C_SHL_CLN_VAR ")\n\n" \
-							"c_shared_libs_install: $(" MKF_C_SHL_INST_VAR ")\n\n" \
-							"c_shared_libs_deinstall: $(" MKF_C_SHL_DEINST_VAR ")\n\n"
+							MK_BLD_TARGET_C ": $(" MKF_C_SHLIB_VAR ")\n\n" \
+							MK_CLN_TARGET_C ": $(" MKF_C_SHL_CLN_VAR ")\n\n" \
+							MK_INST_TARGET_C ": $(" MKF_C_SHL_INST_VAR ")\n\n" \
+							MK_DEINST_TARGET_C ": $(" MKF_C_SHL_DEINST_VAR ")\n\n"
 #define MKF_TRGT_CXX_SHLIBS	"# C++ language shared library targets\n" \
-							"cxx_shared_libs: $(" MKF_CXX_SHLIB_VAR ")\n\n" \
-							"cxx_shared_libs_clean: $(" MKF_CXX_SHL_CLN_VAR ")\n\n" \
-							"cxx_shared_libs_install: $(" MKF_CXX_SHL_INST_VAR ")\n\n" \
-							"cxx_shared_libs_deinstall: $(" MKF_CXX_SHL_DEINST_VAR ")\n\n"
+							MK_BLD_TARGET_CXX ": $(" MKF_CXX_SHLIB_VAR ")\n\n" \
+							MK_CLN_TARGET_CXX ": $(" MKF_CXX_SHL_CLN_VAR ")\n\n" \
+							MK_INST_TARGET_CXX ": $(" MKF_CXX_SHL_INST_VAR ")\n\n" \
+							MK_DEINST_TARGET_CXX ": $(" MKF_CXX_SHL_DEINST_VAR ")\n\n"
 
 #define MKF_FILE_BIN_VAR	"# by default we consider all binaries as non privileged\n" \
 							"BIN_FILES=\t$(ALL_BIN_TARGETS)\n\n"
@@ -581,6 +577,8 @@ typedef struct {
 typedef struct {
 	char		*lib_name,		/* library name */
 				*lib_label,		/* library name label */
+                *lib_vmaj,      /* major version number */
+                *lib_vmin,      /* minor version number */
 				*lib_srcs,		/* library sources variable */
 				*lib_hdrs,		/* library headers variable */
 				*lib_objs,		/* library objects variable */

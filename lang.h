@@ -84,19 +84,19 @@ enum {
 #define SLLDFLAGS_LABEL_C		"SLCLDFLAGS"	/* C language */
 #define SLLDFLAGS_LABEL_CXX		"SLCXXLDFLAGS"	/* C++ language */
 
-/* XXX */
+/* shared libs build targets */
 #define MK_BLD_TARGET_C			"c_shared_libs"
 #define MK_BLD_TARGET_CXX		"cxx_shared_libs"
 
-/* XXX */
+/* shared libs clean targets */
 #define MK_CLN_TARGET_C			"c_shared_libs_clean"
 #define MK_CLN_TARGET_CXX		"cxx_shared_libs_clean"
 
-/* XXX */
+/* shared libs install targets */
 #define MK_INST_TARGET_C		"c_shared_libs_install"
 #define MK_INST_TARGET_CXX		"cxx_shared_libs_install"
 
-/* XXX */
+/* shared libs deinstall targets */
 #define MK_DEINST_TARGET_C		"c_shared_libs_deinstall"
 #define MK_DEINST_TARGET_CXX	"cxx_shared_libs_deinstall"
 
