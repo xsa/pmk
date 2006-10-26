@@ -89,19 +89,24 @@
 
 /* ADD_SYSTEM keyword options */
 #define SYS_KW_NAME		"NAME"
-#define SYS_KW_EXT		"SL_EXT"
-#define SYS_KW_VERSION	"SL_VERSION"
-#define SYS_KW_FMT		"SL_LIBNAME"
-#define SYS_KW_FMT_MAJ	"SL_LIBNAME_VMAJ"
-#define SYS_KW_FMT_FULL	"SL_LIBNAME_VFULL"
+#define SYS_KW_VERSION	"LIB_VERSION"
+#define SYS_KW_SH_EXT	"SH_EXT"
+#define SYS_KW_SH_NONE	"SH_LIBNAME_NONE"
+#define SYS_KW_SH_VERS	"SH_LIBNAME_VERS"
+#define SYS_KW_ST_EXT	"ST_EXT"
+#define SYS_KW_ST_NONE	"ST_LIBNAME_NONE"
+#define SYS_KW_ST_VERS	"ST_LIBNAME_VERS"
 
 /* reserved variable name */
-#define SL_KW_LIB_VNONE	"SL_LIBNAME"
-#define SL_KW_LIB_VMAJ	"SL_LIBNAME_VMAJ"
-#define SL_KW_LIB_VFULL	"SL_LIBNAME_VFULL"
-#define SL_KW_LIB_NAME	"SL_NAME"
-#define SL_KW_LIB_MAJ	"SL_MAJOR"
-#define SL_KW_LIB_MIN	"SL_MINOR"
+#define LIB_KW_MAJ	    "LIB_MAJOR"
+#define LIB_KW_MIN	    "LIB_MINOR"
+#define LIB_KW_NAME	    "LIB_NAME"
+#define LIB_KW_SH_VAR	"SH_VAR_NAME"
+#define LIB_KW_SH_NONE	SYS_KW_SH_NONE
+#define LIB_KW_SH_VERS	SYS_KW_SH_VERS
+#define LIB_KW_ST_VAR	"ST_VAR_NAME"
+#define LIB_KW_ST_NONE	SYS_KW_ST_NONE
+#define LIB_KW_ST_VERS	SYS_KW_ST_VERS
 
 
 /************************

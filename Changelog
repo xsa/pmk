@@ -1,4 +1,9 @@
 22 Oct 2006 coudercd
+ * added BUILD_LIB_NAME() to replace BUILD_SHLIB_NAME() as it also build
+   the static library name.
+ * marked BUILD_SHLIB_NAME() as obsolete.
+
+22 Oct 2006 coudercd
  * added support for shared library versioning.
  * library version numbers become optional.
 
