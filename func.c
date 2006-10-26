@@ -183,6 +183,26 @@ kwopt_t	kw_chkvar = {
 	sizeof(opt_chkvar) / sizeof(kw_t)
 };
 
+/* BUILD_LIB_NAME options */
+kw_t	req_bldlib[] = {
+	{KW_OPT_NAME,		PO_STRING}
+};
+kw_t	opt_bldlib[] = {
+	{KW_OPT_REQUIRED,	PO_BOOL},
+	{KW_OPT_MAJOR,		PO_STRING},
+	{KW_OPT_MINOR,		PO_STRING},
+	{KW_SL_STATIC,	    PO_STRING},
+	{KW_SL_SHARED,	    PO_STRING},
+	{KW_SL_VERSION,	    PO_BOOL}
+};
+
+kwopt_t	kw_bldlib = {
+	req_bldlib,
+	sizeof(req_bldlib) / sizeof(kw_t),
+	opt_bldlib,
+	sizeof(opt_bldlib) / sizeof(kw_t)
+};
+
 /* BUILD_SHLIB_NAME options */
 kw_t	req_bldshl[] = {
 	{KW_OPT_NAME,		PO_STRING}
@@ -194,6 +214,7 @@ kw_t	opt_bldshl[] = {
 	{KW_SL_VERS_FULL,	PO_STRING},
 	{KW_SL_VERS_NONE,	PO_STRING}
 };
+
 kwopt_t	kw_bldshl = {
 	req_bldshl,
 	sizeof(req_bldshl) / sizeof(kw_t),
@@ -215,6 +236,7 @@ prskw	kw_pmkfile[] = {
 	{"CHECK_PKG_CONFIG",	PMK_TOK_CHKPKG,	PRS_KW_CELL, PRS_TOK_NULL,		&kw_chkpc},
 	{"CHECK_TYPE",			PMK_TOK_CHKTYP,	PRS_KW_CELL, PRS_TOK_NULL,		&kw_chktyp},
 	{"CHECK_VARIABLE",		PMK_TOK_CHKVAR,	PRS_KW_CELL, PRS_TOK_NULL,		&kw_chkvar},
+	{"BUILD_LIB_NAME",	    PMK_TOK_BLDLIB,	PRS_KW_CELL, PRS_TOK_NULL,		&kw_bldlib},
 	{"BUILD_SHLIB_NAME",	PMK_TOK_BLDSLN,	PRS_KW_CELL, PRS_TOK_NULL,		&kw_bldshl}
 };
 
@@ -288,6 +310,9 @@ bool func_wrapper(prscell *pcell, pmkdata *pgd) {
 			break;
 		case PMK_TOK_CHKVAR :
 			rval = pmk_check_variable(&cmd, pcell->data, pgd);
+			break;
+		case PMK_TOK_BLDLIB :
+			rval = pmk_build_lib_name(&cmd, pcell->data, pgd);
 			break;
 		case PMK_TOK_BLDSLN :
 			rval = pmk_build_shlib_name(&cmd, pcell->data, pgd);
@@ -1925,22 +1950,23 @@ bool pmk_check_variable(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 }
 
 
-/**************************
- * pmk_build_shlib_name() *
+/************************
+ * pmk_build_lib_name() *
  ***********************************************************************
  DESCR
-	build name of a shared library
+	build names of a library
  ***********************************************************************/
 
-bool pmk_build_shlib_name(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
-	bool	 required;
-	char	*variable,
-			*versvar,
-			*versmaj,
+bool pmk_build_lib_name(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
+	bool	 required,
+			 versbool;
+	char	*shvar = NULL,
+			*stvar = NULL,
 			*pstr,
 			*value;
+	pmkobj	*po;
 
-	pmk_log("\n* Building shared library name\n");
+	pmk_log("\n* Building library name\n");
 
 	required = require_check(ht);
 	
@@ -1957,16 +1983,19 @@ bool pmk_build_shlib_name(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 
 	/* get name (REQUIRED) */
 	pstr = po_get_str(hash_get(ht, KW_OPT_NAME));
-	if (pstr != NULL) {
-#ifdef SHLIB_DEBUG
-		debugf("pstr(name) = '%s'", pstr);
-#endif
-		value = process_string(pstr, pgd->htab);
-#ifdef SHLIB_DEBUG
-		debugf("value = '%s'", value);
-#endif
-		hash_update(pgd->htab, SL_KW_LIB_NAME, value);
+	if (pstr == NULL) {
+		errorf("NAME not assigned in label '%s'", cmd->label);
+		return(false);
 	}
+
+#ifdef SHLIB_DEBUG
+	debugf("pstr(name) = '%s'", pstr);
+#endif
+	value = process_string(pstr, pgd->htab);
+#ifdef SHLIB_DEBUG
+	debugf("value = '%s'", value);
+#endif
+	hash_update(pgd->htab, LIB_KW_NAME, value);
 
 	/* get major version number */
 	pstr = po_get_str(hash_get(ht, KW_OPT_MAJOR));
@@ -1978,7 +2007,7 @@ bool pmk_build_shlib_name(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 #ifdef SHLIB_DEBUG
 		debugf("value = '%s'", value);
 #endif
-		hash_update(pgd->htab, SL_KW_LIB_MAJ, value); /* no dup */
+		hash_update(pgd->htab, LIB_KW_MAJ, value); /* no dup */
 	}
 
 	/* get minor version number */
@@ -1991,79 +2020,130 @@ bool pmk_build_shlib_name(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 #ifdef SHLIB_DEBUG
 		debugf("value = '%s'", value);
 #endif
-		hash_update(pgd->htab, SL_KW_LIB_MIN, value); /* no dup */
+		hash_update(pgd->htab, LIB_KW_MIN, value); /* no dup */
 	}
 
-	/* get libname without version */
-	variable = po_get_str(hash_get(ht, KW_SL_VERS_NONE));
-	if (variable != NULL) {
-		pstr = hash_get(pgd->htab, SL_KW_LIB_VNONE);
+	/* get shared lib variable */
+	pstr = po_get_str(hash_get(ht, KW_SL_SHARED));
+	if (pstr != NULL) {
 #ifdef SHLIB_DEBUG
-		debugf("pstr = '%s'", pstr);
+		debugf("pstr(SHARED) = '%s'", pstr);
 #endif
-		value = process_string(pstr, pgd->htab);
+		shvar = process_string(pstr, pgd->htab);
 #ifdef SHLIB_DEBUG
-		debugf("value = '%s'", value);
-#endif
-
-		/* no dup */
-		if (hash_update(pgd->htab, variable, value) == HASH_ADD_FAIL) {
-			errorf(HASH_ERR_UPDT_ARG, variable);
-			return(false);
-		}
-		pmk_log("\tSetting %s to '%s'\n", variable, value);
-#ifdef SHLIB_DEBUG
-		debugf("save in '%s'", variable);
-	} else {
-		debugf("variable not set");
+		debugf("shvar = '%s'", shvar);
 #endif
 	}
 
-	versvar = po_get_str(hash_get(ht, KW_SL_VERS_FULL));
-	if (versvar != NULL) {
-		pstr = hash_get(pgd->htab, SL_KW_LIB_VFULL);
+	/* get static lib variable */
+	pstr = po_get_str(hash_get(ht, KW_SL_STATIC));
+	if (pstr != NULL) {
 #ifdef SHLIB_DEBUG
-		debugf("pstr = '%s'", pstr);
+		debugf("pstr(STATIC) = '%s'", pstr);
 #endif
-		value = process_string(pstr, pgd->htab);
+		stvar = process_string(pstr, pgd->htab);
 #ifdef SHLIB_DEBUG
-		debugf("value = '%s'", value);
-#endif
-		if (hash_update(pgd->htab, versvar, value) == HASH_ADD_FAIL) {
-			errorf(HASH_ERR_UPDT_ARG, versvar);
-			return(false);
-		}
-		pmk_log("\tSetting %s to '%s'\n", versvar, value);
-#ifdef SHLIB_DEBUG
-		debugf("save in '%s'", versvar);
-	} else {
-		debugf("versvar not set");
+		debugf("stvar = '%s'", stvar);
 #endif
 	}
 
-	versmaj = po_get_str(hash_get(ht, KW_SL_VERS_MAJ));
-	if (versmaj != NULL) {
-		pstr = hash_get(pgd->htab, SL_KW_LIB_VMAJ);
+	/* get versioning boolean */
+	po = hash_get(ht, KW_SL_VERSION);
+	if (po != NULL) {
+		versbool = po_get_bool(po);
+	} else {
+		/* no version by default */
+		versbool = false;
+	}
+
+	/* process shared lib name */
+	if (shvar != NULL) {
+		if (versbool == false) {
+			/* get libname without version */
+			pstr = hash_get(pgd->htab, LIB_KW_SH_NONE);
 #ifdef SHLIB_DEBUG
-		debugf("pstr = '%s'", pstr);
+			debugf("pstr(LIB_KW_SH_NONE) = '%s'", pstr);
 #endif
-		value = process_string(pstr, pgd->htab);
+			value = process_string(pstr, pgd->htab);
 #ifdef SHLIB_DEBUG
-		debugf("value = '%s'", value);
+			debugf("value = '%s'", value);
 #endif
-		if (hash_update(pgd->htab, versmaj, value) == HASH_ADD_FAIL) {
-			errorf(HASH_ERR_UPDT_ARG, versmaj);
+		} else {
+			pstr = hash_get(pgd->htab, LIB_KW_SH_VERS);
+#ifdef SHLIB_DEBUG
+			debugf("pstr(LIB_KW_SH_VERS) = '%s'", pstr);
+#endif
+			value = process_string(pstr, pgd->htab);
+#ifdef SHLIB_DEBUG
+			debugf("value = '%s'", value);
+#endif
+		}
+
+		/* no dup, no free */
+		if (hash_update(pgd->htab, shvar, value) == HASH_ADD_FAIL) {
+			errorf(HASH_ERR_UPDT_ARG, shvar);
 			return(false);
 		}
-		pmk_log("\tSetting %s to '%s'\n", versmaj, value);
+		pmk_log("\tSetting %s to '%s'\n", shvar, value);
 #ifdef SHLIB_DEBUG
-		debugf("save in '%s'", versmaj);
-	} else {
-		debugf("versmaj not set");
+		debugf("save in '%s'", shvar);
 #endif
+		free(shvar);
+	}
+
+	/* process static lib name */
+	if (stvar != NULL) {
+		if (versbool == false) {
+			/* get libname without version */
+			pstr = hash_get(pgd->htab, LIB_KW_ST_NONE);
+#ifdef SHLIB_DEBUG
+			debugf("pstr(LIB_KW_ST_NONE) = '%s'", pstr);
+#endif
+			value = process_string(pstr, pgd->htab);
+#ifdef SHLIB_DEBUG
+			debugf("value = '%s'", value);
+#endif
+		} else {
+			pstr = hash_get(pgd->htab, LIB_KW_ST_VERS);
+#ifdef SHLIB_DEBUG
+			debugf("pstr(LIB_KW_ST_VERS) = '%s'", pstr);
+#endif
+			value = process_string(pstr, pgd->htab);
+#ifdef SHLIB_DEBUG
+			debugf("value = '%s'", value);
+#endif
+		}
+
+		/* no dup, no free */
+		if (hash_update(pgd->htab, stvar, value) == HASH_ADD_FAIL) {
+			errorf(HASH_ERR_UPDT_ARG, stvar);
+			return(false);
+		}
+		pmk_log("\tSetting %s to '%s'\n", stvar, value);
+#ifdef SHLIB_DEBUG
+		debugf("save in '%s'", stvar);
+#endif
+		free(stvar);
 	}
 
 	return(true);
+}
+
+
+/**************************
+ * pmk_build_shlib_name() *
+ ***********************************************************************
+ DESCR
+	build name of a shared library
+ ***********************************************************************/
+
+bool pmk_build_shlib_name(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
+	pmk_log("\n* Building shared library name\n");
+
+	pmk_log("\tBUILD_SHLIB_NAME() has been obsoleted by BUILD_LIB_NAME().\n");
+	pmk_log("\tRead the man page for further information.\n");
+
+	return(false);
 }
 
 

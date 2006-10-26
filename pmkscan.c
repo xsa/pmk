@@ -1983,10 +1983,14 @@ bool scan_build_pmk(scn_zone_t *psz) {
 			plc = hash_get(psz->libraries, phk->keys[i]);
 	
 			/* output command */
-			build_cmd_begin(fp, "BUILD_SHLIB_NAME", NULL);
+			build_cmd_begin(fp, "BUILD_LIB_NAME", NULL);
 
 			/* output lib name */
 			build_quoted(fp, "NAME", phk->keys[i]);
+
+            /* output lib variables */
+			build_quoted(fp, "STATIC", plc->lib_static);
+			build_quoted(fp, "SHARED", plc->lib_shared);
 
 			if ((plc->lib_vmaj != NULL) && (plc->lib_vmin != NULL)) {
 				/* output major version */
@@ -1996,10 +2000,10 @@ bool scan_build_pmk(scn_zone_t *psz) {
 				build_quoted(fp, "MINOR", plc->lib_vmin);
 
 				/* output versioned variable name */
-				build_quoted(fp, "VERSION_FULL", plc->lib_shared);
+	            build_boolean(fp, "VERSION", true);
 			} else {
 				/* output non versioned variable name */
-				build_quoted(fp, "VERSION_NONE", plc->lib_shared);
+	            build_boolean(fp, "VERSION", false);
 			}
 
 			/* end of command */
@@ -3008,8 +3012,7 @@ void mkf_output_libs(FILE *fp, scn_zone_t *psz) {
 				
 			fprintf(fp, "%s=\t%s\n", plc->lib_label, plc->lib_name);
 
-			fprintf(fp, MKF_STCLIB_VAR, plc->lib_static, plc->lib_label);
-
+			fprintf(fp, MKF_SUBSTVAR, plc->lib_static, plc->lib_static);
 			fprintf(fp, MKF_SUBSTVAR, plc->lib_shared, plc->lib_shared);
 
 			fprintf(fp, MKF_LIB_HEADERS, plc->lib_label);

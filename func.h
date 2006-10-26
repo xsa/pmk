@@ -64,8 +64,9 @@
 #define PMK_TOK_CHKPKG	24
 #define PMK_TOK_CHKTYP	25
 #define PMK_TOK_CHKVAR	26
-/* shared lib stuff */
-#define PMK_TOK_BLDSLN	30
+/* lib stuff */
+#define PMK_TOK_BLDLIB	30
+#define PMK_TOK_BLDSLN	31
 
 
 /* option keywords */
@@ -92,7 +93,11 @@
 #define KW_SETNGS_ACCOMP	"AC_COMPAT"
 #define KW_SETNGS_ACCOMP	"AC_COMPAT"
 #define KW_SETNGS_CCDTCT	"DETECT"
-/* shared lib */
+/* library name building */
+#define KW_SL_VERSION		"VERSION"
+#define KW_SL_STATIC		"STATIC"
+#define KW_SL_SHARED		"SHARED"
+/* obsolete stuff *//* XXX OBOSLETE */
 #define KW_SL_VERS_NONE		"VERSION_NONE"
 #define KW_SL_VERS_MAJ		"VERSION_MAJ"
 #define KW_SL_VERS_FULL		"VERSION_FULL"
@@ -136,6 +141,7 @@ bool	pmk_check_config(pmkcmd *, htable *, pmkdata *);
 bool	pmk_check_pkg_config(pmkcmd *, htable *, pmkdata *);
 bool	pmk_check_type(pmkcmd *, htable *, pmkdata *);
 bool	pmk_check_variable(pmkcmd *, htable *, pmkdata *);
+bool	pmk_build_lib_name(pmkcmd *, htable *, pmkdata *);
 bool	pmk_build_shlib_name(pmkcmd *, htable *, pmkdata *);
 
 bool	pmk_set_parameter(pmkcmd *, prsopt *, pmkdata *);
