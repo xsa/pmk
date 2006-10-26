@@ -18,9 +18,6 @@ IF(sw_usermode) {
 		CONFDIR = "\\$(PREFIX)/.pmk"
 		SBINDIR = "\\$(PREFIX)/bin"
 		DATADIR = "\\$(CONFDIR)"
-		MAN1DIR = "\\$(MANDIR)"
-		MAN5DIR = "\\$(MANDIR)"
-		MAN8DIR = "\\$(MANDIR)"
 	}
 }
 
@@ -29,15 +26,15 @@ IF(!sw_usermode) {
 		CONFDIR = "\\$(SYSCONFDIR)/pmk"
 		SBINDIR = "\\$(PREFIX)/sbin"
 		DATADIR = "\\$(PREFIX)/share/\\$(PREMAKE)"
-		MAN1DIR = "\\$(MANDIR)/man1"
-		MAN5DIR = "\\$(MANDIR)/man5"
-		MAN8DIR = "\\$(MANDIR)/man8"
 	}
 }
 
 DEFINE {
 	BINDIR = "\\$(PREFIX)/bin"
 	MANDIR = "\\$(PREFIX)/man"
+	MAN1DIR = "\\$(MANDIR)/man1"
+	MAN5DIR = "\\$(MANDIR)/man5"
+	MAN8DIR = "\\$(MANDIR)/man8"
 	PRIVSEP_USER = "nobody"
 	PACKAGE = "pmk"
 	VERSION = "0.9.3"
