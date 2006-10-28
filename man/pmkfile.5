@@ -265,39 +265,43 @@ ELSE(header_glib) {
 .Ed
 .El
 
-.Sh SHARED LIBRARY SUPPORT
+.Sh LIBRARY NAME BUILDING
 .Bl -tag -width Ds
-.It Cm BUILD_SHLIB_NAME
-This command helps you to build the name of a shared library.
+.It Cm BUILD_LIB_NAME
+This command helps you to build static and/or shared library name(s)
+depending on the rules of the host operanding system.
 .Pp
 Arguments:
-.Bl -tag -width VERSION_FULL -offset indent
+.Bl -tag -width VERSION -offset indent
 .It Dv NAME
 type is 'quoted', name of the library (without leading 'lib').
 .It Dv MAJOR
-type is 'quoted', major number for the version.
+type is 'quoted', major number for the version, optional.
 .It Dv MINOR
-type is 'quoted', minor number for the version.
-.It Dv VERSION_NONE
-type is 'quoted', variable name to store library name without version, optional.
-.It Dv VERSION_MAJ
-type is 'quoted', variable name to store library name with major version,
-optional.
-.It Dv VERSION_FULL
-type is 'quoted', variable name to store library name with full version,
-optional.
+type is 'quoted', minor number for the version, optional.
+.It Dv SHARED
+type is 'quoted', variable that will be set with the shared library name, optional.
+.It Dv STATIC
+type is 'quoted', variable that will be set with the static library name, optional.
+.It Dv VERSION
+type is 'boolean', boolean value for library version processing , optional.
 .El
 .Pp
-For example,
+For example:
 .Bd -literal -offset indent
-BUILD_SHLIB_NAME {
+BUILD_LIB_NAME {
 	NAME = "test"
+	STATIC = "TESTLIB_STATIC"
+	SHARED = "TESTLIB_SHARED"
 	MAJOR = "0"
 	MINOR = "2"
-	VERSION_NONE = "LIBNAME"
-	VERSION_FULL = "LIBNAMEVERS"
+	VERSION = TRUE
 }
 .Ed
+.El
+.Bl -tag -width Ds
+.It Cm BUILD_SHLIB_NAME
+This command has been obsoleted by the BUILD_LIB_NAME command.
 .El
 
 .Sh SEE ALSO
