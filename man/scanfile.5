@@ -136,6 +136,10 @@ Arguments:
 .Bl -tag -width DIRECTORY -offset indent
 .It Dv NAME
 type is 'quoted', give the name of the library.
+.It Dv VMAJ
+type is 'quoted', give the major version of the library.
+.It Dv VMIN
+type is 'quoted', give the minor version of the library.
 .It Dv LINKER
 type is 'quoted', define the relative language of the linker to be used.
 .It Dv SOURCES
@@ -148,6 +152,8 @@ For example:
 .Bd -literal -offset indent
 DEFINE_LIB {
 	NAME = "testc"
+	VMAJ = "1"
+	VMIN = "3"
 	LINKER = "C"
 	SOURCES = ("libtest.c")
 	HEADERS = ("libtest.h")
