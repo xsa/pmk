@@ -23,12 +23,12 @@ Indented lines means subtask.
 
 common:
 -----------------------------------------------------------------------
-	~R	update tutorial
+	~R!	update tutorial
 	~.	improve test_pmkinstall to check more modes
 	~!	new samples
 			- add a sample that show architecture data from pmk
 	+R!	improve tag generation and substitution.
-	-R	regroup common labels at the same place
+	~R	regroup common labels at the same place
 
 
 pmk:
@@ -57,17 +57,12 @@ pmksetup:
 pmkscan
 -----------------------------------------------------------------------
 	+R	add support for advanced tags in pmkscan and pmk
-	-R	update scanfile.5 (ADVTAG)(VMAJ & VMIN in DEFINE_LIB)
+	-R	update scanfile.5 (ADVTAG)
 	~R!	add more entries in pmkscan.dat
-	+R	add list of library targets in makefile for automatic lib
-			generation (list object)
-	~R	add distclean in generated makefiles
-	+R	improve C++ source scanning
-	-R	move hard coded strings of pmkscan.c into macros
+	+R	add distclean in generated makefiles
+	~R	move hard coded strings of pmkscan.c into macros
 	~R	reorganize macros of pmkscan.h
-	+R	reimplement data install target generation in pmkscan
-	+R	reimplement man pages install target generation in pmkscan
-    -R  static library versioning
+	+R	static library versioning
 
 
 pmkinstall
