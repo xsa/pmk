@@ -1,3 +1,5 @@
+# snapshot 20061028
+
 22 Oct 2006 coudercd
  * added BUILD_LIB_NAME() to replace BUILD_SHLIB_NAME() as it also build
    the static library name.
