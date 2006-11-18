@@ -1,3 +1,8 @@
+18 Nov 2006 coudercd
+ * added in pmkscan the code to create binary install directory in
+   generated makefile template.
+ * support alternative assembler in pmkcfg.sh via AS variable.
+
 # snapshot 20061028
 
 22 Oct 2006 coudercd
