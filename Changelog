@@ -2,6 +2,8 @@
  * added in pmkscan the code to create binary install directory in
    generated makefile template.
  * support alternative assembler in pmkcfg.sh via AS variable.
+ * update Makefile.pmk template to create correctly the binary install
+   directory.
 
 # snapshot 20061028
 
