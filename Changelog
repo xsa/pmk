@@ -4,6 +4,8 @@
  * support alternative assembler in pmkcfg.sh via AS variable.
  * update Makefile.pmk template to create correctly the binary install
    directory.
+ * also added in pmkscan the code for install data directory creation
+   in the generated makefile template.
 
 # snapshot 20061028
 
