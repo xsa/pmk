@@ -243,7 +243,7 @@ BIN_CLEAN_TARGETS=	$(PMK)_clean $(PMKINSTALL)_clean $(PMKPC)_clean \
 
 
 # installing
-INSTALL_TARGETS=	$(BIN_INSTALL_TARGETS) install_man install_data
+INSTALL_TARGETS=	install_bin install_man install_data
 
 BIN_INSTALL_TARGETS=	$(PMKINSTALL)_install $(PMK)_install $(PMKPC)_install \
 			$(PMKSCAN)_install $(PMKSETUP)_install
@@ -432,6 +432,13 @@ tags.o: $(TAGS_SRCS)
 #
 # binary target rules
 #
+
+# main binary install target
+install_bin: install_bindir $(BIN_INSTALL_TARGETS)
+
+# install binary directory
+install_bindir:
+	$(INSTALL_DIR) $(DESTDIR)$(BINDIR)
 
 # pmk binary targets
 $(PMK): $(PMK_OBJS)
