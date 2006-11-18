@@ -453,9 +453,23 @@ enum {
 #define MKF_TRGT_INST_LIBHDR	"lib_headers_install"
 #define MKF_TRGT_INST_STLIB		"static_libs_install"
 #define MKF_TRGT_INST_SHLIB		"shared_libs_install"
+#define MKF_TRGT_INST_BIN		"install_bin"
+#define MKF_TRGT_INST_LIB		"install_lib"
 #define MKF_TRGT_INST_MAN		"install_man"
 #define MKF_TRGT_INST_DATA		"install_data"
 #define MKF_LIB_INSTALL_ALL		MKF_LIB_INST_VAR "=\t" MKF_TRGT_INST_LIBHDR " " MKF_TRGT_INST_STLIB " $(" MKF_SHLIB_INST_VAR ")\n"
+#define MKF_GTRGT_INST_BIN		"#\n# binary target rules\n#\n\n" \
+								"# main binary install target\n" \
+								"install_bin: install_bindir $(" MKF_BIN_INST_VAR ")\n\n" \
+								"# install binary directory\n" \
+								"install_bindir:\n" \
+								"\t$(INSTALL_DIR) $(DESTDIR)$(BINDIR)\n\n"
+#define MKF_GTRGT_INST_LIB		"#\n# library target rules\n#\n\n" \
+								"# main library install target\n" \
+								"install_lib: install_libdir $(" MKF_BIN_INST_VAR ")\n\n" \
+								"# install library directory\n" \
+								"install_libdir:\n" \
+								"\t$(INSTALL_DIR) $(DESTDIR)$(LIBDIR)\n\n"
 
 #define MKF_TRGT_DEINST_LIBHDR	"lib_headers_deinstall"
 #define MKF_TRGT_DEINST_STLIB	"static_libs_deinstall"

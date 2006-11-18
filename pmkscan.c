@@ -3482,7 +3482,7 @@ void mkf_output_inst_trgs(FILE *fp, scn_zone_t *psz) {
 	need_sep = false;
 	if (hash_nbkey(psz->targets) > 0) {
 		/* if binary targets have been found */
-		fprintf(fp, MKF_VAR, MKF_BIN_INST_VAR);
+		fprintf(fp, MKF_TRGT_INST_BIN);
 		need_sep = true;
 	}
 	if (hash_nbkey(psz->libraries) > 0) {
@@ -3491,7 +3491,7 @@ void mkf_output_inst_trgs(FILE *fp, scn_zone_t *psz) {
 			fprintf(fp, " ");
 		}
 		/* if library targets have been found */
-		fprintf(fp, MKF_VAR, MKF_LIB_INST_VAR);
+		fprintf(fp, MKF_TRGT_INST_LIB);
 		need_sep = true;
 	}
 	if (psz->found[FILE_TYPE_MAN] == true) {
@@ -3943,7 +3943,7 @@ void mkf_output_trg_rules(FILE *fp, scn_zone_t *psz) {
 
 	if (phk != NULL) {
 		/* generate targets */
-		fprintf(fp, "#\n# binary target rules\n#\n\n");
+		fprintf(fp, MKF_GTRGT_INST_BIN);
 		for (i = 0 ; i < phk->nkey ; i++) {
 			pstr = phk->keys[i];
 
@@ -4017,7 +4017,7 @@ void mkf_output_lib_trg_rules(FILE *fp, scn_zone_t *psz) {
 	}
 
 	/* generate targets */
-	fprintf(fp, "#\n# library target rules\n#\n");
+	fprintf(fp, MKF_GTRGT_INST_LIB);
 
 	fprintf(fp, "\n# library headers install target\n");
 	fprintf(fp, MKF_TRGT, MKF_TRGT_INST_LIBHDR);
