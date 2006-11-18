@@ -333,6 +333,7 @@ deinstall_man:
 
 # install data files
 install_data: $(DATA_FILES)
+	$(INSTALL_DIR) $(DESTDIR)$(DATADIR)
 	$(INSTALL_DATA) data/pmkcfgtool.dat $(DESTDIR)$(DATADIR)/pmkcfgtool.dat
 	$(INSTALL_DATA) data/pmkcomp.dat $(DESTDIR)$(DATADIR)/pmkcomp.dat
 	$(INSTALL_DATA) data/pmkcpu.dat $(DESTDIR)$(DATADIR)/pmkcpu.dat

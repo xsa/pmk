@@ -532,7 +532,8 @@ enum {
 #define MKF_DEINST_MAN_P	"\t$(RM) $(RMFLAGS) $(DESTDIR)$(MAN%uDIR)/%s\n"
 
 #define MKF_INST_DATA_H		"# install data files\n" \
-							"install_data: $(DATA_FILES)\n"
+							"install_data: $(DATA_FILES)\n" \
+							"\t$(INSTALL_DIR) $(DESTDIR)$(DATADIR)\n"
 #define MKF_INST_DATA_P		"\t$(INSTALL_DATA) %s $(DESTDIR)$(DATADIR)/%s\n"
 
 #define MKF_DEINST_DATA_H	"# deinstall data files\n" \
