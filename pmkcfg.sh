@@ -503,10 +503,16 @@ mkf_sed 'CPP' "$CPP"
 # as check
 #
 
-if ! check_binary as; then
-	printf "Unable to find assembler.\n"
-	exit 1
+if [ -z "$AS" ]; then
+	if ! check_binary as; then
+		printf "Unable to find assembler.\n"
+		exit 1
+	fi
+else
+	printf "AS defined, skipping assembler.\n"
 fi
+
+mkf_sed 'AS' "$AS"
 
 
 ###############
