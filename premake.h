@@ -1,7 +1,7 @@
 /* $Id$ */
 
 /*
- * Copyright (c) 2003-2005 Damien Couderc
+* Copyright (c) 2003-2006 Damien Couderc
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -70,9 +70,9 @@
 /* major version */
 #define PREMAKE_VMAJOR	"0"
 /* minor version */
-#define PREMAKE_VMINOR	"9"
+#define PREMAKE_VMINOR	"10"
 /* minor subversion, only used for bugfixes  */
-#define PREMAKE_VSUB	"3"
+/*#define PREMAKE_VSUB	"0"*/
 
 /* full version */
 #ifndef PREMAKE_VSUB
@@ -82,7 +82,7 @@
 #endif
 
 /* only used for snapshots, comment for release */
-#define PREMAKE_SNAP		"20061028"
+/*#define PREMAKE_SNAP		"20061028"*/
 
 /* build version string */
 #ifndef PREMAKE_SNAP

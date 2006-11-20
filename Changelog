@@ -1,3 +1,5 @@
+# PMK 0.10.0 release
+
 18 Nov 2006 coudercd
  * added in pmkscan the code to create binary install directory in
    generated makefile template.
