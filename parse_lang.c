@@ -1,7 +1,7 @@
 /* $Id$ */
 
 /*
- * Copyright (c) 2005 Damien Couderc
+ * Copyright (c) 2006 Damien Couderc
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
