@@ -1,7 +1,7 @@
 /* $Id$ */
 
 /*
- * Copyright (c) 2003-2005 Damien Couderc
+ * Copyright (c) 2003-2006 Damien Couderc
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -234,10 +234,10 @@ bool find_pattern(dynary *da, char *pattern, char *pbuf, int bsize) {
 	boolean
  ***********************************************************************/
 
-bool record_def(htable *ht, char *name, bool status) {
+bool record_def(htable_t *ht, char *name, bool status) {
 	char	*def_str,
 			*have_str,
-			 def_val[MAX_HASH_VALUE_LEN];
+			 def_val[TMP_BUF_LEN];
 
 	def_str = gen_basic_tag_def(name);
 
@@ -258,7 +258,7 @@ bool record_def(htable *ht, char *name, bool status) {
 #endif
 
 	/* pmk style define ID (DEF__*) */
-	if (hash_update_dup(ht, def_str, def_val) == HASH_ADD_FAIL)
+	if (hash_update_dup(ht, def_str, def_val) == false)
 		return(false);
 #ifdef FC_DEBUG
 	debugf("record_def() : recorded '%s' with '%s'", def_str, def_val);
@@ -283,10 +283,10 @@ bool record_def(htable *ht, char *name, bool status) {
 	boolean
  ***********************************************************************/
 
-bool record_def_data(htable *ht, char *name, char *value) {
+bool record_def_data(htable_t *ht, char *name, char *value) {
 	char	*def_str,
 			*have_str,
-			 def_val[MAX_HASH_VALUE_LEN];
+			 def_val[TMP_BUF_LEN];
 
 	def_str = gen_basic_tag_def(name);
 
@@ -294,7 +294,7 @@ bool record_def_data(htable *ht, char *name, char *value) {
 
 	if (value != NULL) {
 		/* common variable tag HAVE_* */
-		if (hash_update_dup(ht, have_str, value) == HASH_ADD_FAIL)
+		if (hash_update_dup(ht, have_str, value) == false)
 			return(false);
 
 #ifdef FC_DEBUG
@@ -316,7 +316,7 @@ bool record_def_data(htable *ht, char *name, char *value) {
 #endif
 
 	/* pmk style define ID (DEF__*) */
-	if (hash_update_dup(ht, def_str, def_val) == HASH_ADD_FAIL)
+	if (hash_update_dup(ht, def_str, def_val) == false)
 		return(false);
 #ifdef FC_DEBUG
 	debugf("record_def_data() : recorded '%s' with '%s'", def_str, def_val);
@@ -339,10 +339,10 @@ bool record_def_data(htable *ht, char *name, char *value) {
 	boolean
  ***********************************************************************/
 
-bool record_def_adv(htable *ht, int type, char *ctn, char *ctt, char *msc, char *val) {
+bool record_def_adv(htable_t *ht, int type, char *ctn, char *ctt, char *msc, char *val) {
 	char	*tag_def,
 			*tag_name,
-			 buf[MAX_HASH_VALUE_LEN];
+			 buf[TMP_BUF_LEN];
 
 	tag_def = gen_tag_def(type, ctn, ctt, msc);
 	tag_name = gen_tag_name(type, ctn, ctt, msc);
@@ -359,13 +359,13 @@ bool record_def_adv(htable *ht, int type, char *ctn, char *ctt, char *msc, char 
 		}
 
 		/* record tag */
-		if (hash_update_dup(ht, tag_name, val) == HASH_ADD_FAIL) {
+		if (hash_update_dup(ht, tag_name, val) == false) {
 			return(false);
 		}
 	}
 
 	/* record tag define */
-	if (hash_update_dup(ht, tag_def, buf) == HASH_ADD_FAIL) {
+	if (hash_update_dup(ht, tag_def, buf) == false) {
 		return(false);
 	}
 
@@ -387,7 +387,7 @@ bool record_def_adv(htable *ht, int type, char *ctn, char *ctt, char *msc, char 
 	boolean
  ***********************************************************************/
 
-bool process_def_list(htable *ht, dynary *da, bool define) {
+bool process_def_list(htable_t *ht, dynary *da, bool define) {
 	char	*name,
 			*value;
 	int		 i,
@@ -431,8 +431,8 @@ bool process_def_list(htable *ht, dynary *da, bool define) {
 	boolean
  ***********************************************************************/
 
-bool label_set(htable *lht, char *name, bool status) {
-	if (hash_update_dup(lht, name, bool_to_str(status)) == HASH_ADD_FAIL)
+bool label_set(htable_t *lht, char *name, bool status) {
+	if (hash_update_dup(lht, name, bool_to_str(status)) == false)
 		return(false);
 
 	return(true);
@@ -453,7 +453,7 @@ bool label_set(htable *lht, char *name, bool status) {
 	boolean
  ***********************************************************************/
 
-bool label_check(htable *lht, char *name) {
+bool label_check(htable_t *lht, char *name) {
 	bool	 neg = false,
 		 rval;
 	char	*p;
@@ -491,7 +491,7 @@ bool label_check(htable *lht, char *name) {
 	boolean
  ***********************************************************************/
 
-bool depend_check(htable *lht, pmkdata *gd) {
+bool depend_check(htable_t *lht, pmkdata *gd) {
 	bool		 rval = true;
 	char		*fdep;
 	dynary		*da;
@@ -542,7 +542,7 @@ bool depend_check(htable *lht, pmkdata *gd) {
 	returns a boolean
  ***********************************************************************/
 
-bool require_check(htable *pht) {
+bool require_check(htable_t *pht) {
 	pmkobj	*req;
 
 	req = hash_get(pht, KW_OPT_REQUIRED);
@@ -573,7 +573,7 @@ bool require_check(htable *pht) {
 	language string or NULL if language cannot be determined
  ***********************************************************************/
 
-char *get_lang_str(htable *pht, pmkdata *pgd) {
+char *get_lang_str(htable_t *pht, pmkdata *pgd) {
 	char	*lang;
 
 	/* check first if language has been provided locally */
@@ -663,7 +663,7 @@ bool process_required(pmkdata *pgd, pmkcmd *pcmd, bool required,
 	OBSOLETE, to remove later when useless
  ***********************************************************************/
 
-bool obsolete_string_to_list(htable *ht, char *opt) {
+bool obsolete_string_to_list(htable_t *ht, char *opt) {
 	char	*pstr;
 	dynary	*da;
 	pmkobj	*po;

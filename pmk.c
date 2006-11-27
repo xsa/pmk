@@ -1,7 +1,7 @@
 /* $Id$ */
 
 /*
- * Copyright (c) 2003-2005 Damien Couderc
+ * Copyright (c) 2003-2006 Damien Couderc
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -100,13 +100,13 @@ pmkdata *pmkdata_init(void) {
 		return(NULL);
 
 		/* initialise global data hash table */
-	ppd->htab = hash_init(MAX_DATA_KEY);
+	ppd->htab = hash_create_simple(MAX_DATA_KEY);
 	if (ppd->htab == NULL) {
 		errorf("cannot initialize hash table for data.");
 		return(NULL);
 	}
 
-	ppd->labl = hash_init(MAX_LABEL_KEY);
+	ppd->labl = hash_create_simple(MAX_LABEL_KEY);
 	if (ppd->labl == NULL) {
 		hash_destroy(ppd->htab);
 		errorf("cannot initialize hash table for labels.");
@@ -153,9 +153,9 @@ pmkdata *pmkdata_init(void) {
  ***********************************************************************/
 
 bool init_var(pmkdata *pgd) {
-	char	 buf[TMP_BUF_LEN],
-			*pstr;
-	htable	*pht;
+	char		 buf[TMP_BUF_LEN],
+				*pstr;
+	htable_t	*pht;
 
 	pht = pgd->htab;
 
@@ -166,7 +166,7 @@ bool init_var(pmkdata *pgd) {
 #ifdef PMK_DEBUG
 debugf("%s = '%s'", pstr, buf);
 #endif
-	if (hash_update_dup(pht, pstr, buf) == HASH_ADD_FAIL) {
+	if (hash_update_dup(pht, pstr, buf) == false) {
 		return(false);
 	}
 
@@ -177,7 +177,7 @@ debugf("%s = '%s'", pstr, buf);
 #ifdef PMK_DEBUG
 debugf("%s = '%s'", pstr, buf);
 #endif
-	if (hash_update_dup(pht, pstr, buf) == HASH_ADD_FAIL) {
+	if (hash_update_dup(pht, pstr, buf) == false) {
 		return(false);
 	}
 
@@ -188,7 +188,7 @@ debugf("%s = '%s'", pstr, buf);
 #ifdef PMK_DEBUG
 debugf("%s = '%s'", pstr, buf);
 #endif
-	if (hash_update_dup(pht, pstr, buf) == HASH_ADD_FAIL) {
+	if (hash_update_dup(pht, pstr, buf) == false) {
 		return(false);
 	}
 
@@ -199,7 +199,7 @@ debugf("%s = '%s'", pstr, buf);
 #ifdef PMK_DEBUG
 debugf("%s = '%s'", pstr, buf);
 #endif
-	if (hash_update_dup(pht, pstr, buf) == HASH_ADD_FAIL) {
+	if (hash_update_dup(pht, pstr, buf) == false) {
 		return(false);
 	}
 
@@ -210,7 +210,7 @@ debugf("%s = '%s'", pstr, buf);
 #ifdef PMK_DEBUG
 debugf("%s = '%s'", pstr, buf);
 #endif
-	if (hash_update_dup(pht, pstr, buf) == HASH_ADD_FAIL) {
+	if (hash_update_dup(pht, pstr, buf) == false) {
 		return(false);
 	}
 
@@ -221,7 +221,7 @@ debugf("%s = '%s'", pstr, buf);
 #ifdef PMK_DEBUG
 debugf("%s = '%s'", pstr, buf);
 #endif
-	if (hash_update_dup(pht, pstr, buf) == HASH_ADD_FAIL) {
+	if (hash_update_dup(pht, pstr, buf) == false) {
 		return(false);
 	}
 
@@ -232,7 +232,7 @@ debugf("%s = '%s'", pstr, buf);
 #ifdef PMK_DEBUG
 debugf("%s = '%s'", pstr, buf);
 #endif
-	if (hash_update_dup(pht, pstr, buf) == HASH_ADD_FAIL) {
+	if (hash_update_dup(pht, pstr, buf) == false) {
 		return(false);
 	}
 
@@ -244,33 +244,33 @@ debugf("%s = '%s'", pstr, buf);
 debugf("%s = '%s'", pstr, buf);
 #endif
 
-	if (hash_update_dup(pht, pstr, buf) == HASH_ADD_FAIL) {
+	if (hash_update_dup(pht, pstr, buf) == false) {
 		return(false);
 	}
 
 	/* autoconf shit ? *//* XXX YES !!! => to move ! */
-	if (hash_update_dup(pht, "OBJEXT", "o") == HASH_ADD_FAIL) {
+	if (hash_update_dup(pht, "OBJEXT", "o") == false) {
 		return(false);
 	}
 
 
 	pstr = hash_get(pht, PMKCONF_BIN_CC);
 	if (pstr != NULL) {
-		if (hash_update_dup(pht, "CC", pstr) == HASH_ADD_FAIL) {
+		if (hash_update_dup(pht, "CC", pstr) == false) {
 			return(false);
 		}
 	}
 
 	pstr = hash_get(pht, PMKCONF_BIN_CXX);
 	if (pstr != NULL) {
-		if (hash_update_dup(pht, "CXX", pstr) == HASH_ADD_FAIL) {
+		if (hash_update_dup(pht, "CXX", pstr) == false) {
 			return(false);
 		}
 	}
 
 	pstr = hash_get(pht, PMKCONF_BIN_CPP);
 	if (pstr != NULL) {
-		if (hash_update_dup(pht, "CPP", pstr) == HASH_ADD_FAIL) {
+		if (hash_update_dup(pht, "CPP", pstr) == false) {
 			return(false);
 		}
 	}
@@ -283,76 +283,76 @@ debugf("%s = '%s'", pstr, buf);
 			return(false);
 		}
 
-		if (hash_update_dup(pht, "INSTALL", buf) == HASH_ADD_FAIL) {
+		if (hash_update_dup(pht, "INSTALL", buf) == false) {
 			return(false);
 		}
 	}
 
 	pstr = hash_get(pht, PMKCONF_BIN_AR);
 	if (pstr != NULL) {
-		if (hash_update_dup(pht, "AR", pstr) == HASH_ADD_FAIL) {
+		if (hash_update_dup(pht, "AR", pstr) == false) {
 			return(false);
 		}
 	}
 
 	pstr = hash_get(pht, PMKCONF_BIN_RANLIB);
 	if (pstr != NULL) {
-		if (hash_update_dup(pht, "RANLIB", pstr) == HASH_ADD_FAIL) {
+		if (hash_update_dup(pht, "RANLIB", pstr) == false) {
 			return(false);
 		}
 	}
 
 	pstr = hash_get(pht, PMKCONF_BIN_SH);
 	if (pstr != NULL) {
-		if (hash_update_dup(pht, "SHELL", pstr) == HASH_ADD_FAIL) {
+		if (hash_update_dup(pht, "SHELL", pstr) == false) {
 			return(false);
 		}
 	}
 
 	pstr = hash_get(pht, PMKCONF_BIN_STRIP);
 	if (pstr != NULL) {
-		if (hash_update_dup(pht, "STRIP", pstr) == HASH_ADD_FAIL) {
+		if (hash_update_dup(pht, "STRIP", pstr) == false) {
 			return(false);
 		}
 	}
 
 	pstr = hash_get(pht, PMKCONF_BIN_AWK);
 	if (pstr != NULL) {
-		if (hash_update_dup(pht, "AWK", pstr) == HASH_ADD_FAIL) {
+		if (hash_update_dup(pht, "AWK", pstr) == false) {
 			return(false);
 		}
 	}
 
 	pstr = hash_get(pht, PMKCONF_BIN_EGREP);
 	if (pstr != NULL) {
-		if (hash_update_dup(pht, "EGREP", pstr) == HASH_ADD_FAIL) {
+		if (hash_update_dup(pht, "EGREP", pstr) == false) {
 			return(false);
 		}
 	}
 
 	/* shared lib support */
-	if (hash_update_dup(pht, MK_VAR_SL_BUILD, "") == HASH_ADD_FAIL) {
+	if (hash_update_dup(pht, MK_VAR_SL_BUILD, "") == false) {
 		return(false);
 	}
-	if (hash_update_dup(pht, MK_VAR_SL_CLEAN, "") == HASH_ADD_FAIL) {
+	if (hash_update_dup(pht, MK_VAR_SL_CLEAN, "") == false) {
 		return(false);
 	}
-	if (hash_update_dup(pht, MK_VAR_SL_INST, "") == HASH_ADD_FAIL) {
+	if (hash_update_dup(pht, MK_VAR_SL_INST, "") == false) {
 		return(false);
 	}
-	if (hash_update_dup(pht, MK_VAR_SL_DEINST, "") == HASH_ADD_FAIL) {
+	if (hash_update_dup(pht, MK_VAR_SL_DEINST, "") == false) {
 		return(false);
 	}
 
 	/* set absolute paths */
-	if (hash_update_dup(pht, PMK_DIR_SRC_ROOT_ABS, pgd->srcdir) == HASH_ADD_FAIL) {
+	if (hash_update_dup(pht, PMK_DIR_SRC_ROOT_ABS, pgd->srcdir) == false) {
 		return(false);
 	}
 #ifdef PMK_DEBUG
 	debugf("%s = '%s'", PMK_DIR_SRC_ROOT_ABS, pgd->srcdir);
 #endif
 
-	if (hash_update_dup(pht, PMK_DIR_BLD_ROOT_ABS, pgd->basedir) == HASH_ADD_FAIL) {
+	if (hash_update_dup(pht, PMK_DIR_BLD_ROOT_ABS, pgd->basedir) == false) {
 		return(false);
 	}
 #ifdef PMK_DEBUG
@@ -469,48 +469,48 @@ bool process_dyn_paths(pmkdata *pgd, char *tmplpath) {
  ***********************************************************************/
 
 bool process_dyn_var(pmkdata *pgd) {
-	htable		*pht;
+	htable_t	*pht;
 	pmkdyn_t	*pdd;
 
 	pht = pgd->htab;
 	pdd = &(pgd->dyndata);
 
-	if (hash_update_dup(pht, PMK_DIR_BLD_ROOT_REL, pdd->bld_root_rel) == HASH_ADD_FAIL) {
+	if (hash_update_dup(pht, PMK_DIR_BLD_ROOT_REL, pdd->bld_root_rel) == false) {
 		return(false);
 	}
 #ifdef PMK_DEBUG
 	debugf("%s = '%s'", PMK_DIR_BLD_ROOT_REL, pdd->bld_root_rel);
 #endif
 
-	if (hash_update_dup(pht, PMK_DIR_BLD_ABS, pdd->bld_abs) == HASH_ADD_FAIL) {
+	if (hash_update_dup(pht, PMK_DIR_BLD_ABS, pdd->bld_abs) == false) {
 		return(false);
 	}
 #ifdef PMK_DEBUG
 	debugf("%s = '%s'", PMK_DIR_BLD_ABS, pdd->bld_abs);
 #endif
 
-	if (hash_update_dup(pht, PMK_DIR_BLD_REL, pdd->bld_rel) == HASH_ADD_FAIL) {
+	if (hash_update_dup(pht, PMK_DIR_BLD_REL, pdd->bld_rel) == false) {
 		return(false);
 	}
 #ifdef PMK_DEBUG
 	debugf("%s = '%s'", PMK_DIR_BLD_REL, pdd->bld_rel);
 #endif
 
-	if (hash_update_dup(pht, PMK_DIR_SRC_ROOT_REL, pdd->src_root_rel) == HASH_ADD_FAIL) {
+	if (hash_update_dup(pht, PMK_DIR_SRC_ROOT_REL, pdd->src_root_rel) == false) {
 		return(false);
 	}
 #ifdef PMK_DEBUG
 	debugf("%s = '%s'", PMK_DIR_SRC_ROOT_REL, pdd->src_root_rel);
 #endif
 
-	if (hash_update_dup(pht, PMK_DIR_SRC_ABS, pdd->src_abs) == HASH_ADD_FAIL) {
+	if (hash_update_dup(pht, PMK_DIR_SRC_ABS, pdd->src_abs) == false) {
 		return(false);
 	}
 #ifdef PMK_DEBUG
 	debugf("%s = '%s'", PMK_DIR_SRC_ABS, pdd->src_abs);
 #endif
 
-	if (hash_update_dup(pht, PMK_DIR_SRC_REL, pdd->src_rel) == HASH_ADD_FAIL) {
+	if (hash_update_dup(pht, PMK_DIR_SRC_REL, pdd->src_rel) == false) {
 		return(false);
 	}
 #ifdef PMK_DEBUG
@@ -543,7 +543,7 @@ bool process_template(pmkdata *pgd, char *template) {
 				*pstr,
 				 gfpath[MAXPATHLEN],
 				 buf[TMP_BUF_LEN];
-	htable		*pht;
+	htable_t	*pht;
 	pmkdyn_t	*pdd;
 	prseng_t	*ppe;
 
@@ -598,7 +598,7 @@ bool process_template(pmkdata *pgd, char *template) {
 	if (snprintf_b(buf, sizeof(buf), PMK_GENMSG, gfname, pdd->tmpl_name) == false) {
 		return(false);
 	}
-	if (hash_update_dup(pht, "configure_input", buf) == HASH_ADD_FAIL) {
+	if (hash_update_dup(pht, "configure_input", buf) == false) {
 		return(false);
 	}
 
@@ -775,11 +775,11 @@ bool process_cmd(prsdata *pdata, pmkdata *pgd) {
  ***********************************************************************/
 
 bool parse_cmdline(char **val, int nbval, pmkdata *pgd) {
-	bool	 rval = true;
-	char	*pstr;
-	htable	*ht;
-	int		 i;
-	prsopt	 opt;
+	bool		 rval = true;
+	char		*pstr;
+	htable_t	*ht;
+	int			 i;
+	prsopt		 opt;
 
 	/* don't init pscell */
 	ht = pgd->htab;
@@ -795,7 +795,7 @@ bool parse_cmdline(char **val, int nbval, pmkdata *pgd) {
 			}
 
 			/* no need to strdup */
-			if (hash_update(ht, opt.key, pstr) == HASH_ADD_FAIL) {
+			if (hash_update(ht, opt.key, pstr) == false) {
 				errorf("%s.", PRS_ERR_HASH);
 				rval = false;
 			}
@@ -878,7 +878,7 @@ bool set_switch_list(pmkdata *pgd, char *swlst, bool state, int *ovrsw) {
 		do {
 			pstr = da_pop(da);
 			if (pstr != NULL) {
-				if (hash_update_dup(pgd->labl, pstr, ststr) == HASH_ADD_FAIL)
+				if (hash_update_dup(pgd->labl, pstr, ststr) == false)
 					return(false);
 				*ovrsw++; /* increment number of overriden switches */
 				free(pstr);

@@ -1,7 +1,7 @@
 /* $Id$ */
 
 /*
- * Copyright (c) 2003-2005 Damien Couderc
+ * Copyright (c) 2003-2006 Damien Couderc
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -629,7 +629,7 @@ typedef struct {
 				*datafiles,				/* data files dynary */
 				*discard,				/* discard list */
 				*templates;				/* template files */
-	htable		*nodes,					/* global nodes table */
+	htable_t	*nodes,					/* global nodes table */
 				*objects,				/* zone objects */
 				*targets,				/* zone targets */
 				*libraries,				/* zone libraries */
@@ -652,9 +652,9 @@ typedef struct {
 
 /* scanning data parsed from dat file */
 typedef struct {
-	htable	*headers,
-			*libraries,
-			*types;
+	htable_t	*headers,
+				*libraries,
+				*types;
 } scandata;
 
 
@@ -667,16 +667,16 @@ scn_node_t	*scan_node_init(char *);
 void		 scan_node_destroy(scn_node_t *);
 lib_cell_t	*lib_cell_init(char *, dynary *, dynary *, ltype_t);
 void		 lib_cell_destroy(lib_cell_t *);
-scn_zone_t	*scan_zone_init(htable *);
+scn_zone_t	*scan_zone_init(htable_t *);
 void		 scan_zone_destroy(scn_zone_t *);
 
 /* pmkfile specific ****************************************************/
 check_t		*init_chk_cell(char *);
 void		 destroy_chk_cell(check_t *);
-check_t		*mk_chk_cell(htable *, int);
+check_t		*mk_chk_cell(htable_t *, int);
 bool		 parse_data_file(prsdata *, scandata *);
 char		*conv_to_label(ftype_t, char *, ...);
-bool		 recurse_sys_deps(htable *, dynary *, char *);
+bool		 recurse_sys_deps(htable_t *, dynary *, char *);
 bool		 add_library(scn_zone_t *, char *, scandata *, scn_node_t *);
 bool		 check_header(scn_zone_t *, char *, scandata *, scn_node_t *);
 bool		 check_type(scn_zone_t *, char *, scandata *, scn_node_t *);
@@ -688,9 +688,9 @@ void		 build_boolean(FILE *, char *, bool);
 void		 build_quoted(FILE *, char *, char *);
 bool		 build_list(FILE *, char *, dynary *);
 bool		 set_lang(FILE *, ftype_t);
-bool		 output_header(htable *, char *, FILE *);
-bool		 output_library(htable *, char *, FILE *);
-bool		 output_type(htable *, char *, FILE *);
+bool		 output_header(htable_t *, char *, FILE *);
+bool		 output_library(htable_t *, char *, FILE *);
+bool		 output_type(htable_t *, char *, FILE *);
 bool		 scan_build_pmk(scn_zone_t *);
 bool		 scan_build_cfg(scn_zone_t *);
 
@@ -698,7 +698,7 @@ bool		 scan_build_cfg(scn_zone_t *);
 bool		 find_deps(dynary *, dynary *);
 void		 extract_dir(char *, char *, size_t);
 void		 build_path(char *, char *, char *, size_t);
-bool		 recurse_obj_deps(htable *, dynary *, char *);
+bool		 recurse_obj_deps(htable_t *, dynary *, char *);
 bool		 gen_objects(scn_zone_t *);
 bool		 recurse_src_deps(scn_zone_t *, dynary *, char *);
 bool		 gen_targets(scn_zone_t *);
@@ -732,8 +732,8 @@ bool		 process_ppro(void *, char *, prseng_t *);
 bool		 process_proc_call(void *, char *, prseng_t *);
 bool		 process_proc_decl(void *, char *, prseng_t *);
 bool		 process_type(void *, char *, prseng_t *);
-bool		 parse_deflib(htable *, htable *);
-bool		 parse_zone_opts(prs_cmn_t *, htable *, htable *);
+bool		 parse_deflib(htable_t *, htable_t *);
+bool		 parse_zone_opts(prs_cmn_t *, htable_t *, htable_t *);
 bool		 parse_file(prs_cmn_t *, char *, ftype_t, bool);
 bool		 process_zone(prs_cmn_t *, scandata *);
 bool		 parse_script(char *, prs_cmn_t *, scandata *);

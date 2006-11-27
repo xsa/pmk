@@ -247,7 +247,7 @@ comp_parse_t *init_comp_parse(void) {
 	}
 
 	/* init compilers hash table */
-	pcp->cht = hash_init_adv(MAX_COMP, NULL, (void (*)(void *)) compcell_destroy, NULL);
+	pcp->cht = hash_create(MAX_COMP, false, NULL, NULL, (void (*)(void *)) compcell_destroy);
 	if (pcp->cht == NULL) {
 		free(pcp);
 		/*debugf("cannot initialize comp_data");*/
@@ -255,7 +255,7 @@ comp_parse_t *init_comp_parse(void) {
 	}
 
 	/* init systems hash table */
-	pcp->sht = hash_init(MAX_OS);
+	pcp->sht = hash_create_simple(MAX_OS);
 	if (pcp->sht == NULL) {
 		free(pcp);
 		hash_destroy(pcp->sht);
@@ -298,7 +298,7 @@ void destroy_comp_parse(comp_parse_t *pcp) {
  * %RETURN boolean
  ***********************************************************************/
 
-bool add_compiler(comp_parse_t *pcp, htable *pht) {
+bool add_compiler(comp_parse_t *pcp, htable_t *pht) {
 	comp_prscell_t	*pcell;
 	char			*pstr,
 					 tstr[TMP_BUF_LEN];
@@ -358,7 +358,7 @@ bool add_compiler(comp_parse_t *pcp, htable *pht) {
 	}
 
 	/* no need to strdup */
-	if (hash_update(pcp->cht, pcell->c_id, pcell) == HASH_ADD_FAIL) {
+	if (hash_update(pcp->cht, pcell->c_id, pcell) == false) {
 		return false;
 	}
 
@@ -377,10 +377,10 @@ bool add_compiler(comp_parse_t *pcp, htable *pht) {
  * %RETURN boolean
  ***********************************************************************/
 
-bool add_system(comp_parse_t *pcp, htable *pht, char *osname) {
+bool add_system(comp_parse_t *pcp, htable_t *pht, char *osname) {
 	char			*name,
 					*pstr;
-	hkeys			*phk;
+	hkeys_t			*phk;
 	unsigned int	 i;
 
 	name = po_get_str(hash_get(pht, SYS_KW_NAME));
@@ -516,7 +516,7 @@ comp_parse_t *parse_comp_file(char *cdfile, char *osname) {
 bool gen_test_file(comp_parse_t *pcp, char *fnbuf, size_t bsz) {
 	FILE				*fp;
 	comp_prscell_t		*pcell;
-	hkeys				*phk;
+	hkeys_t				*phk;
 	unsigned int		 i;
 
 	/* get key list of parsed compiler data */

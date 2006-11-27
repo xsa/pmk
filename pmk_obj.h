@@ -1,7 +1,7 @@
 /* $Id$ */
 
 /*
- * Copyright (c) 2003 Damien Couderc
+ * Copyright (c) 2006 Damien Couderc
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -58,7 +58,7 @@ typedef struct {
 pmkobj	*po_mk_bool(bool);
 pmkobj	*po_mk_str(char *);
 pmkobj	*po_mk_list(dynary *);
-pmkobj	*po_mk_hash(htable *);
+pmkobj	*po_mk_hash(htable_t *);
 pmkobj	*po_dup(pmkobj *);
 potype	 po_get_type(pmkobj *);
 void	*po_get_data(pmkobj *);

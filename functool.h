@@ -1,7 +1,7 @@
 /* $Id$ */
 
 /*
- * Copyright (c) 2003-2005 Damien Couderc
+ * Copyright (c) 2003-2006 Damien Couderc
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -82,19 +82,19 @@ bool	 invert_bool(bool);
 char	*bool_to_str(bool);
 bool	 get_file_dir_path(char *, char *, char *, int);
 bool	 find_pattern(dynary *, char *, char *, int);
-bool	 record_def(htable *, char *, bool);
-bool	 record_def_data(htable *, char *, char *);
-bool	 record_def_adv(htable *, int, char *, char *, char *, char *);
-bool	 process_def_list(htable *, dynary *, bool);
-bool	 record_have(htable *, char *, char *);
-bool	 label_set(htable *, char *, bool);
-bool	 label_check(htable *, char *);
-bool	 depend_check(htable *, pmkdata *);
-bool	 require_check(htable *);
-char	*get_lang_str(htable *, pmkdata *);
+bool	 record_def(htable_t *, char *, bool);
+bool	 record_def_data(htable_t *, char *, char *);
+bool	 record_def_adv(htable_t *, int, char *, char *, char *, char *);
+bool	 process_def_list(htable_t *, dynary *, bool);
+bool	 record_have(htable_t *, char *, char *);
+bool	 label_set(htable_t *, char *, bool);
+bool	 label_check(htable_t *, char *);
+bool	 depend_check(htable_t *, pmkdata *);
+bool	 require_check(htable_t *);
+char	*get_lang_str(htable_t *, pmkdata *);
 bool	 check_cfgt_data(pmkdata *);
 bool	 process_required(pmkdata *, pmkcmd *, bool , char *, char *);
-bool	 obsolete_string_to_list(htable *, char *);
+bool	 obsolete_string_to_list(htable_t *, char *);
 
 #endif /* _PMK_FUNCTOOL_H_ */
 

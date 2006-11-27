@@ -68,14 +68,14 @@ extern int	 optind;
 FILE		*sfp;			/* scratch file pointer */
 char		 sfn[MAXPATHLEN];	/* scratch file name */
 
-htable		*ht;
+htable_t	*ht;
 int			 verbose_flag = 0;	/* -V option at the cmd-line */
 
 hpair		 predef[] = {
-				{PMKCONF_MISC_SYSCONFDIR,	SYSCONFDIR},
-				{PMKCONF_MISC_PREFIX,		"/usr/local"},
-				{PMKCONF_PATH_INC,		"/usr/include"},
-				{PMKCONF_PATH_LIB,		"/usr/lib"}
+	{PMKCONF_MISC_SYSCONFDIR,	SYSCONFDIR},
+	{PMKCONF_MISC_PREFIX,		"/usr/local"},
+	{PMKCONF_PATH_INC,			"/usr/include"},
+	{PMKCONF_PATH_LIB,			"/usr/lib"}
 };
 int			 nbpredef = sizeof(predef) / sizeof(hpair);
 
@@ -102,7 +102,7 @@ int			 nbpredef = sizeof(predef) / sizeof(hpair);
 	boolean
  ***********************************************************************/
 
-bool record_data(htable *pht, char *key, char opchar, char *value) {
+bool record_data(htable_t *pht, char *key, char opchar, char *value) {
 	prsopt	*ppo;
 
 	switch (opchar) {
@@ -131,7 +131,7 @@ bool record_data(htable *pht, char *key, char opchar, char *value) {
 			return(false);
 	}
 
-	if (hash_update(pht, ppo->key, ppo) == HASH_ADD_FAIL) {
+	if (hash_update(pht, ppo->key, ppo) == false) {
 		prsopt_destroy(ppo);
 		return(false);
 	}
@@ -153,7 +153,7 @@ bool record_data(htable *pht, char *key, char opchar, char *value) {
 	boolean
  ***********************************************************************/
 
-bool gather_data(htable *pht) {
+bool gather_data(htable_t *pht) {
 	printf("==> Looking for default parameters...\n");
 
 	/* gather env variables */
@@ -210,9 +210,9 @@ bool gather_data(htable *pht) {
  	boolean
  ***********************************************************************/
 
-bool write_new_data(htable *pht) {
+bool write_new_data(htable_t *pht) {
 	char			*val;
-	hkeys			*phk;
+	hkeys_t			*phk;
 	prsopt			*ppo;
 	unsigned int	 i;
 
@@ -266,14 +266,14 @@ bool write_new_data(htable *pht) {
 	Check and process option
 
  IN
-	pht: htable for comparison
+	pht: htable_t for comparison
 	popt: option to process
 
  OUT
 	boolean
  ***********************************************************************/
 
-bool check_opt(htable *cht, prsopt *popt) {
+bool check_opt(htable_t *cht, prsopt *popt) {
 	char	*recval,
 			*optval;
 	prsopt	*ppo;
@@ -367,7 +367,7 @@ bool check_opt(htable *cht, prsopt *popt) {
 	boolean
  ***********************************************************************/
 
-bool get_env_vars(htable *pht) {
+bool get_env_vars(htable_t *pht) {
 	struct utsname	 utsname;
 	char			*bin_path;
 
@@ -415,7 +415,7 @@ bool get_env_vars(htable *pht) {
 	boolean
  ***********************************************************************/
 
-bool get_binaries(htable *pht) {
+bool get_binaries(htable_t *pht) {
 	char			 fbin[MAXPATHLEN],	/* full binary path */
 					*pstr,
 					*pcc;
@@ -529,7 +529,7 @@ bool get_binaries(htable *pht) {
 	boolean
  ***********************************************************************/
 
-bool predef_vars(htable *pht) {
+bool predef_vars(htable_t *pht) {
 	int	 i;
 
 	for (i = 0 ; i < nbpredef ; i++) {
@@ -557,7 +557,7 @@ bool predef_vars(htable *pht) {
 	boolean
  ***********************************************************************/
 
-bool check_echo(htable *pht) {
+bool check_echo(htable_t *pht) {
 	FILE	*echo_pipe = NULL;
 	char	 buf[TMP_BUF_LEN],
 			 echocmd[TMP_BUF_LEN];
@@ -646,7 +646,7 @@ bool check_echo(htable *pht) {
 	can't rely on predefined prefix.
  ***********************************************************************/
 
-bool check_libpath(htable *pht) {
+bool check_libpath(htable_t *pht) {
 	char	 libpath[MAXPATHLEN];
 
 	/* build the path dynamically */
@@ -691,11 +691,11 @@ bool check_libpath(htable *pht) {
 	boolean
  ***********************************************************************/
 
-bool get_cpu_data(htable *pht) {
+bool get_cpu_data(htable_t *pht) {
 	char			*uname_m;
 	char			*pstr;
-	hkeys			*phk;
-	htable			*spht;
+	hkeys_t			*phk;
+	htable_t			*spht;
 	pmkobj			*po;
 	prsdata			*pdata;
 	prsopt			*ppo;
@@ -798,7 +798,7 @@ bool dir_exists(const char *fdir) {
 	boolean
  ***********************************************************************/
 
-bool byte_order_check(htable *pht) {
+bool byte_order_check(htable_t *pht) {
 	char	bo_type[16];
 	int	num = 0x41424344;
 
@@ -915,7 +915,7 @@ bool detection_loop(int argc, char *argv[]) {
 
 				/* record prsopt structure directly, fast and simple */
 				ppo->opchar = PMKSTP_REC_UPDT;
-				if (hash_update(ht, ppo->key, ppo) == HASH_ADD_FAIL) {
+				if (hash_update(ht, ppo->key, ppo) == false) {
 					prsopt_destroy(ppo);
 					errorf("hash update failed.");
 					return(false);
@@ -1041,7 +1041,7 @@ void child_loop(uid_t uid, gid_t gid, int argc, char *argv[]) {
 	debugf("uid = %d", getuid());
 #endif /* PMKSETUP_DEBUG */
 
-	ht = hash_init_adv(MAX_CONF_OPT, NULL, (void (*)(void *)) prsopt_destroy, NULL);
+	ht = hash_create(MAX_CONF_OPT, false, NULL, NULL, (void (*)(void *)) prsopt_destroy);
 	if (ht == NULL) {
 		errorf("cannot create hash table.");
 		exit(EXIT_FAILURE);

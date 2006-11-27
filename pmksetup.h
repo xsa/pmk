@@ -2,7 +2,7 @@
 
 /*
  * Copyright (c) 2003-2004 Xavier Santolaria <xavier@santolaria.net>
- * Copyright (c) 2003-2005 Damien Couderc
+ * Copyright (c) 2003-2006 Damien Couderc
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -89,6 +89,12 @@
 
 #define EMSG_PRIV_FMT	"Failed to change privilege (%s)"
 
+/* hash pair type */
+typedef struct {
+	char	*key;
+	void	*value;
+} hpair;
+
 /* compiler list */
 static char *c_compilers[][2] = {
 	{"c99",		PMKCONF_BIN_C99},
@@ -130,20 +136,20 @@ static  char *binaries[][2] = {
  * functions prototypes *
  ***********************************************************************/
 
-bool	record_data(htable *, char *, char, char *);
-bool	gather_data(htable *);
-bool	check_opt(htable *, prsopt *);
+bool	record_data(htable_t *, char *, char, char *);
+bool	gather_data(htable_t *);
+bool	check_opt(htable_t *, prsopt *);
 bool	open_tmp_config(void);
 bool	close_tmp_config(void);
-bool	get_env_vars(htable *);
-bool	get_binaries(htable *);
-bool	predef_vars(htable *);
-bool	check_echo(htable *);
-bool	check_libpath(htable *);
-bool	get_cpu_data(htable *);
+bool	get_env_vars(htable_t *);
+bool	get_binaries(htable_t *);
+bool	predef_vars(htable_t *);
+bool	check_echo(htable_t *);
+bool	check_libpath(htable_t *);
+bool	get_cpu_data(htable_t *);
 bool	dir_exists(const char *);
-bool	byte_order_check(htable *);
-bool	write_new_data(htable *);
+bool	byte_order_check(htable_t *);
+bool	write_new_data(htable_t *);
 void	verbosef(const char *, ...);
 void	usage(void);
 bool	detection_loop(int, char *[]);

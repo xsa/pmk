@@ -1,7 +1,7 @@
 /* $Id$ */
 
 /*
- * Copyright (c) 2003-2005 Damien Couderc
+ * Copyright (c) 2003-2006 Damien Couderc
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -119,7 +119,7 @@ typedef struct {
 				 errmsg[MAX_ERR_MSG_LEN];
 	comp_data_t	 comp_data;
 	dynary		*tlist;
-	htable		*htab,
+	htable_t	*htab,
 				*labl;
 	pmkdyn_t	 dyndata;
 } pmkdata;

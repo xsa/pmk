@@ -135,7 +135,7 @@ void	 name_randomize(char *);
 void	 code_bld_init(code_bld_t *, char *);
 int		 verify_language(char *);
 bool	 set_language(code_bld_t *, char *);
-char	*set_compiler(code_bld_t *, htable *t);
+char	*set_compiler(code_bld_t *, htable_t *t);
 void	 set_cflags(code_bld_t *, char *);
 void	 set_ldflags(code_bld_t *, char *);
 void	 set_slcflags(code_bld_t *, char *);

@@ -1,7 +1,7 @@
 /* $Id$ */
 
 /*
- * Copyright (c) 2003-2005 Damien Couderc
+ * Copyright (c) 2003-2006 Damien Couderc
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -169,10 +169,10 @@ typedef struct {
 
 /* misc data structure */
 typedef struct {
-	void	*data;			/* misc_data */
-	htable	*phtkw;			/* command keywords */
-	kwopt_t	*kwopts;		/* pointer to keyword def */
-	size_t	 nbreq;			/* number of required options */
+	void		*data;			/* misc_data */
+	htable_t	*phtkw;			/* command keywords */
+	kwopt_t		*kwopts;		/* pointer to keyword def */
+	size_t		 nbreq;			/* number of required options */
 } miscdata_t;
 
 
@@ -180,41 +180,41 @@ typedef struct {
  * function prototypes *
  ***********************************************************************/
 
-prsdata	*prsdata_init(void);
-void	 prsdata_destroy(prsdata *);
-prsnode	*prsnode_init(void);
-void	 prsnode_add(prsnode *, prscell *);
-void	 prsnode_destroy(prsnode *);
-prscell	*prscell_init(int, int, int);
-void	 prscell_destroy(prscell *);
-prsopt	*prsopt_init(void);
-prsopt	*prsopt_init_adv(char *, char, char *);
-void	 prsopt_destroy(prsopt *);
-htable	*keyword_hash(prskw [], int);
-bool	 prs_skip_blank(prseng_t *);
-bool	 prs_skip_comment(prseng_t *);
-bool	 prs_skip_useless(prseng_t *);
-bool	 parse_label(prseng_t *, char *, size_t);
-bool	 parse_bool(prseng_t *, pmkobj *, size_t);
-bool	 parse_quoted(prseng_t *, pmkobj *, size_t);
-bool	 parse_list(prseng_t *, pmkobj *, size_t);
-bool	 parse_key(prseng_t *, pmkobj *, size_t);
-bool	 parse_data(prseng_t *, pmkobj *, size_t);
-prscell	*parse_cell(char *, htable *);
-prscell	*parse_cmd_header(prseng_t *, prsnode *pnode);
-bool	 parse_opt(prseng_t *, prsopt *, char *);
-bool	 parse_clopt(char *, prsopt *, char *);
-bool	 parse_node(prsdata *, prseng_t *, prscell *);
-bool	 parse_command(prsdata *, prseng_t *, prscell *);
-kw_t	*check_opt_avl(char *, kw_t *, size_t);
-bool	 check_opt_type(kw_t *, pmkobj *);
-bool	 check_option(miscdata_t *, prsopt *);
-bool	 process_block_opt(prseng_t *, prsnode *, prscell *);
-bool	 parse_opt_block(prsdata *, prseng_t *, prscell *, bool);
-bool	 parse_cmd_block(prsdata *, prseng_t *, prsnode *, bool);
-bool	 parse_pmkfile(FILE *, prsdata *, prskw [], size_t);
-bool	 process_opt(htable *, prsopt *);
-bool	 parse_pmkconf(FILE *, htable *, char *, bool (*)(htable *, prsopt *));
+prsdata		*prsdata_init(void);
+void		 prsdata_destroy(prsdata *);
+prsnode		*prsnode_init(void);
+void		 prsnode_add(prsnode *, prscell *);
+void		 prsnode_destroy(prsnode *);
+prscell		*prscell_init(int, int, int);
+void		 prscell_destroy(prscell *);
+prsopt		*prsopt_init(void);
+prsopt		*prsopt_init_adv(char *, char, char *);
+void		 prsopt_destroy(prsopt *);
+htable_t	*keyword_hash(prskw [], int);
+bool		 prs_skip_blank(prseng_t *);
+bool		 prs_skip_comment(prseng_t *);
+bool		 prs_skip_useless(prseng_t *);
+bool		 parse_label(prseng_t *, char *, size_t);
+bool		 parse_bool(prseng_t *, pmkobj *, size_t);
+bool		 parse_quoted(prseng_t *, pmkobj *, size_t);
+bool		 parse_list(prseng_t *, pmkobj *, size_t);
+bool		 parse_key(prseng_t *, pmkobj *, size_t);
+bool		 parse_data(prseng_t *, pmkobj *, size_t);
+prscell		*parse_cell(char *, htable_t *);
+prscell		*parse_cmd_header(prseng_t *, prsnode *pnode);
+bool		 parse_opt(prseng_t *, prsopt *, char *);
+bool		 parse_clopt(char *, prsopt *, char *);
+bool		 parse_node(prsdata *, prseng_t *, prscell *);
+bool		 parse_command(prsdata *, prseng_t *, prscell *);
+kw_t		*check_opt_avl(char *, kw_t *, size_t);
+bool		 check_opt_type(kw_t *, pmkobj *);
+bool		 check_option(miscdata_t *, prsopt *);
+bool		 process_block_opt(prseng_t *, prsnode *, prscell *);
+bool		 parse_opt_block(prsdata *, prseng_t *, prscell *, bool);
+bool		 parse_cmd_block(prsdata *, prseng_t *, prsnode *, bool);
+bool		 parse_pmkfile(FILE *, prsdata *, prskw [], size_t);
+bool		 process_opt(htable_t *, prsopt *);
+bool		 parse_pmkconf(FILE *, htable_t *, char *, bool (*)(htable_t *, prsopt *));
 
 #endif /* _PMK_PARSE_H_ */
 

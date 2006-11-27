@@ -1,7 +1,7 @@
 /* $Id$ */
 
 /*
- * Copyright (c) 2004 Damien Couderc
+ * Copyright (c) 2006 Damien Couderc
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,8 +39,10 @@
 
 #include "hash.h"
 
-char	*parse_idtf(char *, char *, size_t);
-char	*process_string(char *, htable *);
-bool	 single_append(htable *, char *, char *);
+void		*hash_str_append(void *, void *, void *);
+htable_t	*hash_create_simple(size_t table_size);
+char		*parse_idtf(char *, char *, size_t);
+char		*process_string(char *, htable_t *);
+bool		 single_append(htable_t *, char *, char *);
 
 #endif /* _HASH_TOOLS_H_ */

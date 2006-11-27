@@ -1,7 +1,7 @@
 /* $Id$ */
 
 /*
- * Copyright (c) 2003-2005 Damien Couderc
+ * Copyright (c) 2003-2006 Damien Couderc
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -241,7 +241,7 @@ bool check_mode(char *mstr, mode_t *pmode) {
 	if (mstr == NULL)
 		return(false);
 
-	if (isdigit(*mstr) != 0) {
+	if (isdigit((int) *mstr) != 0) {
 		/* octal value */
 		if (str_to_ulong(mstr, 8, &mode) == false) {
 			return(false); /* unable to get numerical value */
@@ -272,7 +272,7 @@ bool process_owner(char *pstr, uid_t *puid) {
 	struct passwd	*pp = NULL;
 	unsigned long	 ul;
 
-	if (isdigit(*pstr) == 0) {
+	if (isdigit((int) *pstr) == 0) {
 		/* user name */
 		pp = getpwnam(pstr);
 		if (pp == NULL) {
@@ -306,7 +306,7 @@ bool process_group(char *pstr, gid_t *pgid) {
 	struct group	*pg = NULL;
 	unsigned long	 ul;
 
-	if (isdigit(*pstr) == 0) {
+	if (isdigit((int) *pstr) == 0) {
 		/* group name */
 		pg = getgrnam(pstr);
 		if (pg == NULL) {

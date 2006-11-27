@@ -1,3 +1,6 @@
+27 Nov 2006 coudercd
+ * imported new hash table implementation with double linked lists.
+
 # PMK 0.10.0 release
 
 18 Nov 2006 coudercd
@@ -345,6 +348,8 @@
  * improved target's object dependencies scanning in pmkscan.
  * removed useless pmkshgen* files as the idea will be implemented in
    pmkinstall.
+
+# PMK 0.9.3 release
 
 25 Apr 2005 coudercd
  * fixed a bug that prevent --list-all option to work in pmkpc.

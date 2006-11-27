@@ -38,6 +38,7 @@
 #define _DETECT_H_
 
 #include "compat/pmk_string.h"
+#include "hash_tools.h"
 #include "parse.h"
 #include "premake.h"
 
@@ -166,8 +167,8 @@ typedef struct {
 } comp_info;
 
 typedef struct {
-	htable	*cht,	/* compiler data hash table */
-			*sht;	/* system data hash table */
+	htable_t	*cht,	/* compiler data hash table */
+				*sht;	/* system data hash table */
 } comp_data;
 
 /*********************
@@ -176,7 +177,7 @@ typedef struct {
  * %DESCR compiler data storage for detection
  ***********************************************************************/
 typedef struct {
-	htable		*cht,	/* %FIELD cht:	compiler cell data hash table */
+	htable_t	*cht,	/* %FIELD cht:	compiler cell data hash table */
 				*sht;	/* %FIELD sht:	system cell data hash table */
 } comp_parse_t;
 
@@ -217,8 +218,8 @@ void			 clean_compiler_data(comp_data_t *);
 void			 compcell_destroy(comp_prscell_t *);
 comp_parse_t	*init_comp_parse(void);
 void			 destroy_comp_parse(comp_parse_t *);
-bool			 add_compiler(comp_parse_t *, htable *);
-bool			 add_system(comp_parse_t *, htable *, char *);
+bool			 add_compiler(comp_parse_t *, htable_t *);
+bool			 add_system(comp_parse_t *, htable_t *, char *);
 comp_parse_t	*parse_comp_file(char *, char *);
 bool			 gen_test_file(comp_parse_t *, char *, size_t);
 bool			 comp_identify(char *, char *, compiler_t *, comp_parse_t *);

@@ -1,7 +1,7 @@
 /* $Id$ */
 
 /*
- * Copyright (c) 2004-2005 Damien Couderc
+ * Copyright (c) 2004-2006 Damien Couderc
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -172,10 +172,10 @@ prsdata *parse_cpu_data(char *fname) {
 
 char *check_cpu_arch(char *uname_m, prsdata *pdata) {
 	char		*pstr = NULL;
-	htable		*pht;
+	htable_t		*pht;
 	void		*ptmp;
 
-	pht = (htable *) seek_key(pdata, LIST_ARCH_EQUIV);
+	pht = (htable_t *) seek_key(pdata, LIST_ARCH_EQUIV);
 	if (pht != NULL) {
 		ptmp = hash_get(pht, uname_m); /* no check needed */
 		if (ptmp != NULL)
@@ -233,8 +233,8 @@ unsigned char arch_name_to_id(char *arch_name) {
 	hash table with values or NULL
  ***********************************************************************/
 
-htable *arch_wrapper(prsdata *pdata, char *arch_name) {
-	htable			*pht;
+htable_t *arch_wrapper(prsdata *pdata, char *arch_name) {
+	htable_t			*pht;
 	unsigned char	 arch_id;
 
 #if defined(ARCH_X86_32) || defined(ARCH_X86_64)
@@ -243,7 +243,7 @@ htable *arch_wrapper(prsdata *pdata, char *arch_name) {
 
 	arch_id = arch_name_to_id(arch_name);
 
-	pht = hash_init(ARCH_NB_MAX);
+	pht = hash_create_simple(ARCH_NB_MAX);
 	if (pht == NULL) {
 		printf("DEBUG pht init failed !\n");
 		return(NULL);
@@ -441,7 +441,7 @@ void x86_cpu_cell_destroy(x86_cpu_cell *pcell) {
 
 char *x86_get_std_cpu_vendor(prsdata *pdata, char *civendor) {
 	char		*vendor = NULL;
-	htable		*pht;
+	htable_t		*pht;
 	prscell		*pcell;
 
 	/* look for vendor list */
@@ -606,68 +606,68 @@ bool x86_get_cpuid_data(x86_cpu_cell *cell) {
 	boolean
  ***********************************************************************/
 
-bool x86_set_cpu_data(prsdata *pdata, x86_cpu_cell *pcell, htable *pht) {
+bool x86_set_cpu_data(prsdata *pdata, x86_cpu_cell *pcell, htable_t *pht) {
 	char	 buffer[TMP_BUF_LEN],
 			*pstr;
-	htable	*phtbis;
+	htable_t	*phtbis;
 
 	if (snprintf_b(buffer, sizeof(buffer), "%u", pcell->family) == false)
 		return(false);
 
-	if (hash_update_dup(pht, PMKCONF_HW_X86_CPU_FAMILY, buffer) == HASH_ADD_FAIL) {
+	if (hash_update_dup(pht, PMKCONF_HW_X86_CPU_FAMILY, buffer) == false) {
 		return(false);
 	}
 
 	if (snprintf_b(buffer, sizeof(buffer), "%u", pcell->model) == false)
 		return(false);
 
-	if (hash_update_dup(pht, PMKCONF_HW_X86_CPU_MODEL, buffer) == HASH_ADD_FAIL) {
+	if (hash_update_dup(pht, PMKCONF_HW_X86_CPU_MODEL, buffer) == false) {
 		return(false);
 	}
 
 	if (snprintf_b(buffer, sizeof(buffer), "%u", pcell->extfam) == false)
 		return(false);
 
-	if (hash_update_dup(pht, PMKCONF_HW_X86_CPU_EXTFAM, buffer) == HASH_ADD_FAIL) {
+	if (hash_update_dup(pht, PMKCONF_HW_X86_CPU_EXTFAM, buffer) == false) {
 		return(false);
 	}
 
 	if (snprintf_b(buffer, sizeof(buffer), "%u", pcell->extmod) == false)
 		return(false);
 
-	if (hash_update_dup(pht, PMKCONF_HW_X86_CPU_EXTMOD, buffer) == HASH_ADD_FAIL) {
+	if (hash_update_dup(pht, PMKCONF_HW_X86_CPU_EXTMOD, buffer) == false) {
 		return(false);
 	}
 
 	if (pcell->cpuname != NULL) {
 		if (hash_update_dup(pht, PMKCONF_HW_X86_CPU_NAME,
-				pcell->cpuname) == HASH_ADD_FAIL) {
+				pcell->cpuname) == false) {
 			return(false);
 		}
 	} /* else put unknown ? */
 
 	if (pcell->vendor != NULL) {
 		if (hash_update_dup(pht, PMKCONF_HW_X86_CPU_VENDOR,
-				pcell->vendor) == HASH_ADD_FAIL) {
+				pcell->vendor) == false) {
 			return(false);
 		}
 	} /* else put unknown ? */
 
 	if (pcell->stdvendor != NULL) {
 		if (hash_update_dup(pht, PMKCONF_HW_X86_CPU_STD_VENDOR,
-				pcell->stdvendor) == HASH_ADD_FAIL) {
+				pcell->stdvendor) == false) {
 			return(false);
 		}
 	} /* else put unknown ? */
 
 	if (pcell->features != NULL) {
 		if (hash_update_dup(pht, PMKCONF_HW_X86_CPU_FEATURES,
-				pcell->features) == HASH_ADD_FAIL) {
+				pcell->features) == false) {
 			return(false);
 		}
 	} /* else put empty string ? */
 
-	phtbis = (htable *) seek_key(pdata, LIST_X86_CPU_CLASS);
+	phtbis = (htable_t *) seek_key(pdata, LIST_X86_CPU_CLASS);
 	if (phtbis != NULL) {
 		if (pcell->family < 15) {
 			snprintf_b(buffer, sizeof(buffer), /* no check needed */
@@ -691,7 +691,7 @@ bool x86_set_cpu_data(prsdata *pdata, x86_cpu_cell *pcell, htable *pht) {
 		}
 
 		if (hash_update_dup(pht, PMKCONF_HW_X86_CPU_CLASS,
-						pstr) == HASH_ADD_FAIL) {
+						pstr) == false) {
 			return(false);
 		}
 	} else {
@@ -736,17 +736,17 @@ int nb_feat = sizeof(alpha_cpu_feat) / sizeof(alpha_cpu_feature);
 	boolean
  ***********************************************************************/
 
-bool alpha_set_cpu_data(prsdata *pdata, htable *pht) {
+bool alpha_set_cpu_data(prsdata *pdata, htable_t *pht) {
 	char			 buffer[16],
 					 feat_str[TMP_BUF_LEN] = "",
 					*pstr;
-	htable			*phtbis;
+	htable_t			*phtbis;
 	unsigned int	 i;
 	uint64_t		 implver,
 					 amask;
 
 /*debugf("alpha_set_cpu_data() : end");*/
-	phtbis = (htable *) seek_key(pdata, LIST_ALPHA_CPU_CLASS);
+	phtbis = (htable_t *) seek_key(pdata, LIST_ALPHA_CPU_CLASS);
 	if (phtbis != NULL) {
 		/* get cpu class */
 		implver = alpha_exec_implver();
@@ -761,7 +761,7 @@ bool alpha_set_cpu_data(prsdata *pdata, htable *pht) {
 			pstr = ALPHA_CPU_UNKNOWN;
 		}
 
-		if (hash_update_dup(pht, PMKCONF_HW_ALPHA_CPU_CLASS, pstr) == HASH_ADD_FAIL) {
+		if (hash_update_dup(pht, PMKCONF_HW_ALPHA_CPU_CLASS, pstr) == false) {
 			return(false);
 		}
 
@@ -779,7 +779,7 @@ bool alpha_set_cpu_data(prsdata *pdata, htable *pht) {
 		}
 
 		/* save feature string */
-		if (hash_update_dup(pht, PMKCONF_HW_ALPHA_CPU_FEATURES, feat_str) == HASH_ADD_FAIL) {
+		if (hash_update_dup(pht, PMKCONF_HW_ALPHA_CPU_FEATURES, feat_str) == false) {
 			return(false);
 		}
 
@@ -826,10 +826,10 @@ size_t nb_feat = sizeof(ia64_cpu_feat) / sizeof(ia64_cpu_feature);
 	boolean
  ***********************************************************************/
 
-bool ia64_get_cpuid_data(prsdata *pdata, htable *pht) {
+bool ia64_get_cpuid_data(prsdata *pdata, htable_t *pht) {
 	char			 buffer[TMP_BUF_LEN],
 					*pstr;
-	htable			*phtbis;
+	htable_t			*phtbis;
 	uint64_t		 regbuf[3],
 					 level,
 					 rslt;
@@ -838,7 +838,7 @@ bool ia64_get_cpuid_data(prsdata *pdata, htable *pht) {
 	regbuf[0] = ia64_get_cpuid_register(0);
 	regbuf[1] = ia64_get_cpuid_register(1);
 	regbuf[2] = 0;
-	if (hash_update_dup(pht, PMKCONF_HW_IA64_CPU_VENDOR, regbuf) == HASH_ADD_FAIL)
+	if (hash_update_dup(pht, PMKCONF_HW_IA64_CPU_VENDOR, regbuf) == false)
 		return(false);
 /*debugf("cpuid register 0 = %x", regbuf[0]);*/
 /*debugf("cpuid register 1 = %x", regbuf[1]);*/
@@ -853,25 +853,25 @@ bool ia64_get_cpuid_data(prsdata *pdata, htable *pht) {
 	rslt = (regbuf[0] & IA64_CPU_MASK_REVISION) >> 8;
 	if (snprintf_b(buffer, sizeof(buffer), "%u", rslt) == false)
 		return(false);
-	if (hash_update_dup(pht, PMKCONF_HW_IA64_CPU_REVISION, buffer) == HASH_ADD_FAIL)
+	if (hash_update_dup(pht, PMKCONF_HW_IA64_CPU_REVISION, buffer) == false)
 		return(false);
 /*debugf("revision = %x", rslt);*/
 
 	rslt = (regbuf[0] & IA64_CPU_MASK_MODEL) >> 16;
 	if (snprintf_b(buffer, sizeof(buffer), "%u", rslt) == false)
 		return(false);
-	if (hash_update_dup(pht, PMKCONF_HW_IA64_CPU_MODEL, buffer) == HASH_ADD_FAIL)
+	if (hash_update_dup(pht, PMKCONF_HW_IA64_CPU_MODEL, buffer) == false)
 		return(false);
 /*debugf("model = %x", rslt);*/
 
 	rslt = (regbuf[0] & IA64_CPU_MASK_FAMILY) >> 24;
 	if (snprintf_b(buffer, sizeof(buffer), "%u", rslt) == false)
 		return(false);
-	if (hash_update_dup(pht, PMKCONF_HW_IA64_CPU_FAMILY, buffer) == HASH_ADD_FAIL)
+	if (hash_update_dup(pht, PMKCONF_HW_IA64_CPU_FAMILY, buffer) == false)
 		return(false);
 /*debugf("family = %x", rslt);*/
 
-	phtbis = (htable *) seek_key(pdata, LIST_IA64_CPU_CLASS);
+	phtbis = (htable_t *) seek_key(pdata, LIST_IA64_CPU_CLASS);
 	if (phtbis != NULL) {
 		snprintf_b(buffer, sizeof(buffer), /* no check needed */
 				IA64_CPU_CLASS_FAMILY_FMT, rslt);
@@ -890,7 +890,7 @@ bool ia64_get_cpuid_data(prsdata *pdata, htable *pht) {
 /*debugf("pstr = '%s'", pstr);*/
 
 		if (hash_update_dup(pht, PMKCONF_HW_IA64_CPU_CLASS,
-						pstr) == HASH_ADD_FAIL) {
+						pstr) == false) {
 			/* err msg ? */
 			return(false);
 		}
@@ -903,7 +903,7 @@ bool ia64_get_cpuid_data(prsdata *pdata, htable *pht) {
 	rslt = (regbuf[0] & IA64_CPU_MASK_ARCHREV) >> 32;
 	if (snprintf_b(buffer, sizeof(buffer), "%u", rslt) == false)
 		return(false);
-	if (hash_update_dup(pht, PMKCONF_HW_IA64_CPU_ARCHREV, buffer) == HASH_ADD_FAIL)
+	if (hash_update_dup(pht, PMKCONF_HW_IA64_CPU_ARCHREV, buffer) == false)
 		return(false);
 	/*printf("archrev = %x\n", rslt);*/
 
@@ -922,8 +922,7 @@ bool ia64_get_cpuid_data(prsdata *pdata, htable *pht) {
 					return(false); /* err msg ? */
 			}
 		}
-		if (hash_update_dup(pht, PMKCONF_HW_IA64_CPU_FEATURES,
-					buffer) == HASH_ADD_FAIL)
+		if (hash_update_dup(pht, PMKCONF_HW_IA64_CPU_FEATURES, buffer) == false)
 			/* err msg ? */
 			return(false);
 	}

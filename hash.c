@@ -1,7 +1,7 @@
 /* $Id$ */
 
 /*
- * Copyright (c) 2003-2005 Damien Couderc
+ * Copyright (c) 2003-2006 Damien Couderc
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -35,985 +35,1199 @@
 
 
 /*
- * Credits for patches :
- *	- Marek Habersack
+ *
+ * hash table implementation using two-way linked lists for collisions
+ *
  */
 
-/*******************************************************************
- *                                                                 *
- * Hash-coding functions                                           *
- *                                                                 *
- *******************************************************************/
-
-
 #include <stdlib.h>
+#include <string.h>
 
 #include "hash.h"
-#include "compat/pmk_stdio.h"
-#include "compat/pmk_string.h"
+/*#include "debug.h"*/
 
-/*#define HASH_DEBUG 1*/
 
-#ifdef HASH_DEBUG
-#include "common.h"
-#endif
+/*************
+ * constants *
+ *************************************************************************************************************/
+
+char *hmsg[] = {
+	"hash table pointer is NULL",			/*  0 */
+	"unknown error code",					/*  1 */
+	"hash table created",					/*  2 */
+	"key added",							/*  3 */
+	"key updated",							/*  4 */
+	"data appended",						/*  5 */
+	"memory allocation failed",				/*  6 */
+	"appendition function failed",			/*  7 */
+	"duplication function failed",			/*  8 */
+	"deallocation function failed",			/*  9 */
+	"appendition function not defined",		/* 10 */
+	"duplication function not defined",		/* 11 */
+	"deallocation function not defined",	/* 12 */
+	"cannot add already existing cell",		/* 13 */
+	"data pointer is NULL",					/* 14 */
+	"hash table is full",					/* 15 */
+};
+
+
+/*********************
+ * private functions *
+ *************************************************************************************************************/
+
+/* private functions prototypes */
+static hash_t	 hash_compute(char *, size_t);
+static size_t	 hash_correct_size(size_t);
+static hnode_t	*hash_search_node(htable_t *, char *);
+static hcell_t	*hash_create_cell(char *, void *);
+static void		 hash_add_cell(hnode_t *, hcell_t *);
+static void		 hash_update_cell(htable_t *, hcell_t *, void *);
+static hcell_t	*hash_search_cell(hnode_t *, char *);
+static hcell_t	*hash_extract_cell(hnode_t *, char *);
+static void		 hash_free_cell(htable_t *, hcell_t *);
+static void		*hash_extract_data(hcell_t *);
+static int		 hash_strcmp(const void *, const void *);
 
 /******************
  * hash_compute() *
- ***********************************************************************
- DESCR
-	compute hash (perfect hashing)
+ *************************************************************************************************************
+ %DESCR generate the hashing value corresponding to the provided key
 
- IN
-	key : key string
+ %PARAM key :	key string to hash
+ %PARAM size :	size of hash table
 
- OUT
-	resulting hash
- ***********************************************************************/
+ %RETURN hash value
+ *************************************************************************************************************/
 
-unsigned int hash_compute(char *key, size_t table_size) {
-	unsigned int	len = 0,
-					hash = 0;
-	unsigned char	c;
+static hash_t hash_compute(char *key, size_t size) {
+	hash_t	hash = 0,
+			l = 0;
 
-	c = *key;
-	while (c != '\0') {
-		/* sum all characters with modulo */
-		hash = (hash + (int) c) % table_size;
-		c = *key;
+	/* for each characters of the key string */
+	while (*key != '\0') {
+		/* hashing process */
+		hash = hash + (hash_t) *key + (l >> 8);
+		hash = hash + (hash << 3);
+		hash = hash ^ (hash >> 9);
+
 		key++;
-		len++;
+		l++;
 	}
 
-	/* add the len always with modulo */
-	hash = (hash + len) % table_size;
+	/*
+	 * use a mask which is faster than a modulo
+	 */
+	hash = hash & ((hash_t) size - 1);
 
-	return(hash);
+	return hash;
 }
 
 
-/***************
- * hash_init() *
- ***********************************************************************
- DESCR
-	init hash structure of character strings
+/***********************
+ * hash_correct_size() *
+ *************************************************************************************************************
+ %DESCR provide the first power of two that is equal or greater then the provided number
 
- IN
-	table_size : number of hash elements
+ %PARAM size : minimal size of the table
 
- OUT
-	 a pointer to the hash structure
- ***********************************************************************/
+ %RETURN the power of two that is next to the provided size
+ *************************************************************************************************************/
 
-htable *hash_init(size_t table_size) {
-	return(hash_init_adv(table_size, (void *(*)(void *))strdup,
-											free, hash_str_append));
+static size_t hash_correct_size(size_t size) {
+	size_t	power_size;
+	uint8_t	shift = 0;
+
+	/* initialize with the given size */
+	power_size = size;
+
+	/* shift to the right until we get the highest bit */
+	while (power_size > 1) {
+		power_size = power_size >> 1;
+		shift++;
+	}
+
+	/* shift back to the left to get the original place */
+	power_size = power_size << shift;
+
+	/*
+	 * if the original value was greater than the actual power of two
+	 * then we shift again to the left to get a superior value
+	 */
+	if (power_size < size) {
+		power_size = power_size << 1;
+	}
+
+	return power_size;
 }
 
 
-/*******************
- * hash_init_adv() *
- ***********************************************************************
- DESCR
-	init hash structure of objects
+/**********************
+ * hash_search_node() *
+ *************************************************************************************************************
+ %DESCR search the node corresponding to the given key string
 
- IN
-	table_size : number of hash elements
-	dupfunc : function to duplicate an object
-	freefunc : function to free an object
-	appdfunc : function to create appended object
+ %PARAM pht : hash table pointer
+ %PARAM key : key string to look for
 
- OUT
-	a pointer to the hash structure
+ %RETURN node pointer
+ *************************************************************************************************************/
 
- NOTE
-	append function will have three arguments (original object,
-	value to append, misc data) and will return the resulting object
-	(see hash_append_str for an example).
- ***********************************************************************/
+static hnode_t *hash_search_node(htable_t *pht, char *key) {
+	hash_t	 h;
+	hnode_t *phn;
 
-htable *hash_init_adv(size_t table_size, void *(*dupfunc)(void *),
-							void (*freefunc)(void *),
-							void *(*appdfunc)(void *, void *, void *)) {
+	/* compute hash */
+	h = hash_compute(key, pht->size);
 
-	htable	*pht;
-	hnode	*phn;
-	size_t	 i;
+	/* get node pointer */
+	phn = &(pht->harray[h]);
 
-	/* allocate hash table */
-	pht = (htable *) malloc(sizeof(htable));
-	if (pht != NULL) {
-		/* allocate node table */
-		phn = (hnode *) malloc(sizeof(hnode) * table_size);
-		if (phn == NULL) {
-			/* allocation failed then
-				deallocate and return NULL */
-			free(pht);
-			return(NULL);
-		}
-	} else {
-		/* allocation failed, return NULL */
-		return(NULL);
-	}
-
-	for(i = 0 ; i < table_size ; i++) {
-		phn[i].first = NULL;
-		phn[i].last = NULL;
-	}
-
-	/* finish init */
-	pht->size = table_size;
-	pht->count = 0;
-	pht->autogrow = false; /* disabled by default */
-	pht->dupobj = dupfunc;
-	pht->freeobj = freefunc;
-	pht->appdobj = appdfunc;
-	pht->nodetab = phn;
-
-	return(pht);
-}
-
-/*****************
- * hash_resize() *
- ***********************************************************************
- DESCR
-	resizing hash table
-
- IN
-	ht : hash table to resize
-	newsize : new size
-
- OUT
-	boolean
- ***********************************************************************/
-
-bool hash_resize(htable *ht, size_t newsize) {
-	hcell			*phc,
-					*next;
-	hnode			*newhn;
-	size_t			 c = 0,
-					 i;
-	unsigned int	 h;
-
-	/* allocate new node table */
-	newhn = (hnode *) malloc(sizeof(hnode) * newsize);
-	if (newhn == NULL)
-		return(false);
-
-	/* init */
-	for (i = 0 ; i < newsize ; i++) {
-		newhn[i].first = NULL;
-		newhn[i].last = NULL;
-	}
-
-	for (i = 0 ; i < ht->size ; i++) {
-		phc = ht->nodetab[i].first;
-		while (phc != NULL) {
-			h = hash_compute(phc->key, newsize);
-			next = phc->next;
-			hash_add_cell(&newhn[h], phc);
-			phc = next;
-			c++;
-		}
-
-	}
-
-	free(ht->nodetab);
-	ht->nodetab = newhn;
-	ht->size = newsize;
-
-	return(true);
+	return phn;
 }
 
 
-/*******************
- * hash_set_grow() *
- ***********************************************************************
- DESCR
-	set hash table as automatically resizable
+/**********************
+ * hash_create_cell() *
+ *************************************************************************************************************
+ %DESCR allocate and initialize an hash table cell structure
 
- IN
-	ht : hash table to set
+ %PARAM key : key string
+ %PARAM data : key data
 
- OUT
-	-
- ***********************************************************************/
+ %RETURN pointer of the new cell or NULL on failure
+ *************************************************************************************************************/
 
-void hash_set_grow(htable *ht) {
-	ht->autogrow = true;
-}
+static hcell_t *hash_create_cell(char *key, void *data) {
+	hcell_t	*phc;
 
-
-/******************
- * hash_destroy() *
- ***********************************************************************
- DESCR
-	destroy hash table
-
- IN
-	pht : hash table to remove
-
- OUT
-	number of keys deleted
- ***********************************************************************/
-
-size_t hash_destroy(htable *pht) {
-	hcell			*p,
-					*t;
-	size_t			 s,
-					 c = 0;
-	unsigned int	 i;
-
-	if (pht == NULL)
-		return(0);
-
-	s = pht->size;
-
-	for(i = 0 ; i < s ; i++) {
-		p = pht->nodetab[i].first;
-		t = NULL;
-		while (p != NULL) {
-			t = p->next;
-			hash_free_hcell(pht, p);
-			c++; /* removed one more key */
-			p = t;
-		}
+	/* allocate cell structure */
+	phc = (hcell_t *) malloc(sizeof(hcell_t));
+	if (phc == NULL) {
+		/* allocation failed */
+		return NULL;
 	}
 
-	free(pht->nodetab);
-	free(pht);
-	pht = NULL;
+	/* set key */
+	phc->key = strdup(key);
 
-	return(c);
-}
+	/* set data */
+	phc->data = data;
 
-/**************
- * hash_add() *
- ***********************************************************************
- DESCR
-	add a key in the hash table
+	/* initialize cell pointers */
+	phc->prev = NULL;
+	phc->next = NULL;
 
- IN
-	pht : hash structure
-	key : key string
-	value : value object
-
- OUT
-	return an error code
-		HASH_ADD_FAIL : addition failed.
-		HASH_ADD_OKAY : added (no collision).
-		HASH_ADD_COLL : added (collision, key chained).
-		HASH_ADD_UPDT : key already exists, change value.
- ***********************************************************************/
-
-unsigned int hash_add(htable *pht, char *key, void *value) {
-	return(hash_update(pht, key, value));
-}
-
-
-/*****************
- * hash_update() *
- ***********************************************************************
- DESCR
-	update or add a key in the hash table
-
- IN
-	pht : hash structure
-	key : key string
-	value : value object
-
- OUT
-	return an error code
-		HASH_ADD_FAIL : addition failed.
-		HASH_ADD_OKAY : added (no collision).
-		HASH_ADD_COLL : added (collision, key chained).
-		HASH_ADD_UPDT : key already exists, change value.
- ***********************************************************************/
-
-unsigned int hash_update(htable *pht, char *key, void *value) {
-	unsigned int	 hash,
-					 rval;
-	hnode			*phn;
-	hcell			*phc = NULL;
-	size_t			 size;
-
-	rval = HASH_ADD_FAIL;
-
-	size = pht->size;
-
-	/* test remaing free cells */
-	if (pht->count >= size) {
-		/* number of cell is higher than the supposed table size */
-		if (pht->autogrow == false) {
-			/* fixed size */
-			return(HASH_ADD_FAIL);
-		} else {
-			/* resize the hash table (long) */
-			if (hash_resize(pht, size * 2) == false) {
-				/* cannot resize the hash */
-				return(HASH_ADD_FAIL);
-			}
-		}
-	}
-
-
-	phc = (hcell *) malloc(sizeof(hcell));
-	if (phc == NULL)
-		return(rval);
-
-	/* if okay put key & value in a new cell */
-	if (strlcpy_b(phc->key, key, sizeof(phc->key)) == false) {
-		hash_free_hcell(pht, phc);
-		return(HASH_ADD_FAIL);
-	}
-	phc->value = value;
-
-	/* compute hash code */
-	hash = hash_compute(key, size);
-
-	phn = &pht->nodetab[hash];
-	rval = hash_add_cell(phn, phc);
-
-	if (rval == HASH_ADD_OKAY || rval == HASH_ADD_COLL)
-		pht->count++;
-
-	return(rval);
-}
-
-/*********************
- * hash_update_dup() *
- ***********************************************************************
- DESCR
-	update or add a key in the hash table but duplicate the value
-
- IN
-	pht : hash structure
-	key : key string
-	value : value object
-
- OUT
-	return an error code
-		HASH_ADD_FAIL : addition failed.
-		HASH_ADD_OKAY : added (no collision).
-		HASH_ADD_COLL : added (collision, key chained).
-		HASH_ADD_UPDT : key already exists, change value.
- ***********************************************************************/
-
-unsigned int hash_update_dup(htable *pht, char *key, void *value) {
-	return(hash_update(pht, key, pht->dupobj(value)));
+	return phc;
 }
 
 
 /*******************
  * hash_add_cell() *
- ***********************************************************************
- DESCR
-	add a new cell in a node
+ *************************************************************************************************************
+ %DESCR add a cell into a given node
 
- IN
-	phn : storage node
-	phc : cell to add
+ %PARAM phn : node pointer in which the cell must be added
+ %PARAM phc : cell to add
 
- OUT
-	return an error code
-		HASH_ADD_OKAY : added (no collision).
-		HASH_ADD_COLL : added (collision, key chained).
-		HASH_ADD_UPDT : key already exists, change value.
+ %RETURN NONE
+ *************************************************************************************************************/
 
- NOTE
-	this function does not increment the cell number of the hash table.
- ***********************************************************************/
-
-unsigned int hash_add_cell(hnode *phn, hcell *phc) {
-	hcell	*np;
-
-	phc->next = NULL;
-	if (phn->first == NULL) {
-		/* hash code unused */
+static void hash_add_cell(hnode_t *phn, hcell_t *phc) {
+	/* if the node is empty */
+	if (phn->last == NULL) {
+		/* set the cell as first link */
 		phn->first = phc;
-		phn->last = phc;
-
-		return(HASH_ADD_OKAY);
 	} else {
-		/* collision, hash code already used */
-		np = phn->first;
+		/* link the new cell next to the last cell of the node */
+		phc->prev = phn->last;
+		phn->last->next = phc;
+	}
 
-		/* looking for last element */
-		while (1) {
-			if (strncmp(phc->key, np->key, sizeof(phc->key)) == 0) {
-				/* key already exists */
-				np->value = phc->value;
-				phc->value = NULL; /* XXX useless ??? */
+	/* update the node link to the last cell */
+	phn->last = phc;
+}
 
-				/* new cell no longer needed, free struct only */
-				free(phc);
 
-				return(HASH_ADD_UPDT);
-			} else {
-				if (np->next == NULL) {
-					/* last element found */
-					phn->last = phc;
-					/* chaining new cell */
-					np->next = phc;
+/**********************
+ * hash_update_cell() *
+ *************************************************************************************************************
+ %DESCR update cell data
 
-					return(HASH_ADD_COLL);
-				} else {
-					np = np->next;
-				}
-			}
+ %PARAM pht : hash table pointer
+ %PARAM phc : cell pointer
+ %PARAM data : pointer to new data
+
+ %RETURN NONE
+ *************************************************************************************************************/
+
+static void hash_update_cell(htable_t *pht, hcell_t *phc, void *data) {
+	if (phc->data != NULL) {
+		/* deallocate data if it exists */
+		pht->free_data(phc->data);
+	}
+
+	/* put new data */
+	phc->data = data;
+}
+
+
+/**********************
+ * hash_search_cell() *
+ *************************************************************************************************************
+ %DESCR key based search of a cell in a node
+
+ %PARAM phn : pointer to the node
+ %PARAM key : key string
+
+ %RETURN cell pointer or NULL if not found
+ *************************************************************************************************************/
+
+static hcell_t *hash_search_cell(hnode_t *phn, char *key) {
+	hcell_t	*phc;
+	size_t	 ksize;
+
+	/* compute size of string (null terminator included) */
+	ksize = strlen(key) + 1;
+
+	/* get first cell of the node */
+	phc = phn->first;
+
+	/* search until the last cell */
+	while (phc != NULL) {
+		/* if the cell matches with the key */
+		if (strncmp(phc->key, key, ksize) == 0) {
+			/* return cell pointer */
+			return phc;
+		}
+
+		/* set pointer to next cell */
+		phc = phc->next;
+	}
+
+	/* value not found, return NULL */
+	return NULL;
+}
+
+
+/***********************
+ * hash_extract_cell() *
+ *************************************************************************************************************
+ %DESCR extract a cell from a node
+
+ %PARAM phn : pointer to the node
+ %PARAM phc : key string of the cell to extract
+
+ %RETURN pointer to the extracted cell or NULL if not found
+
+ %NOTE the extracted cell will no longer be deallocated with the hash table
+ *************************************************************************************************************/
+
+static hcell_t *hash_extract_cell(hnode_t *phn, char *key) {
+	hcell_t	*next,
+			*phc,
+			*prev;
+
+	/* get the cell */
+	phc = hash_search_cell(phn, key);
+
+	/* if a matching cell has been found */
+	if (phc != NULL) {
+		/* get pointers to previous and next cells */
+		prev = phc->prev;
+		next = phc->next;
+
+		/* update link with previous cell */
+		if (prev == NULL) {
+			phn->first = next;
+		} else {
+			prev->next = next;
+		}
+
+		/* update link with next cell */
+		if (next == NULL) {
+			phn->last = prev;
+		} else {
+			next->prev = prev;
 		}
 	}
+
+	return phc;
 }
 
 
 /********************
- * hash_add_array() *
- ***********************************************************************
- DESCR
-	add an array into the hash table
+ * hash_free_cell() *
+ *************************************************************************************************************
+ %DESCR deallocate cell structure 
 
- IN
-	ht : storage hash table
-	ary : array to add
-	size : size of the array
+ %PARAM pht : hash table pointer
+ %PARAM phc : cell pointer
 
- OUT
-	boolean
- ***********************************************************************/
+ %RETURN NONE
+ *************************************************************************************************************/
 
-bool hash_add_array(htable *pht, hpair *php, size_t size) {
-	return(hash_add_array_adv(pht, php, size, (void *(*)(void *)) strdup));
+static void hash_free_cell(htable_t *pht, hcell_t *phc) {
+	/* deallocate key */
+	free(phc->key);
+	
+	if (phc->data != NULL) {
+		/* deallocate data if it exists */
+		pht->free_data(phc->data);
+	}
 }
 
-/************************
- * hash_add_array_adv() *
- ***********************************************************************
- DESCR
-	add an array into the hash table
 
- IN
-	ht : storage hash table
-	ary : array to add
-	size : size of the array
-	dup_func : object duplication function
+/***********************
+ * hash_extract_data() *
+ *************************************************************************************************************
+ %DESCR extract data of a cell
 
- OUT
-	boolean
- ***********************************************************************/
+ %PARAM phc : cell pointer
 
-bool hash_add_array_adv(htable *pht, hpair *php, size_t size, void *(dupfunc)(void *)) {
-	bool			 error = false,
-					 rval = false;
-	htable			*pmht;
-	unsigned int	 i;
+ %RETURN data pointer
+ *************************************************************************************************************/
 
-	pmht = hash_init(size);
-	if (pmht == NULL)
+static void *hash_extract_data(hcell_t *phc) {
+	void	*pdata;
+
+	/* get the pointer to data */
+	pdata = phc->data;
+
+	/* initialize cell's data pointer */
+	phc->data = NULL;
+
+	return pdata;
+}
+
+
+/*****************
+ * hash_strcmp() *
+ *************************************************************************************************************
+ %DESCR string compare function wrapper for quick sort
+
+ %PARAM a : string a
+ %PARAM b : string b
+
+ %RETURN comparison status
+ *************************************************************************************************************/
+
+static int hash_strcmp(const void *a, const void *b) {
+	return(strcmp(*(char * const *) a, *(char * const *) b));
+}
+
+
+/********************
+ * public functions *
+ *************************************************************************************************************/
+
+/*****************
+ * hash_create() *
+ *************************************************************************************************************
+ %DESCR allocation and initialization of hash table structure
+
+ %PARAM size :	hash table size
+ %PARAM fa :	data appending function
+ %PARAM fd :	data duplication function
+ %PARAM ff :	data deallocation function
+
+ %RETURN hash table pointer or NULL on failure
+ *************************************************************************************************************/
+
+htable_t *hash_create(	size_t size,
+						bool autogrow,
+						void *(*fa)(void *, void *, void *),
+						void *(*fd)(void *),
+						void (*ff)(void *)) {
+	htable_t	*pht;
+	size_t		 csize,
+				 i;
+
+	csize = hash_correct_size(size);
+
+	/* allocate main structure */
+	pht = (htable_t *) malloc(sizeof (htable_t));
+	if (pht == NULL) {
+		/* allocation failed */
+		return NULL;
+	}
+
+	/* allocate node array */
+	pht->harray = (hnode_t *) malloc(sizeof (hnode_t) * size);
+	if (pht->harray == NULL) {
+		/* allocation failed */
+		free(pht);
+		return NULL;
+	}
+
+	/* set value of automatic resizing indicator */
+	pht->autogrow = autogrow;
+
+	/* set size */
+	pht->size = size;
+
+	/* initialize usage counter */
+	pht->count = 0;
+
+	/* initialise hash error indicator */
+	pht->herr = HERR_CREATED;
+
+	/* initialize node structures */
+	for (i = 0 ; i < size ; i++) {
+		pht->harray[i].first = NULL;
+		pht->harray[i].last = NULL;
+	}
+
+	/* set data append function */
+	pht->apnd_data = fa;
+
+	/* set data duplicate function */
+	pht->dup_data = fd;
+
+	/* set deallocation function pointer */
+	pht->free_data = ff;
+
+	return pht;
+}
+
+
+/**************
+ * hash_add() *
+ *************************************************************************************************************
+ %DESCR addition (without update) of a key
+
+ %PARAM pht : hash table pointer
+ %PARAM key : key string
+ %PARAM data : key data
+
+ %RETURN true if correctly added or false if the key already exists or has failed to be added
+
+ %NOTE the error detail is set into hash table structure
+ *************************************************************************************************************/
+
+bool hash_add(htable_t *pht, char *key, void *data) {
+	hcell_t	*phc;
+	hnode_t	*phn;
+
+	/* check size */
+	if (hash_check_grow(pht) == false) {
+		return false;
+	}
+
+	/* get node */
+	phn = hash_search_node(pht, key);
+
+	/* look for existing key */
+	if (hash_search_cell(phn, key) != NULL) {
+		/* the key is already there */
+		pht->herr = HERR_CELL_EXISTS;
+		return false;
+	}
+
+	/* create cell */
+	phc = hash_create_cell(key, data);
+	if (phc == NULL) {
+		/* creation failed */
+		pht->herr = HERR_MALLOC_FAILED;
+		return false;
+	}
+
+	/* add cell */
+	hash_add_cell(phn, phc);
+
+	/* update counter */
+	pht->count++;
+
+	pht->herr = HERR_ADDED;
+	return true;
+}
+
+
+/******************
+ * hash_add_dup() *
+ *************************************************************************************************************
+ %DESCR addition (without update) of a key using data duplication function
+
+ %PARAM pht : hash table pointer
+ %PARAM key : key string
+ %PARAM data : key data
+
+ %RETURN true if correctly added or false if the key already exists or has failed to be added
+
+ %NOTE the error detail is set into hash table structure
+ *************************************************************************************************************/
+
+bool hash_add_dup(htable_t *pht, char *key, void *data) {
+	bool	 rval;
+	void	*dupdata;
+
+	/* check if duplication function is available */
+	if (pht->dup_data == NULL) {
+		pht->herr = HERR_FDUP_NOT_DEF;
 		return(false);
-
-	for (i = 0 ; (i < size) && (error == false) ; i ++) {
-		if (hash_add(pmht, php[i].key, dupfunc(php[i].value)) == HASH_ADD_FAIL)
-			error = true;
 	}
 
-	if (error == false) {
-		hash_merge(pht, pmht);
-		rval = true;
+	/* duplicate data */
+	dupdata = pht->dup_data(data);
+
+	/* update key data */
+	rval = hash_add(pht, key, dupdata);
+
+	if (rval == false) {
+		/* deallocate duplicated data */
+		pht->free_data(data);
 	}
 
-	hash_destroy(pmht);
+	return rval;
+}
 
-	return(rval);
+
+/*****************
+ * hash_update() *
+ *************************************************************************************************************
+ %DESCR addition or update of a key
+
+ %PARAM pht : hash table pointer
+ %PARAM key : key string
+ %PARAM data : key data
+
+ %RETURN true on success else false
+ *************************************************************************************************************/
+
+bool hash_update(htable_t *pht, char * key, void *data) {
+	hcell_t	*phc;
+	hnode_t	*phn;
+
+	/* check size */
+	if (hash_check_grow(pht) == false) {
+		return false;
+	}
+
+	/* get node */
+	phn = hash_search_node(pht, key);
+
+	/* try to get an existent cell */
+	phc = hash_search_cell(phn, key);
+
+	/* if the cell has not been found */
+	if (phc == NULL) {
+		/* create a new cell */
+		phc = hash_create_cell(key, data);
+		if (phc == NULL) {
+			/* creation failed */
+			return false;
+		}
+
+		/* add cell */
+		hash_add_cell(phn, phc);
+
+		/* update counter */
+		pht->count++;
+
+		pht->herr = HERR_ADDED;
+	} else {
+		/* update cell */
+		hash_update_cell(pht, phc, data);
+
+		pht->herr = HERR_UPDATED;
+	}
+
+	return true;
+}
+
+
+/*********************
+ * hash_update_dup() *
+ *************************************************************************************************************
+ %DESCR addition or update of a key using data duplication function
+
+ %PARAM pht : hash table pointer
+ %PARAM key : key string
+ %PARAM data : key data
+
+ %RETURN true on success else false
+ *************************************************************************************************************/
+
+bool hash_update_dup(htable_t *pht, char *key, void *data) {
+	bool	 rval;
+	void	*dupdata;
+
+	/* check if duplication function is available */
+	if (pht->dup_data == NULL) {
+		pht->herr = HERR_FDUP_NOT_DEF;
+		return(false);
+	}
+
+	/* duplicate data */
+	dupdata = pht->dup_data(data);
+
+	/* update key data */
+	rval = hash_update(pht, key, dupdata);
+
+	if (rval == false) {
+		/* deallocate duplicated data */
+		pht->free_data(data);
+	}
+
+	return rval;
 }
 
 
 /*****************
  * hash_append() *
  ***********************************************************************
- DESCR
-	append a value to the existing value
+ %DESCR append a value to the existing key data
 
- IN
-	pht : hash structure
-	key : key to be appended
-	value : value to append
-	misc : extra data to transmit to append function
+ %PARAM pht :	hash structure
+ %PARAM key :	key to be modified
+ %PARAM value :	value to append into key data
+ %PARAM misc :	extra data to transmit to append function
 
- OUT
-	return an error code.
-		HASH_ADD_OKAY : added (no collision).
-		HASH_ADD_COLL : added (collision, key chained).
-		HASH_ADD_UPDT : key already exists, change value.
+ %RETURN true on success else false
  ***********************************************************************/
 
-unsigned int hash_append(htable *pht, char *key, void *value, void *misc) {
-	unsigned int	 rval;
-	void			*pobj,
-					*robj;
+bool hash_append(htable_t *pht, char *key, void *data, void *misc) {
+	hcell_t	*phc;
+	hnode_t	*phn;
+	void	*newdata;
 
-	if (value == NULL) {
-#ifdef HASH_DEBUG
-		debugf("hash_append : value is null");
-#endif
-		return(HASH_ADD_FAIL);
+	if (data == NULL) {
+		pht->herr = HERR_NULL_DATA;
+		return(false);
 	}
 
-	if (pht->appdobj == NULL) {
-#ifdef HASH_DEBUG
-		debugf("hash_append : appobj is null");
-#endif
-		return(HASH_ADD_FAIL);
+	if (pht->apnd_data == NULL) {
+		pht->herr = HERR_FAPND_NOT_DEF;
+		return(false);
 	}
 
-	pobj = hash_get(pht, key);
-	if (pobj == NULL) {
-		/* no previous value, adding given data */
-		rval = hash_add(pht, key, value);
+	/* get node */
+	phn = hash_search_node(pht, key);
+
+	/* try to get an existent cell */
+	phc = hash_search_cell(phn, key);
+
+	/* if the cell has not been found */
+	if (phc == NULL) {
+		/* create a new cell */
+		phc = hash_create_cell(key, data);
+		if (phc == NULL) {
+			/* creation failed */
+			return false;
+		}
+
+		/* add cell */
+		hash_add_cell(phn, phc);
+
+		/* update counter */
+		pht->count++;
 	} else {
-		robj = pht->appdobj(pobj, value, misc);
-		if (robj != NULL) {
-			rval = hash_add(pht, key, robj);
-			if (rval == HASH_ADD_UPDT)
-				rval = HASH_ADD_APPD; /* not an update as we append */
-		} else {
-#ifdef HASH_DEBUG
-			debugf("hash_append : robj is null");
-#endif
-			rval = HASH_ADD_FAIL;
+		/* append data to existing cell data */
+		newdata = pht->apnd_data(phc->data, data, misc);
+
+		if (newdata == NULL) {
+			/* appending failed */
+			pht->herr = HERR_FAPND_FAILED;
+			return false;
 		}
+
+		/* update cell with new data */
+		hash_update_cell(pht, phc, newdata);
 	}
 
-	return(rval);
-}
+	/* override error status */
+	pht->herr = HERR_APPENDED;
 
-
-/*****************
- * hash_delete() *
- ***********************************************************************
- DESCR
-	remove a key from the hash table
-
- IN
-	pht : hash table
-	key : key to search
-
- OUT
-	-
- ***********************************************************************/
-
-void hash_delete(htable *pht, char *key) {
-	hcell			*phc,
-					*last;
-	unsigned int	 hash;
-
-	/* compute hash code */
-	hash = hash_compute(key, pht->size);
-
-	phc = pht->nodetab[hash].first;
-	last = NULL;
-	while (phc != NULL) {
-		/* hash not empty */
-		if (strncmp(key, phc->key, MAX_HASH_KEY_LEN) == 0) {
-			/* found key */
-			if (last == NULL) {
-				/* first cell */
-				if (phc->next == NULL) {
-					/* only one cell */
-					pht->nodetab[hash].first = NULL;
-					pht->nodetab[hash].last = NULL;
-				} else {
-					/* re-link with next cell */
-					pht->nodetab[hash].first = phc->next;
-				}
-			} else {
-				last->next = phc->next;
-				if (phc->next == NULL) {
-					/* delete last cell, update node */
-					pht->nodetab[hash].last = last;
-				}
-			}
-			hash_free_hcell(pht, phc);
-			phc = NULL;
-
-			pht->count--;
-		} else {
-			/* go to next cell */
-			last = phc;
-			phc = phc->next;
-		}
-	}
-	/* key not found */
-}
-
-
-/******************
- * hash_extract() *
- ***********************************************************************
- DESCR
-	remove a key from the hash table
-
- IN
-	pht : hash table
-	key : key to search
-
- OUT
-	-
- ***********************************************************************/
-
-void *hash_extract(htable *pht, char *key) {
-	hcell			*phc,
-					*last;
-	unsigned int	 hash;
-	void			*data = NULL;
-
-	/* compute hash code */
-	hash = hash_compute(key, pht->size);
-
-	phc = pht->nodetab[hash].first;
-	last = NULL;
-	while (phc != NULL) {
-		/* hash not empty */
-		if (strncmp(key, phc->key, MAX_HASH_KEY_LEN) == 0) {
-			/* found key */
-			if (last == NULL) {
-				/* first cell */
-				if (phc->next == NULL) {
-					/* only one cell */
-					pht->nodetab[hash].first = NULL;
-					pht->nodetab[hash].last = NULL;
-				} else {
-					/* re-link with next cell */
-					pht->nodetab[hash].first = phc->next;
-				}
-			} else {
-				last->next = phc->next;
-				if (phc->next == NULL) {
-					/* delete last cell, update node */
-					pht->nodetab[hash].last = last;
-				}
-			}
-			data = phc->value;
-			phc->value = NULL;
-			hash_free_hcell(pht, phc);
-			pht->count--;
-
-			break;
-		} else {
-			/* go to next cell */
-			last = phc;
-			phc = phc->next;
-		}
-	}
-	/* key not found */
-	return(data);
+	return true;
 }
 
 
 /**************
  * hash_get() *
+ *************************************************************************************************************
+ %DESCR get a pointer to the key data
+
+ %PARAM pht : hash table pointer
+ %PARAM key : string of the key to look for
+
+ %RETURN key data pointer or NULL if not found
+ *************************************************************************************************************/
+
+void *hash_get(htable_t *pht, char *key) {
+	hcell_t	*phc;
+	hnode_t	*phn;
+
+	/* get node */
+	phn = hash_search_node(pht, key);
+
+	/* try to get an existent cell */
+	phc = hash_search_cell(phn, key);
+
+	if (phc == NULL) {
+		/* no cell found */
+		return NULL;
+	}
+
+	/* return cell data */
+	return phc->data;
+}
+
+
+/******************
+ * hash_extract() *
+ *************************************************************************************************************
+ %DESCR extract key from the hash table 
+
+ %PARAM pht : hash table pointer
+ %PARAM key : string of the key to extract
+
+ %RETURN key data pointer or NULL if not found
+
+ %NOTE key cell will be removed from the node, data will not be deallocated by hash table deallocation
+ *************************************************************************************************************/
+
+void *hash_extract(htable_t *pht, char *key) {
+	hcell_t	*phc;
+	hnode_t	*phn;
+	void	*pdata;
+
+	/* get node */
+	phn = hash_search_node(pht, key);
+
+	/* extract cell from the node */
+	phc = hash_extract_cell(phn, key);
+	if (phc == NULL) {
+		/* cell not found, key does not exists */
+		return NULL;
+	}
+
+	/* extract data from the cell (to preserve it from cell destruction) */
+	pdata = hash_extract_data(phc);
+
+	/* desallocate cell structure */
+	hash_free_cell(pht, phc);
+
+	/* update counter */
+	pht->count--;
+
+	/* return data pointer */
+	return pdata;
+}
+
+
+/*****************
+ * hash_delete() *
+ *************************************************************************************************************
+ %DESCR remove a key from the hash table
+
+ %PARAM pht : hash table pointer
+ %PARAM key : key to delete
+
+ %RETURN NONE
+ *************************************************************************************************************/
+
+void hash_delete(htable_t *pht, char *key) {
+	hcell_t	*phc;
+	hnode_t	*phn;
+
+	/* get node */
+	phn = hash_search_node(pht, key);
+
+	/* extract cell */
+	phc = hash_extract_cell(phn, key);
+	if (phc != NULL) {
+		/* cell found, deallocate cell structure and data within */
+		hash_free_cell(pht, phc);
+
+		/* update counter */
+		pht->count--;
+	}
+}
+
+
+/****************
+ * hash_merge() *
  ***********************************************************************
- DESCR
-	get a key from the hash table
+ %DESCR merge a hash table into another one
 
- IN
-	pht : hash table
-	key : key to search
+ %PARAM dst_ht : destination hash table
+ %PARAM src_ht : source hash table to be merged
+ %PARAM update : boolean to allow update of key during merge
 
- OUT
-	return the value or NULL
+ %RETURN true on success else false
  ***********************************************************************/
 
-void *hash_get(htable *pht, char *key) {
-	hcell			*phc;
-	unsigned int	 hash;
+bool hash_merge(htable_t *pdht, htable_t *psht, bool update) {
+	hcell_t			*phc;
+	size_t			 i;
 
-	/* compute hash code */
-	hash = hash_compute(key, pht->size);
+	/* for each node of the source hash table */
+	for(i = 0 ; i < psht->size ; i++) {
+		/* get the first cell */
+		phc = psht->harray[i].first;
 
-	phc = pht->nodetab[hash].first;
-	while (phc != NULL) {
-		/* hash not empty */
-#ifdef HASH_DEBUG
-		debugf("hash_get : comparing with '%s'", phc->key);
-#endif
-		if (strncmp(key, phc->key, MAX_HASH_KEY_LEN) == 0) {
-			/* found key, return pointer on value */
-			return(phc->value);
-		} else {
+		/* process all of the node cells */
+		while (phc != NULL) {
+			/* add the key in destination hash_table */
+			if (update == true) {
+				/* update is allowed */
+				if (hash_update_dup(pdht, phc->key, phc->data) == false) {
+					return false;
+				}
+			} else {
+				/* add only */
+				if (hash_add_dup(pdht, phc->key, phc->data) == false) {
+					return false;
+				}
+			}
+
 			/* go to next cell */
 			phc = phc->next;
 		}
 	}
 
-	/* key not found */
-	return(NULL);
+	return true;
 }
 
-/****************
- * hash_merge() *
+
+/*****************
+ * hash_resize() *
  ***********************************************************************
- DESCR
-	merge one hash table into another
+ %DESCR resizing hash table
 
- IN
-	dst_ht : destination table
-	src_ht : table to merge
+ %PARAM pht :	hash table to resize
+ %PARAM size :	new hash table size
 
- OUT
-	number of merged key
+ %RETURN true on success else false
  ***********************************************************************/
 
-size_t hash_merge(htable *dst_ht, htable *src_ht) {
-	hcell			*p;
-	size_t			 s,
-					 c = 0;
-	unsigned int	 i;
+bool hash_resize(htable_t *pht, size_t size) {
+	hcell_t	*phc,
+			*next;
+	hnode_t	*phn,
+			*pold;
+	size_t	 i,
+			 s;
 
-	/* get table size */
-	s = src_ht->size;
+	/* save actual node array */
+	pold = pht->harray;
 
-	for(i = 0 ; i < s ; i++) {
-		p = src_ht->nodetab[i].first;
-		while (p != NULL) {
-			/* add the key in dst_ht */
-			if (hash_add(dst_ht, p->key, p->value) != HASH_ADD_FAIL) {
-				/* merged one more key */
-				c++;
+	/* allocate new node array */
+	pht->harray = (hnode_t *) malloc(sizeof(hnode_t) * size);
+	if (pht->harray == NULL) {
+		/* allocation failed */
+		pht->herr = HERR_MALLOC_FAILED;
+		/* restore old node array */
+		pht->harray = pold;
 
-				/* unset p->value to prevent deletion */
-				p->value = NULL;
-			}
-			p = p->next;
+		return false;
+	}
+
+	/* save old size */
+	s = pht->size;
+
+	/* set new size */
+	pht->size = size;
+
+	/* initialize nodes of the new array */
+	for (i = 0 ; i < size ; i++) {
+		pht->harray[i].first = NULL;
+		pht->harray[i].last = NULL;
+	}
+
+	/* process previous node array */
+	for (i = 0 ; i < s ; i++) {
+		/* get first cell of the node */
+		phc = pold[i].first;
+
+		/* process each cell of the current node */
+		while (phc != NULL) {
+			/* get node */
+			phn = hash_search_node(pht, phc->key);
+
+			/* save pointer to next cell */
+			next = phc->next;
+
+			/* add cell into the node */
+			hash_add_cell(phn, phc);
+
+			/* next cell of the old node array */
+			phc = next;
 		}
 	}
 
-	/* return count of merged keys */
-	return(c);
+	/* deallocate old array structure */
+	free(pold);
+
+	return true;
 }
+
+
+/*********************
+ * hash_check_grow() *
+ *************************************************************************************************************
+ %DESCR check if hash table is full and resize it if allowed
+
+ %PARAM pht : hash table pointer
+
+ %RETURN true on success else false if table is full or if resizing failed
+ *************************************************************************************************************/
+
+bool hash_check_grow(htable_t *pht) {
+	/* compare number of cells with table size */
+	if (pht->count >= pht->size) {
+		/* table is full */
+		if (pht->autogrow == false) {
+			/* autogrow is disabled, check fails */
+			pht->herr = HERR_TABLE_FULL;
+			return false;
+		}
+		
+		/* autogrow is enabled, resize the table */
+		if (hash_resize(pht, pht->size * 2) == false) {
+			/* cannot resize the hash */
+			return false;
+		}
+	}
+
+	return true;
+}
+
+
+/******************
+ * hash_destroy() *
+ *************************************************************************************************************
+ %DESCR deallocate hash table
+
+ %PARAM pht : hash table pointer
+
+ %RETURN NONE
+ *************************************************************************************************************/
+
+void hash_destroy(htable_t *pht) {
+	hcell_t	*phc,
+			*next;
+	size_t	 i;
+
+	/* process each node of the table */
+	for (i = 0 ; i < pht->size ; i++) {
+		/* get first cell of the node */
+		phc = pht->harray[i].first;
+
+		/* process each cell of the node */
+		while (phc != NULL) {
+			/* save next cell's pointer */
+			next = phc->next;
+
+			/* deallocate cell */
+			hash_free_cell(pht, phc);
+
+			/* update with saved pointer to the next cell */
+			phc = next;
+		}
+	}
+
+	/* deallocate node array */
+	free(pht->harray);
+
+	/* deallocate hash table structure */
+	free(pht);
+}
+
 
 /****************
  * hash_nbkey() *
  ***********************************************************************
- DESCR
-	get number of keys
+ %DESCR get number of keys
 
- IN
-	pht : hash table
+ %PARAM pht : hash table
 
- OUT
-	number of keys
+ %RETURN number of keys
  ***********************************************************************/
 
-size_t hash_nbkey(htable *pht) {
-	return(pht->count);
+size_t hash_nbkey(htable_t *pht) {
+	return pht->count;
 }
+
 
 /***************
  * hash_keys() *
  ***********************************************************************
- DESCR
-	get the keys of the hash table
+ %DESCR get the keys of the hash table
 
- IN
-	pht : hash table
+ %PARAM pht : hash table
 
- OUT
-	hkeys structure
+ %RETURN hkeys structure
 
- NOTE
-	don't forget to free the array after use.
+ %NOTE don't forget to free the array after use.
  ***********************************************************************/
 
-hkeys *hash_keys(htable *pht) {
-	hcell			*p;
-	hkeys			*phk;
+hkeys_t *hash_keys(htable_t *pht) {
+	hcell_t			*phc;
+	hkeys_t			*phk;
 	unsigned int	 i,
 					 j = 0;
 
-	/* init hkeys struct to be returned */
-	phk = (hkeys *)malloc(sizeof(hkeys));
-	if (phk != NULL) {
-		if (pht->count == 0)
-			return(NULL);
-
-		phk->nkey = pht->count;
-
-		/* create an array with a size of the number of keys */
-		phk->keys = (char **)malloc(sizeof(char *) * phk->nkey);
-		if (phk->keys != NULL) {
-			for(i = 0 ; i < pht->size ; i++) {
-				p = pht->nodetab[i].first;
-				while (p != NULL) {
-					/* add the key in key_ary */
-					phk->keys[j] = p->key;
-					j++;
-					p = p->next;
-				}
-			}
-
-			return(phk);
-		} else {
-#ifdef HASH_DEBUG
-			debugf("keys alloc failed");
-#endif
-			/* free allocated space only */
-			free(phk);
-		}
-#ifdef HASH_DEBUG
-	} else {
-		debugf("hkeys struct alloc failed");
-#endif
+	/* if hash table is empty */
+	if (pht->count == 0) {
+		return NULL;
 	}
 
-	return(NULL);
+	/* init hkeys struct to be returned */
+	phk = (hkeys_t *) malloc(sizeof(hkeys_t));
+	if (phk == NULL) {
+		return NULL;
+	}
+
+	phk->nkey = pht->count;
+
+	/* create an array with a size of the number of keys */
+	phk->keys = (char **) malloc(sizeof(char *) * phk->nkey);
+	if (phk->keys == NULL) {
+		/* free allocated space only */
+		free(phk);
+		return NULL;
+	}
+
+	for(i = 0 ; i < pht->size ; i++) {
+		phc = pht->harray[i].first;
+		while (phc != NULL) {
+			/* add the key in key_ary */
+			phk->keys[j] = phc->key;
+			j++;
+			phc = phc->next;
+		}
+	}
+
+	return phk;
 }
 
 
 /**********************
  * hash_keys_sorted() *
  ***********************************************************************
- DESCR
-	get the sorted list of keys of the hash table
+ %DESCR get the sorted list of keys of the hash table
 
- IN
-	pht : hash table
+ %PARAM pht : hash table
 
- OUT
-	return an hkeys structure
+ %RETURN return an hkeys structure
 
- NOTE
-	don't forget to free the array after use
+ %NOTE don't forget to free the array after use
  ***********************************************************************/
 
-static int hash_strcmp(const void *a, const void *b) {
-	return(strcmp(*(char * const *)a, *(char * const *) b));
-}
-
-hkeys *hash_keys_sorted(htable *pht) {
-	hkeys	*phk;
+hkeys_t *hash_keys_sorted(htable_t *pht) {
+	hkeys_t	*phk;
 
 	/* build hkey structure */
 	phk = hash_keys(pht);
 
 	if (phk != NULL) {
 		/* sort key names */
-		qsort((void *) phk->keys, phk->nkey, sizeof(char *),
-							hash_strcmp);
+		qsort((void *) phk->keys, phk->nkey, sizeof(char *), hash_strcmp);
 	}
 	return(phk);
 }
 
 
 /*********************
- * hash_free_hcell() *
- ***********************************************************************
- DESCR
-	free memory allocated to the hcell structure
-
- IN
-	phc : structure to free
-
- OUT
-	-
- ***********************************************************************/
-
-void hash_free_hcell(htable *pht, hcell *phc) {
-	if (phc != NULL) {
-		if (phc->value != NULL) {
-			if (pht->freeobj != NULL)
-#ifdef HASH_DEBUG
-		debugf("free phcell '%s' data", phc->key);
-#endif
-				pht->freeobj(phc->value);
-		}
-#ifdef HASH_DEBUG
-		debugf("free phcell '%s'", phc->key);
-#endif
-		free(phc);
-	}
-}
-
-/*********************
  * hash_free_hkeys() *
  ***********************************************************************
- DESCR
-	free memory allocated to the hkeys structure
+ %DESCR free memory allocated to the hkeys structure
 
- IN
-	phk : structure to free
+ %PARAM phk : structure to free
 
- OUT
-	-
+ %RETURN NONE
  ***********************************************************************/
 
-void hash_free_hkeys(hkeys *phk) {
+void hash_free_hkeys(hkeys_t *phk) {
 	/* doesn't free pointed values */
 	free(phk->keys);
 	free(phk);
 }
 
-/*********************
- * hash_str_append() *
+
+/****************
+ * hash_error() *
  ***********************************************************************
- DESCR
-	append function for string hash
+ %DESCR error message for latest hash table operation status
 
- IN
-	orig : XXX
-	value : XXX
-	sep : XXX
+ %PARAM herr : error code
 
- OUT
-	-
+ %RETURN NONE
  ***********************************************************************/
 
-void *hash_str_append(void *orig, void *value, void *sep) {
-	char	*pbuf;
-	size_t	 s;
+char *hash_error(htable_t *pht) {
+	char	*pstr;
 
-	/* compute needed space */
-	if (sep != NULL) {
-		s = strlen((char *) sep);
-	} else {
-		s = 0;
-	}
-	s = s + strlen((char *) orig) + strlen((char *) value) + 1;
-
-	/* allocate space */
-	pbuf = (char *) malloc(s);
-
-	if (strlcpy_b(pbuf, orig, s) == false) {
-		free(value);
-		free(pbuf);
-#ifdef HASH_DEBUG
-		debugf("hash_str_append : strlcpy1 failed");
-#endif
-		return(NULL);
+	if (pht == NULL) {
+		return hmsg[0];
 	}
 
-	if ((sep != NULL) && (pbuf[0] != '\0')) {
-		/* adding separator if provided and if
-			string is not empty */
-		if (strlcat_b(pbuf, (char *) sep, s) == false) {
-			free(value);
-			free(pbuf);
-#ifdef HASH_DEBUG
-		debugf("hash_str_append : strlcat1 failed");
-#endif
-			return(NULL);
-		}
-	}
-	if (strlcat_b(pbuf, value, s) == false) {
-		free(value);
-		free(pbuf);
-#ifdef HASH_DEBUG
-		debugf("hash_str_append : strlcat2 failed");
-#endif
-		return(NULL);
+	switch (pht->herr) {
+		/*case HERR_NONE :  */
+		/*    pstr = hmsg[];*/
+		/*    break;        */
+
+		case HERR_CREATED :
+			pstr = hmsg[2];
+			break;
+
+		case HERR_ADDED	:
+			pstr = hmsg[3];
+			break;
+
+		case HERR_UPDATED :
+			pstr = hmsg[4];
+			break;
+
+		case HERR_APPENDED :
+			pstr = hmsg[5];
+			break;
+
+		case HERR_MALLOC_FAILED :
+			pstr = hmsg[6];
+			break;
+
+		case HERR_FAPND_FAILED :
+			pstr = hmsg[7];
+			break;
+
+		case HERR_FDUP_FAILED :
+			pstr = hmsg[8];
+			break;
+
+		case HERR_FFREE_FAILED :
+			pstr = hmsg[9];
+			break;
+
+		case HERR_FAPND_NOT_DEF :
+			pstr = hmsg[10];
+			break;
+
+		case HERR_FDUP_NOT_DEF :
+			pstr = hmsg[11];
+			break;
+
+		case HERR_FFREE_NOT_DEF :
+			pstr = hmsg[12];
+			break;
+
+		case HERR_CELL_EXISTS :
+			pstr = hmsg[13];
+			break;
+
+		case HERR_NULL_DATA :
+			pstr = hmsg[14];
+			break;
+
+		case HERR_TABLE_FULL :
+			pstr = hmsg[15];
+			break;
+
+		default :
+			pstr = hmsg[1];
 	}
 
-	free(value);
-	return((void *) pbuf);
+	return pstr;
 }
 
 /* vim: set noexpandtab tabstop=4 softtabstop=4 shiftwidth=4: */

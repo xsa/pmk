@@ -1,7 +1,7 @@
 /* $Id$ */
 
 /*
- * Copyright (c) 2005 Damien Couderc
+ * Copyright (c) 2006 Damien Couderc
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -74,7 +74,7 @@ char *conv_to_tag(char *str) {
 			*pbuf = 'P';
 		} else {
 			/* check if we have an alphanumeric character */
-			if (isalnum(*str) == 0) {
+			if (isalnum((int) *str) == 0) {
 				/* no, replace by an underscore */
 				*pbuf = '_';
 			} else {

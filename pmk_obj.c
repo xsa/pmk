@@ -1,7 +1,7 @@
 /* $Id$ */
 
 /*
- * Copyright (c) 2003-2005 Damien Couderc
+ * Copyright (c) 2003-2006 Damien Couderc
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -137,7 +137,7 @@ pmkobj *po_mk_list(dynary *pda) {
 	object or NULL if failed
 ***********************************************************************/
 
-pmkobj *po_mk_hash(htable *pht) {
+pmkobj *po_mk_hash(htable_t *pht) {
 	pmkobj	*p;
 
 	p = (pmkobj *) malloc(sizeof(pmkobj));

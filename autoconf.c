@@ -1,7 +1,7 @@
 /* $Id$ */
 
 /*
- * Copyright (c) 2003-2005 Damien Couderc
+ * Copyright (c) 2003-2006 Damien Couderc
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -70,21 +70,21 @@
  ***********************************************************************/
 
 bool ac_parse_config(pmkdata *pgd) {
-	FILE	*fp_in,
-			*fp_out;
-	bool	 rval = true;
-	char	 line[TMP_BUF_LEN],
-			 buf[TMP_BUF_LEN],
-			 fsrc[MAXPATHLEN],
-			 fname[MAXPATHLEN],
-			 ftmp[MAXPATHLEN],
-			*fpath,
-			*pstr,
-			*defname;
-	htable	*ht;
-	int		 i,
-			 s,
-			 fe;
+	FILE		*fp_in,
+				*fp_out;
+	bool		 rval = true;
+	char		 line[TMP_BUF_LEN],
+				 buf[TMP_BUF_LEN],
+				 fsrc[MAXPATHLEN],
+				 fname[MAXPATHLEN],
+				 ftmp[MAXPATHLEN],
+				*fpath,
+				*pstr,
+				*defname;
+	htable_t	*ht;
+	int			 i,
+				 s,
+				 fe;
 
 	ht = pgd->htab;
 	fpath = pgd->ac_file;
@@ -137,13 +137,13 @@ bool ac_parse_config(pmkdata *pgd) {
 
 		if (pstr != NULL) {
 			/* look for the definition name */
-			while (isspace(*pstr) != 0) {
+			while (isspace((int) *pstr) != 0) {
 				/* ignore spaces */
 				pstr++;
 			}
 			s = sizeof(line);
 			i = 0;
-			while (((*pstr == '_') || (isalpha(*pstr) != 0)) && (i < s)) {
+			while (((*pstr == '_') || (isalpha((int) *pstr) != 0)) && (i < s)) {
 				buf[i] = *pstr;
 				pstr++;
 				i++;
@@ -234,8 +234,8 @@ bool ac_parse_config(pmkdata *pgd) {
  ***********************************************************************/
 
 bool ac_process_dyn_var(pmkdata *pgd, char *template) {
-	char	*pstr;
-	htable	*pht;
+	char		*pstr;
+	htable_t	*pht;
 
 	/* should process variables like following (if i believe autoconf manual) :
 		- srcdir : the relative path to the directory that contains the source code for that `Makefile'.
@@ -256,42 +256,42 @@ bool ac_process_dyn_var(pmkdata *pgd, char *template) {
 
 	/* init builddir */
 	pstr = hash_get(pht, PMK_DIR_BLD_ROOT_ABS);
-	if (hash_update_dup(pht, "abs_top_builddir", pstr) == HASH_ADD_FAIL)
+	if (hash_update_dup(pht, "abs_top_builddir", pstr) == false)
 		return(false);
 
 	/* set abs_builddir */
 	pstr = hash_get(pht, PMK_DIR_BLD_ABS);
-	if (hash_update_dup(pht, "abs_builddir", pstr) == HASH_ADD_FAIL)
+	if (hash_update_dup(pht, "abs_builddir", pstr) == false)
 		return(false);
 
 	/* compute top_builddir */
 	pstr = hash_get(pht, PMK_DIR_BLD_ROOT_REL);
-	if (hash_update_dup(pht, "top_builddir", pstr) == HASH_ADD_FAIL)
+	if (hash_update_dup(pht, "top_builddir", pstr) == false)
 		return(false);
 
 	/* Mr GNU said : rigorously equal to ".". So i did :) */
 	pstr = hash_get(pht, PMK_DIR_BLD_REL);
-	if (hash_update_dup(pht, "builddir", pstr) == HASH_ADD_FAIL)
+	if (hash_update_dup(pht, "builddir", pstr) == false)
 		return(false);
 
 	/* set absolute srcdir */
 	pstr = hash_get(pht, PMK_DIR_SRC_ROOT_ABS);
-	if (hash_update_dup(pht, "abs_top_srcdir", pstr) == HASH_ADD_FAIL)
+	if (hash_update_dup(pht, "abs_top_srcdir", pstr) == false)
 		return(false);
 
 	/* compute top_srcdir */
 	pstr = hash_get(pht, PMK_DIR_SRC_ROOT_REL);
-	if (hash_update_dup(pht, "top_srcdir", pstr) == HASH_ADD_FAIL)
+	if (hash_update_dup(pht, "top_srcdir", pstr) == false)
 		return(false);
 
 	/* absolute path of template */
 	pstr = hash_get(pht, PMK_DIR_SRC_ABS);
-	if (hash_update_dup(pht, "abs_srcdir", pstr) == HASH_ADD_FAIL)
+	if (hash_update_dup(pht, "abs_srcdir", pstr) == false)
 		return(false);
 
 	/* relative path to template */
 	pstr = hash_get(pht, PMK_DIR_SRC_REL);
-	if (hash_update_dup(pht, "srcdir", pstr) == HASH_ADD_FAIL)
+	if (hash_update_dup(pht, "srcdir", pstr) == false)
 		return(false);
 
 	/* all operations succeeded */
@@ -311,7 +311,7 @@ bool ac_process_dyn_var(pmkdata *pgd, char *template) {
 	NONE
  ***********************************************************************/
 
-void ac_clean_dyn_var(htable *pht) {
+void ac_clean_dyn_var(htable_t *pht) {
 	hash_delete(pht, "srcdir");
 	hash_delete(pht, "abs_srcdir");
 	hash_delete(pht, "top_srcdir");
@@ -335,64 +335,64 @@ void ac_clean_dyn_var(htable *pht) {
 	boolean
  ***********************************************************************/
 
-bool ac_set_variables(htable *pht) {
+bool ac_set_variables(htable_t *pht) {
 	char	 buf[TMP_BUF_LEN],
 			*pstr;
 
 	/* path variables */
 	pstr = (char *) hash_get(pht, "PREFIX");
-	if (hash_update_dup(pht, "prefix", pstr) == HASH_ADD_FAIL)
+	if (hash_update_dup(pht, "prefix", pstr) == false)
 		return(false);
 
 	pstr = (char *) hash_get(pht, "SYSCONFDIR");
-	if (hash_update_dup(pht, "sysconfdir", pstr) == HASH_ADD_FAIL)
+	if (hash_update_dup(pht, "sysconfdir", pstr) == false)
 		return(false);
 
 
-	if (hash_update_dup(pht, "exec_prefix", "${prefix}") == HASH_ADD_FAIL)
+	if (hash_update_dup(pht, "exec_prefix", "${prefix}") == false)
 		return(false);
-	if (hash_update_dup(pht, "bindir", "${exec_prefix}/bin") == HASH_ADD_FAIL)
+	if (hash_update_dup(pht, "bindir", "${exec_prefix}/bin") == false)
 		return(false);
-	if (hash_update_dup(pht, "sbindir", "${exec_prefix}/sbin") == HASH_ADD_FAIL)
+	if (hash_update_dup(pht, "sbindir", "${exec_prefix}/sbin") == false)
 		return(false);
-	if (hash_update_dup(pht, "libexecdir", "${exec_prefix}/libexec") == HASH_ADD_FAIL)
+	if (hash_update_dup(pht, "libexecdir", "${exec_prefix}/libexec") == false)
 		return(false);
-	if (hash_update_dup(pht, "libdir", "${exec_prefix}/lib") == HASH_ADD_FAIL)
+	if (hash_update_dup(pht, "libdir", "${exec_prefix}/lib") == false)
 		return(false);
-	if (hash_update_dup(pht, "datadir", "${prefix}/share") == HASH_ADD_FAIL)
+	if (hash_update_dup(pht, "datadir", "${prefix}/share") == false)
 		return(false);
-	if (hash_update_dup(pht, "includedir", "${prefix}/include") == HASH_ADD_FAIL)
+	if (hash_update_dup(pht, "includedir", "${prefix}/include") == false)
 		return(false);
-	if (hash_update_dup(pht, "mandir", "${prefix}/man") == HASH_ADD_FAIL)
+	if (hash_update_dup(pht, "mandir", "${prefix}/man") == false)
 		return(false);
-	if (hash_update_dup(pht, "infodir", "${prefix}/info") == HASH_ADD_FAIL)
+	if (hash_update_dup(pht, "infodir", "${prefix}/info") == false)
 		return(false);
-	if (hash_update_dup(pht, "sharedstatedir", "${prefix}/com") == HASH_ADD_FAIL)
+	if (hash_update_dup(pht, "sharedstatedir", "${prefix}/com") == false)
 		return(false);
-	if (hash_update_dup(pht, "localstatedir", "${prefix}/var") == HASH_ADD_FAIL)
+	if (hash_update_dup(pht, "localstatedir", "${prefix}/var") == false)
 		return(false);
-	if (hash_update_dup(pht, "oldincludedir", "/usr/include") == HASH_ADD_FAIL)
+	if (hash_update_dup(pht, "oldincludedir", "/usr/include") == false)
 		return(false);
 
-	if (hash_update_dup(pht, "INSTALL_DATA", "${INSTALL} -m 644") == HASH_ADD_FAIL)
+	if (hash_update_dup(pht, "INSTALL_DATA", "${INSTALL} -m 644") == false)
 		return(false);
-	if (hash_update_dup(pht, "INSTALL_PROGRAM", "${INSTALL}") == HASH_ADD_FAIL)
+	if (hash_update_dup(pht, "INSTALL_PROGRAM", "${INSTALL}") == false)
 		return(false);
-	if (hash_update_dup(pht, "INSTALL_SCRIPT", "${INSTALL}") == HASH_ADD_FAIL)
+	if (hash_update_dup(pht, "INSTALL_SCRIPT", "${INSTALL}") == false)
 		return(false);
 	if (hash_update_dup(pht, "INSTALL_STRIP_PROGRAM",
-			"${SHELL} $(install_sh) -c -s") == HASH_ADD_FAIL)
+			"${SHELL} $(install_sh) -c -s") == false)
 		return(false);
 
 /*
 	well i dunno if the following really needs to be full compatible with autoconf
 */
 	pstr = (char *) hash_get(pht, "OS_ARCH");
-	if (hash_update_dup(pht, "host_cpu", pstr) == HASH_ADD_FAIL)
+	if (hash_update_dup(pht, "host_cpu", pstr) == false)
 		return(false);
-	if (hash_update_dup(pht, "build_cpu", pstr) == HASH_ADD_FAIL)
+	if (hash_update_dup(pht, "build_cpu", pstr) == false)
 		return(false); /* XXX  ouargl cross compiling ... */
-	if (hash_update_dup(pht, "target_cpu", pstr) == HASH_ADD_FAIL)
+	if (hash_update_dup(pht, "target_cpu", pstr) == false)
 		return(false); /* XXX  ouargl cross compiling ... */
 
 	pstr = (char *) hash_get(pht, "OS_NAME");
@@ -401,18 +401,18 @@ bool ac_set_variables(htable *pht) {
 	if (strlcat_b(buf, pstr, sizeof(buf)) ==false)
 		return(false);
 
-	if (hash_update_dup(pht, "host_os", buf) == HASH_ADD_FAIL)
+	if (hash_update_dup(pht, "host_os", buf) == false)
 		return(false);
-	if (hash_update_dup(pht, "build_os", buf) == HASH_ADD_FAIL)
+	if (hash_update_dup(pht, "build_os", buf) == false)
 		return(false); /* XXX  ouargl cross compiling ... */
-	if (hash_update_dup(pht, "target_os", buf) == HASH_ADD_FAIL)
+	if (hash_update_dup(pht, "target_os", buf) == false)
 		return(false); /* XXX  ouargl cross compiling ... */
 
-	if (hash_update_dup(pht, "host_vendor", "vendorisnotset") == HASH_ADD_FAIL)
+	if (hash_update_dup(pht, "host_vendor", "vendorisnotset") == false)
 		return(false);
-	if (hash_update_dup(pht, "build_vendor", "vendorisnotset") == HASH_ADD_FAIL)
+	if (hash_update_dup(pht, "build_vendor", "vendorisnotset") == false)
 		return(false);
-	if (hash_update_dup(pht, "target_vendor", "vendorisnotset") == HASH_ADD_FAIL)
+	if (hash_update_dup(pht, "target_vendor", "vendorisnotset") == false)
 		return(false);
 
 	pstr = (char *) hash_get(pht, "host_cpu");
@@ -425,31 +425,31 @@ bool ac_set_variables(htable *pht) {
 	if (strlcat_b(buf, pstr, sizeof(buf)) == false)
 		return(false); /* overflow */
 
-	if (hash_update_dup(pht, "host", buf) == HASH_ADD_FAIL)
+	if (hash_update_dup(pht, "host", buf) == false)
 		return(false);
-	if (hash_update_dup(pht, "build", buf) == HASH_ADD_FAIL)
+	if (hash_update_dup(pht, "build", buf) == false)
 		return(false);
-	if (hash_update_dup(pht, "target", buf) == HASH_ADD_FAIL)
-		return(false);
-
-	if (hash_update_dup(pht, "host_alias", "") == HASH_ADD_FAIL)
-		return(false);
-	if (hash_update_dup(pht, "build_alias", "") == HASH_ADD_FAIL)
-		return(false);
-	if (hash_update_dup(pht, "target_alias", "") == HASH_ADD_FAIL)
+	if (hash_update_dup(pht, "target", buf) == false)
 		return(false);
 
-	if (hash_update_dup(pht, "build_triplet", "") == HASH_ADD_FAIL)
+	if (hash_update_dup(pht, "host_alias", "") == false)
 		return(false);
-	if (hash_update_dup(pht, "host_triplet", "") == HASH_ADD_FAIL)
+	if (hash_update_dup(pht, "build_alias", "") == false)
 		return(false);
-	if (hash_update_dup(pht, "target_triplet", "") == HASH_ADD_FAIL)
+	if (hash_update_dup(pht, "target_alias", "") == false)
+		return(false);
+
+	if (hash_update_dup(pht, "build_triplet", "") == false)
+		return(false);
+	if (hash_update_dup(pht, "host_triplet", "") == false)
+		return(false);
+	if (hash_update_dup(pht, "target_triplet", "") == false)
 		return(false);
 
 /* use values from pmk.conf */
 	pstr = (char *) hash_get(pht, PMKCONF_AC_ECHO_C);
 	if (pstr != NULL) {
-		if (hash_update_dup(pht, AC_ECHO_C, pstr) == HASH_ADD_FAIL) {
+		if (hash_update_dup(pht, AC_ECHO_C, pstr) == false) {
 			errorf("failed to set '%s'.", AC_ECHO_C);
 			return(false);
 		}
@@ -457,7 +457,7 @@ bool ac_set_variables(htable *pht) {
 
 	pstr = (char *) hash_get(pht, PMKCONF_AC_ECHO_N);
 	if (pstr != NULL) {
-		if (hash_update_dup(pht, AC_ECHO_N, pstr) == HASH_ADD_FAIL) {
+		if (hash_update_dup(pht, AC_ECHO_N, pstr) == false) {
 			errorf("failed to set '%s'.", AC_ECHO_N);
 			return(false);
 		}
@@ -465,7 +465,7 @@ bool ac_set_variables(htable *pht) {
 
 	pstr = (char *) hash_get(pht, PMKCONF_AC_ECHO_T);
 	if (pstr != NULL) {
-		if (hash_update_dup(pht, AC_ECHO_T, pstr) == HASH_ADD_FAIL) {
+		if (hash_update_dup(pht, AC_ECHO_T, pstr) == false) {
 			errorf("failed to set '%s'.", AC_ECHO_T);
 			return(false);
 		}
@@ -485,15 +485,15 @@ bool ac_set_variables(htable *pht) {
 	/*hash_add(pht, "LTLIBOBJS", strdup(""));                           */
 	/*hash_add(pht, "PATH_SEPARATOR", strdup(":")); |+ default shell is sh +|*/
 
-	if (hash_update_dup(pht, "install_sh", "pmkinstall") == HASH_ADD_FAIL)
+	if (hash_update_dup(pht, "install_sh", "pmkinstall") == false)
 		return(false); /* provide our own */
-	if (hash_update_dup(pht, "program_transform_name", "s,x,x,") == HASH_ADD_FAIL)
+	if (hash_update_dup(pht, "program_transform_name", "s,x,x,") == false)
 		return(false);
 
 	/* byte order */
 	pstr = (char *) hash_get(pht, PMKCONF_HW_BYTEORDER);
 	if (strncmp(pstr, HW_ENDIAN_BIG, sizeof(pstr)) == 0) {
-		if (hash_update_dup(pht, "WORDS_BIGENDIAN", "1") == HASH_ADD_FAIL)
+		if (hash_update_dup(pht, "WORDS_BIGENDIAN", "1") == false)
 			return(false);
 	}
 

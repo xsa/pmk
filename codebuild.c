@@ -219,7 +219,7 @@ bool set_language(code_bld_t *pcb, char *lang) {
 	returns the compiler path
  ***********************************************************************/
 
-char *set_compiler(code_bld_t *pcb, htable *pht) {
+char *set_compiler(code_bld_t *pcb, htable_t *pht) {
 	pcb->pathcomp = hash_get(pht, pcb->pld->compiler);
 
 	return(pcb->pathcomp);

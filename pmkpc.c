@@ -1,7 +1,7 @@
 /* $Id$ */
 
 /*
- * Copyright (c) 2004-2005 Damien Couderc
+ * Copyright (c) 2004-2006 Damien Couderc
  * Copyright (c) 2004 Xavier Santolaria <xavier@santolaria.net>
  * All rights reserved.
  *
@@ -260,7 +260,7 @@ bool list_all(pkgdata *ppd) {
 					 *pcfile,
 					**descr,
 					  fmt[32];
-	hkeys			 *phk;
+	hkeys_t			 *phk;
 	pkgcell			 *ppc;
 	size_t			  len,
 					  maxs = 0;
@@ -457,7 +457,7 @@ int main(int argc, char *argv[]) {
 	}
 
 	/* initialise global data hash table */
-	gdata.pht = hash_init(MAX_DATA_KEY);
+	gdata.pht = hash_create_simple(MAX_DATA_KEY);
 	if (gdata.pht == NULL) {
 		clean(&gdata);
 		errorf("cannot initialize hash table for data.");

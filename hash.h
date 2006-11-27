@@ -1,7 +1,7 @@
 /* $Id$ */
 
 /*
- * Copyright (c) 2003-2005 Damien Couderc
+ * Copyright (c) 2006 Damien Couderc
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,99 +34,111 @@
  */
 
 
+#include <sys/types.h>
+#include <stdbool.h>
+
+#ifndef _HASH_H_
+#define _HASH_H_
+
+/**********
+ * macros *
+ *************************************************************************************************************/
+
+/* for compatibility with previous code, to remove later */
+//#define hash_init(s)			hash_create_simple(s)
+//#define hash_init_adv(s,d,f,a)	hash_create(s,false,a,d,f)
+//#define htable					htable_t
+
 /*************
  * constants *
- ***********************************************************************/
+ *************************************************************************************************************/
 
-#ifndef _PMK_HASH_H_
-#define _PMK_HASH_H_
-
-#include "compat/pmk_stdbool.h"
-
-
-#ifndef MAX_HASH_KEY_LEN
-#	define MAX_HASH_KEY_LEN 256
-#endif
-
-#ifndef MAX_HASH_VALUE_LEN
-#	define MAX_HASH_VALUE_LEN 512
-#endif
-
-#define HASH_ADD_FAIL	0 /* addition or appending failed */
-#define HASH_ADD_OKAY	1 /* first add */
-#define HASH_ADD_COLL	2 /* collision, key chained */
-#define HASH_ADD_UPDT	3 /* key already exists, change value */
-#define HASH_ADD_APPD	4 /* value appended */
-
-/* error messages */
-#define HASH_ERR_UPDT		"Hash table update failed."
-#define HASH_ERR_UPDT_ARG	"Failed to update hash table key '%s'."
+enum {
+	HERR_NONE = 0,
+	HERR_CREATED,
+	HERR_ADDED,
+	HERR_UPDATED,
+	HERR_APPENDED,
+	HERR_MALLOC_FAILED,
+	HERR_FAPND_FAILED,
+	HERR_FDUP_FAILED,
+	HERR_FFREE_FAILED,
+	HERR_FAPND_NOT_DEF,
+	HERR_FDUP_NOT_DEF,
+	HERR_FFREE_NOT_DEF,
+	HERR_CELL_EXISTS,
+	HERR_NULL_DATA,
+	HERR_RESIZE_FAILED,
+	HERR_TABLE_FULL
+};
 
 
-/**********************************
- * type and structure definitions *
- ***********************************************************************/
+/********************
+ * type definitions *
+ *************************************************************************************************************/
 
-typedef struct s_hcell {
-	char			 key[MAX_HASH_KEY_LEN];
-	void			*value;
-	struct s_hcell	*next;
-} hcell;
+/* hash type */
+typedef uint32_t	hash_t;
 
+
+/* node cell type */
+typedef struct hcell_s {
+	char			*key;	/* cle */
+	void			*data;	/* donnees */
+	struct hcell_s	*prev,	/* cellule precedente */
+					*next;	/* cellule suivante */
+} hcell_t;
+
+/* node type */
 typedef struct {
-	hcell	*first,
+	hcell_t	*first,
 			*last;
-} hnode;
+} hnode_t;
 
+/* hash table type */
 typedef struct {
-	bool			 autogrow;
-	size_t			 count,
-					 size;
-	void			*(*dupobj)(void *),
-					 (*freeobj)(void *),
-					*(*appdobj)(void *, void *, void *);
-	hnode			*nodetab; /* array of hnode */
-} htable;
+	bool	 autogrow;
+	size_t	 count,
+			 size;
+	hnode_t	*harray;
+	int		 herr;
+	void	*(*apnd_data)(void *, void *, void *),
+			*(*dup_data)(void *),
+			 (*free_data)(void *);
+} htable_t;
 
-typedef struct {
-	char	 key[MAX_HASH_KEY_LEN];
-	void	*value;
-} hpair;
 
+/* hash keys type */
 typedef struct {
 	size_t	  nkey;
 	char	**keys;
-} hkeys;
+} hkeys_t;
 
 
-/***********************
- * function prototypes *
- ***********************************************************************/
+/**************
+ * prototypes *
+ *************************************************************************************************************/
 
-unsigned int	 hash_compute(char *, size_t);
-htable			*hash_init(size_t);
-htable			*hash_init_adv(size_t, void *(*)(void *), void (*)(void *), void *(*)(void *, void *, void *));
-bool			 hash_resize(htable *, size_t);
-void			 hash_set_grow(htable *);
-size_t			 hash_destroy(htable *);
-unsigned int	 hash_add(htable *, char *, void *);
-unsigned int	 hash_update(htable *, char *, void *);
-unsigned int	 hash_update_dup(htable *, char *, void *);
-unsigned int	 hash_add_cell(hnode *, hcell *);
-bool			 hash_add_array(htable *, hpair *, size_t);
-bool			 hash_add_array_adv(htable *, hpair *, size_t, void *(*)(void *));
-unsigned int	 hash_append(htable *, char *, void *, void *);
-void			 hash_delete(htable *, char *);
-void			*hash_extract(htable *, char *);
-void			*hash_get(htable *, char *);
-size_t			 hash_merge(htable *, htable *);
-size_t			 hash_nbkey(htable *);
-hkeys			*hash_keys(htable *);
-hkeys			*hash_keys_sorted(htable *);
-void			 hash_free_hcell(htable *, hcell *);
-void			 hash_free_hkeys(hkeys *);
-void			*hash_str_append(void *, void *, void *);
+/* public functions prototypes */
+htable_t	*hash_create(size_t, bool, void *(*)(void *, void *, void *), void *(*)(void *), void (*)(void *));
+bool		 hash_add(htable_t *, char *, void *);
+bool		 hash_add_dup(htable_t *, char *, void *);
+bool		 hash_update(htable_t *, char *, void *);
+bool		 hash_update_dup(htable_t *, char *, void *);
+bool		 hash_append(htable_t *, char *, void *, void *);
+void		*hash_get(htable_t *, char *);
+void		*hash_extract(htable_t *, char *);
+void		 hash_delete(htable_t *, char *);
+bool		 hash_merge(htable_t *, htable_t *, bool);
+bool		 hash_resize(htable_t *, size_t);
+bool		 hash_check_grow(htable_t *);
+void		 hash_destroy(htable_t *);
+size_t		 hash_nbkey(htable_t *);
+hkeys_t		*hash_keys(htable_t *);
+hkeys_t		*hash_keys_sorted(htable_t *);
+void		 hash_free_hkeys(hkeys_t *);
+char		*hash_error(htable_t *);
 
-#endif /* _PMK_HASH_H_ */
+#endif /* _HASH_H_ */
 
 /* vim: set noexpandtab tabstop=4 softtabstop=4 shiftwidth=4: */

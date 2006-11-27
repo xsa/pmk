@@ -1,7 +1,7 @@
 /* $Id$ */
 
 /*
- * Copyright (c) 2004 Damien Couderc
+ * Copyright (c) 2006 Damien Couderc
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,7 +37,7 @@
 #ifndef _PMK_CFGTOOL_H_
 #define _PMK_CFGTOOL_H_
 
-#include "hash.h"
+#include "hash_tools.h"
 
 
 /*************
@@ -82,8 +82,8 @@ typedef struct {
 
 
 typedef struct {
-	htable	*by_mod,
-			*by_bin;
+	htable_t	*by_mod,
+				*by_bin;
 } cfgtdata;
 
 
@@ -95,7 +95,7 @@ void		 cfgtcell_destroy(cfgtcell *);
 cfgtdata	*cfgtdata_init(void);
 void		 cfgtdata_destroy(cfgtdata *);
 
-bool		 add_cfgtool(cfgtdata *, htable *);
+bool		 add_cfgtool(cfgtdata *, htable_t *);
 cfgtdata	*parse_cfgt_file(void);
 bool		 cfgtcell_get_binary(cfgtdata *, char *, char *, size_t);
 cfgtcell	*cfgtcell_get_cell(cfgtdata *, char *);
