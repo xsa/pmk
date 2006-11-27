@@ -1,7 +1,7 @@
 /* $Id$ */
 
 /*
- * Copyright (c) 2003-2005 Damien Couderc
+ * Copyright (c) 2003-2006 Damien Couderc
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -117,7 +117,7 @@
 /* structures */
 typedef struct {
 	char	kw[CMD_LEN];
-	bool	(*fnp)(pmkcmd *, htable *, pmkdata *);
+	bool	(*fnp)(pmkcmd *, htable_t *, pmkdata *);
 } cmdkw;
 
 
@@ -128,21 +128,21 @@ typedef struct {
 bool	func_wrapper(prscell *, pmkdata *);
 bool	process_node(prsnode *, pmkdata *);
 bool	pmk_define(pmkcmd *, prsnode *, pmkdata *);
-bool	pmk_target(pmkcmd *, htable *, pmkdata *);
-bool	pmk_ac_compat(pmkcmd *, htable *, pmkdata *);
+bool	pmk_target(pmkcmd *, htable_t *, pmkdata *);
+bool	pmk_ac_compat(pmkcmd *, htable_t *, pmkdata *);
 bool	pmk_settings(pmkcmd *, prsnode *, pmkdata *);
 bool	pmk_ifcond(pmkcmd *, prsnode *, pmkdata *);
 bool	pmk_elcond(pmkcmd *, prsnode *, pmkdata *);
-bool	pmk_switches(pmkcmd *, htable *, pmkdata *);
-bool	pmk_check_binary(pmkcmd *, htable *, pmkdata *);
-bool	pmk_check_header(pmkcmd *, htable *, pmkdata *);
-bool	pmk_check_lib(pmkcmd *, htable *, pmkdata *);
-bool	pmk_check_config(pmkcmd *, htable *, pmkdata *);
-bool	pmk_check_pkg_config(pmkcmd *, htable *, pmkdata *);
-bool	pmk_check_type(pmkcmd *, htable *, pmkdata *);
-bool	pmk_check_variable(pmkcmd *, htable *, pmkdata *);
-bool	pmk_build_lib_name(pmkcmd *, htable *, pmkdata *);
-bool	pmk_build_shlib_name(pmkcmd *, htable *, pmkdata *);
+bool	pmk_switches(pmkcmd *, htable_t *, pmkdata *);
+bool	pmk_check_binary(pmkcmd *, htable_t *, pmkdata *);
+bool	pmk_check_header(pmkcmd *, htable_t *, pmkdata *);
+bool	pmk_check_lib(pmkcmd *, htable_t *, pmkdata *);
+bool	pmk_check_config(pmkcmd *, htable_t *, pmkdata *);
+bool	pmk_check_pkg_config(pmkcmd *, htable_t *, pmkdata *);
+bool	pmk_check_type(pmkcmd *, htable_t *, pmkdata *);
+bool	pmk_check_variable(pmkcmd *, htable_t *, pmkdata *);
+bool	pmk_build_lib_name(pmkcmd *, htable_t *, pmkdata *);
+bool	pmk_build_shlib_name(pmkcmd *, htable_t *, pmkdata *);
 
 bool	pmk_set_parameter(pmkcmd *, prsopt *, pmkdata *);
 bool	pmk_setparam_accompat(pmkcmd *, prsopt *, pmkdata *);

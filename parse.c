@@ -41,7 +41,6 @@
 #include "compat/pmk_string.h"
 
 #include "common.h"
-#include "hash.h"
 #include "parse.h"
 #include "prseng.h"
 
@@ -220,11 +219,11 @@ void prsnode_destroy(prsnode *pnode) {
  ***********************************************************************/
 
 prscell *prscell_init(int token, int type, int subtoken) {
-	bool	 rval = false;
-	htable	*pht;
-	prscell	*pcell;
-	prsnode	*pnode;
-	prsopt	*popt;
+	bool		 rval = false;
+	htable_t	*pht;
+	prscell		*pcell;
+	prsnode		*pnode;
+	prsopt		*popt;
 
 	pcell = (prscell *) malloc(sizeof(prscell));
 
@@ -243,10 +242,11 @@ prscell *prscell_init(int token, int type, int subtoken) {
 				break;
 
 			case PRS_KW_CELL :
-				pht = hash_init_adv(MAX_CMD_OPT,
-					(void *(*)(void *))po_dup,
-					(void (*)(void *))po_free,
-					(void *(*)(void *, void *, void *))po_append);
+				pht = hash_create(MAX_CMD_OPT,
+									false,
+									(void *(*)(void *, void *, void *)) po_append,
+									(void *(*)(void *)) po_dup,
+									(void (*)(void *)) po_free);
 				if (pht != NULL) {
 					pcell->data = pht;
 					rval = true;
@@ -414,19 +414,19 @@ void prsopt_destroy(prsopt *ppo) {
 	hash table
  ***********************************************************************/
 
-htable *keyword_hash(prskw kwtab[], int nbkw) {
-	htable	*phkw;
-	int		 i;
-	prskw	*pkw;
+htable_t *keyword_hash(prskw kwtab[], int nbkw) {
+	htable_t	*phkw;
+	int			 i;
+	prskw		*pkw;
 
-	phkw = hash_init_adv(nbkw, (void *(*)(void *))strdup, free, NULL);
+	phkw = hash_create(nbkw, false, NULL, (void *(*)(void *))strdup, free);
 	if (phkw != NULL) {
 		/* fill keywords hash */
 		for(i = 0 ; i < nbkw ; i++) {
 			pkw = (prskw *) malloc(sizeof(prskw));
 			memmove(pkw, &kwtab[i], sizeof(prskw));
 			if (hash_update(phkw, kwtab[i].kw,	/* no need to strdup */
-					pkw) == HASH_ADD_FAIL) {
+					pkw) == false) {
 				hash_destroy(phkw);
 				errorf("failed to fill keywords hash table.");
 				return(NULL);
@@ -1407,10 +1407,13 @@ bool parse_clopt(char *line, prsopt *popt, char *seplst) {
  ***********************************************************************/
 
 kw_t *check_opt_avl(char *key, kw_t *opts, size_t nbopts) {
-	int	i;
+	int		i;
+	size_t	s;
+
+	s = strlen(key) + 1;
 
 	for (i = 0 ; i < (int) nbopts ; i++) {
-		if (strncmp(key, opts[i].name, MAX_HASH_VALUE_LEN) == 0) {
+		if (strncmp(key, opts[i].name, s) == 0) {
 			return(&opts[i]);
 		}
 	}
@@ -1594,7 +1597,7 @@ bool process_block_opt(prseng_t *ppe, prsnode *pnode, prscell *pcell) {
 			}
 
 			if (hash_update(pcell->data, opt.key, /* no need to strdup */
-										opt.value) == HASH_ADD_FAIL) {
+										opt.value) == false) {
 				strlcpy(parse_err, PRS_ERR_HASH, sizeof(parse_err)); /* no check */
 				return false;
 			}
@@ -1861,11 +1864,11 @@ bool parse_pmkfile(FILE *fp, prsdata *pdata, prskw kwtab[], size_t size) {
 	boolean
  ***********************************************************************/
 
-bool process_opt(htable *pht, prsopt *popt) {
+bool process_opt(htable_t *pht, prsopt *popt) {
 	if ((popt->opchar != CHAR_COMMENT) && (popt->opchar != CHAR_EOS)) {
 		/* add options that are not comment neither blank lines */
 		if (hash_update_dup(pht, popt->key,
-							po_get_str(popt->value)) == HASH_ADD_FAIL) {
+							po_get_str(popt->value)) == false) {
 			errorf("hash failure.");
 			return false;
 		}
@@ -1890,8 +1893,8 @@ bool process_opt(htable *pht, prsopt *popt) {
 	boolean
  ***********************************************************************/
 
-bool parse_pmkconf(FILE *fp, htable *pht, char *seplst,
-									bool (*func)(htable *, prsopt *)) {
+bool parse_pmkconf(FILE *fp, htable_t *pht, char *seplst,
+									bool (*func)(htable_t *, prsopt *)) {
 	bool		 loop;
 	char		*pbuf,
 				 c,

@@ -67,8 +67,8 @@ AUTOCONF_SRCS=	autoconf.c autoconf.h cfgtool.h common.h compat/config.h \
 
 CFGTOOL_SRCS=	cfgtool.c cfgtool.h common.h compat/config.h \
 		compat/pmk_stdbool.h compat/pmk_stdio.h \
-		compat/pmk_string.h dynarray.h errmsg.h hash.h parse.h \
-		pmk_obj.h premake.h prseng.h
+		compat/pmk_string.h dynarray.h errmsg.h hash.h \
+		hash_tools.h parse.h pmk_obj.h premake.h prseng.h
 
 CODEBUILD_SRCS=	codebuild.c codebuild.h common.h compat/config.h \
 		compat/pmk_stdbool.h compat/pmk_stdio.h \
@@ -88,15 +88,15 @@ COMPAT_SRCS=	compat.c compat.h compat/config.h compat/pmk_ctype.h \
 DETECT_SRCS=	common.h compat/config.h compat/pmk_stdbool.h \
 		compat/pmk_stdio.h compat/pmk_string.h \
 		compat/pmk_unistd.h detect.c detect.h dynarray.h \
-		errmsg.h hash.h lang.h parse.h pmk_obj.h premake.h \
-		prseng.h
+		errmsg.h hash.h hash_tools.h lang.h parse.h pmk_obj.h \
+		premake.h prseng.h
 
 DETECT_CPU_SRCS=	common.h compat/config.h compat/pmk_stdbool.h \
 			compat/pmk_stdio.h compat/pmk_string.h \
 			compat/pmk_sys_types.h cpu_arch_def.h \
 			detect_cpu.c detect_cpu.h detect_cpu_asm.h \
-			dynarray.h errmsg.h hash.h parse.h pmk_obj.h \
-			premake.h prseng.h
+			dynarray.h errmsg.h hash.h hash_tools.h parse.h \
+			pmk_obj.h premake.h prseng.h
 
 DETECT_CPU_ASM_SRCS=	cpu_arch_def.h detect_cpu_asm.s
 
@@ -117,9 +117,7 @@ FUNCTOOL_SRCS=	cfgtool.h common.h compat/config.h compat/pmk_ctype.h \
 		hash_tools.h parse.h pmk.h pmk_obj.h premake.h prseng.h \
 		tags.h
 
-HASH_SRCS=	common.h compat/config.h compat/pmk_stdbool.h \
-		compat/pmk_stdio.h compat/pmk_string.h dynarray.h \
-		errmsg.h hash.c hash.h pmk_obj.h premake.h
+HASH_SRCS=	hash.c hash.h
 
 HASH_TOOLS_SRCS=	compat/config.h compat/pmk_stdbool.h compat/pmk_stdio.h \
 			compat/pmk_string.h dynarray.h errmsg.h hash.h \
@@ -183,8 +181,8 @@ PMKSETUP_SRCS=	common.h compat/config.h compat/pmk_stdbool.h \
 		compat/pmk_stdio.h compat/pmk_string.h \
 		compat/pmk_sys_types.h compat/pmk_unistd.h \
 		cpu_arch_def.h detect_cpu.h dynarray.h errmsg.h hash.h \
-		parse.h pmk_obj.h pmksetup.c pmksetup.h premake.h \
-		prseng.h
+		hash_tools.h parse.h pmk_obj.h pmksetup.c pmksetup.h \
+		premake.h prseng.h
 
 PRSENG_SRCS=	compat/config.h compat/pmk_stdbool.h compat/pmk_stdio.h \
 		compat/pmk_string.h prseng.c prseng.h
@@ -223,7 +221,8 @@ PMKSCAN_OBJS=	common.o compat.o dynarray.o hash.o hash_tools.o parse.o \
 		tags.o
 
 PMKSETUP_OBJS=	common.o compat.o detect_cpu.o detect_cpu_asm.o \
-		dynarray.o hash.o parse.o pmk_obj.o pmksetup.o prseng.o
+		dynarray.o hash.o hash_tools.o parse.o pmk_obj.o \
+		pmksetup.o prseng.o
 
 #
 # target lists

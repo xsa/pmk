@@ -1,7 +1,7 @@
 /* $Id$ */
 
 /*
- * Copyright (c) 2003-2004 Damien Couderc
+ * Copyright (c) 2003-2006 Damien Couderc
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -73,23 +73,23 @@
 /* package structures */
 
 typedef struct {
-	char	*name,
-		*descr,
-		*version,
-		*requires;
-	dynary	*cflags,
-		*libs;
-	htable	*variables;
+	char		*name,
+				*descr,
+				*version,
+				*requires;
+	dynary		*cflags,
+				*libs;
+	htable_t	*variables;
 } pkgcell;
 
 typedef struct {
-	htable	*files,
-		*cells;
-	dynary	*mods;
+	htable_t	*files,
+				*cells;
+	dynary		*mods;
 } pkgdata;
 
 typedef struct {
-	char		*kw_name;
+	char			*kw_name;
 	unsigned int	 kw_id;
 } pkgkw;
 
@@ -107,7 +107,7 @@ char		*skip_blank(char *);
 bool		 scan_dir(char *, pkgdata *);
 bool		 pkg_collect(char *, pkgdata *);
 bool		 parse_keyword(pkgcell *, char *, char *);
-char		*process_variables(char *, htable *);
+char		*process_variables(char *, htable_t *);
 pkgcell		*parse_pc_file(char *);
 pkgcell		*pkg_cell_add(pkgdata *, char *);
 bool		 pkg_recurse(pkgdata *, char *);
@@ -120,5 +120,6 @@ bool		 pkg_mod_exists(pkgdata *, char *);
 
 int			 compare_version(char *, char *);
 
-
 #endif /* _PMK_PKGCONFIG_H_ */
+
+/* vim: set noexpandtab tabstop=4 softtabstop=4 shiftwidth=4: */

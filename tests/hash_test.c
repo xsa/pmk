@@ -9,30 +9,30 @@
 
 #include "../compat/pmk_stdio.h"
 #include "../compat/pmk_string.h"
-#include "../hash.h"
+#include "../hash_tools.h"
 
 #define TAB_SIZE 256
 #define NBKEYS 256
 
 
-hpair	testab[] = {
-			{ "test1", "test value 1"},
-			{ "test2", "test value 2"},
-			{ "test3", "test value 3"}
-		};
+/*hpair	testab[] = {                                 */
+/*                        { "test1", "test value 1"},*/
+/*                        { "test2", "test value 2"},*/
+/*                        { "test3", "test value 3"} */
+/*                };                                 */
 
 int main(void) {
-	int		n;
+	bool		r;
 	char		tstr[256],
 			ttstr[256],
 			*val;
-	hkeys		*phk = NULL;
-	htable		*hp;
+	hkeys_t		*phk = NULL;
+	htable_t	*hp;
 	unsigned int	i;
 
 	printf("Testing init\n");
-	hp = hash_init(TAB_SIZE / 2);
-	hash_set_grow(hp);
+	hp = hash_create_simple(TAB_SIZE / 2);
+	hp->autogrow = true;
 
 	printf("Adding test key\n");
 	hash_add(hp, "prefix", strdup("/usr/local"));
@@ -77,20 +77,28 @@ int main(void) {
 		printf("found\n");
 	}
 
-	n = sizeof(testab) / sizeof(hpair);
-	printf("Adding %d test keys\n", n);
-	hash_add_array(hp, testab, n);
+	/*n = sizeof(testab) / sizeof(hpair);*/
+	/*printf("Adding %d test keys\n", n);*/
+	/*hash_add_array(hp, testab, n);     */
+	hash_add_dup(hp, "test1", "value 1");
+	hash_add_dup(hp, "test2", "value 2");
+	hash_add_dup(hp, "test3", "value 3");
 
 	phk = hash_keys(hp);
-	printf("Displaying %d keys :\n", n);
-	for(i = 0 ; i < phk->nkey ; i++) {
-		printf("\t%s => %s\n", (char *) phk->keys[i], (char *) hash_get(hp, phk->keys[i]));
+	if (phk == NULL) {
+		printf("Nothing to display !!!\n");
+	} else {
+		printf("Displaying keys :\n");
+		for(i = 0 ; i < phk->nkey ; i++) {
+			printf("\t%s", (char *) phk->keys[i]);
+			printf(" => %s\n", (char *) hash_get(hp, phk->keys[i]));
+		}
 	}
 
 	printf("Removing 3 test keys\n");
 	hash_delete(hp, "test1");
 	hash_delete(hp, "test2");
-	hash_delete(hp, "test3");
+	hash_delete(hp, "test 3");
 
 	printf("Adding %d random keys\n", NBKEYS);
 
@@ -100,23 +108,19 @@ int main(void) {
 		if (mktemp(tstr) != NULL) {
 			snprintf(ttstr, sizeof(ttstr), "value.%s", tstr);
 
-			n = hash_add(hp, tstr, strdup(ttstr));
+			r = hash_add(hp, tstr, strdup(ttstr));
 			printf("(%3d) ", i);
-			switch (n) {
-				case HASH_ADD_FAIL:
-					printf("Failed add for key %s\n", tstr);
-					break;
-				case HASH_ADD_OKAY:
+			switch (hp->herr) {
+				case HERR_ADDED:
 					printf("Added for key %s\n", tstr);
 					break;
-				case HASH_ADD_COLL:
-					printf("Collision for key %s\n", tstr);
-					break;
-				case HASH_ADD_UPDT:
+
+				case HERR_UPDATED:
 					printf("Updated key %s\n", tstr);
 					break;
+
 				default:
-					printf("Unknown return value %s\n", tstr);
+					printf("Failed add for key %s\n", tstr);
 					break;
 			}
 		} else {
@@ -125,8 +129,8 @@ int main(void) {
 	}
 
 	printf("Testing destroy\n");
-	n = hash_destroy(hp);
-	printf("Removed %d key(s)\n", n);
+	/*printf("Removing %d key(s)\n", n);*/
+	hash_destroy(hp);
 
 	return(0);
 }

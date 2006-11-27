@@ -1,7 +1,7 @@
 /* $Id$ */
 
 /*
- * Copyright (c) 2004-2005 Damien Couderc
+ * Copyright (c) 2004-2006 Damien Couderc
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,23 +43,98 @@
 #include "premake.h"
 
 
+/*********************
+ * hash_str_append() *
+ ***********************************************************************
+ %DESCR
+	append function for string hash
+
+ %PARAM orig :	original value
+ %PARAM value :	value to append
+ %PARAM sep :	separator
+
+ %RETURN resulting value or NULL if failed
+ ***********************************************************************/
+
+void *hash_str_append(void *orig, void *value, void *sep) {
+	char	*pbuf;
+	size_t	 s;
+
+	/* compute needed space */
+	if (sep != NULL) {
+		s = strlen((char *) sep);
+	} else {
+		s = 0;
+	}
+	s = s + strlen((char *) orig) + strlen((char *) value) + 1;
+
+	/* allocate space */
+	pbuf = (char *) malloc(s);
+
+	if (strlcpy_b(pbuf, orig, s) == false) {
+		free(value);
+		free(pbuf);
+#ifdef HASH_DEBUG
+		debugf("hash_str_append : strlcpy1 failed");
+#endif
+		return(NULL);
+	}
+
+	if ((sep != NULL) && (pbuf[0] != '\0')) {
+		/* adding separator if provided and if
+			string is not empty */
+		if (strlcat_b(pbuf, (char *) sep, s) == false) {
+			free(value);
+			free(pbuf);
+#ifdef HASH_DEBUG
+		debugf("hash_str_append : strlcat1 failed");
+#endif
+			return(NULL);
+		}
+	}
+	if (strlcat_b(pbuf, value, s) == false) {
+		free(value);
+		free(pbuf);
+#ifdef HASH_DEBUG
+		debugf("hash_str_append : strlcat2 failed");
+#endif
+		return(NULL);
+	}
+
+	free(value);
+	return((void *) pbuf);
+}
+
+
+/************************
+ * hash_create_simple() *
+ *************************************************************************************************************
+ %DESCR allocation and initialization of a simple hash table (data is characters strings)
+
+ %PARAM size : hash table size
+
+ %RETURN hash table pointer or NULL on failure
+ *************************************************************************************************************/
+
+htable_t *hash_create_simple(size_t table_size) {
+	return(hash_create(table_size, false, hash_str_append, (void *(*)(void *)) strdup, free));
+}
+
+
 /**************
  * parse_idtf *
  ***********************************************************************
- DESCR
-	parse string for identifiers
+ %DESCR parse string for identifiers
 
- IN
-	pstr : string to parse
-	pbuf : resulting string buffer
-	size : size of buffer
+ %PARAM pstr : string to parse
+ %PARAM pbuf : resulting string buffer
+ %PARAM size : size of buffer
 
- OUT
-	buffer address or NULL
+ %RETURN buffer address or NULL
  ***********************************************************************/
 
 char *parse_idtf(char *pstr, char *pbuf, size_t size) {
-	while (((isalnum(*pstr) != 0) || (*pstr == '_')) && (size > 0)) {
+	while (((isalnum((int) *pstr) != 0) || (*pstr == '_')) && (size > 0)) {
 		*pbuf = *pstr;
 		pbuf++;
 		pstr++;
@@ -79,18 +154,16 @@ char *parse_idtf(char *pstr, char *pbuf, size_t size) {
 /******************
  * process_string *
  ***********************************************************************
- DESCR
+ %DESCR
 	process string to substitute variables with their values
 
- IN
-	pstr : string to process
-	pht : hash table where variables are stored
+ %PARAM pstr : string to process
+ %PARAM pht : hash table where variables are stored
 
- OUT
-	new string or NULL
+ %RETURN new string or NULL
  ***********************************************************************/
 
-char *process_string(char *pstr, htable *pht) {
+char *process_string(char *pstr, htable_t *pht) {
 	bool	 bs = false;
 	char	 buf[OPT_VALUE_LEN],
 			 var[OPT_NAME_LEN],
@@ -181,19 +254,16 @@ char *process_string(char *pstr, htable *pht) {
 /*****************
  * single_append *
  ***********************************************************************
- DESCR
-	append only if not already in the string
+ %DESCR append only if not already in the string
 
- IN
-	pht : hash table
-	key : key where to append
-	value : value to append
+ %PARAM pht : hash table
+ %PARAM key : key where to append
+ %PARAM value : value to append
 
- OUT
-	boolean
+ %RETURN boolean
  ***********************************************************************/
 
-bool single_append(htable *pht, char *key, char *value) {
+bool single_append(htable_t *pht, char *key, char *value) {
 	bool	 found = false;
 	char	*cval,
 			*pstr;
@@ -219,7 +289,7 @@ bool single_append(htable *pht, char *key, char *value) {
 	}
 
 	if (found == false) {
-		if (hash_append(pht, key, value, " ") == HASH_ADD_FAIL) {
+		if (hash_append(pht, key, value, " ") == false) {
 			/* add failed */
 			return(false);
 		}
@@ -228,3 +298,4 @@ bool single_append(htable *pht, char *key, char *value) {
 	return(true);
 }
 
+/* vim: set noexpandtab tabstop=4 softtabstop=4 shiftwidth=4: */

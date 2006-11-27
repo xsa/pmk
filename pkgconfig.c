@@ -1,7 +1,7 @@
 /* $Id$ */
 
 /*
- * Copyright (c) 2003-2005 Damien Couderc
+ * Copyright (c) 2003-2006 Damien Couderc
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -118,7 +118,7 @@ pkgcell *pkgcell_init(void) {
 		return(NULL);
 	}
 
-	ppc->variables = hash_init(PKGCFG_HTABLE_SIZE);
+	ppc->variables = hash_create_simple(PKGCFG_HTABLE_SIZE);
 	if (ppc->variables == NULL) {
 		free(ppc);
 		errorf("cannot initialize pkgcell hash table.");
@@ -188,15 +188,14 @@ pkgdata *pkgdata_init(void) {
 		return(NULL);
 
 	/* init pc files hash table */
-	ppd->files = hash_init(PKGCFG_HT_SIZE);
+	ppd->files = hash_create_simple(PKGCFG_HT_SIZE);
 	if (ppd->files == NULL) {
 		free(ppd);
 		return(NULL);
 	}
 
 	/* init package cells hash table */
-	ppd->cells = hash_init_adv(PKGCFG_HT_SIZE, NULL,
-		(void (*)(void *))pkgcell_destroy, NULL);
+	ppd->cells = hash_create(PKGCFG_HT_SIZE, false, NULL, NULL, (void (*)(void *))pkgcell_destroy);
 	if (ppd->cells == NULL) {
 		hash_destroy(ppd->files);
 		free(ppd);
@@ -493,7 +492,7 @@ bool parse_keyword(pkgcell *ppc, char *kword, char *value) {
 	new string or NULL
 ************************************************************************/
 
-char *process_variables(char *pstr, htable *pht) {
+char *process_variables(char *pstr, htable_t *pht) {
 	bool	 bs = false;
 	char	 buf[OPT_VALUE_LEN],
 			 var[OPT_NAME_LEN],
@@ -646,7 +645,7 @@ pkgcell *parse_pc_file(char *pcfile) {
 				debugf("variable = '%s', value = '%s', string = '%s'", buf, pps, pstr);
 #endif
 				/* store variable in hash */
-				if (hash_update_dup(ppc->variables, buf, pps) == HASH_ADD_FAIL) {
+				if (hash_update_dup(ppc->variables, buf, pps) == false) {
 					errorf("cannot fill pkgcell structure (variables).");
 					pkgcell_destroy(ppc);
 					return(NULL);
@@ -696,7 +695,7 @@ pkgcell *pkg_cell_add(pkgdata *ppd, char *mod) {
 		return(NULL);
 
 	/* store pkgcell in hash */
-	if (hash_update(ppd->cells, mod, ppc) == HASH_ADD_FAIL) {
+	if (hash_update(ppd->cells, mod, ppc) == false) {
 		return(NULL);
 #ifdef PKGCFG_DEBUG
 	} else {

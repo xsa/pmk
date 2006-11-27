@@ -1,7 +1,7 @@
 /* $Id$ */
 
 /*
- * Copyright (c) 2003-2004 Damien Couderc
+ * Copyright (c) 2003-2006 Damien Couderc
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -60,7 +60,7 @@
 
 bool	ac_parse_config(pmkdata *);
 bool	ac_process_dyn_var(pmkdata *, char *);
-void	ac_clean_dyn_var(htable *);
-bool	ac_set_variables(htable *);
+void	ac_clean_dyn_var(htable_t *);
+bool	ac_set_variables(htable_t *);
 
 #endif /* _PMK_AUTOCONF_H_ */

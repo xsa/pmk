@@ -1,7 +1,7 @@
 /* $Id$ */
 
 /*
- * Copyright (c) 2004-2005 Damien Couderc
+ * Copyright (c) 2004-2006 Damien Couderc
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -110,8 +110,7 @@ cfgtdata *cfgtdata_init(void) {
 	}
 
 	/* initialize config tool hash table */
-	pcd->by_mod = hash_init_adv(CFGTOOL_HT_SIZE, NULL,
-			(void (*)(void *)) cfgtcell_destroy, NULL);
+	pcd->by_mod = hash_create(CFGTOOL_HT_SIZE, false, NULL, NULL, (void (*)(void *)) cfgtcell_destroy);
 	if (pcd->by_mod == NULL) {
 		free(pcd);
 #ifdef CFGT_DEBUG
@@ -121,7 +120,7 @@ cfgtdata *cfgtdata_init(void) {
 	}
 
 	/* initialize config tool hash table */
-	pcd->by_bin = hash_init(CFGTOOL_HT_SIZE);
+	pcd->by_bin = hash_create_simple(CFGTOOL_HT_SIZE);
 	if (pcd->by_bin == NULL) {
 		hash_destroy(pcd->by_mod);
 		free(pcd);
@@ -188,7 +187,7 @@ debugf("WARNING : by_bin doesn't exists !!!");
 	boolean
  ***********************************************************************/
 
-bool add_cfgtool(cfgtdata *pcd, htable *pht) {
+bool add_cfgtool(cfgtdata *pcd, htable_t *pht) {
 	cfgtcell	*pcell;
 	char		*pstr;
 
@@ -272,12 +271,12 @@ bool add_cfgtool(cfgtdata *pcd, htable *pht) {
 	}
 
 	/* no need to strdup */
-	if (hash_update(pcd->by_mod, pcell->name, pcell) == HASH_ADD_FAIL)
+	if (hash_update(pcd->by_mod, pcell->name, pcell) == false)
 		return(false);
 #ifdef CFGT_DEBUG
 debugf("added cfgtcell '%s'", pcell->name);
 #endif
-	if (hash_update_dup(pcd->by_bin, pcell->binary, pcell->name) == HASH_ADD_FAIL)
+	if (hash_update_dup(pcd->by_bin, pcell->binary, pcell->name) == false)
 		return(false);
 #ifdef CFGT_DEBUG
 debugf("added cfgtcell '%s'", pcell->binary);

@@ -612,9 +612,9 @@ void lib_cell_destroy(lib_cell_t *plc) {
 	scan zone structure
  ***********************************************************************/
 
-scn_zone_t *scan_zone_init(htable *nodes) {
+scn_zone_t *scan_zone_init(htable_t *nodes) {
 	scn_zone_t	*pzone;
-	size_t			i;
+	size_t		 i;
 
 	pzone = (scn_zone_t *) malloc(sizeof(scn_zone_t));
 	if (pzone != NULL) {
@@ -650,12 +650,12 @@ scn_zone_t *scan_zone_init(htable *nodes) {
 		pzone->found_src = false;
 
 		/* init zone tables */
-		pzone->objects = hash_init(256); /* XXX can do better :) */
-		pzone->targets = hash_init(256); /* XXX can do better :) */
-		pzone->libraries = hash_init_adv(16, NULL, (void (*)(void *)) lib_cell_destroy, NULL); /* library cells */
-		pzone->h_checks = hash_init_adv(128, NULL, (void (*)(void *)) destroy_chk_cell, NULL); /* XXX can do better :) */
-		pzone->l_checks = hash_init_adv(128, NULL, (void (*)(void *)) destroy_chk_cell, NULL); /* XXX can do better :) */
-		pzone->t_checks = hash_init_adv(128, NULL, (void (*)(void *)) destroy_chk_cell, NULL); /* XXX can do better :) */
+		pzone->objects = hash_create_simple(256); /* XXX can do better :) */
+		pzone->targets = hash_create_simple(256); /* XXX can do better :) */
+		pzone->libraries = hash_create(16, false, NULL, NULL, (void (*)(void *)) lib_cell_destroy); /* library cells */
+		pzone->h_checks = hash_create(128, false, NULL, NULL, (void (*)(void *)) destroy_chk_cell); /* XXX can do better :) */
+		pzone->l_checks = hash_create(128, false, NULL, NULL, (void (*)(void *)) destroy_chk_cell); /* XXX can do better :) */
+		pzone->t_checks = hash_create(128, false, NULL, NULL, (void (*)(void *)) destroy_chk_cell); /* XXX can do better :) */
 
 		/* init directory list to scan */
 		pzone->dirlist = da_init();
@@ -825,7 +825,7 @@ void destroy_chk_cell(check_t *pchk) {
 	pointer to new cell or NULL
  ***********************************************************************/
 
-check_t *mk_chk_cell(htable *pht, int token) {
+check_t *mk_chk_cell(htable_t *pht, int token) {
 	check_t	*pchk;
 
 	pchk = (check_t *) malloc(sizeof(check_t));
@@ -904,9 +904,9 @@ bool parse_data_file(prsdata *pdata, scandata *sdata) {
 	}
 
 	/* init hash tables */
-	sdata->headers = hash_init_adv(256, NULL, free, NULL);
-	sdata->libraries = hash_init_adv(256, NULL, free, NULL);
-	sdata->types = hash_init_adv(256, NULL, free, NULL);
+	sdata->headers = hash_create(256, false, NULL, NULL, free);
+	sdata->libraries = hash_create(256, false, NULL, NULL, free);
+	sdata->types = hash_create(256, false, NULL, NULL, free);
 
 	rval = parse_pmkfile(fd, pdata, kw_pmkscan, nbkwps);
 	fclose(fd);
@@ -926,7 +926,7 @@ bool parse_data_file(prsdata *pdata, scandata *sdata) {
 					return false;
 				}
 
-				if (hash_add(sdata->headers, pchk->name, pchk) == HASH_ADD_FAIL) {
+				if (hash_add(sdata->headers, pchk->name, pchk) == false) {
 					errorf("failed to add '%s'", pchk->name);
 					return false;
 				}
@@ -939,7 +939,7 @@ bool parse_data_file(prsdata *pdata, scandata *sdata) {
 					return false;
 				}
 
-				if (hash_add(sdata->libraries, pchk->name, pchk) == HASH_ADD_FAIL) {
+				if (hash_add(sdata->libraries, pchk->name, pchk) == false) {
 					errorf("failed to add '%s'", pchk->name);
 					return false;
 				}
@@ -952,7 +952,7 @@ bool parse_data_file(prsdata *pdata, scandata *sdata) {
 					return false;
 				}
 
-				if (hash_add(sdata->types, pchk->name, pchk) == HASH_ADD_FAIL) {
+				if (hash_add(sdata->types, pchk->name, pchk) == false) {
 					errorf("failed to add '%s'", pchk->name);
 					return false;
 				}
@@ -1016,7 +1016,7 @@ char *conv_to_label(ftype_t ltype, char *fmt, ...) {
 	/* process the given string */
 	while ((*pbuf != '\0') && (s > 1)) {
 		/* check if we have an alphanumeric character */
-		if (isalnum(*pbuf) == 0) {
+		if (isalnum((int) *pbuf) == 0) {
 			/* no, replace by an underscore */
 			*pbuf = '_';
 		} else {
@@ -1051,7 +1051,7 @@ char *conv_to_label(ftype_t ltype, char *fmt, ...) {
 	boolean
  ***********************************************************************/
 
-bool recurse_sys_deps(htable *nodes, dynary *deps, char *nodename) {
+bool recurse_sys_deps(htable_t *nodes, dynary *deps, char *nodename) {
 	char		 dir[PATH_MAX],
 				*pstr;
 	scn_node_t	*pnode;
@@ -1138,7 +1138,7 @@ bool add_library(scn_zone_t *psz, char *library, scandata *psd, scn_node_t *pn) 
 			return false;
 		}
 
-		if (hash_update(psz->l_checks, label, pchk) == HASH_ADD_FAIL) {
+		if (hash_update(psz->l_checks, label, pchk) == false) {
 			return false;
 		}
 
@@ -1229,7 +1229,7 @@ bool check_header(scn_zone_t *psz, char *header, scandata *psd, scn_node_t *pn) 
 			return false;
 		}
 
-		if (hash_update(psz->h_checks, label, pchk) == HASH_ADD_FAIL) {
+		if (hash_update(psz->h_checks, label, pchk) == false) {
 			return false;
 		}
 
@@ -1347,7 +1347,7 @@ bool check_type(scn_zone_t *psz, char *type, scandata *psd, scn_node_t *pn) {
 		pchk->header = pcrec->header; /* XXX strdup ? */
 	}
 
-	if (hash_update(psz->t_checks, label, pchk) == HASH_ADD_FAIL) {
+	if (hash_update(psz->t_checks, label, pchk) == false) {
 		return false;
 	}
 
@@ -1383,7 +1383,7 @@ bool check_type(scn_zone_t *psz, char *type, scandata *psd, scn_node_t *pn) {
 
 bool gen_checks(scn_zone_t *psz, scandata *psd) {
 	char			*pstr;
-	hkeys			*phk;
+	hkeys_t			*phk;
 	scn_node_t		*pn;
 	unsigned int	 i,
 					 j;
@@ -1656,7 +1656,7 @@ bool set_lang(FILE *fp, ftype_t ltype) {
 	boolean
  ***********************************************************************/
 
-bool output_header(htable *checks, char *cname, FILE *fp) {
+bool output_header(htable_t *checks, char *cname, FILE *fp) {
 	check_t	*pchk;
 
 	pchk = hash_get(checks, cname);
@@ -1712,7 +1712,7 @@ bool output_header(htable *checks, char *cname, FILE *fp) {
 	boolean
  ***********************************************************************/
 
-bool output_library(htable *checks, char *cname, FILE *fp) {
+bool output_library(htable_t *checks, char *cname, FILE *fp) {
 	check_t	*pchk;
 
 	pchk = hash_get(checks, cname);
@@ -1769,7 +1769,7 @@ bool output_library(htable *checks, char *cname, FILE *fp) {
  ***********************************************************************/
 
 
-bool output_type(htable *checks, char *cname, FILE *fp) {
+bool output_type(htable_t *checks, char *cname, FILE *fp) {
 	check_t	*pchk;
 
 	pchk = hash_get(checks, cname);
@@ -1827,7 +1827,7 @@ bool scan_build_pmk(scn_zone_t *psz) {
 	FILE			*fp;
 	char			 buf[MKF_OUTPUT_WIDTH * 2];
 	dynary			*da;
-	hkeys			*phk;
+	hkeys_t			*phk;
 	lib_cell_t		*plc;
 	time_t			 now;
 	unsigned int	 i;
@@ -2213,7 +2213,7 @@ void build_path(char *dir, char *file, char *buffer, size_t blen) {
 	boolean
  ***********************************************************************/
 
-bool recurse_obj_deps(htable *nodes, dynary *deps, char *nodename) {
+bool recurse_obj_deps(htable_t *nodes, dynary *deps, char *nodename) {
 	char		 dir[PATH_MAX];
 	scn_node_t	*pnode;
 	size_t		 i;
@@ -2269,7 +2269,7 @@ bool recurse_obj_deps(htable *nodes, dynary *deps, char *nodename) {
 bool gen_objects(scn_zone_t *psz) {
 	char			 buf[PATH_MAX],
 					*pstr;
-	hkeys			*phk;
+	hkeys_t			*phk;
 	scn_node_t		*pnode,
 					*pn;
 	unsigned int	 i,
@@ -2300,7 +2300,7 @@ bool gen_objects(scn_zone_t *psz) {
 			psc_log(NULL, "\tProcessing '%s'\n", buf);
 
 			/* add object reference */
-			if (hash_update_dup(psz->objects, buf, pnode->fname) == HASH_ADD_FAIL) {
+			if (hash_update_dup(psz->objects, buf, pnode->fname) == false) {
 				hash_free_hkeys(phk);
 				return false;
 			}
@@ -2472,7 +2472,7 @@ bool recurse_src_deps(scn_zone_t *psz, dynary *deps, char *name) {
 bool gen_targets(scn_zone_t *psz) {
 	char			 buf[PATH_MAX],
 					*nodename;
-	hkeys			*phk;
+	hkeys_t			*phk;
 	scn_node_t		*pnode;
 	unsigned int	 i;
 
@@ -2493,7 +2493,7 @@ bool gen_targets(scn_zone_t *psz) {
 		if (pnode->mainproc == true) {
 			/* adding in the target list */
 			if (hash_update_dup(psz->targets, pnode->prefix,
-										pnode->fname) == HASH_ADD_FAIL) {
+										pnode->fname) == false) {
 				return false;
 			}
 
@@ -2545,7 +2545,7 @@ bool gen_targets(scn_zone_t *psz) {
 
 bool gen_lib_targets(scn_zone_t *psz) {
 	char			*srcname;
-	hkeys			*phk;
+	hkeys_t			*phk;
 	lib_cell_t		*plc;
 	scn_node_t		*pnode;
 	unsigned int	 i,
@@ -2684,11 +2684,11 @@ size_t fprintf_width(size_t left, size_t width, size_t offset, FILE *fp, char *s
  ***********************************************************************/
 
 void mkf_output_header(FILE *fp, scn_zone_t *psz) {
-	char			 buf[MKF_OUTPUT_WIDTH * 2],
-					*pstr;
-	int				 i;
-	size_t			 s;
-	time_t			 now;
+	char	 buf[MKF_OUTPUT_WIDTH * 2],
+			*pstr;
+	int		 i;
+	size_t	 s;
+	time_t	 now;
 
 	/* generating date */
 	now = time(NULL);
@@ -2811,11 +2811,11 @@ void mkf_output_header(FILE *fp, scn_zone_t *psz) {
  ***********************************************************************/
 
 void mkf_output_recurs(FILE *fp, scn_zone_t *psz) {
-	char			*pstr;
-	size_t			 ofst,
-					 lm,
-					 i,
-					 s;
+	char	*pstr;
+	size_t	 ofst,
+			 lm,
+			 i,
+			 s;
 
 	/* XXX not used yet */
 	/*|+ generate the list of scanned directories	+|                   */
@@ -2901,14 +2901,14 @@ void mkf_output_recurs(FILE *fp, scn_zone_t *psz) {
  ***********************************************************************/
 
 void mkf_output_srcs(FILE *fp, scn_zone_t *psz) {
-	char			 buf[MKF_OUTPUT_WIDTH * 2],
-					*pstr;
-	hkeys			*phk;
-	scn_node_t		*pn;
-	size_t			 ofst,
-					 lm,
-					 i,
-					 j;
+	char		 buf[MKF_OUTPUT_WIDTH * 2],
+				*pstr;
+	hkeys_t		*phk;
+	scn_node_t	*pn;
+	size_t		 ofst,
+				 lm,
+				 i,
+				 j;
 
 	/* check if objects exist */
 	phk = hash_keys_sorted(psz->objects);
@@ -2958,10 +2958,10 @@ void mkf_output_srcs(FILE *fp, scn_zone_t *psz) {
  ***********************************************************************/
 
 void mkf_output_bins(FILE *fp, scn_zone_t *psz) {
-	char			*pstr;
-	hkeys			*phk;
-	scn_node_t		*pn;
-	size_t			 i;
+	char		*pstr;
+	hkeys_t		*phk;
+	scn_node_t	*pn;
+	size_t		 i;
 
 	phk = hash_keys_sorted(psz->targets);
 	if (phk != NULL) {
@@ -2994,13 +2994,13 @@ void mkf_output_bins(FILE *fp, scn_zone_t *psz) {
  ***********************************************************************/
 
 void mkf_output_libs(FILE *fp, scn_zone_t *psz) {
-	char			 buf[MKF_OUTPUT_WIDTH * 2];
-	hkeys			*phk;
-	lib_cell_t		*plc;
-	size_t			 ofst,
-					 lm,
-					 i,
-					 j;
+	char		 buf[MKF_OUTPUT_WIDTH * 2];
+	hkeys_t		*phk;
+	lib_cell_t	*plc;
+	size_t		 ofst,
+				 lm,
+				 i,
+				 j;
 
 	phk = hash_keys_sorted(psz->libraries);
 	if (phk != NULL) {
@@ -3050,15 +3050,15 @@ void mkf_output_libs(FILE *fp, scn_zone_t *psz) {
  ***********************************************************************/
 
 void mkf_output_objs(FILE *fp, scn_zone_t *psz) {
-	char			 buf[MKF_OUTPUT_WIDTH * 2],
-					*pstr;
-	hkeys			*phk;
-	lib_cell_t		*plc;
-	scn_node_t		*pn;
-	size_t			 ofst,
-					 lm,
-					 i,
-					 j;
+	char		 buf[MKF_OUTPUT_WIDTH * 2],
+				*pstr;
+	hkeys_t		*phk;
+	lib_cell_t	*plc;
+	scn_node_t	*pn;
+	size_t		 ofst,
+				 lm,
+				 i,
+				 j;
 
 	/* binaries *************************/
 	phk = hash_keys_sorted(psz->targets);
@@ -3185,15 +3185,15 @@ void mkf_output_suffixes(FILE *fp, scn_zone_t *psz) {
  ***********************************************************************/
 
 void mkf_output_build_trgs(FILE *fp, scn_zone_t *psz) {
-	bool			 need_sep;
-	char			 buf[MKF_OUTPUT_WIDTH * 2],
-					*pstr;
-	hkeys			*phk;
-	lib_cell_t		*plc;
-	scn_node_t		*pn;
-	size_t			 ofst,
-					 lm,
-					 i;
+	bool		 need_sep;
+	char		 buf[MKF_OUTPUT_WIDTH * 2],
+				*pstr;
+	hkeys_t	 	*phk;
+	lib_cell_t	*plc;
+	scn_node_t	*pn;
+	size_t		 ofst,
+				 lm,
+				 i;
 
 	fprintf(fp, "#\n# target lists\n#\n");
 
@@ -3324,15 +3324,15 @@ void mkf_output_build_trgs(FILE *fp, scn_zone_t *psz) {
  ***********************************************************************/
 
 void mkf_output_clean_trgs(FILE *fp, scn_zone_t *psz) {
-	bool			 need_sep;
-	char			 buf[MKF_OUTPUT_WIDTH * 2],
-					*pstr;
-	hkeys			*phk;
-	lib_cell_t		*plc;
-	scn_node_t		*pn;
-	size_t			 ofst,
-					 lm,
-					 i;
+	bool		 need_sep;
+	char		 buf[MKF_OUTPUT_WIDTH * 2],
+				*pstr;
+	hkeys_t	 	*phk;
+	lib_cell_t	*plc;
+	scn_node_t	*pn;
+	size_t		 ofst,
+				 lm,
+				 i;
 
 	/* generate main cleaning target list */
 	fprintf(fp, "\n# cleaning\n");
@@ -3465,15 +3465,15 @@ void mkf_output_clean_trgs(FILE *fp, scn_zone_t *psz) {
  ***********************************************************************/
 
 void mkf_output_inst_trgs(FILE *fp, scn_zone_t *psz) {
-	bool			 need_sep;
-	char			 buf[MKF_OUTPUT_WIDTH * 2],
-					*pstr;
-	hkeys			*phk;
-	lib_cell_t		*plc;
-	scn_node_t		*pn;
-	size_t			 ofst,
-					 lm,
-					 i;
+	bool		 need_sep;
+	char		 buf[MKF_OUTPUT_WIDTH * 2],
+				*pstr;
+	hkeys_t	 	*phk;
+	lib_cell_t	*plc;
+	scn_node_t	*pn;
+	size_t		 ofst,
+				 lm,
+				 i;
 
 	/* generate main installing target list */
 	fprintf(fp, "\n# installing\n");
@@ -3622,15 +3622,15 @@ void mkf_output_inst_trgs(FILE *fp, scn_zone_t *psz) {
  ***********************************************************************/
 
 void mkf_output_deinst_trgs(FILE *fp, scn_zone_t *psz) {
-	bool			 need_sep;
-	char			 buf[MKF_OUTPUT_WIDTH * 2],
-					*pstr;
-	hkeys			*phk;
-	lib_cell_t		*plc;
-	scn_node_t		*pn;
-	size_t			 ofst,
-					 lm,
-					 i;
+	bool		 need_sep;
+	char		 buf[MKF_OUTPUT_WIDTH * 2],
+				*pstr;
+	hkeys_t	 	*phk;
+	lib_cell_t	*plc;
+	scn_node_t	*pn;
+	size_t		 ofst,
+				 lm,
+				 i;
 
 	/* generate main deinstalling target list */
 	fprintf(fp, "\n# deinstalling\n");
@@ -3779,13 +3779,13 @@ void mkf_output_deinst_trgs(FILE *fp, scn_zone_t *psz) {
  ***********************************************************************/
 
 void mkf_output_man_trgs(FILE *fp, scn_zone_t *psz) {
-	char		 buf[MKF_OUTPUT_WIDTH * 2],
-				*pstr;
-	size_t		 ofst,
-				 lm,
-				 i,
-				 j,
-				 k;
+	char	 buf[MKF_OUTPUT_WIDTH * 2],
+			*pstr;
+	size_t	 ofst,
+			 lm,
+			 i,
+			 j,
+			 k;
 
 	if (psz->found[FILE_TYPE_MAN] == false) {
 		/* no man page, skip */
@@ -3841,11 +3841,11 @@ void mkf_output_man_trgs(FILE *fp, scn_zone_t *psz) {
  ***********************************************************************/
 
 void mkf_output_data_trgs(FILE *fp, scn_zone_t *psz) {
-	char		 buf[MKF_OUTPUT_WIDTH * 2],
-				*pstr;
-	size_t		 ofst,
-				 lm,
-				 i;
+	char	 buf[MKF_OUTPUT_WIDTH * 2],
+			*pstr;
+	size_t	 ofst,
+			 lm,
+			 i;
 
 	if (psz->found[FILE_TYPE_DATA] == false) {
 		/* no data files */
@@ -3887,11 +3887,11 @@ void mkf_output_data_trgs(FILE *fp, scn_zone_t *psz) {
  ***********************************************************************/
 
 void mkf_output_obj_rules(FILE *fp, scn_zone_t *psz) {
-	char			 buf[MKF_OUTPUT_WIDTH * 2],
-					*pstr;
-	hkeys			*phk;
-	scn_node_t		*pn;
-	size_t			 i;
+	char		 buf[MKF_OUTPUT_WIDTH * 2],
+				*pstr;
+	hkeys_t		*phk;
+	scn_node_t	*pn;
+	size_t		 i;
 
 	phk = hash_keys_sorted(psz->objects);
 	if (phk == NULL) {
@@ -3929,11 +3929,11 @@ void mkf_output_obj_rules(FILE *fp, scn_zone_t *psz) {
 ************************************************************************/
 
 void mkf_output_trg_rules(FILE *fp, scn_zone_t *psz) {
-	char			*pstr,
-					*pname;
-	hkeys			*phk;
-	scn_node_t		*pn;
-	size_t			 i;
+	char		*pstr,
+				*pname;
+	hkeys_t		*phk;
+	scn_node_t	*pn;
+	size_t		 i;
 
 	phk = hash_keys_sorted(psz->targets);
 	if (phk == NULL) {
@@ -4002,13 +4002,13 @@ void mkf_output_trg_rules(FILE *fp, scn_zone_t *psz) {
 ************************************************************************/
 
 void mkf_output_lib_trg_rules(FILE *fp, scn_zone_t *psz) {
-	char			 buf[MKF_OUTPUT_WIDTH * 2];
-	hkeys			*phk;
-	lib_cell_t		*plc;
-	size_t			 ofst,
-					 lm,
-					 i,
-					 j;
+	char		 buf[MKF_OUTPUT_WIDTH * 2];
+	hkeys_t	 	*phk;
+	lib_cell_t	*plc;
+	size_t		 ofst,
+				 lm,
+				 i,
+				 j;
 
 	phk = hash_keys_sorted(psz->libraries);
 	if (phk == NULL) {
@@ -4146,8 +4146,6 @@ void mkf_output_lib_trg_rules(FILE *fp, scn_zone_t *psz) {
 }
 
 
-
-
 /*************************
  * mkf_output_man_inst() *
  ***********************************************************************
@@ -4237,8 +4235,8 @@ void mkf_output_man_inst(FILE *fp, scn_zone_t *psz) {
  ***********************************************************************/
 
 void mkf_output_data_inst(FILE *fp, scn_zone_t *psz) {
-	char		*pstr;
-	size_t		 i;
+	char	*pstr;
+	size_t	 i;
 
 	da_sort(psz->datafiles);
 
@@ -4505,7 +4503,7 @@ void str_to_upper(char *buf, size_t siz, char *str) {
  ***********************************************************************/
 
 ftype_t check_file_ext(char *fname) {
-	int		 i;
+	int	 i;
 
 	for (i = 0 ; i < (int) nb_file_ext ; i++) {
 #ifdef PMKSCAN_DEBUG
@@ -4748,7 +4746,7 @@ bool parse_file(prs_cmn_t *pcmn, char *fname, ftype_t ft, bool isdep) {
 	psz = (scn_zone_t *) pcmn->data;
 
 	/* check if this node is already existing */
-	pnode = hash_get(psz->nodes, fname);
+	pnode = hash_extract(psz->nodes, fname);
 	if (pnode == NULL) {
 #ifdef PMKSCAN_DEBUG
 		debugf("parse_file() : adding node for '%s'", fname); /* XXX */
@@ -4835,8 +4833,8 @@ bool parse_file(prs_cmn_t *pcmn, char *fname, ftype_t ft, bool isdep) {
 	}
 
 	/* add the node in the table of nodes */
-	if (hash_add(psz->nodes, fname, pnode) == HASH_ADD_FAIL) {
-		errorf("failed to add node '%s' in the hash table.", pnode->fname);
+	if (hash_add(psz->nodes, fname, pnode) == false) {
+		errorf("failed to add node '%s' in the hash table : %s", fname, hash_error(psz->nodes));
 		scan_node_destroy(pnode);
 		return false;
 	}
@@ -4869,7 +4867,6 @@ bool parse_file(prs_cmn_t *pcmn, char *fname, ftype_t ft, bool isdep) {
 			/* and in the list of directorie to be scanned */
 			da_push(psz->dirscan, strdup(idir));
 		}
-
 	}
 
 	return true;
@@ -4892,8 +4889,8 @@ bool parse_file(prs_cmn_t *pcmn, char *fname, ftype_t ft, bool isdep) {
  ***********************************************************************/
 
 bool scan_node_file(prs_cmn_t *pcmn, char *fname, bool isdep) {
-	ftype_t			 ft;
-	scn_zone_t		*psz;
+	ftype_t		 ft;
+	scn_zone_t	*psz;
 
 #ifdef PMKSCAN_DEBUG
 	debugf("scan_node_file() : fname = '%s'", fname);
@@ -5260,7 +5257,7 @@ bool process_zone(prs_cmn_t *pcmn, scandata *psd) {
 	boolean
  ***********************************************************************/
 
-bool parse_deflib(htable *pht, htable *libs) {
+bool parse_deflib(htable_t *pht, htable_t *libs) {
 	char		*name,
 				*linker = NULL;
 	dynary		*srcs = NULL,
@@ -5312,7 +5309,7 @@ bool parse_deflib(htable *pht, htable *libs) {
 	/* get library minor version number */
 	plc->lib_vmin = po_get_str(hash_get(pht, KW_OPT_VMIN));
 
-	if (hash_add(libs, name, plc) == HASH_ADD_FAIL) {
+	if (hash_add(libs, name, plc) == false) {
 		lib_cell_destroy(plc);
 		return false;
 	}
@@ -5336,28 +5333,28 @@ bool parse_deflib(htable *pht, htable *libs) {
 	XXX
  ***********************************************************************/
 
-bool parse_zone_opts(prs_cmn_t *pcmn, htable *pht, htable *libs) {
+bool parse_zone_opts(prs_cmn_t *pcmn, htable_t *pht, htable_t *libs) {
 	char		*pdir,
 				*pstr;
 	dynary		*da_l;	/* library list */
 	pmkobj		*ppo;
-	htable		*tnodes;
+	htable_t		*tnodes;
 	lib_cell_t	*plc;
 	scn_zone_t	*psz;
 	size_t		 i;
 
 
 	/* init of nodes table */
-	tnodes = hash_init_adv(512, NULL, (void (*)(void *))scan_node_destroy, NULL);
+	tnodes = hash_create(512, true, NULL, NULL, (void (*)(void *))scan_node_destroy);
 	if (tnodes == NULL) {
-		/* XXX errmsg !! */
+		errorf("unabe to create hash table for nodes");
 		return false;
 	}
 
 	/* init zone structure */
 	psz = scan_zone_init(tnodes);
 	if (psz == NULL) {
-		/* XXX err msg */
+		errorf("zone scan failed");
 		hash_destroy(tnodes);
 		return false;
 	}
@@ -5471,7 +5468,7 @@ bool parse_zone_opts(prs_cmn_t *pcmn, htable *pht, htable *libs) {
 				}
 
 				/* adds the extracted cell in zone libraries */
-				if (hash_add(psz->libraries, pstr, plc) == HASH_ADD_FAIL) {
+				if (hash_add(psz->libraries, pstr, plc) == false) {
 					return false;
 				}
 
@@ -5522,7 +5519,7 @@ bool parse_zone_opts(prs_cmn_t *pcmn, htable *pht, htable *libs) {
 bool parse_script(char *cfname, prs_cmn_t *pcmn, scandata *psd) {
 	FILE		*fd;
 	bool		 frslt = true;
-	htable		*lcells;
+	htable_t		*lcells;
 	prscell		*pcell;
 	prsdata		*pdata;
 	scn_zone_t	*psz;
@@ -5534,7 +5531,7 @@ bool parse_script(char *cfname, prs_cmn_t *pcmn, scandata *psd) {
 	}
 
 	/* init of library cells hash table */
-	lcells = hash_init_adv(32, NULL, (void (*)(void *)) lib_cell_destroy, NULL);
+	lcells = hash_create(32, false, NULL, NULL, (void (*)(void *)) lib_cell_destroy);
 	if (lcells == NULL) {
 		/* XXX errmsg */
 		return false;

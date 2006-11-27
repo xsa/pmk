@@ -1,7 +1,7 @@
 /* $Id$ */
 
 /*
- * Copyright (c) 2004-2005 Damien Couderc
+ * Copyright (c) 2004-2006 Damien Couderc
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,7 +39,7 @@
 
 #include <inttypes.h>
 #include "cpu_arch_def.h"
-#include "hash.h"
+#include "hash_tools.h"
 #include "parse.h"
 
 
@@ -48,12 +48,12 @@
  ***********************************************************************/
 
 
-#define LIST_ARCH_EQUIV		1
-#define LIST_X86_CPU_VENDOR	2
-#define LIST_X86_CPU_MODEL	3
-#define LIST_X86_CPU_CLASS	4
+#define LIST_ARCH_EQUIV			1
+#define LIST_X86_CPU_VENDOR		2
+#define LIST_X86_CPU_MODEL		3
+#define LIST_X86_CPU_CLASS		4
 #define LIST_ALPHA_CPU_CLASS	5
-#define LIST_IA64_CPU_CLASS	6
+#define LIST_IA64_CPU_CLASS		6
 
 #define	PMK_ARCH_UNKNOWN	0
 #define	PMK_ARCH_X86_32		1
@@ -81,10 +81,10 @@ typedef struct {
 } arch_cell;
 
 
-void		*seek_key(prsdata *, int);
-prsdata		*parse_cpu_data(char *);
-char		*check_cpu_arch(char *, prsdata *);
-htable		*arch_wrapper(prsdata *, char *);
+void			*seek_key(prsdata *, int);
+prsdata			*parse_cpu_data(char *);
+char			*check_cpu_arch(char *, prsdata *);
+htable_t		*arch_wrapper(prsdata *, char *);
 unsigned char	 arch_name_to_id(char *);
 
 /****************
@@ -102,27 +102,27 @@ unsigned char	 arch_name_to_id(char *);
 
 
 /* feature register 1 (edx) */
-#define X86_CPU_MASK_FEAT_FPU	0x00000001	/* bit  0 */
-#define X86_CPU_MASK_FEAT_VME	0x00000002	/* bit  1 */
-#define X86_CPU_MASK_FEAT_DE	0x00000004	/* bit  2 */
-#define X86_CPU_MASK_FEAT_PSE	0x00000008	/* bit  3 */
-#define X86_CPU_MASK_FEAT_TSC	0x00000010	/* bit  4 */
-#define X86_CPU_MASK_FEAT_MSR	0x00000020	/* bit  5 */
-#define X86_CPU_MASK_FEAT_PAE	0x00000040	/* bit  6 */
-#define X86_CPU_MASK_FEAT_MCE	0x00000080	/* bit  7 */
-#define X86_CPU_MASK_FEAT_CX8	0x00000100	/* bit  8 */
-#define X86_CPU_MASK_FEAT_APIC	0x00000200	/* bit  9 */
-/*		RESERVED			   bit 10 */
-#define X86_CPU_MASK_FEAT_SEP	0x00000800	/* bit 11 */
-#define X86_CPU_MASK_FEAT_MTRR	0x00001000	/* bit 12 */
-#define X86_CPU_MASK_FEAT_PGE	0x00002000	/* bit 13 */
-#define X86_CPU_MASK_FEAT_MCA	0x00004000	/* bit 14 */
-#define X86_CPU_MASK_FEAT_CMOV	0x00008000	/* bit 15 */
-#define X86_CPU_MASK_FEAT_PAT	0x00010000	/* bit 16 */
-#define X86_CPU_MASK_FEAT_PSE36	0x00020000	/* bit 17 */
-#define X86_CPU_MASK_FEAT_PSN	0x00040000	/* bit 18 */
-#define X86_CPU_MASK_FEAT_CLFL	0x00080000	/* bit 19 */
-/*		RESERVED			   bit 20 */
+#define X86_CPU_MASK_FEAT_FPU	0x00000001	/*	bit  0 */
+#define X86_CPU_MASK_FEAT_VME	0x00000002	/*	bit  1 */
+#define X86_CPU_MASK_FEAT_DE	0x00000004	/*	bit  2 */
+#define X86_CPU_MASK_FEAT_PSE	0x00000008	/*	bit  3 */
+#define X86_CPU_MASK_FEAT_TSC	0x00000010	/*	bit  4 */
+#define X86_CPU_MASK_FEAT_MSR	0x00000020	/*	bit  5 */
+#define X86_CPU_MASK_FEAT_PAE	0x00000040	/*	bit  6 */
+#define X86_CPU_MASK_FEAT_MCE	0x00000080	/*	bit  7 */
+#define X86_CPU_MASK_FEAT_CX8	0x00000100	/*	bit  8 */
+#define X86_CPU_MASK_FEAT_APIC	0x00000200	/*	bit  9 */
+/*		RESERVED								bit 10 */
+#define X86_CPU_MASK_FEAT_SEP	0x00000800	/*	bit 11 */
+#define X86_CPU_MASK_FEAT_MTRR	0x00001000	/*	bit 12 */
+#define X86_CPU_MASK_FEAT_PGE	0x00002000	/*	bit 13 */
+#define X86_CPU_MASK_FEAT_MCA	0x00004000	/*	bit 14 */
+#define X86_CPU_MASK_FEAT_CMOV	0x00008000	/*	bit 15 */
+#define X86_CPU_MASK_FEAT_PAT	0x00010000	/*	bit 16 */
+#define X86_CPU_MASK_FEAT_PSE36	0x00020000	/*	bit 17 */
+#define X86_CPU_MASK_FEAT_PSN	0x00040000	/*	bit 18 */
+#define X86_CPU_MASK_FEAT_CLFL	0x00080000	/*	bit 19 */
+/*		RESERVED								bit 20 */
 #define X86_CPU_MASK_FEAT_DTES	0x00200000	/* bit 21 */
 #define X86_CPU_MASK_FEAT_ACPI	0x00400000	/* bit 22 */
 #define X86_CPU_MASK_FEAT_MMX	0x00800000	/* bit 23 */
@@ -136,21 +136,21 @@ unsigned char	 arch_name_to_id(char *);
 #define X86_CPU_MASK_FEAT_PBE	0x80000000	/* bit 31 */
 
 /* feature register 2 (ecx) */
-#define X86_CPU_MASK_FEAT_FPU	0x00000001	/* bit  0 */
-/*		RESERVED			   bit  1 */
-/*		RESERVED			   bit  2 */
-#define X86_CPU_MASK_FEAT_MON	0x00000008	/* bit  3 */
-#define X86_CPU_MASK_FEAT_DSCPL	0x00000010	/* bit  4 */
-/*		RESERVED			   bit  5 */
-/*		RESERVED			   bit  6 */
-#define X86_CPU_MASK_FEAT_EST	0x00000080	/* bit  7 */
-#define X86_CPU_MASK_FEAT_TM2	0x00000100	/* bit  8 */
-/*		RESERVED			   bit  9 */
-#define X86_CPU_MASK_FEAT_CID	0x00000400	/* bit 10 */
-/*		RESERVED			   bit 11 */
-/*		RESERVED			   bit 12 */
-#define X86_CPU_MASK_FEAT_CX16	0x00002000	/* bit 13 */
-#define X86_CPU_MASK_FEAT_ETPRD	0x00004000	/* bit 14 */
+#define X86_CPU_MASK_FEAT_FPU	0x00000001	/*	bit  0 */
+/*		RESERVED								bit  1 */
+/*		RESERVED								bit  2 */
+#define X86_CPU_MASK_FEAT_MON	0x00000008	/*	bit  3 */
+#define X86_CPU_MASK_FEAT_DSCPL	0x00000010	/*	bit  4 */
+/*		RESERVED								bit  5 */
+/*		RESERVED								bit  6 */
+#define X86_CPU_MASK_FEAT_EST	0x00000080	/*	bit  7 */
+#define X86_CPU_MASK_FEAT_TM2	0x00000100	/*	bit  8 */
+/*		RESERVED								bit  9 */
+#define X86_CPU_MASK_FEAT_CID	0x00000400	/*	bit 10 */
+/*		RESERVED								bit 11 */
+/*		RESERVED								bit 12 */
+#define X86_CPU_MASK_FEAT_CX16	0x00002000	/*	bit 13 */
+#define X86_CPU_MASK_FEAT_ETPRD	0x00004000	/*	bit 14 */
 
 /* extended feature register (edx) */
 #define X86_CPU_MASK_FEAT_LM		0x20000000	/* bit 29 */
@@ -158,31 +158,31 @@ unsigned char	 arch_name_to_id(char *);
 #define X86_CPU_MASK_FEAT_3DNOW		0x80000000	/* bit 31 */
 
 
-#define PMKCONF_HW_X86_CPU_FAMILY	"HW_X86_CPU_FAMILY"	/* family */
-#define PMKCONF_HW_X86_CPU_MODEL	"HW_X86_CPU_MODEL"	/* model */
-#define PMKCONF_HW_X86_CPU_EXTFAM	"HW_X86_CPU_EXTFAM"	/* extended family */
-#define PMKCONF_HW_X86_CPU_EXTMOD	"HW_X86_CPU_EXTMOD"	/* extended model */
-#define PMKCONF_HW_X86_CPU_NAME		"HW_X86_CPU_NAME"	/* name optionaly provided by cpuid */
-#define PMKCONF_HW_X86_CPU_FEATURES	"HW_X86_CPU_FEATURES"	/* MMX,SSE,SSE2,HTT, etc ... */
-#define PMKCONF_HW_X86_CPU_VENDOR	"HW_X86_CPU_VENDOR"	/* vendor name from cpuid */
+#define PMKCONF_HW_X86_CPU_FAMILY		"HW_X86_CPU_FAMILY"	/* family */
+#define PMKCONF_HW_X86_CPU_MODEL		"HW_X86_CPU_MODEL"	/* model */
+#define PMKCONF_HW_X86_CPU_EXTFAM		"HW_X86_CPU_EXTFAM"	/* extended family */
+#define PMKCONF_HW_X86_CPU_EXTMOD		"HW_X86_CPU_EXTMOD"	/* extended model */
+#define PMKCONF_HW_X86_CPU_NAME			"HW_X86_CPU_NAME"	/* name optionaly provided by cpuid */
+#define PMKCONF_HW_X86_CPU_FEATURES		"HW_X86_CPU_FEATURES"	/* MMX,SSE,SSE2,HTT, etc ... */
+#define PMKCONF_HW_X86_CPU_VENDOR		"HW_X86_CPU_VENDOR"	/* vendor name from cpuid */
 #define PMKCONF_HW_X86_CPU_STD_VENDOR	"HW_X86_CPU_STD_VENDOR"	/* "standard" vendor name : INTEL, AMD, etc ... */
-#define PMKCONF_HW_X86_CPU_CLASS	"HW_X86_CPU_CLASS"	/* ex: i386, i486, i586, etc ... */
+#define PMKCONF_HW_X86_CPU_CLASS		"HW_X86_CPU_CLASS"	/* ex: i386, i486, i586, etc ... */
 
 #define X86_CPU_CLASS_FAMILY_FMT	"%s_FAM%d"		/* standard vendor, family */
 #define X86_CPU_CLASS_EXTFAM_FMT	"%s_EFAM%d"		/* standard vendor, extended family */
 
 
 typedef struct {
-	bool		 cpuid;
-	char		*vendor,
-			*cpuname,
-			*stdvendor,
-			*features;
+	bool			 cpuid;
+	char			*vendor,
+					*cpuname,
+					*stdvendor,
+					*features;
 	unsigned char	 family,
-			 model,
-			 extfam,
-			 extmod;
-	uint32_t	 level;
+					 model,
+					 extfam,
+					 extmod;
+	uint32_t		 level;
 } x86_cpu_cell;
 
 typedef struct {
@@ -191,10 +191,10 @@ typedef struct {
 } x86_cpu_feature;
 
 x86_cpu_cell	*x86_cpu_cell_init(void);
-void		 x86_cpu_cell_destroy(x86_cpu_cell *);
-char		*x86_get_std_cpu_vendor(prsdata *, char *);
-bool		 x86_get_cpuid_data(x86_cpu_cell *);
-bool		 x86_set_cpu_data(prsdata *, x86_cpu_cell *, htable *);
+void			 x86_cpu_cell_destroy(x86_cpu_cell *);
+char			*x86_get_std_cpu_vendor(prsdata *, char *);
+bool			 x86_get_cpuid_data(x86_cpu_cell *);
+bool			 x86_set_cpu_data(prsdata *, x86_cpu_cell *, htable_t *);
 
 #endif /* ARCH_X86_32 || ARCH_X86_64 */
 
@@ -230,7 +230,7 @@ typedef struct {
 } alpha_cpu_feature;
 
 
-bool alpha_set_cpu_data(prsdata *, htable *);
+bool alpha_set_cpu_data(prsdata *, htable_t *);
 
 #endif /* ARCH_ALPHA */
 
@@ -272,9 +272,10 @@ typedef struct {
 } ia64_cpu_feature;
 
 
-bool ia64_get_cpuid_data(prsdata *, htable *);
+bool ia64_get_cpuid_data(prsdata *, htable_t *);
 
 #endif /* ARCH_IA64 */
 
 #endif /* _DETECT_CPU_H_ */
 
+/* vim: set noexpandtab tabstop=4 softtabstop=4 shiftwidth=4: */

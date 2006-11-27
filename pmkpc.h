@@ -1,7 +1,7 @@
 /* $Id$ */
 
 /*
- * Copyright (c) 2004 Damien Couderc
+ * Copyright (c) 2006 Damien Couderc
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -114,9 +114,9 @@ typedef struct {
 } optcell;
 
 typedef struct {
-	dynary	*pda;
-	htable	*pht;
-	pkgdata	*ppd;
+	dynary		*pda;
+	htable_t	*pht;
+	pkgdata		*ppd;
 } pcdata;
 
 
