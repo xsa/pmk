@@ -508,15 +508,12 @@ bool c_code_builder(code_bld_t *pcb) {
 
 	code_logger(tfp, lfp, CODE_C_END);
 
-	fclose(tfp);
-	fclose(lfp);
-
-	if (ferror(tfp) != 0) {
+	if (fclose(tfp) != 0) {
 		errorf("c_code_builder: generated source I/O failure");
 		return(false);
 	}
 
-	if (ferror(lfp) != 0) {
+	if (fclose(lfp) != 0) {
 		errorf("c_code_builder: build log I/O failure");
 		return(false);
 	}
@@ -584,15 +581,12 @@ bool c_shared_builder(code_bld_t *pcb, char *content) {
 	/* code content */
 	code_logger(tfp, lfp, content);
 
-	fclose(tfp);
-	fclose(lfp);
-
-	if (ferror(tfp) != 0) {
+	if (fclose(tfp) != 0) {
 		errorf("c_shared_builder: generated source I/O failure");
 		return(false);
 	}
 
-	if (ferror(lfp) != 0) {
+	if (fclose(lfp) != 0) {
 		errorf("c_shared_builder: build log I/O failure");
 		return(false);
 	}
