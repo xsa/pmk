@@ -452,7 +452,7 @@ htable_t *hash_create(	size_t size,
 	}
 
 	/* allocate node array */
-	pht->harray = (hnode_t *) malloc(sizeof (hnode_t) * size);
+	pht->harray = (hnode_t *) malloc(sizeof (hnode_t) * csize);
 	if (pht->harray == NULL) {
 		/* allocation failed */
 		free(pht);
@@ -463,7 +463,7 @@ htable_t *hash_create(	size_t size,
 	pht->autogrow = autogrow;
 
 	/* set size */
-	pht->size = size;
+	pht->size = csize;
 
 	/* initialize usage counter */
 	pht->count = 0;
@@ -472,7 +472,7 @@ htable_t *hash_create(	size_t size,
 	pht->herr = HERR_CREATED;
 
 	/* initialize node structures */
-	for (i = 0 ; i < size ; i++) {
+	for (i = 0 ; i < csize ; i++) {
 		pht->harray[i].first = NULL;
 		pht->harray[i].last = NULL;
 	}
