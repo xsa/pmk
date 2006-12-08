@@ -1,3 +1,7 @@
+08 Dec 2006 coudercd
+ * fixed install_lib target in makefile generation from pmkscan.
+ * removed the compatibility option -c for install for portability.
+
 # PMK 0.10.0 release
 
 18 Nov 2006 coudercd
