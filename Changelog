@@ -1,3 +1,7 @@
+08 Dec 2006 coudercd
+ * fixed install_lib target in makefile generation from pmkscan.
+ * removed the compatibility option -c for install for portability.
+
 27 Nov 2006 coudercd
  * imported new hash table implementation with double linked lists.
 

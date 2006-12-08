@@ -466,7 +466,7 @@ enum {
 								"\t$(INSTALL_DIR) $(DESTDIR)$(BINDIR)\n\n"
 #define MKF_GTRGT_INST_LIB		"#\n# library target rules\n#\n\n" \
 								"# main library install target\n" \
-								"install_lib: install_libdir $(" MKF_BIN_INST_VAR ")\n\n" \
+								"install_lib: install_libdir $(" MKF_LIB_INST_VAR ")\n\n" \
 								"# install library directory\n" \
 								"install_libdir:\n" \
 								"\t$(INSTALL_DIR) $(DESTDIR)$(LIBDIR)\n\n"

@@ -277,13 +277,7 @@ debugf("%s = '%s'", pstr, buf);
 
 	pstr = hash_get(pht, PMKCONF_BIN_INSTALL);
 	if (pstr != NULL) {
-		/* append -c for compat with autoconf*/
-		if (snprintf_b(buf, sizeof(buf), "%s -c", pstr) == false) {
-			errorf(PMK_ERR_OVRFLOW);
-			return(false);
-		}
-
-		if (hash_update_dup(pht, "INSTALL", buf) == false) {
+		if (hash_update_dup(pht, "INSTALL", pstr) == false) {
 			return(false);
 		}
 	}
