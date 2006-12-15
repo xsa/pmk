@@ -137,6 +137,11 @@ static size_t hash_correct_size(size_t size) {
 	size_t	power_size;
 	uint8_t	shift = 0;
 
+	/* minimum size is 2 */
+	if (size < 2) {
+		return 2;
+	}
+
 	/* initialize with the given size */
 	power_size = size;
 
