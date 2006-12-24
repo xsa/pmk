@@ -59,6 +59,7 @@
 #include "pmkscan.h"
 #include "premake.h"
 #include "tags.h"
+#include "time.h"
 
 
 /*#define PMKSCAN_DEBUG	1*/
