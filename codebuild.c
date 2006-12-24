@@ -622,17 +622,15 @@ bool cmdline_builder(code_bld_t *pcb, int lnk) {
 	if (r == true) {
 		lfp = fopen(pcb->blog, "a");
 		if (lfp == NULL) {
-			errorf("c_code_builder: build log fopen() failed");
+			errorf("cmdline_builder: build log fopen() failed");
 			return(false); /* failed to open */
 		}
 	
 		fprintf(lfp, "Generated command line:\n");
 		fprintf(lfp, "%s\n", pcb->bldcmd);
 
-		fclose(lfp);
-
-		if (ferror(lfp) != 0) {
-			errorf("c_code_builder: build log I/O failure");
+		if (fclose(lfp) != 0) {
+			errorf("cmdline_builder: build log I/O failure");
 			return(false);
 		}
 	}
