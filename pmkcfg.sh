@@ -458,12 +458,12 @@ fi
 
 if [ -z "$CC" ]; then
 	# check first for C99 then C89 compilers
-	if check_binary c99; then
+	if check_binary cc; then
+		CC="cc"
+	elif check_binary c99; then
 		CC="c99"
 	elif check_binary c89; then
 		CC="c89"
-	elif check_binary cc; then
-		CC="cc"
 	else
 		printf "Unable to find C compiler.\n"
 		exit 1
