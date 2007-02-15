@@ -1,3 +1,7 @@
+15 Feb 2007 coudercd
+ * fixed a bug occuring in pmkpc when specifying both --cflags and
+   --libs options. The result is now separated but a space.
+
 08 Dec 2006 coudercd
  * fixed install_lib target in makefile generation from pmkscan.
  * removed the compatibility option -c for install for portability.
