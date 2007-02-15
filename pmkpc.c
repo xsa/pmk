@@ -741,14 +741,23 @@ debugf("{main} parsed '%s'", PREMAKE_CONFIG_PATH);
 				}
 
 				if (opt_cflags == true) {
-					if (cflags_opts == 0)
+					/* display cflags */
+					if (cflags_opts == 0) {
 						cflags_opts = PKGCFG_CFLAGS_ALL;
+					}
 
 					printf("%s", pkg_get_cflags_adv(gdata.ppd, cflags_opts));
 				}
 				if (opt_libs == true) {
-					if (libs_opts == 0)
+					/* if cflags have been displayed, add a space */
+					if (opt_cflags == true) {
+						printf(" ");
+					}
+
+					/* display libs */
+					if (libs_opts == 0) {
 						libs_opts = PKGCFG_LIBS_ALL;
+					}
 
 					printf("%s", pkg_get_libs_adv(gdata.ppd, libs_opts));
 				}
