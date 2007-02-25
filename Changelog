@@ -1,3 +1,6 @@
+25 Feb 2007 coudercd
+ * fixed a segfaulting bug in code_logger().
+
 15 Feb 2007 coudercd
  * fixed a bug occuring in pmkpc when specifying both --cflags and
    --libs options. The result is now separated but a space.

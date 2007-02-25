@@ -400,12 +400,15 @@ char *get_libs_label(code_bld_t *pcb) {
 
 
 void code_logger(FILE *tfp, FILE *lfp, const char *fmt, ...) {
-	va_list	plst;
+	va_list	plst1,
+			plst2;
 
-	va_start(plst, fmt);
-	vfprintf(tfp, fmt, plst);
-	vfprintf(lfp, fmt, plst);
-	va_end(plst);
+	va_start(plst1, fmt);
+	va_copy(plst2, plst1);
+	vfprintf(tfp, fmt, plst1);
+	vfprintf(lfp, fmt, plst2);
+	va_end(plst1);
+	va_end(plst2);
 }
 
 
