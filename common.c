@@ -1,7 +1,7 @@
 /* $Id$ */
 
 /*
- * Copyright (c) 2003-2006 Damien Couderc
+ * Copyright (c) 2003-2007 Damien Couderc
  * Copyright (c) 2003-2004 Xavier Santolaria <xavier@santolaria.net>
  * All rights reserved.
  *
@@ -147,10 +147,10 @@ bool env_to_opt(char *env_name, pmkcmdopt *opt) {
 
 bool get_make_var(char *varname, char *result, size_t rsize) {
 	FILE	*mfp,
-		*tfp;
+			*tfp;
 	bool	 rval;
 	char	 mfn[MAXPATHLEN],
-		 varstr[TMP_BUF_LEN];
+			 varstr[TMP_BUF_LEN];
 
 	if (strlcpy_b(mfn, TMP_MK_FILE, sizeof(mfn)) == false) {
 		errorf("failed to create temporary file");
@@ -187,8 +187,7 @@ debugf(MKVAR_FMT_MK, varname, MKVAR_FILE);
 			/* catch output of make */
 			if (get_line(tfp, result, rsize) == false) {
 #ifdef MKVAR_DEBUG
-				errorf("failed to get result from '%s' : %s.",
-						varstr, strerror(errno));
+				errorf("failed to get result from '%s' : %s.", varstr, strerror(errno));
 #endif
 				rval = false;
 			}
@@ -197,15 +196,13 @@ debugf(MKVAR_FMT_MK, varname, MKVAR_FILE);
 			rval = true;
 		} else {
 #ifdef MKVAR_DEBUG
-			errorf("failed to open '%s' : %s.", varstr,
-						strerror(errno));
+			errorf("failed to open '%s' : %s.", varstr, strerror(errno));
 #endif
 			rval = false;
 		}
 	} else {
 #ifdef MKVAR_DEBUG
-		errorf("failed to execute '%s' : %s.", varstr,
-						strerror(errno));
+		errorf("failed to execute '%s' : %s.", varstr, strerror(errno));
 #endif
 		rval = false;
 	}
@@ -213,15 +210,13 @@ debugf(MKVAR_FMT_MK, varname, MKVAR_FILE);
 
 	if (unlink(mfn) == -1) {
 		/* cannot remove temporary file */
-		errorf("cannot remove temporary file: '%s' : %s.",
-			mfn, strerror(errno));
+		errorf("cannot remove temporary file: '%s' : %s.", mfn, strerror(errno));
 	}
 
 	if (unlink(MKVAR_FILE) == -1) {
 		/* cannot remove temporary file */
 #ifdef MKVAR_DEBUG
-		errorf("cannot remove temporary file: '%s' : %s.",
-			mfn, strerror(errno));
+		errorf("cannot remove temporary file: '%s' : %s.", mfn, strerror(errno));
 #endif
 	}
 
@@ -302,9 +297,9 @@ dynary *str_to_dynary(char *str, char sep) {
 
 dynary *str_to_dynary_adv(char *str, char *seplst) {
 	char	 buf[MAXPATHLEN],
-		*pbuf;
+			*pbuf;
 	dynary	*da;
-	int	 s;
+	int		 s;
 
 	if (str == NULL) {
 		/* protect against NULL */
@@ -370,8 +365,8 @@ dynary *str_to_dynary_adv(char *str, char *seplst) {
  ***********************************************************************/
 
 bool find_file_dir(dynary *da, char *fname, char *fpath, size_t fplen) {
-	char		 tstr[MAXPATHLEN],
-			*path;
+	char			 tstr[MAXPATHLEN],
+					*path;
 	unsigned int	 i;
 
 	for (i = 0 ; i < da_usize(da) ; i++) {
@@ -764,3 +759,4 @@ FILE *tmps_open(char *tfile, char *mode, char *buf, size_t bsize, size_t slen) {
 	return(fdopen(fd, mode));
 }
 
+/* vim: set noexpandtab tabstop=4 softtabstop=4 shiftwidth=4: */
