@@ -2402,7 +2402,7 @@ bool pmk_setparam_detect(pmkcmd *cmd, prsopt *popt, pmkdata *pgd) {
 		}
 
 		/* set shared lib linker flags */
-		pmk_log("\t\tSetting %s to '%s'\n", SL_LDFLAG_VARNAME, pc->slldflags);
+		pmk_log("\t\tSetting %s to '%s'\n", scb.pld->slldflags, pc->slldflags);
 		if (hash_update_dup(pgd->htab, scb.pld->slldflags, pc->slldflags) == false) {
 			return(false);
 		}
