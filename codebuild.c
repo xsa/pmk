@@ -44,19 +44,6 @@
 #include "common.h"
 
 
-/* XXX TODO to remove */
-/*|+****************                                                                                                                              */
-/* * language data *                                                                                                                              */
-/* **********************************************************************+|                                                                       */
-/*                                                                                                                                                */
-/*lgdata_t	lang_data[] = {                                                                                                                       */
-/*|+	language label		compiler label		comp. flags label	linker flags label	SL cflags label		SL ldflags label		language ID +|*/
-/*    {LANG_LABEL_C,		PMKCONF_BIN_CC,		CFLAGS_LABEL_C,		LDFLAGS_LABEL_C,	SLCFLAGS_LABEL_C,	SLLDFLAGS_LABEL_C,		LANG_C},      */
-/*    {LANG_LABEL_CXX,	PMKCONF_BIN_CXX,	CFLAGS_LABEL_CXX,	LDFLAGS_LABEL_CXX,	SLCFLAGS_LABEL_CXX,	SLLDFLAGS_LABEL_CXX,	LANG_CXX}         */
-/*};                                                                                                                                              */
-/*size_t		nb_lang_data = sizeof(lang_data) / sizeof(lgdata_t);                                                                              */
-
-
 /********************
  * name_randomize() *
  ***********************************************************************
