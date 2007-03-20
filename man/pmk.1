@@ -62,9 +62,7 @@ To display pmk version number:
 .Pp
 .Dl $ pmk -v
 .Pp
-To use
-.Em src
-as the basedir and disable two switches:
+To use src as the basedir and disable two switches:
 .Pp
 .Dl $ pmk -b src -d use_gtk,use_qt
 .Pp
@@ -72,12 +70,9 @@ To specify an alternate
 .Xr pmkfile 5 ,
 enabling one switch and overriding
 .Pa /etc/pmk/pmk.conf
-with the content of a given file (
-.Pa pmk/pmkovr
-in this case):
+with the content of a given file (pmk/pmkovr in this case):
 .Pp
 .Dl $ pmk -f pmk/pmkfile -e use_curses -o pmk/pmkovr
-.Ed
 
 .Sh SEE ALSO
 .Xr make 1 ,
