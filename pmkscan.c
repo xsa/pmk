@@ -669,6 +669,9 @@ scn_zone_t *scan_zone_init(htable_t *nodes) {
 		/* init templates dynary */
 		pzone->templates = da_init();
 
+		/* init generated files dynary */
+		pzone->generated = da_init();
+
 		/* init tags dynary */
 		pzone->tags = da_init();
 	}
@@ -729,6 +732,10 @@ void scan_zone_destroy(scn_zone_t *pzone) {
 
 	if (pzone->templates != NULL) {
 		da_destroy(pzone->templates);
+	}
+
+	if (pzone->generated != NULL) {
+		da_destroy(pzone->generated);
 	}
 
 	if (pzone->tags != NULL) {
@@ -2871,11 +2878,25 @@ void mkf_output_recurs(FILE *fp, scn_zone_t *psz) {
 
 		da_sort(psz->templates);
 
-		lm = strlen(MKF_GEN_FILES);
-		ofst = lm;
 		for (i = 0 ; i < s ; i++) {
 			/* generate file name from template */
 			pstr = gen_from_tmpl(da_idx(psz->templates, i));
+
+			if (da_find(psz->generated, pstr) == false) {
+				/* add default config file template in the list */
+				if (da_push(psz->generated, strdup(pstr)) == false) {
+					/*return false; XXX make return boolean */
+					return;
+				}
+			}
+		}
+
+		lm = strlen(MKF_GEN_FILES);
+		ofst = lm;
+		s = da_usize(psz->generated);
+		for (i = 0 ; i < s ; i++) {
+			/* get generated file name */
+			pstr = da_idx(psz->generated, i);
 
 			/* add result to the list */
 			ofst = fprintf_width(lm, MKF_OUTPUT_WIDTH, ofst, fp, pstr);
@@ -4966,6 +4987,9 @@ bool scan_node_file(prs_cmn_t *pcmn, char *fname, bool isdep) {
 				if (da_push(psz->templates, strdup(fname)) == false) {
 					return false;
 				}
+#ifdef PMKSCAN_DEBUG
+				debugf("scan_node_file() : added '%s' in psz->templates.", fname);
+#endif /* PMKSCAN_DEBUG */
 			}
 
 			/* display data file as recorded */
@@ -5382,6 +5406,9 @@ bool parse_zone_opts(prs_cmn_t *pcmn, htable_t *pht, htable_t *libs) {
 				if (da_push(psz->templates, strdup(PMKSCAN_CFGFILE)) == false) {
 					return false;
 				}
+#ifdef PMKSCAN_DEBUG
+				debugf("parse_zone_opts() : added '%s' in psz->templates.", PMKSCAN_CFGFILE);
+#endif /* PMKSCAN_DEBUG */
 			}
 
 			/* alternate name for pmkfile template */
@@ -5419,11 +5446,17 @@ bool parse_zone_opts(prs_cmn_t *pcmn, htable_t *pht, htable_t *libs) {
 				if (da_push(psz->templates, strdup(pstr)) == false) {
 					return false;
 				}
+#ifdef PMKSCAN_DEBUG
+				debugf("parse_zone_opts() : added '%s' in psz->templates.", pstr);
+#endif /* PMKSCAN_DEBUG */
 			} else {
 				/* add default makefile template in the list */
 				if (da_push(psz->templates, strdup(PMKSCAN_MKFILE)) == false) {
 					return false;
 				}
+#ifdef PMKSCAN_DEBUG
+				debugf("parse_zone_opts() : added '%s' in psz->templates.", PMKSCAN_MKFILE);
+#endif /* PMKSCAN_DEBUG */
 			}
 
 			/* extra to append to makefile template */
@@ -5439,7 +5472,6 @@ bool parse_zone_opts(prs_cmn_t *pcmn, htable_t *pht, htable_t *libs) {
 			}
 		}
 	}
-
 
 	/* get base directory (REQUIRED) */
 	pdir = po_get_str(hash_get(pht, KW_OPT_DIR));

@@ -628,7 +628,8 @@ typedef struct {
 				*manpgs,				/* man pages dynary */
 				*datafiles,				/* data files dynary */
 				*discard,				/* discard list */
-				*templates;				/* template files */
+				*templates,				/* template files */
+				*generated;				/* files to be generated from templates */
 	htable_t	*nodes,					/* global nodes table */
 				*objects,				/* zone objects */
 				*targets,				/* zone targets */
