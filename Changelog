@@ -1,7 +1,10 @@
+21 Mar 2007 coudercd
+ * fixed errors in manual pages and replaced blank line by one dot
+   lines, notified by Magnus Holmgren.
+
 28 Feb 2007 coudercd
  * fixed the label of shared lib linking flags variable in the log
    message (noticed by barratis from toy'd project).
-
 
 25 Feb 2007 coudercd
  * fixed a segfaulting bug in code_logger().
