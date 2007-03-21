@@ -1,4 +1,8 @@
-20 Mar 2007
+21 Mar 2007 coudercd
+ * replaced blank lines by one dot lines in manual pages, notified by
+   Magnus Holmgren.
+
+20 Mar 2007 coudercd
  * fixed errors in manual pages, notified by Magnus Holmgren.
 
 28 Feb 2007 coudercd
