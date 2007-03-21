@@ -1,25 +1,25 @@
 .\" $Id$
-
+.
 .Dd January 20, 2004
 .Dt PMKPC 1
 .Os
-
+.
 .Sh NAME
 .Nm pmkpc
 .Nd Packages metainformation management tool.
-
+.
 .Sh SYNOPSIS
 .Nm
 .B pmkpc
 .Op Ar options
 .Op Ar modules
-
+.
 .Sh DESCRIPTION
 .Nm
 is a tool that gathers metainformation about installed libraries that
 provide pkg-config data files.
 It aims to be an alternative to the pkg-config tool.
-
+.
 .Sh OPTIONS
 .Pp
 The options are as follows:
@@ -72,7 +72,7 @@ Display usage.
 .It --list-all
 Display all module names and descriptions.
 .El
-
+.
 .Pp
 The following options have not been implemented yet:
 .Bd -literal -offset indent
@@ -84,13 +84,13 @@ The following options have not been implemented yet:
 --silence-errors
 --errors-to-stdout
 .Ed
-
+.
 .Sh OUTPUT FILTERING
 As pkg-config has no standard specifications we determinated its
 behavior from pkg-config man page.
 The result is that filtering options can be accumulated.
 The default behavior is like if all filtering options were enabled.
-
+.
 .Sh FILES
 .Bl -tag -width "pmkcfgtool.dat" -compact
 .It Pa pmkcfgtool.dat

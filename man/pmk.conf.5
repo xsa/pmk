@@ -40,12 +40,12 @@ contains a series of assignements that are used by
 .Xr pmk 1
 and created by
 .Xr pmksetup 8 .
-
+.
 .Sh DATA TYPES
 These are common types used by pmk, see
 .Xr pmkfile 5
 for a complete description.
-
+.
 .Sh OPERATORS
 .Bl -tag -width Ds
 .It Cm =
@@ -70,7 +70,7 @@ BIN_INSTALL:"/usr/local/bin/install"
 .Ed
 .El
 .Pp
-
+.
 .Sh FAMILY CLASSES
 Assignements can be classed in different families.
 .Bl -tag -width PATH_*
@@ -87,7 +87,7 @@ System specific data.
 .It Ev misc
 Some other data (such as PREFIX) cannot fit into previous families.
 .El
-
+.
 .Sh AC CLASS
 This class is providing some variables for GNU Autoconf compatibility:
 .Bl -tag -width AC_ECHO_C
@@ -98,10 +98,10 @@ Support for "\\n".
 .It Ev AC_ECHO_T
 Support for "\\t".
 .El
-
+.
 .Sh BIN CLASS
 This class is providing locations of various useful binaries such as ar, as, cc, cpp, ...
-
+.
 .Sh HW CLASS
 This class is giving some information about the host hardware.
 .Bl -tag -width HW_BYTEORDER
@@ -110,7 +110,7 @@ Provide the byte order of the host: 'BIG_ENDIAN' or 'LITTLE_ENDIAN'.
 .It Ev HW_CPU_ARCH
 Identify the cpu architecture.
 .El
-
+.
 We support actually the following architectures (with cpu identification for some of them):
 .Bl -tag -width parisc_64
 .It Ev alpha
@@ -120,7 +120,7 @@ Cpu class (EV4, EV5 or EV6).
 .It Ev HW_ALPHA_CPU_FEATURES
 Cpu features list (BWX, FIX, CIX, MVI, PAT and PMI)
 .El
-
+.
 .It Ev ia_64
 .Bl -tag -width HW_IA64_CPU_FEATURES
 .It Ev HW_IA64_CPU_ARCHREV
@@ -138,22 +138,22 @@ Cpu revision number.
 .It Ev HW_IA64_CPU_VENDOR
 Cpu vendor string.
 .El
-
+.
 .It Ev m68k
 No specific variables.
-
+.
 .It Ev parisc_64
 No specific variables.
-
+.
 .It Ev ppc
 No specific variables.
-
+.
 .It Ev sparc_32
 No specific variables.
-
+.
 .It Ev sparc_64
 No specific variables.
-
+.
 .It Ev x86_32
 .Bl -tag -width HW_X86_CPU_STD_VENDOR
 .It Ev HW_X86_CPU_CLASS
@@ -173,14 +173,14 @@ Standardised cpu vendor ('INTEL', 'AMD', ...).
 .It Ev HW_X86_CPU_VENDOR
 Cpu vendor string.
 .El
-
+.
 .It Ev x86_64
 Same as x86_32 architecture.
-
+.
 .It Ev vax
 No specific variables.
 .El
-
+.
 .Sh OS CLASS
 This class is providing informations about the host's operating system:
 .Bl -tag -width OS_VERSION
@@ -191,10 +191,10 @@ Operating system name (warning: linux distributions return the kernel name).
 .It Ev OS_VERSION
 Operating system version (warning: linux distributions return the kernel version).
 .El
-
+.
 .Sh PATH CLASS
 This class is providing path for binaries, headers and libraries.
-
+.
 .Sh MISC CLASS
 This class is regrouping what can not be classed elsewhere.
 .Bl -tag -width PC_PATH_LIB
@@ -205,7 +205,7 @@ System configuration directory.
 .It Ev PC_PATH_LIB
 Library path for pmkpc or pkg_config.
 .El
-
+.
 .Sh FILES
 .Bl -tag -width "/etc/pmk/pmk.conf" -compact
 .It Pa /etc/pmk/pmk.conf
