@@ -1,13 +1,13 @@
 .\" $Id$
-
+.
 .Dd March 28, 2003
 .Dt PMK 1
 .Os
-
+.
 .Sh NAME
 .Nm pmk
 .Nd configuring tool
-
+.
 .Sh SYNOPSIS
 .Nm
 .Bk -words
@@ -19,7 +19,7 @@
 .Op Fl o Ar file
 .Op Ar options
 .Ek
-
+.
 .Sh DESCRIPTION
 .Nm
 is a configuring tool which aims to help building project on different
@@ -45,7 +45,7 @@ Override pmk.conf data with the content of the given file.
 .It Fl v
 Display the version number.
 .El
-
+.
 .Sh FILES
 .Bl -tag -width "/etc/pmk/pmk.conf" -compact
 .It Pa pmkfile
@@ -56,7 +56,7 @@ default
 .Xr pmk 1
 configuration file
 .El
-
+.
 .Sh EXAMPLES
 To display pmk version number:
 .Pp
@@ -77,21 +77,20 @@ with the content of a given file (
 in this case):
 .Pp
 .Dl $ pmk -f pmk/pmkfile -e use_curses -o pmk/pmkovr
-.Ed
-
+.
 .Sh SEE ALSO
 .Xr make 1 ,
 .Xr pmkscan 1 ,
 .Xr pmkfile 5 ,
 .Xr pmk.conf 5 ,
 .Xr pmksetup 8
-
+.
 .Sh HISTORY
 The idea to replace configure script was existing since a long time.
 But the projet was initiated in the begining of March 2003.
-
+.
 .Sh AUTHOR
 .An Damien Couderc.
-
+.
 .Sh BUGS
 You have to find them.

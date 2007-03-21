@@ -1,23 +1,23 @@
 .\" $Id$
-
+.
 .Dd April 27, 2003
 .Dt PMKFILE 5
 .Os
-
+.
 .Sh NAME
 .Nm pmkfile
 .Nd pmk specification file
-
+.
 .Sh DESCRIPTION
 .Nm
 is a file containing specifications that help configuring a package build
 on a given platform.
-
+.
 .Sh SYNTAX
 See
 .Xr pmksyntax.5
 to have an overview of the basic syntax of pmkfiles.
-
+.
 .Sh SPECIFIC COMMANDS
 .Pp
 The following commands have no label.
@@ -46,7 +46,7 @@ SETTINGS {
 	DETECT=("CC")
 }
 .Ed
-
+.
 .It Cm DEFINE
 This command permits to define variables.
 .Pp
@@ -62,7 +62,7 @@ DEFINE {
 	VERSION="0.1"
 }
 .Ed
-
+.
 .It Cm SWITCHES
 This command is setting dependency switches (see further DEPEND definition).
 .Pp
@@ -76,7 +76,7 @@ SWITCHES {
 }
 .Ed
 .El
-
+.
 .Sh STANDARD COMMANDS
 .Pp
 All these commands need a label.
@@ -232,7 +232,7 @@ type is 'quoted', name of the variable to check.
 type is 'quoted', value to check with the variable, optional.
 .El
 .El
-
+.
 .Sh CONDITIONAL COMMANDS
 .Bl -tag -width Ds
 .It Cm IF(expression)
@@ -264,7 +264,7 @@ ELSE(header_glib) {
 }
 .Ed
 .El
-
+.
 .Sh LIBRARY NAME BUILDING
 .Bl -tag -width Ds
 .It Cm BUILD_LIB_NAME
@@ -303,9 +303,9 @@ BUILD_LIB_NAME {
 .It Cm BUILD_SHLIB_NAME
 This command has been obsoleted by the BUILD_LIB_NAME command.
 .El
-
+.
 .Sh SEE ALSO
 .Xr pmk 1 ,
 .Xr pmkscan 1 ,
 .Xr pmksyntax.5
-
+.
