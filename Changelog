@@ -1,6 +1,8 @@
 21 Mar 2007 coudercd
  * replaced blank lines by one dot lines in manual pages, notified by
    Magnus Holmgren.
+ * fixed the duplicates in macro GEN_FILES of generated makefiles, also
+   notified by Magnus Holmgren.
 
 20 Mar 2007 coudercd
  * fixed errors in manual pages, notified by Magnus Holmgren.
