@@ -244,7 +244,6 @@ kw_t	opt_genzone[] = {
 	{KW_OPT_EXTMKF,	PO_STRING},
 	{KW_OPT_EXTTAG,	PO_LIST},
 	{KW_OPT_LIB,	PO_LIST},
-	{KW_OPT_LIBOBJ,	PO_LIST},
 	{KW_OPT_MKF,	PO_BOOL},
 	{KW_OPT_MKFALT,	PO_STRING},
 	{KW_OPT_NAM,	PO_STRING},
@@ -645,6 +644,11 @@ scn_zone_t *scan_zone_init(htable *nodes) {
 		/* init file type flags */
 		for (i = 0 ; i < sizeof(pzone->found) ; i++) {
 			pzone->found[i] = false;
+		}
+
+		/* init lib type flags */
+		for (i = 0 ; i < sizeof(pzone->lib_type) ; i++) {
+			pzone->lib_type[i] = false;
 		}
 
 		/* init source flag */

@@ -24,8 +24,8 @@ Indented lines means subtask.
 common:
 -----------------------------------------------------------------------
 	~R!	update tutorial
-	~.	improve test_pmkinstall to check more modes
-	~!	new samples
+	~	improve test_pmkinstall to check more modes => moved to testsuite
+	~!	new samples => move to testsuite
 			- add a sample that show architecture data from pmk
 	+R!	improve tag generation and substitution.
 	~R	regroup common labels at the same place
@@ -59,10 +59,11 @@ pmkscan
 	+R	add support for advanced tags in pmkscan and pmk
 	-R	update scanfile.5 (ADVTAG)
 	~R!	add more entries in pmkscan.dat
-	+R	add distclean in generated makefiles
 	~R	move hard coded strings of pmkscan.c into macros
 	~R	reorganize macros of pmkscan.h
-	+R	static library versioning
+	.R	replace EXTRAMKF by EXTRA_MACROS and EXTRA_RULES
+			- EXTRA_MACROS is the file containing macros to add to makefile
+			- EXTRA_RULES is the file containing rules to add to makefile
 
 
 pmkinstall
