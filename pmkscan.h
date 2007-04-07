@@ -114,9 +114,10 @@ enum {
 #define KW_OPT_CFGALT	"CFGNAME"
 #define KW_OPT_DIR		"DIRECTORY"
 #define KW_OPT_DSC		"DISCARD"
-#define KW_OPT_EXTMKF	"EXTRAMKF"
-#define KW_OPT_EXTTAG	"EXTRATAG"
-#define KW_OPT_LIBOBJ	"LIBOBJ"
+#define KW_OPT_EXTMKF	"EXTRAMKF" /* XXX to be obsoleted by EXTRA_MACROS and EXTRA_RULES */
+#define KW_OPT_EXTMAC	"EXTRA_MACROS"
+#define KW_OPT_EXTRUL	"EXTRA_RULES"
+#define KW_OPT_EXTTAG	"EXTRATAG" /* XXX to be obsoleted by EXTRA_MACROS ? */
 #define KW_OPT_LINKER	"LINKER"
 #define KW_OPT_MKF		"MAKEFILE"
 #define KW_OPT_MKFALT	"MKFNAME"
@@ -613,7 +614,7 @@ typedef struct {
 				 gen_pmk,				/* pmkfile generation flag */
 				 gen_mkf,				/* makefile generation flag */
 				 gen_lib,				/* library generation flag *//* XXX to remove ? */
-				 lib_type[NB_LIB_TYPE],	/* file type flags *//* XXX to init */
+				 lib_type[NB_LIB_TYPE],	/* file type flags */
 				 recursive,				/* recursive scan flag */
 				 unique;				/* unique file flag */
 	char		*directory,				/* initial directory */
