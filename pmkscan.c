@@ -512,7 +512,11 @@ lib_cell_t *lib_cell_init(char *name, dynary *srcs, dynary *hdrs, ltype_t type) 
 	char		 buffer[TMP_BUF_LEN],
 				 ubuf[TMP_BUF_LEN];
 	lib_cell_t	*plc;
-	
+
+#ifdef PMKSCAN_DEBUG
+	debugf("lib_cell_init(): processing '%s'", name);
+#endif
+
 	plc = (lib_cell_t *) malloc(sizeof(lib_cell_t));
 	if (plc != NULL) {
 		/* set library filename */
@@ -523,20 +527,20 @@ lib_cell_t *lib_cell_init(char *name, dynary *srcs, dynary *hdrs, ltype_t type) 
 		str_to_upper(ubuf, sizeof(ubuf), buffer);
 		plc->lib_label = strdup(ubuf);
 
-        /* init version numbers */
+		/* init version numbers */
 		plc->lib_vmaj = NULL;
 		plc->lib_vmin = NULL;
 
-		/* set library objects variable */
-		snprintf(buffer, sizeof(buffer), "%s_SRCS", ubuf);
+		/* set library sources variable */
+		snprintf(buffer, sizeof(buffer), MKF_OBJ_SRCS_VAR, ubuf);
 		plc->lib_srcs = strdup(buffer);
 
-		/* set library objects variable */
-		snprintf(buffer, sizeof(buffer), "%s_HDRS", ubuf);
+		/* set library headers variable */
+		snprintf(buffer, sizeof(buffer), MKF_TRGT_HDRS_VAR, ubuf);
 		plc->lib_hdrs = strdup(buffer);
 
 		/* set library objects variable */
-		snprintf(buffer, sizeof(buffer), "%s_OBJS", ubuf);
+		snprintf(buffer, sizeof(buffer), MKF_TRGT_OBJS_VAR, ubuf);
 		plc->lib_objs = strdup(buffer);
 
 		/* set static library variable name */
@@ -547,16 +551,16 @@ lib_cell_t *lib_cell_init(char *name, dynary *srcs, dynary *hdrs, ltype_t type) 
 		snprintf(buffer, sizeof(buffer), "%s_SHARED", ubuf);
 		plc->lib_shared = strdup(buffer);
 
-		/* library linking type */		
+		/* library linking type */
 		plc->type = type;
 
-		/* source dependencies */		
+		/* source dependencies */
 		plc->src_list = srcs;
 
-		/* header dependencies */		
+		/* header dependencies */
 		plc->hdr_list = hdrs;
 
-		/* object dependencies */		
+		/* object dependencies */
 		plc->obj_deps = da_init();
 	}
 	
@@ -654,8 +658,8 @@ scn_zone_t *scan_zone_init(htable_t *nodes) {
 		pzone->found_src = false;
 
 		/* init zone tables */
-		pzone->objects = hash_create_simple(256); /* XXX can do better :) */
-		pzone->targets = hash_create_simple(256); /* XXX can do better :) */
+		pzone->objects = hash_create_simple(512); /* XXX autogrow ? */
+		pzone->targets = hash_create_simple(256); /* XXX autogrow ? */
 		pzone->libraries = hash_create(16, false, NULL, NULL, (void (*)(void *)) lib_cell_destroy); /* library cells */
 		pzone->h_checks = hash_create(128, false, NULL, NULL, (void (*)(void *)) destroy_chk_cell); /* XXX can do better :) */
 		pzone->l_checks = hash_create(128, false, NULL, NULL, (void (*)(void *)) destroy_chk_cell); /* XXX can do better :) */
@@ -2313,6 +2317,7 @@ bool gen_objects(scn_zone_t *psz) {
 			/* add object reference */
 			if (hash_update_dup(psz->objects, buf, pnode->fname) == false) {
 				hash_free_hkeys(phk);
+				errorf("failed to update '%s' value with '%s'.", buf, pnode->fname);
 				return false;
 			}
 
@@ -2347,6 +2352,7 @@ bool gen_objects(scn_zone_t *psz) {
 					/* and set object link if common declarator is found */
 					if (da_push(pn->obj_links, strdup(pnode->obj_name)) == false) {
 						hash_free_hkeys(phk);
+						errorf("failed to push '%s' into objects linking dependencies of '%s'.", buf, pn->fname);
 						return false;
 					}
 				}
@@ -2367,6 +2373,7 @@ bool gen_objects(scn_zone_t *psz) {
 						/* and set object link if common declarator is found */
 						if (da_push(pn->obj_links, strdup(pnode->obj_name)) == false) {
 							hash_free_hkeys(phk);
+							errorf("failed to push '%s' into objects linking dependencies of '%s'.", buf, pn->fname);
 							return false;
 						}
 					}
@@ -2600,8 +2607,7 @@ bool gen_lib_targets(scn_zone_t *psz) {
 			if (recurse_src_deps(psz, plc->obj_deps, srcname) == false) {
 				/* failed */
 				return false;
-
-		}
+			}
 
 #ifdef PMKSCAN_DEBUG
 			debugf("END recurse_src_deps() for for source '%s'", srcname);
@@ -4599,6 +4605,7 @@ bool process_ppro(void *data, char *pstr, prseng_t *ppe) {
 					return false;
 				}
 
+				psc_log(NULL, "\t\tFound local include '%s'.\n", iname);
 				break;
 
 			case '<' :
@@ -4610,6 +4617,8 @@ bool process_ppro(void *data, char *pstr, prseng_t *ppe) {
 					errorf("unable to add '%s' in sys deps", iname);
 					return false;
 				}
+
+				psc_log(NULL, "\t\tFound system include '%s'.\n", iname);
 				break;
 
 			default :
@@ -4813,7 +4822,7 @@ bool parse_file(prs_cmn_t *pcmn, char *fname, ftype_t ft, bool isdep) {
 				}
 
 				/* display parsed assembly file */
-				psc_log("a", "\tParsed assembly file '%s'\n", fname);
+				psc_log("a", "\tEnd of parsing of assembly file '%s'\n", fname);
 				break;
 
 			case FILE_TYPE_C :
@@ -4834,10 +4843,10 @@ bool parse_file(prs_cmn_t *pcmn, char *fname, ftype_t ft, bool isdep) {
 
 				if (ft == FILE_TYPE_C) {
 					/* display parsed c file */
-					psc_log("c", "\tParsed C file '%s'\n", fname);
+					psc_log("c", "\tEnd of parsing of C file '%s'\n", fname);
 				} else {
 					/* display parsed c++ file */
-					psc_log("C", "\tParsed C++ file '%s'\n", fname);
+					psc_log("C", "\tEnd of parsing of C++ file '%s'\n", fname);
 				}
 				break;
 		}
@@ -4867,7 +4876,7 @@ bool parse_file(prs_cmn_t *pcmn, char *fname, ftype_t ft, bool isdep) {
 	for (i = 0 ; i < da_usize(pnode->local_inc) ; i++) {
 		ptr = (char *) da_idx(pnode->local_inc, i);
 #ifdef PMKSCAN_DEBUG
-		debugf("parse_file() : dir = '%s', inc = '%s'", dir, ptr);
+		debugf("parse_file() : dir = '%s', inc = '%s'", pnode->dname, ptr);
 #endif /* PMKSCAN_DEBUG */
 
 		/* scan local include */
@@ -5244,6 +5253,7 @@ bool process_zone(prs_cmn_t *pcmn, scandata *psd) {
 					if (rslt == false) {
 						psc_log("Failed\n\n", NULL);
 					} else {
+						psc_log("Ok\n\n", NULL);
 
 						/* generate makefile */
 						psc_log("Generating %s ...\n", NULL, psz->mkf_name);

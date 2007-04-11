@@ -250,6 +250,7 @@ enum {
 #define MKF_OBJECT_SRCS		MKF_OBJ_SRCS_VAR "=\t"
 #define MKF_TRGT_OBJS_VAR	"%s_OBJS"
 #define MKF_TARGET_OBJS		MKF_TRGT_OBJS_VAR "=\t"
+#define MKF_TRGT_HDRS_VAR	"%s_HDRS"
 
 #define MKF_SUBSTVAR		"%s=\t@%s@\n"
 #define MKF_VARHDR			"%s=\t"
