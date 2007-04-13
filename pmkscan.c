@@ -659,8 +659,8 @@ scn_zone_t *scan_zone_init(htable *nodes) {
 		pzone->found_src = false;
 
 		/* init zone tables */
-		pzone->objects = hash_init(512); /* XXX can do better :) */
-		pzone->targets = hash_init(256); /* XXX can do better :) */
+		pzone->objects = hash_init(1024); /* XXX should be autogrow enabled */
+		pzone->targets = hash_init(512); /* XXX should be autogrow enabled */
 		pzone->libraries = hash_init_adv(16, NULL, (void (*)(void *)) lib_cell_destroy, NULL); /* library cells */
 		pzone->h_checks = hash_init_adv(128, NULL, (void (*)(void *)) destroy_chk_cell, NULL); /* XXX can do better :) */
 		pzone->l_checks = hash_init_adv(128, NULL, (void (*)(void *)) destroy_chk_cell, NULL); /* XXX can do better :) */
@@ -2303,6 +2303,7 @@ bool gen_objects(scn_zone_t *psz) {
 #ifdef PMKSCAN_DEBUG
 		debugf("score of '%s' = %d", phk->keys[i], pnode->score);
 #endif /* PMKSCAN_DEBUG */
+		psc_log(NULL, "\tScore of '%s' = %d\n", phk->keys[i], pnode->score);
 
 		/*
 			if we got a node with a score of 0 then it should
@@ -2313,7 +2314,7 @@ bool gen_objects(scn_zone_t *psz) {
 			strlcpy(buf, pnode->prefix, sizeof(buf));
 			strlcat(buf, OBJ_SUFFIX, sizeof(buf));
 
-			psc_log(NULL, "\tProcessing '%s'\n", buf);
+			psc_log(NULL, "\tAdding node '%s' linked to '%s' into object list\n", buf, pnode->fname);
 
 			/* add object reference */
 			if (hash_update_dup(psz->objects, buf, pnode->fname) == HASH_ADD_FAIL) {
@@ -2321,6 +2322,8 @@ bool gen_objects(scn_zone_t *psz) {
 				errorf("failed to update '%s' value with '%s'.", buf, pnode->fname);
 				return false;
 			}
+
+			psc_log(NULL, "\tProcessing '%s'\n", buf);
 
 			/* set object name */
 			pnode->obj_name = strdup(buf);
@@ -2349,6 +2352,7 @@ bool gen_objects(scn_zone_t *psz) {
 #ifdef PMKSCAN_DEBUG
 					debugf("adding object link '%s' dependency to node '%s'", pnode->obj_name, pn->fname);
 #endif /* PMKSCAN_DEBUG */
+					psc_log(NULL, "\t\tAdding object link '%s' dependency to node '%s'", pnode->obj_name, pn->fname);
 
 					/* and set object link if common declarator is found */
 					if (da_push(pn->obj_links, strdup(pnode->obj_name)) == false) {
@@ -2587,15 +2591,14 @@ bool gen_lib_targets(scn_zone_t *psz) {
 			/* get source name name */
 			srcname = da_idx(plc->src_list, j);
 
+			/* fetch source node */
 			pnode = hash_get(psz->nodes, srcname);
 			if (pnode == NULL) {
 				psc_log("cannot find node '%s'.\n", NULL, srcname);
 				return false;
 			}
 
-			/* build and store label name */
-			pnode->label = strdup(plc->lib_label);
-
+			/* push object name of source file into dependencies */
 			if (da_push(plc->obj_deps, strdup(pnode->obj_name)) == false) {
 				/* err msg */
 				return false;
@@ -5387,7 +5390,7 @@ bool parse_zone_opts(prs_cmn_t *pcmn, htable *pht, htable *libs) {
 
 
 	/* init of nodes table */
-	tnodes = hash_init_adv(512, NULL, (void (*)(void *))scan_node_destroy, NULL);
+	tnodes = hash_init_adv(2048, NULL, (void (*)(void *))scan_node_destroy, NULL);
 	if (tnodes == NULL) {
 		/* XXX errmsg !! */
 		return false;
