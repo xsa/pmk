@@ -1,5 +1,7 @@
 13 Apr 2007 coudercd
  * fixed library source labels generation.
+ * fixed object dependencies when an object is used in both a binary
+   and a library to avoid duplicates.
 
 10 Apr 2007 coudercd
  * resized ressources in pmkscan for larger projects.

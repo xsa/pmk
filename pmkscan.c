@@ -2530,9 +2530,11 @@ bool gen_targets(scn_zone_t *psz) {
 			/* build and store object name */
 			strlcpy(buf, pnode->prefix, sizeof(buf));
 			strlcat(buf, OBJ_SUFFIX, sizeof(buf));
-			if (da_push(pnode->obj_deps, strdup(buf)) == false) {
-				/* err msg */
-				return false;
+			if (da_find(pnode->obj_deps, buf) == false) {
+				if (da_push(pnode->obj_deps, strdup(buf)) == false) {
+					/* XXX err msg */
+					return false;
+				}
 			}
 
 #ifdef PMKSCAN_DEBUG
@@ -2598,10 +2600,12 @@ bool gen_lib_targets(scn_zone_t *psz) {
 				return false;
 			}
 
-			/* push object name of source file into dependencies */
-			if (da_push(plc->obj_deps, strdup(pnode->obj_name)) == false) {
-				/* err msg */
-				return false;
+			if (da_find(plc->obj_deps, pnode->obj_name) == false) {
+				/* push object name of source file into dependencies */
+				if (da_push(plc->obj_deps, strdup(pnode->obj_name)) == false) {
+					/* XXX err msg */
+					return false;
+				}
 			}
 
 #ifdef PMKSCAN_DEBUG
