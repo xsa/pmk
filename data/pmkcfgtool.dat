@@ -23,6 +23,11 @@ ADD_CFGTOOL {
 }
 
 ADD_CFGTOOL {
+	NAME = "gtkmm"
+	BINARY = "gtkmm-config"
+}
+
+ADD_CFGTOOL {
 	NAME = "libgnomevfs"
 	BINARY = "gnome-vfs-config"
 }

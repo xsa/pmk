@@ -326,8 +326,7 @@ bool scan_dir(char *dir, pkgdata *ppd) {
 				/* build full path of pc file */
 				strlcpy(fpath, dir, sizeof(fpath)); /* no check */
 				strlcat(fpath, "/", sizeof(fpath)); /* no check */
-				if (strlcat_b(fpath, pstr,
-						sizeof(fpath)) == false) {
+				if (strlcat_b(fpath, pstr, sizeof(fpath)) == false) {
 					/* XXX err msg ? */
 					closedir(pdir);
 					return(false);
@@ -365,34 +364,45 @@ bool scan_dir(char *dir, pkgdata *ppd) {
 
 bool pkg_collect(char *pkglibdir, pkgdata *ppd) {
 	char			*pstr;
-	dynary			*pda;
+	dynary			*ppath,
+					*ppcpath;
 	unsigned int	 i;
 
 	pstr = getenv(PMKCFG_ENV_PATH);
 	if (pstr != NULL) {
 		/* also scan path provided in env variable */
-		pda = str_to_dynary(pstr, PKGCFG_CHAR_PATH_SEP);
+		ppath = str_to_dynary(pstr, PKGCFG_CHAR_PATH_SEP);
 
-		for (i = 0 ; i < da_usize(pda) ; i++) {
-			pstr = da_idx(pda, i);
+		for (i = 0 ; i < da_usize(ppath) ; i++) {
+			pstr = da_idx(ppath, i);
 			if (scan_dir(pstr, ppd) == false) {
-				da_destroy(pda);
+				da_destroy(ppath);
 				return(false);
 			}
 		}
 
-		da_destroy(pda);
+		da_destroy(ppath);
 	}
 
+	/* check if pkg-config library directory has been set in env variable */
 	pstr = getenv(PMKCFG_ENV_LIBDIR);
 	if (pstr == NULL) {
-		/* scan default pkgconfig lib directory */
-		if (scan_dir(pkglibdir, ppd) == false)
-			return(false);
+		/* env variable is not set, getting pmk.conf variable */
+		ppcpath = str_to_dynary(pkglibdir, PKGCFG_CHAR_PATH_SEP);
 	} else {
-		/* scan overrided pkgconfig libdir */
-		if (scan_dir(pstr, ppd) == false)
+		/* else use env variable */
+		ppcpath = str_to_dynary(pstr, PKGCFG_CHAR_PATH_SEP);
+	}
+
+	/* scan all path for pc files */
+	for (i = 0 ; i < da_usize(ppcpath) ; i++) {
+		/* get directory */
+		pstr = da_idx(ppcpath, i);
+
+		/* scan directory */
+		if (scan_dir(pstr, ppd) == false) {
 			return(false);
+		}
 	}
 
 	return(true);
@@ -601,7 +611,7 @@ pkgcell *parse_pc_file(char *pcfile) {
 
 	fp = fopen(pcfile, "r");
 	if (fp == NULL) {
-		errorf("cannot open '%s' : %s.", pcfile, strerror(errno));
+		errorf("cannot open .pc file '%s' : %s.", pcfile, strerror(errno));
 		return(NULL);
 	}
 
@@ -688,7 +698,7 @@ pkgcell *pkg_cell_add(pkgdata *ppd, char *mod) {
 	pkgcell		*ppc;
 
 	/* get pc file name */
-	pcf = hash_get(ppd->files, mod);
+	pcf = hash_get(ppd->files, mod); /* XXX check if NULL ?? */
 
 	/* parse pc file */
 	ppc = parse_pc_file(pcf);
