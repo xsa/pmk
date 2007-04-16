@@ -45,6 +45,7 @@
 #include <limits.h>
 #include <stdarg.h>
 #include <stdlib.h>
+#include <time.h>
 
 #include "compat/pmk_ctype.h"
 #include "compat/pmk_libgen.h"
@@ -2351,7 +2352,7 @@ bool gen_objects(scn_zone_t *psz) {
 #ifdef PMKSCAN_DEBUG
 					debugf("adding object link '%s' dependency to node '%s'", pnode->obj_name, pn->fname);
 #endif /* PMKSCAN_DEBUG */
-					psc_log(NULL, "\t\tAdding object link '%s' dependency to node '%s'", pnode->obj_name, pn->fname);
+					psc_log(NULL, "\t\tAdding object link '%s' dependency to node '%s'\n", pnode->obj_name, pn->fname);
 
 					/* and set object link if common declarator is found */
 					if (da_push(pn->obj_links, strdup(pnode->obj_name)) == false) {
@@ -2373,6 +2374,7 @@ bool gen_objects(scn_zone_t *psz) {
 #ifdef PMKSCAN_DEBUG
 						debugf("adding object link '%s' dependency to node '%s'", pnode->obj_name, pn->fname);
 #endif /* PMKSCAN_DEBUG */
+						psc_log(NULL, "\t\tAdding object link '%s' dependency to node '%s'\n", pnode->obj_name, pn->fname);
 
 						/* and set object link if common declarator is found */
 						if (da_push(pn->obj_links, strdup(pnode->obj_name)) == false) {
