@@ -42,7 +42,6 @@ SYSCONFDIR=	@SYSCONFDIR@
 
 # packaging
 PACKAGE=	@PACKAGE@
-VERSION=	@VERSION@
 
 
 # extra tags
@@ -52,7 +51,7 @@ PRIVSEP_USER=	@PRIVSEP_USER@
 #
 # list of generated files
 #
-GEN_FILES=	Makefile Makefile compat/config.h
+GEN_FILES=	Makefile compat/config.h
 
 #
 # source dependency lists
