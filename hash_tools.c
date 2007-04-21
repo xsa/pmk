@@ -121,6 +121,21 @@ htable_t *hash_create_simple(size_t table_size) {
 }
 
 
+/*********************************
+ * hash_create_simple_autogrow() *
+ *************************************************************************************************************
+ %DESCR allocation and initialization of a simple hash table with autogrow enabled
+
+ %PARAM size : hash table size
+
+ %RETURN hash table pointer or NULL on failure
+ *************************************************************************************************************/
+
+htable_t *hash_create_simple_autogrow(size_t table_size) {
+	return(hash_create(table_size, true, hash_str_append, (void *(*)(void *)) strdup, free));
+}
+
+
 /**************
  * parse_idtf *
  ***********************************************************************

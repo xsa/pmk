@@ -41,6 +41,7 @@
 
 void		*hash_str_append(void *, void *, void *);
 htable_t	*hash_create_simple(size_t table_size);
+htable_t	*hash_create_simple_autogrow(size_t table_size);
 char		*parse_idtf(char *, char *, size_t);
 char		*process_string(char *, htable_t *);
 bool		 single_append(htable_t *, char *, char *);
