@@ -430,10 +430,11 @@ static int hash_strcmp(const void *a, const void *b) {
  *************************************************************************************************************
  %DESCR allocation and initialization of hash table structure
 
- %PARAM size :	hash table size
- %PARAM fa :	data appending function
- %PARAM fd :	data duplication function
- %PARAM ff :	data deallocation function
+ %PARAM size :		hash table size
+ %PARAM autogrow :	enable or disable autogrow
+ %PARAM fa :		data appending function
+ %PARAM fd :		data duplication function
+ %PARAM ff :		data deallocation function
 
  %RETURN hash table pointer or NULL on failure
  *************************************************************************************************************/
