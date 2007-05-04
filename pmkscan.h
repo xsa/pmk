@@ -86,9 +86,8 @@ enum {
 	PSC_TOK_PMKF = 1,
 	PSC_TOK_MAKF,
 	PSC_TOK_ZONE,
-	PSC_TOK_DEFLIB,
-	PSC_TOK_DEFLIBS,
-	PSC_TOK_SETLIB
+	PSC_TOK_DEFBIN,
+	PSC_TOK_DEFLIB
 };
 
 
@@ -107,6 +106,7 @@ enum {
 #define KW_CMD_GENPF	"GEN_PMKFILE"
 #define KW_CMD_GENMF	"GEN_MAKEFILE"
 #define KW_CMD_GENZN	"GEN_ZONE"
+#define KW_CMD_DEFBIN	"DEFINE_BIN"
 #define KW_CMD_DEFLIB	"DEFINE_LIB"
 
 /* script keyword options */
@@ -124,6 +124,7 @@ enum {
 #define KW_OPT_PMK		"PMKFILE"
 #define KW_OPT_PMKALT	"PMKNAME"
 #define KW_OPT_REC		"RECURSE"
+#define KW_OPT_SRC		"SOURCE"
 #define KW_OPT_SRCS		"SOURCES"
 #define KW_OPT_HDRS		"HEADERS"
 #define KW_OPT_UNI		"UNIQUE"
@@ -132,6 +133,7 @@ enum {
 
 
 /* common options */
+#define KW_OPT_BIN		"BINARY"
 #define KW_OPT_LIB		"LIBRARY"
 #define KW_OPT_NAM		"NAME"
 
@@ -169,11 +171,11 @@ enum {
 
 /* library types *******************************************************/
 enum {
-	LIB_TYPE_UNKNOWN = 0,
-	LIB_TYPE_ASM,
-	LIB_TYPE_C,
-	LIB_TYPE_CXX,
-	NB_LIB_TYPE			/* number of library types */
+	LINK_TYPE_UNKNOWN = 0,
+	LINK_TYPE_ASM,
+	LINK_TYPE_C,
+	LINK_TYPE_CXX,
+	NB_LINK_TYPE			/* number of linker types */
 };
 
 /* object type *********************************************************/
@@ -561,12 +563,12 @@ typedef struct {
 	ftype_t	 type;
 } scn_ext_t;
 
-/* library type */
+/* linker type */
 typedef unsigned char	ltype_t;
 typedef struct {
 	char	*lang;
 	ltype_t	 type;
-} lib_type_t;
+} link_type_t;
 
 /* node structure */
 typedef struct {
@@ -596,7 +598,6 @@ typedef struct {
 				*lib_label,		/* library name label */
                 *lib_vmaj,      /* major version number */
                 *lib_vmin,      /* minor version number */
-				*lib_srcs,		/* library sources variable */
 				*lib_hdrs,		/* library headers variable */
 				*lib_objs,		/* library objects variable */
 				*lib_static,	/* static library filename */
@@ -615,7 +616,7 @@ typedef struct {
 				 gen_pmk,				/* pmkfile generation flag */
 				 gen_mkf,				/* makefile generation flag */
 				 gen_lib,				/* library generation flag *//* XXX to remove ? */
-				 lib_type[NB_LIB_TYPE],	/* file type flags */
+				 lib_type[NB_LINK_TYPE],	/* file type flags */
 				 recursive,				/* recursive scan flag */
 				 unique;				/* unique file flag */
 	char		*directory,				/* initial directory */
@@ -635,6 +636,7 @@ typedef struct {
 	htable_t	*nodes,					/* global nodes table */
 				*objects,				/* zone objects */
 				*targets,				/* zone targets */
+				*binaries,				/* zone binaries */
 				*libraries,				/* zone libraries */
 				*h_checks,				/* zone header checks */
 				*l_checks,				/* zone header checks */
@@ -735,8 +737,9 @@ bool		 process_ppro(void *, char *, prseng_t *);
 bool		 process_proc_call(void *, char *, prseng_t *);
 bool		 process_proc_decl(void *, char *, prseng_t *);
 bool		 process_type(void *, char *, prseng_t *);
+bool		 parse_defbin(htable_t *, htable_t *);
 bool		 parse_deflib(htable_t *, htable_t *);
-bool		 parse_zone_opts(prs_cmn_t *, htable_t *, htable_t *);
+bool		 parse_zone_opts(prs_cmn_t *, htable_t *, htable_t *, htable_t *);
 bool		 parse_file(prs_cmn_t *, char *, ftype_t, bool);
 bool		 process_zone(prs_cmn_t *, scandata *);
 bool		 parse_script(char *, prs_cmn_t *, scandata *);

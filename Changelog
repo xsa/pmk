@@ -1,3 +1,7 @@
+04 May 2007 coudercd
+ * added DEFINE_BIN to allow specification of a binary name by giving
+   the name of it's main source.
+
 21 Apr 2007 coudercd
  * added hash_create_simple_autogrow() which is almost the same as
    hash_create_simple() but with autogrow enabled.
