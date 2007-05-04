@@ -108,12 +108,12 @@ scn_ext_t	 file_ext[] = {
 };
 size_t	 nb_file_ext = sizeof(file_ext) / sizeof(scn_ext_t);
 
-lib_type_t	 lib_types[] = {
-		/*{LANG_LABEL_ASM,	LIB_TYPE_ASM},*/
-		{LANG_LABEL_C,		LIB_TYPE_C},
-		{LANG_LABEL_CXX,	LIB_TYPE_CXX}
+link_type_t	 link_types[] = {
+		/*{LANG_LABEL_ASM,	LINK_TYPE_ASM},*/
+		{LANG_LABEL_C,		LINK_TYPE_C},
+		{LANG_LABEL_CXX,	LINK_TYPE_CXX}
 };
-size_t	 nb_lib_types = sizeof(lib_types) / sizeof(lib_type_t);
+size_t	 nb_link_types = sizeof(link_types) / sizeof(link_type_t);
 
 
 /* pmkscan data parser options *****************************************/
@@ -172,6 +172,19 @@ size_t	nbkwps = sizeof(kw_pmkscan) / sizeof(prskw);
 
 /* pmkscan script parser options ***************************************/
 
+/* DEFINE_BIN required options */
+kw_t	req_defbin[] = {
+	{KW_OPT_NAM,	PO_STRING},
+	{KW_OPT_SRC,	PO_STRING}
+};
+
+kwopt_t	kw_defbin = {
+	req_defbin,
+	sizeof(req_defbin) / sizeof(kw_t),
+	0,
+	NULL
+};
+
 /* DEFINE_LIB required options */
 kw_t	req_deflib[] = {
 	{KW_OPT_NAM,	PO_STRING},
@@ -204,6 +217,7 @@ kw_t	opt_genpmk[] = {
 	{KW_OPT_CFGALT,	PO_STRING},
 	{KW_OPT_DSC,	PO_LIST},
 	{KW_OPT_EXTTAG,	PO_LIST},
+	{KW_OPT_BIN,	PO_LIST},
 	{KW_OPT_LIB,	PO_LIST},
 	{KW_OPT_PMKALT,	PO_STRING},
 	{KW_OPT_REC,	PO_BOOL},
@@ -222,6 +236,7 @@ kw_t	opt_genmkf[] = {
 	{KW_OPT_DSC,	PO_LIST},
 	{KW_OPT_EXTMKF,	PO_STRING},
 	{KW_OPT_EXTTAG,	PO_LIST},
+	{KW_OPT_BIN,	PO_LIST},
 	{KW_OPT_LIB,	PO_LIST},
 	{KW_OPT_NAM,	PO_STRING},
 	{KW_OPT_MKFALT,	PO_STRING},
@@ -243,6 +258,7 @@ kw_t	opt_genzone[] = {
 	{KW_OPT_DSC,	PO_LIST},
 	{KW_OPT_EXTMKF,	PO_STRING},
 	{KW_OPT_EXTTAG,	PO_LIST},
+	{KW_OPT_BIN,	PO_LIST},
 	{KW_OPT_LIB,	PO_LIST},
 	{KW_OPT_MKF,	PO_BOOL},
 	{KW_OPT_MKFALT,	PO_STRING},
@@ -264,6 +280,7 @@ prskw	kw_scanfile[] = {
 	{KW_CMD_GENPF,		PSC_TOK_PMKF,		PRS_KW_CELL,	PRS_TOK_NULL,	&kw_genpmk},
 	{KW_CMD_GENMF,		PSC_TOK_MAKF,		PRS_KW_CELL,	PRS_TOK_NULL,	&kw_genmkf},
 	{KW_CMD_GENZN,		PSC_TOK_ZONE,		PRS_KW_CELL,	PRS_TOK_NULL,	&kw_genzone},
+	{KW_CMD_DEFBIN,		PSC_TOK_DEFBIN,		PRS_KW_CELL,	PRS_TOK_NULL,	&kw_defbin},
 	{KW_CMD_DEFLIB,		PSC_TOK_DEFLIB,		PRS_KW_CELL,	PRS_TOK_NULL,	&kw_deflib}
 };
 size_t	nbkwsf = sizeof(kw_scanfile) / sizeof(prskw);
@@ -313,7 +330,7 @@ scn_node_t *scan_node_init(char *fname) {
 
 		/* build prefix name */
 		len = strlen(fname);
-		pstr = &fname[len];
+		pstr = &fname[(int) len];
 		while (pstr > fname) {
 			if (*pstr == '.') {
 				len = (size_t) (pstr - fname);
@@ -503,7 +520,8 @@ void scan_node_destroy(scn_node_t *pnode) {
 
  IN
 	name :	library name
-	srcs :	object list
+	srcs :	source file list
+	type :	linker type
 
  OUT
 	structure pointer or NULL
@@ -531,10 +549,6 @@ lib_cell_t *lib_cell_init(char *name, dynary *srcs, dynary *hdrs, ltype_t type) 
 		/* init version numbers */
 		plc->lib_vmaj = NULL;
 		plc->lib_vmin = NULL;
-
-		/* set library sources variable */
-		snprintf(buffer, sizeof(buffer), MKF_OBJ_SRCS_VAR, ubuf);
-		plc->lib_srcs = strdup(buffer);
 
 		/* set library headers variable */
 		snprintf(buffer, sizeof(buffer), MKF_TRGT_HDRS_VAR, ubuf);
@@ -595,7 +609,6 @@ void lib_cell_destroy(lib_cell_t *plc) {
 	}
 
 	free(plc->lib_name);
-	free(plc->lib_srcs);
 	free(plc->lib_hdrs);
 	free(plc->lib_objs);
 	free(plc->lib_static);
@@ -618,7 +631,7 @@ void lib_cell_destroy(lib_cell_t *plc) {
 
 scn_zone_t *scan_zone_init(htable_t *nodes) {
 	scn_zone_t	*pzone;
-	size_t		 i;
+	int			 i;
 
 	pzone = (scn_zone_t *) malloc(sizeof(scn_zone_t));
 	if (pzone != NULL) {
@@ -646,12 +659,12 @@ scn_zone_t *scan_zone_init(htable_t *nodes) {
 		pzone->exttags = NULL;
 
 		/* init file type flags */
-		for (i = 0 ; i < sizeof(pzone->found) ; i++) {
+		for (i = 0 ; i < (int) sizeof(pzone->found) ; i++) {
 			pzone->found[i] = false;
 		}
 
 		/* init lib type flags */
-		for (i = 0 ; i < sizeof(pzone->lib_type) ; i++) {
+		for (i = 0 ; i < (int) sizeof(pzone->lib_type) ; i++) {
 			pzone->lib_type[i] = false;
 		}
 
@@ -661,6 +674,7 @@ scn_zone_t *scan_zone_init(htable_t *nodes) {
 		/* init zone tables */
 		pzone->objects = hash_create_simple(1024); /* XXX autogrow ? */
 		pzone->targets = hash_create_simple(512); /* XXX autogrow ? */
+		pzone->binaries = hash_create_simple(16); /* binary definitions */
 		pzone->libraries = hash_create(16, false, NULL, NULL, (void (*)(void *)) lib_cell_destroy); /* library cells */
 		pzone->h_checks = hash_create(128, false, NULL, NULL, (void (*)(void *)) destroy_chk_cell); /* XXX can do better :) */
 		pzone->l_checks = hash_create(128, false, NULL, NULL, (void (*)(void *)) destroy_chk_cell); /* XXX can do better :) */
@@ -709,6 +723,10 @@ void scan_zone_destroy(scn_zone_t *pzone) {
 
 	if (pzone->targets != NULL) {
 		hash_destroy(pzone->targets);
+	}
+
+	if (pzone->binaries != NULL) {
+		hash_destroy(pzone->binaries);
 	}
 
 	if (pzone->libraries != NULL) {
@@ -1071,7 +1089,7 @@ bool recurse_sys_deps(htable_t *nodes, dynary *deps, char *nodename) {
 	char		 dir[PATH_MAX],
 				*pstr;
 	scn_node_t	*pnode;
-	size_t		 i;
+	int			 i;
 
 	/* get node structure */
 	pnode = hash_get(nodes, nodename); /* should not fail */
@@ -1083,7 +1101,7 @@ bool recurse_sys_deps(htable_t *nodes, dynary *deps, char *nodename) {
 	}
 
 	/* process all system headers linked to this node */
-	for (i = 0 ; i < da_usize(pnode->system_inc) ; i++) {
+	for (i = 0 ; i < (int) da_usize(pnode->system_inc) ; i++) {
 		pstr = (char *) da_idx(pnode->system_inc, i);
 
 		/* check if the system header is already listed as a dependency */
@@ -1099,7 +1117,7 @@ bool recurse_sys_deps(htable_t *nodes, dynary *deps, char *nodename) {
 	extract_dir(nodename, dir, sizeof(dir));
 
 	/* look for all the local dependencies of the current node */
-	for (i = 0 ; i < da_usize(pnode->local_inc) ; i++) {
+	for (i = 0 ; i < (int) da_usize(pnode->local_inc) ; i++) {
 		/* and recurse */
 		if (recurse_sys_deps(nodes, deps, (char *) da_idx(pnode->local_inc, i)) == false) {
 			return false;
@@ -1133,7 +1151,7 @@ bool add_library(scn_zone_t *psz, char *library, scandata *psd, scn_node_t *pn) 
 			 tmp[TMP_BUF_LEN];
 	check_t	*pchk,
 			*pcrec;
-	size_t	 i,
+	int		 i,
 			 s;
 
 	/* try to retrieve a check record for the given header */
@@ -1171,7 +1189,7 @@ bool add_library(scn_zone_t *psz, char *library, scandata *psd, scn_node_t *pn) 
 
 	/* look for related procedures */
 	if (pcrec->procs != NULL) {
-		s = da_usize(pcrec->procs);
+		s = (int) da_usize(pcrec->procs);
 		for (i = 0 ; i < s ; i++) {
 			pstr = da_idx(pcrec->procs, i);
 
@@ -1224,7 +1242,7 @@ bool check_header(scn_zone_t *psz, char *header, scandata *psd, scn_node_t *pn) 
 			*tag;
 	check_t	*pchk,
 			*pcrec;
-	size_t	 i,
+	int		 i,
 			 s;
 
 	/* try to retrieve a check record for the given header */
@@ -1270,7 +1288,7 @@ bool check_header(scn_zone_t *psz, char *header, scandata *psd, scn_node_t *pn) 
 
 	/* look for related procedures */
 	if (pcrec->procs != NULL) {
-		s = da_usize(pcrec->procs);
+		s = (int) da_usize(pcrec->procs);
 		for (i = 0 ; i < s ; i++) {
 			pstr = da_idx(pcrec->procs, i);
 
@@ -1401,7 +1419,7 @@ bool gen_checks(scn_zone_t *psz, scandata *psd) {
 	char			*pstr;
 	hkeys_t			*phk;
 	scn_node_t		*pn;
-	unsigned int	 i,
+	int				 i,
 					 j;
 
 	/* for each node */
@@ -1410,13 +1428,13 @@ bool gen_checks(scn_zone_t *psz, scandata *psd) {
 		return true;
 	}
 
-	for(i = 0 ; i < phk->nkey ; i++) {
+	for(i = 0 ; i < (int) phk->nkey ; i++) {
 		pn = hash_get(psz->nodes, phk->keys[i]); /* no check needed */
 
 		/* check types */
 		if (psd->types != NULL) {
 			/* process types */
-			for (j = 0 ; j < da_usize(pn->type_idtfs) ; j++) {
+			for (j = 0 ; j < (int) da_usize(pn->type_idtfs) ; j++) {
 				pstr = (char *) da_idx(pn->type_idtfs, j);
 
 				if (check_type(psz, pstr, psd, pn) == false) {
@@ -1433,7 +1451,7 @@ bool gen_checks(scn_zone_t *psz, scandata *psd) {
 			recurse_sys_deps(psz->nodes, pn->sys_deps, pn->fname);
 
 			/* process system dependencies */
-			for (j = 0 ; j < da_usize(pn->sys_deps) ; j++) {
+			for (j = 0 ; j < (int) da_usize(pn->sys_deps) ; j++) {
 				pstr = (char *) da_idx(pn->sys_deps, j);
 
 				if (check_header(psz, pstr, psd, pn) == false) {
@@ -1586,15 +1604,15 @@ void build_boolean(FILE *fp, char *vname, bool bval) {
  ***********************************************************************/
 
 bool build_list(FILE *fp, char *vname, dynary *list) {
-	size_t	 i,
-			 s;
+	int	 i,
+		 s;
 
 	if (list == NULL) {
 		return true;
 	}
 
 	/* get number of items */
-	s = da_usize(list);
+	s = (int) da_usize(list);
 
 	/* if no items then leave */
 	if (s == 0) {
@@ -1840,13 +1858,13 @@ bool output_type(htable_t *checks, char *cname, FILE *fp) {
  ***********************************************************************/
 
 bool scan_build_pmk(scn_zone_t *psz) {
-	FILE			*fp;
-	char			 buf[MKF_OUTPUT_WIDTH * 2];
-	dynary			*da;
-	hkeys_t			*phk;
-	lib_cell_t		*plc;
-	time_t			 now;
-	unsigned int	 i;
+	FILE		*fp;
+	char		 buf[MKF_OUTPUT_WIDTH * 2];
+	dynary		*da;
+	hkeys_t		*phk;
+	lib_cell_t	*plc;
+	time_t		 now;
+	int			 i;
 
 	/* open output file */
 	fp = fopen(psz->pmk_name, "w");
@@ -1935,7 +1953,7 @@ bool scan_build_pmk(scn_zone_t *psz) {
 		da_sort(psz->exttags);
 
 		/* output each extra tag */
-		for (i = 0 ; i < da_usize(psz->exttags) ; i++) {
+		for (i = 0 ; i < (int) da_usize(psz->exttags) ; i++) {
 			fprintf(fp, PMKF_DEF_TAG, (char *) da_idx(psz->exttags, i));
 		}
 	}
@@ -1949,7 +1967,7 @@ bool scan_build_pmk(scn_zone_t *psz) {
 	phk = hash_keys_sorted(psz->t_checks);
 	if (phk != NULL) {
 		/* output every type checks */
-		for(i = 0 ; i < phk->nkey ; i++) {
+		for(i = 0 ; i < (int) phk->nkey ; i++) {
 			if (output_type(psz->t_checks, phk->keys[i], fp) == false) {
 				hash_free_hkeys(phk);
 				fclose(fp);
@@ -1964,7 +1982,7 @@ bool scan_build_pmk(scn_zone_t *psz) {
 	phk = hash_keys_sorted(psz->h_checks);
 	if (phk != NULL) {
 		/* output every header checks */
-		for(i = 0 ; i < phk->nkey ; i++) {
+		for(i = 0 ; i < (int) phk->nkey ; i++) {
 			if (output_header(psz->h_checks, phk->keys[i], fp) == false) {
 				hash_free_hkeys(phk);
 				fclose(fp);
@@ -1979,7 +1997,7 @@ bool scan_build_pmk(scn_zone_t *psz) {
 	phk = hash_keys_sorted(psz->l_checks);
 	if (phk != NULL) {
 		/* output every library checks */
-		for(i = 0 ; i < phk->nkey ; i++) {
+		for(i = 0 ; i < (int) phk->nkey ; i++) {
 			if (output_library(psz->l_checks, phk->keys[i], fp) == false) {
 				hash_free_hkeys(phk);
 				fclose(fp);
@@ -1994,7 +2012,7 @@ bool scan_build_pmk(scn_zone_t *psz) {
 	phk = hash_keys_sorted(psz->libraries);
 	if (phk != NULL) {
 		/* output every library */
-		for(i = 0 ; i < phk->nkey ; i++) {
+		for(i = 0 ; i < (int) phk->nkey ; i++) {
 			/* get lib cell */
 			plc = hash_get(psz->libraries, phk->keys[i]);
 	
@@ -2054,11 +2072,11 @@ bool scan_build_pmk(scn_zone_t *psz) {
  ***********************************************************************/
 
 bool scan_build_cfg(scn_zone_t *psz) {
-	FILE			*fp;
-	char			 buf[MKF_OUTPUT_WIDTH * 2],
-					*pstr;
-	time_t			 now;
-	unsigned int	 i;
+	FILE	*fp;
+	char	 buf[MKF_OUTPUT_WIDTH * 2],
+			*pstr;
+	time_t	 now;
+	int		 i;
 
 	fp = fopen(psz->cfg_name, "w");
 	if (fp == NULL) {
@@ -2074,14 +2092,14 @@ bool scan_build_cfg(scn_zone_t *psz) {
 
 	if (psz->exttags != NULL) {
 		fprintf(fp, "/* extra tags */\n\n");
-		for (i = 0 ; i < da_usize(psz->exttags) ; i++) {
+		for (i = 0 ; i < (int) da_usize(psz->exttags) ; i++) {
 			pstr = gen_basic_tag_def(da_idx(psz->exttags, i));
 			fprintf(fp, "@%s@\n\n", pstr);
 		}
 	}
 
 	fprintf(fp, "/* scanned tags */\n\n");
-	for (i = 0 ; i < da_usize(psz->tags) ; i++) {
+	for (i = 0 ; i < (int) da_usize(psz->tags) ; i++) {
 		fprintf(fp, "@%s@\n\n", (char *) da_idx(psz->tags, i));
 	}
 
@@ -2112,19 +2130,19 @@ bool scan_build_cfg(scn_zone_t *psz) {
  ***********************************************************************/
 
 bool find_deps(dynary *da_fc, dynary *da_fd) {
-	char			*str_fc,
-					*str_fd;
-	size_t			 siz;
-	unsigned int	 i,
-					 j;
+	char	*str_fc,
+			*str_fd;
+	size_t	 siz;
+	int		 i,
+			 j;
 
 	/* for each entry of the first dynary */
-	for (i = 0 ; i < da_usize(da_fc) ; i++) {
+	for (i = 0 ; i < (int) da_usize(da_fc) ; i++) {
 		str_fc = da_idx(da_fc, i);
 		siz = strlen(str_fc) + 1;
 
 		/* compare with each entry of the second dynary */
-		for (j = 0 ; j < da_usize(da_fd) ; j++) {
+		for (j = 0 ; j < (int) da_usize(da_fd) ; j++) {
 			str_fd = da_idx(da_fd, j);
 			if (strncmp(str_fc, str_fd, siz) == 0) {
 				psc_log(NULL, "\t\tFound common dependency '%s'\n", str_fc);
@@ -2232,7 +2250,7 @@ void build_path(char *dir, char *file, char *buffer, size_t blen) {
 bool recurse_obj_deps(htable_t *nodes, dynary *deps, char *nodename) {
 	char		 dir[PATH_MAX];
 	scn_node_t	*pnode;
-	size_t		 i;
+	int			 i;
 
 	/* check if the node is already listed as target dependency */
 	if (da_find(deps, nodename) == true) {
@@ -2258,7 +2276,7 @@ bool recurse_obj_deps(htable_t *nodes, dynary *deps, char *nodename) {
 	extract_dir(nodename, dir, sizeof(dir));
 
 	/* look for all the local dependencies of the current node */
-	for (i = 0 ; i < da_usize(pnode->local_inc) ; i++) {
+	for (i = 0 ; i < (int) da_usize(pnode->local_inc) ; i++) {
 		/* and recurse */
 		if (recurse_obj_deps(nodes, deps, (char *)da_idx(pnode->local_inc, i)) == false) {
 			return false;
@@ -2283,13 +2301,13 @@ bool recurse_obj_deps(htable_t *nodes, dynary *deps, char *nodename) {
  ***********************************************************************/
 
 bool gen_objects(scn_zone_t *psz) {
-	char			 buf[PATH_MAX],
-					*pstr;
-	hkeys_t			*phk;
-	scn_node_t		*pnode,
-					*pn;
-	unsigned int	 i,
-					 j;
+	char		 buf[PATH_MAX],
+				*pstr;
+	hkeys_t		*phk;
+	scn_node_t	*pnode,
+				*pn;
+	int			 i,
+				 j;
 
 	phk = hash_keys(psz->nodes);
 	if (phk == NULL) {
@@ -2298,7 +2316,7 @@ bool gen_objects(scn_zone_t *psz) {
 		return true;
 	}
 
-	for(i = 0 ; i < phk->nkey ; i++) {
+	for(i = 0 ; i < (int) phk->nkey ; i++) {
 		pnode = hash_get(psz->nodes, phk->keys[i]); /* XXX check needed ??? (think no) */
 #ifdef PMKSCAN_DEBUG
 		debugf("score of '%s' = %d", phk->keys[i], pnode->score);
@@ -2336,7 +2354,7 @@ bool gen_objects(scn_zone_t *psz) {
 			recurse_obj_deps(psz->nodes, pnode->src_deps, pnode->fname);
 
 			/* for each local include */
-			for (j = 0 ; j < da_usize(pnode->local_inc) ; j++) {
+			for (j = 0 ; j < (int) da_usize(pnode->local_inc) ; j++) {
 				pstr = da_idx(pnode->local_inc, j);
 				pn = hash_get(psz->nodes, pstr);
 
@@ -2366,7 +2384,7 @@ bool gen_objects(scn_zone_t *psz) {
 			/* extra stuff */
 			if (pnode->type == FILE_TYPE_ASM) {
 				/* try to find optionnal header file for assembly functions */
-				for(j = 0 ; j < phk->nkey ; j++) {
+				for(j = 0 ; j < (int) phk->nkey ; j++) {
 					pn = hash_get(psz->nodes, phk->keys[j]);
 
 					/* check for common function declarators */
@@ -2414,7 +2432,7 @@ bool recurse_src_deps(scn_zone_t *psz, dynary *deps, char *name) {
 				*odep;
 	scn_node_t	*pnode,
 				*pn;
-	size_t		 i,
+	int			 i,
 				 j;
 
 	/* get node structure */
@@ -2424,7 +2442,7 @@ bool recurse_src_deps(scn_zone_t *psz, dynary *deps, char *name) {
 #endif /* PMKSCAN_DEBUG */
 
 	/* for each source dependency */
-	for (i = 0 ; i < da_usize(pnode->src_deps) ; i++) {
+	for (i = 0 ; i < (int) da_usize(pnode->src_deps) ; i++) {
 		/* get the node structure */
 		src = da_idx(pnode->src_deps, i);
 		pn = hash_get(psz->nodes, src);
@@ -2441,7 +2459,7 @@ bool recurse_src_deps(scn_zone_t *psz, dynary *deps, char *name) {
 #endif /* PMKSCAN_DEBUG */
 
 		/* check each object link */
-		for (j = 0 ; j < da_usize(pn->obj_links) ; j++) {
+		for (j = 0 ; j < (int) da_usize(pn->obj_links) ; j++) {
 			/* get object name */
 			odep = da_idx(pn->obj_links, j);
 #ifdef PMKSCAN_DEBUG
@@ -2494,11 +2512,12 @@ bool recurse_src_deps(scn_zone_t *psz, dynary *deps, char *name) {
  ***********************************************************************/
 
 bool gen_targets(scn_zone_t *psz) {
-	char			 buf[PATH_MAX],
-					*nodename;
-	hkeys_t			*phk;
-	scn_node_t		*pnode;
-	unsigned int	 i;
+	char		 buf[PATH_MAX],
+				*nodename,
+				*pstr;
+	hkeys_t		*phk;
+	scn_node_t	*pnode;
+	int			 i;
 
 	phk = hash_keys(psz->objects);
 	if (phk == NULL) {
@@ -2508,7 +2527,7 @@ bool gen_targets(scn_zone_t *psz) {
 	}
 
 	/* for each object */
-	for (i = 0 ; i < phk->nkey ; i++) {
+	for (i = 0 ; i < (int) phk->nkey ; i++) {
 		/* get it's node structure */
 		nodename = hash_get(psz->objects, phk->keys[i]);
 		pnode = hash_get(psz->nodes, nodename); /* XXX check needed ??? (think no) */
@@ -2549,6 +2568,20 @@ bool gen_targets(scn_zone_t *psz) {
 #ifdef PMKSCAN_DEBUG
 			debugf("END recurse_src_deps() for node '%s'\n", pnode->fname);
 #endif /* PMKSCAN_DEBUG */
+
+			pstr = hash_get(psz->binaries, pnode->fname);
+			if (pstr != NULL) {
+				psc_log("Setting target to '%s' for node '%s'.\n", NULL, pstr, pnode->fname);
+
+				/* modify prefix */
+				free(pnode->prefix);
+				pnode->prefix = strdup(pstr);
+
+				/* modify label */
+				free(pnode->label);
+				str_to_upper(buf, sizeof(buf), pstr);
+				pnode->label = strdup(buf);
+			}
 		}
 	}
 
@@ -2570,12 +2603,12 @@ bool gen_targets(scn_zone_t *psz) {
  ***********************************************************************/
 
 bool gen_lib_targets(scn_zone_t *psz) {
-	char			*srcname;
-	hkeys_t			*phk;
-	lib_cell_t		*plc;
-	scn_node_t		*pnode;
-	unsigned int	 i,
-					 j;
+	char		*srcname;
+	hkeys_t		*phk;
+	lib_cell_t	*plc;
+	scn_node_t	*pnode;
+	int			 i,
+				 j;
 
 	phk = hash_keys(psz->libraries);
 	if (phk == NULL) {
@@ -2585,12 +2618,12 @@ bool gen_lib_targets(scn_zone_t *psz) {
 	}
 
 	/* for each library */
-	for (i = 0 ; i < phk->nkey ; i++) {
+	for (i = 0 ; i < (int) phk->nkey ; i++) {
 		/* get it's cell structure */
 		plc = hash_get(psz->libraries, phk->keys[i]);
 
 		/* check each object link */
-		for (j = 0 ; j < da_usize(plc->src_list) ; j++) {
+		for (j = 0 ; j < (int) da_usize(plc->src_list) ; j++) {
 			/* get source name name */
 			srcname = da_idx(plc->src_list, j);
 
@@ -2648,7 +2681,7 @@ bool gen_lib_targets(scn_zone_t *psz) {
  ***********************************************************************/
 
 size_t fprintf_width(size_t left, size_t width, size_t offset, FILE *fp, char *str) {
-	unsigned int	 i,
+	unsigned long	 i,
 					 m;
 	size_t			 s,
 					 t;
@@ -2749,10 +2782,10 @@ void mkf_output_header(FILE *fp, scn_zone_t *psz) {
 	/* library stuff */
 	if (psz->gen_lib == true) {
 
-		if (psz->lib_type[LIB_TYPE_C] == true) {
+		if (psz->lib_type[LINK_TYPE_C] == true) {
 			fprintf(fp, MKF_HDR_C_SL);
 		}
-		if (psz->lib_type[LIB_TYPE_CXX] == true) {
+		if (psz->lib_type[LINK_TYPE_CXX] == true) {
 			fprintf(fp, MKF_HDR_CXX_SL);
 		}
 
@@ -2838,10 +2871,10 @@ void mkf_output_header(FILE *fp, scn_zone_t *psz) {
 
 void mkf_output_recurs(FILE *fp, scn_zone_t *psz) {
 	char	*pstr;
-	size_t	 ofst,
-			 lm,
-			 i,
+	int		 i,
 			 s;
+	size_t	 ofst,
+			 lm;
 
 	/* XXX not used yet */
 	/*|+ generate the list of scanned directories	+|                   */
@@ -2889,7 +2922,7 @@ void mkf_output_recurs(FILE *fp, scn_zone_t *psz) {
 	/*}                                                                  */
 
 	/* generate the list of template generated files */
-	s = da_usize(psz->templates);
+	s = (int) da_usize(psz->templates);
 	if (s > 0) {
 		/* get list of generated files */
 		fprintf(fp, "#\n# list of generated files\n#\n");
@@ -2912,7 +2945,7 @@ void mkf_output_recurs(FILE *fp, scn_zone_t *psz) {
 
 		lm = strlen(MKF_GEN_FILES);
 		ofst = lm;
-		s = da_usize(psz->generated);
+		s = (int) da_usize(psz->generated);
 		for (i = 0 ; i < s ; i++) {
 			/* get generated file name */
 			pstr = da_idx(psz->generated, i);
@@ -2944,11 +2977,11 @@ void mkf_output_srcs(FILE *fp, scn_zone_t *psz) {
 	char		 buf[MKF_OUTPUT_WIDTH * 2],
 				*pstr;
 	hkeys_t		*phk;
+	int			 i,
+				 j;
 	scn_node_t	*pn;
 	size_t		 ofst,
-				 lm,
-				 i,
-				 j;
+				 lm;
 
 	/* check if objects exist */
 	phk = hash_keys_sorted(psz->objects);
@@ -2958,7 +2991,7 @@ void mkf_output_srcs(FILE *fp, scn_zone_t *psz) {
 	}
 
 	fprintf(fp, "#\n# source dependency lists\n#\n");
-	for (i = 0 ; i < phk->nkey ; i++) {
+	for (i = 0 ; i < (int) phk->nkey ; i++) {
 		pstr = hash_get(psz->objects, phk->keys[i]);
 		pn = hash_get(psz->nodes, pstr);
 
@@ -2972,7 +3005,7 @@ void mkf_output_srcs(FILE *fp, scn_zone_t *psz) {
 		da_sort(pn->src_deps);
 
 		/* append sources */
-		for (j = 0 ; j < da_usize(pn->src_deps) ; j++) {
+		for (j = 0 ; j < (int) da_usize(pn->src_deps) ; j++) {
 			ofst = fprintf_width(lm, MKF_OUTPUT_WIDTH, ofst, fp,
 									(char *) da_idx(pn->src_deps, j));
 		}
@@ -3001,14 +3034,14 @@ void mkf_output_bins(FILE *fp, scn_zone_t *psz) {
 	char		*pstr;
 	hkeys_t		*phk;
 	scn_node_t	*pn;
-	size_t		 i;
+	int			 i;
 
 	phk = hash_keys_sorted(psz->targets);
 	if (phk != NULL) {
 		/* generate binary name variables */
 		fprintf(fp, "#\n# binary name macros\n#\n");
 
-		for (i = 0 ; i < phk->nkey ; i++) {
+		for (i = 0 ; i < (int) phk->nkey ; i++) {
 			pstr = hash_get(psz->targets, phk->keys[i]);
 			pn = hash_get(psz->nodes, pstr);
 				
@@ -3036,18 +3069,18 @@ void mkf_output_bins(FILE *fp, scn_zone_t *psz) {
 void mkf_output_libs(FILE *fp, scn_zone_t *psz) {
 	char		 buf[MKF_OUTPUT_WIDTH * 2];
 	hkeys_t		*phk;
+	int			 i,
+				 j;
 	lib_cell_t	*plc;
 	size_t		 ofst,
-				 lm,
-				 i,
-				 j;
+				 lm;
 
 	phk = hash_keys_sorted(psz->libraries);
 	if (phk != NULL) {
 		/* generate library name variables */
 		fprintf(fp, "#\n# library name macros\n#\n");
 
-		for (i = 0 ; i < phk->nkey ; i++) {
+		for (i = 0 ; i < (int) phk->nkey ; i++) {
 			plc = hash_get(psz->libraries, phk->keys[i]);
 				
 			fprintf(fp, "%s=\t%s\n", plc->lib_label, plc->lib_name);
@@ -3062,8 +3095,8 @@ void mkf_output_libs(FILE *fp, scn_zone_t *psz) {
 
 			da_sort(plc->hdr_list);
 
-			/* append sources */
-			for (j = 0 ; j < da_usize(plc->hdr_list) ; j++) {
+			/* append headers */
+			for (j = 0 ; j < (int) da_usize(plc->hdr_list) ; j++) {
 				ofst = fprintf_width(lm, MKF_OUTPUT_WIDTH, ofst, fp,
 										(char *) da_idx(plc->hdr_list, j));
 			}
@@ -3093,12 +3126,12 @@ void mkf_output_objs(FILE *fp, scn_zone_t *psz) {
 	char		 buf[MKF_OUTPUT_WIDTH * 2],
 				*pstr;
 	hkeys_t		*phk;
+	int			 i,
+				 j;
 	lib_cell_t	*plc;
 	scn_node_t	*pn;
 	size_t		 ofst,
-				 lm,
-				 i,
-				 j;
+				 lm;
 
 	/* binaries *************************/
 	phk = hash_keys_sorted(psz->targets);
@@ -3106,7 +3139,7 @@ void mkf_output_objs(FILE *fp, scn_zone_t *psz) {
 		/* generate target deps */
 		fprintf(fp, "#\n# binary target dependency lists\n#\n");
 
-		for (i = 0 ; i < phk->nkey ; i++) {
+		for (i = 0 ; i < (int) phk->nkey ; i++) {
 			pstr = hash_get(psz->targets, phk->keys[i]);
 			pn = hash_get(psz->nodes, pstr);
 
@@ -3120,7 +3153,7 @@ void mkf_output_objs(FILE *fp, scn_zone_t *psz) {
 			da_sort(pn->obj_deps);
 
 			/* append objects */
-			for (j = 0 ; j < da_usize(pn->obj_deps) ; j++) {
+			for (j = 0 ; j < (int) da_usize(pn->obj_deps) ; j++) {
 				ofst = fprintf_width(lm, MKF_OUTPUT_WIDTH, ofst, fp,
 										(char *) da_idx(pn->obj_deps, j));
 			}
@@ -3138,7 +3171,7 @@ void mkf_output_objs(FILE *fp, scn_zone_t *psz) {
 		/* output every library */
 		fprintf(fp, "#\n# library target dependency lists\n#\n");
 
-		for(i = 0 ; i < phk->nkey ; i++) {
+		for(i = 0 ; i < (int) phk->nkey ; i++) {
 			/* get lib cell */
 			plc = hash_get(psz->libraries, phk->keys[i]);
 
@@ -3152,7 +3185,7 @@ void mkf_output_objs(FILE *fp, scn_zone_t *psz) {
 			da_sort(plc->obj_deps);
 
 			/* append objects */
-			for (j = 0 ; j < da_usize(plc->obj_deps) ; j++) {
+			for (j = 0 ; j < (int) da_usize(plc->obj_deps) ; j++) {
 			ofst = fprintf_width(lm, MKF_OUTPUT_WIDTH, ofst,
 										 fp, (char *) da_idx(plc->obj_deps, j));
 			}
@@ -3229,11 +3262,11 @@ void mkf_output_build_trgs(FILE *fp, scn_zone_t *psz) {
 	char		 buf[MKF_OUTPUT_WIDTH * 2],
 				*pstr;
 	hkeys_t	 	*phk;
+	int			 i;
 	lib_cell_t	*plc;
 	scn_node_t	*pn;
 	size_t		 ofst,
-				 lm,
-				 i;
+				 lm;
 
 	fprintf(fp, "#\n# target lists\n#\n");
 
@@ -3264,7 +3297,7 @@ void mkf_output_build_trgs(FILE *fp, scn_zone_t *psz) {
 		if (phk != NULL) {
 			lm = strlen(MKF_TRGT_ALL_BIN);
 			ofst = lm;
-			for (i = 0 ; i < phk->nkey ; i++) {
+			for (i = 0 ; i < (int) phk->nkey ; i++) {
 				pstr = hash_get(psz->targets, phk->keys[i]);
 				pn = hash_get(psz->nodes, pstr);
 
@@ -3287,7 +3320,7 @@ void mkf_output_build_trgs(FILE *fp, scn_zone_t *psz) {
 		if (phk != NULL) {
 			lm = strlen(MKF_STATIC_LIB_VAR);
 			ofst = lm;
-			for (i = 0 ; i < phk->nkey ; i++) {
+			for (i = 0 ; i < (int) phk->nkey ; i++) {
 				/* get lib cell */
 				plc = hash_get(psz->libraries, phk->keys[i]);
 
@@ -3303,18 +3336,18 @@ void mkf_output_build_trgs(FILE *fp, scn_zone_t *psz) {
 		fprintf(fp, MKF_LINE_JUMP);
 
 		/* C shared lib support */
-		if (psz->lib_type[LIB_TYPE_C] == true) {
+		if (psz->lib_type[LINK_TYPE_C] == true) {
 			fprintf(fp, MKF_VARHDR, MKF_C_SHLIB_VAR);
 			/* list of library targets */
 			phk = hash_keys_sorted(psz->libraries);
 			if (phk != NULL) {
 				lm = strlen(MKF_C_SHLIB_VAR);
 				ofst = lm;
-				for (i = 0 ; i < phk->nkey ; i++) {
+				for (i = 0 ; i < (int) phk->nkey ; i++) {
 					/* get lib cell */
 					plc = hash_get(psz->libraries, phk->keys[i]);
 
-					if (plc->type == LIB_TYPE_C) {
+					if (plc->type == LINK_TYPE_C) {
 						snprintf(buf, sizeof(buf), "$(%s)", plc->lib_shared);
 
 						ofst = fprintf_width(lm, MKF_OUTPUT_WIDTH, ofst, fp, buf);
@@ -3325,18 +3358,18 @@ void mkf_output_build_trgs(FILE *fp, scn_zone_t *psz) {
 		}
 
 		/* C++ shared lib support */
-		if (psz->lib_type[LIB_TYPE_CXX] == true) {
+		if (psz->lib_type[LINK_TYPE_CXX] == true) {
 			fprintf(fp, MKF_VARHDR, MKF_CXX_SHLIB_VAR);
 			/* list of library targets */
 			phk = hash_keys_sorted(psz->libraries);
 			if (phk != NULL) {
 				lm = strlen(MKF_CXX_SHLIB_VAR);
 				ofst = lm;
-				for (i = 0 ; i < phk->nkey ; i++) {
+				for (i = 0 ; i < (int) phk->nkey ; i++) {
 					/* get lib cell */
 					plc = hash_get(psz->libraries, phk->keys[i]);
 
-					if (plc->type == LIB_TYPE_CXX) {
+					if (plc->type == LINK_TYPE_CXX) {
 						snprintf(buf, sizeof(buf), "$(%s)", plc->lib_shared);
 
 						ofst = fprintf_width(lm, MKF_OUTPUT_WIDTH, ofst, fp, buf);
@@ -3368,11 +3401,11 @@ void mkf_output_clean_trgs(FILE *fp, scn_zone_t *psz) {
 	char		 buf[MKF_OUTPUT_WIDTH * 2],
 				*pstr;
 	hkeys_t	 	*phk;
+	int			 i;
 	lib_cell_t	*plc;
 	scn_node_t	*pn;
 	size_t		 ofst,
-				 lm,
-				 i;
+				 lm;
 
 	/* generate main cleaning target list */
 	fprintf(fp, "\n# cleaning\n");
@@ -3401,7 +3434,7 @@ void mkf_output_clean_trgs(FILE *fp, scn_zone_t *psz) {
 		if (phk != NULL) {
 			lm = strlen(MKF_BIN_CLEAN_VAR);
 			ofst = lm;
-			for (i = 0 ; i < phk->nkey ; i++) {
+			for (i = 0 ; i < (int) phk->nkey ; i++) {
 				pstr = hash_get(psz->targets, phk->keys[i]);
 				pn = hash_get(psz->nodes, pstr);
 
@@ -3425,7 +3458,7 @@ void mkf_output_clean_trgs(FILE *fp, scn_zone_t *psz) {
 		if (phk != NULL) {
 			lm = strlen(MKF_STLIB_CLN_VAR);
 			ofst = lm;
-			for (i = 0 ; i < phk->nkey ; i++) {
+			for (i = 0 ; i < (int) phk->nkey ; i++) {
 				/* get lib cell */
 				plc = hash_get(psz->libraries, phk->keys[i]);
 
@@ -3442,18 +3475,18 @@ void mkf_output_clean_trgs(FILE *fp, scn_zone_t *psz) {
 		fprintf(fp, MKF_LINE_JUMP);
 
 		/* C shared lib support */
-		if (psz->lib_type[LIB_TYPE_C] == true) {
+		if (psz->lib_type[LINK_TYPE_C] == true) {
 			fprintf(fp, MKF_VARHDR, MKF_C_SHL_CLN_VAR);
 			/* list of library targets */
 			phk = hash_keys_sorted(psz->libraries);
 			if (phk != NULL) {
 				lm = strlen(MKF_C_SHL_CLN_VAR);
 				ofst = lm;
-				for (i = 0 ; i < phk->nkey ; i++) {
+				for (i = 0 ; i < (int) phk->nkey ; i++) {
 					/* get lib cell */
 					plc = hash_get(psz->libraries, phk->keys[i]);
 
-					if (plc->type == LIB_TYPE_C) {
+					if (plc->type == LINK_TYPE_C) {
 						snprintf(buf, sizeof(buf), "$(%s)_shared_clean", plc->lib_label);
 
 						ofst = fprintf_width(lm, MKF_OUTPUT_WIDTH, ofst, fp, buf);
@@ -3465,18 +3498,18 @@ void mkf_output_clean_trgs(FILE *fp, scn_zone_t *psz) {
 		}
 
 		/* C++ shared lib support */
-		if (psz->lib_type[LIB_TYPE_CXX] == true) {
+		if (psz->lib_type[LINK_TYPE_CXX] == true) {
 			fprintf(fp, MKF_VARHDR, MKF_CXX_SHL_CLN_VAR);
 			/* list of library targets */
 			phk = hash_keys_sorted(psz->libraries);
 			if (phk != NULL) {
 				lm = strlen(MKF_CXX_SHL_CLN_VAR);
 				ofst = lm;
-				for (i = 0 ; i < phk->nkey ; i++) {
+				for (i = 0 ; i < (int) phk->nkey ; i++) {
 					/* get lib cell */
 					plc = hash_get(psz->libraries, phk->keys[i]);
 
-					if (plc->type == LIB_TYPE_CXX) {
+					if (plc->type == LINK_TYPE_CXX) {
 						snprintf(buf, sizeof(buf), "$(%s)_shared_clean", plc->lib_label);
 
 						ofst = fprintf_width(lm, MKF_OUTPUT_WIDTH, ofst, fp, buf);
@@ -3509,11 +3542,11 @@ void mkf_output_inst_trgs(FILE *fp, scn_zone_t *psz) {
 	char		 buf[MKF_OUTPUT_WIDTH * 2],
 				*pstr;
 	hkeys_t	 	*phk;
+	int			 i;
 	lib_cell_t	*plc;
 	scn_node_t	*pn;
 	size_t		 ofst,
-				 lm,
-				 i;
+				 lm;
 
 	/* generate main installing target list */
 	fprintf(fp, "\n# installing\n");
@@ -3562,7 +3595,7 @@ void mkf_output_inst_trgs(FILE *fp, scn_zone_t *psz) {
 		if (phk != NULL) {
 			lm = strlen(MKF_BIN_INST_VAR);
 			ofst = lm;
-			for (i = 0 ; i < phk->nkey ; i++) {
+			for (i = 0 ; i < (int) phk->nkey ; i++) {
 				pstr = hash_get(psz->targets, phk->keys[i]);
 				pn = hash_get(psz->nodes, pstr);
 
@@ -3585,7 +3618,7 @@ void mkf_output_inst_trgs(FILE *fp, scn_zone_t *psz) {
 		if (phk != NULL) {
 			lm = strlen(MKF_STLIB_INST_VAR);
 			ofst = lm;
-			for (i = 0 ; i < phk->nkey ; i++) {
+			for (i = 0 ; i < (int) phk->nkey ; i++) {
 				/* get lib cell */
 				plc = hash_get(psz->libraries, phk->keys[i]);
 
@@ -3601,18 +3634,18 @@ void mkf_output_inst_trgs(FILE *fp, scn_zone_t *psz) {
 		fprintf(fp, MKF_LINE_JUMP);
 
 		/* C shared lib support */
-		if (psz->lib_type[LIB_TYPE_C] == true) {
+		if (psz->lib_type[LINK_TYPE_C] == true) {
 			fprintf(fp, MKF_VARHDR, MKF_C_SHL_INST_VAR);
 			/* list of library targets */
 			phk = hash_keys_sorted(psz->libraries);
 			if (phk != NULL) {
 				lm = strlen(MKF_C_SHL_INST_VAR);
 				ofst = lm;
-				for (i = 0 ; i < phk->nkey ; i++) {
+				for (i = 0 ; i < (int) phk->nkey ; i++) {
 					/* get lib cell */
 					plc = hash_get(psz->libraries, phk->keys[i]);
 
-					if (plc->type == LIB_TYPE_C) {
+					if (plc->type == LINK_TYPE_C) {
 						snprintf(buf, sizeof(buf), "$(%s)_shared_install", plc->lib_label);
 
 						ofst = fprintf_width(lm, MKF_OUTPUT_WIDTH, ofst, fp, buf);
@@ -3623,18 +3656,18 @@ void mkf_output_inst_trgs(FILE *fp, scn_zone_t *psz) {
 		}
 
 		/* C++ shared lib support */
-		if (psz->lib_type[LIB_TYPE_CXX] == true) {
+		if (psz->lib_type[LINK_TYPE_CXX] == true) {
 			fprintf(fp, MKF_VARHDR, MKF_CXX_SHL_INST_VAR);
 			/* list of library targets */
 			phk = hash_keys_sorted(psz->libraries);
 			if (phk != NULL) {
 				lm = strlen(MKF_CXX_SHL_INST_VAR);
 				ofst = lm;
-				for (i = 0 ; i < phk->nkey ; i++) {
+				for (i = 0 ; i < (int) phk->nkey ; i++) {
 					/* get lib cell */
 					plc = hash_get(psz->libraries, phk->keys[i]);
 
-					if (plc->type == LIB_TYPE_CXX) {
+					if (plc->type == LINK_TYPE_CXX) {
 						snprintf(buf, sizeof(buf), "$(%s)_shared_install", plc->lib_label);
 
 						ofst = fprintf_width(lm, MKF_OUTPUT_WIDTH, ofst, fp, buf);
@@ -3666,11 +3699,11 @@ void mkf_output_deinst_trgs(FILE *fp, scn_zone_t *psz) {
 	char		 buf[MKF_OUTPUT_WIDTH * 2],
 				*pstr;
 	hkeys_t	 	*phk;
+	int			 i;
 	lib_cell_t	*plc;
 	scn_node_t	*pn;
 	size_t		 ofst,
-				 lm,
-				 i;
+				 lm;
 
 	/* generate main deinstalling target list */
 	fprintf(fp, "\n# deinstalling\n");
@@ -3719,7 +3752,7 @@ void mkf_output_deinst_trgs(FILE *fp, scn_zone_t *psz) {
 		if (phk != NULL) {
 			lm = strlen(MKF_BIN_DEINST_VAR);
 			ofst = lm;
-			for (i = 0 ; i < phk->nkey ; i++) {
+			for (i = 0 ; i < (int) phk->nkey ; i++) {
 				pstr = hash_get(psz->targets, phk->keys[i]);
 				pn = hash_get(psz->nodes, pstr);
 
@@ -3742,7 +3775,7 @@ void mkf_output_deinst_trgs(FILE *fp, scn_zone_t *psz) {
 		if (phk != NULL) {
 			lm = strlen(MKF_STLIB_DEINST_VAR);
 			ofst = lm;
-			for (i = 0 ; i < phk->nkey ; i++) {
+			for (i = 0 ; i < (int) phk->nkey ; i++) {
 				/* get lib cell */
 				plc = hash_get(psz->libraries, phk->keys[i]);
 
@@ -3758,18 +3791,18 @@ void mkf_output_deinst_trgs(FILE *fp, scn_zone_t *psz) {
 		fprintf(fp, MKF_LINE_JUMP);
 
 		/* C shared lib support */
-		if (psz->lib_type[LIB_TYPE_C] == true) {
+		if (psz->lib_type[LINK_TYPE_C] == true) {
 			fprintf(fp, MKF_VARHDR, MKF_C_SHL_DEINST_VAR);
 			/* list of library targets */
 			phk = hash_keys_sorted(psz->libraries);
 			if (phk != NULL) {
 				lm = strlen(MKF_C_SHL_DEINST_VAR);
 				ofst = lm;
-				for (i = 0 ; i < phk->nkey ; i++) {
+				for (i = 0 ; i < (int) phk->nkey ; i++) {
 					/* get lib cell */
 					plc = hash_get(psz->libraries, phk->keys[i]);
 
-					if (plc->type == LIB_TYPE_C) {
+					if (plc->type == LINK_TYPE_C) {
 						snprintf(buf, sizeof(buf), "$(%s)_shared_deinstall", plc->lib_label);
 
 						ofst = fprintf_width(lm, MKF_OUTPUT_WIDTH, ofst, fp, buf);
@@ -3780,18 +3813,18 @@ void mkf_output_deinst_trgs(FILE *fp, scn_zone_t *psz) {
 		}
 
 		/* C++ shared lib support */
-		if (psz->lib_type[LIB_TYPE_CXX] == true) {
+		if (psz->lib_type[LINK_TYPE_CXX] == true) {
 			fprintf(fp, MKF_VARHDR, MKF_CXX_SHL_DEINST_VAR);
 			/* list of library targets */
 			phk = hash_keys_sorted(psz->libraries);
 			if (phk != NULL) {
 				lm = strlen(MKF_CXX_SHL_DEINST_VAR);
 				ofst = lm;
-				for (i = 0 ; i < phk->nkey ; i++) {
+				for (i = 0 ; i < (int) phk->nkey ; i++) {
 					/* get lib cell */
 					plc = hash_get(psz->libraries, phk->keys[i]);
 
-					if (plc->type == LIB_TYPE_CXX) {
+					if (plc->type == LINK_TYPE_CXX) {
 						snprintf(buf, sizeof(buf), "$(%s)_shared_deinstall", plc->lib_label);
 
 						ofst = fprintf_width(lm, MKF_OUTPUT_WIDTH, ofst, fp, buf);
@@ -3821,11 +3854,11 @@ void mkf_output_deinst_trgs(FILE *fp, scn_zone_t *psz) {
 void mkf_output_man_trgs(FILE *fp, scn_zone_t *psz) {
 	char	 buf[MKF_OUTPUT_WIDTH * 2],
 			*pstr;
-	size_t	 ofst,
-			 lm,
-			 i,
+	int		 i,
 			 j,
 			 k;
+	size_t	 ofst,
+			 lm;
 
 	if (psz->found[FILE_TYPE_MAN] == false) {
 		/* no man page, skip */
@@ -3846,16 +3879,16 @@ void mkf_output_man_trgs(FILE *fp, scn_zone_t *psz) {
 			da_sort(psz->manpgs);
 
 			/* for each man page */
-			for (j = 0 ; j < da_usize(psz->manpgs) ; j++) {
+			for (j = 0 ; j < (int) da_usize(psz->manpgs) ; j++) {
 				/* get the last character */
 				pstr = da_idx(psz->manpgs, j);
-				k = strlen(pstr) - 1;
+				k = (int) strlen(pstr) - 1;
 
 				/*
 						if the numeric conversion of the character is equal
 						to the current man page category
 				*/
-				if ((size_t) atoi(&pstr[k]) == i) {
+				if (atoi(&pstr[k]) == i) {
 						/* record it into the list */
 						ofst = fprintf_width(lm, MKF_OUTPUT_WIDTH, ofst, fp, pstr);
 				}
@@ -3883,9 +3916,9 @@ void mkf_output_man_trgs(FILE *fp, scn_zone_t *psz) {
 void mkf_output_data_trgs(FILE *fp, scn_zone_t *psz) {
 	char	 buf[MKF_OUTPUT_WIDTH * 2],
 			*pstr;
+	int		 i;
 	size_t	 ofst,
-			 lm,
-			 i;
+			 lm;
 
 	if (psz->found[FILE_TYPE_DATA] == false) {
 		/* no data files */
@@ -3901,7 +3934,7 @@ void mkf_output_data_trgs(FILE *fp, scn_zone_t *psz) {
 	da_sort(psz->datafiles);
 
 	/* for each data file */
-	for (i = 0 ; i < da_usize(psz->datafiles) ; i++) {
+	for (i = 0 ; i < (int) da_usize(psz->datafiles) ; i++) {
 		pstr = da_idx(psz->datafiles, i);
 
 		/* record it into the list */
@@ -3931,7 +3964,7 @@ void mkf_output_obj_rules(FILE *fp, scn_zone_t *psz) {
 				*pstr;
 	hkeys_t		*phk;
 	scn_node_t	*pn;
-	size_t		 i;
+	int			 i;
 
 	phk = hash_keys_sorted(psz->objects);
 	if (phk == NULL) {
@@ -3940,7 +3973,7 @@ void mkf_output_obj_rules(FILE *fp, scn_zone_t *psz) {
 	}
 
 	fprintf(fp, "#\n# object rules\n#\n");
-	for (i = 0 ; i < phk->nkey ; i++) {
+	for (i = 0 ; i < (int) phk->nkey ; i++) {
 		pstr = hash_get(psz->objects, phk->keys[i]);
 		pn = hash_get(psz->nodes, pstr);
 
@@ -3969,11 +4002,10 @@ void mkf_output_obj_rules(FILE *fp, scn_zone_t *psz) {
 ************************************************************************/
 
 void mkf_output_trg_rules(FILE *fp, scn_zone_t *psz) {
-	char		*pstr,
-				*pname;
+	char		*pname;
 	hkeys_t		*phk;
 	scn_node_t	*pn;
-	size_t		 i;
+	int			 i;
 
 	phk = hash_keys_sorted(psz->targets);
 	if (phk == NULL) {
@@ -3984,9 +4016,7 @@ void mkf_output_trg_rules(FILE *fp, scn_zone_t *psz) {
 	if (phk != NULL) {
 		/* generate targets */
 		fprintf(fp, MKF_GTRGT_INST_BIN);
-		for (i = 0 ; i < phk->nkey ; i++) {
-			pstr = phk->keys[i];
-
+		for (i = 0 ; i < (int) phk->nkey ; i++) {
 			pname = hash_get(psz->targets, phk->keys[i]);
 			pn = hash_get(psz->nodes, pname);
 			if (pn != NULL) {
@@ -4044,11 +4074,11 @@ void mkf_output_trg_rules(FILE *fp, scn_zone_t *psz) {
 void mkf_output_lib_trg_rules(FILE *fp, scn_zone_t *psz) {
 	char		 buf[MKF_OUTPUT_WIDTH * 2];
 	hkeys_t	 	*phk;
+	int			 i,
+				 j;
 	lib_cell_t	*plc;
 	size_t		 ofst,
-				 lm,
-				 i,
-				 j;
+				 lm;
 
 	phk = hash_keys_sorted(psz->libraries);
 	if (phk == NULL) {
@@ -4066,7 +4096,7 @@ void mkf_output_lib_trg_rules(FILE *fp, scn_zone_t *psz) {
 	if (phk != NULL) {
 		lm = strlen(MKF_TRGT_INST_LIBHDR);
 		ofst = lm;
-		for (i = 0 ; i < phk->nkey ; i++) {
+		for (i = 0 ; i < (int) phk->nkey ; i++) {
 			/* get lib cell */
 			plc = hash_get(psz->libraries, phk->keys[i]);
 
@@ -4085,7 +4115,7 @@ void mkf_output_lib_trg_rules(FILE *fp, scn_zone_t *psz) {
 	if (phk != NULL) {
 		lm = strlen(MKF_TRGT_DEINST_LIBHDR);
 		ofst = lm;
-		for (i = 0 ; i < phk->nkey ; i++) {
+		for (i = 0 ; i < (int) phk->nkey ; i++) {
 			/* get lib cell */
 			plc = hash_get(psz->libraries, phk->keys[i]);
 
@@ -4103,33 +4133,33 @@ void mkf_output_lib_trg_rules(FILE *fp, scn_zone_t *psz) {
 	/* list of library targets */
 	phk = hash_keys_sorted(psz->libraries);
 
-	if ((phk != NULL) && (psz->lib_type[LIB_TYPE_C] == true)) {
+	if ((phk != NULL) && (psz->lib_type[LINK_TYPE_C] == true)) {
 		/* C shared libs targets */
 		fprintf(fp, MKF_TRGT_C_SHLIBS);
 		fprintf(fp, MKF_LINE_JUMP);
 	}
 
-	if ((phk != NULL) && (psz->lib_type[LIB_TYPE_CXX] == true)) {
+	if ((phk != NULL) && (psz->lib_type[LINK_TYPE_CXX] == true)) {
 		/* C++ shared libs targets */
 		fprintf(fp, MKF_TRGT_CXX_SHLIBS);
 		fprintf(fp, MKF_LINE_JUMP);
 	}
 	
-	for (i = 0 ; i < phk->nkey ; i++) {
+	for (i = 0 ; i < (int) phk->nkey ; i++) {
 		plc = hash_get(psz->libraries, phk->keys[i]);
 
 		/* build target */
 		fprintf(fp, "# %s library targets\n", plc->lib_name);
 
 		fprintf(fp, "$(%s)_headers_install: $(%s_HEADERS)\n", plc->lib_label, plc->lib_label);
-		for (j = 0 ; j < da_usize(plc->hdr_list) ; j++) {
+		for (j = 0 ; j < (int) da_usize(plc->hdr_list) ; j++) {
 			/* install of each header */
 			fprintf(fp, "\t$(INSTALL_DATA) %s $(DESTDIR)$(INCDIR)/%s\n", (char *) da_idx(plc->hdr_list, j), (char *) da_idx(plc->hdr_list, j));
 		}
 		fprintf(fp, MKF_LINE_JUMP);
 
 		fprintf(fp, "$(%s)_headers_deinstall:\n", plc->lib_label);
-		for (j = 0 ; j < da_usize(plc->hdr_list) ; j++) {
+		for (j = 0 ; j < (int) da_usize(plc->hdr_list) ; j++) {
 			/* install of each header */
 			fprintf(fp, "\t$(RM) $(RMFLAGS) $(DESTDIR)$(INCDIR)/%s\n", (char *) da_idx(plc->hdr_list, j));
 		}
@@ -4156,11 +4186,11 @@ void mkf_output_lib_trg_rules(FILE *fp, scn_zone_t *psz) {
 
 		fprintf(fp, MKF_TARGET_SIMPLE, plc->lib_shared, plc->lib_objs);
 		switch(plc->type) {
-			case LIB_TYPE_C :
+			case LINK_TYPE_C :
 				fprintf(fp, MKF_TARGET_SL_C, plc->lib_objs);
 				break;
 
-			case LIB_TYPE_CXX :
+			case LINK_TYPE_CXX :
 				fprintf(fp, MKF_TARGET_SL_CXX, plc->lib_objs);
 				break;
 
@@ -4201,10 +4231,10 @@ void mkf_output_lib_trg_rules(FILE *fp, scn_zone_t *psz) {
  ***********************************************************************/
 
 void mkf_output_man_inst(FILE *fp, scn_zone_t *psz) {
-	char			*pstr;
-	size_t			 j,
-					 k;
-	unsigned int	 i;
+	char	*pstr;
+	int		 j,
+			 k,
+			 i;
 
 	/* manual pages to install */
 	fprintf(fp, MKF_INST_MAN_H);
@@ -4215,16 +4245,16 @@ void mkf_output_man_inst(FILE *fp, scn_zone_t *psz) {
 			fprintf(fp, MKF_INST_MAN_D, i, i);
 
 			/* for each man page */
-			for (j = 0 ; j < da_usize(psz->manpgs) ; j++) {
+			for (j = 0 ; j < (int) da_usize(psz->manpgs) ; j++) {
 				/* get the last character */
 				pstr = da_idx(psz->manpgs, j);
-				k = strlen(pstr) - 1;
+				k = (int) strlen(pstr) - 1;
 
 				/*
 						if the numeric conversion of the character is equal
 						to the current man page category
 				*/
-				if ((size_t) atoi(&pstr[k]) == i) {
+				if (atoi(&pstr[k]) == i) {
 					fprintf(fp, MKF_INST_MAN_P, pstr, i, basename(pstr));
 				}
 			}
@@ -4241,16 +4271,16 @@ void mkf_output_man_inst(FILE *fp, scn_zone_t *psz) {
 			fprintf(fp, MKF_DEINST_MAN_D, i);
 
 			/* for each man page */
-			for (j = 0 ; j < da_usize(psz->manpgs) ; j++) {
+			for (j = 0 ; j < (int) da_usize(psz->manpgs) ; j++) {
 				/* get the last character */
 				pstr = da_idx(psz->manpgs, j);
-				k = strlen(pstr) - 1;
+				k = (int) strlen(pstr) - 1;
 
 				/*
 						if the numeric conversion of the character is equal
 						to the current man page category
 				*/
-				if ((size_t) atoi(&pstr[k]) == i) {
+				if (atoi(&pstr[k]) == i) {
 					fprintf(fp, MKF_DEINST_MAN_P, i, basename(pstr));
 				}
 			}
@@ -4276,13 +4306,13 @@ void mkf_output_man_inst(FILE *fp, scn_zone_t *psz) {
 
 void mkf_output_data_inst(FILE *fp, scn_zone_t *psz) {
 	char	*pstr;
-	size_t	 i;
+	int		 i;
 
 	da_sort(psz->datafiles);
 
 	/* data files to install */
 	fprintf(fp, MKF_INST_DATA_H);
-	for (i = 0 ; i < da_usize(psz->datafiles) ; i++) {
+	for (i = 0 ; i < (int) da_usize(psz->datafiles) ; i++) {
 		pstr = da_idx(psz->datafiles, i);
 
 		fprintf(fp, MKF_INST_DATA_P, pstr, basename(pstr));
@@ -4291,7 +4321,7 @@ void mkf_output_data_inst(FILE *fp, scn_zone_t *psz) {
 
 	/* data files to deinstall */
 	fprintf(fp, MKF_DEINST_DATA_H);
-	for (i = 0 ; i < da_usize(psz->datafiles) ; i++) {
+	for (i = 0 ; i < (int) da_usize(psz->datafiles) ; i++) {
 		pstr = da_idx(psz->datafiles, i);
 
 		fprintf(fp, MKF_DEINST_DATA_P, basename(pstr));
@@ -4518,7 +4548,7 @@ void str_to_upper(char *buf, size_t siz, char *str) {
 			*buf = '_';
 		} else {
 			/* else copy character in uppercase */
-			*buf = toupper(*str);
+			*buf = (char) toupper(*str);
 		}
 		buf++;
 		str++;
@@ -4777,13 +4807,13 @@ bool process_type(void *data, char *pstr, prseng_t *ppe) {
  ***********************************************************************/
 
 bool parse_file(prs_cmn_t *pcmn, char *fname, ftype_t ft, bool isdep) {
-	FILE			*fp;
-	char			*ptr,
-					 dir[PATH_MAX],
-					 idir[PATH_MAX];
-	scn_node_t		*pnode;
-	scn_zone_t		*psz;
-	unsigned int	 i;
+	FILE		*fp;
+	char		*ptr,
+				 dir[PATH_MAX],
+				 idir[PATH_MAX];
+	scn_node_t	*pnode;
+	scn_zone_t	*psz;
+	int			 i;
 
 	/* get misc data */
 	psz = (scn_zone_t *) pcmn->data;
@@ -4882,7 +4912,7 @@ bool parse_file(prs_cmn_t *pcmn, char *fname, ftype_t ft, bool isdep) {
 		return false;
 	}
 
-	for (i = 0 ; i < da_usize(pnode->local_inc) ; i++) {
+	for (i = 0 ; i < (int) da_usize(pnode->local_inc) ; i++) {
 		ptr = (char *) da_idx(pnode->local_inc, i);
 #ifdef PMKSCAN_DEBUG
 		debugf("parse_file() : dir = '%s', inc = '%s'", pnode->dname, ptr);
@@ -5053,7 +5083,7 @@ bool scan_dir(prs_cmn_t *pcmn, char *dir, bool recursive) {
 	dynary			*hdr_dir,
 					*to_scan = NULL;
 	scn_zone_t		*psz;
-	size_t			 i;
+	int				 i;
 
 	psz = pcmn->data;
 
@@ -5144,7 +5174,7 @@ bool scan_dir(prs_cmn_t *pcmn, char *dir, bool recursive) {
 	psc_log("]\n", "]\n\n");
 
 	/* scan directories of relative headers (no recurse) */
-	for (i = 0 ; i < da_usize(hdr_dir) ; i++) {
+	for (i = 0 ; i < (int) da_usize(hdr_dir) ; i++) {
 		scan_dir(pcmn, da_idx(hdr_dir, i), false);
 	}
 
@@ -5152,7 +5182,7 @@ bool scan_dir(prs_cmn_t *pcmn, char *dir, bool recursive) {
 
 	if (recursive == true) {
 		/* recurse sub directories and directory found in headers */
-		for (i = 0 ; i < da_usize(to_scan) ; i++) {
+		for (i = 0 ; i < (int) da_usize(to_scan) ; i++) {
 			scan_dir(pcmn, da_idx(to_scan, i), true);
 		}
 
@@ -5292,6 +5322,45 @@ bool process_zone(prs_cmn_t *pcmn, scandata *psd) {
 
 
 /******************
+ * parse_defbin() *
+ ***********************************************************************
+ DESCR
+	define binary parameters
+
+ IN
+	XXX
+
+ OUT
+	boolean
+ ***********************************************************************/
+
+bool parse_defbin(htable_t *pht, htable_t *bins) {
+	char		*name,
+				*src;
+
+	/* get library name (REQUIRED) */
+	name = po_get_str(hash_get(pht, KW_OPT_NAM));
+	if (name == NULL) {
+		return false;
+	}
+
+	/* get main source (REQUIRED) */
+	src = po_get_str(hash_get(pht, KW_OPT_SRC));
+	if (src == NULL) {
+		return false;
+	}
+
+	if (hash_add_dup(bins, name, src) == false) {
+		return false;
+	}
+
+	psc_log("Recording binary definition '%s'.\n", NULL, name);
+
+	return true;
+}
+
+
+/******************
  * parse_deflib() *
  ***********************************************************************
  DESCR
@@ -5311,7 +5380,7 @@ bool parse_deflib(htable_t *pht, htable_t *libs) {
 				*hdrs = NULL;
 	int			 i;
 	lib_cell_t	*plc;
-	ltype_t		 type = LIB_TYPE_UNKNOWN;
+	ltype_t		 type = LINK_TYPE_UNKNOWN;
 	pmkobj		*ppo;
 
 	/* get library name (REQUIRED) */
@@ -5337,9 +5406,9 @@ bool parse_deflib(htable_t *pht, htable_t *libs) {
 	linker = po_get_str(hash_get(pht, KW_OPT_LINKER));
 
 	/* check lib type */
-	for (i = 0 ; i < (int) nb_lib_types ; i++) {
-		if (strncmp(lib_types[i].lang, linker, strlen(lib_types[i].lang) + 1) == 0) {
-			type = lib_types[i].type;
+	for (i = 0 ; i < (int) nb_link_types ; i++) {
+		if (strncmp(link_types[i].lang, linker, strlen(link_types[i].lang) + 1) == 0) {
+			type = link_types[i].type;
 			break;
 		}
 	}
@@ -5380,15 +5449,17 @@ bool parse_deflib(htable_t *pht, htable_t *libs) {
 	XXX
  ***********************************************************************/
 
-bool parse_zone_opts(prs_cmn_t *pcmn, htable_t *pht, htable_t *libs) {
+bool parse_zone_opts(prs_cmn_t *pcmn, htable_t *pht, htable_t *bins, htable_t *libs) {
 	char		*pdir,
+				*pname,
 				*pstr;
-	dynary		*da_l;	/* library list */
+	dynary		*da_b,	/* binary list */
+				*da_l;	/* library list */
 	pmkobj		*ppo;
-	htable_t		*tnodes;
+	htable_t	*tnodes;
 	lib_cell_t	*plc;
 	scn_zone_t	*psz;
-	size_t		 i;
+	int			 i;
 
 
 	/* init of nodes table */
@@ -5506,12 +5577,37 @@ bool parse_zone_opts(prs_cmn_t *pcmn, htable_t *pht, htable_t *libs) {
 		psz->discard = po_get_list(ppo);
 	}
 
+	/* get binary name list */
+	ppo = hash_get(pht, KW_OPT_BIN);
+	if (ppo != NULL) {
+		da_b = po_get_list(ppo);
+		if (da_b != NULL) {
+			for (i = 0 ; i < (int) da_usize(da_b) ; i++) {
+				/* get binary name */
+				pname = da_idx(da_b, i);
+				
+				/* look for binary source file */
+				pstr = hash_get(bins, pname);
+				if (pstr == NULL) {
+					/* binary source not found */
+					/* XXX TODO err msg */
+					return false;
+				}
+
+				/* record binary name for given source */
+				if (hash_add_dup(psz->binaries, pstr, pname) == false) {
+					return false;
+				}
+			}
+		}
+	}
+
 	/* get library name list */
 	ppo = hash_get(pht, KW_OPT_LIB);
 	if (ppo != NULL) {
 		da_l = po_get_list(ppo);
 		if (da_l != NULL) {
-			for (i = 0 ; i < da_usize(da_l) ; i++) {
+			for (i = 0 ; i < (int) da_usize(da_l) ; i++) {
 				/* get lib name */
 				pstr = da_idx(da_l, i);
 				
@@ -5519,6 +5615,7 @@ bool parse_zone_opts(prs_cmn_t *pcmn, htable_t *pht, htable_t *libs) {
 				plc = hash_extract(libs, pstr);
 				if (plc == NULL) {
 					/* lib cell not found */
+					/* XXX TODO err msg */
 					return false;
 				}
 
@@ -5574,7 +5671,8 @@ bool parse_zone_opts(prs_cmn_t *pcmn, htable_t *pht, htable_t *libs) {
 bool parse_script(char *cfname, prs_cmn_t *pcmn, scandata *psd) {
 	FILE		*fd;
 	bool		 frslt = true;
-	htable_t		*lcells;
+	htable_t	*bcells,
+				*lcells;
 	prscell		*pcell;
 	prsdata		*pdata;
 	scn_zone_t	*psz;
@@ -5582,6 +5680,13 @@ bool parse_script(char *cfname, prs_cmn_t *pcmn, scandata *psd) {
 	fd = fopen(cfname, "r");
 	if (fd == NULL) {
 		errorf("cannot open '%s' : %s.", cfname, strerror(errno));
+		return false;
+	}
+
+	/* init of binary cells hash table */
+	bcells = hash_create_simple(64);
+	if (bcells == NULL) {
+		/* XXX errmsg */
 		return false;
 	}
 
@@ -5611,6 +5716,14 @@ bool parse_script(char *cfname, prs_cmn_t *pcmn, scandata *psd) {
 	pcell = pdata->tree->first;
 	while (pcell != NULL) {
 		switch(pcell->token) {
+			case PSC_TOK_DEFBIN :
+				if (parse_defbin(pcell->data, bcells) == false) {
+					errorf("parsing of script file failed (token %d).", pcell->token);
+					prsdata_destroy(pdata);
+					return false;
+				}
+				break;
+
 			case PSC_TOK_DEFLIB :
 				if (parse_deflib(pcell->data, lcells) == false) {
 					errorf("parsing of script file failed (token %d).", pcell->token);
@@ -5622,7 +5735,7 @@ bool parse_script(char *cfname, prs_cmn_t *pcmn, scandata *psd) {
 			case PSC_TOK_PMKF :
 			case PSC_TOK_MAKF :
 			case PSC_TOK_ZONE :
-				if (parse_zone_opts(pcmn, pcell->data, lcells) == false) {
+				if (parse_zone_opts(pcmn, pcell->data, bcells, lcells) == false) {
 					errorf("parsing of script file failed (token %d).", pcell->token);
 					prsdata_destroy(pdata);
 					return false;
