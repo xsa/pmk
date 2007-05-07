@@ -395,20 +395,20 @@ enum {
 
 /* building ***************************/
 
-#define MKF_TARGET_DEF		"\t$(LD) $(LDFLAGS) -o $@ $(%s_OBJS)\n\n"
+#define MKF_TARGET_DEF		"\t$(LD) -o $@ $(%s_OBJS) $(LDFLAGS)\n\n"
 
-#define MKF_TARGET_C		"\t$(CC) $(CLDFLAGS) -o $@ $(%s_OBJS)\n\n"
+#define MKF_TARGET_C		"\t$(CC) -o $@ $(%s_OBJS) $(CLDFLAGS)\n\n"
 
-#define MKF_TARGET_CXX		"\t$(CXX) $(CXXLDFLAGS) -o $@ $(%s_OBJS)\n\n"
+#define MKF_TARGET_CXX		"\t$(CXX) -o $@ $(%s_OBJS) $(CXXLDFLAGS)\n\n"
 
 #define MKF_TARGET_LIB_STC	"\t$(" MKF_LABEL_AR ") $(" MKF_LABEL_AR "FLAGS) $@ $(%s)\n" \
 							"\t$(" MKF_LABEL_RANLIB ") $@\n\n"
 
-#define MKF_TARGET_LIB_SHD	"\t$(LD) $(LDFLAGS) $(SLLDFLAGS) -o $@ $(%s)\n"
+#define MKF_TARGET_LIB_SHD	"\t$(LD) $(SLLDFLAGS) -o $@ $(%s) $(LDFLAGS)\n"
 
-#define MKF_TARGET_SL_C		"\t$(CC) $(CLDFLAGS) $(SLCLDFLAGS) -o $@ $(%s)\n\n" /* XXX make better */
+#define MKF_TARGET_SL_C		"\t$(CC) $(SLCLDFLAGS) -o $@ $(%s) $(CLDFLAGS)\n\n" /* XXX make better */
 
-#define MKF_TARGET_SL_CXX	"\t$(CXX) $(CXXLDFLAGS) $(SLCXXLDFLAGS) -o $@ $(%s)\n\n" /* XXX make better */
+#define MKF_TARGET_SL_CXX	"\t$(CXX) $(SLCXXLDFLAGS) -o $@ $(%s) $(CXXLDFLAGS)\n\n" /* XXX make better */
 
 #define MKF_TARGET_CLN		"$(%s)_clean:\n" \
 							"\t$(" MKF_LABEL_RM ") $("MKF_LABEL_RM "FLAGS) $(%s_OBJS)\n" \
