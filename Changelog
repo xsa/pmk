@@ -2,6 +2,7 @@
  * put linker flags like library path and/or name after objects to fix
    link resolution on platforms where order is important.
  * build library targets first.
+ * update scanfile.5 manual page with DEFINE_BIN.
 
 04 May 2007 coudercd
  * added DEFINE_BIN to allow specification of a binary name by giving

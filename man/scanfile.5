@@ -129,11 +129,31 @@ GEN_ZONE(main) {
 }
 .Ed
 .
+.It Cm DEF_BIN
+This command allow to specify an alternate name for a binary when it's
+different from the main source filename.
+.Pp
+Arguments:
+.Bl -tag -width SOURCE -offset indent
+.It Dv NAME
+type is 'quoted', give the name to use for the binary.
+.It Dv SOURCE
+type is 'quoted', the name of the main binary source.
+.El
+.Pp
+For example:
+.Bd -literal -offset indent
+DEFINE_BIN {
+	NAME = "myprog"
+	SOURCE = "main.c"
+}
+.Ed
+.
 .It Cm DEF_LIB
 This command define library attributes.
 .Pp
 Arguments:
-.Bl -tag -width DIRECTORY -offset indent
+.Bl -tag -width HEADERS -offset indent
 .It Dv NAME
 type is 'quoted', give the name of the library.
 .It Dv VMAJ
