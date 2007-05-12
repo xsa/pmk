@@ -1,3 +1,6 @@
+12 May 2007 coudercd
+ * updated pmkfile and scanfile.
+
 16 Apr 2007 coudercd
  * removed ending line with only one dot that makes Linux complaining,
    noticed by Magnus Holmgren.
