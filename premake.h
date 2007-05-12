@@ -70,9 +70,9 @@
 /* major version */
 #define PREMAKE_VMAJOR	"0"
 /* minor version */
-#define PREMAKE_VMINOR	"10"
+#define PREMAKE_VMINOR	"11"
 /* minor subversion, only used for bugfixes  */
-#define PREMAKE_VSUB	"0"
+#define PREMAKE_VSUB	"dev"
 
 /* full version */
 #ifndef PREMAKE_VSUB

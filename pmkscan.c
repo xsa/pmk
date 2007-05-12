@@ -1179,7 +1179,7 @@ bool add_library(scn_zone_t *psz, char *library, scandata *psd, scn_node_t *pn) 
 		/* set language */
 		pchk->ftype = pn->type;
 
-		/* add header tag */
+		/* add library tag */
 		snprintf(tmp, sizeof(tmp), "lib%s", library);
 		tag = gen_basic_tag_def(tmp);
 		if (da_find(psz->tags, tag) == false) {

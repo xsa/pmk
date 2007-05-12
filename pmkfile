@@ -1,10 +1,9 @@
 # $Id$
 # pmkfile for pmk
 
-# set target file
 SETTINGS {
 	LANG="C"
-	TARGET=("compat/config.h.pmk","Makefile.pmk","tests/Makefile.pmk")
+	TARGET = ("Makefile.pmk", "compat/config.h.pmk", "tests/Makefile.pmk")
 }
 
 SWITCHES {
@@ -30,13 +29,13 @@ IF(!sw_usermode) {
 }
 
 DEFINE {
+	PACKAGE = "pmk"
 	BINDIR = "\\$(PREFIX)/bin"
 	MANDIR = "\\$(PREFIX)/man"
 	MAN1DIR = "\\$(MANDIR)/man1"
 	MAN5DIR = "\\$(MANDIR)/man5"
 	MAN8DIR = "\\$(MANDIR)/man8"
 	PRIVSEP_USER = "nobody"
-	PACKAGE = "pmk"
 	VERSION = "0.9.3"
 	INSTALL = "./pmkinstall"
 }
@@ -76,137 +75,181 @@ CHECK_BINARY(binary_as) {
 }
 
 
-#
-# type checks
-#
-
 # check _Bool type
 CHECK_TYPE(type__bool) {
 	REQUIRED = FALSE
 	NAME = "_Bool"
 }
 
-# check blkcnt_t type
-CHECK_TYPE(type_blkcnt_t) {
+# check type bool
+CHECK_TYPE(c_type_bool) {
+	REQUIRED = FALSE
+	NAME = "bool"
+	HEADER = "stdbool.h"
+}
+
+# check type gid_t
+CHECK_TYPE(c_type_gid_t) {
+	REQUIRED = FALSE
+	NAME = "gid_t"
+	HEADER = "sys/types.h"
+}
+
+# check type blkcnt_t
+CHECK_TYPE(c_type_blkcnt_t) {
 	REQUIRED = FALSE
 	NAME = "blkcnt_t"
 	HEADER = "sys/types.h"
 }
 
-# check long long type
-CHECK_TYPE(type_long_long) {
+# check type long long
+CHECK_TYPE(c_type_long_long) {
 	REQUIRED = FALSE
 	NAME = "long long"
 }
 
-# check unsigned long long type
-CHECK_TYPE(type_unsigned_long_long) {
+# check type unsigned long long
+CHECK_TYPE(c_type_unsigned_long_long) {
 	REQUIRED = FALSE
 	NAME = "unsigned long long"
 }
 
-# check long double type
-CHECK_TYPE(type_long_double) {
+# check type long double
+CHECK_TYPE(c_type_long_double) {
 	REQUIRED = FALSE
 	NAME = "long double"
 }
 
-# check intmax_t type
-CHECK_TYPE(type_intmax_t) {
+# check type intmax_t
+CHECK_TYPE(c_type_intmax_t) {
 	REQUIRED = FALSE
 	NAME = "intmax_t"
 	HEADER = "stdint.h"
 }
 
-# check ptrdiff_t type
-CHECK_TYPE(type_ptrdiff_t) {
+# check type mode_t
+CHECK_TYPE(c_type_mode_t) {
+	REQUIRED = FALSE
+	NAME = "mode_t"
+	LANG = "C"
+	HEADER = "sys/types.h"
+}
+
+# check type ptrdiff_t
+CHECK_TYPE(c_type_ptrdiff_t) {
 	REQUIRED = FALSE
 	NAME = "ptrdiff_t"
 	HEADER = "stddef.h"
 }
 
-# check wchar_t type
-CHECK_TYPE(type_wchar_t) {
+# check type size_t
+CHECK_TYPE(c_type_size_t) {
+	REQUIRED = FALSE
+	NAME = "size_t"
+	LANG = "C"
+	HEADER = "sys/types.h"
+}
+
+# check type uid_t
+CHECK_TYPE(c_type_uid_t) {
+	REQUIRED = FALSE
+	NAME = "uid_t"
+	LANG = "C"
+	HEADER = "sys/types.h"
+}
+
+# check type wchar_t
+CHECK_TYPE(c_type_wchar_t) {
 	REQUIRED = FALSE
 	NAME = "wchar_t"
 	HEADER = "wchar.h"
 }
 
-# check wint_t type
+# check type wint_t
 CHECK_TYPE(type_wint_t) {
 	REQUIRED = FALSE
 	NAME = "wint_t"
 	HEADER = "wchar.h"
 }
 
-
-#
-# header checks
-#
-
-# checking stdbool.h
-CHECK_HEADER(header_stdbool_h) {
-	REQUIRED = FALSE
-	NAME = "stdbool.h"
-}
-
-# checking libgen.h
-CHECK_HEADER(header_libgen_h) {
-	REQUIRED = FALSE
-	NAME = "libgen.h"
-	FUNCTION = ("dirname", "basename")
-}
-
-
-#
-# procedure checks
-#
-
-# checking strlcpy() and strlcat() in string.h
-CHECK_HEADER(header_string_h) {
-	REQUIRED = FALSE
-	NAME = "string.h"
-	FUNCTION = ("strlcpy","strlcat")
-}
-
-# checking strdup in string.h
-CHECK_HEADER(function_strdup) {
-	REQUIRED = FALSE
-	NAME = "string.h"
-	FUNCTION = ("strdup")
-}
-
-# checking vsnprintf and snprintf in stdio.h
-CHECK_HEADER(header_stdio_h) {
-	REQUIRED = FALSE
-	NAME = "stdio.h"
-	FUNCTION = ("vsnprintf", "snprintf")
-}
-
-# checking isblank in ctype.h
-CHECK_HEADER(function_isblank) {
+# check header ctype.h
+CHECK_HEADER(c_header_ctype_h) {
 	REQUIRED = FALSE
 	NAME = "ctype.h"
+	LANG = "C"
 	FUNCTION = ("isblank")
 }
 
-# checking mkstemps in unistd.h
-CHECK_HEADER(function_mkstemps) {
+# check header dirent.h
+CHECK_HEADER(c_header_dirent_h) {
+	REQUIRED = FALSE
+	NAME = "dirent.h"
+}
+
+# check header libgen.h
+CHECK_HEADER(c_header_libgen_h) {
+	REQUIRED = FALSE
+	NAME = "libgen.h"
+	FUNCTION = ("basename", "dirname")
+}
+
+# check header stdarg.h
+CHECK_HEADER(c_header_stdarg_h) {
+	REQUIRED = FALSE
+	NAME = "stdarg.h"
+}
+
+# check header stdio.h
+CHECK_HEADER(c_header_stdio_h) {
+	REQUIRED = FALSE
+	NAME = "stdio.h"
+	FUNCTION = ("snprintf", "vsnprintf")
+}
+
+# check header stdlib.h
+CHECK_HEADER(c_header_stdlib_h) {
+	REQUIRED = FALSE
+	NAME = "stdlib.h"
+	FUNCTION = ("free", "malloc")
+}
+
+# check header string.h
+CHECK_HEADER(c_header_string_h) {
+	REQUIRED = FALSE
+	NAME = "string.h"
+	LANG = "C"
+	FUNCTION = ("strlcat", "strlcpy", "strdup", "memcpy")
+}
+
+# check header sys/param.h
+CHECK_HEADER(c_header_sys_param_h) {
+	REQUIRED = FALSE
+	NAME = "sys/param.h"
+	LANG = "C"
+}
+
+# check header sys/wait.h
+CHECK_HEADER(c_header_sys_wait_h) {
+	REQUIRED = FALSE
+	NAME = "sys/wait.h"
+	LANG = "C"
+	SUBHDR = ("sys/type.h")
+}
+
+# check header unistd.h
+CHECK_HEADER(c_header_unistd_h) {
 	REQUIRED = FALSE
 	NAME = "unistd.h"
+	LANG = "C"
 	FUNCTION = ("mkstemps")
 }
 
-
-#
-# library checks
-#
-
-# check dirname and basename in libgen
-CHECK_LIB(library_gen) {
+# check library gen
+CHECK_LIB(c_library_gen) {
 	REQUIRED = FALSE
 	NAME = "gen"
-	FUNCTION = ("dirname", "basename")
-	LIBS = "LGEN_FLAGS"
+	LANG = "C"
+	FUNCTION = ("basename", "dirname")
 }
+
 

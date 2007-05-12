@@ -1,3 +1,7 @@
+12 May 2007 coudercd
+ * updated pmkfile and scanfile.
+ * added missing tag generation for pmk library check.
+
 07 May 2007 coudercd
  * put linker flags like library path and/or name after objects to fix
    link resolution on platforms where order is important.
