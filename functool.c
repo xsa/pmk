@@ -94,11 +94,11 @@ bool check_bool_str(char *str) {
  ***********************************************************************/
 
 bool invert_bool(bool value) {
-		if (value == true) {
-			return(false);
-		} else {
-			return(true);
-		}
+	if (value == true) {
+		return(false);
+	} else {
+		return(true);
+	}
 }
 
 
