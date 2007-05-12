@@ -939,6 +939,8 @@ bool pmk_check_lib(pmkcmd *cmd, htable *ht, pmkdata *pgd) {
 		return(false);
 	}
 	scb.library = pstr;
+	snprintf(lib_buf, sizeof(lib_buf), "lib%s", scb.library);
+	record_def_data(pgd->htab, lib_buf, NULL);
 	record_def_adv(pgd->htab, TAG_TYPE_LIB, scb.library, NULL, NULL, NULL);
 
 	/* check if a function or more must be searched */

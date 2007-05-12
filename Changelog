@@ -1,5 +1,6 @@
 12 May 2007 coudercd
  * updated pmkfile and scanfile.
+ * added missing tag generation for pmk library check.
 
 16 Apr 2007 coudercd
  * removed ending line with only one dot that makes Linux complaining,
