@@ -1,3 +1,6 @@
+23 May 2007 coudercd
+ * fixed function detection in library check.
+
 12 May 2007 coudercd
  * updated pmkfile and scanfile.
  * added missing tag generation for pmk library check.

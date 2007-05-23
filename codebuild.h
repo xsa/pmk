@@ -70,6 +70,7 @@ enum {
 						"#ifndef %s\n" \
 						"break_build_process();\n" \
 						"#endif\n"
+#define CODE_C_DECL		"int %s();\n\n"
 #define CODE_C_PROC		"/* check procedure */\n" \
 						"void (*pmk_funcp)() = (void *) %s;\n"
 #define CODE_C_VAR		"%s test_var;\n\n"
