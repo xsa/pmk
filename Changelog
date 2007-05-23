@@ -1,5 +1,7 @@
 23 May 2007 coudercd
  * fixed function detection in library check.
+ * added math library check in pmkfile.
+ * updated data/pmkscan.dat database.
 
 12 May 2007 coudercd
  * updated pmkfile and scanfile.

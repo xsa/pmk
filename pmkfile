@@ -58,12 +58,6 @@ IF(!var_privsep) {
 # binary checks
 #
 
-# XXX TODO : check stuff for C99, C89 and CC
-CHECK_BINARY(binary_cc) {
-	NAME = "cc"
-	VARIABLE = "CC"
-}
-
 CHECK_BINARY(binary_cpp) {
 	NAME = "cpp"
 	VARIABLE = "CPP"
@@ -75,10 +69,17 @@ CHECK_BINARY(binary_as) {
 }
 
 
-# check _Bool type
-CHECK_TYPE(type__bool) {
+# check type _Bool
+CHECK_TYPE(c_type__bool) {
 	REQUIRED = FALSE
 	NAME = "_Bool"
+}
+
+# check type blkcnt_t
+CHECK_TYPE(c_type_blkcnt_t) {
+	REQUIRED = FALSE
+	NAME = "blkcnt_t"
+	HEADER = "sys/types.h"
 }
 
 # check type bool
@@ -92,13 +93,6 @@ CHECK_TYPE(c_type_bool) {
 CHECK_TYPE(c_type_gid_t) {
 	REQUIRED = FALSE
 	NAME = "gid_t"
-	HEADER = "sys/types.h"
-}
-
-# check type blkcnt_t
-CHECK_TYPE(c_type_blkcnt_t) {
-	REQUIRED = FALSE
-	NAME = "blkcnt_t"
 	HEADER = "sys/types.h"
 }
 
@@ -132,6 +126,13 @@ CHECK_TYPE(c_type_mode_t) {
 	REQUIRED = FALSE
 	NAME = "mode_t"
 	LANG = "C"
+	HEADER = "sys/types.h"
+}
+
+# check type pid_t
+CHECK_TYPE(c_type_pid_t) {
+	REQUIRED = FALSE
+	NAME = "pid_t"
 	HEADER = "sys/types.h"
 }
 
@@ -193,6 +194,13 @@ CHECK_HEADER(c_header_libgen_h) {
 	FUNCTION = ("basename", "dirname")
 }
 
+# check header math.h
+CHECK_HEADER(c_header_math_h) {
+	REQUIRED = FALSE
+	NAME = "math.h"
+	FUNCTION = ("isinf", "isnan")
+}
+
 # check header stdarg.h
 CHECK_HEADER(c_header_stdarg_h) {
 	REQUIRED = FALSE
@@ -217,7 +225,6 @@ CHECK_HEADER(c_header_stdlib_h) {
 CHECK_HEADER(c_header_string_h) {
 	REQUIRED = FALSE
 	NAME = "string.h"
-	LANG = "C"
 	FUNCTION = ("strlcat", "strlcpy", "strdup", "memcpy")
 }
 
@@ -225,14 +232,12 @@ CHECK_HEADER(c_header_string_h) {
 CHECK_HEADER(c_header_sys_param_h) {
 	REQUIRED = FALSE
 	NAME = "sys/param.h"
-	LANG = "C"
 }
 
 # check header sys/wait.h
 CHECK_HEADER(c_header_sys_wait_h) {
 	REQUIRED = FALSE
 	NAME = "sys/wait.h"
-	LANG = "C"
 	SUBHDR = ("sys/type.h")
 }
 
@@ -240,7 +245,6 @@ CHECK_HEADER(c_header_sys_wait_h) {
 CHECK_HEADER(c_header_unistd_h) {
 	REQUIRED = FALSE
 	NAME = "unistd.h"
-	LANG = "C"
 	FUNCTION = ("mkstemps")
 }
 
@@ -248,8 +252,13 @@ CHECK_HEADER(c_header_unistd_h) {
 CHECK_LIB(c_library_gen) {
 	REQUIRED = FALSE
 	NAME = "gen"
-	LANG = "C"
 	FUNCTION = ("basename", "dirname")
 }
 
+# check library m
+CHECK_LIB(c_library_m) {
+	REQUIRED = FALSE
+	NAME = "m"
+	FUNCTION = ("isinf", "isnan")
+}
 
