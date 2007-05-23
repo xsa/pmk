@@ -33,6 +33,12 @@ ADD_HEADER {
 }
 
 ADD_HEADER {
+	NAME = "math.h"
+	PROCEDURE = ("isinf", "isnan")
+	LIBRARY = "m"
+}
+
+ADD_HEADER {
 	NAME = "stdarg.h"
 }
 	
@@ -102,6 +108,11 @@ ADD_LIBRARY {
 	PROCEDURE = ("socket")
 }
 
+ADD_LIBRARY {
+	NAME = "m"
+	PROCEDURE = ("isinf", "isnan")
+}
+
 
 # type data ############################
 
@@ -111,7 +122,7 @@ ADD_TYPE {
 
 ADD_TYPE {
 	NAME = "blkcnt_t"
-	HEADER = "sys/types"
+	HEADER = "sys/types.h"
 }
 
 ADD_TYPE {
