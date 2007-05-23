@@ -58,12 +58,6 @@ IF(!var_privsep) {
 # binary checks
 #
 
-# XXX TODO : check stuff for C99, C89 and CC
-CHECK_BINARY(binary_cc) {
-	NAME = "cc"
-	VARIABLE = "CC"
-}
-
 CHECK_BINARY(binary_cpp) {
 	NAME = "cpp"
 	VARIABLE = "CPP"
@@ -252,4 +246,10 @@ CHECK_LIB(c_library_gen) {
 	FUNCTION = ("basename", "dirname")
 }
 
+# check library m
+CHECK_LIB(c_library_m) {
+	REQUIRED = FALSE
+	NAME = "m"
+	FUNCTION = ("isinf", "isnan")
+}
 
