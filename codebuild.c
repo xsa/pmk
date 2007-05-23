@@ -468,6 +468,11 @@ bool c_code_builder(code_bld_t *pcb) {
 	if (pcb->header != NULL) {
 		code_logger(tfp, lfp, "/* main header to test */\n");
 		code_logger(tfp, lfp, CODE_C_HDR, pcb->header);
+	} else {
+		if (pcb->procedure != NULL) {
+			/* prototype */
+			code_logger(tfp, lfp, CODE_C_DECL, pcb->procedure);
+		}
 	}
 
 	/* main proc */
