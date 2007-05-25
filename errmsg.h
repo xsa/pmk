@@ -37,21 +37,18 @@
 #ifndef _ERRMSG_H_
 #define _ERRMSG_H_
 
-#define _ERRMSG_FILE_ERRNO	"``%s'' : %s."
+#define ERRMSG_FILE_ERRNO	"'%s' : %s."
 
-#define ERRMSG_APPEND		"failed to append ``%s'' in ``%s''."
-#define ERRMSG_CLOSE		"failed to close %s ``%s'' : %s."
-#define ERRMSG_GET		"failed to get"
-#define ERRMSG_INIT		"failed to initialize"
-#define ERRMSG_MEM		"out of memory."
-#define ERRMSG_OPEN		"failed to open " _ERRMSG_FILE_ERRNO
-#define ERRMSG_OPEN_TMP		"failed to open temporary file" \
-					_ERRMSG_FILE_ERRNO
-#define ERRMSG_PARSE		"failed to parse ``%s''."
+#define ERRMSG_APPEND		"failed to append '%s' in '%s'."
+#define ERRMSG_CLOSE		"failed to close %s '%s' : %s."
+#define ERRMSG_GET			"failed to get"
+#define ERRMSG_INIT			"failed to initialize"
+#define ERRMSG_MEM			"out of memory."
+#define ERRMSG_OPEN			"failed to open " _ERRMSG_FILE_ERRNO
+#define ERRMSG_OPEN_TMP		"failed to open temporary file" ERRMSG_FILE_ERRNO
+#define ERRMSG_PARSE		"failed to parse '%s'."
 #define ERRMSG_PROCESS		"failed to process"
-#define ERRMSG_REMOVE		"failed to remove " \
-					_ERRMSG_FILE_ERRNO
-#define ERRMSG_REMOVE_TMP	"failed to remove temporary file" \
-					_ERRMSG_FILE_ERRNO
+#define ERRMSG_REMOVE		"failed to remove " ERRMSG_FILE_ERRNO
+#define ERRMSG_REMOVE_TMP	"failed to remove temporary file" ERRMSG_FILE_ERRNO
 
 #endif /* _ERRMSG_H_ */

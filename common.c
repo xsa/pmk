@@ -46,6 +46,7 @@
 #include <limits.h>
 #include <stdarg.h>
 #include <stdlib.h>
+#include <pwd.h>
 
 #include "compat/pmk_string.h"
 #include "compat/pmk_stdio.h"
@@ -178,8 +179,9 @@ debugf(MKVAR_FMT_MK, varname, MKVAR_FILE);
 		return(false);
 	}
 
-	if (snprintf_b(varstr, sizeof(varstr), MKVAR_FMT_CMD, mfn) == false)
+	if (snprintf_b(varstr, sizeof(varstr), MKVAR_FMT_CMD, mfn) == false) {
 		return(false);
+	}
 
 	if (system(varstr) == 0) {
 		tfp = fopen(MKVAR_FILE, "r");
@@ -639,9 +641,9 @@ bool pmk_log(const char *fmt, ...) {
 bool fcopy(char *src, char *dst, mode_t mode) {
 	char		cbuf[S_BLKSIZE];
 	bool		do_loop = true,
-			rval = true;
-	int		src_fd,
-			dst_fd;
+				rval = true;
+	int			src_fd,
+				dst_fd;
 	ssize_t		rsz;
 
 	/* try to open both source and destination files */
@@ -758,5 +760,69 @@ FILE *tmps_open(char *tfile, char *mode, char *buf, size_t bsize, size_t slen) {
 
 	return(fdopen(fd, mode));
 }
+
+
+/********************
+ * open_pmk_conf() *
+ ***********************************************************************
+ DESCR
+	try to open pmk.conf by looking first in ~/.pmk/, else in SYSCONFDIR
+
+ IN
+	NONE
+
+ OUT
+	Configuration file path or NULL
+ ***********************************************************************/
+
+bool get_pmk_conf_path(char *buffer, size_t bsize) {
+	struct passwd	*ppw;
+
+	ppw = getpwuid(geteuid());
+	if (ppw == NULL) {
+#ifdef DEBUG_COMMON
+		debugf("failed to get passwd entry");
+#endif
+		return false;
+	}
+
+	if (snprintf_b(buffer, bsize, PMK_CFG_HOME_FMT, ppw->pw_dir) == false) {
+#ifdef DEBUG_COMMON
+		debugf("failed to get build home path for pmk config file");
+#endif
+		return false;
+	}
+
+	/*
+	 * check if the config file exists in the home directory
+	 * NOTE: no race condition here for access(), BUT
+	 * BE CAREFUL if changes are to be made.
+	 */
+	if (access(buffer, F_OK) != 0) { /* see above */
+		/* the file doesn't exists in HOME */
+#ifdef DEBUG_COMMON
+		debugf("failed to access '%s'", buffer);
+#endif
+
+		if (snprintf_b(buffer, bsize, PMK_CFG_SYS_FMT) == false) {
+#ifdef DEBUG_COMMON
+			debugf("failed to get build system path for pmk config file");
+#endif
+			return false;
+		}
+
+		if (access(buffer, F_OK) != 0) { /* see above */
+			/* the file doesn't exists in SYSCONFDIR */
+#ifdef DEBUG_COMMON
+			debugf("failed to access '%s'", buffer);
+#endif
+			return false;
+		}
+	}
+
+	/* pmk.conf has been found */
+	return true;
+}
+
 
 /* vim: set noexpandtab tabstop=4 softtabstop=4 shiftwidth=4: */

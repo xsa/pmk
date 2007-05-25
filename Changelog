@@ -1,3 +1,8 @@
+25 May 2007 coudercd
+ * fixed use of LIBS.
+ * pmk now check for for ~/.pmk/pmk.conf and if not exists for 
+   SYSCONFDIR/pmk/pmk.conf.
+
 23 May 2007 coudercd
  * fixed function detection in library check.
  * added math library check in pmkfile.
