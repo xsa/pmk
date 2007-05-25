@@ -128,4 +128,6 @@ bool	 fcopy(char *, char *, mode_t);
 FILE	*tmp_open(char *, char *, char *, size_t);
 FILE	*tmps_open(char *, char *, char *, size_t, size_t);
 
+bool	 get_pmk_conf_path(char *, size_t);
+
 #endif /* _PMK_COMMON_H_ */

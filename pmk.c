@@ -921,7 +921,8 @@ int main(int argc, char *argv[]) {
 	char			*pstr,
 					*enable_sw = NULL,
 					*disable_sw = NULL,
-					 buf[MAXPATHLEN];
+					 buf[MAXPATHLEN],
+					 cfgpath[MAXPATHLEN];
 	int				 rval = 0,
 					 nbpd,
 					 nbcd,
@@ -1064,8 +1065,7 @@ int main(int argc, char *argv[]) {
 
 	if (buildlog == true) {
 		/* set build log name */
-		if (strlcpy_b(pgd->buildlog, PMK_BUILD_LOG,
-					sizeof(pgd->buildlog)) == false) {
+		if (strlcpy_b(pgd->buildlog, PMK_BUILD_LOG,	sizeof(pgd->buildlog)) == false) {
 			errorf(PMK_ERR_BLDLOG);
 			exit(EXIT_FAILURE);
 		}
@@ -1074,8 +1074,7 @@ int main(int argc, char *argv[]) {
 		unlink(pgd->buildlog);
 	} else {
 		/* redirect build output to /dev/null */
-		if (strlcpy_b(pgd->buildlog, "/dev/null",
-					sizeof(pgd->buildlog)) == false) {
+		if (strlcpy_b(pgd->buildlog, "/dev/null", sizeof(pgd->buildlog)) == false) {
 			errorf(PMK_ERR_BLDLOG);
 			exit(EXIT_FAILURE);
 		}
@@ -1088,7 +1087,14 @@ int main(int argc, char *argv[]) {
 		exit(EXIT_FAILURE);
 	}
 
-	fp = fopen(PREMAKE_CONFIG_PATH, "r");
+	if (get_pmk_conf_path(cfgpath, sizeof(cfgpath)) == false) {
+		/* configuration file not found */
+		clean(pgd);
+		errorf(" Configuration file '%s' not fond, run pmksetup(8).", PREMAKE_CONFIG);
+		exit(EXIT_FAILURE);
+	}
+
+	fp = fopen(cfgpath, "r");
 	if (fp != NULL) {
 		if (parse_pmkconf(fp, pgd->htab, PRS_PMKCONF_SEP, process_opt) == false) {
 			/* parsing failed */
@@ -1144,7 +1150,7 @@ int main(int argc, char *argv[]) {
 			fclose(fp);
 			nbpd = hash_nbkey(pgd->htab);
 		} else {
-			/* configuration file not found */
+			/* override file not found */
 			clean(pgd);
 			errorf("cannot parse '%s' : %s.",
 				pgd->ovrfile, strerror(errno));
@@ -1177,6 +1183,8 @@ int main(int argc, char *argv[]) {
 	pmk_log(" [SUB #%s] [SNAP #%s]", PREMAKE_SUBVER_PMK, PREMAKE_SNAP);
 #endif
 	pmk_log("\n\n");
+
+	pmk_log("Using '%s'.\n\n", cfgpath);
 
 	pmk_log("Loaded %d predefinined variables.\n", nbpd);
 	pmk_log("Loaded %d overridden switches.\n", ovrsw);
