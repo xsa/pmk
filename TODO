@@ -23,6 +23,8 @@ Indented lines means subtask.
 
 common:
 -----------------------------------------------------------------------
+	-!	look for pmk.conf in HOME/.pmk/ before checking SYSCONFIGDIR
+			getlogin() + getpwnam()
 	~R!	update tutorial
 	~	improve test_pmkinstall to check more modes => moved to testsuite
 	~!	new samples => move to testsuite
@@ -33,6 +35,8 @@ common:
 
 pmk:
 -----------------------------------------------------------------------
+	-!	path duplicates in LIBS
+	-!	LIBS into generated makefiles from pmkscan
 	-R?	check if ~/.pmk.conf is available
 	~.	compatibility with autoconf (progressing) :
 			~ support for DEFS (-D options to pass to the
