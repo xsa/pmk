@@ -611,29 +611,33 @@ bool x86_set_cpu_data(prsdata *pdata, x86_cpu_cell *pcell, htable_t *pht) {
 			*pstr;
 	htable_t	*phtbis;
 
-	if (snprintf_b(buffer, sizeof(buffer), "%u", pcell->family) == false)
+	if (snprintf_b(buffer, sizeof(buffer), "%u", pcell->family) == false) {
 		return(false);
+	}
 
 	if (hash_update_dup(pht, PMKCONF_HW_X86_CPU_FAMILY, buffer) == false) {
 		return(false);
 	}
 
-	if (snprintf_b(buffer, sizeof(buffer), "%u", pcell->model) == false)
+	if (snprintf_b(buffer, sizeof(buffer), "%u", pcell->model) == false) {
 		return(false);
+	}
 
 	if (hash_update_dup(pht, PMKCONF_HW_X86_CPU_MODEL, buffer) == false) {
 		return(false);
 	}
 
-	if (snprintf_b(buffer, sizeof(buffer), "%u", pcell->extfam) == false)
+	if (snprintf_b(buffer, sizeof(buffer), "%u", pcell->extfam) == false) {
 		return(false);
+	}
 
 	if (hash_update_dup(pht, PMKCONF_HW_X86_CPU_EXTFAM, buffer) == false) {
 		return(false);
 	}
 
-	if (snprintf_b(buffer, sizeof(buffer), "%u", pcell->extmod) == false)
+	if (snprintf_b(buffer, sizeof(buffer), "%u", pcell->extmod) == false) {
 		return(false);
+	}
 
 	if (hash_update_dup(pht, PMKCONF_HW_X86_CPU_EXTMOD, buffer) == false) {
 		return(false);
@@ -690,8 +694,7 @@ bool x86_set_cpu_data(prsdata *pdata, x86_cpu_cell *pcell, htable_t *pht) {
 			}
 		}
 
-		if (hash_update_dup(pht, PMKCONF_HW_X86_CPU_CLASS,
-						pstr) == false) {
+		if (hash_update_dup(pht, PMKCONF_HW_X86_CPU_CLASS, pstr) == false) {
 			return(false);
 		}
 	} else {
@@ -851,24 +854,30 @@ bool ia64_get_cpuid_data(prsdata *pdata, htable_t *pht) {
 /*debugf("level = %x", level);*/
 
 	rslt = (regbuf[0] & IA64_CPU_MASK_REVISION) >> 8;
-	if (snprintf_b(buffer, sizeof(buffer), "%u", rslt) == false)
+	if (snprintf_b(buffer, sizeof(buffer), "%u", rslt) == false) {
 		return(false);
-	if (hash_update_dup(pht, PMKCONF_HW_IA64_CPU_REVISION, buffer) == false)
+	}
+	if (hash_update_dup(pht, PMKCONF_HW_IA64_CPU_REVISION, buffer) == false) {
 		return(false);
+	}
 /*debugf("revision = %x", rslt);*/
 
 	rslt = (regbuf[0] & IA64_CPU_MASK_MODEL) >> 16;
-	if (snprintf_b(buffer, sizeof(buffer), "%u", rslt) == false)
+	if (snprintf_b(buffer, sizeof(buffer), "%u", rslt) == false) {
 		return(false);
-	if (hash_update_dup(pht, PMKCONF_HW_IA64_CPU_MODEL, buffer) == false)
+	}
+	if (hash_update_dup(pht, PMKCONF_HW_IA64_CPU_MODEL, buffer) == false) {
 		return(false);
+	}
 /*debugf("model = %x", rslt);*/
 
 	rslt = (regbuf[0] & IA64_CPU_MASK_FAMILY) >> 24;
-	if (snprintf_b(buffer, sizeof(buffer), "%u", rslt) == false)
+	if (snprintf_b(buffer, sizeof(buffer), "%u", rslt) == false) {
 		return(false);
-	if (hash_update_dup(pht, PMKCONF_HW_IA64_CPU_FAMILY, buffer) == false)
+	}
+	if (hash_update_dup(pht, PMKCONF_HW_IA64_CPU_FAMILY, buffer) == false) {
 		return(false);
+	}
 /*debugf("family = %x", rslt);*/
 
 	phtbis = (htable_t *) seek_key(pdata, LIST_IA64_CPU_CLASS);
@@ -889,8 +898,7 @@ bool ia64_get_cpuid_data(prsdata *pdata, htable_t *pht) {
 		}
 /*debugf("pstr = '%s'", pstr);*/
 
-		if (hash_update_dup(pht, PMKCONF_HW_IA64_CPU_CLASS,
-						pstr) == false) {
+		if (hash_update_dup(pht, PMKCONF_HW_IA64_CPU_CLASS, pstr) == false) {
 			/* err msg ? */
 			return(false);
 		}
@@ -901,10 +909,12 @@ bool ia64_get_cpuid_data(prsdata *pdata, htable_t *pht) {
 
 
 	rslt = (regbuf[0] & IA64_CPU_MASK_ARCHREV) >> 32;
-	if (snprintf_b(buffer, sizeof(buffer), "%u", rslt) == false)
+	if (snprintf_b(buffer, sizeof(buffer), "%u", rslt) == false) {
 		return(false);
-	if (hash_update_dup(pht, PMKCONF_HW_IA64_CPU_ARCHREV, buffer) == false)
+	}
+	if (hash_update_dup(pht, PMKCONF_HW_IA64_CPU_ARCHREV, buffer) == false) {
 		return(false);
+	}
 	/*printf("archrev = %x\n", rslt);*/
 
 	if (level >= 0x04) {
@@ -922,11 +932,11 @@ bool ia64_get_cpuid_data(prsdata *pdata, htable_t *pht) {
 					return(false); /* err msg ? */
 			}
 		}
-		if (hash_update_dup(pht, PMKCONF_HW_IA64_CPU_FEATURES, buffer) == false)
+		if (hash_update_dup(pht, PMKCONF_HW_IA64_CPU_FEATURES, buffer) == false) {
 			/* err msg ? */
 			return(false);
+		}
 	}
-
 
 	return(true);
 }
