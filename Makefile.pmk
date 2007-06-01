@@ -17,6 +17,7 @@ CLDFLAGS=	@CLDFLAGS@ @LIBS@
 INSTALL=	@INSTALL@
 RM=		rm
 RMFLAGS=	-rf
+LIBS=	@LIBS@
 
 
 # tool aliases
@@ -441,7 +442,7 @@ install_bindir:
 
 # pmk binary targets
 $(PMK): $(PMK_OBJS)
-	$(CC) $(CLDFLAGS) -o $@ $(PMK_OBJS)
+	$(CC) -o $@ $(PMK_OBJS) $(CLDFLAGS) $(LIBS)
 
 $(PMK)_clean:
 	$(RM) $(RMFLAGS) $(PMK_OBJS)
@@ -455,7 +456,7 @@ $(PMK)_deinstall:
 
 # pmkinstall binary targets
 $(PMKINSTALL): $(PMKINSTALL_OBJS)
-	$(CC) $(CLDFLAGS) -o $@ $(PMKINSTALL_OBJS)
+	$(CC) -o $@ $(PMKINSTALL_OBJS) $(CLDFLAGS) $(LIBS)
 
 $(PMKINSTALL)_clean:
 	$(RM) $(RMFLAGS) $(PMKINSTALL_OBJS)
@@ -469,7 +470,7 @@ $(PMKINSTALL)_deinstall:
 
 # pmkpc binary targets
 $(PMKPC): $(PMKPC_OBJS)
-	$(CC) $(CLDFLAGS) -o $@ $(PMKPC_OBJS)
+	$(CC) -o $@ $(PMKPC_OBJS) $(CLDFLAGS) $(LIBS)
 
 $(PMKPC)_clean:
 	$(RM) $(RMFLAGS) $(PMKPC_OBJS)
@@ -483,7 +484,7 @@ $(PMKPC)_deinstall:
 
 # pmkscan binary targets
 $(PMKSCAN): $(PMKSCAN_OBJS)
-	$(CC) $(CLDFLAGS) -o $@ $(PMKSCAN_OBJS)
+	$(CC) -o $@ $(PMKSCAN_OBJS) $(CLDFLAGS) $(LIBS)
 
 $(PMKSCAN)_clean:
 	$(RM) $(RMFLAGS) $(PMKSCAN_OBJS)
@@ -497,7 +498,7 @@ $(PMKSCAN)_deinstall:
 
 # pmksetup binary targets
 $(PMKSETUP): $(PMKSETUP_OBJS)
-	$(CC) $(CLDFLAGS) -o $@ $(PMKSETUP_OBJS)
+	$(CC) -o $@ $(PMKSETUP_OBJS) $(CLDFLAGS) $(LIBS)
 
 $(PMKSETUP)_clean:
 	$(RM) $(RMFLAGS) $(PMKSETUP_OBJS)

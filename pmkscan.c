@@ -2796,6 +2796,9 @@ void mkf_output_header(FILE *fp, scn_zone_t *psz) {
 	/* misc stuff */
 	fprintf(fp, MKF_HEADER_MISC);
 
+	/* library list macro */
+	fprintf(fp, MKF_LIBS);
+
 	fprintf(fp, MKF_LINE_JUMP);
 
 	/* tool aliases */

@@ -1,3 +1,7 @@
+01 Jun 2007 coudercd
+ * added support of LIBS into generated makefile templates from pmkscan.
+ * added detection of sete*id() functions.
+
 25 May 2007 coudercd
  * fixed use of LIBS.
  * pmk now check for for ~/.pmk/pmk.conf and if not exists for 

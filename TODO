@@ -23,8 +23,7 @@ Indented lines means subtask.
 
 common:
 -----------------------------------------------------------------------
-	-!	look for pmk.conf in HOME/.pmk/ before checking SYSCONFIGDIR
-			getlogin() + getpwnam()
+	+!	look for pmk.conf in HOME/.pmk/ before checking SYSCONFIGDIR
 	~R!	update tutorial
 	~	improve test_pmkinstall to check more modes => moved to testsuite
 	~!	new samples => move to testsuite

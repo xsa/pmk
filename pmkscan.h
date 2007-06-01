@@ -303,10 +303,6 @@ enum {
 #define MKF_HEADER_LEX		MKF_LABEL_LEX "=\t@" MKF_LABEL_LEX "@\n" \
 							MKF_LABEL_LEX "FLAGS=\t@" MKF_LABEL_LEX "FLAGS@\n"
 
-#define MKF_HEADER_LD		"LD=\t\t@LD@\n" \
-							"# LDFLAGS shall contain -lc if used with ld\n" \
-							"LDFLAGS=\t-lc @LDFLAGS@\n\n"
-
 #define MKF_HEADER_AR		MKF_LABEL_AR "=\t\t@" MKF_LABEL_AR "@\n" \
 							MKF_LABEL_AR "FLAGS=\tcru\n"
 							/*MKF_LABEL_AR "FLAGS=\t@" MKF_LABEL_AR "FLAGS@\n"*/
@@ -341,6 +337,7 @@ enum {
 
 /* simple macros */
 
+#define MKF_LIBS			"LIBS=\t@LIBS@\n"
 
 /* lists */
 
@@ -395,11 +392,11 @@ enum {
 
 /* building ***************************/
 
-#define MKF_TARGET_DEF		"\t$(LD) -o $@ $(%s_OBJS) $(LDFLAGS)\n\n"
+#define MKF_TARGET_DEF		"\t$(LD) -o $@ $(%s_OBJS) $(LDFLAGS) $(LIBS)\n\n"
 
-#define MKF_TARGET_C		"\t$(CC) -o $@ $(%s_OBJS) $(CLDFLAGS)\n\n"
+#define MKF_TARGET_C		"\t$(CC) -o $@ $(%s_OBJS) $(CLDFLAGS) $(LIBS)\n\n"
 
-#define MKF_TARGET_CXX		"\t$(CXX) -o $@ $(%s_OBJS) $(CXXLDFLAGS)\n\n"
+#define MKF_TARGET_CXX		"\t$(CXX) -o $@ $(%s_OBJS) $(CXXLDFLAGS) $(LIBS)\n\n"
 
 #define MKF_TARGET_LIB_STC	"\t$(" MKF_LABEL_AR ") $(" MKF_LABEL_AR "FLAGS) $@ $(%s)\n" \
 							"\t$(" MKF_LABEL_RANLIB ") $@\n\n"
