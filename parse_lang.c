@@ -878,7 +878,22 @@ bool prs_c_common(prs_cmn_t *pcmn, FILE *fp, char **lkw, char **tkw) {
 #endif
 			/* clear flags */
 			idtf_flag = false; /* XXX here idtf could contain a constant */
-			type_flag = false;
+
+/* XXX XXX */
+			if (type_flag == true) {
+				/* if a type flag is on => type identifier */
+#ifdef DEBUG_PRSC
+				debugf("possible type identifier '%s'", type);
+#endif
+				/* processing, call to pcmn->func_type */
+				if (pcmn->func_type(pcmn->data, idtf, ppe) == false) {
+					errorf("error in processing of type.");
+					return(false);
+				}
+
+				type_flag = false;
+			}
+/* XXX XXX */
 
 			/* skip character */
 			prseng_next_char(ppe);
@@ -902,7 +917,7 @@ bool prs_c_common(prs_cmn_t *pcmn, FILE *fp, char **lkw, char **tkw) {
 
 		prseng_get_idtf(ppe, idtf, sizeof(idtf), PRS_C_IDTF_STR);
 #ifdef DEBUG_PRSC
-			debugf("found identifier '%s'", idtf);
+		debugf("found identifier '%s'", idtf);
 #endif
 
 		if (idtf[0] == '\0') {

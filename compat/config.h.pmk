@@ -87,6 +87,10 @@
 @DEF__LIBGEN_H@
 
 
+/* unistd.h (setegid, seteuid and mkstemps) */
+@DEF__UNISTD_H@
+
+
 /*************
  * functions *
  ***********************************************************************/
@@ -117,6 +121,12 @@
 
 /* dirname() */
 @DEF__DIRNAME@
+
+/* setegid() */
+@DEF__SETEGID@
+
+/* seteuid() */
+@DEF__SETEUID@
 
 
 #endif /* _PMK_CONFIG_H_ */

@@ -57,7 +57,15 @@
 
 
 /*#define PMKSETUP_DEBUG 1*/
-/*#define WITHOUT_FORK 1*/
+
+#ifndef HAVE_SETEGID
+#define WITHOUT_FORK 1
+#endif
+
+#ifndef HAVE_SETEUID
+#define WITHOUT_FORK 1
+#endif
+
 
 /********************
  * global variables *

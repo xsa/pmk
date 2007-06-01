@@ -87,7 +87,7 @@ ADD_HEADER {
 
 ADD_HEADER {
 	NAME = "unistd.h"
-	PROCEDURE = ("mkstemps")
+	PROCEDURE = ("mkstemps", "setegid", "seteuid")
 }
 
 

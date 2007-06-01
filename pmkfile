@@ -36,7 +36,7 @@ DEFINE {
 	MAN5DIR = "\\$(MANDIR)/man5"
 	MAN8DIR = "\\$(MANDIR)/man8"
 	PRIVSEP_USER = "nobody"
-	VERSION = "0.9.3"
+	VERSION = "0.11.dev"
 	INSTALL = "./pmkinstall"
 }
 
@@ -245,7 +245,7 @@ CHECK_HEADER(c_header_sys_wait_h) {
 CHECK_HEADER(c_header_unistd_h) {
 	REQUIRED = FALSE
 	NAME = "unistd.h"
-	FUNCTION = ("mkstemps")
+	FUNCTION = ("setegid", "seteuid", "mkstemps")
 }
 
 # check library gen
@@ -259,6 +259,7 @@ CHECK_LIB(c_library_gen) {
 CHECK_LIB(c_library_m) {
 	REQUIRED = FALSE
 	NAME = "m"
-	FUNCTION = ("isinf", "isnan")
+	FUNCTION = ("isnan")
 }
+
 
