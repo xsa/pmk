@@ -464,7 +464,7 @@ bool get_binaries(htable_t *pht) {
 			}
 			verbosef("Setting '%s' => '%s'", c_compilers[i][1], fbin);
 			if (pcc == NULL) {
-				pcc = c_compilers[i][1];
+				pcc = fbin; /* XXX should be c_compilers[i][1] but pmk badly resolves it */
 			}
 		} else {
 			verbosef("Info : '%s' (%s) not found", c_compilers[i][0], c_compilers[i][1]);
