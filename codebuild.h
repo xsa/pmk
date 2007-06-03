@@ -41,7 +41,7 @@
 #include "compat/pmk_stdio.h"
 
 #include "dynarray.h"
-#include "hash.h"
+#include "hash_tools.h"
 #include "lang.h"
 #include "premake.h"
 
@@ -108,13 +108,13 @@ typedef struct {
 				 bldcmd[MAXPATHLEN],	/* building command buffer */
 				 objfile[MAXPATHLEN],	/* binary file */
 				 srcfile[MAXPATHLEN],	/* source file */
+				 pathcomp[MAXPATHLEN],	/* compiler path */
 				*header,				/* header filename */
 				*library,				/* library name */
 				*define,				/* macro name */
 				*procedure,				/* procedure name */
 				*type,					/* type name */
 				*member,				/* type member name */
-				*pathcomp,				/* compiler path */
 				*cflags,				/* compilation flags */
 				*ldflags,				/* linker flags */
 				*slcflags,				/* shared lib compilation flags */

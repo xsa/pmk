@@ -313,4 +313,29 @@ bool single_append(htable_t *pht, char *key, char *value) {
 	return(true);
 }
 
+
+/************************
+ * hash_get_processed() *
+ *************************************************************************************************************
+ %DESCR get a pointer to the key data after substitution processing
+
+ %PARAM pht : hash table pointer
+ %PARAM key : string of the key to look for
+
+ %RETURN key data pointer or NULL if not found
+ *************************************************************************************************************/
+
+void *hash_get_processed(htable_t *pht, char *key) {
+	char *pstr;
+
+	/* try to get raw value */
+	pstr = hash_get(pht, key);
+	if (pstr == NULL) {
+		return pstr;
+	}
+
+	/* if raw value exist, process the string */
+	return process_string(pstr, pht);
+}
+
 /* vim: set noexpandtab tabstop=4 softtabstop=4 shiftwidth=4: */

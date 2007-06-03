@@ -105,7 +105,6 @@ void code_bld_init(code_bld_t *pcb, char *blog) {
 	pcb->procedure = NULL;
 	pcb->type = NULL;
 	pcb->member = NULL;
-	pcb->pathcomp = NULL;
 	pcb->cflags = NULL;
 	pcb->ldflags = NULL;
 	pcb->slcflags = NULL;
@@ -121,6 +120,9 @@ void code_bld_init(code_bld_t *pcb, char *blog) {
 
 	/* init command line buffer */
 	pcb->bldcmd[0] = '\0';
+
+	/* init compiler path buffer */
+	pcb->pathcomp[0] = '\0';
 
 	/* set build log file name */
 	pcb->blog = blog;
@@ -207,7 +209,7 @@ bool set_language(code_bld_t *pcb, char *lang) {
  ***********************************************************************/
 
 char *set_compiler(code_bld_t *pcb, htable_t *pht) {
-	pcb->pathcomp = hash_get(pht, pcb->pld->compiler);
+	strlcpy(pcb->pathcomp, hash_get_processed(pht, pcb->pld->compiler), MAXPATHLEN); /* XXX need check ? */
 
 	return(pcb->pathcomp);
 }

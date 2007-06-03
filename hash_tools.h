@@ -45,5 +45,6 @@ htable_t	*hash_create_simple_autogrow(size_t table_size);
 char		*parse_idtf(char *, char *, size_t);
 char		*process_string(char *, htable_t *);
 bool		 single_append(htable_t *, char *, char *);
+void		*hash_get_processed(htable_t *, char *);
 
 #endif /* _HASH_TOOLS_H_ */
