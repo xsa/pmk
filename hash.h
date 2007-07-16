@@ -33,13 +33,12 @@
  *
  */
 
+#ifndef _HASH_H_
+#define _HASH_H_
 
 #include <sys/types.h>
 #include <stdbool.h>
 #include <stdint.h>
-
-#ifndef _HASH_H_
-#define _HASH_H_
 
 /**********
  * macros *
