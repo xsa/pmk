@@ -1,3 +1,8 @@
+18 Jul 2007 coudercd
+ * moved hash_t to hash.c and done some cleaning.
+ * adding dynary.c, dynary.h, dynary_tools.c and dynary_tools.h for
+   further use (to replace basic dynarrays).
+
 01 Jun 2007 coudercd
  * added support of LIBS into generated makefile templates from pmkscan.
  * added detection of sete*id() functions.
