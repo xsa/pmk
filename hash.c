@@ -1,7 +1,7 @@
 /* $Id$ */
 
 /*
- * Copyright (c) 2003-2006 Damien Couderc
+ * Copyright (c) 2003-2007 Damien Couderc
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -69,6 +69,14 @@ char *hmsg[] = {
 	"data pointer is NULL",					/* 14 */
 	"hash table is full",					/* 15 */
 };
+
+
+/********************
+ * type definitions *
+ *************************************************************************************************************/
+
+/* hash type */
+typedef uint32_t	hash_t;
 
 
 /*********************
@@ -179,7 +187,7 @@ static size_t hash_correct_size(size_t size) {
 
 static hnode_t *hash_search_node(htable_t *pht, char *key) {
 	hash_t	 h;
-	hnode_t *phn;
+	hnode_t	*phn;
 
 	/* compute hash */
 	h = hash_compute(key, pht->size);
@@ -553,9 +561,9 @@ bool hash_add(htable_t *pht, char *key, void *data) {
  *************************************************************************************************************
  %DESCR addition (without update) of a key using data duplication function
 
- %PARAM pht : hash table pointer
- %PARAM key : key string
- %PARAM data : key data
+ %PARAM pht :	hash table pointer
+ %PARAM key :	key string
+ %PARAM data :	key data
 
  %RETURN true if correctly added or false if the key already exists or has failed to be added
 
@@ -592,9 +600,9 @@ bool hash_add_dup(htable_t *pht, char *key, void *data) {
  *************************************************************************************************************
  %DESCR addition or update of a key
 
- %PARAM pht : hash table pointer
- %PARAM key : key string
- %PARAM data : key data
+ %PARAM pht :	hash table pointer
+ %PARAM key :	key string
+ %PARAM data :	key data
 
  %RETURN true on success else false
  *************************************************************************************************************/
@@ -646,9 +654,9 @@ bool hash_update(htable_t *pht, char * key, void *data) {
  *************************************************************************************************************
  %DESCR addition or update of a key using data duplication function
 
- %PARAM pht : hash table pointer
- %PARAM key : key string
- %PARAM data : key data
+ %PARAM pht :	hash table pointer
+ %PARAM key :	key string
+ %PARAM data :	key data
 
  %RETURN true on success else false
  *************************************************************************************************************/

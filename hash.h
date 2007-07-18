@@ -38,16 +38,7 @@
 
 #include <sys/types.h>
 #include <stdbool.h>
-#include <stdint.h>
 
-/**********
- * macros *
- *************************************************************************************************************/
-
-/* for compatibility with previous code, to remove later */
-//#define hash_init(s)			hash_create_simple(s)
-//#define hash_init_adv(s,d,f,a)	hash_create(s,false,a,d,f)
-//#define htable					htable_t
 
 /*************
  * constants *
@@ -77,16 +68,12 @@ enum {
  * type definitions *
  *************************************************************************************************************/
 
-/* hash type */
-typedef uint32_t	hash_t;
-
-
 /* node cell type */
 typedef struct hcell_s {
-	char			*key;	/* cle */
-	void			*data;	/* donnees */
-	struct hcell_s	*prev,	/* cellule precedente */
-					*next;	/* cellule suivante */
+	char			*key;	/* key */
+	void			*data;	/* data */
+	struct hcell_s	*prev,	/* previous cell */
+					*next;	/* next cell */
 } hcell_t;
 
 /* node type */
