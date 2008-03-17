@@ -76,7 +76,8 @@ char *hmsg[] = {
  *************************************************************************************************************/
 
 /* hash type */
-typedef uint32_t	hash_t;
+/*typedef uint32_t	hash_t;*//* XXX need stdint.h */
+typedef unsigned int	hash_t;
 
 
 /*********************
@@ -143,7 +144,8 @@ static hash_t hash_compute(char *key, size_t size) {
 
 static size_t hash_correct_size(size_t size) {
 	size_t	power_size;
-	uint8_t	shift = 0;
+	/*uint8_t	shift = 0;*//* XXX needs stdint.h */
+	int		shift = 0;
 
 	/* minimum size is 2 */
 	if (size < 2) {
