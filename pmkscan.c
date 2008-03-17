@@ -181,8 +181,8 @@ kw_t	req_defbin[] = {
 kwopt_t	kw_defbin = {
 	req_defbin,
 	sizeof(req_defbin) / sizeof(kw_t),
-	0,
-	NULL
+	NULL,
+	0
 };
 
 /* DEFINE_LIB required options */
