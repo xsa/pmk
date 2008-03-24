@@ -698,12 +698,17 @@ pkgcell *pkg_cell_add(pkgdata *ppd, char *mod) {
 	pkgcell		*ppc;
 
 	/* get pc file name */
-	pcf = hash_get(ppd->files, mod); /* XXX check if NULL ?? */
+	pcf = hash_get(ppd->files, mod);
+	if (pcf == NULL) {
+		/* config file not found */
+		return NULL;
+	}
 
 	/* parse pc file */
 	ppc = parse_pc_file(pcf);
-	if (ppc == NULL)
+	if (ppc == NULL) {
 		return(NULL);
+	}
 
 	/* store pkgcell in hash */
 	if (hash_update(ppd->cells, mod, ppc) == HASH_ADD_FAIL) {
@@ -766,11 +771,11 @@ debugf("recursing '%s'", reqs);
 
 		/*  check if module has been already processed */
 		if (hash_get(ppd->cells, mod) == NULL) {
-			if (pkg_cell_add(ppd, mod) == NULL) {
-				errorf("failed to add a cell in pkg_recurse().");
-				da_destroy(pda);
-				return(false);
-			}
+			/*
+			 * here we don't check the result as dependencies 
+			 * can be missing in some cases.
+			 */
+			pkg_cell_add(ppd, mod); /* no check */
 		}
 	}
 
