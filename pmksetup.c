@@ -87,6 +87,12 @@ hpair		 predef[] = {
 };
 int			 nbpredef = sizeof(predef) / sizeof(hpair);
 
+char		*pcpath[] = {
+	"/usr",
+	"/usr/local"
+};
+int			 nbpcpath = sizeof(pcpath) / sizeof(char *);
+
 
 /*************
  * functions *
@@ -464,7 +470,7 @@ bool get_binaries(htable_t *pht) {
 			}
 			verbosef("Setting '%s' => '%s'", c_compilers[i][1], fbin);
 			if (pcc == NULL) {
-				pcc = c_compilers[i][1];
+				pcc = strdup(fbin);
 			}
 		} else {
 			verbosef("Info : '%s' (%s) not found", c_compilers[i][0], c_compilers[i][1]);
@@ -474,7 +480,8 @@ bool get_binaries(htable_t *pht) {
 	/* setting PMKCONF_BIN_CC */
 	if (pcc != NULL) {
 		/* standard compiler found */
-		snprintf(fbin, sizeof(fbin), "$%s", pcc); /* XXX check ? */
+		snprintf(fbin, sizeof(fbin), "%s", pcc); /* XXX check ? */
+		free(pcc);
 		if (record_data(pht, PMKCONF_BIN_CC, 'u', fbin) == false) {
 			da_destroy(stpath);
 			return(false);
@@ -655,34 +662,36 @@ bool check_echo(htable_t *pht) {
  ***********************************************************************/
 
 bool check_libpath(htable_t *pht) {
+	bool	 found = false;
 	char	 libpath[MAXPATHLEN];
-
-	/* build the path dynamically */
-	/* variable prefix */
-	strlcpy(libpath, "$", sizeof(libpath)); /* should not fail */
-
-	/* prefix variable name */
-	strlcat(libpath, PMKCONF_MISC_PREFIX,
-				sizeof(libpath)); /* no check yet */
-
-	/* pkgconfig path suffix */
-	if (strlcat_b(libpath, PMKVAL_LIB_PKGCONFIG,
-				sizeof(libpath)) == false)
-		return(false);
+	int		 i;
 
 	if (hash_get(pht, PMKCONF_BIN_PKGCONFIG) != NULL) {
-		if (dir_exists(libpath) == 0) {
-			if (record_data(pht, PMKCONF_PC_PATH_LIB,
-						'u', libpath) == false)
-				return(false);
+		/* try predefined path for pkconfig lib path */
+		for (i = 0 ; (i < nbpcpath) && (found == false) ; i++) {
+			strlcpy(libpath, pcpath[i], sizeof(libpath));
 
-			verbosef("Setting '%s' => '%s'",
-					PMKCONF_PC_PATH_LIB, libpath);
+			/* pkgconfig path suffix */
+			if (strlcat_b(libpath, PMKVAL_LIB_PKGCONFIG, sizeof(libpath)) == false) {
+				return false;
+			}
+
+			if (dir_exists(libpath) == true) {
+				found = true;
+			}
+		}
+
+		if (found == true) {
+			if (record_data(pht, PMKCONF_PC_PATH_LIB, 'u', libpath) == false) {
+				return false;
+			}
+
+			verbosef("Setting '%s' => '%s'", PMKCONF_PC_PATH_LIB, libpath);
 		} else {
-			verbosef("**warning: %s does not exist.", libpath);
+			verbosef("**warning: pkgconfig lib path not found (%s not set).", PMKCONF_PC_PATH_LIB);
 		}
 	}
-	return(true);
+	return true;
 }
 
 
