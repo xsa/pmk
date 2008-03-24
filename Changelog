@@ -1,5 +1,6 @@
 24 Mar 2008 coudercd
  * better use of hash_get_processed() in codebuild.
+ * fixed pkgconfig stuff in cases where dependencies can be missing.
 
 18 Jul 2007 coudercd
  * moved hash_t to hash.c and done some cleaning.
