@@ -1,5 +1,7 @@
 24 Mar 2008 coudercd
  * fixed pkgconfig stuff in cases where dependencies can be missing.
+ * removed use of (broken) variable substitution in pmk.conf.
+ * added pkgconfig lib path detection.
 
 # PMK 0.10.3 release
 
