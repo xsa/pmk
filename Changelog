@@ -1,3 +1,6 @@
+24 Mar 2008 coudercd
+ * better use of hash_get_processed() in codebuild.
+
 18 Jul 2007 coudercd
  * moved hash_t to hash.c and done some cleaning.
  * adding dynary.c, dynary.h, dynary_tools.c and dynary_tools.h for

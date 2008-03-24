@@ -209,7 +209,11 @@ bool set_language(code_bld_t *pcb, char *lang) {
  ***********************************************************************/
 
 char *set_compiler(code_bld_t *pcb, htable_t *pht) {
-	strlcpy(pcb->pathcomp, hash_get_processed(pht, pcb->pld->compiler), MAXPATHLEN); /* XXX need check ? */
+	char	*pstr;
+
+	pstr = hash_get_processed(pht, pcb->pld->compiler);
+	strlcpy(pcb->pathcomp, pstr, MAXPATHLEN); /* XXX need check ? */
+	free(pstr);
 
 	return(pcb->pathcomp);
 }
