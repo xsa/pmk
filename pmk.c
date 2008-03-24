@@ -621,7 +621,7 @@ bool process_template(pmkdata *pgd, char *template) {
 					}
 
 					/* try to get tag content */
-					pstr = (char *) hash_get_processed(pht, buf);
+					pstr = (char *) hash_get(pht, buf);
 					if (pstr != NULL) {
 						/* put data */
 						fprintf(gfp, "%s", pstr);
