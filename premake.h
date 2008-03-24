@@ -72,7 +72,7 @@
 /* minor version */
 #define PREMAKE_VMINOR	"10"
 /* minor subversion, only used for bugfixes  */
-#define PREMAKE_VSUB	"3"
+#define PREMAKE_VSUB	"4"
 
 /* full version */
 #ifndef PREMAKE_VSUB
