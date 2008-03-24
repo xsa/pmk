@@ -1,3 +1,6 @@
+24 Mar 2008 coudercd
+ * fixed pkgconfig stuff in cases where dependencies can be missing.
+
 # PMK 0.10.3 release
 
 26 May 2007 coudercd
