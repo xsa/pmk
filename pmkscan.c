@@ -924,13 +924,13 @@ check_t *mk_chk_cell(htable_t *pht, int token) {
 	boolean (true on success)
  ***********************************************************************/
 
-bool parse_data_file(prsdata *pdata, scandata *sdata) {
+bool parse_data_file(prsdata *pdata, scandata *sdata, char *datafile) {
 	FILE	*fd;
 	bool	 rval;
 	check_t	*pchk;
 	prscell	*pcell;
 
-	fd = fopen(PMKSCAN_DATA, "r");
+	fd = fopen(datafile, "r");
 	if (fd == NULL) {
 		errorf("cannot open '%s' : %s.",
 			PMKSCAN_DATA, strerror(errno));
@@ -5797,7 +5797,9 @@ void usage(void) {
 
 int main(int argc, char *argv[]) {
 	bool		 go_exit = false;
-	char		 scfile[PATH_MAX] = PMKSCAN_CONFIG;
+	char		 scfile[PATH_MAX] = PMKSCAN_CONFIG,
+				 filepath[PATH_MAX],
+				*home;
 	int			 chr;
 	prs_cmn_t	 pcmn;
 	prsdata		*pdata = NULL;
@@ -5859,10 +5861,16 @@ int main(int argc, char *argv[]) {
 		errorf("\ncannot initialize prsdata.");
 		exit(EXIT_FAILURE);
 	} else {
-		if (parse_data_file(pdata, &sd) == false) {
+		if (parse_data_file(pdata, &sd, PMKSCAN_DATA) == false) {
 			/* error message displayed by parse_data_file */
 			prsdata_destroy(pdata);
 			exit(EXIT_FAILURE);
+		}
+
+		home = get_home();
+		if (home != NULL) {
+			snprintf(filepath, sizeof(filepath), "%s/%s/%s", home, PREMAKE_HOME_DIR, PMKSCAN_USER);
+			parse_data_file(pdata, &sd, filepath); /* XXX check and exit on error ? */
 		}
 	}
 

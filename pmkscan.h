@@ -54,6 +54,7 @@
 #endif
 
 #define PMKSCAN_DATA	DATADIR "/pmkscan.dat"
+#define PMKSCAN_USER	"userscan.dat"
 #define PMKSCAN_CFGFILE	"config.h.pmk"
 #define PMKSCAN_PMKFILE	"pmkfile"
 #define PMKSCAN_MKFILE	"Makefile.pmk"
@@ -307,7 +308,7 @@ enum {
 							MKF_LABEL_AR "FLAGS=\tcru\n"
 							/*MKF_LABEL_AR "FLAGS=\t@" MKF_LABEL_AR "FLAGS@\n"*/
 
-#define MKF_HEADER_RANLIB	MKF_LABEL_RANLIB "=\t\t@" MKF_LABEL_RANLIB "@\n"
+#define MKF_HEADER_RANLIB	MKF_LABEL_RANLIB "=\t\t$(AR) rs # @" MKF_LABEL_RANLIB "@\n"
 
 #define MKF_HEADER_MISC		MKF_LABEL_INSTALL "=\t@" MKF_LABEL_INSTALL"@\n" \
 							MKF_LABEL_RM "=\t\trm\n" \
@@ -676,7 +677,7 @@ void		 scan_zone_destroy(scn_zone_t *);
 check_t		*init_chk_cell(char *);
 void		 destroy_chk_cell(check_t *);
 check_t		*mk_chk_cell(htable_t *, int);
-bool		 parse_data_file(prsdata *, scandata *);
+bool		 parse_data_file(prsdata *, scandata *, char *);
 char		*conv_to_label(ftype_t, char *, ...);
 bool		 recurse_sys_deps(htable_t *, dynary *, char *);
 bool		 add_library(scn_zone_t *, char *, scandata *, scn_node_t *);
