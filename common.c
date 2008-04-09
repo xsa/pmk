@@ -761,12 +761,38 @@ FILE *tmps_open(char *tfile, char *mode, char *buf, size_t bsize, size_t slen) {
 	return(fdopen(fd, mode));
 }
 
-
-/********************
- * open_pmk_conf() *
+/*************
+ * get_home() *
  ***********************************************************************
  DESCR
-	try to open pmk.conf by looking first in ~/.pmk/, else in SYSCONFDIR
+	get the home directory path
+
+ IN
+	NONE
+
+ OUT
+	path or NULL
+ ***********************************************************************/
+
+char *get_home(void) {
+	struct passwd	*ppw;
+
+	ppw = getpwuid(geteuid());
+	if (ppw == NULL) {
+#ifdef DEBUG_COMMON
+		debugf("failed to get passwd entry");
+#endif
+		return NULL;
+	}
+
+	return ppw->pw_dir;
+}
+
+/**********************
+ * get_pmk_conf_path() *
+ ***********************************************************************
+ DESCR
+	get the path to pmk.conf by looking first in ~/.pmk/, else in SYSCONFDIR
 
  IN
 	NONE
@@ -776,17 +802,14 @@ FILE *tmps_open(char *tfile, char *mode, char *buf, size_t bsize, size_t slen) {
  ***********************************************************************/
 
 bool get_pmk_conf_path(char *buffer, size_t bsize) {
-	struct passwd	*ppw;
+	char	*home;
 
-	ppw = getpwuid(geteuid());
-	if (ppw == NULL) {
-#ifdef DEBUG_COMMON
-		debugf("failed to get passwd entry");
-#endif
+	home = get_home();
+	if (home == NULL) {
 		return false;
 	}
 
-	if (snprintf_b(buffer, bsize, PMK_CFG_HOME_FMT, ppw->pw_dir) == false) {
+	if (snprintf_b(buffer, bsize, PMK_CFG_HOME_FMT, home) == false) {
 #ifdef DEBUG_COMMON
 		debugf("failed to get build home path for pmk config file");
 #endif
