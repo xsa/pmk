@@ -932,8 +932,6 @@ bool parse_data_file(prsdata *pdata, scandata *sdata, char *datafile) {
 
 	fd = fopen(datafile, "r");
 	if (fd == NULL) {
-		errorf("cannot open '%s' : %s.",
-			PMKSCAN_DATA, strerror(errno));
 		return false;
 	}
 
@@ -5863,6 +5861,7 @@ int main(int argc, char *argv[]) {
 	} else {
 		if (parse_data_file(pdata, &sd, PMKSCAN_DATA) == false) {
 			/* error message displayed by parse_data_file */
+			errorf("cannot open '%s' : %s.", PMKSCAN_DATA, strerror(errno));
 			prsdata_destroy(pdata);
 			exit(EXIT_FAILURE);
 		}
