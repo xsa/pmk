@@ -106,6 +106,8 @@ void code_bld_init(code_bld_t *pcb, char *blog) {
 	pcb->type = NULL;
 	pcb->member = NULL;
 	pcb->cflags = NULL;
+	pcb->incpath = NULL;
+	pcb->libpath = NULL;
 	pcb->ldflags = NULL;
 	pcb->slcflags = NULL;
 	pcb->slldflags = NULL;
@@ -236,7 +238,41 @@ void set_cflags(code_bld_t *pcb, char *cflags) {
 }
 
 
-/**********************
+/*********************
+ * PROC set_incpath() *
+ ***********************************************************************
+ * DESCR XXX
+ *
+ * PARAM XXX
+ * PARAM XXX
+ *
+ * RETURN XXX
+ ***********************************************************************/
+
+void set_incpath(code_bld_t *pcb, char *incpath) {
+	/* set include path value */
+	pcb->incpath = incpath;
+}
+
+
+/*********************
+ * PROC set_libpath() *
+ ***********************************************************************
+ * DESCR XXX
+ *
+ * PARAM XXX
+ * PARAM XXX
+ *
+ * RETURN XXX
+ ***********************************************************************/
+
+void set_libpath(code_bld_t *pcb, char *libpath) {
+	/* set library path value */
+	pcb->libpath = libpath;
+}
+
+
+/*********************
  * PROC set_ldflags() *
  ***********************************************************************
  * DESCR XXX
@@ -248,7 +284,7 @@ void set_cflags(code_bld_t *pcb, char *cflags) {
  ***********************************************************************/
 
 void set_ldflags(code_bld_t *pcb, char *ldflags) {
-	/* set cflags value */
+	/* set ldflags value */
 	pcb->ldflags = ldflags;
 }
 
@@ -667,11 +703,23 @@ bool c_cmdline_builder(code_bld_t *pcb, int lnk) {
 		strlcat(pcb->bldcmd, pcb->cflags, sizeof(pcb->bldcmd));
 	}
 
+	/* if include path is provided */
+	if (pcb->incpath != NULL) {
+		strlcat(pcb->bldcmd, " ", sizeof(pcb->bldcmd));
+		strlcat(pcb->bldcmd, pcb->incpath, sizeof(pcb->bldcmd));
+	}
+
 	if (lnk != LINK_NONE) {
 		/* if linker flags are provided */
 		if (pcb->ldflags != NULL) {
 			strlcat(pcb->bldcmd, " ", sizeof(pcb->bldcmd));
 			strlcat(pcb->bldcmd, pcb->ldflags, sizeof(pcb->bldcmd));
+		}
+
+		/* if library path is provided */
+		if (pcb->libpath != NULL) {
+			strlcat(pcb->bldcmd, " ", sizeof(pcb->bldcmd));
+			strlcat(pcb->bldcmd, pcb->libpath, sizeof(pcb->bldcmd));
 		}
 	}
 	/* if not in linking mode */
