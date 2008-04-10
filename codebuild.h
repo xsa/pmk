@@ -116,7 +116,9 @@ typedef struct {
 				*type,					/* type name */
 				*member,				/* type member name */
 				*cflags,				/* compilation flags */
+				*incpath,				/* include path */
 				*ldflags,				/* linker flags */
+				*libpath,				/* library path */
 				*slcflags,				/* shared lib compilation flags */
 				*slldflags,				/* shared lib linking flags */
 				*alt_cflags,			/* alternative compilation flags variable */

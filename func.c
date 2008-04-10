@@ -706,6 +706,10 @@ bool pmk_check_header(pmkcmd *cmd, htable_t *ht, pmkdata *pgd) {
 		return(false);
 	}
 
+	/* set CFLAGS */
+	set_cflags(&scb, hash_get(pgd->htab, get_cflags_label(&scb)));
+
+	/* try to get the path of the header file */
 	if (get_file_dir_path(scb.header, pstr, inc_path, sizeof(inc_path)) == true) {
 		pstr = strdup(inc_path);
 		if (pstr == NULL) {
@@ -724,10 +728,7 @@ bool pmk_check_header(pmkcmd *cmd, htable_t *ht, pmkdata *pgd) {
 			return(false);
 		}
 	}
-	/* XXX the following is required for hierarchical include */
-	/*strlcat_b(inc_path, " ", sizeof(inc_path)); |+ XXX check +|                                        */
-	/*strlcat_b(inc_path, hash_get(pgd->htab, get_cflags_label(&scb)), sizeof(inc_path)); |+ XXX check +|*/
-	set_cflags(&scb, inc_path);
+	set_incpath(&scb, inc_path);
 
 	/*
 		check header file
@@ -1008,7 +1009,7 @@ bool pmk_check_lib(pmkcmd *cmd, htable_t *ht, pmkdata *pgd) {
 		pmk_log("\tStore library flags in '%s'.\n", get_libs_label(&scb));
 
 		/* get actual content of LIBS, no need to check as it is initialised */
-		set_cflags(&scb, hash_get(pgd->htab, PMKVAL_ENV_LIBS));
+		set_ldflags(&scb, hash_get(pgd->htab, PMKVAL_ENV_LIBS));
 	}
 
 	/* get the list of library path */
@@ -1031,7 +1032,7 @@ bool pmk_check_lib(pmkcmd *cmd, htable_t *ht, pmkdata *pgd) {
 	/* parse list of path to find the pattern */
 	if (find_pattern(da, pattern, lib_buf, sizeof(lib_buf)) == true) {
 		snprintf(lib_path, sizeof(lib_path), "-L%s", lib_buf);
-		set_ldflags(&scb, lib_path);
+		set_libpath(&scb, lib_path);
 	}
 
 	/* clean dynary now useless */
@@ -1723,6 +1724,9 @@ bool pmk_check_type(pmkcmd *cmd, htable_t *ht, pmkdata *pgd) {
 
 	/* check optional header */
 	if (scb.header != NULL) {
+		/* set CFLAGS */
+		set_cflags(&scb, hash_get(pgd->htab, get_cflags_label(&scb)));
+
 		/* use each element of INC_PATH with -I */
 		pstr = (char *) hash_get(pgd->htab, PMKCONF_PATH_INC);
 		if (pstr == NULL) {
@@ -1748,7 +1752,7 @@ bool pmk_check_type(pmkcmd *cmd, htable_t *ht, pmkdata *pgd) {
 				return(false);
 			}
 		}
-		set_cflags(&scb, inc_path);
+		set_incpath(&scb, inc_path);
 
 		/*
 			check header file
