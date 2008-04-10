@@ -724,6 +724,9 @@ bool pmk_check_header(pmkcmd *cmd, htable_t *ht, pmkdata *pgd) {
 			return(false);
 		}
 	}
+	/* XXX the following is required for hierarchical include */
+	/*strlcat_b(inc_path, " ", sizeof(inc_path)); |+ XXX check +|                                        */
+	/*strlcat_b(inc_path, hash_get(pgd->htab, get_cflags_label(&scb)), sizeof(inc_path)); |+ XXX check +|*/
 	set_cflags(&scb, inc_path);
 
 	/*
