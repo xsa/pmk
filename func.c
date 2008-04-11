@@ -1121,8 +1121,8 @@ bool pmk_check_lib(pmkcmd *cmd, htable_t *ht, pmkdata *pgd) {
 			return(false);
 		}
 
-		if (scb.ldflags != NULL) {
-			if (snprintf_b(lib_buf, sizeof(lib_buf), "%s -l%s", scb.ldflags, scb.library) == false) {
+		if (scb.libpath != NULL) {
+			if (snprintf_b(lib_buf, sizeof(lib_buf), "%s -l%s", scb.libpath, scb.library) == false) {
 				errorf("failed to build library path or name.");
 				return(false);
 			}
