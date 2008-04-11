@@ -1,3 +1,6 @@
+11 Mar 2008 coudercd
+ * fix recording of library path broken by previous commit.
+
 10 Apr 2008 coudercd
  * use collected CFLAGS and LDFLAGS during checks (fix problems with
    hierarchical includes or libraries).
