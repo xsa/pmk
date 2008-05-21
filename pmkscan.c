@@ -5167,7 +5167,7 @@ bool scan_dir(prs_cmn_t *pcmn, char *dir, bool recursive) {
 
 		if (scan_node_file(pcmn, buf, false) == false) {
 			/* display scan failure for the file */
-			psc_log("!", "Failed to scan '%s'", fname);
+			psc_log("!", "\t=> Failed to scan '%s' !\n", fname);
 		}
 	}
 
