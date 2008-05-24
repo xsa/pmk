@@ -5387,12 +5387,14 @@ bool parse_deflib(htable_t *pht, htable_t *libs) {
 	/* get library name (REQUIRED) */
 	name = po_get_str(hash_get(pht, KW_OPT_NAM));
 	if (name == NULL) {
+		errorf("Missing name in library definition");
 		return false;
 	}
 
 	/* get source list (REQUIRED) */
 	ppo = hash_extract(pht, KW_OPT_SRCS); /* XXX duplicate ? */
 	if (ppo == NULL) {
+		errorf("Missing source list in library definition");
 		return false;
 	}
 	srcs = po_get_list(ppo);
@@ -5405,6 +5407,10 @@ bool parse_deflib(htable_t *pht, htable_t *libs) {
 
 	/* get linker type */
 	linker = po_get_str(hash_get(pht, KW_OPT_LINKER));
+	if (linker == NULL) {
+		errorf("Missing linker type in library definition");
+		return false;
+	}
 
 	/* check lib type */
 	for (i = 0 ; i < (int) nb_link_types ; i++) {
@@ -5413,12 +5419,16 @@ bool parse_deflib(htable_t *pht, htable_t *libs) {
 			break;
 		}
 	}
+	if (type == LINK_TYPE_UNKNOWN) {
+		errorf("Unknown linker type in library definition");
+		return false;
+	}
 
 	/* init lib cell */
 	plc = lib_cell_init(name, srcs, hdrs, type);
-    if (plc == NULL) {
-        return false;
-    }
+	if (plc == NULL) {
+		return false;
+	}
 
 	/* get library major version number */
 	plc->lib_vmaj = po_get_str(hash_get(pht, KW_OPT_VMAJ));

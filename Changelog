@@ -1,3 +1,7 @@
+24 May 2008 coudercd
+ * fixed pmkscan to check linker type values in scanfile (noticed by
+   Magnus Holmgren).
+
 11 Mar 2008 coudercd
  * fix recording of library path broken by previous commit.
 
