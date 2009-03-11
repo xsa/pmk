@@ -54,6 +54,7 @@
 enum {
 	LINK_NONE = 0,	/* no linking */
 	LINK_SRC,		/* link source */
+	LINK_LIB,		/* link source with library */
 	LINK_OBJ		/* link object */
 };
 
