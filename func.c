@@ -1050,7 +1050,7 @@ bool pmk_check_lib(pmkcmd *cmd, htable_t *ht, pmkdata *pgd) {
 	}
 
 	/* build compiler command */
-	 if (cmdline_builder(&scb, LINK_SRC) == false) {
+	 if (cmdline_builder(&scb, LINK_LIB) == false) {
 		errorf(ERR_MSG_CC_CMD);
 		return(false);
 	}
@@ -1089,7 +1089,7 @@ bool pmk_check_lib(pmkcmd *cmd, htable_t *ht, pmkdata *pgd) {
 			}
 
 			/* build compiler command */
-			 if (cmdline_builder(&scb, LINK_SRC) == false) {
+			 if (cmdline_builder(&scb, LINK_LIB) == false) {
 				errorf(ERR_MSG_CC_CMD);
 				return(false);
 			}

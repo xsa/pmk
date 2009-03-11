@@ -777,7 +777,7 @@ bool c_cmdline_builder(code_bld_t *pcb, int lnk) {
 	}
 
 	/* if we don't link use -c */
-	if (lnk != LINK_OBJ) {
+	if ((lnk != LINK_OBJ) && (lnk != LINK_LIB)) {
 		strlcat(pcb->bldcmd, " -c", sizeof(pcb->bldcmd));
 	}
 
