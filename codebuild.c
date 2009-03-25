@@ -772,7 +772,7 @@ bool c_cmdline_builder(code_bld_t *pcb, int lnk) {
 
 	/* if an optional library has been provided */
 	if (pcb->library != NULL) {
-		strlcat(pcb->bldcmd, " -l ", sizeof(pcb->bldcmd));
+		strlcat(pcb->bldcmd, " -l", sizeof(pcb->bldcmd));
 		strlcat(pcb->bldcmd, pcb->library, sizeof(pcb->bldcmd));
 	}
 

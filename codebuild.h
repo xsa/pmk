@@ -65,7 +65,7 @@ enum {
 #define CODE_C_HDR		"#include <%s>\n"
 #define CODE_C_BEG		"/* main procedure */\n" \
 						"int main() {\n"
-#define CODE_C_END		"return(0);\n" \
+#define CODE_C_END		"return 0;\n" \
 						"}\n"
 #define CODE_C_DEF		"/* check define */\n" \
 						"#ifndef %s\n" \
@@ -77,11 +77,11 @@ enum {
 #define CODE_C_VAR		"%s test_var;\n\n"
 #define CODE_C_TYPE		"/* check type */\n" \
 						"if (sizeof(test_var)) {\n" \
-						"\treturn(0);\n" \
+						"\treturn 0;\n" \
 						"}\n"
 #define CODE_C_MEMBER	"/* check structure member */\n" \
 						"if (sizeof(test_var.%s)) {\n" \
-						"\treturn(0);\n" \
+						"\treturn 0;\n" \
 						"}\n"
 
 #define CODE_C_SHARED_F	"/* simple C function for shared object */\n" \
@@ -95,7 +95,7 @@ enum {
 						"void shfunc(void);\n\n" \
 						"int main() {\n" \
 						"\tshfunc();\n" \
-						"\treturn(0);\n" \
+						"\treturn 0;\n" \
 						"}\n"
 
 
