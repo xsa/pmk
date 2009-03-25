@@ -181,7 +181,6 @@ check_header() {
 	printf "Checking header '%s' : " "$header"
 
 	cat > $testfile <<EOF
-#include <stdio.h>
 #include <$header>
 
 int main() {
@@ -209,7 +208,6 @@ check_header_function() {
 	printf "Checking function '%s' in header '%s' : " "$function" "$include"
 
 	cat > $testfile <<EOF
-#include <stdio.h>
 #include <$include>
 
 void (*pmk_funcp)() = $function;
@@ -233,18 +231,12 @@ EOF
 	return $r
 }
 
-check_lib_function() {
+check_lib() {
 	lib="$1"
-	function="$2"
-	printf "Checking function '%s' in library 'l%s' : " "$function" "$lib"
+	printf "Checking library 'l%s' : " "$lib"
 
 	cat > $testfile <<EOF
-#include <stdio.h>
-
-int $function();
-
 int main() {
-	printf("%p", $function);
 	return(0);
 }
 EOF
@@ -252,6 +244,36 @@ EOF
 	if $CC -o $testobj $testfile -l$lib >/dev/null 2>&1; then
 		sed_define "def" "$function"
 		printf "yes\n"
+		r=0
+	else
+		sed_define "udef" "$function"
+		printf "no\n"
+		r=1
+	fi
+	rm -f $testfile $testobj
+
+	return $r
+}
+
+check_lib_function() {
+	lib="$1"
+	function="$2"
+	printf "Checking function '%s' in library 'l%s' : " "$function" "$lib"
+
+	cat > $testfile <<EOF
+int $function();
+
+void (*pmk_funcp)() = $function;
+
+int main() {
+	return(0);
+}
+EOF
+
+	if $CC -o $testobj $testfile -l$lib >/dev/null 2>&1; then
+		sed_define "def" "$function"
+		printf "yes\n"
+
 		r=0
 	else
 		sed_define "udef" "$function"
@@ -656,30 +678,42 @@ check_header_function unistd.h setegid
 check_header_function unistd.h seteuid
 
 #
-# dirname() check
+# libgen check
 #
 
-if check_lib_function gen dirname; then
+if check_lib gen; then
 	LGEN_FLAGS="-lgen"
 else
 	LGEN_FLAGS=""
 fi
 
 #
+# dirname() check
+#
+
+check_lib_function gen dirname # XXX check ?
+
+#
 # basename() check
 #
 
-check_lib_function gen basename
+check_lib_function gen basename # XXX check ?
+
+#
+# libm check
+#
+
+if check_lib m; then
+	LM_FLAGS="-lm"
+else
+	LM_FLAGS=""
+fi
 
 #
 # isnan() check
 #
 
-if check_lib_function m isnan; then
-	LM_FLAGS="-lm"
-else
-	LM_FLAGS=""
-fi
+check_lib_function m isnan # XXX check ?
 
 
 #####################
