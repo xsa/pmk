@@ -147,6 +147,8 @@ void	 set_slldflags(code_bld_t *, char *);
 char	*get_lang_label(code_bld_t *);
 char	*get_compiler_label(code_bld_t *);
 char	*get_cflags_label(code_bld_t *);
+void	 set_incpath(code_bld_t *, char *);
+void	 set_libpath(code_bld_t *, char *);
 char	*get_libs_label(code_bld_t *);
 void	 code_logger(FILE *, FILE *, const char *, ...);
 bool	 code_builder(code_bld_t *);
