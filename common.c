@@ -611,9 +611,9 @@ bool pmk_log(const char *fmt, ...) {
 	va_end(plst);
 
 	if (pmk_log_fp != NULL) {
-		fprintf(pmk_log_fp, buf);
+		fprintf(pmk_log_fp, "%s", buf);
 		fflush(pmk_log_fp);
-		fprintf(stdout, buf);
+		fprintf(stdout, "%s", buf);
 		fflush(stdout);
 		return(true);
 	} else {
