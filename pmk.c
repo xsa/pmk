@@ -874,7 +874,7 @@ bool set_switch_list(pmkdata *pgd, char *swlst, bool state, int *ovrsw) {
 			if (pstr != NULL) {
 				if (hash_update_dup(pgd->labl, pstr, ststr) == false)
 					return(false);
-				*ovrsw++; /* increment number of overriden switches */
+				(*ovrsw)++; /* increment number of overriden switches */
 				free(pstr);
 			}
 		} while (pstr != NULL);
