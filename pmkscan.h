@@ -102,6 +102,7 @@ enum {
 #define KW_OPT_MBR		"MEMBER"
 #define KW_OPT_PRC		"PROCEDURE"
 #define KW_OPT_SUB		"SUBHDR"
+#define KW_OPT_DEP		"DEPEND"
 
 /* script keywords */
 #define KW_CMD_GENPF	"GEN_PMKFILE"
@@ -472,6 +473,12 @@ enum {
 								"# install library directory\n" \
 								"install_libdir:\n" \
 								"\t$(INSTALL_DIR) $(DESTDIR)$(LIBDIR)\n\n"
+#define MKF_GTRGT_INST_HDR		"#\n# library headers install target\n#\n\n" \
+								"# install headers directory\n" \
+								"install_hdrdir:\n" \
+								"\t$(INSTALL_DIR) $(DESTDIR)$(INCDIR)\n\n" \
+								"# main headers install target\n" \
+								MKF_TRGT_INST_LIBHDR ": install_hdrdir "
 
 #define MKF_TRGT_DEINST_LIBHDR	"lib_headers_deinstall"
 #define MKF_TRGT_DEINST_STLIB	"static_libs_deinstall"
@@ -637,7 +644,7 @@ typedef struct {
 				*binaries,				/* zone binaries */
 				*libraries,				/* zone libraries */
 				*h_checks,				/* zone header checks */
-				*l_checks,				/* zone header checks */
+				*l_checks,				/* zone library checks */
 				*t_checks;				/* zone type checks */
 	scn_node_t	*pnode;
 } scn_zone_t;
@@ -649,16 +656,27 @@ typedef struct {
 			*library,
 			*member;
 	dynary	*procs,
-			*subhdrs;
-	ftype_t	 ftype;
+			*subhdrs,
+			*depends;
 } check_t;
+
+/* generated check type */
+typedef struct {
+	bool	*done;
+	char	*name;
+	check_t	*check;
+	dynary	*procs;
+	ftype_t	 ftype;
+} gencheck_t;
+
 
 /* scanning data parsed from dat file */
 typedef struct {
-	htable_t	*headers,
+	htable_t	*all,
+				*headers,
 				*libraries,
 				*types;
-} scandata;
+} scandata_t;
 
 
 /************************
@@ -674,16 +692,17 @@ scn_zone_t	*scan_zone_init(htable_t *);
 void		 scan_zone_destroy(scn_zone_t *);
 
 /* pmkfile specific ****************************************************/
-check_t		*init_chk_cell(char *);
-void		 destroy_chk_cell(check_t *);
+gencheck_t	*init_genchk_cell(char *);
+void		 destroy_genchk_cell(gencheck_t *);
 check_t		*mk_chk_cell(htable_t *, int);
-bool		 parse_data_file(prsdata *, scandata *, char *);
+void		 destroy_chk_cell(check_t *);
+bool		 parse_data_file(prsdata *, scandata_t *, char *);
 char		*conv_to_label(ftype_t, char *, ...);
 bool		 recurse_sys_deps(htable_t *, dynary *, char *);
-bool		 add_library(scn_zone_t *, char *, scandata *, scn_node_t *);
-bool		 check_header(scn_zone_t *, char *, scandata *, scn_node_t *);
-bool		 check_type(scn_zone_t *, char *, scandata *, scn_node_t *);
-bool		 gen_checks(scn_zone_t *, scandata *);
+bool		 add_library(scn_zone_t *, char *, scandata_t *, scn_node_t *);
+bool		 check_header(scn_zone_t *, char *, scandata_t *, scn_node_t *);
+bool		 check_type(scn_zone_t *, char *, scandata_t *, scn_node_t *);
+bool		 gen_checks(scn_zone_t *, scandata_t *);
 void		 build_cmd_begin(FILE *, char *, char *);
 void		 build_cmd_end(FILE *);
 void		 build_comment(FILE *, char *, ...);
@@ -739,8 +758,8 @@ bool		 parse_defbin(htable_t *, htable_t *);
 bool		 parse_deflib(htable_t *, htable_t *);
 bool		 parse_zone_opts(prs_cmn_t *, htable_t *, htable_t *, htable_t *);
 bool		 parse_file(prs_cmn_t *, char *, ftype_t, bool);
-bool		 process_zone(prs_cmn_t *, scandata *);
-bool		 parse_script(char *, prs_cmn_t *, scandata *);
+bool		 process_zone(prs_cmn_t *, scandata_t *);
+bool		 parse_script(char *, prs_cmn_t *, scandata_t *);
 bool		 scan_node_file(prs_cmn_t *, char *, bool);
 bool		 scan_dir(prs_cmn_t *, char *, bool);
 void		 usage(void);
