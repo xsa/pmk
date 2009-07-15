@@ -615,37 +615,37 @@ typedef struct {
 				
 /* scanning zone data structure */
 typedef struct {
-	bool		 found[NB_FILE_TYPE],	/* file type flags */
-				 found_src,				/* source file flag */
-				 advtag,				/* use advanced tagging */
-				 gen_pmk,				/* pmkfile generation flag */
-				 gen_mkf,				/* makefile generation flag */
-				 gen_lib,				/* library generation flag *//* XXX to remove ? */
+	bool		 found[NB_FILE_TYPE],		/* file type flags */
+				 found_src,					/* source file flag */
+				 advtag,					/* use advanced tagging */
+				 gen_pmk,					/* pmkfile generation flag */
+				 gen_mkf,					/* makefile generation flag */
+				 gen_lib,					/* library generation flag *//* XXX to remove ? */
 				 lib_type[NB_LINK_TYPE],	/* file type flags */
-				 recursive,				/* recursive scan flag */
-				 unique;				/* unique file flag */
-	char		*directory,				/* initial directory */
-				*cfg_name,				/* alternate config file name */
-				*mkf_name,				/* alternate makefile name */
-				*pmk_name,				/* alternative pmkfile name */
-				*ext_mkf;				/* extra to append to makefile template */
-	dynary		*dirlist,				/* scanned directory list */
-				*dirscan,				/* directory list to scan (just a pointer) */
-				*exttags,				/* extra tags */
-				*tags,					/* zone tags */
-				*manpgs,				/* man pages dynary */
-				*datafiles,				/* data files dynary */
-				*discard,				/* discard list */
-				*templates,				/* template files */
-				*generated;				/* files to be generated from templates */
-	htable_t	*nodes,					/* global nodes table */
-				*objects,				/* zone objects */
-				*targets,				/* zone targets */
-				*binaries,				/* zone binaries */
-				*libraries,				/* zone libraries */
-				*h_checks,				/* zone header checks */
-				*l_checks,				/* zone library checks */
-				*t_checks;				/* zone type checks */
+				 recursive,					/* recursive scan flag */
+				 unique;					/* unique file flag */
+	char		*directory,					/* initial directory */
+				*cfg_name,					/* alternate config file name */
+				*mkf_name,					/* alternate makefile name */
+				*pmk_name,					/* alternative pmkfile name */
+				*ext_mkf;					/* extra to append to makefile template */
+	dynary		*dirlist,					/* scanned directory list */
+				*dirscan,					/* directory list to scan (just a pointer) */
+				*exttags,					/* extra tags */
+				*tags,						/* zone tags */
+				*manpgs,					/* man pages dynary */
+				*datafiles,					/* data files dynary */
+				*discard,					/* discard list */
+				*templates,					/* template files */
+				*generated;					/* files to be generated from templates */
+	htable_t	*nodes,						/* global nodes table */
+				*objects,					/* zone objects */
+				*targets,					/* zone targets */
+				*binaries,					/* zone binaries */
+				*libraries,					/* zone libraries */
+				*h_checks,					/* zone header checks */
+				*l_checks,					/* zone library checks */
+				*t_checks;					/* zone type checks */
 	scn_node_t	*pnode;
 } scn_zone_t;
 
