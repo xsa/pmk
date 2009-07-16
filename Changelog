@@ -1,3 +1,7 @@
+16 Jul 2009 couderc
+ * completed management of dependencies between checks into generated
+   pmkfile.
+
 13 Jul 2009 couderc
  * first part of modifications to handle check dependencies.
 
