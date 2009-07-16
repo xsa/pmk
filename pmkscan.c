@@ -1383,7 +1383,7 @@ bool check_recurse(scn_zone_t *psz, char *name, dynary *deps, scandata_t *psd, s
 			if (da_find(deps, label) == false) {
 				da_push(deps, strdup(label)); /* XXX check ? */
 
-				psc_log(NULL, "recorded '%s' as depedency\n", label);
+				psc_log(NULL, "recorded '%s' as dependency\n", label);
 			}
 		}
 
