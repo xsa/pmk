@@ -1356,6 +1356,15 @@ bool check_recurse(scn_zone_t *psz, char *name, dynary *deps, scandata_t *psd, s
 	/* search for existing check */
 	pgchk = hash_get(psz->all_checks, label);
 	if (pgchk != NULL) { /* XXX correct ? no further processing ? */
+		if (deps != NULL) {
+			/* adding to dependencies if not already present */
+			if (da_find(deps, label) == false) {
+				da_push(deps, strdup(label)); /* XXX check ? */
+
+				psc_log(NULL, "recorded '%s' as dependency\n", label);
+			}
+		}
+
 #ifdef PMKSCAN_DEBUG
 		debugf("check_recurse() : check '%s' is already recorded, skipping\n", name);
 #endif /* PMKSCAN_DEBUG */
