@@ -188,6 +188,13 @@ enum {
 	OBJ_TYPE_CXX
 };
 
+/* check types *********************************************************/
+enum {
+	CHK_HEADER,
+	CHK_LIBRARY,
+	CHK_TYPE
+};
+
 
 /****************
  * misc defines *
@@ -563,6 +570,7 @@ typedef unsigned char	ttype_t;
 
 /* file type and extension struct */
 typedef unsigned char	ftype_t;
+
 typedef struct {
 	char	*ext;
 	ftype_t	 type;
@@ -615,46 +623,48 @@ typedef struct {
 				
 /* scanning zone data structure */
 typedef struct {
-	bool		 found[NB_FILE_TYPE],		/* file type flags */
-				 found_src,					/* source file flag */
-				 advtag,					/* use advanced tagging */
-				 gen_pmk,					/* pmkfile generation flag */
-				 gen_mkf,					/* makefile generation flag */
-				 gen_lib,					/* library generation flag *//* XXX to remove ? */
+	bool		 found[NB_FILE_TYPE],	/* file type flags */
+				 found_src,				/* source file flag */
+				 advtag,				/* use advanced tagging */
+				 gen_pmk,				/* pmkfile generation flag */
+				 gen_mkf,				/* makefile generation flag */
+				 gen_lib,				/* library generation flag *//* XXX to remove ? */
 				 lib_type[NB_LINK_TYPE],	/* file type flags */
-				 recursive,					/* recursive scan flag */
-				 unique;					/* unique file flag */
-	char		*directory,					/* initial directory */
-				*cfg_name,					/* alternate config file name */
-				*mkf_name,					/* alternate makefile name */
-				*pmk_name,					/* alternative pmkfile name */
-				*ext_mkf;					/* extra to append to makefile template */
-	dynary		*dirlist,					/* scanned directory list */
-				*dirscan,					/* directory list to scan (just a pointer) */
-				*exttags,					/* extra tags */
-				*tags,						/* zone tags */
-				*manpgs,					/* man pages dynary */
-				*datafiles,					/* data files dynary */
-				*discard,					/* discard list */
-				*templates,					/* template files */
-				*generated;					/* files to be generated from templates */
-	htable_t	*nodes,						/* global nodes table */
-				*objects,					/* zone objects */
-				*targets,					/* zone targets */
-				*binaries,					/* zone binaries */
-				*libraries,					/* zone libraries */
-				*h_checks,					/* zone header checks */
-				*l_checks,					/* zone library checks */
-				*t_checks;					/* zone type checks */
+				 recursive,				/* recursive scan flag */
+				 unique;				/* unique file flag */
+	char		*directory,				/* initial directory */
+				*cfg_name,				/* alternate config file name */
+				*mkf_name,				/* alternate makefile name */
+				*pmk_name,				/* alternative pmkfile name */
+				*ext_mkf;				/* extra to append to makefile template */
+	dynary		*dirlist,				/* scanned directory list */
+				*dirscan,				/* directory list to scan (just a pointer) */
+				*exttags,				/* extra tags */
+				*tags,					/* zone tags */
+				*manpgs,				/* man pages dynary */
+				*datafiles,				/* data files dynary */
+				*discard,				/* discard list */
+				*templates,				/* template files */
+				*generated;				/* files to be generated from templates */
+	htable_t	*nodes,					/* global nodes table */
+				*objects,				/* zone objects */
+				*targets,				/* zone targets */
+				*binaries,				/* zone binaries */
+				*libraries,				/* zone libraries */
+				*all_checks;			/* zone checks */
 	scn_node_t	*pnode;
 } scn_zone_t;
 
 /* check type */
+typedef int	ctype_t;
+
+/* check structure type */
 typedef struct {
 	char	*name,
 			*header,
 			*library,
 			*member;
+	ctype_t	 ctype;
 	dynary	*procs,
 			*subhdrs,
 			*depends;
@@ -662,10 +672,12 @@ typedef struct {
 
 /* generated check type */
 typedef struct {
-	bool	*done;
+	bool	 done;
 	char	*name;
 	check_t	*check;
-	dynary	*procs;
+	dynary	*depends,
+			*procs;
+	ctype_t	 ctype;
 	ftype_t	 ftype;
 } gencheck_t;
 
@@ -679,90 +691,6 @@ typedef struct {
 } scandata_t;
 
 
-/************************
- * functions prototypes *
- ***********************************************************************/
-
-/* init functions ******************************************************/
-scn_node_t	*scan_node_init(char *);
-void		 scan_node_destroy(scn_node_t *);
-lib_cell_t	*lib_cell_init(char *, dynary *, dynary *, ltype_t);
-void		 lib_cell_destroy(lib_cell_t *);
-scn_zone_t	*scan_zone_init(htable_t *);
-void		 scan_zone_destroy(scn_zone_t *);
-
-/* pmkfile specific ****************************************************/
-gencheck_t	*init_genchk_cell(char *);
-void		 destroy_genchk_cell(gencheck_t *);
-check_t		*mk_chk_cell(htable_t *, int);
-void		 destroy_chk_cell(check_t *);
-bool		 parse_data_file(prsdata *, scandata_t *, char *);
-char		*conv_to_label(ftype_t, char *, ...);
-bool		 recurse_sys_deps(htable_t *, dynary *, char *);
-bool		 add_library(scn_zone_t *, char *, scandata_t *, scn_node_t *);
-bool		 check_header(scn_zone_t *, char *, scandata_t *, scn_node_t *);
-bool		 check_type(scn_zone_t *, char *, scandata_t *, scn_node_t *);
-bool		 gen_checks(scn_zone_t *, scandata_t *);
-void		 build_cmd_begin(FILE *, char *, char *);
-void		 build_cmd_end(FILE *);
-void		 build_comment(FILE *, char *, ...);
-void		 build_boolean(FILE *, char *, bool);
-void		 build_quoted(FILE *, char *, char *);
-bool		 build_list(FILE *, char *, dynary *);
-bool		 set_lang(FILE *, ftype_t);
-bool		 output_header(htable_t *, char *, FILE *);
-bool		 output_library(htable_t *, char *, FILE *);
-bool		 output_type(htable_t *, char *, FILE *);
-bool		 scan_build_pmk(scn_zone_t *);
-bool		 scan_build_cfg(scn_zone_t *);
-
-/* makefile specific ***************************************************/
-bool		 find_deps(dynary *, dynary *);
-void		 extract_dir(char *, char *, size_t);
-void		 build_path(char *, char *, char *, size_t);
-bool		 recurse_obj_deps(htable_t *, dynary *, char *);
-bool		 gen_objects(scn_zone_t *);
-bool		 recurse_src_deps(scn_zone_t *, dynary *, char *);
-bool		 gen_targets(scn_zone_t *);
-bool		 gen_lib_targets(scn_zone_t *);
-size_t		 fprintf_width(size_t, size_t, size_t, FILE *, char *);
-void		 mkf_output_header(FILE *, scn_zone_t *);
-void		 mkf_output_recurs(FILE *, scn_zone_t *);
-void		 mkf_output_srcs(FILE *, scn_zone_t *);
-void		 mkf_output_bins(FILE *, scn_zone_t *);
-void		 mkf_output_libs(FILE *, scn_zone_t *);
-void		 mkf_output_objs(FILE *, scn_zone_t *);
-void		 mkf_output_suffixes(FILE *, scn_zone_t *);
-void		 mkf_output_build_trgs(FILE *, scn_zone_t *);
-void		 mkf_output_clean_trgs(FILE *, scn_zone_t *);
-void		 mkf_output_inst_trgs(FILE *, scn_zone_t *);
-void		 mkf_output_deinst_trgs(FILE *, scn_zone_t *);
-void		 mkf_output_man_trgs(FILE *, scn_zone_t *);
-void		 mkf_output_data_trgs(FILE *, scn_zone_t *);
-void		 mkf_output_obj_rules(FILE *, scn_zone_t *);
-void		 mkf_output_trg_rules(FILE *, scn_zone_t *);
-void		 mkf_output_lib_trg_rules(FILE *, scn_zone_t *);
-void		 mkf_output_man_inst(FILE *, scn_zone_t *);
-void		 mkf_output_data_inst(FILE *, scn_zone_t *);
-bool		 scan_build_mkf(scn_zone_t *);
-
-/* common functions */
-void		 psc_log(char *, char *, ...);
-void		 str_to_upper(char *, size_t, char *);
-ftype_t		 check_file_ext(char *);
-bool		 process_ppro(void *, char *, prseng_t *);
-bool		 process_proc_call(void *, char *, prseng_t *);
-bool		 process_proc_decl(void *, char *, prseng_t *);
-bool		 process_type(void *, char *, prseng_t *);
-bool		 parse_defbin(htable_t *, htable_t *);
-bool		 parse_deflib(htable_t *, htable_t *);
-bool		 parse_zone_opts(prs_cmn_t *, htable_t *, htable_t *, htable_t *);
-bool		 parse_file(prs_cmn_t *, char *, ftype_t, bool);
-bool		 process_zone(prs_cmn_t *, scandata_t *);
-bool		 parse_script(char *, prs_cmn_t *, scandata_t *);
-bool		 scan_node_file(prs_cmn_t *, char *, bool);
-bool		 scan_dir(prs_cmn_t *, char *, bool);
-void		 usage(void);
 
 #endif /* _PMKSCAN_H_ */
 
