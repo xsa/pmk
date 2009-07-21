@@ -872,7 +872,7 @@ void scan_zone_destroy(scn_zone_t *pzone) {
  ***********************************************************************/
 
 gencheck_t *init_genchk_cell(char *name, ctype_t type) {
-	gencheck_t	*pgchk;
+	gencheck_t	*pgchk = NULL;
 
 	pgchk = (gencheck_t *) malloc(sizeof(gencheck_t));
 	if (pgchk == NULL) {
@@ -972,6 +972,7 @@ check_t *mk_chk_cell(htable_t *pht, int token) {
 		pchk->library = NULL;
 		pchk->member = NULL;
 		pchk->subhdrs = NULL;
+		pchk->depends = NULL;
 
 		/* specific stuff */
 		switch (token) {
@@ -1019,7 +1020,7 @@ check_t *mk_chk_cell(htable_t *pht, int token) {
 		}
 	}
 
-	return(pchk);
+	return pchk;
 }
 
 
@@ -1308,9 +1309,9 @@ bool check_recurse(scn_zone_t *psz, char *name, dynary *deps, scandata_t *psd, s
 				*pstr,
 				*tag,
 				 tmp[TMP_BUF_LEN];
-	check_t		*pcrec;
+	check_t		*pcrec = NULL;
 	dynary		*da;
-	gencheck_t	*pgchk;
+	gencheck_t	*pgchk = NULL;
 	int			 i,
 				 s,
 				 tagtype,
@@ -1355,7 +1356,7 @@ bool check_recurse(scn_zone_t *psz, char *name, dynary *deps, scandata_t *psd, s
 
 	/* search for existing check */
 	pgchk = hash_get(psz->all_checks, label);
-	if (pgchk != NULL) { /* XXX correct ? no further processing ? */
+	if (pgchk != NULL) {
 		if (deps != NULL) {
 			/* adding to dependencies if not already present */
 			if (da_find(deps, label) == false) {
@@ -1368,76 +1369,74 @@ bool check_recurse(scn_zone_t *psz, char *name, dynary *deps, scandata_t *psd, s
 #ifdef PMKSCAN_DEBUG
 		debugf("check_recurse() : check '%s' is already recorded, skipping\n", name);
 #endif /* PMKSCAN_DEBUG */
+
 		return true;
 	}
 
+	/* add new check */
+	pgchk = init_genchk_cell(name, pcrec->ctype);
 	if (pgchk == NULL) {
-		/* add new check */
-		pgchk = init_genchk_cell(name, pcrec->ctype);
-		if (pgchk == NULL) {
-			/* allocation failed */
-			errorf("failed to init check cell");
-			return false;
+		/* allocation failed */
+		errorf("failed to init check cell");
+		return false;
+	}
+
+	if (hash_add(psz->all_checks, label, pgchk) == false) {
+		errorf("failed to add generated check into hash table");
+		return false;
+	}
+
+	psc_log(NULL, "Added generated check for '%s' with label '%s'\n", name, label);
+
+	if (deps != NULL) {
+		/* adding to dependencies if not already present */
+		if (da_find(deps, label) == false) {
+			da_push(deps, strdup(label)); /* XXX check ? */
+
+			psc_log(NULL, "recorded '%s' as dependency\n", label);
 		}
+	}
 
-		if (hash_add(psz->all_checks, label, pgchk) == false) {
-			errorf("failed to add generated check into hash table");
-			return false;
-		}
+	/* link to check */
+	pgchk->check = pcrec;
 
-		psc_log(NULL, "Added generated check for '%s' with label '%s'\n", name, label);
+	/* set language */
+	pgchk->ftype = pn->type;
 
-		if (deps != NULL) {
-			/* adding to dependencies if not already present */
-			if (da_find(deps, label) == false) {
-				da_push(deps, strdup(label)); /* XXX check ? */
+	/* add AC style tag */
+	if (pcrec->ctype == CHK_LIBRARY) {
+		/* library specific tagging */
+		snprintf(tmp, sizeof(tmp), "lib%s", name);
+		tag = gen_basic_tag_def(tmp);
+	} else {
+		/* common tagging */
+		tag = gen_basic_tag_def(name);
+	}
+	if (da_find(psz->tags, tag) == false) {
+		da_push(psz->tags, strdup(tag)); /* XXX check ? */
+	}
 
-				psc_log(NULL, "recorded '%s' as dependency\n", label);
+	/* add pmk style tag */
+	tag = gen_tag_def(tagtype, name, NULL, NULL);
+	if (da_find(psz->tags, tag) == false) {
+		da_push(psz->tags, strdup(tag)); /* XXX check ? */
+	}
+
+	/* get the dependencies */
+	da = pcrec->depends;
+
+	/* process its dependencies */
+	if (da != NULL) {
+		psc_log(NULL, "Processing dependencies of '%s'\n", name);
+
+		/* process each dependency */
+		for (i = 0 ; i < (int) da_usize(da) ; i++) {
+			if (check_recurse(psz, (char *) da_idx(da, i), pgchk->depends, psd, pn) == false) {
+				return false;
 			}
 		}
 
-		/* link to check */
-		pgchk->check = pcrec;
-
-		/* set language */
-		pgchk->ftype = pn->type;
-
-		/* add AC style tag */
-		if (pcrec->ctype == CHK_LIBRARY) {
-			/* library specific tagging */
-			snprintf(tmp, sizeof(tmp), "lib%s", name);
-			tag = gen_basic_tag_def(tmp);
-		} else {
-			/* common tagging */
-			tag = gen_basic_tag_def(name);
-		}
-		if (da_find(psz->tags, tag) == false) {
-			da_push(psz->tags, strdup(tag)); /* XXX check ? */
-		}
-
-		/* add pmk style tag */
-		tag = gen_tag_def(tagtype, name, NULL, NULL);
-		if (da_find(psz->tags, tag) == false) {
-			da_push(psz->tags, strdup(tag)); /* XXX check ? */
-		}
-
-		/* get the dependencies */
-		da = pcrec->depends;
-
-		/* process its dependencies */
-		if (da != NULL) {
-			psc_log(NULL, "Processing dependencies of '%s'\n", name);
-
-			/* process each dependency */
-			for (i = 0 ; i < (int) da_usize(da) ; i++) {
-				if (check_recurse(psz, (char *) da_idx(da, i), pgchk->depends, psd, pn) == false) {
-					return false;
-				}
-			}
-
-			psc_log(NULL, "End of dependencies of '%s'\n", name);
-		}
-
+		psc_log(NULL, "End of dependencies of '%s'\n", name);
 	}
 
 	if (pcrec->ctype != CHK_TYPE) { /* for speed, but dangerous if we add a new check type */
