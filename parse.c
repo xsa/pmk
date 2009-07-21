@@ -742,14 +742,14 @@ bool parse_quoted(prseng_t *ppe, pmkobj *po, size_t size) {
 			/* copy character */
 			*pbuf = c;
 			pbuf++;
-			size--;
 
 			/* check remaining space */
-			if (size < 0) {
+			if (size == 0) {
 				free(buffer);
 				strlcpy(parse_err, PRS_ERR_OVERFLOW, sizeof(parse_err)); /* no check */
 				return false;
 			}
+			size--;
 		}
 
 		if (prseng_next_char(ppe) == false) {
@@ -1936,15 +1936,15 @@ bool parse_pmkconf(FILE *fp, htable_t *pht, char *seplst,
 
 					*pbuf = c;
 					pbuf++;
-					s--;
 
 					/* check remaining space */
-					if (s < 0) {
+					if (s == 0) {
 						strlcpy(parse_err, PRS_ERR_OVERFLOW,
 												sizeof(parse_err)); /* no check */
 						prseng_destroy(ppe);
 						return false;
 					}
+					s--;
 
 					/* next char */
 					if (prseng_next_char(ppe) == false) {
