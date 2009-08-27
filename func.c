@@ -1,7 +1,7 @@
 /* $Id$ */
 
 /*
- * Copyright (c) 2003-2006 Damien Couderc
+ * Copyright (c) 2003-2009 Damien Couderc
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -1970,11 +1970,12 @@ bool pmk_build_lib_name(pmkcmd *cmd, htable_t *ht, pmkdata *pgd) {
 	bool	 required,
 			 versbool;
 	char	*shvar = NULL,
-			*shnonevar[256] = "", /* XXX size */
-			*shmajvar[256] = "", /* XXX size */
-			*shminvar[256] = "", /* XXX size */
 			*stvar = NULL,
+			 vname[512],
+			 tmp[512],
 			*pstr,
+			*major = NULL,
+			*minor = NULL,
 			*value;
 	pmkobj	*po;
 
@@ -2015,11 +2016,11 @@ bool pmk_build_lib_name(pmkcmd *cmd, htable_t *ht, pmkdata *pgd) {
 #ifdef SHLIB_DEBUG
 		debugf("pstr(major) = '%s'", pstr);
 #endif
-		value = process_string(pstr, pgd->htab);
+		major = process_string(pstr, pgd->htab);
 #ifdef SHLIB_DEBUG
-		debugf("value = '%s'", value);
+		debugf("major = '%s'", major);
 #endif
-		hash_update(pgd->htab, LIB_KW_MAJ, value); /* no dup */
+		hash_update(pgd->htab, LIB_KW_MAJ, major); /* no dup */
 	}
 
 	/* get minor version number */
@@ -2028,11 +2029,11 @@ bool pmk_build_lib_name(pmkcmd *cmd, htable_t *ht, pmkdata *pgd) {
 #ifdef SHLIB_DEBUG
 		debugf("pstr(minor) = '%s'", pstr);
 #endif
-		value = process_string(pstr, pgd->htab);
+		minor = process_string(pstr, pgd->htab);
 #ifdef SHLIB_DEBUG
-		debugf("value = '%s'", value);
+		debugf("minor = '%s'", minor);
 #endif
-		hash_update(pgd->htab, LIB_KW_MIN, value); /* no dup */
+		hash_update(pgd->htab, LIB_KW_MIN, minor); /* no dup */
 	}
 
 	/* get shared lib variable */
@@ -2068,38 +2069,100 @@ bool pmk_build_lib_name(pmkcmd *cmd, htable_t *ht, pmkdata *pgd) {
 		versbool = false;
 	}
 
-	/* process shared lib name */
+	/*
+	 * build shared lib version strings
+	 */
 	if (shvar != NULL) {
-		if (versbool == false) {
-			/* get libname without version */
-			pstr = hash_get(pgd->htab, LIB_KW_SH_NONE);
-#ifdef SHLIB_DEBUG
-			debugf("pstr(LIB_KW_SH_NONE) = '%s'", pstr);
-#endif
-			value = process_string(pstr, pgd->htab);
-#ifdef SHLIB_DEBUG
-			debugf("value = '%s'", value);
-#endif
-		} else {
-			pstr = hash_get(pgd->htab, LIB_KW_SH_VERS);
-#ifdef SHLIB_DEBUG
-			debugf("pstr(LIB_KW_SH_VERS) = '%s'", pstr);
-#endif
-			value = process_string(pstr, pgd->htab);
-#ifdef SHLIB_DEBUG
-			debugf("value = '%s'", value);
-#endif
-		}
+		/*
+		 * build _NONE
+		 */
 
-		/* no dup, no free */
-		if (hash_update(pgd->htab, shvar, value) == false) {
-			errorf("updating '%s' : %s", shvar, hash_error(pgd->htab));
+		/* get format without version */
+		pstr = hash_get(pgd->htab, LIB_KW_SH_NONE);
+
+		/* build variable name */
+		snprintf(vname, sizeof(vname), "%s_NONE", shvar);
+
+		/* build value */
+		value = process_string(pstr, pgd->htab);
+
+		/* record value, no dup, no free */
+		if (hash_update(pgd->htab, vname, value) == false) {
+			errorf("updating '%s' : %s", vname, hash_error(pgd->htab));
 			return(false);
 		}
-		pmk_log("\tSetting %s to '%s'\n", shvar, value);
-#ifdef SHLIB_DEBUG
-		debugf("save in '%s'", shvar);
-#endif
+		pmk_log("\tSetting %s to '%s'\n", vname, value);
+
+		if (versbool == false) {
+			if (hash_update_dup(pgd->htab, shvar, value) == false) {
+				errorf("updating '%s' : %s", shvar, hash_error(pgd->htab));
+				return(false);
+			}
+			pmk_log("\tSetting %s to '%s'\n", shvar, value);
+		}
+
+		/* get format with version */
+		pstr = hash_get(pgd->htab, LIB_KW_SH_VERS);
+
+		/*
+		 * build _MAJOR
+		 */
+
+		/* build variable name */
+		snprintf(vname, sizeof(vname), "%s_MAJOR", shvar);
+
+		/* set version */
+		if (major == NULL) {
+			strlcpy(tmp, "1", sizeof(tmp)); /* XXX TODO check */
+		} else {
+			strlcpy(tmp, major, sizeof(tmp)); /* XXX TODO check */
+		}
+		hash_update_dup(pgd->htab, "LIB_VERSION", tmp); /* XXX TODO check */
+
+		/* build value */
+		value = process_string(pstr, pgd->htab);
+
+		/* record value, no dup, no free */
+		if (hash_update(pgd->htab, vname, value) == false) {
+			errorf("updating '%s' : %s", vname, hash_error(pgd->htab));
+			return(false);
+		}
+		pmk_log("\tSetting %s to '%s'\n", vname, value);
+
+		/*
+		 * build _MINOR
+		 */
+
+		/* build variable name */
+		snprintf(vname, sizeof(vname), "%s_MINOR", shvar);
+
+		/* set version */
+		strlcat(tmp, ".", sizeof(tmp)); /* XXX TODO check */
+		if (minor == NULL) {
+			strlcat(tmp, "0", sizeof(tmp)); /* XXX TODO check */
+		} else {
+			strlcat(tmp, minor, sizeof(tmp)); /* XXX TODO check */
+		}
+		hash_update_dup(pgd->htab, "LIB_VERSION", tmp); /* XXX TODO check */
+
+		/* build value */
+		value = process_string(pstr, pgd->htab);
+
+		/* record value, no dup, no free */
+		if (hash_update(pgd->htab, vname, value) == false) {
+			errorf("updating '%s' : %s", vname, hash_error(pgd->htab));
+			return(false);
+		}
+		pmk_log("\tSetting %s to '%s'\n", vname, value);
+
+		if (versbool == true) {
+			if (hash_update_dup(pgd->htab, shvar, value) == false) {
+				errorf("updating '%s' : %s", shvar, hash_error(pgd->htab));
+				return(false);
+			}
+			pmk_log("\tSetting %s to '%s'\n", shvar, value);
+		}
+
 		free(shvar);
 	}
 
@@ -2135,6 +2198,7 @@ bool pmk_build_lib_name(pmkcmd *cmd, htable_t *ht, pmkdata *pgd) {
 #ifdef SHLIB_DEBUG
 		debugf("save in '%s'", stvar);
 #endif
+
 		free(stvar);
 	}
 

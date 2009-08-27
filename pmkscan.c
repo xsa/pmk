@@ -1,7 +1,7 @@
 /* $Id$ */
 
 /*
- * Copyright (c) 2003-2006 Damien Couderc
+ * Copyright (c) 2003-2009 Damien Couderc
  * Copyright (c) 2004 Xavier Santolaria <xavier@santolaria.net>
  * All rights reserved.
  *
@@ -4368,7 +4368,7 @@ void mkf_output_lib_trg_rules(FILE *fp, scn_zone_t *psz) {
 		fprintf(fp, MKF_LINK_SHLIB, plc->lib_major, plc->lib_none);
 		fprintf(fp, MKF_LINE_JUMP);
 
-		fprintf(fp, "$(%s)_shared_install: $(%s)\n", plc->lib_label, plc->lib_minor);
+		fprintf(fp, "$(%s)_shared_install: $(%s)\n", plc->lib_minor, plc->lib_minor);
 		fprintf(fp, MKF_INST_SHLIB, plc->lib_minor, plc->lib_minor);
 		fprintf(fp, MKF_LINK_SHLIB, plc->lib_minor, plc->lib_major);
 		fprintf(fp, MKF_LINK_SHLIB, plc->lib_minor, plc->lib_none);
