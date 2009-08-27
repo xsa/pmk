@@ -319,6 +319,8 @@ enum {
 #define MKF_HEADER_RANLIB	MKF_LABEL_RANLIB "=\t\t$(AR) rs # @" MKF_LABEL_RANLIB "@\n"
 
 #define MKF_HEADER_MISC		MKF_LABEL_INSTALL "=\t@" MKF_LABEL_INSTALL"@\n" \
+							MKF_LABEL_LN "=\t\tln\n" \
+							MKF_LABEL_LN "FLAGS=\t-sf\n" \
 							MKF_LABEL_RM "=\t\trm\n" \
 							MKF_LABEL_RM "FLAGS=\t-rf\n"
 
@@ -331,6 +333,7 @@ enum {
 							"INSTALL_DATA=\t$(INSTALL) -m 644\n" \
 							"INSTALL_DIR=\t$(INSTALL) -d -m 755\n" \
 							"INSTALL_MAN=\t$(INSTALL) -m 644\n\n"
+
 
 /* directories ************************/
 
@@ -533,6 +536,7 @@ enum {
 							"\t$(RM) $(RMFLAGS) $(DESTDIR)$(BINDIR)/$(%s)\n\n"
 #define MKF_INST_STLIB		"\t$(INSTALL_STLIB) $(%s) $(DESTDIR)$(LIBDIR)/$(%s)\n"
 #define MKF_INST_SHLIB		"\t$(INSTALL_SHLIB) $(%s) $(DESTDIR)$(LIBDIR)/$(%s)\n"
+#define MKF_LINK_SHLIB		"\t$(LN) $(LNFLAGS) $(DESTDIR)$(LIBDIR)/$(%s) $(DESTDIR)$(LIBDIR)/$(%s)\n"
 
 /* XXX put dependencies in rule ? */
 #define MKF_INST_MAN_H		"# install manual pages\n" \
@@ -614,7 +618,10 @@ typedef struct {
 				*lib_hdrs,		/* library headers variable */
 				*lib_objs,		/* library objects variable */
 				*lib_static,	/* static library filename */
-				*lib_shared;	/* shared library filename */
+				*lib_none,		/* shared library filename without version */
+				*lib_major,		/* shared library filename for major version */
+				*lib_minor,		/* shared library filename for minor version */
+				*lib_shared;	/* shared library filename for prefered version (none, major or minor) */
 	dynary		*src_list,		/* object dependency list */
 				*hdr_list,		/* object dependency list */
 				*obj_deps;		/* object dependency list */

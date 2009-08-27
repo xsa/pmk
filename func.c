@@ -1970,6 +1970,9 @@ bool pmk_build_lib_name(pmkcmd *cmd, htable_t *ht, pmkdata *pgd) {
 	bool	 required,
 			 versbool;
 	char	*shvar = NULL,
+			*shnonevar[256] = "", /* XXX size */
+			*shmajvar[256] = "", /* XXX size */
+			*shminvar[256] = "", /* XXX size */
 			*stvar = NULL,
 			*pstr,
 			*value;
