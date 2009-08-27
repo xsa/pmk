@@ -1,3 +1,6 @@
+27 Aug 2009 couderc
+ * improved support of shared libs using versioning.
+
 16 Jul 2009 couderc
  * completed management of dependencies between checks into generated
    pmkfile.
