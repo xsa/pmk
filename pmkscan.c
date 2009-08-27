@@ -654,6 +654,18 @@ lib_cell_t *lib_cell_init(char *name, dynary *srcs, dynary *hdrs, ltype_t type) 
 		snprintf(buffer, sizeof(buffer), "%s_SHARED", ubuf);
 		plc->lib_shared = strdup(buffer);
 
+		/* set shared library variable name for major version */
+		snprintf(buffer, sizeof(buffer), "%s_SHARED_NONE", ubuf);
+		plc->lib_none = strdup(buffer);
+
+		/* set shared library variable name for major version */
+		snprintf(buffer, sizeof(buffer), "%s_SHARED_MAJOR", ubuf);
+		plc->lib_major = strdup(buffer);
+
+		/* set shared library variable name */
+		snprintf(buffer, sizeof(buffer), "%s_SHARED_MINOR", ubuf);
+		plc->lib_minor = strdup(buffer);
+
 		/* library linking type */
 		plc->type = type;
 
@@ -700,6 +712,9 @@ void lib_cell_destroy(lib_cell_t *plc) {
 	free(plc->lib_hdrs);
 	free(plc->lib_objs);
 	free(plc->lib_static);
+	free(plc->lib_none);
+	free(plc->lib_major);
+	free(plc->lib_minor);
 	free(plc->lib_shared);
 }
 
@@ -3223,6 +3238,9 @@ void mkf_output_libs(FILE *fp, scn_zone_t *psz) {
 			fprintf(fp, "%s=\t%s\n", plc->lib_label, plc->lib_name);
 
 			fprintf(fp, MKF_SUBSTVAR, plc->lib_static, plc->lib_static);
+			fprintf(fp, MKF_SUBSTVAR, plc->lib_none, plc->lib_none);
+			fprintf(fp, MKF_SUBSTVAR, plc->lib_major, plc->lib_major);
+			fprintf(fp, MKF_SUBSTVAR, plc->lib_minor, plc->lib_minor);
 			fprintf(fp, MKF_SUBSTVAR, plc->lib_shared, plc->lib_shared);
 
 			fprintf(fp, MKF_LIB_HEADERS, plc->lib_label);
@@ -4338,12 +4356,37 @@ void mkf_output_lib_trg_rules(FILE *fp, scn_zone_t *psz) {
 		fprintf(fp, MKF_TARGET_LIB_CLN, plc->lib_shared);
 		fprintf(fp, MKF_LINE_JUMP);
 
-		fprintf(fp, "$(%s)_shared_install: $(%s)\n", plc->lib_label, plc->lib_shared);
-		fprintf(fp, MKF_INST_SHLIB, plc->lib_shared, plc->lib_shared);
+		fprintf(fp, "$(%s)_shared_install: $(%s)_shared_install\n", plc->lib_label, plc->lib_shared);
 		fprintf(fp, MKF_LINE_JUMP);
 
-		fprintf(fp, "$(%s)_shared_deinstall:\n", plc->lib_label);
-		fprintf(fp, "\t$(RM) $(RMFLAGS) $(DESTDIR)$(LIBDIR)/$(%s)\n", plc->lib_shared);
+		fprintf(fp, "$(%s)_shared_install: $(%s)\n", plc->lib_none, plc->lib_none);
+		fprintf(fp, MKF_INST_SHLIB, plc->lib_none, plc->lib_none);
+		fprintf(fp, MKF_LINE_JUMP);
+
+		fprintf(fp, "$(%s)_shared_install: $(%s)\n", plc->lib_major, plc->lib_major);
+		fprintf(fp, MKF_INST_SHLIB, plc->lib_major, plc->lib_major);
+		fprintf(fp, MKF_LINK_SHLIB, plc->lib_major, plc->lib_none);
+		fprintf(fp, MKF_LINE_JUMP);
+
+		fprintf(fp, "$(%s)_shared_install: $(%s)\n", plc->lib_label, plc->lib_minor);
+		fprintf(fp, MKF_INST_SHLIB, plc->lib_minor, plc->lib_minor);
+		fprintf(fp, MKF_LINK_SHLIB, plc->lib_minor, plc->lib_major);
+		fprintf(fp, MKF_LINK_SHLIB, plc->lib_minor, plc->lib_none);
+		fprintf(fp, MKF_LINE_JUMP);
+
+		fprintf(fp, "$(%s)_shared_deinstall: $(%s)_shared_deinstall\n", plc->lib_label, plc->lib_shared);
+		fprintf(fp, MKF_LINE_JUMP);
+
+		fprintf(fp, "$(%s)_shared_deinstall:\n", plc->lib_none);
+		fprintf(fp, "\t$(RM) $(RMFLAGS) $(DESTDIR)$(LIBDIR)/$(%s)\n", plc->lib_none);
+		fprintf(fp, MKF_LINE_JUMP);
+
+		fprintf(fp, "$(%s)_shared_deinstall:\n", plc->lib_major);
+		fprintf(fp, "\t$(RM) $(RMFLAGS) $(DESTDIR)$(LIBDIR)/$(%s)\n", plc->lib_major);
+		fprintf(fp, MKF_LINE_JUMP);
+
+		fprintf(fp, "$(%s)_shared_deinstall:\n", plc->lib_minor);
+		fprintf(fp, "\t$(RM) $(RMFLAGS) $(DESTDIR)$(LIBDIR)/$(%s)\n", plc->lib_minor);
 		fprintf(fp, MKF_LINE_JUMP);
 	}
 	hash_free_hkeys(phk);
