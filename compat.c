@@ -1566,8 +1566,8 @@ printf("Enter state PARSE_CONV_SPEC\n");
 }
 
 
-/*****************
- * pmk_strlcpy() *
+/***************
+ * pmk_strdup() *
  ***********************************************************************
  DESCR
 	This function duplicate a string.
